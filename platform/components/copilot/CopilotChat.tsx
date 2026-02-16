@@ -49,14 +49,172 @@ const DEFAULT_PROMPTS = [
   "Give me the full intelligence report",
 ];
 
+// ─── Language label mapping for display ─────────────────────────────────────
+
+const LANG_LABELS: Record<string, string> = {
+  ts: "TypeScript", tsx: "TSX", js: "JavaScript", jsx: "JSX",
+  py: "Python", python: "Python", rb: "Ruby", go: "Go",
+  rs: "Rust", java: "Java", sql: "SQL", sh: "Shell", bash: "Bash",
+  json: "JSON", yaml: "YAML", yml: "YAML", css: "CSS", html: "HTML",
+  xml: "XML", md: "Markdown", graphql: "GraphQL", toml: "TOML",
+  dockerfile: "Dockerfile", c: "C", cpp: "C++", cs: "C#",
+  swift: "Swift", kotlin: "Kotlin", dart: "Dart", r: "R",
+  typescript: "TypeScript", javascript: "JavaScript", ruby: "Ruby",
+  rust: "Rust", shell: "Shell", plaintext: "Text",
+};
+
+// ─── Copy-to-clipboard helper ───────────────────────────────────────────────
+
+function CopyButton({ text, label = "Copy", className }: { text: string; label?: string; className?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={cn(
+        "flex items-center gap-1 text-[10px] font-medium transition-colors",
+        copied ? "text-success" : "text-muted hover:text-foreground",
+        className
+      )}
+      title={copied ? "Copied!" : label}
+    >
+      {copied ? (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+        </svg>
+      )}
+      <span>{copied ? "Copied" : label}</span>
+    </button>
+  );
+}
+
+// ─── Code block component with syntax theming + copy ────────────────────────
+
+function CodeBlock({ code, language, blockKey }: { code: string; language: string; blockKey: string }) {
+  const langLabel = LANG_LABELS[language.toLowerCase()] || language || "Code";
+
+  return (
+    <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-[#0a0a12]">
+      {/* Header bar — language label + copy */}
+      <div className="flex items-center justify-between px-4 py-2 bg-surface border-b border-border-subtle">
+        <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{langLabel}</span>
+        <CopyButton text={code} label="Copy code" />
+      </div>
+      {/* Code body with basic syntax coloring via CSS */}
+      <div className="overflow-x-auto">
+        <pre className="px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground whitespace-pre">
+          {highlightCode(code, language)}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+// ─── Lightweight syntax highlighter (no external deps) ──────────────────────
+// Applies token-level coloring for keywords, strings, comments, numbers
+
+function highlightCode(code: string, lang: string): React.ReactNode[] {
+  const lines = code.split("\n");
+  return lines.map((line, li) => {
+    const tokens = tokenizeLine(line, lang);
+    return (
+      <div key={li} className="flex">
+        <span className="inline-block w-8 text-right pr-3 text-muted/30 select-none text-xs tabular-nums shrink-0">
+          {li + 1}
+        </span>
+        <span className="flex-1">
+          {tokens.map((tok, ti) => (
+            <span key={ti} className={tok.className}>{tok.text}</span>
+          ))}
+        </span>
+      </div>
+    );
+  });
+}
+
+interface Token { text: string; className: string }
+
+function tokenizeLine(line: string, lang: string): Token[] {
+  const tokens: Token[] = [];
+  // Simple token patterns
+  const commentStart = lang === "python" || lang === "py" || lang === "rb" || lang === "ruby" || lang === "r" || lang === "shell" || lang === "bash" || lang === "sh" || lang === "yaml" || lang === "yml" ? "#" : "//";
+
+  // Check for full-line comment
+  const trimmed = line.trimStart();
+  if (trimmed.startsWith(commentStart) || trimmed.startsWith("/*") || trimmed.startsWith("*") || trimmed.startsWith("--")) {
+    return [{ text: line, className: "text-muted/50 italic" }];
+  }
+
+  // Tokenize with regex
+  const regex = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+\.?\d*\b)|(\b(?:import|export|from|const|let|var|function|class|return|if|else|for|while|switch|case|break|continue|new|this|async|await|try|catch|throw|typeof|instanceof|default|interface|type|enum|extends|implements|public|private|protected|static|readonly|abstract|override|def|self|True|False|None|lambda|print|yield|with|as|in|not|and|or|elif|pass|raise|SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|GROUP|ORDER|BY|ON|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TABLE|INDEX|INTO|VALUES|SET|HAVING|LIMIT|OFFSET|UNION|AND|OR|NOT|NULL|IS|LIKE|IN|BETWEEN|EXISTS|AS|DISTINCT|COUNT|SUM|AVG|MIN|MAX|CASE|WHEN|THEN|ELSE|END)\b)|(=>|===|!==|==|!=|<=|>=|\|\||&&|\?\?|\?\.)/g;
+
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(line)) !== null) {
+    // Push text before match
+    if (match.index > lastIndex) {
+      tokens.push({ text: line.slice(lastIndex, match.index), className: "" });
+    }
+
+    if (match[1]) {
+      // String
+      tokens.push({ text: match[0], className: "text-[#a5d6a7]" }); // green
+    } else if (match[2]) {
+      // Number
+      tokens.push({ text: match[0], className: "text-[#ce93d8]" }); // purple
+    } else if (match[3]) {
+      // Keyword
+      tokens.push({ text: match[0], className: "text-[#90caf9] font-medium" }); // blue
+    } else if (match[4]) {
+      // Operator
+      tokens.push({ text: match[0], className: "text-[#ffab91]" }); // orange
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < line.length) {
+    tokens.push({ text: line.slice(lastIndex), className: "" });
+  }
+
+  return tokens.length > 0 ? tokens : [{ text: line, className: "" }];
+}
+
 // ─── Markdown-lite renderer ─────────────────────────────────────────────────
-// Handles bold, headers, tables, code, and bullet points.
+// Handles bold, headers, tables, code blocks, inline code, and bullet points.
 
 function renderMarkdown(text: string) {
   const lines = text.split("\n");
   const elements: React.ReactNode[] = [];
   let tableRows: string[][] = [];
   let inTable = false;
+  let codeBlockLines: string[] = [];
+  let inCodeBlock = false;
+  let codeLanguage = "";
+  let codeBlockIdx = 0;
 
   const flushTable = () => {
     if (tableRows.length === 0) return;
@@ -102,7 +260,37 @@ function renderMarkdown(text: string) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Table row detection
+    // ── Code block fences ───────────────────────────────────────────
+    if (line.trimStart().startsWith("```")) {
+      if (!inCodeBlock) {
+        // Open code block
+        inCodeBlock = true;
+        codeLanguage = line.trimStart().slice(3).trim();
+        codeBlockLines = [];
+        continue;
+      } else {
+        // Close code block
+        inCodeBlock = false;
+        const code = codeBlockLines.join("\n");
+        elements.push(
+          <CodeBlock
+            key={`code-${codeBlockIdx}`}
+            code={code}
+            language={codeLanguage}
+            blockKey={`code-${codeBlockIdx}`}
+          />
+        );
+        codeBlockIdx++;
+        continue;
+      }
+    }
+
+    if (inCodeBlock) {
+      codeBlockLines.push(line);
+      continue;
+    }
+
+    // ── Table row detection ─────────────────────────────────────────
     if (line.includes("|") && line.trim().startsWith("|")) {
       const cells = line
         .split("|")
@@ -154,6 +342,22 @@ function renderMarkdown(text: string) {
       continue;
     }
 
+    // Numbered list item
+    if (line.match(/^\d+\.\s/)) {
+      const content = line.replace(/^\d+\.\s/, "");
+      elements.push(
+        <div key={i} className="flex items-start gap-2 ml-2 my-0.5">
+          <span className="text-accent mt-0.5 text-[10px] font-mono tabular-nums shrink-0 w-4 text-right">
+            {line.match(/^(\d+)\./)?.[1]}.
+          </span>
+          <span className="text-sm text-muted-foreground leading-relaxed flex-1">
+            {renderInline(content)}
+          </span>
+        </div>
+      );
+      continue;
+    }
+
     // Bullet point
     if (line.match(/^[-*]\s/)) {
       elements.push(
@@ -197,6 +401,19 @@ function renderMarkdown(text: string) {
   // Flush any remaining table
   if (inTable) flushTable();
 
+  // Flush any unclosed code block (streaming mid-block)
+  if (inCodeBlock && codeBlockLines.length > 0) {
+    const code = codeBlockLines.join("\n");
+    elements.push(
+      <CodeBlock
+        key={`code-${codeBlockIdx}`}
+        code={code}
+        language={codeLanguage}
+        blockKey={`code-streaming-${codeBlockIdx}`}
+      />
+    );
+  }
+
   return elements;
 }
 
@@ -223,7 +440,7 @@ function renderInline(text: string): React.ReactNode {
       parts.push(
         <code
           key={match.index}
-          className="px-1 py-0.5 rounded bg-surface text-accent text-xs font-mono"
+          className="px-1.5 py-0.5 rounded bg-surface text-accent text-[12px] font-mono"
         >
           {match[4]}
         </code>
@@ -235,6 +452,57 @@ function renderInline(text: string): React.ReactNode {
     parts.push(text.slice(lastIndex));
   }
   return parts.length === 1 ? parts[0] : parts;
+}
+
+// ─── Follow-up suggestions generator ────────────────────────────────────────
+
+function generateFollowUps(lastUserMessage: string, lastAssistantMessage: string): string[] {
+  const suggestions: string[] = [];
+  const lower = (lastUserMessage + " " + lastAssistantMessage).toLowerCase();
+
+  // Context-aware suggestions based on content
+  if (lower.includes("churn") || lower.includes("retention")) {
+    suggestions.push("What's causing the churn increase?", "Show me churn by cohort", "Compare churn vs last quarter");
+  } else if (lower.includes("velocity") || lower.includes("deploy") || lower.includes("pr")) {
+    suggestions.push("Show velocity trend over 30 days", "Who are the top bottleneck reviewers?", "Predict next sprint velocity");
+  } else if (lower.includes("sql") || lower.includes("query") || lower.includes("database")) {
+    suggestions.push("Find other slow queries", "Check for missing indexes", "Optimize the top 5 queries");
+  } else if (lower.includes("test") || lower.includes("tdd") || lower.includes("coverage")) {
+    suggestions.push("Generate integration tests too", "Show current test coverage", "Create edge case tests");
+  } else if (lower.includes("incident") || lower.includes("error") || lower.includes("production")) {
+    suggestions.push("Show related past incidents", "What services are affected?", "Generate a runbook for this");
+  } else if (lower.includes("cost") || lower.includes("budget") || lower.includes("spend")) {
+    suggestions.push("Break down costs by model", "Project end-of-month spend", "Which agents cost the most?");
+  } else if (lower.includes("causal") || lower.includes("relationship") || lower.includes("edge")) {
+    suggestions.push("Show cross-domain relationships", "Which edges have highest confidence?", "What was discovered this week?");
+  } else {
+    // Generic follow-ups
+    suggestions.push("Tell me more", "What actions should we take?", "Show me the underlying data");
+  }
+
+  return suggestions.slice(0, 3);
+}
+
+// ─── Message action bar ─────────────────────────────────────────────────────
+
+function MessageActions({ content, onRegenerate, isLast }: { content: string; onRegenerate?: () => void; isLast: boolean }) {
+  return (
+    <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <CopyButton text={content} label="Copy" className="px-2 py-1 rounded-md hover:bg-surface" />
+      {isLast && onRegenerate && (
+        <button
+          onClick={onRegenerate}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-muted hover:text-foreground hover:bg-surface transition-colors"
+          title="Regenerate response"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+          </svg>
+          <span>Regenerate</span>
+        </button>
+      )}
+    </div>
+  );
 }
 
 // ─── SSE Stream Consumer ────────────────────────────────────────────────────
@@ -436,6 +704,7 @@ export function CopilotChat({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
+  const [followUps, setFollowUps] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -469,9 +738,8 @@ export function CopilotChat({
 
   // ── SSE stream consumer ─────────────────────────────────────────────────
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const trimmed = input.trim();
+  const sendMessage = useCallback(async (messageText: string) => {
+    const trimmed = messageText.trim();
     if (!trimmed || isLoading) return;
 
     // Cancel any in-flight request
@@ -484,11 +752,15 @@ export function CopilotChat({
     setInput("");
     setIsLoading(true);
     setBrainMeta(null);
+    setFollowUps([]);
 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     // Build conversation history from existing messages for multi-turn context
+    const currentMessages = [...messages, userMessage];
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
+
+    let finalAssistantContent = "";
 
     try {
       const response = await fetch(endpoint, {
@@ -510,6 +782,7 @@ export function CopilotChat({
         response,
         {
           onText: (_text, accumulated) => {
+            finalAssistantContent = accumulated;
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
@@ -532,7 +805,13 @@ export function CopilotChat({
           onBrainMeta: (meta) => {
             setBrainMeta(meta);
           },
-          onDone: () => {},
+          onDone: () => {
+            // Generate follow-up suggestions based on the conversation
+            if (finalAssistantContent) {
+              const suggestions = generateFollowUps(trimmed, finalAssistantContent);
+              setFollowUps(suggestions);
+            }
+          },
         },
         controller.signal
       );
@@ -552,11 +831,32 @@ export function CopilotChat({
       setIsLoading(false);
       abortRef.current = null;
     }
+  }, [endpoint, extraParams, isLoading, messages]);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    sendMessage(input);
   };
 
   const handlePromptClick = (prompt: string) => {
     setInput(prompt);
     inputRef.current?.focus();
+  };
+
+  const handleFollowUpClick = (suggestion: string) => {
+    setFollowUps([]);
+    sendMessage(suggestion);
+  };
+
+  const handleRegenerate = () => {
+    // Find the last user message and resend
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUserMsg) return;
+    // Remove the last assistant message
+    setMessages((prev) => prev.slice(0, -1));
+    setFollowUps([]);
+    // Re-send
+    setTimeout(() => sendMessage(lastUserMsg.content), 50);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -662,63 +962,94 @@ export function CopilotChat({
         ) : (
           /* Message list */
           <>
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex gap-3 max-w-4xl",
-                  msg.role === "user"
-                    ? "ml-auto flex-row-reverse"
-                    : "mr-auto"
-                )}
-              >
-                {/* Avatar */}
-                {msg.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <svg
-                      className="w-4 h-4 text-accent"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                      />
-                    </svg>
-                  </div>
-                )}
+            {messages.map((msg, i) => {
+              const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
 
-                {/* Bubble */}
+              return (
                 <div
+                  key={i}
                   className={cn(
-                    "rounded-xl px-4 py-3 text-sm leading-relaxed",
+                    "group flex gap-3 max-w-4xl",
                     msg.role === "user"
-                      ? "bg-accent text-accent-foreground max-w-md"
-                      : "bg-card border border-border-subtle text-foreground w-full"
+                      ? "ml-auto flex-row-reverse"
+                      : "mr-auto"
                   )}
                 >
-                  {msg.content ? (
-                    msg.role === "assistant" ? (
-                      <div className="space-y-0">
-                        {renderMarkdown(msg.content)}
-                      </div>
-                    ) : (
-                      msg.content
-                    )
-                  ) : (
-                    /* Loading dots */
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
-                    </span>
+                  {/* Avatar */}
+                  {msg.role === "assistant" && (
+                    <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                      <svg
+                        className="w-4 h-4 text-accent"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                        />
+                      </svg>
+                    </div>
                   )}
+
+                  {/* Bubble + Actions */}
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className={cn(
+                        "rounded-xl px-4 py-3 text-sm leading-relaxed",
+                        msg.role === "user"
+                          ? "bg-accent text-accent-foreground max-w-md ml-auto"
+                          : "bg-card border border-border-subtle text-foreground w-full"
+                      )}
+                    >
+                      {msg.content ? (
+                        msg.role === "assistant" ? (
+                          <div className="space-y-0">
+                            {renderMarkdown(msg.content)}
+                          </div>
+                        ) : (
+                          msg.content
+                        )
+                      ) : (
+                        /* Loading dots */
+                        <span className="inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Message actions (copy, regenerate) — appear on hover */}
+                    {msg.role === "assistant" && msg.content && !isLoading && (
+                      <MessageActions
+                        content={msg.content}
+                        onRegenerate={isLastAssistant ? handleRegenerate : undefined}
+                        isLast={isLastAssistant}
+                      />
+                    )}
+                  </div>
                 </div>
+              );
+            })}
+
+            {/* Follow-up suggestions — shown after last assistant response */}
+            {followUps.length > 0 && !isLoading && (
+              <div className="flex flex-wrap gap-2 max-w-4xl pt-1">
+                {followUps.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleFollowUpClick(suggestion)}
+                    className="px-3 py-1.5 rounded-full bg-accent/5 border border-accent/15 text-[12px] text-accent hover:bg-accent/10 hover:border-accent/30 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
+
             <div ref={messagesEndRef} />
           </>
         )}

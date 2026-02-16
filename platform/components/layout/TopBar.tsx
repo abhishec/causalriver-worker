@@ -43,16 +43,22 @@ export function TopBar() {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, [supabase.auth]);
 
-  // Fetch quick brain stats for the status strip
+  // Fetch quick brain stats for the status strip (scoped to current org)
   useEffect(() => {
     async function loadStats() {
+      if (!currentOrg?.id) {
+        setBrainStats({ edges: 0, signalsHr: 0 });
+        return;
+      }
       const [edgesRes, signalsRes] = await Promise.all([
         supabase
           .from("causal_relationships_statistical")
-          .select("id", { count: "exact", head: true }),
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", currentOrg.id),
         supabase
           .from("cross_domain_signals")
           .select("id", { count: "exact", head: true })
+          .eq("organization_id", currentOrg.id)
           .gte("created_at", new Date(Date.now() - 3600000).toISOString()),
       ]);
       setBrainStats({
@@ -61,7 +67,7 @@ export function TopBar() {
       });
     }
     loadStats();
-  }, [supabase]);
+  }, [supabase, currentOrg?.id]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
