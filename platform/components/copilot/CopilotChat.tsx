@@ -738,7 +738,7 @@ export function CopilotChat({
                 className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center",
                   "bg-danger/20 text-danger",
-                  "hover:bg-red-500/30 transition-colors"
+                  "hover:bg-danger/30 transition-colors"
                 )}
                 title="Stop generation"
               >
