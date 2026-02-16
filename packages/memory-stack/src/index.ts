@@ -887,6 +887,17 @@ export {
   type InterventionRecord,
 } from './orchestrator/brain-evolution-engine';
 
+// Brain Observability Bridge — Wires 15 cognitive layers + federation + evolution into observability
+export {
+  createBrainObservabilityBridge,
+  type BrainObservabilityBridge,
+  type BrainObservabilityBridgeConfig,
+  type CognitiveLayerOutput,
+  type EvolutionObservabilityData,
+  type FederationObservabilityData,
+  type BrainHealthReport,
+} from './orchestrator/brain-observability-bridge';
+
 // SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered + Brain-Augmented)
 export {
   testCaseGeneratorDomain,
@@ -1172,7 +1183,7 @@ export {
   createBrainPipeline,
   type BrainPipelineConfig,
   type BrainCycleReport,
-  type BrainHealthReport,
+  type BrainHealthReport as BrainPipelineHealthReport,
   type BrainRegionStatus,
   type SimulationWithPredictions,
   type LearningCycleResult,

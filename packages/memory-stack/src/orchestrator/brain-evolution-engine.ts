@@ -79,6 +79,10 @@ export interface BrainEvolutionState {
     totalPredictions: number;
     verifiedPredictions: number;
     cognitiveLayersActive: number; // Out of 15
+    // Federation-aware knowledge metrics (THE NETWORK EFFECT)
+    federatedCoreEdges: number;      // CORE brain edges available to this org
+    isFederating: boolean;           // Is org contributing to collective learning?
+    itemsContributedToCore: number;  // Items promoted upstream
   };
 
   // Intervention Effectiveness
@@ -712,7 +716,9 @@ async function computeKnowledgeGrowth(
   supabase: SupabaseClient,
   organizationId: string
 ): Promise<BrainEvolutionState['knowledge']> {
-  const [totalEdges, highConfEdges, patterns, rules, predictions, verified] = await Promise.all([
+  const CORE_ORG_ID = '00000000-0000-0000-0000-000000000000';
+
+  const [totalEdges, highConfEdges, patterns, rules, predictions, verified, coreEdges, federationSettings] = await Promise.all([
     supabase
       .from('causal_relationships_statistical')
       .select('id', { count: 'exact', head: true })
@@ -746,6 +752,19 @@ async function computeKnowledgeGrowth(
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
       .not('was_correct', 'is', null),
+
+    // FEDERATION: Count CORE brain edges available to this org
+    supabase
+      .from('causal_relationships_statistical')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', CORE_ORG_ID),
+
+    // FEDERATION: Check if org is contributing to collective learning
+    supabase
+      .from('organization_federation_settings')
+      .select('contribute_to_core_brain, upstream_items_contributed')
+      .eq('organization_id', organizationId)
+      .limit(1),
   ]);
 
   // Count active cognitive layers (check if data exists for each layer's tables)
@@ -759,6 +778,12 @@ async function computeKnowledgeGrowth(
   ]);
   const cognitiveLayersActive = layerChecks.filter(r => (r.count ?? 0) > 0).length;
 
+  // Federation metrics: CORE brain contributes to org knowledge
+  const fedSettings = federationSettings.data?.[0];
+  const coreEdgesCount = coreEdges.count ?? 0;
+  const isFederating = fedSettings?.contribute_to_core_brain ?? false;
+  const itemsContributed = fedSettings?.upstream_items_contributed ?? 0;
+
   return {
     totalCausalEdges: totalEdges.count ?? 0,
     highConfidenceEdges: highConfEdges.count ?? 0,
@@ -767,6 +792,10 @@ async function computeKnowledgeGrowth(
     totalPredictions: predictions.count ?? 0,
     verifiedPredictions: verified.count ?? 0,
     cognitiveLayersActive: Math.min(15, cognitiveLayersActive + 9), // Add LEAP layers
+    // Federation-aware knowledge metrics (THE NETWORK EFFECT)
+    federatedCoreEdges: coreEdgesCount,
+    isFederating,
+    itemsContributedToCore: itemsContributed,
   };
 }
 
@@ -867,7 +896,10 @@ function computeIntelligenceScore(
 
   // Knowledge component (0-20 points)
   // Logarithmic: 10 edges = 5pts, 50 edges = 10pts, 200 edges = 15pts, 1000 = 20pts
-  const totalKnowledge = knowledge.totalCausalEdges + knowledge.totalPatterns + knowledge.totalRules;
+  // FEDERATION BOOST: CORE brain edges count at 0.3x weight (collective intelligence)
+  const orgKnowledge = knowledge.totalCausalEdges + knowledge.totalPatterns + knowledge.totalRules;
+  const federatedKnowledge = (knowledge.federatedCoreEdges ?? 0) * 0.3;
+  const totalKnowledge = orgKnowledge + federatedKnowledge;
   const knowledgeNormalized = Math.min(1, Math.log10(Math.max(1, totalKnowledge)) / 3);
   const knowledgeScore = knowledgeNormalized * 20;
 
