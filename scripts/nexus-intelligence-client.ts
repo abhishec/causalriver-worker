@@ -330,6 +330,205 @@ export class NexusIntelligenceClient {
   }
 
   // ==========================================================================
+  // STEP 1b: GENERATE SYNTHETIC JIRA SIGNALS (Simulated Connector → L1)
+  // ==========================================================================
+
+  async generateJiraSignals(options?: {
+    ticketCount?: number;
+    sprintCount?: number;
+    teamCount?: number;
+  }): Promise<{ totalSignals: number; ticketsGenerated: number; duration_ms: number }> {
+    const startTime = Date.now();
+    const ticketCount = options?.ticketCount ?? 2000;
+    const sprintCount = options?.sprintCount ?? 12;
+    const teamCount = options?.teamCount ?? 5;
+
+    logger.info(`Generating ${ticketCount} synthetic Jira tickets across ${sprintCount} sprints, ${teamCount} teams...`);
+
+    // Realistic Jira project configuration
+    const projects = ['PLAT', 'CORE', 'INFRA', 'DATA', 'MOBILE'];
+    const issueTypes = ['Story', 'Bug', 'Task', 'Epic', 'Sub-task', 'Spike'];
+    const priorities = ['Blocker', 'Critical', 'Major', 'Minor', 'Trivial'];
+    const statuses = ['To Do', 'In Progress', 'In Review', 'QA', 'Done', 'Won\'t Fix'];
+    const components = [
+      'API', 'Frontend', 'Backend', 'Database', 'Auth', 'Payments',
+      'Notifications', 'Search', 'Analytics', 'DevOps', 'Security',
+      'Mobile-iOS', 'Mobile-Android', 'Infrastructure', 'ML-Pipeline',
+    ];
+    const labels = [
+      'tech-debt', 'performance', 'security', 'ux', 'accessibility',
+      'regression', 'p0-incident', 'customer-reported', 'documentation',
+      'refactor', 'migration', 'feature-flag', 'a11y', 'i18n',
+    ];
+    const devs = [
+      'alice.chen', 'bob.kumar', 'carol.rodriguez', 'dave.nakamura',
+      'emma.johnson', 'frank.zhang', 'grace.okafor', 'henry.patel',
+      'iris.schmidt', 'jack.wilson', 'kate.martinez', 'leo.tanaka',
+      'maya.singh', 'noah.brown', 'olivia.kim', 'peter.dubois',
+    ];
+
+    const signals: Array<Record<string, unknown>> = [];
+    const nowMs = Date.now();
+    const sprintDays = 14;
+
+    for (let i = 0; i < ticketCount; i++) {
+      const project = projects[i % projects.length];
+      const issueKey = `${project}-${1000 + i}`;
+      const issueType = issueTypes[Math.floor(Math.random() * issueTypes.length)];
+      const priority = priorities[Math.floor(Math.random() * priorities.length)];
+      const assignee = devs[Math.floor(Math.random() * devs.length)];
+      const reporter = devs[Math.floor(Math.random() * devs.length)];
+      const component = components[Math.floor(Math.random() * components.length)];
+      const sprint = Math.floor(i / (ticketCount / sprintCount));
+      const team = Math.floor(i / (ticketCount / teamCount));
+      const label = labels[Math.floor(Math.random() * labels.length)];
+
+      // Realistic created date (distributed over 6 months)
+      const daysAgo = Math.floor(Math.random() * 180);
+      const createdAt = new Date(nowMs - daysAgo * 86400000);
+      const isClosed = Math.random() < 0.7; // 70% resolved
+      const cycleTimeHours = isClosed ? Math.floor(Math.random() * 336) + 2 : 0; // 2h to 14 days
+      const closedAt = isClosed ? new Date(createdAt.getTime() + cycleTimeHours * 3600000) : null;
+      const storyPoints = issueType === 'Story' ? [1, 2, 3, 5, 8, 13][Math.floor(Math.random() * 6)] : 0;
+
+      // Signal: jira_issue_created
+      signals.push({
+        organization_id: this.orgId,
+        source_domain: 'engineering.jira',
+        signal_type: 'jira_issue_created',
+        signal_value: 1,
+        entity_id: issueKey,
+        entity_type: 'jira_ticket',
+        signal_timestamp: createdAt.toISOString(),
+        created_at: createdAt.toISOString(),
+        signal_metadata: {
+          issue_key: issueKey,
+          project: project,
+          issue_type: issueType,
+          priority: priority,
+          assignee: assignee,
+          reporter: reporter,
+          component: component,
+          sprint: `Sprint ${sprint + 1}`,
+          team: `Team-${projects[team % projects.length]}`,
+          labels: [label],
+          story_points: storyPoints,
+          summary: `[${issueType}] ${component} - ${label} improvement #${i}`,
+        },
+      });
+
+      // Signal: jira_issue_resolved (if closed)
+      if (isClosed) {
+        signals.push({
+          organization_id: this.orgId,
+          source_domain: 'engineering.jira',
+          signal_type: 'jira_issue_resolved',
+          signal_value: cycleTimeHours,
+          entity_id: issueKey,
+          entity_type: 'jira_ticket',
+          signal_timestamp: closedAt!.toISOString(),
+          created_at: closedAt!.toISOString(),
+          signal_metadata: {
+            issue_key: issueKey,
+            project: project,
+            resolution: Math.random() < 0.85 ? 'Done' : 'Won\'t Fix',
+            cycle_time_hours: cycleTimeHours,
+            story_points: storyPoints,
+            assignee: assignee,
+            component: component,
+          },
+        });
+      }
+
+      // Signal: jira_comment (1-5 comments per ticket)
+      const commentCount = Math.floor(Math.random() * 5) + 1;
+      for (let c = 0; c < commentCount; c++) {
+        const commentTime = new Date(createdAt.getTime() + (c + 1) * 3600000 * Math.random() * 48);
+        signals.push({
+          organization_id: this.orgId,
+          source_domain: 'engineering.jira',
+          signal_type: 'jira_comment',
+          signal_value: 1,
+          entity_id: issueKey,
+          entity_type: 'jira_comment',
+          signal_timestamp: commentTime.toISOString(),
+          created_at: commentTime.toISOString(),
+          signal_metadata: {
+            issue_key: issueKey,
+            author: devs[Math.floor(Math.random() * devs.length)],
+            project: project,
+          },
+        });
+      }
+
+      // Bug-specific signals
+      if (issueType === 'Bug') {
+        signals.push({
+          organization_id: this.orgId,
+          source_domain: 'engineering.jira',
+          signal_type: 'bug_opened',
+          signal_value: priority === 'Blocker' || priority === 'Critical' ? 3 : 1,
+          entity_id: issueKey,
+          entity_type: 'jira_ticket',
+          signal_timestamp: createdAt.toISOString(),
+          created_at: createdAt.toISOString(),
+          signal_metadata: {
+            issue_key: issueKey,
+            priority: priority,
+            component: component,
+            assignee: assignee,
+            severity: priority === 'Blocker' ? 'SEV1' : priority === 'Critical' ? 'SEV2' : 'SEV3',
+          },
+        });
+
+        if (isClosed) {
+          signals.push({
+            organization_id: this.orgId,
+            source_domain: 'engineering.jira',
+            signal_type: 'bug_closed',
+            signal_value: cycleTimeHours,
+            entity_id: issueKey,
+            entity_type: 'jira_ticket',
+            signal_timestamp: closedAt!.toISOString(),
+            created_at: closedAt!.toISOString(),
+            signal_metadata: {
+              issue_key: issueKey,
+              resolution_hours: cycleTimeHours,
+              component: component,
+            },
+          });
+        }
+      }
+    }
+
+    // Batch insert signals into cross_domain_signals
+    const BATCH_SIZE = 500;
+    let totalInserted = 0;
+
+    for (let offset = 0; offset < signals.length; offset += BATCH_SIZE) {
+      const batch = signals.slice(offset, offset + BATCH_SIZE);
+      const { error } = await this.supabase
+        .from('cross_domain_signals')
+        .insert(batch);
+
+      if (error) {
+        logger.error(`Jira signal batch insert error at offset ${offset}: ${error.message}`);
+      } else {
+        totalInserted += batch.length;
+      }
+    }
+
+    const duration = Date.now() - startTime;
+    logger.info(`Jira signals generated: ${totalInserted} signals from ${ticketCount} tickets in ${duration}ms`);
+
+    return {
+      totalSignals: totalInserted,
+      ticketsGenerated: ticketCount,
+      duration_ms: duration,
+    };
+  }
+
+  // ==========================================================================
   // STEP 3: RUN BRAIN CONSOLIDATION (L1-L15 + Causal Discovery)
   // ==========================================================================
 
@@ -1014,8 +1213,8 @@ export class NexusIntelligenceClient {
     // Step 1: Ensure org
     await this.ensureOrganization();
 
-    // Step 2: Ingest from GitHub
-    console.log('\n--- STEP 1: GITHUB INGESTION (Connector → L1) ---\n');
+    // Step 1a: Ingest from GitHub
+    console.log('\n--- STEP 1a: GITHUB INGESTION (Connector → L1) ---\n');
     let ingestionResult = { totalSignals: 0, repoResults: [] as any[] };
     const connectorsUsed: string[] = [];
     try {
@@ -1024,6 +1223,26 @@ export class NexusIntelligenceClient {
     } catch (err: any) {
       console.log(`  GitHub ingestion skipped: ${err.message}`);
       console.log('  (Continuing with existing data in the brain)\n');
+    }
+
+    // Step 1b: Generate Jira Signals (synthetic)
+    const jiraTicketCount = (this.config as any).jiraTicketCount ?? 0;
+    if (jiraTicketCount > 0) {
+      console.log('\n--- STEP 1b: JIRA SIGNAL GENERATION (Synthetic → L1) ---\n');
+      try {
+        const jiraResult = await this.generateJiraSignals({
+          ticketCount: jiraTicketCount,
+          sprintCount: Math.max(12, Math.floor(jiraTicketCount / 200)),
+          teamCount: Math.min(10, Math.max(3, Math.floor(jiraTicketCount / 500))),
+        });
+        ingestionResult.totalSignals += jiraResult.totalSignals;
+        connectorsUsed.push('jira-synthetic');
+        console.log(`  Jira tickets: ${jiraResult.ticketsGenerated}`);
+        console.log(`  Signals generated: ${jiraResult.totalSignals}`);
+        console.log(`  Duration: ${jiraResult.duration_ms}ms`);
+      } catch (err: any) {
+        console.log(`  Jira generation error: ${err.message}`);
+      }
     }
 
     // Step 3: Consolidation (L1-L15)
@@ -1596,26 +1815,38 @@ async function main() {
   console.log('  Ingest → Flow Through 30 Layers → Report');
   console.log('═'.repeat(90) + '\n');
 
-  const client = await createNexusIntelligenceClient();
-
-  // Parse CLI args or env for repos
+  // Parse CLI args
   const args = process.argv.slice(2);
   let repos: Array<{ owner: string; repo: string }> | undefined;
+  let jiraTicketCount = 0;
 
-  if (args.length >= 2) {
-    // CLI: npx tsx scripts/nexus-intelligence-client.ts owner repo [owner2 repo2 ...]
+  // Parse --jira-tickets N
+  const jiraIdx = args.indexOf('--jira-tickets');
+  if (jiraIdx >= 0 && args[jiraIdx + 1]) {
+    jiraTicketCount = parseInt(args[jiraIdx + 1], 10) || 0;
+    args.splice(jiraIdx, 2);
+  }
+
+  // Parse --repos owner/repo,owner/repo2
+  const reposIdx = args.indexOf('--repos');
+  if (reposIdx >= 0 && args[reposIdx + 1]) {
+    repos = args[reposIdx + 1].split(',').map(r => {
+      const [owner, repo] = r.trim().split('/');
+      return { owner, repo };
+    });
+    args.splice(reposIdx, 2);
+  } else if (args.length >= 2) {
+    // Legacy: npx tsx script.ts owner repo
     repos = [];
     for (let i = 0; i < args.length - 1; i += 2) {
       repos.push({ owner: args[i], repo: args[i + 1] });
     }
   } else if (args.length === 1 && args[0].includes('/')) {
-    // CLI: npx tsx scripts/nexus-intelligence-client.ts owner/repo
     repos = args[0].split(',').map(r => {
       const [owner, repo] = r.trim().split('/');
       return { owner, repo };
     });
   } else if (process.env.GITHUB_REPOS) {
-    // ENV: GITHUB_REPOS=owner/repo1,owner/repo2
     repos = process.env.GITHUB_REPOS.split(',').map(r => {
       const [owner, repo] = r.trim().split('/');
       return { owner, repo };
@@ -1623,6 +1854,10 @@ async function main() {
   } else if (process.env.GITHUB_OWNER && process.env.GITHUB_REPO) {
     repos = [{ owner: process.env.GITHUB_OWNER, repo: process.env.GITHUB_REPO }];
   }
+
+  const client = await createNexusIntelligenceClient({
+    jiraTicketCount,
+  } as any);
 
   const report = await client.runFullPipeline(repos);
 
