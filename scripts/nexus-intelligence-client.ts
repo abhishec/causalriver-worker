@@ -351,8 +351,8 @@ export class NexusIntelligenceClient {
     const engine = createConsolidationEngine({
       supabase: this.supabase,
       organizationId: this.orgId,
-      lookbackHours: options?.lookbackHours ?? 8760, // 1 year — fetch ALL historical signals
-      discoveryLookbackDays: options?.discoveryLookbackDays ?? 365,
+      lookbackHours: options?.lookbackHours ?? 2160, // 90 days
+      discoveryLookbackDays: options?.discoveryLookbackDays ?? 180,
       minObservations: 5, // Lowered from 30 to enable causal discovery with fewer signals per domain
       minEdgeWeight: 0.10, // Lowered from 0.20 to discover more edges
       verbose: options?.verbose ?? true,
