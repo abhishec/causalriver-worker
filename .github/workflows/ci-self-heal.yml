@@ -109,10 +109,13 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        # MUST use --no-frozen-lockfile because the healer runs AFTER CI fails
+        # and lockfile drift is one of the most common failure causes
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build memory-stack
         run: pnpm --filter @nexus-ai/memory-stack run build
+        continue-on-error: true  # Build may fail — healer still needs to diagnose
 
       - name: Configure git for auto-fix commits
         run: |
