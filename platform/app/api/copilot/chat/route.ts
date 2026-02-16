@@ -979,6 +979,63 @@ function detectSEaaSRoute(
     };
   }
 
+  // ── Dependency Upgrade (P1 1.4) ─────────────────────────────────────
+  if (
+    /outdated\s+dep|upgrade\s+dep|dependency\s+upgrade|dependency\s+update|check\s+dep.*version|npm\s+audit|security\s+vuln/i.test(lower)
+  ) {
+    const manifestMatch = message.match(/```(?:json)?\s*([\s\S]+?)```/);
+    return {
+      domainType: 'dependency-upgrade',
+      extractedInput: {
+        manifest: manifestMatch?.[1]?.trim() || '{}',
+        ecosystem: /pip|python/i.test(lower) ? 'pip' : /go\b/i.test(lower) ? 'go' : 'npm',
+      },
+    };
+  }
+
+  // ── Design Doc Generator (P1 1.5) ──────────────────────────────────
+  if (
+    /generate\s+(?:hld|lld|design\s+doc)|create\s+(?:hld|lld|design\s+doc)|reverse.?engineer\s+design|architecture\s+doc/i.test(lower)
+  ) {
+    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
+    const isReverse = /reverse|from\s+code|extract\s+design/i.test(lower);
+    return {
+      domainType: 'design-doc-generator',
+      extractedInput: {
+        direction: isReverse ? 'reverse' : 'forward',
+        requirements: isReverse ? undefined : message,
+        sourceCode: isReverse ? (codeMatch?.[1]?.trim() || message) : codeMatch?.[1]?.trim(),
+        level: /hld\s+and\s+lld|both/i.test(lower) ? 'both' : /lld/i.test(lower) ? 'lld' : 'hld',
+      },
+    };
+  }
+
+  // ── Performance Profiler (P1 3.4) ──────────────────────────────────
+  if (
+    /performance\s+profil|slow\s+endpoint|bottleneck.*performance|latency\s+analys|apm\s+data|slow\s+query.*analys/i.test(lower)
+  ) {
+    return {
+      domainType: 'performance-profiler',
+      extractedInput: {
+        traceData: message,
+      },
+    };
+  }
+
+  // ── Dead Code Detector (P1 4.3) ────────────────────────────────────
+  if (
+    /dead\s+code|unused\s+(?:code|import|function|variable)|unreachable\s+code|code\s+cleanup/i.test(lower)
+  ) {
+    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
+    return {
+      domainType: 'dead-code-detector',
+      extractedInput: {
+        sourceCode: codeMatch?.[1]?.trim() || message,
+        language: detectLanguage(message),
+      },
+    };
+  }
+
   return null;
 }
 

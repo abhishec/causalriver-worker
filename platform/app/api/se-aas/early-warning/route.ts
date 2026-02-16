@@ -1,4 +1,13 @@
-/** SE-aaS Early Warning System — GET /api/se-aas/early-warning */
+/**
+ * SE-aaS Early Warning System — GET /api/se-aas/early-warning
+ *
+ * BRAIN-INTEGRATED: Every early warning analysis also:
+ * 1. Records predictions in prediction_records → Brain verifies later
+ * 2. Emits cross_domain_signals → Brain observes patterns
+ * 3. Triggers lightweight Brain evolution → Bayesian weight updates
+ *
+ * The more you check early warnings, the smarter the Brain gets.
+ */
 
 import { NextRequest } from "next/server";
 import { authenticateSeAaSRequest, createSeAaSResponse, createSeAaSError } from "@/lib/se-aas/middleware";
@@ -9,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await authenticateSeAaSRequest(request);
 
-    const { runEarlyWarningSystem, getEarlyWarningSummary } = await import("@nexus-ai/memory-stack");
+    const { runEarlyWarningSystem, getEarlyWarningSummary, runBrainEvolutionCycle } = await import("@nexus-ai/memory-stack");
 
     const url = new URL(request.url);
     const domainsParam = url.searchParams.get("domains");
@@ -27,6 +36,67 @@ export async function GET(request: NextRequest) {
     });
 
     const summary = getEarlyWarningSummary(report);
+
+    // =====================================================================
+    // BRAIN FEEDBACK LOOP: Early warning results feed back into the Brain
+    // =====================================================================
+    // Non-blocking: Brain learns from every early warning analysis
+    (async () => {
+      try {
+        const service = auth.supabase;
+        const orgId = auth.organizationId;
+
+        // 1. Record velocity predictions for Brain verification
+        if (report.velocityCollapse?.isAtRisk) {
+          await service.from("prediction_records").insert({
+            organization_id: orgId,
+            domain: "velocity",
+            predicted_outcome: `Velocity collapse predicted: ${report.velocityCollapse.predictedDrop}% drop`,
+            predicted_value: report.velocityCollapse.predictedDrop ?? null,
+            confidence: report.velocityCollapse.confidence ?? 0.6,
+            entity_type: "early_warning",
+            entity_id: `velocity_${new Date().toISOString().split("T")[0]}`,
+          }).catch(() => {});
+        }
+
+        // 2. Record bottleneck predictions for Brain verification
+        for (const alert of report.bottleneckAlerts ?? []) {
+          if (alert.riskLevel === "critical" || alert.riskLevel === "high") {
+            await service.from("prediction_records").insert({
+              organization_id: orgId,
+              domain: alert.domain ?? "bottleneck",
+              predicted_outcome: `Bottleneck risk: ${alert.description ?? alert.riskLevel}`,
+              predicted_value: alert.riskScore ?? null,
+              confidence: 0.7,
+              entity_type: "early_warning",
+              entity_id: `bottleneck_${alert.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
+            }).catch(() => {});
+          }
+        }
+
+        // 3. Emit early warning signal → Brain observes
+        await service.from("cross_domain_signals").insert({
+          organization_id: orgId,
+          source_domain: "brain.early_warning",
+          signal_type: "early_warning_analysis",
+          signal_value: report.velocityCollapse?.isAtRisk ? 1 : 0,
+          entity_type: "early_warning",
+          entity_id: `ew_${new Date().toISOString().split("T")[0]}`,
+          signal_metadata: {
+            domains,
+            lookbackDays,
+            velocityAtRisk: report.velocityCollapse?.isAtRisk ?? false,
+            bottleneckAlerts: (report.bottleneckAlerts ?? []).length,
+            overallRisk: summary?.overallRisk ?? "unknown",
+          },
+        }).catch(() => {});
+
+        // 4. Lightweight Brain evolution cycle (verify past predictions + update weights)
+        await runBrainEvolutionCycle(service, orgId, "lightweight").catch(() => {});
+      } catch {
+        // Non-blocking: feedback failures should never break early warning
+      }
+    })();
 
     return createSeAaSResponse(request, {
       success: true,

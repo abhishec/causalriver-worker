@@ -440,6 +440,76 @@ export function calculateBetweennessCentrality(
 }
 
 /**
+ * Calculate Eigenvector Centrality (Power Iteration method)
+ *
+ * Eigenvector centrality measures influence — a node is important if it's
+ * connected to other important nodes. Unlike betweenness (gatekeepers),
+ * this finds "influential connectors" in the collaboration network.
+ *
+ * Algorithm: Power iteration until convergence or max iterations.
+ *   v(t+1) = A * v(t) / ||A * v(t)||
+ *
+ * Spec Requirement: Use Case B — Bottleneck Concentration Risk
+ */
+export function calculateEigenvectorCentrality(
+  adjacency: Map<string, Map<string, number>>,
+  maxIterations: number = 100,
+  tolerance: number = 1e-6
+): Map<string, number> {
+  const nodes = Array.from(adjacency.keys());
+  const n = nodes.length;
+  if (n === 0) return new Map();
+
+  // Initialize with uniform vector
+  let centrality = new Map<string, number>();
+  const initVal = 1 / Math.sqrt(n);
+  for (const node of nodes) {
+    centrality.set(node, initVal);
+  }
+
+  for (let iter = 0; iter < maxIterations; iter++) {
+    const newCentrality = new Map<string, number>();
+
+    // Matrix-vector multiply: new[i] = Σ_j A[i][j] * old[j]
+    for (const node of nodes) {
+      let sum = 0;
+      const neighbors = adjacency.get(node);
+      if (neighbors) {
+        for (const [neighbor, weight] of neighbors) {
+          sum += weight * (centrality.get(neighbor) ?? 0);
+        }
+      }
+      newCentrality.set(node, sum);
+    }
+
+    // Normalize by L2 norm
+    let norm = 0;
+    for (const val of newCentrality.values()) {
+      norm += val * val;
+    }
+    norm = Math.sqrt(norm);
+
+    if (norm === 0) break; // Disconnected graph
+
+    for (const [node, val] of newCentrality) {
+      newCentrality.set(node, val / norm);
+    }
+
+    // Check convergence
+    let maxDiff = 0;
+    for (const node of nodes) {
+      maxDiff = Math.max(maxDiff, Math.abs((newCentrality.get(node) ?? 0) - (centrality.get(node) ?? 0)));
+    }
+
+    centrality = newCentrality;
+
+    if (maxDiff < tolerance) break;
+  }
+
+  return centrality;
+}
+
+/**
  * Get heatmap of bottleneck risk across organization
  * Returns: { domain: riskScore } where riskScore = 0-100
  *

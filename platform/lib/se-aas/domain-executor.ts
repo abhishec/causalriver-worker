@@ -18,7 +18,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 
-// Import all 8 SE-aaS domains
+// Import all 12 SE-aaS domains (8 original + 4 P1 gap closure)
 import {
   testDataGeneratorDomain,
   sqlAnalyzerDomain,
@@ -28,13 +28,21 @@ import {
   impactAnalysisDomain,
   dataLineageDomain,
   logQueryDomain,
+  // P1 Gap Closure: 4 missing domains from CTO spec
+  dependencyUpgradeDomain,
+  designDocGeneratorDomain,
+  performanceProfilerDomain,
+  deadCodeDetectorDomain,
+  // Brain Evolution Engine — feedback loop integration
+  runBrainEvolutionCycle,
 } from "@nexus-ai/memory-stack";
 
 // ============================================================================
-// DOMAIN REGISTRY
+// DOMAIN REGISTRY — All 12 SE-aaS Brain-Augmented Domains
 // ============================================================================
 
 const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
+  // === Sprint 1-3 (Original 8) ===
   "test-data-generator": { domain: testDataGeneratorDomain, sync: true },
   "sql-analyzer": { domain: sqlAnalyzerDomain, sync: true },
   "test-case-generator": { domain: testCaseGeneratorDomain, sync: false },
@@ -43,6 +51,11 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "impact-analysis": { domain: impactAnalysisDomain, sync: false },
   "data-lineage": { domain: dataLineageDomain, sync: true },
   "log-query": { domain: logQueryDomain, sync: false },
+  // === P1 Gap Closure (4 new from CTO spec) ===
+  "dependency-upgrade": { domain: dependencyUpgradeDomain, sync: false },
+  "design-doc-generator": { domain: designDocGeneratorDomain, sync: false },
+  "performance-profiler": { domain: performanceProfilerDomain, sync: false },
+  "dead-code-detector": { domain: deadCodeDetectorDomain, sync: true },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {
@@ -118,10 +131,99 @@ export async function executeDomain(
     createdBy: params.userId,
   });
 
+  // ============================================================================
+  // BRAIN FEEDBACK LOOP — Every Execution Teaches the Brain
+  // ============================================================================
+  // This is THE differentiator. Every SE-aaS domain execution:
+  // 1. Emits a signal → Brain observes
+  // 2. Records prediction (if domain generated one) → Brain verifies later
+  // 3. Triggers lightweight evolution cycle → Brain weights update in real-time
+  //
+  // Result: The more you use NexusBrain, the smarter it gets. This is a MOAT.
+  await feedBrainFromExecution(supabase, params, result, brainContext, durationMs).catch(() => {
+    // Non-blocking: feedback failure should NEVER break domain execution
+  });
+
   return {
     result: { ...result, timing: { totalMs: durationMs } },
     artifactId,
   };
+}
+
+// ============================================================================
+// BRAIN FEEDBACK LOOP — The Learning Circuit
+// ============================================================================
+
+/**
+ * After every SE-aaS domain execution, feed the result back into the Brain.
+ *
+ * This closes the loop:
+ *   User request → Brain-augmented Claude → Result → Brain learns → Better next time
+ *
+ * THREE feedback channels:
+ * 1. SIGNAL: Domain execution emitted as cross_domain_signal (Brain observes activity)
+ * 2. PREDICTION: If result contains a prediction/confidence → stored for later verification
+ * 3. EVOLUTION: Lightweight Brain evolution cycle triggered (Bayesian weight updates)
+ */
+async function feedBrainFromExecution(
+  supabase: SupabaseClient,
+  params: ExecuteDomainParams,
+  result: Record<string, unknown>,
+  brainContext: Record<string, any>,
+  durationMs: number
+): Promise<void> {
+  const { organizationId, domainType, userId } = params;
+
+  // Channel 1: SIGNAL — Brain observes this domain execution
+  await supabase.from("cross_domain_signals").insert({
+    organization_id: organizationId,
+    source_domain: `se-aas.${domainType}`,
+    signal_type: "domain_execution",
+    signal_value: (result as any).confidence ?? 0.5,
+    entity_type: "se_aas_artifact",
+    entity_id: `${domainType}_${Date.now()}`,
+    signal_metadata: {
+      domainType,
+      claudePowered: (result as any).data?.claudePowered ?? false,
+      brainAugmented: brainContext.cognitiveStackAvailable,
+      causalEdgesUsed: brainContext.causalEdges?.length ?? 0,
+      durationMs,
+      userId,
+      interventionsCount: ((result as any).interventions ?? []).length,
+      hasNarrative: !!(result as any).narrative,
+    },
+  });
+
+  // Channel 2: PREDICTION — If domain generated predictions, store for verification
+  const interventions = (result as any).interventions ?? [];
+  if (interventions.length > 0) {
+    for (const intervention of interventions.slice(0, 5)) {
+      await supabase.from("prediction_records").insert({
+        organization_id: organizationId,
+        domain: domainType,
+        predicted_outcome: intervention.description,
+        predicted_value: null,
+        confidence: (result as any).confidence ?? 0.5,
+        entity_type: "se_aas_intervention",
+        entity_id: intervention.type ?? domainType,
+        source_rule_id: null,
+      });
+    }
+  }
+
+  // Channel 3: EVOLUTION — Trigger lightweight Brain evolution cycle
+  // (verifies past predictions + Bayesian weight updates)
+  // Only trigger every ~10 executions to avoid overhead
+  const { count: recentExecs } = await supabase
+    .from("cross_domain_signals")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("source_domain", `se-aas.${domainType}`)
+    .gte("created_at", new Date(Date.now() - 3600000).toISOString());
+
+  if ((recentExecs ?? 0) % 10 === 0) {
+    await runBrainEvolutionCycle(supabase, organizationId, "lightweight").catch(() => {});
+  }
 }
 
 // ============================================================================
@@ -134,23 +236,26 @@ export async function executeDomain(
  * THE CRITICAL DIFFERENTIATOR: This is what makes NexusBrain's P1 domains
  * "Brain-augmented Claude" instead of "stateless Claude".
  *
- * Loads the FULL cognitive stack from the Brain:
+ * THE WORLD'S MOST COMPREHENSIVE BRAIN CONTEXT — 10 parallel queries:
  * - L4: Causal edges (what causes what in THIS organization)
  * - L5: Grammar rules / discovered patterns
  * - P0: Velocity snapshots + bottleneck risk
  * - L1: Recent cross-domain engineering signals
  * - Brain insights: Recent AI-generated organizational insights
  * - Cascade rules: Known cascade chains the Brain has learned
+ * - Dependency graph: Code/module dependency relationships (structural intelligence)
+ * - Brain evolution: Latest intelligence score, accuracy, learning velocity
+ * - User corrections: Recent user corrections (high-priority learning)
+ * - Brain predictions: Recent verified predictions (accuracy context)
  *
- * Domains that don't need Brain context gracefully ignore it
- * (the context is additive, never blocking).
+ * Every domain gets the FULL Brain context. This is NEVER stateless Claude.
  */
 async function assembleBrainContext(
   supabase: SupabaseClient,
   organizationId: string
 ): Promise<Record<string, any>> {
   try {
-    // Parallel load: FULL cognitive stack for Brain-augmented Claude
+    // Parallel load: FULL cognitive stack for Brain-augmented Claude (10 queries)
     const [
       causalEdgesRes,
       patternsRes,
@@ -159,11 +264,14 @@ async function assembleBrainContext(
       recentSignalsRes,
       brainInsightsRes,
       cascadeRulesRes,
+      evolutionRes,
+      correctionsRes,
+      verifiedPredictionsRes,
     ] = await Promise.all([
       // L4: Causal relationships Brain has learned
       supabase
         .from('causal_relationships_statistical')
-        .select('source_signal, target_signal, strength, confidence, lag, p_value')
+        .select('source_signal, target_signal, strength, confidence, lag, p_value, source_domain, target_domain, effect_size, evidence_weight')
         .eq('organization_id', organizationId)
         .order('updated_at', { ascending: false })
         .limit(50),
@@ -221,7 +329,43 @@ async function assembleBrainContext(
         .gte('confidence', 0.5)
         .order('confidence', { ascending: false })
         .limit(15),
+
+      // Brain Evolution: Latest intelligence score (THE differentiator visualization)
+      supabase
+        .from('brain_evolution_snapshots')
+        .select('intelligence_score, accuracy, brier_score, total_edges, total_evidence, snapshot_date')
+        .eq('organization_id', organizationId)
+        .order('snapshot_date', { ascending: false })
+        .limit(7),
+
+      // User corrections: High-priority learning from feedback (most recent)
+      supabase
+        .from('ai_memory')
+        .select('content, metadata, created_at')
+        .eq('organization_id', organizationId)
+        .eq('memory_type', 'correction')
+        .order('created_at', { ascending: false })
+        .limit(5),
+
+      // Verified predictions: Brain's track record (accuracy context for domains)
+      supabase
+        .from('prediction_records')
+        .select('domain, predicted_outcome, was_correct, confidence, verified_at')
+        .eq('organization_id', organizationId)
+        .not('was_correct', 'is', null)
+        .order('verified_at', { ascending: false })
+        .limit(20),
     ]);
+
+    // Compute Brain accuracy from verified predictions
+    const verifiedPreds = verifiedPredictionsRes.data || [];
+    const correctPreds = verifiedPreds.filter(p => p.was_correct);
+    const brainAccuracy = verifiedPreds.length > 0
+      ? correctPreds.length / verifiedPreds.length
+      : 0;
+
+    // Get latest evolution snapshot
+    const latestEvolution = evolutionRes.data?.[0] || null;
 
     return {
       organizationId,
@@ -241,6 +385,34 @@ async function assembleBrainContext(
       brainInsights: (brainInsightsRes.data || []).slice(0, 5),
       // Cascade rules (cross-domain chains)
       cascadeRules: cascadeRulesRes.data || [],
+      // Brain Evolution state (THE NEVER-EXISTED-BEFORE FEATURE)
+      brainEvolution: {
+        intelligenceScore: latestEvolution?.intelligence_score ?? 0,
+        accuracy: latestEvolution?.accuracy ?? 0,
+        brierScore: latestEvolution?.brier_score ?? 0.25,
+        totalEdges: latestEvolution?.total_edges ?? 0,
+        totalEvidence: latestEvolution?.total_evidence ?? 0,
+        recentSnapshots: (evolutionRes.data || []).slice(0, 7),
+        isLearning: (latestEvolution?.total_evidence ?? 0) > 0,
+      },
+      // Brain accuracy (from real prediction verification)
+      brainAccuracy: {
+        totalPredictions: verifiedPreds.length,
+        correctPredictions: correctPreds.length,
+        accuracy: brainAccuracy,
+        recentTrackRecord: verifiedPreds.slice(0, 5).map(p => ({
+          domain: p.domain,
+          outcome: p.predicted_outcome,
+          wasCorrect: p.was_correct,
+          confidence: p.confidence,
+        })),
+      },
+      // User corrections (highest-priority learning from feedback loop)
+      userCorrections: (correctionsRes.data || []).map(c => ({
+        correction: c.content,
+        learnedAt: c.created_at,
+        source: (c.metadata as any)?.source ?? 'unknown',
+      })),
     };
   } catch {
     // Non-blocking: domains work without Brain context (degraded mode)
@@ -252,6 +424,9 @@ async function assembleBrainContext(
       crossDomainContext: {},
       brainInsights: [],
       cascadeRules: [],
+      brainEvolution: null,
+      brainAccuracy: { totalPredictions: 0, correctPredictions: 0, accuracy: 0, recentTrackRecord: [] },
+      userCorrections: [],
     };
   }
 }

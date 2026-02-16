@@ -230,6 +230,41 @@ export function formatBrainContextForDomain(
     }
   }
 
+  // ── BRAIN EVOLUTION CONTEXT ───────────────────────────────────────────
+  const brainEvolution = (brain as Record<string, any>).brainEvolution;
+  if (brainEvolution && brainEvolution.isLearning) {
+    sections.push(`\n### Brain Evolution (Self-Learning Intelligence)`);
+    sections.push(`The Brain is actively learning from this organization:`);
+    sections.push(`- Intelligence Score: ${brainEvolution.intelligenceScore}/100`);
+    sections.push(`- Prediction Accuracy: ${(brainEvolution.accuracy * 100).toFixed(0)}%`);
+    sections.push(`- Calibration (Brier): ${brainEvolution.brierScore.toFixed(3)} (${brainEvolution.brierScore < 0.25 ? 'well-calibrated' : 'improving'})`);
+    sections.push(`- Knowledge Base: ${brainEvolution.totalEdges} causal edges, ${brainEvolution.totalEvidence} verified predictions`);
+    sections.push(`The Brain gets smarter with every interaction. Its predictions improve over time via Bayesian weight updates.`);
+  }
+
+  // ── BRAIN ACCURACY & TRACK RECORD ──────────────────────────────────────
+  const brainAccuracy = (brain as Record<string, any>).brainAccuracy;
+  if (brainAccuracy && brainAccuracy.totalPredictions > 0) {
+    sections.push(`\n### Brain Track Record (Verified Predictions)`);
+    sections.push(`Brain accuracy: ${(brainAccuracy.accuracy * 100).toFixed(0)}% (${brainAccuracy.correctPredictions}/${brainAccuracy.totalPredictions})`);
+    if (brainAccuracy.recentTrackRecord?.length > 0) {
+      sections.push(`Recent verified predictions:`);
+      for (const p of brainAccuracy.recentTrackRecord.slice(0, 3)) {
+        sections.push(`- [${p.wasCorrect ? '✓' : '✗'}] ${p.domain}: ${p.outcome} (${(p.confidence * 100).toFixed(0)}% confident)`);
+      }
+    }
+  }
+
+  // ── USER CORRECTIONS (highest-priority learning) ───────────────────────
+  const userCorrections = (brain as Record<string, any>).userCorrections;
+  if (userCorrections && userCorrections.length > 0) {
+    sections.push(`\n### User-Verified Corrections (High-Priority Knowledge)`);
+    sections.push(`Users have corrected the Brain on these topics — use these as ground truth:`);
+    for (const c of userCorrections.slice(0, 3)) {
+      sections.push(`- ${c.correction}`);
+    }
+  }
+
   // ── DOMAIN-SPECIFIC CONTEXT HINTS ──────────────────────────────────────
   sections.push(getDomainSpecificHint(domainName));
 
@@ -309,6 +344,42 @@ function getDomainSpecificHint(domainName: string): string {
         `The Brain's causal graph can help identify root causes from log symptoms.`
       );
 
+    case 'dependency-upgrade':
+      return (
+        `\n### Domain Hint: Dependency Upgrade\n` +
+        `Use the Brain's causal graph to understand how dependency changes cascade through ` +
+        `the system. If the Brain has learned that certain dependency updates correlate with ` +
+        `incident spikes, flag those as higher-risk upgrades. Reference bottleneck data to ` +
+        `identify if the upgrade will affect a critical reviewer's area of expertise.`
+      );
+
+    case 'design-doc-generator':
+      return (
+        `\n### Domain Hint: Design Document Generation\n` +
+        `Use the Brain's learned patterns and causal relationships to generate ` +
+        `org-specific design documents. Reference the Brain's knowledge of team velocity, ` +
+        `bottleneck patterns, and code structure to produce HLD/LLD documents that ` +
+        `reflect this organization's architecture and conventions, not generic templates.`
+      );
+
+    case 'performance-profiler':
+      return (
+        `\n### Domain Hint: Performance Profiling\n` +
+        `Use the Brain's engineering signals to correlate performance bottlenecks with ` +
+        `organizational patterns. If the Brain's causal graph shows that "review_delays --> ` +
+        `batch_deploys --> latency_spikes", use this to explain performance issues in context. ` +
+        `Reference velocity data to assess if performance issues correlate with sprint pressure.`
+      );
+
+    case 'dead-code-detector':
+      return (
+        `\n### Domain Hint: Dead Code Detection\n` +
+        `Use the Brain's engineering context to assess risk of dead code removal. ` +
+        `If the Brain knows which code areas have high bottleneck risk (few reviewers), ` +
+        `flag dead code in those areas as higher-risk to modify. Reference the Brain's ` +
+        `causal graph to understand if unused code is part of a dormant cascade chain.`
+      );
+
     default:
       return '';
   }
@@ -333,6 +404,9 @@ export function buildBrainAttribution(
   const patterns = (brain.patterns as GrammarPattern[]) || [];
   const eng = brain.crossDomainContext?.engineering;
 
+  const evolution = (brain as Record<string, any>).brainEvolution;
+  const accuracy = (brain as Record<string, any>).brainAccuracy;
+
   return {
     brainAugmented: true,
     brainLayers: {
@@ -342,9 +416,21 @@ export function buildBrainAttribution(
       bottleneck: eng?.bottleneck ? 'loaded' : 'unavailable',
       recentSignals: eng?.signalCount || 0,
     },
+    brainEvolution: evolution ? {
+      intelligenceScore: evolution.intelligenceScore,
+      accuracy: evolution.accuracy,
+      brierScore: evolution.brierScore,
+      isLearning: evolution.isLearning,
+    } : null,
+    brainAccuracy: accuracy ? {
+      predictionAccuracy: accuracy.accuracy,
+      verifiedPredictions: accuracy.totalPredictions,
+    } : null,
     attribution:
       `Analysis powered by NexusBrain's 15-layer cognitive stack. ` +
       `The Brain provided ${causalEdges.length} causal relationship(s) and ${patterns.length} learned pattern(s) ` +
-      `to augment Claude's analysis with organizational intelligence.`,
+      `to augment Claude's analysis with organizational intelligence.` +
+      (evolution?.intelligenceScore ? ` Brain intelligence: ${evolution.intelligenceScore}/100.` : '') +
+      (accuracy?.accuracy ? ` Prediction accuracy: ${(accuracy.accuracy * 100).toFixed(0)}%.` : ''),
   };
 }

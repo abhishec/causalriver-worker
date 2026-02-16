@@ -880,7 +880,7 @@ export {
   runBrainEvolutionCycle,
   type BrainEvolutionState,
   type DomainAccuracy,
-  type CalibrationBucket,
+  type CalibrationBucket as EvolutionCalibrationBucket,
   type EvolutionSnapshot,
   type VerificationJob,
   type VerificationOutcome,
@@ -960,6 +960,23 @@ export {
   type AnomalyEvent as LogAnomalyEvent,
   type RecommendedAlert,
 } from './orchestrator/action-domains-log-query';
+
+// P1 Gap Closure Domains — 4 missing domains from CTO spec (1.4, 1.5, 3.4, 4.3)
+// All Brain-augmented Claude domains following the same pattern as existing 8
+export {
+  dependencyUpgradeDomain,
+  designDocGeneratorDomain,
+  performanceProfilerDomain,
+  deadCodeDetectorDomain,
+  type DependencyUpgradeRequest,
+  type DependencyUpgradeResult,
+  type DesignDocRequest,
+  type DesignDocResult,
+  type PerformanceProfileRequest,
+  type PerformanceProfileResult,
+  type DeadCodeRequest,
+  type DeadCodeResult,
+} from './orchestrator/action-domains-missing-p1';
 
 // Early Warning System — Velocity Collapse + Bottleneck Detection
 // @deprecated - Use Brain-integrated version below for design partners
