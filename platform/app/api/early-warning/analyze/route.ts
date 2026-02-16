@@ -148,12 +148,17 @@ export async function POST(req: NextRequest) {
       window_end: new Date().toISOString(),
       team_id: teamId || null,
       top_reviewer_id: topReviewerEngineerId,
+      top_reviewer_login: bottleneckAnalysis.topReviewer,
       top_reviewer_share: bottleneckAnalysis.reviewShare,
+      top3_reviewer_share: bottleneckAnalysis.top3Share,
       reviewer_gini_coefficient: bottleneckAnalysis.giniCoefficient,
       reviewer_hhi: bottleneckAnalysis.hhi,
       max_betweenness_centrality: bottleneckAnalysis.maxBetweennessCentrality,
+      top_centrality_contributor: bottleneckAnalysis.topCentralityContributor,
+      avg_review_latency_hours: bottleneckAnalysis.avgReviewLatencyHours,
       bottleneck_risk_score: bottleneckAnalysis.riskScore,
       risk_level: bottleneckAnalysis.riskLevel,
+      reviewer_breakdown: bottleneckAnalysis.reviewerBreakdown,
     }, {
       onConflict: 'organization_id,snapshot_date,team_id',
       ignoreDuplicates: false,
@@ -309,6 +314,17 @@ export async function POST(req: NextRequest) {
         velocityAnalysis.featureVector,
         6 // 6 months lookback for training
       );
+      // Persist prediction back to latest velocity snapshot
+      if (prediction) {
+        await supabase.from('velocity_snapshots').update({
+          predicted_velocity: prediction.predictedVelocity,
+          prediction_lower_bound: prediction.lowerBound,
+          prediction_upper_bound: prediction.upperBound,
+          collapse_probability: prediction.collapseProbability,
+          model_confidence: prediction.modelConfidence,
+        }).eq('organization_id', organizationId)
+          .eq('snapshot_date', new Date().toISOString().split('T')[0]);
+      }
     } catch (predErr) {
       console.warn('[Early Warning] Velocity prediction failed (non-fatal):', predErr);
     }

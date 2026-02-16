@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import Link from "next/link";
 import { EarlyWarningActions } from "./actions";
+import { ReviewerDistributionChart, BRSBreakdown } from "./bottleneck-charts";
 
 export const dynamic = 'force-dynamic';
 
@@ -252,7 +253,9 @@ export default async function EarlyWarningPage() {
                       ? `${(latestBottleneck.top_reviewer_share * 100).toFixed(0)}%`
                       : '-'}
                   </div>
-                  <div className="text-xs text-muted">Top reviewer share</div>
+                  <div className="text-xs text-muted">
+                    Top reviewer{latestBottleneck.top_reviewer_login ? ` (${latestBottleneck.top_reviewer_login})` : ''}
+                  </div>
                   {latestBottleneck.top_reviewer_share > 0.4 && (
                     <div className="text-[10px] text-danger mt-0.5">⚠️ Above 40% threshold</div>
                   )}
@@ -332,6 +335,50 @@ export default async function EarlyWarningPage() {
               </div>
               <div className="text-xs text-muted">Model confidence</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reviewer Distribution + BRS Breakdown */}
+      {latestBottleneck && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Reviewer Distribution Chart */}
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="text-sm font-medium">Reviewer Distribution</h3>
+              <span className="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">
+                Review share %
+              </span>
+            </div>
+            <ReviewerDistributionChart
+              reviewerBreakdown={latestBottleneck.reviewer_breakdown || []}
+            />
+          </div>
+
+          {/* BRS Component Breakdown */}
+          <div className="rounded-xl bg-card border border-border-subtle p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="text-sm font-medium">Risk Score Breakdown</h3>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                latestBottleneck.risk_level === 'high'
+                  ? 'bg-danger/10 text-danger'
+                  : latestBottleneck.risk_level === 'medium'
+                  ? 'bg-warning/10 text-warning'
+                  : 'bg-success/10 text-success'
+              }`}>
+                {latestBottleneck.risk_level}
+              </span>
+            </div>
+            <BRSBreakdown
+              reviewerBreakdown={latestBottleneck.reviewer_breakdown || []}
+              riskScore={latestBottleneck.bottleneck_risk_score || 0}
+              giniCoefficient={latestBottleneck.reviewer_gini_coefficient || 0}
+              hhi={latestBottleneck.reviewer_hhi || 0}
+              topReviewerShare={latestBottleneck.top_reviewer_share || 0}
+              reviewerCount={(latestBottleneck.reviewer_breakdown || []).length || 1}
+              maxBetweenness={latestBottleneck.max_betweenness_centrality || 0}
+              avgLatencyHours={latestBottleneck.avg_review_latency_hours || 0}
+            />
           </div>
         </div>
       )}

@@ -535,7 +535,10 @@ export async function POST(request: NextRequest) {
     let seaasResult: Record<string, unknown> | null = null;
     const seaasRoute = detectSEaaSRoute(message);
 
-    if (seaasRoute && process.env.ANTHROPIC_API_KEY) {
+    // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors)
+    const COPILOT_NATIVE_DOMAINS = new Set(['boilerplate-generator', 'pr-review-assistant', 'codebase-qa']);
+
+    if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
         const service = await createServiceClient();
         const { executeDomain } = await import("@/lib/se-aas/domain-executor");
@@ -1032,6 +1035,53 @@ function detectSEaaSRoute(
       extractedInput: {
         sourceCode: codeMatch?.[1]?.trim() || message,
         language: detectLanguage(message),
+      },
+    };
+  }
+
+  // ── Boilerplate & Scaffolding Generator (P1 1.2) ─────────────────
+  if (
+    /scaffol|boilerplate|generate\s+(?:crud|endpoint|api\s+route|service|component)|new\s+(?:service|module|endpoint|component)\s+(?:for|with|that)/i.test(lower)
+  ) {
+    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
+    return {
+      domainType: 'boilerplate-generator',
+      extractedInput: {
+        description: message,
+        template: codeMatch?.[1]?.trim(),
+        language: detectLanguage(message),
+        includeTests: true,
+        includeLogging: true,
+      },
+    };
+  }
+
+  // ── PR Review & Iteration Assistant (P1 1.3) ─────────────────────
+  if (
+    /review\s+(?:this\s+)?(?:pr|pull\s+request|diff|code\s+change)|pr\s+review|code\s+review|check\s+(?:this\s+)?(?:pr|diff)\s+for/i.test(lower)
+  ) {
+    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
+    const prMatch = lower.match(/#(\d+)/);
+    return {
+      domainType: 'pr-review-assistant',
+      extractedInput: {
+        diff: codeMatch?.[1]?.trim() || message,
+        prNumber: prMatch ? parseInt(prMatch[1]) : undefined,
+        checkFor: ['bugs', 'security', 'performance', 'style', 'test_coverage'],
+      },
+    };
+  }
+
+  // ── Codebase Q&A Agent (P1 4.1) ──────────────────────────────────
+  if (
+    /(?:how|where|what|why|explain|show\s+me)\s+.*(?:code|function|class|module|service|endpoint|logic|implemented|work|handler|controller)/i.test(lower) ||
+    /understand\s+.*(?:code|codebase)|explain\s+(?:this\s+)?(?:code|function|class|method)/i.test(lower)
+  ) {
+    return {
+      domainType: 'codebase-qa',
+      extractedInput: {
+        question: message,
+        includeGitHistory: true,
       },
     };
   }

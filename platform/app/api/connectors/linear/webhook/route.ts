@@ -85,20 +85,16 @@ export async function POST(req: NextRequest) {
     // 5. Convert event to signal
     const signal = await convertLinearEventToSignal(event, organizationId);
 
-    // 6. Ingest signal into brain
+    // 6. Ingest signal into brain via cross_domain_signals (canonical table)
     if (signal) {
-      const { error } = await supabase.from('connector_signals').insert({
-        organization_id: organizationId,
-        source: 'linear',
-        signal_type: event.type.toLowerCase(),
-        data: signal.data,
-        metadata: signal.metadata,
-        timestamp: event.createdAt,
-      });
-
-      if (error) {
-        logger.error('Failed to ingest Linear signal', { error });
-        return NextResponse.json({ error: 'Failed to ingest signal' }, { status: 500 });
+      const crossDomainSignal = mapLinearToCrossDomainSignal(event, signal, organizationId);
+      if (crossDomainSignal) {
+        const { error: cdsError } = await supabase
+          .from('cross_domain_signals')
+          .insert(crossDomainSignal);
+        if (cdsError) {
+          logger.error('Failed to ingest Linear signal to cross_domain_signals', { error: cdsError });
+        }
       }
 
       // 7. Record webhook activity
@@ -298,4 +294,100 @@ function getPriorityName(priority: number): string {
     default:
       return 'unknown';
   }
+}
+
+/**
+ * Map Linear event to cross_domain_signals format for Brain causal discovery
+ */
+function mapLinearToCrossDomainSignal(
+  event: LinearWebhookEvent,
+  signal: { data: any; metadata: any },
+  organizationId: string
+): Record<string, unknown> | null {
+  const eventTime = event.createdAt || new Date().toISOString();
+
+  if (event.type === 'Issue') {
+    const statusType = signal.data.status_type;
+    // Map status changes to meaningful signals
+    if (event.action === 'create') {
+      return {
+        organization_id: organizationId,
+        source_domain: 'product',
+        signal_type: 'ticket_created',
+        signal_value: signal.data.estimate || 1,
+        entity_type: 'linear_issue',
+        entity_id: signal.data.issue_key || signal.data.issue_id,
+        signal_metadata: {
+          source: 'linear',
+          title: signal.data.title,
+          priority: signal.data.priority,
+          team: signal.data.team_name,
+          assignee: signal.data.assignee_name,
+          estimate: signal.data.estimate,
+        },
+        created_at: eventTime,
+        signal_timestamp: eventTime,
+      };
+    }
+    if (statusType === 'completed' || statusType === 'done') {
+      return {
+        organization_id: organizationId,
+        source_domain: 'product',
+        signal_type: 'ticket_resolved',
+        signal_value: signal.data.estimate || 1,
+        entity_type: 'linear_issue',
+        entity_id: signal.data.issue_key || signal.data.issue_id,
+        signal_metadata: {
+          source: 'linear',
+          title: signal.data.title,
+          priority: signal.data.priority,
+          team: signal.data.team_name,
+          assignee: signal.data.assignee_name,
+        },
+        created_at: eventTime,
+        signal_timestamp: eventTime,
+      };
+    }
+    if (statusType === 'started' || statusType === 'inProgress') {
+      return {
+        organization_id: organizationId,
+        source_domain: 'product',
+        signal_type: 'ticket_in_progress',
+        signal_value: signal.data.estimate || 1,
+        entity_type: 'linear_issue',
+        entity_id: signal.data.issue_key || signal.data.issue_id,
+        signal_metadata: {
+          source: 'linear',
+          title: signal.data.title,
+          priority: signal.data.priority,
+          team: signal.data.team_name,
+          assignee: signal.data.assignee_name,
+        },
+        created_at: eventTime,
+        signal_timestamp: eventTime,
+      };
+    }
+  }
+
+  if (event.type === 'Cycle') {
+    return {
+      organization_id: organizationId,
+      source_domain: 'product',
+      signal_type: event.action === 'create' ? 'sprint_started' : 'sprint_updated',
+      signal_value: signal.data.progress || 0,
+      entity_type: 'linear_cycle',
+      entity_id: signal.data.cycle_id,
+      signal_metadata: {
+        source: 'linear',
+        name: signal.data.name,
+        progress: signal.data.progress,
+        completed_issues: signal.data.completed_issues,
+        total_issues: signal.data.total_issues,
+      },
+      created_at: eventTime,
+      signal_timestamp: eventTime,
+    };
+  }
+
+  return null;
 }
