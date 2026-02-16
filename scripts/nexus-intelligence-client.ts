@@ -22,10 +22,13 @@
  *   L30 Wisdom → RL Feedback Loop → Brain Evolution
  *
  * USAGE:
- *   tsx scripts/nexus-intelligence-client.ts
+ *   npx tsx scripts/nexus-intelligence-client.ts
  *
  * @packageDocumentation
  */
+
+import { config as loadEnv } from 'dotenv';
+loadEnv(); // Load .env from project root
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseRepository } from '../packages/memory-stack/src/persistence/supabase-repository';
