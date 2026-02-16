@@ -71,17 +71,14 @@ export async function exampleConsolidationInstrumentation(
     for (const edge of causalEdges) {
       await obs.recordCausalCalculation({
         discovery_run_id: consolidationRunId,
-        calculation_type: edge.method, // 'granger', 'ccm', 'pc_algorithm'
+        calculation_type: edge.method, // 'granger', 'pc_algorithm', 'var', 'incremental', 'discovery'
         source_domain: edge.source,
         target_domain: edge.target,
         granger_p_value: edge.granger_p_value,
-        granger_f_stat: edge.granger_f_stat,
-        ccm_rho: edge.ccm_rho,
-        pc_algorithm_score: edge.pc_score,
-        bayesian_confidence: edge.bayesian_confidence,
+        granger_f_statistic: edge.granger_f_stat,
         is_significant: edge.is_significant,
         effect_size: edge.effect_size,
-        calculation_duration_ms: edge.calculation_time_ms,
+        calculation_latency_ms: edge.calculation_time_ms,
         calculated_at: new Date().toISOString(),
       });
     }
@@ -98,14 +95,13 @@ export async function exampleConsolidationInstrumentation(
 
     for (const pattern of patterns) {
       await obs.recordPatternLearning({
-        discovery_run_id: consolidationRunId,
-        pattern_type: pattern.type, // 'association', 'sequential', 'temporal'
-        pattern_signature: pattern.signature,
+        operation_type: 'discover',
+        pattern_type: pattern.type, // 'association', 'sequential', 'temporal', 'cascade'
+        pattern_id: pattern.signature,
         support: pattern.support,
         confidence: pattern.confidence,
         lift: pattern.lift,
-        items: pattern.items,
-        discovered_at: new Date().toISOString(),
+        executed_at: new Date().toISOString(),
       });
     }
 
@@ -122,14 +118,14 @@ export async function exampleConsolidationInstrumentation(
         agent_run_id: result.run_id,
         agent_type: result.agent_type,
         input_context: result.input_context,
-        output_result: result.output_result,
+        output_summary: result.output_result ? JSON.stringify(result.output_result) : undefined,
         status: result.status,
         error_message: result.error,
-        tokens_used: result.tokens_used,
+        tokens_consumed: result.tokens_used,
         cost_usd: result.cost_usd,
         started_at: result.started_at,
         completed_at: result.completed_at,
-        duration_ms: result.duration_ms,
+        execution_latency_ms: result.duration_ms,
       });
     }
 
@@ -143,9 +139,6 @@ export async function exampleConsolidationInstrumentation(
       signals_in_window: signals.length,
       causal_edges_discovered: causalEdges.filter(e => e.is_significant).length,
       patterns_found: patterns.length,
-      agents_executed: agentResults.length,
-      predictions_made: predictions.length,
-      accuracy_score: calculateAccuracy(predictions),
       total_duration_ms: endTime - startTime,
       status: 'success',
       started_at: new Date(startTime).toISOString(),
@@ -172,7 +165,7 @@ export async function exampleConsolidationInstrumentation(
       causal_edges_discovered: 0,
       patterns_found: 0,
       status: 'failed',
-      error_message: err.message,
+      warnings: [err.message],
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date().toISOString(),
     });
@@ -220,13 +213,13 @@ export async function exampleAgentInstrumentation(
       agent_run_id: agentRunId,
       agent_type: agentType,
       input_context: inputContext,
-      output_result: result.output,
+      output_summary: result.output ? JSON.stringify(result.output) : undefined,
       status: 'success',
-      tokens_used: result.tokens,
+      tokens_consumed: result.tokens,
       cost_usd: result.cost,
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date(endTime).toISOString(),
-      duration_ms: endTime - startTime,
+      execution_latency_ms: endTime - startTime,
     });
 
     await obs.flush();
@@ -250,7 +243,7 @@ export async function exampleAgentInstrumentation(
       error_message: err.message,
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
+      execution_latency_ms: Date.now() - startTime,
     });
 
     await obs.flush();
@@ -293,16 +286,16 @@ export async function exampleConnectorInstrumentation(
 
     // Record successful sync
     await obs.recordConnectorOperation({
-      sync_id: syncId,
+      connector_id: syncId,
       connector_type: connectorType,
-      operation_type: 'full_sync',
+      operation_type: 'sync',
+      sync_type: 'full',
       records_fetched: result.recordsFetched,
-      records_processed: result.recordsProcessed,
-      records_failed: result.recordsFailed,
-      status: 'success',
+      signals_generated: result.recordsProcessed,
+      errors_count: result.recordsFailed,
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date(endTime).toISOString(),
-      duration_ms: endTime - startTime,
+      operation_latency_ms: endTime - startTime,
     });
 
     await obs.flush();
@@ -319,14 +312,14 @@ export async function exampleConnectorInstrumentation(
 
     // Record failed sync
     await obs.recordConnectorOperation({
-      sync_id: syncId,
+      connector_id: syncId,
       connector_type: connectorType,
-      operation_type: 'full_sync',
-      status: 'failed',
-      error_message: err.message,
+      operation_type: 'sync',
+      sync_type: 'full',
+      error_messages: [err.message],
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date().toISOString(),
-      duration_ms: Date.now() - startTime,
+      operation_latency_ms: Date.now() - startTime,
     });
 
     await obs.flush();
@@ -373,15 +366,15 @@ export async function exampleFeedbackLoopInstrumentation(
     // Record feedback loop
     await obs.recordFeedbackLoop({
       prediction_id: predictionId,
-      source_domain: prediction.source_domain,
-      target_domain: prediction.target_domain,
+      prediction_type: 'causal',
+      domain: prediction.source_domain,
       predicted_value: prediction.predicted_value,
       actual_value: actualOutcome,
-      prediction_error: error,
-      is_accurate: isAccurate,
-      confidence_at_prediction: prediction.confidence,
+      absolute_error: error,
+      was_correct: isAccurate,
+      confidence: prediction.confidence,
       predicted_at: prediction.created_at,
-      actual_observed_at: new Date().toISOString(),
+      verified_at: new Date().toISOString(),
     });
 
     await obs.flush();

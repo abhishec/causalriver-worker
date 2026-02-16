@@ -39,12 +39,28 @@ interface LinearWebhookEvent {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify Linear webhook signature (if configured)
+    // 1. Verify Linear webhook — URL secret + optional signature
+    const urlSecret = req.nextUrl.searchParams.get('secret');
+    const configuredSecret = process.env.LINEAR_WEBHOOK_SECRET;
+    if (configuredSecret && urlSecret !== configuredSecret) {
+      logger.warn('Linear webhook: invalid URL secret');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const signature = req.headers.get('linear-signature');
     const body = await req.text();
 
-    // TODO: Implement signature verification when Linear provides signing secret
-    // For now, Linear webhooks don't support signatures, rely on HTTPS + secret URL
+    // Verify HMAC signature if signing secret is configured
+    if (process.env.LINEAR_SIGNING_SECRET && signature) {
+      const { createHmac } = await import('crypto');
+      const expected = createHmac('sha256', process.env.LINEAR_SIGNING_SECRET)
+        .update(body)
+        .digest('hex');
+      if (signature !== expected) {
+        logger.warn('Linear webhook: invalid HMAC signature');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
 
     // 2. Parse webhook payload
     const event: LinearWebhookEvent = JSON.parse(body);

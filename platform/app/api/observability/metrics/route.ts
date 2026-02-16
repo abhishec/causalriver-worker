@@ -12,9 +12,25 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDefaultMetrics } from '@nexus-ai/memory-stack';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   try {
+    // Auth: internal API key (for Prometheus scraping) or session auth
+    const apiKey = req.headers.get('x-api-key');
+    const validKey = process.env.NEXUS_INTERNAL_API_KEY;
+    if (!(validKey && apiKey === validKey)) {
+      try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+      } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const metrics = getDefaultMetrics();
     const snapshot = metrics.snapshot();
 

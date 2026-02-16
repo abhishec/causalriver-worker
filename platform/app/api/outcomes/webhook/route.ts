@@ -42,6 +42,16 @@ interface OutcomeWebhookPayload {
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Verify webhook secret
+    const webhookSecret = process.env.NEXUS_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+      if (provided !== webhookSecret) {
+        logger.warn('Outcome webhook: invalid secret');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     // 1. Get organization ID from query params
     const searchParams = req.nextUrl.searchParams;
     const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
@@ -197,6 +207,15 @@ function comparePredictionOutcome(
  */
 export async function GET(req: NextRequest) {
   try {
+    // Auth: verify webhook secret or session
+    const webhookSecret = process.env.NEXUS_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+      if (provided !== webhookSecret) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const searchParams = req.nextUrl.searchParams;
     const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
     const predictionId = searchParams.get('predictionId');

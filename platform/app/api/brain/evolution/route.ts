@@ -81,6 +81,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "organizationId required" }, { status: 400 });
     }
 
+    // Verify user belongs to this org (same check as GET handler)
+    const { data: evoMember } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (!evoMember) {
+      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+    }
+
     const service = await createServiceClient();
 
     // Run full evolution cycle

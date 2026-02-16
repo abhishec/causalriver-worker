@@ -42,19 +42,36 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      // Table might not exist — store in a generic metadata table or return success anyway
       console.error("Failed to save training pack:", error.message);
-      return NextResponse.json({
-        success: true,
-        message: "Pack accepted for processing (table pending creation)",
-        pack: { name, chains: chains?.length || 0, rules: rules?.length || 0 },
+      return NextResponse.json(
+        { error: `Failed to save training pack: ${error.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Trigger async execution: queue the pack for the next consolidation cycle
+    try {
+      await supabase.from("agent_queue").insert({
+        organization_id: orgId,
+        agent_type: "training-pack",
+        status: "pending",
+        payload: {
+          pack_id: data.id,
+          pack_name: name,
+          chain_count: chains?.length || 0,
+          rule_count: rules?.length || 0,
+        },
+        created_by: user.id,
       });
+    } catch (queueErr) {
+      // Non-fatal: pack is saved, execution will be picked up by scheduled job
+      console.warn("Failed to queue training pack (non-fatal):", queueErr);
     }
 
     return NextResponse.json({
       success: true,
       id: data.id,
-      message: `Training pack "${name}" saved successfully`,
+      message: `Training pack "${name}" saved and queued for execution`,
     });
   } catch (err: unknown) {
     return NextResponse.json(

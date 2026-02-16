@@ -14,9 +14,31 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDefaultSEMetrics } from '@nexus-ai/memory-stack';
+import { createClient } from '@/lib/supabase/server';
+
+/** Verify session auth — returns user or null */
+async function verifyAuth(): Promise<{ id: string } | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(req: NextRequest) {
   try {
+    // Auth: session or internal API key
+    const apiKey = req.headers.get('x-api-key');
+    const validKey = process.env.NEXUS_INTERNAL_API_KEY;
+    if (!(validKey && apiKey === validKey)) {
+      const user = await verifyAuth();
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     // Get organization ID from query params or default
     const searchParams = req.nextUrl.searchParams;
     const orgId = searchParams.get('org') || 'default';
@@ -44,6 +66,12 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Auth: require session auth for writes
+    const user = await verifyAuth();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { type, data, org } = body;
 

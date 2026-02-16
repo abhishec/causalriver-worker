@@ -253,12 +253,37 @@ export default async function EarlyWarningPage() {
                       : '-'}
                   </div>
                   <div className="text-xs text-muted">Top reviewer share</div>
+                  {latestBottleneck.top_reviewer_share > 0.4 && (
+                    <div className="text-[10px] text-danger mt-0.5">⚠️ Above 40% threshold</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm font-medium">
                     {latestBottleneck.reviewer_gini_coefficient?.toFixed(2) || '-'}
                   </div>
                   <div className="text-xs text-muted">Gini coefficient</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className={`text-sm font-medium ${
+                    latestBottleneck.reviewer_hhi > 0.25 ? 'text-danger' : ''
+                  }`}>
+                    {latestBottleneck.reviewer_hhi?.toFixed(3) || '-'}
+                  </div>
+                  <div className="text-xs text-muted">HHI index</div>
+                  {latestBottleneck.reviewer_hhi > 0.25 && (
+                    <div className="text-[10px] text-danger mt-0.5">⚠️ Concentrated (&gt;0.25)</div>
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-medium">
+                    {latestBottleneck.max_betweenness_centrality
+                      ? (latestBottleneck.max_betweenness_centrality * 100).toFixed(1)
+                      : '-'}
+                  </div>
+                  <div className="text-xs text-muted">Betweenness centrality</div>
                 </div>
               </div>
             </div>
@@ -269,6 +294,47 @@ export default async function EarlyWarningPage() {
           )}
         </div>
       </div>
+
+      {/* Velocity Prediction (from GBRT model) */}
+      {latestVelocity?.predicted_velocity != null && (
+        <div className="rounded-xl bg-gradient-to-r from-blue-500/5 to-cyan-500/5 border border-blue-500/20 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-xs">
+              📈
+            </div>
+            <h3 className="text-sm font-medium">Velocity Prediction</h3>
+            <span className="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">
+              Gradient Boosted Tree Model
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <div className="text-xl font-bold">{latestVelocity.predicted_velocity?.toFixed(1)}</div>
+              <div className="text-xs text-muted">Predicted next sprint velocity</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium">
+                [{latestVelocity.prediction_lower_bound?.toFixed(1)} — {latestVelocity.prediction_upper_bound?.toFixed(1)}]
+              </div>
+              <div className="text-xs text-muted">95% confidence interval</div>
+            </div>
+            <div>
+              <div className={`text-sm font-medium ${
+                (latestVelocity.collapse_probability || 0) > 0.5 ? 'text-danger' : 'text-success'
+              }`}>
+                {((latestVelocity.collapse_probability || 0) * 100).toFixed(0)}%
+              </div>
+              <div className="text-xs text-muted">Collapse probability</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium">
+                {((latestVelocity.model_confidence || 0) * 100).toFixed(0)}%
+              </div>
+              <div className="text-xs text-muted">Model confidence</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Velocity Trend Chart (last 30 days) */}
       <div className="rounded-xl bg-card border border-border-subtle p-5">

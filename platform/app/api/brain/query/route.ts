@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentOrgId } from '@/lib/org-helpers';
 import { executeUnifiedQuery, type BrainQueryRequest } from '@/lib/brain/orchestrator';
 import { z } from 'zod';
 
@@ -31,9 +32,44 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = BrainQuerySchema.parse(body);
 
+    // Resolve org ID: use provided or fall back to user's current org
+    const requestedOrgId = validated.context?.organizationId;
+    const resolvedOrgId = requestedOrgId || await getCurrentOrgId();
+
+    // Verify user is a member of the target organization
+    if (requestedOrgId) {
+      const { data: membership } = await supabase
+        .from('org_members')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('organization_id', requestedOrgId)
+        .single();
+
+      if (!membership) {
+        // Check platform admin
+        const { data: admin } = await supabase
+          .from('org_members')
+          .select('is_platform_admin')
+          .eq('user_id', user.id)
+          .eq('is_platform_admin', true)
+          .limit(1)
+          .single();
+
+        if (!admin) {
+          return NextResponse.json(
+            { error: 'Not a member of this organization' },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const result = await executeUnifiedQuery({
       query: validated.query,
-      context: validated.context,
+      context: {
+        ...validated.context,
+        organizationId: resolvedOrgId,
+      },
       anthropicApiKey: validated.anthropicApiKey,
     });
 

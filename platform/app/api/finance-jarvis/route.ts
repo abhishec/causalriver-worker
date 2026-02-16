@@ -16,33 +16,33 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    // Auth: require authenticated session
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { analysis, xero, volopay } = getFinanceData();
 
     // ── Seed finance data into the authenticated user's org ──────────────
-    // This runs in the background — doesn't block the dashboard response.
-    // Uses service client (bypasses RLS) for writes, user client for auth.
+    // Uses service client (bypasses RLS) for writes.
     try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: membership } = await supabase
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
 
-      if (user) {
-        // Get the user's org
-        const { data: membership } = await supabase
-          .from("org_members")
-          .select("organization_id")
-          .eq("user_id", user.id)
-          .limit(1)
-          .single();
-
-        if (membership?.organization_id) {
-          const service = await createServiceClient();
-          // Fire-and-forget: seed in background, don't await
-          seedFinanceDataToDb(service, membership.organization_id, analysis)
-            .catch((err) => console.warn("[FinanceJarvis] Non-fatal seed error:", err));
-        }
+      if (membership?.organization_id) {
+        const service = await createServiceClient();
+        // Fire-and-forget: seed in background, don't await
+        seedFinanceDataToDb(service, membership.organization_id, analysis)
+          .catch((err) => console.warn("[FinanceJarvis] Non-fatal seed error:", err));
       }
     } catch {
-      // Auth not available (e.g. unauthenticated request) — skip seeding
+      // Seeding failed — non-fatal, finance data still returned
     }
 
     return NextResponse.json({

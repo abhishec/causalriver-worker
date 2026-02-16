@@ -126,13 +126,15 @@ export async function PATCH(request: Request) {
   const body = await request.json();
 
   if (body.action === "mark_read" && body.notificationId) {
-    // If it's a cascade alert, mark it as read in the DB
+    // If it's a cascade alert, mark it as read in the DB (scoped to user's org)
     const alertId = body.notificationId.replace("cascade-", "");
     if (body.notificationId.startsWith("cascade-")) {
+      const orgId = await getCurrentOrgId();
       await supabase
         .from("cascade_alerts")
         .update({ is_read: true })
-        .eq("id", alertId);
+        .eq("id", alertId)
+        .eq("organization_id", orgId);
     }
     return NextResponse.json({ success: true });
   }

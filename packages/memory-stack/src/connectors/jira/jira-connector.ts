@@ -270,10 +270,14 @@ export class JiraConnector extends ConnectorBase {
     const description = this.extractText(issue.fields.description);
 
     const signal: Signal = {
-      source: 'jira',
-      type: 'issue',
-      content: `${issue.fields.summary}\n\n${description}`,
-      metadata: {
+      source_domain: 'engineering',
+      signal_type: 'jira_issue',
+      signal_value: 1,
+      entity_type: 'issue',
+      entity_id: `jira#${issue.key}`,
+      signal_metadata: {
+        source: 'jira',
+        content: `${issue.fields.summary}\n\n${description}`,
         issue_key: issue.key,
         issue_type: issue.fields.issuetype.name,
         status: issue.fields.status.name,
@@ -285,7 +289,7 @@ export class JiraConnector extends ConnectorBase {
         project_name: issue.fields.project.name,
       },
       organization_id: this.organizationId,
-      timestamp: issue.fields.updated,
+      created_at: issue.fields.updated,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -301,17 +305,21 @@ export class JiraConnector extends ConnectorBase {
       const commentText = this.extractText(comment.body);
 
       const signal: Signal = {
-        source: 'jira',
-        type: 'comment',
-        content: commentText,
-        metadata: {
+        source_domain: 'engineering',
+        signal_type: 'jira_comment',
+        signal_value: 1,
+        entity_type: 'comment',
+        entity_id: `jira#${issue.key}_comment#${comment.id}`,
+        signal_metadata: {
+          source: 'jira',
+          content: commentText,
           issue_key: issue.key,
           comment_id: comment.id,
           author: comment.author.displayName,
           project: issue.fields.project.key,
         },
         organization_id: this.organizationId,
-        timestamp: comment.created,
+        created_at: comment.created,
       };
 
       await this.streamProcessor.addSignal(signal);

@@ -48,6 +48,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Verify user belongs to this org
+    const { data: cfMember } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (!cfMember) {
+      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+    }
+
     const service = await createServiceClient();
 
     // Load the Brain's causal graph for this organization

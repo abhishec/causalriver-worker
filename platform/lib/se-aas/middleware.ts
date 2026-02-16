@@ -11,7 +11,7 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_ORG_ID, getCurrentOrgId } from "@/lib/org-helpers";
 
 export interface SeAaSAuthResult {
   userId: string;
@@ -43,16 +43,8 @@ export async function authenticateSeAaSRequest(
       throw { status: 429, error: "Too many requests. Please slow down." };
     }
 
-    // Resolve org from membership
-    const { data: membership } = await supabase
-      .from("org_members")
-      .select("organization_id")
-      .eq("user_id", user.id)
-      .order("joined_at", { ascending: true })
-      .limit(1)
-      .single();
-
-    orgId = membership?.organization_id || CORE_ORG_ID;
+    // Resolve org from user's currently selected org (cookie-based)
+    orgId = await getCurrentOrgId();
   } else {
     // Try API key
     const authHeader = request.headers.get("authorization");

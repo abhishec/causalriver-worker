@@ -25,6 +25,7 @@ export default async function OverviewPage() {
     recentEdgesResult,
     eventsResult,
     signalsByDomainResult,
+    earlyWarningResult,
   ] = await Promise.all([
     // Latest brain snapshots (30 days)
     supabase
@@ -47,10 +48,11 @@ export default async function OverviewPage() {
       .select("id", { count: "exact", head: true })
       .eq("organization_id", CORE_ORG_ID),
 
-    // Today's LLM cost
+    // Today's LLM cost (scoped to org)
     supabase
       .from("llm_cost_log")
       .select("estimated_cost_usd, component, function_name, model, created_at")
+      .eq("organization_id", CORE_ORG_ID)
       .gte("created_at", today)
       .order("created_at", { ascending: false })
       .limit(50),
@@ -86,6 +88,16 @@ export default async function OverviewPage() {
       .gte("created_at", thirtyDaysAgo)
       .order("created_at", { ascending: false })
       .limit(500),
+
+    // Early warning: velocity collapse + bottleneck alerts
+    supabase
+      .from("cross_domain_signals")
+      .select("id, signal_type, signal_value, signal_metadata, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .eq("source_domain", "engineering")
+      .in("signal_type", ["velocity_collapsed", "bottleneck_detected"])
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   const snapshots = snapshotsResult.data || [];
@@ -153,8 +165,28 @@ export default async function OverviewPage() {
     };
   });
 
+  // Build early warning alert events from P0 signals
+  const earlyWarningSignals = earlyWarningResult.data || [];
+  const earlyWarningEvents = earlyWarningSignals.map((sig: any) => {
+    const meta = sig.signal_metadata || {};
+    const isCollapse = sig.signal_type === "velocity_collapsed";
+    return {
+      id: `ew-${sig.id}`,
+      type: "alert" as const,
+      title: isCollapse
+        ? `⚠️ Velocity Collapse: ${meta.percent_drop?.toFixed(1) || 0}% drop`
+        : `🚨 Bottleneck: ${meta.top_reviewer || "unknown"} (${(meta.review_share * 100)?.toFixed(0) || 0}% of reviews)`,
+      description: isCollapse
+        ? `Deploy velocity dropped to ${meta.current_velocity || 0} (historical mean: ${meta.historical_mean?.toFixed(1) || 0}). Confidence: ${(meta.confidence * 100)?.toFixed(0) || 0}%`
+        : `Risk score: ${meta.risk_score?.toFixed(0) || 0}/100. Gini: ${meta.gini_coefficient?.toFixed(2) || 0}`,
+      timestamp: sig.created_at,
+      domain: "engineering",
+      confidence: meta.confidence,
+    };
+  });
+
   // Merge and sort by timestamp
-  const intelligenceEvents = [...discoveryEvents, ...activityEvents]
+  const intelligenceEvents = [...discoveryEvents, ...activityEvents, ...earlyWarningEvents]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 20);
 

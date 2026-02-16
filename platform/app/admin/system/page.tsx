@@ -1,148 +1,156 @@
-"use client";
+import { createServiceClient } from "@/lib/supabase/server";
+import { SystemClient } from "./system-client";
 
-import { Card, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { StatusDot } from "@/components/ui/StatusDot";
+export const dynamic = "force-dynamic";
 
-export default function AdminSystemPage() {
-  const ecsCluster = "nexusbrain-training";
-  const taskDefinitions = [
-    { name: "nexusbrain-trainer", revision: 2, cpu: "1 vCPU", memory: "4 GB", schedule: "Every 6h" },
-    { name: "nexusbrain-consolidation", revision: 2, cpu: "1 vCPU", memory: "4 GB", schedule: "Daily 2 AM UTC" },
-    { name: "nexusbrain-dmn", revision: 2, cpu: "0.5 vCPU", memory: "2 GB", schedule: "Every 4h" },
+export const metadata = {
+  title: "System Status",
+};
+
+/**
+ * Real system health checks — queries Supabase, validates env vars,
+ * checks scheduled jobs, and reports actual infrastructure state.
+ */
+export default async function AdminSystemPage() {
+  const supabase = await createServiceClient();
+
+  // ── Run all health checks in parallel ──────────────────────────────
+  const [
+    supabaseCheck,
+    scheduledJobsResult,
+    recentConsolidationsResult,
+    recentAgentRunsResult,
+    signalCountResult,
+    edgeCountResult,
+  ] = await Promise.all([
+    // 1. Supabase connectivity: simple query
+    supabase
+      .from("organizations")
+      .select("id", { count: "exact", head: true })
+      .then(({ count, error }) => ({
+        healthy: !error,
+        detail: error ? error.message : `${count} organizations`,
+      })),
+
+    // 2. Scheduled jobs (from agent_queue or scheduled_jobs)
+    supabase
+      .from("scheduled_jobs")
+      .select("id, job_type, schedule, last_run_at, next_run_at, status")
+      .order("next_run_at", { ascending: true })
+      .limit(20),
+
+    // 3. Recent consolidation runs (real training activity)
+    supabase
+      .from("consolidation_runs")
+      .select("id, status, started_at, completed_at, training_packs_applied, new_edges_discovered")
+      .order("started_at", { ascending: false })
+      .limit(5),
+
+    // 4. Recent agent activity (real agent runs)
+    supabase
+      .from("obs_agent_executions")
+      .select("id, agent_type, status, started_at, completed_at, error_message")
+      .order("started_at", { ascending: false })
+      .limit(10),
+
+    // 5. Total signal count (data pipeline health)
+    supabase
+      .from("cross_domain_signals")
+      .select("id", { count: "exact", head: true }),
+
+    // 6. Total causal edge count (brain health)
+    supabase
+      .from("causal_relationships_statistical")
+      .select("id", { count: "exact", head: true }),
+  ]);
+
+  // ── Env var validation (check if required keys are set) ────────────
+  const envChecks = [
+    { name: "NEXT_PUBLIC_SUPABASE_URL", set: !!process.env.NEXT_PUBLIC_SUPABASE_URL },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", set: !!process.env.SUPABASE_SERVICE_ROLE_KEY },
+    { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", set: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY },
+    { name: "ANTHROPIC_API_KEY", set: !!process.env.ANTHROPIC_API_KEY },
+    { name: "OPENAI_API_KEY", set: !!process.env.OPENAI_API_KEY },
+    { name: "NEXUS_WEBHOOK_SECRET", set: !!process.env.NEXUS_WEBHOOK_SECRET },
+    { name: "NEXUS_INTERNAL_API_KEY", set: !!process.env.NEXUS_INTERNAL_API_KEY },
+    { name: "GITHUB_APP_ID", set: !!process.env.GITHUB_APP_ID },
+    { name: "FRED_API_KEY", set: !!process.env.FRED_API_KEY },
   ];
-  const eventBridgeRules = [
-    { name: "nexusbrain-trainer-schedule", schedule: "cron(0 0,6,12,18 * * ? *)", status: "ENABLED" },
-    { name: "nexusbrain-consolidation-schedule", schedule: "cron(0 2 * * ? *)", status: "ENABLED" },
-    { name: "nexusbrain-dmn-schedule", schedule: "cron(0 0,4,8,12,16,20 * * ? *)", status: "ENABLED" },
+
+  // ── Build service health status ────────────────────────────────────
+  const services = [
+    {
+      name: "Supabase",
+      healthy: supabaseCheck.healthy,
+      detail: supabaseCheck.detail,
+    },
+    {
+      name: "Signals Pipeline",
+      healthy: !signalCountResult.error,
+      detail: signalCountResult.error
+        ? signalCountResult.error.message
+        : `${signalCountResult.count?.toLocaleString() || 0} total signals`,
+    },
+    {
+      name: "Causal Brain",
+      healthy: !edgeCountResult.error,
+      detail: edgeCountResult.error
+        ? edgeCountResult.error.message
+        : `${edgeCountResult.count?.toLocaleString() || 0} causal edges`,
+    },
+    {
+      name: "Agent Runtime",
+      healthy: !recentAgentRunsResult.error,
+      detail: recentAgentRunsResult.error
+        ? recentAgentRunsResult.error.message
+        : `${recentAgentRunsResult.data?.length || 0} recent runs`,
+    },
+    {
+      name: "Training Pipeline",
+      healthy: !recentConsolidationsResult.error,
+      detail: recentConsolidationsResult.error
+        ? recentConsolidationsResult.error.message
+        : `${recentConsolidationsResult.data?.length || 0} recent consolidations`,
+    },
   ];
-  const ssmParams = [
-    "/nexusbrain/SUPABASE_URL",
-    "/nexusbrain/SUPABASE_SERVICE_ROLE_KEY",
-    "/nexusbrain/ANTHROPIC_API_KEY",
-    "/nexusbrain/OPENAI_API_KEY",
-    "/nexusbrain/FRED_API_KEY",
-  ];
+
+  // ── Scheduled jobs ─────────────────────────────────────────────────
+  const scheduledJobs = (scheduledJobsResult.data || []).map((job: any) => ({
+    id: job.id,
+    type: job.job_type,
+    schedule: job.schedule,
+    lastRun: job.last_run_at,
+    nextRun: job.next_run_at,
+    status: job.status,
+  }));
+
+  // ── Recent consolidations ──────────────────────────────────────────
+  const recentConsolidations = (recentConsolidationsResult.data || []).map((run: any) => ({
+    id: run.id,
+    status: run.status,
+    startedAt: run.started_at,
+    completedAt: run.completed_at,
+    packsApplied: run.training_packs_applied,
+    edgesDiscovered: run.new_edges_discovered,
+  }));
+
+  // ── Recent agent runs ──────────────────────────────────────────────
+  const recentAgentRuns = (recentAgentRunsResult.data || []).map((run: any) => ({
+    id: run.id,
+    agentType: run.agent_type,
+    status: run.status,
+    startedAt: run.started_at,
+    completedAt: run.completed_at,
+    error: run.error_message,
+  }));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">System Status</h1>
-        <p className="text-xs text-muted mt-0.5">AWS infrastructure health and configuration</p>
-      </div>
-
-      {/* Health Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {[
-          { name: "ECS Cluster", status: "healthy" },
-          { name: "EventBridge", status: "healthy" },
-          { name: "ECR Registry", status: "healthy" },
-          { name: "Supabase", status: "healthy" },
-          { name: "CloudWatch", status: "healthy" },
-        ].map((svc) => (
-          <Card key={svc.name}>
-            <div className="flex items-center gap-2 mb-1">
-              <StatusDot type={svc.status === "healthy" ? "active" : "error"} size="sm" pulse={svc.status === "healthy"} />
-              <span className="text-xs font-medium">{svc.name}</span>
-            </div>
-            <span className={`text-[10px] ${svc.status === "healthy" ? "text-success" : "text-danger"}`}>
-              {svc.status === "healthy" ? "Operational" : "Down"}
-            </span>
-          </Card>
-        ))}
-      </div>
-
-      {/* ECS Cluster */}
-      <Card>
-        <CardTitle className="mb-1">ECS Cluster</CardTitle>
-        <p className="text-xs text-muted mb-4">Cluster: <code className="text-accent">{ecsCluster}</code></p>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle">
-                <th className="text-left py-2 font-medium">Task Definition</th>
-                <th className="text-left py-2 font-medium">Revision</th>
-                <th className="text-left py-2 font-medium">CPU</th>
-                <th className="text-left py-2 font-medium">Memory</th>
-                <th className="text-left py-2 font-medium">Schedule</th>
-              </tr>
-            </thead>
-            <tbody>
-              {taskDefinitions.map((td) => (
-                <tr key={td.name} className="border-b border-border-subtle/50">
-                  <td className="py-2 font-mono text-xs text-accent">{td.name}</td>
-                  <td className="py-2 text-xs">v{td.revision}</td>
-                  <td className="py-2 text-xs">{td.cpu}</td>
-                  <td className="py-2 text-xs">{td.memory}</td>
-                  <td className="py-2 text-xs text-muted">{td.schedule}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* EventBridge Rules */}
-      <Card>
-        <CardTitle className="mb-4">EventBridge Schedules</CardTitle>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle">
-                <th className="text-left py-2 font-medium">Rule</th>
-                <th className="text-left py-2 font-medium">Schedule</th>
-                <th className="text-left py-2 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventBridgeRules.map((rule) => (
-                <tr key={rule.name} className="border-b border-border-subtle/50">
-                  <td className="py-2 font-mono text-xs">{rule.name}</td>
-                  <td className="py-2 font-mono text-xs text-muted">{rule.schedule}</td>
-                  <td className="py-2">
-                    <Badge variant={rule.status === "ENABLED" ? "success" : "danger"} size="xs">
-                      {rule.status}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* SSM Parameters */}
-      <Card>
-        <CardTitle className="mb-4">SSM Parameter Store</CardTitle>
-        <div className="space-y-1">
-          {ssmParams.map((param) => (
-            <div key={param} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface/30 transition-colors">
-              <span className="font-mono text-xs text-muted-foreground">{param}</span>
-              <Badge variant="success" size="xs">Set</Badge>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Docker Image */}
-      <Card>
-        <CardTitle className="mb-4">Docker Image (ECR)</CardTitle>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted">Repository</span>
-            <code className="text-xs text-accent">848269696611.dkr.ecr.us-east-1.amazonaws.com/nexusbrain-trainer</code>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted">Tag</span>
-            <code className="text-xs">latest</code>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted">Build Project</span>
-            <code className="text-xs">nexusbrain-docker-build</code>
-          </div>
-        </div>
-      </Card>
-    </div>
+    <SystemClient
+      services={services}
+      envChecks={envChecks}
+      scheduledJobs={scheduledJobs}
+      recentConsolidations={recentConsolidations}
+      recentAgentRuns={recentAgentRuns}
+    />
   );
 }

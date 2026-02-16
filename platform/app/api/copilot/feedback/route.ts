@@ -36,6 +36,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Verify user belongs to this org
+    const { data: feedbackMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (!feedbackMembership) {
+      return NextResponse.json(
+        { error: "Not a member of this organization" },
+        { status: 403 }
+      );
+    }
+
     const service = await createServiceClient();
 
     // Save feedback
@@ -100,6 +115,21 @@ export async function GET(request: NextRequest) {
     const organizationId = request.nextUrl.searchParams.get("organizationId");
     if (!organizationId) {
       return NextResponse.json({ error: "organizationId required" }, { status: 400 });
+    }
+
+    // Verify user belongs to this org
+    const { data: getFeedbackMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (!getFeedbackMembership) {
+      return NextResponse.json(
+        { error: "Not a member of this organization" },
+        { status: 403 }
+      );
     }
 
     const service = await createServiceClient();

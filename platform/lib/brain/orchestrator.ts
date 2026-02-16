@@ -4,10 +4,12 @@
  * Intelligent routing across all 7 cognitive domains + 8 SE-aaS domains
  * Uses Claude for query understanding and confidence scoring
  *
+ *
  * @module lib/brain/orchestrator
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export interface BrainQueryRequest {
   query: string;
@@ -262,16 +264,35 @@ export async function executeUnifiedQuery(
   const topRoutes = routes.slice(0, 3);
   const domainResults: BrainQueryResponse['domainResults'] = [];
 
+  // Create Supabase client for Brain context assembly
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const orgId = request.context?.organizationId;
+
   for (const route of topRoutes) {
     const domainStart = Date.now();
     try {
-      // This would call the actual domain executor
-      // For now, we return a placeholder
-      const result = {
-        domain: route.domain,
-        success: true,
-        data: { message: `Executed ${route.domain} with confidence ${route.confidence}` },
-      };
+      let result: Record<string, unknown>;
+
+      // Real domain execution: assemble Brain context + query real data
+      if (supabaseUrl && supabaseKey && orgId) {
+        const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+        result = await executeDomainWithBrainContext(
+          supabase as any, orgId, route, request.query, request.anthropicApiKey
+        );
+      } else {
+        // Degraded mode: return routing result with explanation
+        result = {
+          domain: route.domain,
+          success: true,
+          data: {
+            routed: true,
+            confidence: route.confidence,
+            reasoning: route.reasoning,
+            message: `Query routed to ${route.domain}. Configure SUPABASE_SERVICE_ROLE_KEY for full Brain-augmented execution.`,
+          },
+        };
+      }
 
       domainResults.push({
         domain: route.domain,
@@ -360,4 +381,197 @@ Keep the response concise (2-4 paragraphs max).`;
   return domainResults
     .map(r => `**${r.domain}**: ${JSON.stringify(r.result)}`)
     .join('\n\n');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── Domain Execution with Brain Context ──────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Execute a domain with REAL Brain context — causal edges, patterns,
+ * velocity snapshots, bottleneck risk, recent signals.
+ *
+ * This is what makes NexusBrain different from "stateless Claude":
+ * every query gets the full organizational intelligence context.
+ */
+async function executeDomainWithBrainContext(
+  supabase: ReturnType<typeof createSupabaseClient>,
+  organizationId: string,
+  route: DomainRoute,
+  query: string,
+  anthropicApiKey?: string
+): Promise<Record<string, unknown>> {
+  // Assemble Brain context — the same 10-query parallel load used by SE-aaS
+  const [
+    causalEdgesRes,
+    patternsRes,
+    velocityRes,
+    bottleneckRes,
+    recentSignalsRes,
+    brainInsightsRes,
+  ] = await Promise.all([
+    supabase
+      .from('causal_relationships_statistical')
+      .select('source_entity, target_entity, strength, confidence_score, lag_days, p_value, source_domain, target_domain, natural_language')
+      .eq('organization_id', organizationId)
+      .order('updated_at', { ascending: false })
+      .limit(30),
+    supabase
+      .from('brain_grammar_rules')
+      .select('rule_name, rule_body, confidence, domain')
+      .eq('organization_id', organizationId)
+      .gte('confidence', 0.5)
+      .limit(15),
+    supabase
+      .from('velocity_snapshots')
+      .select('prs_merged, mean_pr_cycle_time_hours, open_pr_count, prs_per_engineer, snapshot_date')
+      .eq('organization_id', organizationId)
+      .order('snapshot_date', { ascending: false })
+      .limit(5),
+    supabase
+      .from('bottleneck_snapshots')
+      .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share')
+      .eq('organization_id', organizationId)
+      .order('snapshot_date', { ascending: false })
+      .limit(1),
+    supabase
+      .from('cross_domain_signals')
+      .select('signal_type, signal_value, signal_metadata, source_domain, created_at')
+      .eq('organization_id', organizationId)
+      .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(30),
+    supabase
+      .from('ai_memory')
+      .select('content, memory_type, cognitive_layer, created_at')
+      .eq('organization_id', organizationId)
+      .in('memory_type', ['insight', 'pattern', 'prediction', 'alert'])
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ]);
+
+  const brainContext = {
+    causalEdges: causalEdgesRes.data || [],
+    patterns: patternsRes.data || [],
+    velocitySnapshots: velocityRes.data || [],
+    bottleneck: bottleneckRes.data?.[0] || null,
+    recentSignals: recentSignalsRes.data || [],
+    brainInsights: brainInsightsRes.data || [],
+  };
+
+  // Build domain-specific intelligence from Brain context
+  const domainIntelligence = buildDomainIntelligence(route.domain, brainContext, query);
+
+  return {
+    domain: route.domain,
+    success: true,
+    brainAugmented: true,
+    data: {
+      ...domainIntelligence,
+      confidence: route.confidence,
+      reasoning: route.reasoning,
+      brainContext: {
+        causalEdgesAvailable: brainContext.causalEdges.length,
+        patternsAvailable: brainContext.patterns.length,
+        recentSignals: brainContext.recentSignals.length,
+        velocityData: brainContext.velocitySnapshots.length > 0,
+        bottleneckData: !!brainContext.bottleneck,
+      },
+    },
+  };
+}
+
+/**
+ * Build domain-specific intelligence by filtering Brain context
+ * to the most relevant causal edges, patterns, and signals.
+ */
+function buildDomainIntelligence(
+  domain: string,
+  brainContext: Record<string, any>,
+  query: string
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  // Filter causal edges relevant to this domain
+  const relevantEdges = brainContext.causalEdges.filter(
+    (e: any) => e.source_domain === domain || e.target_domain === domain ||
+      e.source_entity?.toLowerCase().includes(domain) ||
+      e.target_entity?.toLowerCase().includes(domain)
+  );
+  result.relevantCausalEdges = relevantEdges.slice(0, 10).map((e: any) => ({
+    relationship: e.natural_language || `${e.source_entity} → ${e.target_entity}`,
+    strength: e.strength,
+    confidence: e.confidence_score,
+    lagDays: e.lag_days,
+    pValue: e.p_value,
+  }));
+
+  // Filter patterns relevant to this domain
+  result.relevantPatterns = brainContext.patterns
+    .filter((p: any) => p.domain === domain || p.rule_name?.includes(domain))
+    .slice(0, 5)
+    .map((p: any) => ({ rule: p.rule_name, confidence: p.confidence }));
+
+  // Domain-specific enrichment
+  switch (domain) {
+    case 'anomaly-detector':
+    case 'pattern-detection':
+      result.recentSignalSummary = summarizeSignals(brainContext.recentSignals);
+      break;
+
+    case 'forecaster':
+      result.velocityTrend = brainContext.velocitySnapshots.map((v: any) => ({
+        date: v.snapshot_date,
+        prsMerged: v.prs_merged,
+        cycleTime: v.mean_pr_cycle_time_hours,
+      }));
+      break;
+
+    case 'causal-reasoner':
+      result.allCausalEdges = brainContext.causalEdges.slice(0, 20).map((e: any) => ({
+        relationship: e.natural_language || `${e.source_entity} → ${e.target_entity}`,
+        strength: e.strength,
+        confidence: e.confidence_score,
+      }));
+      break;
+
+    case 'incident-diagnosis':
+    case 'log-query':
+      result.recentAlerts = brainContext.brainInsights
+        .filter((i: any) => i.memory_type === 'alert')
+        .map((i: any) => ({ content: i.content, layer: i.cognitive_layer, at: i.created_at }));
+      result.bottleneckRisk = brainContext.bottleneck;
+      break;
+
+    case 'impact-analysis':
+      result.bottleneckRisk = brainContext.bottleneck;
+      result.velocityContext = brainContext.velocitySnapshots[0] || null;
+      break;
+
+    default:
+      // For SE-aaS domains, provide full Brain context summary
+      result.brainInsights = brainContext.brainInsights.slice(0, 5).map((i: any) => ({
+        content: i.content,
+        type: i.memory_type,
+        layer: i.cognitive_layer,
+      }));
+      break;
+  }
+
+  return result;
+}
+
+/**
+ * Summarize recent signals by type for anomaly/pattern detection
+ */
+function summarizeSignals(signals: any[]): Record<string, { count: number; latestValue: number }> {
+  const summary: Record<string, { count: number; latestValue: number }> = {};
+  for (const sig of signals) {
+    const key = `${sig.source_domain}.${sig.signal_type}`;
+    if (!summary[key]) {
+      summary[key] = { count: 0, latestValue: sig.signal_value || 0 };
+    }
+    summary[key].count++;
+  }
+  return summary;
 }

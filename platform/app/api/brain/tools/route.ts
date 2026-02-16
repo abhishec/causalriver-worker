@@ -263,6 +263,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
     }
 
+    // Validate org membership when user explicitly provides an org
+    if (userId && organizationId) {
+      const { data: toolsMembership } = await supabase
+        .from("org_members")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("organization_id", orgId)
+        .single();
+
+      if (!toolsMembership) {
+        const { data: toolsAdmin } = await supabase
+          .from("org_members")
+          .select("is_platform_admin")
+          .eq("user_id", userId)
+          .eq("is_platform_admin", true)
+          .limit(1)
+          .single();
+
+        if (!toolsAdmin) {
+          return NextResponse.json(
+            { error: "Not a member of this organization" },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     // ── MCP Server: Execute tool ─────────────────────────────────────
     const { createNexusMcpServer } = await import("@nexus-ai/memory-stack");
     const mcpServer = createNexusMcpServer({

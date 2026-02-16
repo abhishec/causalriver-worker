@@ -206,10 +206,15 @@ export class FreshdeskConnector extends ConnectorBase {
    */
   private async ingestTicket(ticket: FreshdeskTicket): Promise<void> {
     const signal: Signal = {
-      source: 'freshdesk',
-      type: 'ticket',
-      content: `${ticket.subject}\n\n${ticket.description_text || ticket.description}`,
-      metadata: {
+      source_domain: 'support',
+      signal_type: 'freshdesk_ticket',
+      signal_value: 1,
+      entity_type: 'ticket',
+      entity_id: `freshdesk#${ticket.id}`,
+      signal_metadata: {
+        source: 'freshdesk',
+        subject: ticket.subject,
+        content: `${ticket.subject}\n\n${ticket.description_text || ticket.description}`,
         ticket_id: ticket.id,
         status: this.getStatusName(ticket.status),
         priority: this.getPriorityName(ticket.priority),
@@ -219,7 +224,7 @@ export class FreshdeskConnector extends ConnectorBase {
         responder_id: ticket.responder_id,
       },
       organization_id: this.organizationId,
-      timestamp: ticket.updated_at,
+      created_at: ticket.updated_at,
     };
 
     await this.streamProcessor.addSignal(signal);
@@ -236,17 +241,21 @@ export class FreshdeskConnector extends ConnectorBase {
 
       for (const conv of conversations) {
         const signal: Signal = {
-          source: 'freshdesk',
-          type: 'conversation',
-          content: conv.body_text || conv.body || '',
-          metadata: {
+          source_domain: 'support',
+          signal_type: 'freshdesk_conversation',
+          signal_value: 1,
+          entity_type: 'conversation',
+          entity_id: `freshdesk#${ticketId}_conv#${conv.id}`,
+          signal_metadata: {
+            source: 'freshdesk',
+            content: conv.body_text || conv.body || '',
             ticket_id: ticketId,
             conversation_id: conv.id,
             user_id: conv.user_id,
             is_private: conv.private,
           },
           organization_id: this.organizationId,
-          timestamp: conv.created_at,
+          created_at: conv.created_at,
         };
 
         await this.streamProcessor.addSignal(signal);

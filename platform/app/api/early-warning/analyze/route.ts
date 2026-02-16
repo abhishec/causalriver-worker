@@ -22,9 +22,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient, createClient } from '@/lib/supabase/server';
 import { analyzeVelocityCollapse, analyzeBottleneckRisk } from '@/lib/p0/velocity-analysis';
 import { resolveTopReviewerEngineerId } from '@/lib/p0/engineer-resolver';
+import { predictVelocity } from '@/lib/p0/velocity-predictor';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,13 @@ interface AnalyzeRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    // ── AUTH CHECK ──────────────────────────────────────────────────────
+    const authClient = await createClient();
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body: AnalyzeRequest = await req.json();
     const {
       organizationId,
@@ -58,10 +66,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── ORG MEMBERSHIP CHECK ─────────────────────────────────────────
+    const { data: membership } = await authClient
+      .from('org_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('organization_id', organizationId)
+      .single();
+
+    if (!membership) {
+      const { data: admin } = await authClient
+        .from('org_members')
+        .select('is_platform_admin')
+        .eq('user_id', user.id)
+        .eq('is_platform_admin', true)
+        .limit(1)
+        .single();
+
+      if (!admin) {
+        return NextResponse.json(
+          { error: 'Not a member of this organization' },
+          { status: 403 }
+        );
+      }
+    }
+
     const supabase = await createServiceClient();
 
     // ========================================================================
-    // Run Brain-aligned P0 analysis
+    // Run Brain-aligned P0 analysis + velocity prediction
     // ========================================================================
     const [velocityAnalysis, bottleneckAnalysis] = await Promise.all([
       analyzeVelocityCollapse(supabase, organizationId, lookbackDays),
@@ -266,7 +299,22 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================================================
-    // STANDARD MODE - Return unified report
+    // RUN VELOCITY PREDICTION (GBRT model)
+    // ========================================================================
+    let prediction = null;
+    try {
+      prediction = await predictVelocity(
+        supabase,
+        organizationId,
+        velocityAnalysis.featureVector,
+        6 // 6 months lookback for training
+      );
+    } catch (predErr) {
+      console.warn('[Early Warning] Velocity prediction failed (non-fatal):', predErr);
+    }
+
+    // ========================================================================
+    // STANDARD MODE - Return unified report with prediction
     // ========================================================================
     return NextResponse.json({
       success: true,
@@ -282,6 +330,15 @@ export async function POST(req: NextRequest) {
           collapseReasons: velocityAnalysis.collapseReason,
           confidence: velocityAnalysis.confidence,
         },
+        velocityPrediction: prediction ? {
+          predictedVelocity: prediction.predictedVelocity,
+          lowerBound: prediction.lowerBound,
+          upperBound: prediction.upperBound,
+          collapseProbability: prediction.collapseProbability,
+          featureImportances: prediction.featureImportances,
+          modelConfidence: prediction.modelConfidence,
+          trainingDataPoints: prediction.trainingDataPoints,
+        } : null,
         bottleneckRisk: {
           riskLevel: bottleneckAnalysis.riskLevel,
           riskScore: bottleneckAnalysis.riskScore,
@@ -315,6 +372,13 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   try {
+    // ── AUTH CHECK ──────────────────────────────────────────────────────
+    const authClient = await createClient();
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const organizationId = searchParams.get('organizationId');
     const teamId = searchParams.get('teamId');
@@ -324,6 +388,31 @@ export async function GET(req: NextRequest) {
         { error: 'organizationId required' },
         { status: 400 }
       );
+    }
+
+    // ── ORG MEMBERSHIP CHECK ─────────────────────────────────────────
+    const { data: getMembership } = await authClient
+      .from('org_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('organization_id', organizationId)
+      .single();
+
+    if (!getMembership) {
+      const { data: getAdmin } = await authClient
+        .from('org_members')
+        .select('is_platform_admin')
+        .eq('user_id', user.id)
+        .eq('is_platform_admin', true)
+        .limit(1)
+        .single();
+
+      if (!getAdmin) {
+        return NextResponse.json(
+          { error: 'Not a member of this organization' },
+          { status: 403 }
+        );
+      }
     }
 
     const supabase = await createServiceClient();

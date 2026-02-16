@@ -302,10 +302,14 @@ export class SlackConnector extends ConnectorBase {
     }
 
     return {
-      source: 'slack',
-      type: message.thread_ts ? 'thread_message' : 'message',
-      content: content.substring(0, 10000), // Limit to 10KB
-      metadata: {
+      source_domain: 'communication',
+      signal_type: message.thread_ts ? 'slack_thread_message' : 'slack_message',
+      signal_value: 1,
+      entity_type: message.thread_ts ? 'thread_message' : 'message',
+      entity_id: `slack#${channel.id}_ts#${message.ts}`,
+      signal_metadata: {
+        source: 'slack',
+        content: content.substring(0, 10000), // Limit to 10KB
         channel: channel.name,
         channel_id: channel.id,
         user: message.user,
@@ -315,7 +319,7 @@ export class SlackConnector extends ConnectorBase {
         reaction_count: message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0,
       },
       organization_id: this.organizationId,
-      timestamp: new Date(parseFloat(message.ts) * 1000).toISOString(),
+      created_at: new Date(parseFloat(message.ts) * 1000).toISOString(),
     };
   }
 

@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate org membership
-    if (userId && orgId !== CORE_ORG_ID) {
+    if (userId) {
       const { data: membership } = await supabase
         .from("org_members")
         .select("role")
