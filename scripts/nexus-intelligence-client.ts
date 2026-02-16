@@ -144,6 +144,8 @@ export interface CodebaseReport {
     totalCommits: number;
     totalReviews: number;
     totalIssues: number;
+    totalCodeFiles: number;
+    totalCodeBytes: number;
     totalSignals: number;
     uniqueAuthors: number;
     uniqueReviewers: number;
@@ -686,7 +688,7 @@ export class NexusIntelligenceClient {
     logger.info('Generating codebase analysis report...');
 
     // Fetch all signal data for analysis
-    const [signalStats, prData, reviewData, commitData, issueData, evolutionData, edgeData, patternData] = await Promise.all([
+    const [signalStats, prData, reviewData, commitData, issueData, codeFileData, repoMetaData, evolutionData, edgeData, patternData] = await Promise.all([
       // Total signals
       this.supabase
         .from('cross_domain_signals')
@@ -694,35 +696,49 @@ export class NexusIntelligenceClient {
         .eq('organization_id', this.orgId)
         .order('created_at', { ascending: false })
         .limit(50000),
-      // PRs
+      // PRs — match GitHub connector: pr_opened, pr_merged, pr_closed_unmerged
       this.supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
         .eq('organization_id', this.orgId)
-        .eq('source_domain', 'engineering')
-        .in('signal_type', ['pr_opened', 'pr_merged', 'pr_cycle_time', 'pr_size', 'pr_closed'])
+        .like('source_domain', 'engineering%')
+        .in('signal_type', ['pr_opened', 'pr_merged', 'pr_closed_unmerged', 'pr_cycle_time', 'pr_size', 'pr_closed'])
         .limit(10000),
-      // Reviews
+      // Reviews — match GitHub connector: pr_reviewed
       this.supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
         .eq('organization_id', this.orgId)
-        .in('signal_type', ['pr_review_approved', 'pr_review_changes_requested', 'pr_review_commented', 'pr_review'])
+        .in('signal_type', ['pr_reviewed', 'pr_review_approved', 'pr_review_changes_requested', 'pr_review_commented', 'pr_review'])
         .limit(10000),
-      // Commits
+      // Commits — match GitHub connector: commit_pushed
       this.supabase
         .from('cross_domain_signals')
-        .select('signal_type, signal_value, entity_id, created_at')
+        .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
         .eq('organization_id', this.orgId)
-        .in('signal_type', ['commit_velocity', 'commit', 'commit_count'])
+        .in('signal_type', ['commit_pushed', 'commit_velocity', 'commit', 'commit_count'])
         .limit(5000),
-      // Issues
+      // Issues — match GitHub connector: issue_opened, issue_closed
       this.supabase
         .from('cross_domain_signals')
-        .select('signal_type, signal_value, entity_id, created_at')
+        .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
         .eq('organization_id', this.orgId)
-        .in('signal_type', ['issue_open', 'issue_opened', 'issue_closed', 'bug_reported'])
+        .in('signal_type', ['issue_opened', 'issue_closed', 'issue_open', 'bug_reported'])
         .limit(5000),
+      // Code files — from GitHub connector: code_file_ingested
+      this.supabase
+        .from('cross_domain_signals')
+        .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
+        .eq('organization_id', this.orgId)
+        .eq('signal_type', 'code_file_ingested')
+        .limit(50000),
+      // Repository metadata
+      this.supabase
+        .from('cross_domain_signals')
+        .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
+        .eq('organization_id', this.orgId)
+        .eq('signal_type', 'repository_metadata')
+        .limit(100),
       // Evolution
       this.supabase
         .from('brain_evolution_snapshots')
@@ -749,6 +765,8 @@ export class NexusIntelligenceClient {
     const reviews = reviewData.data || [];
     const commits = commitData.data || [];
     const issues = issueData.data || [];
+    const codeFiles = codeFileData.data || [];
+    const repoMeta = repoMetaData.data || [];
 
     // Unique authors and reviewers
     const authors = new Set<string>();
@@ -757,11 +775,39 @@ export class NexusIntelligenceClient {
     const languages = new Map<string, number>();
     const fileTypes = new Map<string, number>();
     const directories = new Map<string, number>();
+    let totalCodeBytes = 0;
+    let totalCodeFiles = 0;
 
     for (const sig of allSignals) {
       if (sig.entity_type === 'person' || sig.entity_type === 'engineer') {
         authors.add(sig.entity_id);
       }
+    }
+
+    // Extract repo names from repository metadata signals
+    for (const rm of repoMeta) {
+      if (rm.entity_id) repoNames.add(rm.entity_id);
+      const meta = (rm.signal_metadata || {}) as Record<string, any>;
+      if (meta.language) {
+        const lang = meta.language as string;
+        languages.set(lang, (languages.get(lang) || 0) + 1);
+      }
+    }
+
+    // Extract code file structure from code_file_ingested signals
+    for (const cf of codeFiles) {
+      totalCodeFiles++;
+      totalCodeBytes += Number(cf.signal_value) || 0;
+      const filePath = cf.entity_id || '';
+      // entity_id format: "owner/repo:path/to/file.ext"
+      const colonIdx = filePath.indexOf(':');
+      const relativePath = colonIdx >= 0 ? filePath.substring(colonIdx + 1) : filePath;
+      const ext = relativePath.split('.').pop() || 'unknown';
+      fileTypes.set(ext, (fileTypes.get(ext) || 0) + 1);
+      const dir = relativePath.split('/').slice(0, -1).join('/') || '/';
+      directories.set(dir, (directories.get(dir) || 0) + 1);
+      const meta = (cf.signal_metadata || {}) as Record<string, any>;
+      if (meta.author) authors.add(meta.author);
     }
 
     for (const pr of prs) {
@@ -785,6 +831,13 @@ export class NexusIntelligenceClient {
     for (const rev of reviews) {
       const meta = (rev.signal_metadata || {}) as Record<string, any>;
       if (meta.reviewer) reviewers.add(meta.reviewer);
+    }
+
+    // Extract commit authors
+    for (const cm of commits) {
+      const meta = (cm.signal_metadata || {}) as Record<string, any>;
+      if (meta.author) authors.add(meta.author);
+      if (meta.committer) authors.add(meta.committer);
     }
 
     // Cycle times
@@ -836,6 +889,8 @@ export class NexusIntelligenceClient {
         totalCommits: commits.length,
         totalReviews: reviews.length,
         totalIssues: issues.length,
+        totalCodeFiles: totalCodeFiles,
+        totalCodeBytes: totalCodeBytes,
         totalSignals: allSignals.length,
         uniqueAuthors: authors.size,
         uniqueReviewers: reviewers.size,
@@ -1148,6 +1203,8 @@ export class NexusIntelligenceClient {
     console.log('  CODEBASE SUMMARY');
     console.log('  ─────────────────');
     console.log(`  Repos: ${report.summary.totalRepos}`);
+    console.log(`  Code Files: ${report.summary.totalCodeFiles}`);
+    console.log(`  Code Size: ${(report.summary.totalCodeBytes / 1024 / 1024).toFixed(2)} MB (${report.summary.totalCodeBytes.toLocaleString()} bytes)`);
     console.log(`  PRs: ${report.summary.totalPRs}`);
     console.log(`  Commits: ${report.summary.totalCommits}`);
     console.log(`  Reviews: ${report.summary.totalReviews}`);
