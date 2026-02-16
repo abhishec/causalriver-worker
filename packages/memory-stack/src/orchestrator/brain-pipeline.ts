@@ -208,8 +208,6 @@ import {
 import {
   createBrainObservabilityBridge,
   type CognitiveLayerOutput,
-  type EvolutionObservabilityData,
-  type FederationObservabilityData,
 } from './brain-observability-bridge';
 
 // ============================================================================

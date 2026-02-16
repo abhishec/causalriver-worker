@@ -368,6 +368,7 @@ export function createFederationApprovalManager(
    * Approve a pending item — promotes it to the core brain.
    */
   async function approve(decision: ApprovalDecision): Promise<ApprovalResult> {
+    const _approveStartMs = Date.now();
     const item = await getItem(decision.itemId);
     if (!item) {
       return { itemId: decision.itemId, decision: 'approved', promotedToCore: false, promotionError: 'Item not found' };
@@ -435,7 +436,7 @@ export function createFederationApprovalManager(
           itemsProcessed: 1,
           itemsPromoted: promotedToCore ? 1 : 0,
           itemsRejected: 0,
-          durationMs: 0,
+          durationMs: Date.now() - _approveStartMs,
         });
       } catch { /* observability never breaks federation */ }
     }
@@ -452,6 +453,7 @@ export function createFederationApprovalManager(
    * Reject a pending item.
    */
   async function reject(decision: ApprovalDecision): Promise<ApprovalResult> {
+    const _rejectStartMs = Date.now();
     const item = await getItem(decision.itemId);
     if (!item) {
       return { itemId: decision.itemId, decision: 'rejected', promotedToCore: false, promotionError: 'Item not found' };
@@ -491,7 +493,7 @@ export function createFederationApprovalManager(
           itemsProcessed: 1,
           itemsPromoted: 0,
           itemsRejected: 1,
-          durationMs: 0,
+          durationMs: Date.now() - _rejectStartMs,
         });
       } catch { /* observability never breaks federation */ }
     }
