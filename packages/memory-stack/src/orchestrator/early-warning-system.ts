@@ -144,9 +144,11 @@ export async function runEarlyWarningSystem(
   });
 
   // 6. Calculate overall risk score
-  const bottleneckRisk =
+  // BRS heatmap returns 0-1.0 (spec-compliant), scale to 0-100 for overall risk
+  const avgBRS =
     Object.values(bottleneckHeatmap).reduce((a, b) => a + b, 0) /
     Math.max(Object.keys(bottleneckHeatmap).length, 1);
+  const bottleneckRisk = avgBRS * 100; // Scale 0-1 → 0-100
 
   const velocityRisk = velocityCollapse
     ? Math.min(100, velocityCollapse.predictedDrop * 2)
