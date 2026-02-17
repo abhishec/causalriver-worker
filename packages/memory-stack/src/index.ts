@@ -588,6 +588,13 @@ export {
   type SignalIngestedCallback,
 } from './ingestion/connector-signal-bridge';
 
+// Linear Connector (project management signal ingestion)
+export {
+  ingestLinearData,
+  getLinearMetadata,
+  validateLinearConfig,
+} from './connectors/linear';
+
 // Brain Layer Persistence (L3-L30 Supabase state persistence)
 // CTO Audit Fix: Gaps #2 (L3-L15) and #3 (L16-L30)
 export {
@@ -1055,6 +1062,38 @@ export {
   type FederationObservabilityData,
   type BrainHealthReport,
 } from './orchestrator/brain-observability-bridge';
+
+// Brain Context Mesh — Unified Brain Context SDK (THE CORTEX)
+// Three-layer, intent-driven, composable brain context for ALL services
+// Layer 1: Universal (causal edges, patterns, evolution) — cached 60s
+// Layer 2: Domain-specific (engineering for SE-aaS, GL patterns for AAS)
+// Layer 3: Intent-driven (token budget allocation based on user intent)
+export {
+  createBrainContextMesh,
+  type BrainContextMeshConfig,
+  type BrainContextMeshInstance,
+  type AssembledBrainContext,
+  type UniversalBrainContext,
+  type ServiceType,
+  type CopilotDomainContext,
+  type SeaasDomainContext,
+  type AasDomainContext,
+  type IntentContext,
+  type TokenBudget,
+} from './orchestrator/brain-context-mesh';
+
+// Brain Feedback Bus — Unified Learning Circuit
+// Every service execution feeds back into the Brain through the same Bus.
+// 5 channels: Signal, Prediction, Evolution, Observability, Insight Push
+export {
+  createBrainFeedbackBus,
+  type BrainFeedbackBusConfig,
+  type BrainFeedbackBusInstance,
+  type SignalPayload,
+  type PredictionPayload,
+  type ExecutionPayload,
+  type InsightPayload,
+} from './orchestrator/brain-feedback-bus';
 
 // SE-aaS Cognitive Domains — All 8 Sprint 1-3 Domains (Claude-Powered + Brain-Augmented)
 export {

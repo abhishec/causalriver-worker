@@ -1,0 +1,179 @@
+import { NextResponse } from "next/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getCurrentOrgId } from "@/lib/org-helpers";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * POST /api/connectors/linear/sync
+ *
+ * Syncs Linear issues, projects, and cycles into cross_domain_signals.
+ * Uses the memory-stack Linear connector with GraphQL API.
+ *
+ * Body: { teamIds?: string[] }
+ */
+export async function POST(request: Request) {
+  try {
+    // 1. Auth
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const orgId = await getCurrentOrgId();
+
+    // 2. Load connector config + credentials
+    const service = await createServiceClient();
+    const { data: connector } = await service
+      .from("org_connectors")
+      .select("id, config, credentials")
+      .eq("organization_id", orgId)
+      .eq("connector_type", "linear")
+      .maybeSingle();
+
+    if (!connector) {
+      return NextResponse.json(
+        { error: "Linear connector not set up. Please connect Linear first." },
+        { status: 404 }
+      );
+    }
+
+    const credentials = connector.credentials as { api_key?: string; access_token?: string };
+    const apiKey = credentials?.api_key || credentials?.access_token;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Linear API key missing. Please re-authorize Linear." },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { teamIds } = body as { teamIds?: string[] };
+    const config = connector.config as Record<string, any>;
+
+    // 3. Update status to syncing
+    await service
+      .from("org_connectors")
+      .update({
+        config: {
+          ...config,
+          ingestion_progress: {
+            step: "syncing_linear_signals",
+            message: "Syncing Linear issues, projects, and cycles...",
+            startedAt: new Date().toISOString(),
+          },
+        },
+      })
+      .eq("id", connector.id);
+
+    // 4. Fetch Linear data and transform to signals
+    const startMs = Date.now();
+    let signalsGenerated = 0;
+    const errors: string[] = [];
+
+    try {
+      const { ingestLinearData } = await import("@nexus-ai/memory-stack");
+
+      // Lookback 90 days for initial sync
+      const updatedSince = new Date(Date.now() - 90 * 24 * 3600000);
+
+      const signals = await ingestLinearData(
+        {
+          apiKey,
+          teamIds: teamIds || config?.team_ids || [],
+          includeArchived: false,
+        },
+        orgId,
+        updatedSince
+      );
+
+      // 5. Store signals via dual-write bridge
+      if (signals.length > 0) {
+        const { storeDualWriteConnectorSignals } = await import("@nexus-ai/memory-stack");
+
+        // Batch insert (100 at a time for safety)
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < signals.length; i += BATCH_SIZE) {
+          const batch = signals.slice(i, i + BATCH_SIZE);
+          try {
+            await storeDualWriteConnectorSignals(
+              service,
+              batch.map((s) => ({
+                source: "linear",
+                signal_type: s.signal_type,
+                signal_value: s.signal_value,
+                signal_timestamp: s.signal_timestamp,
+                metadata: s.metadata || {},
+              })),
+              orgId
+            );
+            signalsGenerated += batch.length;
+          } catch (batchErr: any) {
+            errors.push(`Batch ${i / BATCH_SIZE} failed: ${batchErr.message}`);
+          }
+        }
+      }
+
+      // 6. Update connector status
+      const durationMs = Date.now() - startMs;
+      await service
+        .from("org_connectors")
+        .update({
+          last_sync_at: new Date().toISOString(),
+          signals_count: signalsGenerated,
+          config: {
+            ...config,
+            ingestion_progress: {
+              step: "complete",
+              message: `Synced ${signalsGenerated} Linear signals`,
+              completedAt: new Date().toISOString(),
+              durationMs,
+            },
+          },
+        })
+        .eq("id", connector.id);
+
+      return NextResponse.json({
+        success: true,
+        signalsGenerated,
+        durationMs,
+        errors: errors.length > 0 ? errors : undefined,
+      });
+    } catch (syncErr: any) {
+      errors.push(syncErr.message);
+
+      await service
+        .from("org_connectors")
+        .update({
+          config: {
+            ...config,
+            ingestion_progress: {
+              step: "error",
+              message: syncErr.message,
+              failedAt: new Date().toISOString(),
+            },
+          },
+        })
+        .eq("id", connector.id);
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: syncErr.message,
+          signalsGenerated,
+          errors,
+        },
+        { status: 500 }
+      );
+    }
+  } catch (err: any) {
+    console.error("[Linear Sync] Error:", err);
+    return NextResponse.json(
+      { error: err.message || "Linear sync failed" },
+      { status: 500 }
+    );
+  }
+}

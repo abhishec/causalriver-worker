@@ -76,8 +76,12 @@ export async function POST(request: Request) {
             syncUrl = `${baseUrl}/api/connectors/slack/sync`;
             syncBody = { lookbackDays: 30 };
             break;
+          case "linear":
+            syncUrl = `${baseUrl}/api/connectors/linear/sync`;
+            syncBody = {};
+            break;
           default:
-            // Skip connector types without a sync route (e.g. linear, hubspot)
+            // Skip connector types without a sync route (e.g. hubspot, asana)
             return {
               connector: type,
               success: false,
@@ -146,9 +150,11 @@ export async function POST(request: Request) {
     const syncedCount = results.length - skippedCount;
 
     // ── Auto-trigger brain cycle after successful sync ──────────
-    // If we ingested any signals, fire a lightweight brain cycle so
-    // the brain actually processes them. Without this, signals just
-    // sit in cross_domain_signals and are never used until manual trigger.
+    // If we ingested any signals, fire a FULL brain cycle so the brain
+    // processes them through all 30 layers including deep analysis.
+    // This is critical for design partners: their 10M+ code and Jira
+    // messages need to flow through entity linking, strategic synthesis,
+    // impact cascades, and organizational wisdom layers.
     let brainCycleResult: any = null;
 
     if (totalSignals > 0 && successCount > 0) {
@@ -165,17 +171,17 @@ export async function POST(request: Request) {
             "Content-Type": "application/json",
             Cookie: cookieHeader,
           },
-          body: JSON.stringify({ mode: "lightweight" }),
+          body: JSON.stringify({ mode: "full" }),
         });
 
         if (brainResponse.ok) {
           const brainData = await brainResponse.json();
           brainCycleResult = {
             triggered: true,
-            mode: "lightweight",
+            mode: "full",
             durationMs: brainData.duration_ms,
           };
-          console.log(`[sync-all] Auto-triggered lightweight brain cycle (${brainData.duration_ms}ms)`);
+          console.log(`[sync-all] Auto-triggered full brain cycle (${brainData.duration_ms}ms)`);
         } else {
           brainCycleResult = {
             triggered: false,

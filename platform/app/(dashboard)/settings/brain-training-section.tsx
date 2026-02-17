@@ -96,12 +96,15 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
 
       const analyzeData = await analyzeResponse.json();
 
-      // Step 4: Run a lightweight brain cycle
-      setTrainingStatus({ status: 'running', step: 'Running brain training cycle...', progress: 80 });
+      // Step 4: Run a FULL brain cycle (all 30 layers) for design partner WOW
+      // Previously was 'lightweight' (L1-L15 only), upgraded to 'full' (L1-L30)
+      // so design partners get deep analysis: strategic synthesis, entity linking,
+      // impact cascades, competitive intel, and organizational wisdom.
+      setTrainingStatus({ status: 'running', step: 'Running full brain training cycle (30 layers)...', progress: 80 });
       await fetch('/api/brain/cycle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'lightweight' }),
+        body: JSON.stringify({ mode: 'full' }),
       });
 
       // Step 5: Complete

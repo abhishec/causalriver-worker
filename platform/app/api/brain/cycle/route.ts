@@ -125,10 +125,88 @@ export async function POST(request: NextRequest) {
         // Set mode on controller
         controller.setMode(mode === 'full' ? 'awake_full' : 'awake_lightweight');
 
-        // Build cycle input from provided signals or empty
-        const cycleInput = input?.signals
-          ? { signals: input.signals, rawQuery: input.query }
-          : { signals: [], rawQuery: input?.query };
+        // Build cycle input: use provided signals OR load from DB
+        // CRITICAL: Without loading signals from DB, the brain processes NOTHING
+        // when called from "Sync & Train" or "Train Now" buttons (which don't pass signals).
+        let cycleSignals = input?.signals || [];
+
+        if (cycleSignals.length === 0) {
+          // Load recent signals from cross_domain_signals
+          // Full mode: load last 90 days for comprehensive analysis
+          // Lightweight mode: load last 7 days for quick processing
+          const lookbackDays = mode === 'full' ? 90 : 7;
+          const since = new Date(Date.now() - lookbackDays * 24 * 3600000).toISOString();
+
+          const { data: dbSignals } = await service
+            .from("cross_domain_signals")
+            .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_metadata, signal_timestamp")
+            .eq("organization_id", orgId)
+            .gte("signal_timestamp", since)
+            .order("signal_timestamp", { ascending: false })
+            .limit(mode === 'full' ? 10000 : 2000);
+
+          if (dbSignals && dbSignals.length > 0) {
+            cycleSignals = dbSignals.map((s: any) => ({
+              id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
+              source: s.source_domain?.split('.')[0] || 'unknown',
+              domain: s.source_domain || 'unknown',
+              entityType: s.entity_type || 'unknown',
+              entityId: s.entity_id || 'unknown',
+              value: s.signal_value || 0,
+              timestamp: new Date(s.signal_timestamp).getTime(),
+              metadata: s.signal_metadata || {},
+            }));
+          }
+        }
+
+        // Load causal edges for richer brain processing
+        let causalEdges: any[] = [];
+        try {
+          const { data: edges } = await service
+            .from("causal_relationships")
+            .select("source_domain, target_domain, correlation_strength, p_value, confidence, effect_size")
+            .eq("organization_id", orgId)
+            .gte("confidence", 0.3)
+            .limit(500);
+
+          if (edges && edges.length > 0) {
+            causalEdges = edges.map((e: any) => ({
+              source: e.source_domain,
+              target: e.target_domain,
+              weight: e.correlation_strength || e.effect_size || 0.5,
+              confidence: e.confidence || 0.5,
+            }));
+          }
+        } catch {
+          // Non-critical: brain can run without causal edges
+        }
+
+        // Load patterns from ai_memory
+        let patterns: string[] = [];
+        try {
+          const { data: memories } = await service
+            .from("ai_memory")
+            .select("content")
+            .eq("organization_id", orgId)
+            .eq("memory_type", "pattern")
+            .order("created_at", { ascending: false })
+            .limit(100);
+
+          if (memories) {
+            patterns = memories.map((m: any) => m.content).filter(Boolean);
+          }
+        } catch {
+          // Non-critical: brain can run without patterns
+        }
+
+        const cycleInput = {
+          signals: cycleSignals,
+          causalEdges,
+          patterns,
+          predictions: [],
+          metrics: [],
+          rawQuery: input?.query,
+        };
 
         result = await controller.runManagedCycle(cycleInput);
         break;
