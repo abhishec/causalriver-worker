@@ -241,10 +241,53 @@ async function main() {
     // Step 3: Run consolidation
     await runInitialConsolidation(supabase, config);
 
-    // Step 4: Validate patterns
+    // Step 4: Create connector records
+    logger.info('\n🔌 Creating connector records...\n');
+    const demoConnectors = [
+      { type: 'slack', label: 'Slack (synthetic)', count: config.dataDays * 15 },
+      { type: 'jira', label: 'Jira (synthetic)', count: config.dataDays * 5 },
+      { type: 'github', label: 'GitHub (synthetic)', count: config.dataDays * 8 },
+    ];
+    for (const conn of demoConnectors) {
+      const { data: existing } = await supabase
+        .from('org_connectors')
+        .select('id')
+        .eq('organization_id', config.orgId)
+        .eq('connector_type', conn.type)
+        .single();
+      if (!existing) {
+        await supabase.from('org_connectors').insert({
+          organization_id: config.orgId,
+          connector_type: conn.type,
+          status: 'active',
+          config: { synthetic: true, source: 'setup-demo-org' },
+          signals_count: conn.count,
+          last_sync_at: new Date().toISOString(),
+        });
+        logger.info(`   ✓ ${conn.label}: active (${conn.count} records)`);
+      } else {
+        logger.info(`   ✓ ${conn.label}: already exists`);
+      }
+    }
+
+    // Log sync activity
+    await supabase.from('connector_sync_log').insert({
+      organization_id: config.orgId,
+      connector_id: 'setup-demo-org',
+      sync_type: 'full',
+      status: 'completed',
+      signals_generated: config.dataDays * 28,
+      records_processed: config.dataDays * 28,
+      errors: [],
+      duration_ms: 0,
+      completed_at: new Date().toISOString(),
+    });
+    logger.info('   ✓ Sync logged');
+
+    // Step 5: Validate patterns
     await validateDiscoveredPatterns(supabase, config);
 
-    // Step 5: Generate credentials
+    // Step 6: Generate credentials
     await generateDemoCredentials(config);
 
     logger.info(`\n${'='.repeat(80)}`);

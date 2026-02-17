@@ -229,7 +229,135 @@ async function main() {
   console.log("\n4. Xero Connector:");
   await addXeroConnector(org.id);
 
-  // 5. Summary
+  // 5. Convert GL data to cross_domain_signals (so brain can reason about this org)
+  console.log("\n5. GL → Signal Conversion:");
+  try {
+    // Load GL data from storage (uploaded by migrate-gl-data-to-storage.ts)
+    const storagePath = `${org.id}/gl-data.json`;
+    const { data: fileData, error: dlError } = await supabase.storage
+      .from("org-data")
+      .download(storagePath);
+
+    if (dlError || !fileData) {
+      console.log("  [skip] No GL data in storage — run migrate-gl-data-to-storage.ts first");
+    } else {
+      const text = await fileData.text();
+      const transactions = JSON.parse(text) as Array<{
+        date: string; account: string; debit: number; credit: number; source: string;
+      }>;
+
+      // Aggregate monthly revenue & expense signals
+      const monthlyData = new Map<string, { revenue: number; expenses: number; txnCount: number }>();
+      for (const txn of transactions) {
+        const month = txn.date.slice(0, 7); // YYYY-MM
+        if (!monthlyData.has(month)) monthlyData.set(month, { revenue: 0, expenses: 0, txnCount: 0 });
+        const m = monthlyData.get(month)!;
+        m.txnCount++;
+        const acctLower = txn.account.toLowerCase();
+        // Revenue accounts: license, subscription, implementation, support, overage, interest, grant, other income
+        if (acctLower.includes("fee") || acctLower.includes("income") || acctLower.includes("grant") || acctLower.includes("revenue")) {
+          m.revenue += txn.credit - txn.debit;
+        }
+        // Expense accounts: salary, cpf, depreciation, insurance, rental, travel, marketing, software, etc.
+        if (acctLower.includes("salary") || acctLower.includes("salaries") || acctLower.includes("cpf") ||
+            acctLower.includes("depreciation") || acctLower.includes("insurance") || acctLower.includes("rental") ||
+            acctLower.includes("travel") || acctLower.includes("marketing") || acctLower.includes("software") ||
+            acctLower.includes("contractor") || acctLower.includes("legal") || acctLower.includes("bank charge") ||
+            acctLower.includes("audit") || acctLower.includes("accounting") || acctLower.includes("bonus")) {
+          m.expenses += txn.debit - txn.credit;
+        }
+      }
+
+      // Generate signals from monthly aggregates
+      const signals: Array<Record<string, unknown>> = [];
+      for (const [month, data] of monthlyData) {
+        const timestamp = `${month}-15T00:00:00.000Z`;
+        if (data.revenue !== 0) {
+          signals.push({
+            organization_id: org.id,
+            source_domain: "accounting",
+            signal_type: "monthly_revenue",
+            signal_value: data.revenue,
+            signal_timestamp: timestamp,
+            entity_type: "financial_period",
+            entity_id: month,
+            signal_metadata: { currency: "SGD", source: "xero-gl", txnCount: data.txnCount },
+          });
+        }
+        if (data.expenses !== 0) {
+          signals.push({
+            organization_id: org.id,
+            source_domain: "accounting",
+            signal_type: "monthly_expenses",
+            signal_value: data.expenses,
+            signal_timestamp: timestamp,
+            entity_type: "financial_period",
+            entity_id: month,
+            signal_metadata: { currency: "SGD", source: "xero-gl" },
+          });
+        }
+        // Net income signal
+        const netIncome = data.revenue - data.expenses;
+        if (data.revenue !== 0 || data.expenses !== 0) {
+          signals.push({
+            organization_id: org.id,
+            source_domain: "accounting",
+            signal_type: "monthly_net_income",
+            signal_value: netIncome,
+            signal_timestamp: timestamp,
+            entity_type: "financial_period",
+            entity_id: month,
+            signal_metadata: { currency: "SGD", source: "xero-gl", margin: data.revenue > 0 ? (netIncome / data.revenue * 100).toFixed(1) : "0" },
+          });
+        }
+      }
+
+      if (signals.length > 0) {
+        // Check if signals already exist for this org
+        const { count: existingCount } = await supabase
+          .from("cross_domain_signals")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", org.id)
+          .eq("source_domain", "accounting");
+
+        if (existingCount && existingCount > 0) {
+          console.log(`  [exists] ${existingCount} accounting signals already present`);
+        } else {
+          // Insert in batches
+          const BATCH_SIZE = 100;
+          let inserted = 0;
+          for (let i = 0; i < signals.length; i += BATCH_SIZE) {
+            const batch = signals.slice(i, i + BATCH_SIZE);
+            const { error: insertError } = await supabase.from("cross_domain_signals").insert(batch);
+            if (insertError) {
+              console.error(`  [error] Batch insert: ${insertError.message}`);
+            } else {
+              inserted += batch.length;
+            }
+          }
+          console.log(`  [created] ${inserted} accounting signals (${monthlyData.size} months × 3 metrics)`);
+        }
+      }
+
+      // Log sync activity
+      await supabase.from("connector_sync_log").insert({
+        organization_id: org.id,
+        connector_id: "seed-accounting-partner",
+        sync_type: "full",
+        status: "completed",
+        signals_generated: signals.length,
+        records_processed: transactions.length,
+        errors: [],
+        duration_ms: 0,
+        completed_at: new Date().toISOString(),
+      });
+      console.log(`  [synced] ${transactions.length} GL transactions → ${signals.length} signals`);
+    }
+  } catch (err) {
+    console.log(`  [skip] Signal conversion failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // 6. Summary
   console.log("\n=== Summary ===\n");
   console.log(`Organization: ${PH_ACCOUNTING_ORG.name}`);
   console.log(`  ID:    ${org.id}`);
