@@ -221,6 +221,11 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
                         fields.labels.some((l) => l.toLowerCase() === 'blocked');
       const statusCategory = fields.status.statusCategory.key; // 'new' | 'indeterminate' | 'done'
 
+      // fixVersions → release_version (Track 1 MVP: link Jira tickets to releases)
+      // e.g. fixVersions: [{ name: '5.11.5' }] → release_version: '5.11.5'
+      const fixVersionNames = fields.fixVersions?.map((v) => v.name) ?? [];
+      const primaryReleaseVersion = fixVersionNames[0] ?? undefined;
+
       const baseMetadata: Record<string, unknown> = {
         key: issue.key,
         summary: fields.summary,
@@ -232,9 +237,14 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         assignee_id: fields.assignee?.accountId,
         reporter: fields.reporter?.displayName,
         components: fields.components?.map((c) => c.name),
+        // Release tracking fields
+        fix_versions: fixVersionNames,
+        release_version: primaryReleaseVersion,
       };
 
       // Issue created signal — enriched with NLP from summary
+      // release_version is set as a top-level field (carried into cross_domain_signals
+      // via the index signature) so queries can filter by version without parsing JSONB.
       const createdSignal: ConnectorSignal = {
         organization_id: orgId,
         source_domain: 'engineering.jira',
@@ -243,6 +253,7 @@ export function createJiraConnector(config: JiraConnectorConfig): NexusConnector
         entity_type: 'jira_issue',
         entity_id: `jira_${issue.key}`,
         signal_timestamp: fields.created,
+        release_version: primaryReleaseVersion,   // ← Track 1 MVP
         metadata: {
           ...baseMetadata,
           is_bug: isBug,

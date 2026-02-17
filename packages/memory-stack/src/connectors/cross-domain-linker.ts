@@ -34,6 +34,9 @@ export interface EntityLink {
   confidence: number;         // 0-1 how confident this link is correct
   evidence: string;           // What triggered this link (e.g. "PR title contains PROJ-1234")
   created_at: string;
+  // ── Branch & Release context (Track 1 MVP) ───────────────────────────────
+  branch_name?: string;       // e.g. 'release/6.3.4'
+  release_version?: string;   // e.g. '6.3.4'
 }
 
 export interface ParsedReferences {
@@ -108,6 +111,7 @@ export function parseReferences(text: string): ParsedReferences {
 /**
  * When a PR is ingested, parse its title, body, and branch for Jira references.
  * Creates entity_links: pull_request ↔ jira_issue
+ * Optionally carries branch_name + release_version for release-scoped linking.
  */
 export async function linkPRToJira(
   supabase: SupabaseClient,
@@ -118,7 +122,8 @@ export async function linkPRToJira(
     title: string;
     body?: string | null;
     head?: { ref?: string } | null;
-  }
+  },
+  branchContext?: { branch_name?: string; release_version?: string }
 ): Promise<EntityLink[]> {
   const links: EntityLink[] = [];
 
@@ -144,6 +149,8 @@ export async function linkPRToJira(
       confidence: pr.title.includes(ticket) ? 0.95 : 0.80,
       evidence: `Ticket "${ticket}" found in ${pr.title.includes(ticket) ? 'PR title' : pr.head?.ref?.includes(ticket) ? 'branch name' : 'PR body'}`,
       created_at: new Date().toISOString(),
+      branch_name: branchContext?.branch_name,
+      release_version: branchContext?.release_version,
     };
     links.push(link);
   }
@@ -408,6 +415,87 @@ export async function getLinkedEntitiesForPR(
   }
 
   return { jiraTickets, slackDiscussions };
+}
+
+/**
+ * Given a branch name (or release version), find all Jira tickets linked to
+ * PRs or commits on that branch.
+ * Enables SE-aaS to answer: "Show me all Jira tickets for release/6.3.4"
+ */
+export async function getLinkedEntitiesForBranch(
+  supabase: SupabaseClient,
+  organizationId: string,
+  branchName: string,
+): Promise<{
+  jiraTickets: string[];
+  pullRequests: any[];
+  commits: any[];
+  releaseVersion: string | null;
+}> {
+  // 1. Find all PR + commit signals on this branch
+  const { data: branchSignals } = await supabase
+    .from('cross_domain_signals')
+    .select('entity_id, entity_type, signal_type, signal_metadata, release_version')
+    .eq('organization_id', organizationId)
+    .eq('branch_name', branchName)
+    .in('entity_type', ['pull_request', 'commit'])
+    .order('signal_timestamp', { ascending: false })
+    .limit(500);
+
+  const prEntityIds = (branchSignals || [])
+    .filter((s: any) => s.entity_type === 'pull_request')
+    .map((s: any) => s.entity_id);
+
+  const commitEntityIds = (branchSignals || [])
+    .filter((s: any) => s.entity_type === 'commit')
+    .map((s: any) => s.entity_id);
+
+  const releaseVersion = (branchSignals || [])[0]?.release_version ?? null;
+
+  // 2. Find entity_links where source is one of those PRs/commits
+  const allSourceIds = [...prEntityIds, ...commitEntityIds];
+  let jiraTickets: string[] = [];
+
+  if (allSourceIds.length > 0) {
+    // Try entity_links table first
+    const { data: links } = await supabase
+      .from('entity_links')
+      .select('target_entity_id')
+      .eq('organization_id', organizationId)
+      .in('source_entity_id', allSourceIds)
+      .eq('target_type', 'jira_issue');
+
+    if (links && links.length > 0) {
+      jiraTickets = [...new Set(links.map((l: any) => l.target_entity_id.replace('jira#', '')))];
+    } else {
+      // Fallback: look in cross_domain_signals meta signals
+      const { data: metaLinks } = await supabase
+        .from('cross_domain_signals')
+        .select('signal_metadata')
+        .eq('organization_id', organizationId)
+        .eq('source_domain', 'meta')
+        .eq('entity_type', 'entity_link');
+
+      for (const sig of metaLinks || []) {
+        const meta = sig.signal_metadata;
+        if (
+          allSourceIds.includes(meta?.source_entity_id) &&
+          meta?.target_type === 'jira_issue' &&
+          meta?.target_entity_id
+        ) {
+          const ticket = meta.target_entity_id.replace('jira#', '');
+          if (!jiraTickets.includes(ticket)) jiraTickets.push(ticket);
+        }
+      }
+    }
+  }
+
+  return {
+    jiraTickets,
+    pullRequests: (branchSignals || []).filter((s: any) => s.entity_type === 'pull_request'),
+    commits: (branchSignals || []).filter((s: any) => s.entity_type === 'commit'),
+    releaseVersion,
+  };
 }
 
 /**

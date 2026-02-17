@@ -3,6 +3,14 @@
  * ================
  * Ingests repositories, files, commits, pull requests, and issues.
  * Optimized for 10M+ files with streaming and smart filtering.
+ *
+ * Track 1 MVP — Multi-Branch + Release Tracking
+ * ─────────────────────────────────────────────
+ * Configure `branches` to ingest specific release branches (e.g. 'release/6.3.4').
+ * Configure `releaseVersionMap` to assign a clean version label to each branch.
+ * Configure `teamBranchMap` to assign a logical team label to each branch.
+ * All signals emitted will carry branch_name, release_version, team_label fields
+ * so SE-aaS can answer branch-scoped and team-scoped queries.
  */
 
 import { ConnectorBase, IngestionResult, IngestionOptions } from '../base/connector-base.js';
@@ -14,6 +22,21 @@ import { linkPRToJira, linkCommitToJira } from '../cross-domain-linker.js';
 interface GitHubCredentials {
   accessToken: string;
   githubLogin?: string;
+  /**
+   * Specific branches to ingest. If omitted, falls back to each repo's default branch.
+   * Example: ['release/6.3.4', 'release/5.11.5-enterprise']
+   */
+  branches?: string[];
+  /**
+   * Maps branch name → normalised release version label.
+   * Example: { 'release/6.3.4': '6.3.4', 'release/5.11.5-enterprise': '5.11.5' }
+   */
+  releaseVersionMap?: Record<string, string>;
+  /**
+   * Maps branch name → logical team label.
+   * Example: { 'release/6.3.4': 'team-634', 'release/5.11.5-enterprise': 'team-5115' }
+   */
+  teamBranchMap?: Record<string, string>;
 }
 
 interface Repository {
@@ -75,25 +98,44 @@ export class GitHubConnector extends ConnectorBase {
         const repo = repos[i];
         console.log(`[GitHub] Processing ${repo.full_name} (${i + 1}/${repos.length})`);
 
-        // 2. Ingest repository metadata
+        // 2. Ingest repository metadata (branch-agnostic)
         await this.ingestRepoMetadata(repo);
         totalSignals++;
 
-        // 3. Ingest file tree (streaming, with filters)
-        const fileSignals = await this.ingestFileTree(repo);
-        totalSignals += fileSignals;
+        // ── Multi-Branch: determine which branches to ingest ──────────────────
+        // If the connector was configured with explicit `branches`, use those.
+        // Otherwise fall back to the repo's default_branch (original behaviour).
+        const targetBranches: string[] =
+          this.githubCreds.branches && this.githubCreds.branches.length > 0
+            ? this.githubCreds.branches
+            : [repo.default_branch];
 
-        // 4. Ingest recent commits (last 100)
-        const commitSignals = await this.ingestRecentCommits(repo, 100);
-        totalSignals += commitSignals;
+        console.log(`[GitHub] ${repo.full_name}: ingesting branches → [${targetBranches.join(', ')}]`);
 
-        // 5. Ingest open pull requests
-        const prSignals = await this.ingestPullRequests(repo, 'open');
-        totalSignals += prSignals;
+        for (const branch of targetBranches) {
+          const releaseVersion = this.resolveReleaseVersion(branch);
+          const teamLabel = this.resolveTeamLabel(branch);
 
-        // 6. Ingest open issues
-        const issueSignals = await this.ingestIssues(repo, 'open');
-        totalSignals += issueSignals;
+          console.log(`[GitHub]   branch="${branch}" version="${releaseVersion ?? 'n/a'}" team="${teamLabel ?? 'n/a'}"`);
+
+          // 3. Ingest file tree for this branch
+          const fileSignals = await this.ingestFileTree(repo, branch, releaseVersion, teamLabel);
+          totalSignals += fileSignals;
+
+          // 4. Ingest recent commits (last 100) for this branch
+          const commitSignals = await this.ingestRecentCommits(repo, 100, branch, releaseVersion, teamLabel);
+          totalSignals += commitSignals;
+
+          // 5. Ingest open pull requests targeting this branch
+          const prSignals = await this.ingestPullRequests(repo, 'open', branch, releaseVersion, teamLabel);
+          totalSignals += prSignals;
+
+          // 6. Ingest open issues (issues are not branch-specific, ingest once per repo on first branch)
+          if (branch === targetBranches[0]) {
+            const issueSignals = await this.ingestIssues(repo, 'open');
+            totalSignals += issueSignals;
+          }
+        }
 
         // Save checkpoint after each repo
         const progress = ((i + 1) / repos.length) * 100;
@@ -102,6 +144,7 @@ export class GitHubConnector extends ConnectorBase {
             lastRepo: repo.full_name,
             reposProcessed: i + 1,
             totalRepos: repos.length,
+            branches: targetBranches,
           },
           Math.floor(progress)
         );
@@ -133,62 +176,67 @@ export class GitHubConnector extends ConnectorBase {
       const repos = await this.getRepositories();
 
       for (const repo of repos) {
-        // Only new commits
-        const commits = await this.getCommitsSince(repo, since);
-        for (const commit of commits) {
-          const signal = this.transformCommitToSignal(repo, commit);
-          await this.streamProcessor.addSignal(signal);
-          totalSignals++;
+        // Determine target branches (same logic as initialLoad)
+        const targetBranches: string[] =
+          this.githubCreds.branches && this.githubCreds.branches.length > 0
+            ? this.githubCreds.branches
+            : [repo.default_branch];
 
-          // Cross-domain linking: parse commit messages for Jira refs (incremental)
-          const commitMsg = commit.commit?.message || '';
-          if (commitMsg.length > 0) {
+        for (const branch of targetBranches) {
+          const releaseVersion = this.resolveReleaseVersion(branch);
+          const teamLabel = this.resolveTeamLabel(branch);
+
+          // New commits on this branch since last sync
+          const commits = await this.getCommitsSince(repo, since, branch);
+          for (const commit of commits) {
+            const signal = this.transformCommitToSignal(repo, commit, branch, releaseVersion, teamLabel);
+            await this.streamProcessor.addSignal(signal);
+            totalSignals++;
+
+            const commitMsg = commit.commit?.message || '';
+            if (commitMsg.length > 0) {
+              try {
+                await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
+                  sha: commit.sha,
+                  message: commitMsg,
+                });
+              } catch { /* non-critical */ }
+            }
+          }
+
+          // Updated PRs targeting this branch
+          const prs = await this.getPullRequestsUpdatedSince(repo, since, branch);
+          for (const pr of prs) {
+            const signal = this.transformPRToSignal(repo, pr, branch, releaseVersion, teamLabel);
+            await this.streamProcessor.addSignal(signal);
+            totalSignals++;
+
             try {
-              await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
-                sha: commit.sha,
-                message: commitMsg,
+              await linkPRToJira(this.supabase, this.organizationId, repo.name, {
+                number: pr.number,
+                title: pr.title,
+                body: pr.body,
+                head: { ref: pr.head?.ref },
               });
             } catch { /* non-critical */ }
-          }
-        }
 
-        // Updated PRs + their reviews (critical for P0 Bottleneck Detection)
-        const prs = await this.getPullRequestsUpdatedSince(repo, since);
-        for (const pr of prs) {
-          const signal = this.transformPRToSignal(repo, pr);
-          await this.streamProcessor.addSignal(signal);
-          totalSignals++;
-
-          // Cross-domain linking: parse PR for Jira refs (incremental)
-          try {
-            await linkPRToJira(this.supabase, this.organizationId, repo.name, {
-              number: pr.number,
-              title: pr.title,
-              body: pr.body,
-              head: { ref: pr.head?.ref },
-            });
-          } catch { /* non-critical */ }
-
-          // Fetch reviews for each PR (same as initialLoad — without this, incremental
-          // syncs produce zero pr_reviewed signals, breaking P0 bottleneck detection)
-          try {
-            const reviews = await this.rateLimiter.throttle(() =>
-              this.githubFetch(`/repos/${repo.full_name}/pulls/${pr.number}/reviews`)
-            );
-
-            for (const review of reviews) {
-              if (review.user && new Date(review.submitted_at) > new Date(since)) {
-                const reviewSignal = this.transformReviewToSignal(repo, pr, review);
-                await this.streamProcessor.addSignal(reviewSignal);
-                totalSignals++;
+            // Reviews for each PR
+            try {
+              const reviews = await this.rateLimiter.throttle(() =>
+                this.githubFetch(`/repos/${repo.full_name}/pulls/${pr.number}/reviews`)
+              );
+              for (const review of reviews) {
+                if (review.user && new Date(review.submitted_at) > new Date(since)) {
+                  const reviewSignal = this.transformReviewToSignal(repo, pr, review, branch, releaseVersion, teamLabel);
+                  await this.streamProcessor.addSignal(reviewSignal);
+                  totalSignals++;
+                }
               }
-            }
-          } catch {
-            // Continue even if reviews fail for one PR
+            } catch { /* continue */ }
           }
         }
 
-        // Updated issues
+        // Issues are not branch-specific — sync once per repo
         const issues = await this.getIssuesUpdatedSince(repo, since);
         for (const issue of issues) {
           const signal = this.transformIssueToSignal(repo, issue);
@@ -294,15 +342,42 @@ export class GitHubConnector extends ConnectorBase {
     await this.streamProcessor.addSignal(signal);
   }
 
+  // ── Branch & Release Resolver Helpers ──────────────────────────────────────
+
+  /**
+   * Returns the normalised release version label for a branch, or the branch
+   * name itself as a fallback.
+   * e.g. 'release/6.3.4' → '6.3.4'  (if configured)
+   */
+  private resolveReleaseVersion(branch: string): string | undefined {
+    return this.githubCreds.releaseVersionMap?.[branch];
+  }
+
+  /**
+   * Returns the logical team label for a branch.
+   * e.g. 'release/5.11.5-enterprise' → 'team-5115'  (if configured)
+   */
+  private resolveTeamLabel(branch: string): string | undefined {
+    return this.githubCreds.teamBranchMap?.[branch];
+  }
+
+  // ── Ingestion Methods (branch-aware) ───────────────────────────────────────
+
   /**
    * Ingest file tree (streaming, skip binaries)
    */
-  private async ingestFileTree(repo: Repository): Promise<number> {
+  private async ingestFileTree(
+    repo: Repository,
+    branch?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Promise<number> {
     let filesIngested = 0;
+    const targetBranch = branch ?? repo.default_branch;
 
-    // Get git tree recursively
+    // Get git tree recursively for the target branch
     const tree = await this.rateLimiter.throttle(() =>
-      this.githubFetch(`/repos/${repo.full_name}/git/trees/${repo.default_branch}?recursive=1`)
+      this.githubFetch(`/repos/${repo.full_name}/git/trees/${targetBranch}?recursive=1`)
     );
 
     if (!tree.tree) return 0;
@@ -329,11 +404,11 @@ export class GitHubConnector extends ConnectorBase {
         )
       );
 
-      // Transform to signals
+      // Transform to signals (carry branch context)
       const signals = fileContents
         .map((content, idx) => {
           if (!content) return null;
-          return this.transformFileToSignal(repo, batch[idx], content);
+          return this.transformFileToSignal(repo, batch[idx], content, targetBranch, releaseVersion, teamLabel);
         })
         .filter((s): s is Signal => s !== null);
 
@@ -355,18 +430,28 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Ingest recent commits
+   * Ingest recent commits on a specific branch
    */
-  private async ingestRecentCommits(repo: Repository, count: number): Promise<number> {
+  private async ingestRecentCommits(
+    repo: Repository,
+    count: number,
+    branch?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Promise<number> {
+    const targetBranch = branch ?? repo.default_branch;
     const commits = await this.rateLimiter.throttle(() =>
-      this.githubFetch(`/repos/${repo.full_name}/commits?per_page=${Math.min(count, 100)}`)
+      this.githubFetch(
+        `/repos/${repo.full_name}/commits?sha=${encodeURIComponent(targetBranch)}&per_page=${Math.min(count, 100)}`
+      )
     );
 
-    const signals = commits.map((commit: any) => this.transformCommitToSignal(repo, commit));
+    const signals = commits.map((commit: any) =>
+      this.transformCommitToSignal(repo, commit, targetBranch, releaseVersion, teamLabel)
+    );
     await this.batchInsertSignals(signals);
 
     // Cross-domain linking: parse commit messages for Jira ticket references
-    // e.g. "fix: resolve PROJ-1234 login timeout" → entity_link record
     for (const commit of commits) {
       const message = commit.commit?.message || '';
       if (message.length > 0) {
@@ -385,22 +470,32 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Ingest pull requests
+   * Ingest pull requests targeting a specific base branch.
+   * GitHub's PR list API supports filtering by `base` (the target branch).
    */
-  private async ingestPullRequests(repo: Repository, state: 'open' | 'closed' | 'all'): Promise<number> {
+  private async ingestPullRequests(
+    repo: Repository,
+    state: 'open' | 'closed' | 'all',
+    branch?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Promise<number> {
+    // If a branch is specified, filter PRs that target that branch (base=branch).
+    // This ensures we only pull PRs going INTO the release branch, not unrelated work.
+    const branchFilter = branch ? `&base=${encodeURIComponent(branch)}` : '';
     const prs = await this.rateLimiter.throttle(() =>
-      this.githubFetch(`/repos/${repo.full_name}/pulls?state=${state}&per_page=100`)
+      this.githubFetch(`/repos/${repo.full_name}/pulls?state=${state}&per_page=100${branchFilter}`)
     );
 
     const signals: Signal[] = [];
+    const targetBranch = branch ?? repo.default_branch;
 
     // Process each PR and fetch its reviews
     for (const pr of prs) {
-      // Add PR signal
-      signals.push(this.transformPRToSignal(repo, pr));
+      // Add PR signal with branch context
+      signals.push(this.transformPRToSignal(repo, pr, targetBranch, releaseVersion, teamLabel));
 
       // Cross-domain linking: parse PR title/branch/body for Jira ticket references
-      // e.g. "fix/PROJ-1234-auth-bug" or "Closes PROJ-1234" → entity_link record
       try {
         await linkPRToJira(this.supabase, this.organizationId, repo.name, {
           number: pr.number,
@@ -419,13 +514,12 @@ export class GitHubConnector extends ConnectorBase {
         );
 
         for (const review of reviews) {
-          if (review.user) {  // Skip reviews without user (bots, etc.)
-            signals.push(this.transformReviewToSignal(repo, pr, review));
+          if (review.user) {
+            signals.push(this.transformReviewToSignal(repo, pr, review, targetBranch, releaseVersion, teamLabel));
           }
         }
       } catch (error) {
         console.warn(`[GitHub] Failed to fetch reviews for PR #${pr.number}:`, error);
-        // Continue processing other PRs even if reviews fail
       }
     }
 
@@ -449,23 +543,23 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Get commits since timestamp
+   * Get commits since timestamp on a specific branch
    */
-  private async getCommitsSince(repo: Repository, since: string): Promise<any[]> {
+  private async getCommitsSince(repo: Repository, since: string, branch?: string): Promise<any[]> {
+    const branchParam = branch ? `&sha=${encodeURIComponent(branch)}` : '';
     return this.rateLimiter.throttle(() =>
-      this.githubFetch(`/repos/${repo.full_name}/commits?since=${since}&per_page=100`)
+      this.githubFetch(`/repos/${repo.full_name}/commits?since=${since}&per_page=100${branchParam}`)
     );
   }
 
   /**
-   * Get PRs updated since timestamp
+   * Get PRs targeting a specific base branch, updated since timestamp
    */
-  private async getPullRequestsUpdatedSince(repo: Repository, since: string): Promise<any[]> {
-    // GitHub doesn't support since for PRs, fetch all and filter
+  private async getPullRequestsUpdatedSince(repo: Repository, since: string, branch?: string): Promise<any[]> {
+    const branchFilter = branch ? `&base=${encodeURIComponent(branch)}` : '';
     const prs = await this.rateLimiter.throttle(() =>
-      this.githubFetch(`/repos/${repo.full_name}/pulls?state=all&sort=updated&per_page=100`)
+      this.githubFetch(`/repos/${repo.full_name}/pulls?state=all&sort=updated&per_page=100${branchFilter}`)
     );
-
     return prs.filter((pr: any) => new Date(pr.updated_at) > new Date(since));
   }
 
@@ -494,24 +588,28 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Transform file to signal
+   * Transform file to signal — carries branch + release context
    */
-  private transformFileToSignal(repo: Repository, file: TreeItem, content: string): Signal {
+  private transformFileToSignal(
+    repo: Repository,
+    file: TreeItem,
+    content: string,
+    branchName?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Signal {
     const now = new Date().toISOString();
     const language = this.detectLanguage(file.path);
 
     // Store full content for files < 100KB (critical for SE-aaS code analysis)
-    // For larger files, store first 50KB + last 1KB (captures imports + key logic)
-    // Without full content, SE-aaS cannot do real code analysis, dependency graphs, or impact analysis
-    const MAX_FULL_CONTENT = 100_000;    // 100KB: store complete
-    const MAX_TRUNCATED = 50_000;        // 50KB prefix for large files
+    const MAX_FULL_CONTENT = 100_000;
+    const MAX_TRUNCATED = 50_000;
     let storedContent: string;
     let contentTruncated = false;
 
     if (content.length <= MAX_FULL_CONTENT) {
       storedContent = content;
     } else {
-      // Large file: capture top (imports, exports, class defs) + tail (key logic)
       storedContent = content.substring(0, MAX_TRUNCATED) + '\n\n... [truncated] ...\n\n' + content.substring(content.length - 1000);
       contentTruncated = true;
     }
@@ -522,19 +620,25 @@ export class GitHubConnector extends ConnectorBase {
       signal_type: 'code_file_ingested',
       signal_value: file.size || content.length,
       entity_type: 'code_file',
-      entity_id: `${repo.full_name}:${file.path}`,
+      // Include branch in entity_id so files from different branches are distinct signals
+      entity_id: branchName
+        ? `${repo.full_name}:${file.path}@${branchName}`
+        : `${repo.full_name}:${file.path}`,
+      branch_name: branchName,
+      release_version: releaseVersion,
+      team_label: teamLabel,
       signal_metadata: {
         repo: repo.full_name,
         path: file.path,
         language,
         size: file.size,
         sha: file.sha,
-        // Full content stored (not just 500-char preview)
-        // This enables SE-aaS to actually read, analyze, and reason about code
+        branch: branchName,
+        release_version: releaseVersion,
+        team_label: teamLabel,
         content: storedContent,
         content_length: content.length,
         content_truncated: contentTruncated,
-        // Keep preview for fast queries that don't need full content
         content_preview: content.substring(0, 500),
       },
       created_at: now,
@@ -543,9 +647,15 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Transform commit to signal (Brain L1 spec)
+   * Transform commit to signal — carries branch + release context
    */
-  private transformCommitToSignal(repo: Repository, commit: any): Signal {
+  private transformCommitToSignal(
+    repo: Repository,
+    commit: any,
+    branchName?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Signal {
     const eventTime = commit.commit?.author?.date || new Date().toISOString();
     return {
       organization_id: this.organizationId,
@@ -554,6 +664,9 @@ export class GitHubConnector extends ConnectorBase {
       signal_value: 1,
       entity_type: 'commit',
       entity_id: `${repo.name}:${commit.sha}`,
+      branch_name: branchName,
+      release_version: releaseVersion,
+      team_label: teamLabel,
       signal_metadata: {
         repo: repo.full_name,
         sha: commit.sha,
@@ -563,6 +676,9 @@ export class GitHubConnector extends ConnectorBase {
         committer: commit.commit?.committer?.name,
         files_changed: commit.files?.length || 0,
         url: commit.html_url,
+        branch: branchName,
+        release_version: releaseVersion,
+        team_label: teamLabel,
       },
       created_at: eventTime,
       signal_timestamp: eventTime,
@@ -570,16 +686,20 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Transform PR to signal (Brain L1 spec)
+   * Transform PR to signal — carries branch + release context
    */
-  private transformPRToSignal(repo: Repository, pr: any): Signal {
-    // Determine signal type and value based on PR state
+  private transformPRToSignal(
+    repo: Repository,
+    pr: any,
+    branchName?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Signal {
     let signalType: string;
     let signalValue: number;
 
     if (pr.merged_at) {
       signalType = 'pr_merged';
-      // Signal value = cycle time in hours
       signalValue = (new Date(pr.merged_at).getTime() - new Date(pr.created_at).getTime()) / 3600000;
     } else if (pr.state === 'open') {
       signalType = 'pr_opened';
@@ -597,6 +717,9 @@ export class GitHubConnector extends ConnectorBase {
       signal_value: signalValue,
       entity_type: 'pull_request',
       entity_id: `${repo.name}#${pr.number}`,
+      branch_name: branchName,
+      release_version: releaseVersion,
+      team_label: teamLabel,
       signal_metadata: {
         repo: repo.full_name,
         pr_number: pr.number,
@@ -611,6 +734,11 @@ export class GitHubConnector extends ConnectorBase {
         merged_at: pr.merged_at,
         url: pr.html_url,
         is_draft: pr.draft || false,
+        base_branch: pr.base?.ref,        // target branch from GitHub (what we're merging into)
+        head_branch: pr.head?.ref,        // source branch (feature branch)
+        branch: branchName,               // our configured release branch
+        release_version: releaseVersion,
+        team_label: teamLabel,
       },
       created_at: eventTime,
       signal_timestamp: eventTime,
@@ -618,10 +746,17 @@ export class GitHubConnector extends ConnectorBase {
   }
 
   /**
-   * Transform PR review to signal (Brain L1 spec)
-   * Critical for P0 Bottleneck Detection
+   * Transform PR review to signal — carries branch + release context
+   * Critical for P0 Bottleneck Detection (branch-scoped)
    */
-  private transformReviewToSignal(repo: Repository, pr: any, review: any): Signal {
+  private transformReviewToSignal(
+    repo: Repository,
+    pr: any,
+    review: any,
+    branchName?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Signal {
     const reviewLatencyHours =
       (new Date(review.submitted_at).getTime() - new Date(pr.created_at).getTime()) / 3600000;
 
@@ -633,6 +768,9 @@ export class GitHubConnector extends ConnectorBase {
       signal_value: reviewLatencyHours,
       entity_type: 'review',
       entity_id: `${repo.name}#${pr.number}:review:${review.id}`,
+      branch_name: branchName,
+      release_version: releaseVersion,
+      team_label: teamLabel,
       signal_metadata: {
         repo: repo.full_name,
         pr_number: pr.number,
@@ -642,6 +780,9 @@ export class GitHubConnector extends ConnectorBase {
         review_state: review.state,
         review_latency_hours: reviewLatencyHours,
         submitted_at: review.submitted_at,
+        branch: branchName,
+        release_version: releaseVersion,
+        team_label: teamLabel,
       },
       created_at: eventTime,
       signal_timestamp: eventTime,

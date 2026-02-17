@@ -19,6 +19,10 @@ export interface Signal {
   created_at: string;          // DB insertion timestamp (defaults to NOW() in DB)
   signal_timestamp: string;    // When the event ACTUALLY occurred (for historical accuracy)
   content_hash?: string;       // For deduplication
+  // ── Branch & Release Tracking (Track 1 MVP) ──────────────────────────────
+  branch_name?: string;        // e.g. 'release/6.3.4', 'release/5.11.5-enterprise'
+  release_version?: string;    // normalised label e.g. '6.3.4', '5.11.5'
+  team_label?: string;         // logical team e.g. 'team-634', 'team-5115'
 }
 
 export interface ProcessingStats {
@@ -184,7 +188,10 @@ export class StreamProcessor {
    * Generate deterministic hash for a signal
    */
   private generateSignalHash(signal: Signal): string {
-    const key = `${signal.source_domain}:${signal.signal_type}:${signal.entity_id}:${signal.signal_timestamp}`;
+    // Include branch_name so the same commit/PR on two different branches
+    // produces two DISTINCT signals rather than being collapsed as duplicates.
+    const branchSuffix = signal.branch_name ? `:${signal.branch_name}` : '';
+    const key = `${signal.source_domain}:${signal.signal_type}:${signal.entity_id}:${signal.signal_timestamp}${branchSuffix}`;
     return crypto.createHash('sha256').update(key).digest('hex');
   }
 

@@ -23,6 +23,16 @@ import { registerEnhancedSoftwareEngineeringDomains } from './action-domains-sof
 import { createRetry, createCircuitBreaker } from '../infra';
 import { createLogger, createMetrics, type NexusLogger, type NexusMetrics } from '../observability';
 import { createSupabaseRepository, type NexusRepository } from '../persistence/supabase-repository';
+import {
+  ReleaseTracker,
+  getReleaseByName,
+  listActiveReleases,
+  type ReleaseConfig,
+  type ReleaseEntity,
+  type ReleaseReadiness,
+  type VelocityByDrop,
+  type CommitDiff,
+} from '../connectors/release-tracker';
 
 // ============================================================================
 // TYPES
@@ -152,6 +162,7 @@ export class SEaaSService {
   private anthropicApiKey: string | null = null;
   private organizationId: string;
   private _jobProcessorInterval: ReturnType<typeof setInterval> | null = null;
+  private _supabase: any | null = null;
 
   constructor(config: SEaaSConfig = {}) {
     // Initialize registry with SE agents
@@ -161,6 +172,7 @@ export class SEaaSService {
 
     // Initialize persistence if provided
     if (config.supabase) {
+      this._supabase = config.supabase;
       this.repository = createSupabaseRepository(config.supabase, config.organizationId || 'default');
     }
 
@@ -311,6 +323,173 @@ export class SEaaSService {
     };
 
     return this.enqueueJob(jobRequest);
+  }
+
+  // ============================================================================
+  // RELEASE TRACKING QUERY HANDLERS (Track 2)
+  // ============================================================================
+
+  /**
+   * SE-aaS Release Query 1: releaseGetTickets
+   * GET /api/v1/releases/:releaseId/tickets
+   *
+   * "What Jira tickets are in the 5.11.5 Drop 1?"
+   * Returns all Jira tickets linked to a release entity, with status / assignee.
+   */
+  async releaseGetTickets(request: {
+    releaseId: string;
+    releaseConfig: ReleaseConfig;
+    apiKey: string;
+  }): Promise<Array<{ key: string; summary: string; status: string; issue_type: string; assignee: string | null }>> {
+    const auth = await this.authenticate(request.apiKey);
+    await this.checkRateLimit(auth);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    const tracker = new ReleaseTracker(this.getSupabase()!, request.releaseConfig);
+    const tickets = await tracker.getTicketsForVersion(request.releaseId);
+
+    this.logger.info('releaseGetTickets completed', {
+      releaseId: request.releaseId,
+      count: tickets.length,
+    });
+    this.metrics.increment('seaas.release.tickets.query');
+
+    return tickets;
+  }
+
+  /**
+   * SE-aaS Release Query 2: releaseGetDiff
+   * GET /api/v1/releases/:releaseId/diff
+   *
+   * "What changed between 5.11.4.3 and 5.11.5?"
+   * Returns all commits linked to the release via github_compare.
+   */
+  async releaseGetDiff(request: {
+    releaseId: string;
+    releaseConfig: ReleaseConfig;
+    apiKey: string;
+  }): Promise<CommitDiff[]> {
+    const auth = await this.authenticate(request.apiKey);
+    await this.checkRateLimit(auth);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    const tracker = new ReleaseTracker(this.getSupabase()!, request.releaseConfig);
+    const diff = await tracker.getCommitsDiff(request.releaseId);
+
+    this.logger.info('releaseGetDiff completed', {
+      releaseId: request.releaseId,
+      commits: diff.length,
+    });
+    this.metrics.increment('seaas.release.diff.query');
+
+    return diff;
+  }
+
+  /**
+   * SE-aaS Release Query 3: releaseGetVelocityByDrop
+   * GET /api/v1/releases/:releaseName/velocity
+   *
+   * "Show me Team B's velocity per drop"
+   * Returns PR merge counts and ticket resolution counts broken down per drop window.
+   */
+  async releaseGetVelocityByDrop(request: {
+    releaseName: string;
+    releaseConfig: ReleaseConfig;
+    apiKey: string;
+  }): Promise<VelocityByDrop> {
+    const auth = await this.authenticate(request.apiKey);
+    await this.checkRateLimit(auth);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    const tracker = new ReleaseTracker(this.getSupabase()!, request.releaseConfig);
+    const velocity = await tracker.getTeamVelocityByDrop();
+
+    this.logger.info('releaseGetVelocityByDrop completed', {
+      releaseName: request.releaseName,
+      drops: velocity.drops.length,
+    });
+    this.metrics.increment('seaas.release.velocity.query');
+
+    return velocity;
+  }
+
+  /**
+   * SE-aaS Release Query 4: releaseGetReadiness
+   * GET /api/v1/releases/:releaseId/readiness
+   *
+   * "What is the release readiness score for 6.3.4?"
+   * Returns a 0–100 score (red / amber / green) based on:
+   *   50% ticket resolution + 30% PR merge rate + 20% team activity.
+   */
+  async releaseGetReadiness(request: {
+    releaseId: string;
+    releaseConfig: ReleaseConfig;
+    apiKey: string;
+  }): Promise<ReleaseReadiness> {
+    const auth = await this.authenticate(request.apiKey);
+    await this.checkRateLimit(auth);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    const tracker = new ReleaseTracker(this.getSupabase()!, request.releaseConfig);
+    const readiness = await tracker.getReleaseReadiness(request.releaseId);
+
+    this.logger.info('releaseGetReadiness completed', {
+      releaseId: request.releaseId,
+      score: readiness.readinessScore,
+      label: readiness.readinessLabel,
+    });
+    this.metrics.increment('seaas.release.readiness.query');
+
+    return readiness;
+  }
+
+  /**
+   * List all active releases for the organisation.
+   * GET /api/v1/releases
+   */
+  async listActiveReleases(apiKey: string): Promise<ReleaseEntity[]> {
+    await this.authenticate(apiKey);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    const releases = await listActiveReleases(this.getSupabase()!, this.organizationId);
+    this.logger.info('listActiveReleases completed', { count: releases.length });
+    this.metrics.increment('seaas.release.list.query');
+
+    return releases;
+  }
+
+  /**
+   * Look up a release by name and return the entity.
+   * GET /api/v1/releases/by-name/:releaseName
+   */
+  async getReleaseByName(releaseName: string, apiKey: string): Promise<ReleaseEntity | null> {
+    await this.authenticate(apiKey);
+
+    if (!this.getSupabase()) {
+      throw new Error('Supabase client is required for release query handlers');
+    }
+
+    return getReleaseByName(this.getSupabase()!, this.organizationId, releaseName);
+  }
+
+  /** Internal helper — returns the raw Supabase client (may be null) */
+  private getSupabase(): any | null {
+    return this._supabase;
   }
 
   /**
