@@ -398,9 +398,17 @@ export async function GET(request: Request) {
 
     const analysis = processGLData(transactions);
 
+    // Look up org name dynamically (not hardcoded)
+    const service = await createServiceClient();
+    const { data: org } = await service
+      .from("organizations")
+      .select("name")
+      .eq("id", orgId)
+      .single();
+
     return NextResponse.json({
       analysis,
-      company: 'PH Accounting', // Org-scoped
+      company: org?.name || "Unknown Organization",
       organizationId: orgId,
       summary: {
         transactions: transactions.length,

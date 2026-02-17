@@ -20,7 +20,10 @@ export type { SlackData, HubSpotData, GoogleDocsData, CustomerData, CompanyJarvi
 export type { CompanyJarvisTrainingPack, CompanyJarvisSignal } from './brain-analyzer';
 export { buildTrainingPacks, buildSignals } from './brain-analyzer';
 
-// ─── Org ID (deterministic UUID for seed script) ───────────────────────────
+// ─── Org ID — canonical value matches platform/lib/constants.ts ─────────────
+// NOTE: This is duplicated here because seed scripts (scripts/) import from
+// this file via relative paths and cannot resolve the @/lib/constants alias.
+// Both values MUST stay in sync: platform/lib/constants.ts is the source of truth.
 
 export const COMPANY_JARVIS_ORG_ID = '22222222-2222-4000-a000-222222222222';
 

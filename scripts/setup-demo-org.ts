@@ -67,6 +67,12 @@ async function createDemoOrganization(
       id: config.orgId,
       name: 'Competition Demo 2026',
       slug: 'competition-demo-2026',
+      plan: 'enterprise',
+      settings: {
+        industry: 'Demo & Competition',
+        description: 'Competition demo org — Memory Genesis, CauseMe, CausalRivers',
+        demo: true,
+      },
       created_at: new Date().toISOString()
     });
 

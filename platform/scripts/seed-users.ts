@@ -42,6 +42,13 @@ const TOOKITAKI_ORG = {
   name: "Tookitaki",
   slug: "tookitaki",
   plan: "enterprise",
+  settings: {
+    industry: "AML Compliance Software",
+    countries: ["SG", "MY", "TW", "AU", "PH"],
+    arr: 10200000,
+    headcount: 87,
+    description: "Enterprise AML compliance platform — RegTech SaaS across 5 APAC countries",
+  },
 };
 
 const TOOKITAKI_USERS = [
@@ -79,7 +86,7 @@ async function findOrCreateUser(email: string, password: string) {
   return data.user;
 }
 
-async function findOrCreateOrg(name: string, slug: string, plan: string) {
+async function findOrCreateOrg(name: string, slug: string, plan: string, settings?: Record<string, unknown>) {
   const { data: existing } = await supabase
     .from("organizations")
     .select("id, name, slug")
@@ -87,14 +94,23 @@ async function findOrCreateOrg(name: string, slug: string, plan: string) {
     .single();
 
   if (existing) {
-    console.log(`  [exists] Org "${name}" (${existing.id})`);
+    // Update settings if provided (ensures consistency on re-runs)
+    if (settings) {
+      await supabase
+        .from("organizations")
+        .update({ settings })
+        .eq("id", existing.id);
+      console.log(`  [exists] Org "${name}" (${existing.id}) — settings updated`);
+    } else {
+      console.log(`  [exists] Org "${name}" (${existing.id})`);
+    }
     return existing;
   }
 
   const orgId = randomUUID();
   const { data, error } = await supabase
     .from("organizations")
-    .insert({ id: orgId, name, slug, plan })
+    .insert({ id: orgId, name, slug, plan, ...(settings ? { settings } : {}) })
     .select()
     .single();
 
@@ -153,7 +169,7 @@ async function main() {
 
   // 2. Create Tookitaki org
   console.log("\n2. Tookitaki Organization:");
-  const org = await findOrCreateOrg(TOOKITAKI_ORG.name, TOOKITAKI_ORG.slug, TOOKITAKI_ORG.plan);
+  const org = await findOrCreateOrg(TOOKITAKI_ORG.name, TOOKITAKI_ORG.slug, TOOKITAKI_ORG.plan, TOOKITAKI_ORG.settings);
   if (!org) {
     console.error("Failed to create Tookitaki org. Aborting.");
     process.exit(1);

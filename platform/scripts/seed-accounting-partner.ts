@@ -42,6 +42,15 @@ const PH_ACCOUNTING_ORG = {
   name: "PH Accounting",
   slug: "ph-accounting",
   plan: "enterprise",
+  settings: {
+    industry: "Accounting & Advisory Services",
+    countries: ["SG"],
+    currency: "SGD",
+    jurisdiction: "SFRS/IRAS",
+    headcount: 15,
+    description: "Singapore accounting firm — design partner for Accounting-as-a-Service (AaaS)",
+    designPartner: true,
+  },
 };
 
 const OWNER_EMAIL = "abhishek@tookitaki.com";
@@ -76,7 +85,7 @@ async function findOrCreateUser(email: string, password: string) {
   return data.user;
 }
 
-async function findOrCreateOrg(name: string, slug: string, plan: string) {
+async function findOrCreateOrg(name: string, slug: string, plan: string, settings?: Record<string, unknown>) {
   const { data: existing } = await supabase
     .from("organizations")
     .select("id, name, slug")
@@ -84,14 +93,23 @@ async function findOrCreateOrg(name: string, slug: string, plan: string) {
     .single();
 
   if (existing) {
-    console.log(`  [exists] Org "${name}" (${existing.id})`);
+    // Update settings if provided (ensures consistency on re-runs)
+    if (settings) {
+      await supabase
+        .from("organizations")
+        .update({ settings })
+        .eq("id", existing.id);
+      console.log(`  [exists] Org "${name}" (${existing.id}) — settings updated`);
+    } else {
+      console.log(`  [exists] Org "${name}" (${existing.id})`);
+    }
     return existing;
   }
 
   const orgId = randomUUID();
   const { data, error } = await supabase
     .from("organizations")
-    .insert({ id: orgId, name, slug, plan })
+    .insert({ id: orgId, name, slug, plan, ...(settings ? { settings } : {}) })
     .select()
     .single();
 
@@ -180,7 +198,7 @@ async function main() {
 
   // 1. Create the org
   console.log("1. Organization:");
-  const org = await findOrCreateOrg(PH_ACCOUNTING_ORG.name, PH_ACCOUNTING_ORG.slug, PH_ACCOUNTING_ORG.plan);
+  const org = await findOrCreateOrg(PH_ACCOUNTING_ORG.name, PH_ACCOUNTING_ORG.slug, PH_ACCOUNTING_ORG.plan, PH_ACCOUNTING_ORG.settings);
   if (!org) {
     console.error("Failed to create PH Accounting org. Aborting.");
     process.exit(1);

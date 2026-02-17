@@ -211,6 +211,34 @@ async function seedCompanyJarvis() {
     process.exit(1);
   }
   console.log(`  Organization "${ORG_NAME}" created/updated.`);
+
+  // Link platform admin to org (if exists)
+  try {
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const adminUser = existingUsers?.users?.find((u: { email?: string }) => u.email === 'abhishek@monetiz3.com');
+    if (adminUser) {
+      const { data: existingMember } = await supabase
+        .from('org_members')
+        .select('id')
+        .eq('organization_id', COMPANY_JARVIS_ORG_ID)
+        .eq('user_id', adminUser.id)
+        .single();
+
+      if (!existingMember) {
+        await supabase.from('org_members').insert({
+          organization_id: COMPANY_JARVIS_ORG_ID,
+          user_id: adminUser.id,
+          role: 'admin',
+          is_platform_admin: true,
+        });
+        console.log(`  Linked platform admin to org`);
+      } else {
+        console.log(`  Platform admin already linked`);
+      }
+    }
+  } catch {
+    console.log(`  Skipping org_members (run seed-users.ts first for user linking)`);
+  }
   console.log();
 
   // ── Step 2: Generate all synthetic data ─────────────────────────────

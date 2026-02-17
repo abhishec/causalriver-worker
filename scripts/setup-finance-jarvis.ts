@@ -245,7 +245,55 @@ async function setupFinanceJarvis() {
   console.log(`   Org ID: ${FINANCE_JARVIS_ORG_ID}`);
   console.log();
 
-  // 2. Create trainer
+  // 2. Create/upsert the organization
+  console.log('📋 Creating organization...');
+  const { error: orgError } = await supabase
+    .from('organizations')
+    .upsert({
+      id: FINANCE_JARVIS_ORG_ID,
+      name: FINANCE_JARVIS_ORG_NAME,
+      slug: 'finance-jarvis',
+      plan: 'enterprise',
+      is_core_brain: false,
+      settings: {
+        industry: 'Financial Intelligence',
+        countries: ['US', 'SG'],
+        description: 'SEC EDGAR + startup financial intelligence — real market data brain',
+      },
+    }, { onConflict: 'id' });
+
+  if (orgError) {
+    console.error(`  ❌ Failed to create org: ${orgError.message}`);
+    process.exit(1);
+  }
+  console.log(`  ✅ Organization "${FINANCE_JARVIS_ORG_NAME}" created/updated.`);
+
+  // Link platform admin to org (if exists)
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const adminUser = existingUsers?.users?.find((u: { email?: string }) => u.email === 'abhishek@monetiz3.com');
+  if (adminUser) {
+    const { data: existingMember } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('organization_id', FINANCE_JARVIS_ORG_ID)
+      .eq('user_id', adminUser.id)
+      .single();
+
+    if (!existingMember) {
+      await supabase.from('org_members').insert({
+        organization_id: FINANCE_JARVIS_ORG_ID,
+        user_id: adminUser.id,
+        role: 'admin',
+        is_platform_admin: true,
+      });
+      console.log(`  ✅ Linked platform admin to org`);
+    } else {
+      console.log(`  ✅ Platform admin already linked`);
+    }
+  }
+  console.log();
+
+  // 2b. Create trainer
   const trainer = createBrainTrainer({
     verbose: true,
     defaultSampleSize: 200,
