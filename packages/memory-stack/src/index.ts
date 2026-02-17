@@ -1085,6 +1085,20 @@ export {
   type LeapEntry,
 } from './orchestrator/brain-context-mesh';
 
+// LLM Query Interpreter — Phase 3: Semantic Query Understanding (Wernicke's Area)
+// Replaces regex dispatch with Haiku LLM call (~200ms) for semantic intent/domain/entity extraction.
+// ONE module used by ALL services (Copilot, SE-aaS, AAS, marketplace).
+// Graceful fallback to regex dispatch-assessor on any failure.
+export {
+  createLLMQueryInterpreter,
+  type LLMQueryInterpreterConfig,
+  type LLMQueryInterpreterInstance,
+  type QueryInterpretation,
+  type ServiceRouteDecision,
+  type ExtractedEntity,
+  type RequiredDataSignals,
+} from './orchestrator/llm-query-interpreter';
+
 // Brain Feedback Bus — Unified Learning Circuit
 // Every service execution feeds back into the Brain through the same Bus.
 // 5 channels: Signal, Prediction, Evolution, Observability, Insight Push

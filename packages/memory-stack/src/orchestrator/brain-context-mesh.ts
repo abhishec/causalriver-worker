@@ -24,6 +24,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createDispatchAssessor, type DispatchAssessment, type UserIntent, type BusinessDomain } from './dispatch-assessor';
+import type { RequiredDataSignals, QueryInterpretation } from './llm-query-interpreter';
 
 // ============================================================================
 // TYPES — Service Types
@@ -348,14 +349,14 @@ export interface BrainContextMeshConfig {
 // ============================================================================
 
 export interface BrainContextMeshInstance {
-  /** Layer 1: Universal brain context (cached, shared) */
-  getUniversalContext(): Promise<UniversalBrainContext>;
-  /** Layer 2: Domain-specific context */
-  getDomainContext(serviceType: ServiceType): Promise<DomainContext>;
-  /** Layer 3: Intent-driven context (token budgets) */
-  getIntentContext(query: string): Promise<IntentContext>;
-  /** Full assembly: all 3 layers combined and de-duplicated */
-  assemble(query: string, serviceType: ServiceType): Promise<AssembledBrainContext>;
+  /** Layer 1: Universal brain context (cached, shared). If interpretation provided, skips unneeded queries. */
+  getUniversalContext(requiredData?: RequiredDataSignals): Promise<UniversalBrainContext>;
+  /** Layer 2: Domain-specific context. If interpretation provided, skips unneeded queries. */
+  getDomainContext(serviceType: ServiceType, requiredData?: RequiredDataSignals): Promise<DomainContext>;
+  /** Layer 3: Intent-driven context (token budgets). If interpretation provided, uses it directly. */
+  getIntentContext(query: string, interpretation?: QueryInterpretation): Promise<IntentContext>;
+  /** Full assembly: all 3 layers combined and de-duplicated. If interpretation provided, uses targeted retrieval. */
+  assemble(query: string, serviceType: ServiceType, interpretation?: QueryInterpretation): Promise<AssembledBrainContext>;
   /** Invalidate cache (call after training/learning) */
   invalidateCache(): void;
 }
@@ -377,10 +378,20 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
 
   // ── Layer 1: Universal Context ──────────────────────────────────────────
 
-  async function getUniversalContext(): Promise<UniversalBrainContext> {
-    // Check cache first
+  async function getUniversalContext(requiredData?: RequiredDataSignals): Promise<UniversalBrainContext> {
+    // Check cache first (cache is always full — no partial caching)
     const cached = getCached(organizationId);
     if (cached) return cached;
+
+    // If requiredData is provided, skip unnecessary queries for faster loading
+    const skipCausal = requiredData ? !requiredData.needsCausalEdges : false;
+    const skipPatterns = requiredData ? !requiredData.needsPatterns : false;
+    const skipCascade = requiredData ? !requiredData.needsCascadeRules : false;
+    const skipEvolution = requiredData ? !requiredData.needsEvolution : false;
+    const skipCorrections = requiredData ? !requiredData.needsCorrections : false;
+    const skipPredictions = requiredData ? !requiredData.needsPredictions : false;
+
+    const emptyResult = { data: [] as any[] };
 
     // ── BRAIN NUTRITION: Per-query resilience ──────────────────────────
     // Each query wrapped with Promise.resolve().catch() so a single table
