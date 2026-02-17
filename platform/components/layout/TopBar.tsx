@@ -24,11 +24,12 @@ const ROUTE_LABELS: Record<string, string> = {
   "/settings": "Settings",
   "/layers": "Layers",
   "/regions": "Regions",
-  "/capabilities": "Capabilities",
+  "/capabilities": "Services",
   "/early-warning": "Early Warning",
   "/inbox": "Inbox",
   "/integrate": "Integrate",
   "/finance-jarvis": "Finance Jarvis",
+  "/accounting-jarvis": "Accounting Jarvis",
 };
 
 export function TopBar() {

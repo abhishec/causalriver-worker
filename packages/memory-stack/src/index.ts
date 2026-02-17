@@ -950,6 +950,24 @@ export {
   registerSoftwareEngineeringAgents,
 } from './orchestrator/agents-software-engineering';
 
+// Accounting Agents ("AaaS Workforce") — 6 agents orchestrating 7 accounting domains
+export {
+  brainBookkeeperAgent,
+  brainReconcilerAgent,
+  brainStatementGeneratorAgent,
+  brainTaxComplianceAgent,
+  brainAuditPreparerAgent,
+  brainAnomalyDetectiveAgent,
+  ALL_ACCOUNTING_AGENTS,
+  registerAccountingAgents,
+  classifyAccount,
+  getAccountSubType,
+  type GLTransaction,
+  type AccountClassification,
+  type JournalEntry,
+  type ReconciliationResult,
+} from './orchestrator/agents-accounting';
+
 // Software Engineering Enhanced Domains (Phase 2) — Real AST parsing, Claude generation, GitHub API
 export {
   codebaseComprehendEnhancedDomain,

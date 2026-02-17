@@ -1,0 +1,241 @@
+/**
+ * Seed Script: Create "PH Accounting" Design Partner Organization
+ *
+ * Usage: npx tsx scripts/seed-accounting-partner.ts
+ *
+ * Creates:
+ * 1. "PH Accounting" organization (enterprise plan)
+ * 2. Links abhishek@tookitaki.com as owner
+ * 3. Links platform admin (abhishek@monetiz3.com) as admin
+ * 4. Seeds org_connectors entry for Xero GL data
+ *
+ * This org is the design partner for Accounting-as-a-Service (AaaS).
+ * The GL data was parsed from a real Xero General Ledger Detail export:
+ *   - 49,684 transactions, 187 accounts, SGD
+ *   - Date range: 2020-01-01 to 2026-02-12
+ *   - Perfectly balanced (debits = credits = $570,335,353.95)
+ */
+
+import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
+import * as dotenv from "dotenv";
+import { resolve } from "path";
+
+// Load env from .env.local
+dotenv.config({ path: resolve(__dirname, "../.env.local") });
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local");
+  process.exit(1);
+}
+
+const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+
+// ─── Design Partner Config ────────────────────────────────────
+
+const PH_ACCOUNTING_ORG = {
+  name: "PH Accounting",
+  slug: "ph-accounting",
+  plan: "enterprise",
+};
+
+const OWNER_EMAIL = "abhishek@tookitaki.com";
+const OWNER_PASSWORD = "Tookitaki@2025!";
+
+const PLATFORM_ADMIN_EMAIL = "abhishek@monetiz3.com";
+
+// ─── Helpers (same pattern as seed-users.ts) ──────────────────
+
+async function findOrCreateUser(email: string, password: string) {
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const existing = existingUsers?.users?.find((u) => u.email === email);
+
+  if (existing) {
+    console.log(`  [exists] ${email} (${existing.id})`);
+    return existing;
+  }
+
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { onboarding_complete: true },
+  });
+
+  if (error) {
+    console.error(`  [error] Failed to create ${email}:`, error.message);
+    return null;
+  }
+
+  console.log(`  [created] ${email} (${data.user.id})`);
+  return data.user;
+}
+
+async function findOrCreateOrg(name: string, slug: string, plan: string) {
+  const { data: existing } = await supabase
+    .from("organizations")
+    .select("id, name, slug")
+    .eq("slug", slug)
+    .single();
+
+  if (existing) {
+    console.log(`  [exists] Org "${name}" (${existing.id})`);
+    return existing;
+  }
+
+  const orgId = randomUUID();
+  const { data, error } = await supabase
+    .from("organizations")
+    .insert({ id: orgId, name, slug, plan })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(`  [error] Failed to create org "${name}":`, error.message);
+    return null;
+  }
+
+  console.log(`  [created] Org "${name}" (${data.id})`);
+  return data;
+}
+
+async function addOrgMember(orgId: string, userId: string, role: string, isPlatformAdmin = false) {
+  const { data: existing } = await supabase
+    .from("org_members")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("user_id", userId)
+    .single();
+
+  if (existing) {
+    console.log(`    [exists] membership for user in org`);
+    return;
+  }
+
+  const { error } = await supabase
+    .from("org_members")
+    .insert({
+      organization_id: orgId,
+      user_id: userId,
+      role,
+      is_platform_admin: isPlatformAdmin,
+    });
+
+  if (error) {
+    console.error(`    [error] Failed to add member:`, error.message);
+  } else {
+    console.log(`    [added] ${role}${isPlatformAdmin ? " (platform admin)" : ""}`);
+  }
+}
+
+async function addXeroConnector(orgId: string) {
+  const { data: existing } = await supabase
+    .from("org_connectors")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("connector_type", "xero")
+    .single();
+
+  if (existing) {
+    console.log(`  [exists] Xero connector`);
+    return;
+  }
+
+  const { error } = await supabase
+    .from("org_connectors")
+    .insert({
+      organization_id: orgId,
+      connector_type: "xero",
+      status: "active",
+      signals_count: 49684,
+      config: {
+        source: "general-ledger-detail",
+        jurisdiction: "SG",
+        currency: "SGD",
+        dateRange: { from: "2020-01-01", to: "2026-02-12" },
+        accounts: 187,
+        transactions: 49684,
+        balanced: true,
+        designPartner: true,
+        importedAt: new Date().toISOString(),
+      },
+    });
+
+  if (error) {
+    console.error(`  [error] Failed to create Xero connector:`, error.message);
+  } else {
+    console.log(`  [created] Xero connector (49,684 signals)`);
+  }
+}
+
+// ─── Main ──────────────────────────────────────────────────────
+
+async function main() {
+  console.log("\n=== Seed: PH Accounting Design Partner ===\n");
+
+  // 1. Create the org
+  console.log("1. Organization:");
+  const org = await findOrCreateOrg(PH_ACCOUNTING_ORG.name, PH_ACCOUNTING_ORG.slug, PH_ACCOUNTING_ORG.plan);
+  if (!org) {
+    console.error("Failed to create PH Accounting org. Aborting.");
+    process.exit(1);
+  }
+
+  // 2. Create/find the owner user
+  console.log("\n2. Owner User:");
+  const ownerUser = await findOrCreateUser(OWNER_EMAIL, OWNER_PASSWORD);
+  if (ownerUser) {
+    console.log("  Adding as owner of PH Accounting:");
+    await addOrgMember(org.id, ownerUser.id, "owner");
+  }
+
+  // 3. Link platform admin to org
+  console.log("\n3. Platform Admin:");
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const adminUser = existingUsers?.users?.find((u) => u.email === PLATFORM_ADMIN_EMAIL);
+
+  if (adminUser) {
+    console.log(`  [found] ${PLATFORM_ADMIN_EMAIL} (${adminUser.id})`);
+    console.log("  Adding as admin of PH Accounting:");
+    await addOrgMember(org.id, adminUser.id, "admin", true);
+  } else {
+    console.log(`  [skip] ${PLATFORM_ADMIN_EMAIL} not found — run seed-users.ts first`);
+  }
+
+  // 4. Seed Xero connector
+  console.log("\n4. Xero Connector:");
+  await addXeroConnector(org.id);
+
+  // 5. Summary
+  console.log("\n=== Summary ===\n");
+  console.log(`Organization: ${PH_ACCOUNTING_ORG.name}`);
+  console.log(`  ID:    ${org.id}`);
+  console.log(`  Slug:  ${PH_ACCOUNTING_ORG.slug}`);
+  console.log(`  Plan:  ${PH_ACCOUNTING_ORG.plan}`);
+  console.log("");
+  console.log("Members:");
+  console.log(`  ${OWNER_EMAIL} — owner`);
+  if (adminUser) {
+    console.log(`  ${PLATFORM_ADMIN_EMAIL} — admin (platform admin)`);
+  }
+  console.log("");
+  console.log("Connectors:");
+  console.log("  Xero GL — 49,684 transactions, 187 accounts, SGD");
+  console.log("");
+  console.log("Login:");
+  console.log(`  Email:    ${OWNER_EMAIL}`);
+  console.log(`  Password: ${OWNER_PASSWORD}`);
+  console.log("");
+  console.log("Next steps:");
+  console.log("  1. Login at your platform URL with the credentials above");
+  console.log('  2. Switch to "PH Accounting" org from the sidebar');
+  console.log("  3. Navigate to Accounting Jarvis dashboard");
+  console.log("\nDone!\n");
+}
+
+main().catch(console.error);

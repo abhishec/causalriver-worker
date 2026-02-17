@@ -571,6 +571,87 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── AaaS NL ROUTING — Accounting queries ──────────────────────────
+    // Detect accounting/finance questions and route to GL data processing.
+    let accountingResult: Record<string, unknown> | null = null;
+    const accountingRoute = detectAccountingRoute(message);
+
+    if (accountingRoute && !seaasResult) {
+      try {
+        // Load GL data from pre-parsed JSON (same source as /api/accounting-jarvis)
+        let glData: Array<Record<string, unknown>> = [];
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          glData = require('@/lib/accounting-jarvis/gl-data.json');
+        } catch {
+          // No GL data available
+        }
+
+        if (glData.length > 0) {
+          // Compute accounting analysis inline (lightweight — same logic as accounting-jarvis route)
+          const accountBalances = new Map<string, { type: string; debit: number; credit: number; count: number }>();
+          for (const txn of glData as any[]) {
+            const key = txn.account as string;
+            if (!accountBalances.has(key)) {
+              accountBalances.set(key, { type: classifyAccountForCopilot(key), debit: 0, credit: 0, count: 0 });
+            }
+            const bal = accountBalances.get(key)!;
+            bal.debit += txn.debit || 0;
+            bal.credit += txn.credit || 0;
+            bal.count++;
+          }
+
+          // P&L summary
+          const revenueAccounts = Array.from(accountBalances.entries())
+            .filter(([_, b]) => b.type === 'revenue')
+            .map(([name, b]) => ({ account: name, amount: b.credit - b.debit }))
+            .filter(a => a.amount !== 0)
+            .sort((a, b) => b.amount - a.amount);
+          const expenseAccounts = Array.from(accountBalances.entries())
+            .filter(([_, b]) => b.type === 'expense')
+            .map(([name, b]) => ({ account: name, amount: b.debit - b.credit }))
+            .filter(a => a.amount !== 0)
+            .sort((a, b) => b.amount - a.amount);
+
+          const totalRevenue = revenueAccounts.reduce((s, a) => s + a.amount, 0);
+          const totalExpenses = expenseAccounts.reduce((s, a) => s + a.amount, 0);
+          const netProfit = totalRevenue - totalExpenses;
+
+          // Balance sheet totals
+          const totalAssets = Array.from(accountBalances.entries())
+            .filter(([_, b]) => b.type === 'asset' || b.type === 'bank')
+            .reduce((s, [_, b]) => s + (b.debit - b.credit), 0);
+          const totalLiabilities = Array.from(accountBalances.entries())
+            .filter(([_, b]) => b.type === 'liability')
+            .reduce((s, [_, b]) => s + (b.credit - b.debit), 0);
+
+          accountingResult = {
+            domainType: accountingRoute.domainType,
+            data: {
+              transactions: glData.length,
+              accounts: accountBalances.size,
+              currency: 'SGD',
+              jurisdiction: 'SG',
+              profitAndLoss: {
+                totalRevenue,
+                totalExpenses,
+                netProfit,
+                netMargin: totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) + '%' : 'N/A',
+                topRevenue: revenueAccounts.slice(0, 5),
+                topExpenses: expenseAccounts.slice(0, 10),
+              },
+              balanceSheet: {
+                totalAssets,
+                totalLiabilities,
+              },
+            },
+          };
+        }
+      } catch (acctErr) {
+        console.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+      }
+    }
+
     // ── Domain Action Engine — give brain HANDS (Motor Cortex) ─────────
     // Routes intent to the RIGHT execution module (forecaster, simulator,
     // explainer) and produces structured artifacts with REAL computed data.
@@ -739,6 +820,18 @@ Artifact ID: ${seaasResult.artifactId || 'N/A'}
 Use this data to give a comprehensive answer. The analysis was performed by NexusBrain's AI ${domainType} engine.`;
     }
 
+    // ── AaaS domain result injection ──────────────────────────────────
+    if (accountingResult) {
+      const acctDomain = accountingResult.domainType as string;
+      effectiveSystemPrompt += `\n\n## ACCOUNTING-aaS RESULT: ${acctDomain.toUpperCase()} (Real GL Data Analysis)
+This is a real analysis from ${(accountingResult.data as any)?.transactions || 0} Xero GL transactions (Design Partner — Singapore, SGD).
+Present these numbers precisely — they are REAL, not estimates.
+Result data:
+${JSON.stringify(accountingResult.data, null, 2).slice(0, 5000)}
+
+Use this data to answer the user's accounting question with precision. Cite specific numbers.`;
+    }
+
     // ── LEARNING LOOP: Inject ai_memory corrections into system prompt ─────
     // Query high-importance user corrections from ai_memory table.
     // These are REAL corrections saved by /api/copilot/feedback when users
@@ -823,6 +916,11 @@ RULES FOR CORRECTIONS:
         // Send SE-aaS domain result to frontend for structured display
         if (seaasResult) {
           send(JSON.stringify({ seaasResult }));
+        }
+
+        // Send AaaS domain result to frontend for structured display
+        if (accountingResult) {
+          send(JSON.stringify({ accountingResult }));
         }
 
         // Send brain context metadata to frontend for display
@@ -1161,4 +1259,130 @@ function detectLanguage(message: string): string {
   if (/rust\b|\.rs\b/i.test(lower)) return 'rust';
   if (/ruby\b|\.rb\b/i.test(lower)) return 'ruby';
   return 'typescript'; // Default
+}
+
+// ============================================================================
+// AaaS (ACCOUNTING) NATURAL LANGUAGE ROUTING
+// ============================================================================
+
+/**
+ * Detect if user message should route to an Accounting-aaS domain.
+ *
+ * ROUTING TABLE:
+ *   "show P&L" / "profit and loss" / "revenue breakdown" → statement-generator
+ *   "balance sheet" / "total assets" → statement-generator
+ *   "reconcile" / "trial balance" → reconciler
+ *   "classify accounts" / "journal entry" → bookkeeper
+ *   "GST" / "tax compliance" / "IRAS" → tax-compliance
+ *   "Benford" / "anomaly" / "duplicate" → anomaly-detective
+ *   "audit" / "workpapers" → audit-preparer
+ *   "expense analysis" / "cost breakdown" → statement-generator
+ */
+function detectAccountingRoute(
+  message: string
+): { domainType: string; extractedInput: Record<string, unknown> } | null {
+  const lower = message.toLowerCase();
+
+  // ── Financial Statements ──────────────────────────────────────────
+  if (
+    /p\s*&\s*l|profit\s+and\s+loss|income\s+statement|revenue\s+breakdown|revenue\s+trend|expense\s+analysis|cost\s+breakdown|margin|financial\s+statement/i.test(lower)
+  ) {
+    return {
+      domainType: 'statement-generator',
+      extractedInput: { reportType: 'profit-and-loss', question: message },
+    };
+  }
+
+  // ── Balance Sheet ─────────────────────────────────────────────────
+  if (
+    /balance\s+sheet|total\s+assets|total\s+liabilities|equity\s+position|net\s+worth|financial\s+position/i.test(lower)
+  ) {
+    return {
+      domainType: 'statement-generator',
+      extractedInput: { reportType: 'balance-sheet', question: message },
+    };
+  }
+
+  // ── Reconciliation ────────────────────────────────────────────────
+  if (
+    /reconcil|trial\s+balance|month.?end\s+close|completeness\s+check/i.test(lower)
+  ) {
+    return {
+      domainType: 'reconciler',
+      extractedInput: { question: message },
+    };
+  }
+
+  // ── Bookkeeping / Classification ──────────────────────────────────
+  if (
+    /classify\s+account|journal\s+entr|double.?entry|chart\s+of\s+account|account\s+classif|bookkeep/i.test(lower)
+  ) {
+    return {
+      domainType: 'bookkeeper',
+      extractedInput: { question: message },
+    };
+  }
+
+  // ── Tax Compliance ────────────────────────────────────────────────
+  if (
+    /\bgst\b|tax\s+compliance|iras|withholding\s+tax|tax\s+filing|tax\s+obligation|vat/i.test(lower)
+  ) {
+    return {
+      domainType: 'tax-compliance',
+      extractedInput: { question: message },
+    };
+  }
+
+  // ── Anomaly Detection ─────────────────────────────────────────────
+  if (
+    /benford|anomal|duplicate\s+transaction|round.?number|vendor\s+concentration|suspicious\s+transaction|fraud/i.test(lower)
+  ) {
+    return {
+      domainType: 'anomaly-detective',
+      extractedInput: { question: message },
+    };
+  }
+
+  // ── Audit Preparation ─────────────────────────────────────────────
+  if (
+    /audit\s+read|audit\s+prep|workpaper|audit\s+risk|external\s+audit|audit\s+finding/i.test(lower)
+  ) {
+    return {
+      domainType: 'audit-preparer',
+      extractedInput: { question: message },
+    };
+  }
+
+  // ── Cash / Runway ─────────────────────────────────────────────────
+  if (
+    /cash\s+balance|runway|burn\s+rate|cash\s+flow|cash\s+position|how\s+long.*money/i.test(lower)
+  ) {
+    return {
+      domainType: 'statement-generator',
+      extractedInput: { reportType: 'cash-flow', question: message },
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Lightweight account classification for Copilot GL data injection.
+ * Mirrors the CLASSIFICATION_RULES from /api/accounting-jarvis/route.ts
+ */
+function classifyAccountForCopilot(name: string): string {
+  const lower = name.toLowerCase();
+  // Liabilities
+  if (/cpf payable|accrued|creditor|deferred revenue|gst summary|wht payable|lease liability|director|convertible|loan/.test(lower)) return 'liability';
+  // Assets
+  if (/debtor|advance to|prepayment|fixed deposit|computer|furniture|renovation|rou asset|accumulated depreciation/.test(lower)) return 'asset';
+  // Equity
+  if (/paid up capital|retained earnings|share based/.test(lower)) return 'equity';
+  // Bank
+  if (/uob|citibank|wise|amex clearing|volopay clearing/.test(lower)) return 'bank';
+  // Revenue
+  if (/license fee|subscription fee|implementation fee|support fee|overage fee|interest income|other income|grant/.test(lower)) return 'revenue';
+  // Expenses
+  if (/salary|salaries|cpf|bonus|depreciation|amortisation|bank charge|insurance|rental|travel|marketing|accounting fee|audit fee|legal|contractor|subscription|software|foreign exchange/.test(lower)) return 'expense';
+  return 'unclassified';
 }

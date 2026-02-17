@@ -13,6 +13,7 @@ import Link from "next/link";
 
 /* ── P1 Capability Quick-Access ──────────────────────────────────────────── */
 const CAPABILITY_PILLS = [
+  // SWE-aaS
   { label: "TDD Generator", prompt: "Generate TDD tests for our authentication module", category: "speed" },
   { label: "PR Review", prompt: "Review the latest PR for code quality and security", category: "speed" },
   { label: "Impact Analysis", prompt: "Analyze the impact of changing the billing schema", category: "accuracy" },
@@ -21,6 +22,11 @@ const CAPABILITY_PILLS = [
   { label: "Incident RCA", prompt: "Diagnose the root cause of the latest production incident", category: "production" },
   { label: "Architecture", prompt: "Extract and visualize the current system architecture", category: "understanding" },
   { label: "Dead Code", prompt: "Identify dead code and unused exports in the codebase", category: "understanding" },
+  // AaaS — Accounting
+  { label: "P&L Analysis", prompt: "Show me the profit and loss breakdown", category: "accounting" },
+  { label: "Balance Sheet", prompt: "Generate the current balance sheet", category: "accounting" },
+  { label: "Anomaly Check", prompt: "Run Benford's Law analysis on transaction amounts", category: "accounting" },
+  { label: "Tax Review", prompt: "Check GST compliance for the latest quarter", category: "accounting" },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -28,6 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   accuracy: "bg-domain-product/10 text-domain-product border-domain-product/20",
   production: "bg-danger/10 text-danger border-danger/20",
   understanding: "bg-domain-knowledge/10 text-domain-knowledge border-domain-knowledge/20",
+  accounting: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
 };
 
 /* ── Right panel mode ────────────────────────────────────────────────────── */
@@ -94,7 +101,7 @@ export default function CopilotPage() {
           <div className="shrink-0 mb-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium text-muted uppercase tracking-wider">AI Capabilities</span>
+                <span className="text-[10px] font-medium text-muted uppercase tracking-wider">AI Services</span>
                 <Link href="/capabilities" className="text-[10px] text-accent hover:text-accent/80">View all</Link>
               </div>
               <button

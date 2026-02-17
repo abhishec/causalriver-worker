@@ -5,7 +5,7 @@ import { CapabilitiesClient } from "./capabilities-client";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "AI Capabilities" };
+export const metadata = { title: "Services" };
 
 export default async function CapabilitiesPage() {
   const supabase = await createClient();
@@ -53,10 +53,10 @@ export default async function CapabilitiesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">
-            AI Capabilities
+            Services
           </h1>
           <p className="text-xs text-muted mt-0.5">
-            15 Brain-powered developer capabilities — invoke via Copilot or API
+            AI-as-a-Service packs — invoke via Copilot, API, or dedicated dashboards
           </p>
         </div>
         <div className="flex items-center gap-2">
