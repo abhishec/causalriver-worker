@@ -8,13 +8,14 @@
  *   GST:           acc_gst_output_tax_rate, acc_gst_input_tax_rate, acc_gst_net_payable
  *   Interpretations: acc_transaction_classification, acc_journal_entry_validity
  *
- * Produces 6 TrainingPacks that teach the brain HOW to compute each Phase 1 output:
+ * Produces 7 TrainingPacks that teach the brain HOW to compute each Phase 1 output:
  *   1. aas-trial-balance-computation   — GL → Trial Balance
  *   2. aas-pl-derivation               — Trial Balance → P&L
  *   3. aas-balance-sheet-derivation    — Trial Balance → Balance Sheet
  *   4. aas-gst-computation             — GL → GST (SG/AU)
  *   5. aas-transaction-interpretation  — Description → Natural Language
  *   6. aas-saas-benchmarks             — Ratio health assessment
+ *   7. aas-cash-flow-statement         — P&L + BS delta → Cash Flow (SFRS 7 indirect method)
  */
 
 import type { ConnectorSignal } from '../../packages/memory-stack/src/connectors/connector-framework';
@@ -475,8 +476,15 @@ export function convertBenchmarksToSignals(
 // ============================================================================
 
 /**
- * Build 6 TrainingPacks that teach the brain to produce the 5 Phase 1 outputs.
+ * Build 7 TrainingPacks that teach the brain to produce the Phase 1 outputs.
  * These are the causal chains that make NexusBrain beat raw Claude.
+ *   1. aas-trial-balance-computation   — GL → Trial Balance
+ *   2. aas-pl-derivation               — Trial Balance → P&L
+ *   3. aas-balance-sheet-derivation    — Trial Balance → Balance Sheet
+ *   4. aas-gst-computation             — GL → GST (SG/AU)
+ *   5. aas-transaction-interpretation  — Description → Natural Language
+ *   6. aas-saas-benchmarks             — Ratio health assessment
+ *   7. aas-cash-flow-statement         — P&L + BS delta → Cash Flow (indirect method)
  */
 export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
   const packs: TrainingPack[] = [];
@@ -976,6 +984,233 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
         observed: allMargins.filter(m => m >= 0.62 && m <= 0.78).length,
         expected: Math.round(allMargins.length * 0.5),
         total: allMargins.length,
+      },
+    ],
+    outcomes: [],
+  } as unknown as TrainingPack);
+
+  // ── PACK 7: Cash Flow Statement (Indirect Method) ───────────────────────────
+  // SG companies use SFRS 7 (equivalent to IAS 7). Indirect method starts from Net Income.
+  // Critical errors Claude makes:
+  //   1. Treating Depreciation/Amortisation as cash outflow (it's a non-cash ADD-BACK)
+  //   2. Treating AR increase as cash inflow (it's a USE of cash → subtract)
+  //   3. Treating AP increase as cash outflow (it's a SOURCE of cash → add)
+  //   4. Including CapEx in Operating Activities (must be in Investing Activities)
+  //   5. Confusing Deferred Revenue increase (operating inflow) with Revenue (P&L)
+  const cfScenarios = rawData.scenarios.filter(s =>
+    s.id.includes('sfrs16') || s.id.includes('deferred') || s.id.includes('bad_debt') ||
+    s.id.includes('capex') || s.id.includes('accrued')
+  );
+
+  packs.push({
+    id: 'aas-cash-flow-statement',
+    title: 'Cash Flow Statement — Indirect Method (SFRS 7 / IAS 7)',
+    source: `${scenarioCount} synthetic SaaS scenarios. Design partner: ph-accounting (SG, Xero GL, SGD). ${cfScenarios.length} CFS-critical scenarios.`,
+    industry: 'Technology / SaaS',
+    domains: ['finance'],
+    confidence: 0.91,
+    tags: ['accounting', 'cash-flow', 'sfrs7', 'ias7', 'indirect-method', 'aas', 'phase1-validation'],
+    causalChains: [
+      {
+        source: 'finance',
+        target: 'finance',
+        metric: 'acc_operating_cash_flow',
+        effectSize: 0.85,
+        lagDays: 0,
+        coefficientSign: 1,
+      },
+      {
+        source: 'finance',
+        target: 'finance',
+        metric: 'acc_free_cash_flow',
+        effectSize: 0.80,
+        lagDays: 0,
+        coefficientSign: 1,
+      },
+    ],
+    businessRules: [
+      {
+        id: 'cfs-rule-start-net-income',
+        condition: 'method = indirect',
+        action: 'START with Net Income from P&L. Then adjust for non-cash items and working capital changes.',
+        confidence: 1.0,
+        source: 'sfrs7_ias7_indirect_method',
+      },
+      {
+        id: 'cfs-rule-depreciation-addback',
+        condition: 'account_type = non_cash_expense AND account IN [Depreciation, Amortisation, Amortization]',
+        action: 'ADD BACK to Net Income in Operating Activities. Depreciation/Amortisation reduces P&L but does NOT consume cash.',
+        confidence: 1.0,
+        source: 'sfrs7_non_cash_adjustments',
+      },
+      {
+        id: 'cfs-rule-rou-depreciation-addback',
+        condition: 'account = Depreciation - Right of Use Asset OR account = ROU Asset Depreciation',
+        action: 'ADD BACK in Operating Activities. SFRS 16 lease payments go to Financing Activities (principal repayment) + Operating Activities (interest paid).',
+        confidence: 1.0,
+        source: 'sfrs16_cash_flow_classification',
+      },
+      {
+        id: 'cfs-rule-ar-increase-subtract',
+        condition: 'account = Accounts Receivable AND delta = increase',
+        action: 'SUBTRACT from Operating Activities. AR increase = revenue recognised but cash not yet collected. Cash is less than profit.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-ar-decrease-add',
+        condition: 'account = Accounts Receivable AND delta = decrease',
+        action: 'ADD to Operating Activities. AR decrease = old receivables collected in cash. Cash exceeds profit from this period.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-ap-increase-add',
+        condition: 'account = Accounts Payable AND delta = increase',
+        action: 'ADD to Operating Activities. AP increase = expenses incurred but cash not yet paid. Cash is better than profit.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-ap-decrease-subtract',
+        condition: 'account = Accounts Payable AND delta = decrease',
+        action: 'SUBTRACT from Operating Activities. AP decrease = old payables settled with cash. Cash is worse than profit.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-deferred-revenue-increase-add',
+        condition: 'account = Deferred Revenue AND delta = increase',
+        action: 'ADD to Operating Activities. Cash received in advance (upfront subscription) — more cash than P&L revenue.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-deferred-revenue-decrease-subtract',
+        condition: 'account = Deferred Revenue AND delta = decrease',
+        action: 'SUBTRACT from Operating Activities. Revenue recognised from prior-period cash receipts — less cash than P&L revenue.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-prepaid-increase-subtract',
+        condition: 'account IN [Prepaid Expenses, Prepayments] AND delta = increase',
+        action: 'SUBTRACT from Operating Activities. Cash paid upfront but not yet expensed. Cash exceeds P&L expense.',
+        confidence: 1.0,
+        source: 'sfrs7_working_capital_changes',
+      },
+      {
+        id: 'cfs-rule-capex-investing',
+        condition: 'account_type = fixed_asset AND transaction_type = purchase',
+        action: 'Place in INVESTING ACTIVITIES (cash outflow). Do NOT put CapEx in Operating Activities.',
+        confidence: 1.0,
+        source: 'sfrs7_investing_activities',
+      },
+      {
+        id: 'cfs-rule-intangible-capex-investing',
+        condition: 'account IN [Intangible Assets, Software WIP, Capitalised Development] AND transaction_type = purchase',
+        action: 'Place in INVESTING ACTIVITIES. Capitalised software development (SFRS 38) = CapEx → Investing, not Operating.',
+        confidence: 1.0,
+        source: 'sfrs7_sfrs38_investing_activities',
+      },
+      {
+        id: 'cfs-rule-lease-liability-financing',
+        condition: 'account = Lease Liability AND transaction_type = principal_repayment',
+        action: 'Place PRINCIPAL repayment in FINANCING ACTIVITIES. Interest component goes to Operating Activities (or Financing — company policy).',
+        confidence: 0.95,
+        source: 'sfrs16_sfrs7_lease_cash_flows',
+      },
+      {
+        id: 'cfs-rule-bad-debt-non-cash',
+        condition: 'account = Bad Debt Expense OR account = Provision for Doubtful Debts',
+        action: 'ADD BACK in Operating Activities. Bad debt expense reduces P&L but is non-cash. The actual cash impact is captured in AR movement.',
+        confidence: 1.0,
+        source: 'sfrs7_non_cash_adjustments',
+      },
+      {
+        id: 'cfs-rule-fx-unrealised-non-cash',
+        condition: 'account IN [Unrealised Foreign Exchange Gain, Unrealised Foreign Exchange Loss, Unrealised foreign exchange differences]',
+        action: 'REVERSE in Operating Activities. Unrealised FX is non-cash. Gains: subtract; Losses: add back. Realised FX is cash.',
+        confidence: 1.0,
+        source: 'sfrs7_foreign_currency_cash_flows',
+      },
+      {
+        id: 'cfs-rule-saas-formula',
+        condition: 'company_type = saas',
+        action: 'CFS formula: Net Cash from Operations = Net Income + Depreciation/Amortisation + Bad Debt + Unrealised FX loss - Unrealised FX gain - AR increase + AR decrease + AP increase - AP decrease + Deferred Revenue increase - Deferred Revenue increase - Prepaid increase + Prepaid decrease.',
+        confidence: 0.92,
+        source: 'sfrs7_saas_indirect_method',
+      },
+    ],
+    cascades: [
+      {
+        trigger: 'net_income_positive_but_operating_cash_flow_negative',
+        effects: ['working_capital_trap_flag', 'ar_collection_review', 'cash_runway_alert'],
+        probability: 0.75,
+      },
+      {
+        trigger: 'deferred_revenue_growing_faster_than_revenue',
+        effects: ['strong_sales_pipeline_signal', 'future_revenue_visibility_high'],
+        probability: 0.80,
+      },
+    ],
+    patterns: [
+      {
+        name: 'SaaS Indirect Method CFS Template',
+        domains: ['finance'],
+        description: [
+          'A. OPERATING ACTIVITIES (Indirect Method):',
+          '   Net Income (from P&L)',
+          '   + Depreciation & Amortisation (non-cash — add back)',
+          '   + ROU Asset Depreciation (SFRS 16 — add back)',
+          '   + Bad Debt Expense / Provision (non-cash — add back)',
+          '   + Unrealised FX Loss / (- Unrealised FX Gain) (non-cash reversal)',
+          '   ± Working Capital Changes:',
+          '     - Increase in AR  (or + Decrease in AR)',
+          '     + Increase in AP  (or - Decrease in AP)',
+          '     + Increase in Deferred Revenue (or - Decrease in DR)',
+          '     + Increase in Accrued Liabilities (or - Decrease)',
+          '     - Increase in Prepaid Expenses (or + Decrease)',
+          '   = NET CASH FROM OPERATING ACTIVITIES',
+          '',
+          'B. INVESTING ACTIVITIES:',
+          '   - Purchase of PPE / Equipment (CapEx)',
+          '   - Capitalised Software Development (SFRS 38)',
+          '   - Advances to Subsidiary (intercompany loans)',
+          '   + Proceeds from asset disposals',
+          '   = NET CASH FROM INVESTING ACTIVITIES',
+          '',
+          'C. FINANCING ACTIVITIES:',
+          '   + Proceeds from equity / share issuance',
+          '   + Proceeds from loans / convertible notes',
+          '   - Lease liability principal repayment (SFRS 16)',
+          '   - Loan repayments',
+          '   - Dividends paid',
+          '   = NET CASH FROM FINANCING ACTIVITIES',
+          '',
+          'D. NET CHANGE IN CASH = A + B + C',
+          'E. Opening cash + D = Closing cash (must agree to bank balance in BS)',
+        ].join('\n'),
+        observed: cfScenarios.length,
+        expected: 5,
+        total: scenarioCount,
+      },
+      {
+        name: 'Common CFS Errors — Claude Baseline Mistakes',
+        domains: ['finance'],
+        description: [
+          '1. Depreciation treated as cash outflow (WRONG). It is a non-cash add-back.',
+          '2. AR increase treated as cash inflow (WRONG). Revenue earned but not collected = subtract.',
+          '3. AP increase treated as cash outflow (WRONG). Payable not yet settled = add (source of cash).',
+          '4. CapEx placed in Operating Activities (WRONG). Must go to Investing Activities.',
+          '5. Deferred Revenue increase treated as revenue (WRONG). It is an operating cash inflow to add to ops.',
+          '6. SFRS 16 lease payment put entirely in Operating (WRONG). Split: interest → Operating, principal → Financing.',
+          '7. Unrealised FX gain left in operating cash flow (WRONG). Non-cash — must reverse.',
+          '8. Bad debt write-off treated as cash outflow (WRONG). Non-cash provision — add back.',
+        ].join('\n'),
+        observed: 0,
+        expected: 0,
+        total: 0,
       },
     ],
     outcomes: [],

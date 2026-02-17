@@ -1487,6 +1487,359 @@ function buildEdgeCaseScenarios(): SyntheticAccountingScenario[] {
     });
   }
 
+  // Edge Case 7: CPF Over-Contribution Correction
+  // Claude often misses that the CPF over-contribution refund reduces Payroll Expense (not income).
+  {
+    const overContrib = 2400;
+    const transactions: SyntheticTransaction[] = [
+      { date: '2025-03-31', description: 'CPF contribution - March 2025', reference: 'CPF-MAR-2025', account: 'CPF Contributions', debit: 12000, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-03-31', description: 'CPF Payable - March 2025', reference: 'CPF-MAR-2025', account: 'CPF Payable', debit: 0, credit: 12000, taxRateName: 'No Tax', taxAmount: 0 },
+      // Over-contribution detected and refund received from CPF Board
+      { date: '2025-04-15', description: 'CPF Board refund - over-contribution Q1', reference: 'CPF-REF-001', account: 'Bank - DBS SGD', debit: overContrib, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-04-15', description: 'CPF over-contribution reversal', reference: 'CPF-REF-001', account: 'CPF Contributions', debit: 0, credit: overContrib, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_cpf_over_contribution_refund',
+      companyType: 'saas_sg',
+      period: '2025-04',
+      transactions,
+      trialBalance: [
+        { account: 'CPF Contributions', accountType: 'expense', debitBalance: 12000 - overContrib, creditBalance: 0 },
+        { account: 'CPF Payable', accountType: 'liability', debitBalance: 0, creditBalance: 12000 },
+        { account: 'Bank - DBS SGD', accountType: 'asset', debitBalance: overContrib, creditBalance: 0 },
+      ],
+      pl: {
+        revenue: 0, cogs: 0, grossProfit: 0, grossMargin: 0,
+        operatingExpenses: [{ name: 'CPF Contributions', amount: 12000 - overContrib }],
+        totalOpEx: 12000 - overContrib, operatingIncome: -(12000 - overContrib),
+        otherIncome: 0, netIncomeBeforeTax: -(12000 - overContrib), incomeTax: 0, netIncome: -(12000 - overContrib),
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Bank - DBS SGD', amount: overContrib }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [{ name: 'CPF Payable', amount: 12000 }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: -(12000 - overContrib) }],
+        totalAssets: overContrib, totalLiabilities: 12000, totalEquity: -(12000 - overContrib), isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: 0, gstOnSales: 0, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'CPF-REF-001', account: 'CPF Contributions', drCr: 'CR', amount: overContrib,
+          interpretation: 'CPF over-contribution refund from CPF Board. Credit CPF Contributions (reduce the expense), Debit Bank. This is NOT income — it is a correction to previously over-recognised payroll expense. Net CPF Contributions = $12,000 - $2,400 = $9,600. CPF Payable remains at $12,000 until settled (separate from the refund).',
+          impactOnFinancials: 'Reduces CPF Contributions expense from $12,000 to $9,600. Increases Bank by $2,400. No income recognised.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 8: Intercompany Loan — Advances to Subsidiary
+  // Common in Tookitaki group: SG parent advances SGD to IN subsidiary. Claude often books it as expense.
+  {
+    const advanceAmount = 500000;
+    const transactions: SyntheticTransaction[] = [
+      // SG parent sends SGD to IN sub — this is an asset (receivable from subsidiary), NOT an expense
+      { date: '2025-02-01', description: 'Advance to subsidiary - Tookitaki Technologies Private Limited', reference: 'IC-ADV-001', account: 'Advances to subsidiary - Tookitaki Technologies Private Limited', debit: advanceAmount, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-02-01', description: 'Bank transfer to subsidiary (Wise)', reference: 'IC-ADV-001', account: 'Bank - Wise SGD', debit: 0, credit: advanceAmount, taxRateName: 'No Tax', taxAmount: 0 },
+      // Monthly management fee from subsidiary to parent (revenue for SG)
+      { date: '2025-02-28', description: 'Management fee income - IN subsidiary Feb 2025', reference: 'IC-MGT-FEB', account: 'Management Fee Income', debit: 0, credit: 15000, taxRateName: 'Zero Rated', taxAmount: 0 },
+      { date: '2025-02-28', description: 'Intercompany receivable - management fee', reference: 'IC-MGT-FEB', account: 'Accounts Receivable', debit: 15000, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_intercompany_advance_to_subsidiary',
+      companyType: 'saas_sg',
+      period: '2025-02',
+      transactions,
+      trialBalance: [
+        { account: 'Advances to subsidiary - Tookitaki Technologies Private Limited', accountType: 'asset', debitBalance: advanceAmount, creditBalance: 0 },
+        { account: 'Bank - Wise SGD', accountType: 'asset', debitBalance: 0, creditBalance: advanceAmount },
+        { account: 'Management Fee Income', accountType: 'revenue', debitBalance: 0, creditBalance: 15000 },
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: 15000, creditBalance: 0 },
+      ],
+      pl: {
+        revenue: 15000, cogs: 0, grossProfit: 15000, grossMargin: 1.0,
+        operatingExpenses: [],
+        totalOpEx: 0, operatingIncome: 15000,
+        otherIncome: 0, netIncomeBeforeTax: 15000, incomeTax: 0, netIncome: 15000,
+      },
+      balanceSheet: {
+        assets: {
+          currentAssets: [
+            { name: 'Bank - Wise SGD', amount: -advanceAmount },
+            { name: 'Accounts Receivable', amount: 15000 },
+          ],
+          fixedAssets: [{ name: 'Advances to Subsidiary (non-current)', amount: advanceAmount }],
+        },
+        liabilities: { currentLiabilities: [], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: 15000 }],
+        totalAssets: 15000, totalLiabilities: 0, totalEquity: 15000, isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: 15000, gstOnSales: 0, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0, // Zero-rated
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'IC-ADV-001', account: 'Advances to subsidiary - Tookitaki Technologies Private Limited', drCr: 'DR', amount: advanceAmount,
+          interpretation: 'Intercompany advance to wholly-owned subsidiary. This is an ASSET (receivable/investment), NOT an expense. Debit "Advances to Subsidiary" (non-current asset). Credit Bank. The advance is repayable — it does NOT appear in P&L. Management fee income ($15,000/month) is zero-rated GST (exported service to overseas related party). Box 1 (total supplies): $15,000. Box 6 (output tax): $0.',
+          impactOnFinancials: 'Advances to Subsidiary: +$500,000 (non-current asset). Bank: -$500,000. Management Fee Income: +$15,000 (zero-rated revenue, Box 1 only). No GST output tax on management fee.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 9: Revenue Recognition — Accrued Income vs Deferred Revenue
+  // Client pays annual SaaS subscription upfront. Claude often recognises full amount immediately.
+  {
+    const annualSub = 120000; // $120k annual license, paid Jan 1 upfront
+    const monthlyRecognition = annualSub / 12; // $10,000/month
+
+    const transactions: SyntheticTransaction[] = [
+      // Day 1: Cash received, but revenue NOT yet earned — Deferred Revenue (liability)
+      { date: '2025-01-01', description: 'Annual license fee received - Client ABC Pte Ltd', reference: 'INV-2025-001', account: 'Bank - DBS SGD', debit: 130800, credit: 0, taxRateName: 'Tax Exclusive', taxAmount: 10800 }, // GST inclusive
+      { date: '2025-01-01', description: 'Deferred Revenue - Annual License Client ABC', reference: 'INV-2025-001', account: 'Deferred Revenue', debit: 0, credit: annualSub, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-01', description: 'GST Output Tax on annual license', reference: 'INV-2025-001', account: 'GST Output Tax', debit: 0, credit: 10800, taxRateName: 'No Tax', taxAmount: 0 },
+      // Month-end Jan: Recognise 1 month of earned revenue
+      { date: '2025-01-31', description: 'Revenue recognition - Jan 2025 (1/12 of annual license)', reference: 'REV-REC-JAN', account: 'Deferred Revenue', debit: monthlyRecognition, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'License Revenue recognised - Jan 2025', reference: 'REV-REC-JAN', account: 'License Fees', debit: 0, credit: monthlyRecognition, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_deferred_revenue_recognition_monthly',
+      companyType: 'saas_sg',
+      period: '2025-01',
+      transactions,
+      trialBalance: [
+        { account: 'Bank - DBS SGD', accountType: 'asset', debitBalance: 130800, creditBalance: 0 },
+        { account: 'Deferred Revenue', accountType: 'liability', debitBalance: 0, creditBalance: annualSub - monthlyRecognition }, // $110,000 remaining
+        { account: 'GST Output Tax', accountType: 'liability', debitBalance: 0, creditBalance: 10800 },
+        { account: 'License Fees', accountType: 'revenue', debitBalance: 0, creditBalance: monthlyRecognition }, // Only $10,000 in P&L
+      ],
+      pl: {
+        revenue: monthlyRecognition, cogs: 0, grossProfit: monthlyRecognition, grossMargin: 1.0,
+        operatingExpenses: [],
+        totalOpEx: 0, operatingIncome: monthlyRecognition,
+        otherIncome: 0, netIncomeBeforeTax: monthlyRecognition, incomeTax: 0, netIncome: monthlyRecognition,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Bank - DBS SGD', amount: 130800 }], fixedAssets: [] },
+        liabilities: {
+          currentLiabilities: [
+            { name: 'Deferred Revenue (current 12 months)', amount: annualSub - monthlyRecognition },
+            { name: 'GST Output Tax', amount: 10800 },
+          ],
+          longTermLiabilities: [],
+        },
+        equity: [{ name: 'Retained Earnings', amount: monthlyRecognition }],
+        totalAssets: 130800, totalLiabilities: (annualSub - monthlyRecognition) + 10800, totalEquity: monthlyRecognition, isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: annualSub, gstOnSales: 10800, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 10800,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'INV-2025-001', account: 'Deferred Revenue', drCr: 'CR', amount: annualSub,
+          interpretation: 'Annual SaaS subscription received upfront ($120,000 + 9% GST = $130,800). SFRS 15 / revenue recognition: cash received ≠ revenue earned. Credit Deferred Revenue (liability) for the FULL $120,000 at receipt. Each month-end, Dr Deferred Revenue $10,000 / Cr License Revenue $10,000 as service is delivered. GST is on the full invoice value at invoice date (not spread). After Jan: Deferred Revenue balance = $110,000 (remaining 11 months of unearned obligation).',
+          impactOnFinancials: 'P&L January: Only $10,000 revenue (not $120,000). Balance Sheet: Deferred Revenue liability $110,000 (current). GST Output Tax: $10,800 payable to IRAS.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 10: CapEx vs OpEx — Software Development Costs
+  // Cloud/SaaS companies often misclassify: internal-use software may be capitalised under SFRS 38.
+  {
+    const devCost = 80000;   // External developer cost for new product feature
+    const maintenanceCost = 5000; // Bug fixes / maintenance = OpEx always
+
+    const transactions: SyntheticTransaction[] = [
+      // CapEx: Application development stage — can be capitalised as Intangible Asset
+      { date: '2025-03-01', description: 'External Contractor Fee - Product feature development (SFRS 38 capitalised)', reference: 'PO-DEV-001', account: 'Intangible Assets - Software (WIP)', debit: devCost, credit: 0, taxRateName: 'Tax Exclusive', taxAmount: 0 },
+      { date: '2025-03-01', description: 'External Contractor Fee payable', reference: 'PO-DEV-001', account: 'Accounts Payable', debit: 0, credit: devCost, taxRateName: 'No Tax', taxAmount: 0 },
+      // OpEx: Maintenance/bug-fix costs — cannot be capitalised, must expense
+      { date: '2025-03-15', description: 'External Contractor Fee - Bug fixes and maintenance (OpEx)', reference: 'PO-MAINT-001', account: 'External Contractor Fee', debit: maintenanceCost, credit: 0, taxRateName: 'Tax Exclusive', taxAmount: 0 },
+      { date: '2025-03-15', description: 'Accounts Payable - maintenance', reference: 'PO-MAINT-001', account: 'Accounts Payable', debit: 0, credit: maintenanceCost, taxRateName: 'No Tax', taxAmount: 0 },
+      // Monthly amortisation: $80,000 / 36 months = $2,222/month (3-year useful life)
+      { date: '2025-03-31', description: 'Amortisation - Intangible Software (SFRS 38, 36-month straight-line)', reference: 'AMORT-MAR-2025', account: 'Amortisation Expense', debit: Math.round(devCost / 36), credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-03-31', description: 'Accumulated Amortisation - Software', reference: 'AMORT-MAR-2025', account: 'Accumulated Amortisation', debit: 0, credit: Math.round(devCost / 36), taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    const amortMonth = Math.round(devCost / 36);
+
+    scenarios.push({
+      id: 'edge_capex_vs_opex_software_development',
+      companyType: 'saas_sg',
+      period: '2025-03',
+      transactions,
+      trialBalance: [
+        { account: 'Intangible Assets - Software (WIP)', accountType: 'asset', debitBalance: devCost, creditBalance: 0 },
+        { account: 'Accumulated Amortisation', accountType: 'contra_asset', debitBalance: 0, creditBalance: amortMonth },
+        { account: 'Accounts Payable', accountType: 'liability', debitBalance: 0, creditBalance: devCost + maintenanceCost },
+        { account: 'External Contractor Fee', accountType: 'expense', debitBalance: maintenanceCost, creditBalance: 0 },
+        { account: 'Amortisation Expense', accountType: 'expense', debitBalance: amortMonth, creditBalance: 0 },
+      ],
+      pl: {
+        revenue: 0, cogs: 0, grossProfit: 0, grossMargin: 0,
+        operatingExpenses: [
+          { name: 'External Contractor Fee (maintenance)', amount: maintenanceCost },
+          { name: 'Amortisation Expense', amount: amortMonth },
+        ],
+        totalOpEx: maintenanceCost + amortMonth, operatingIncome: -(maintenanceCost + amortMonth),
+        otherIncome: 0, netIncomeBeforeTax: -(maintenanceCost + amortMonth), incomeTax: 0, netIncome: -(maintenanceCost + amortMonth),
+      },
+      balanceSheet: {
+        assets: {
+          currentAssets: [],
+          fixedAssets: [
+            { name: 'Intangible Assets - Software (cost)', amount: devCost },
+            { name: 'Accumulated Amortisation', amount: -amortMonth },
+          ],
+        },
+        liabilities: { currentLiabilities: [{ name: 'Accounts Payable', amount: devCost + maintenanceCost }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: -(maintenanceCost + amortMonth) }],
+        totalAssets: devCost - amortMonth,
+        totalLiabilities: devCost + maintenanceCost,
+        totalEquity: -(maintenanceCost + amortMonth),
+        isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: 0, gstOnSales: 0,
+        totalPurchases: maintenanceCost, gstOnPurchases: Math.round(maintenanceCost * 0.09), // GST on maintenance only
+        netGSTPayable: -Math.round(maintenanceCost * 0.09), // Input tax credit
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'PO-DEV-001', account: 'Intangible Assets - Software (WIP)', drCr: 'DR', amount: devCost,
+          interpretation: 'External contractor fees for NEW feature development in the application development stage (SFRS 38): CAPITALISE as Intangible Asset. Do NOT expense. Amortise over useful life (3 years straight-line = $2,222/month). Maintenance/bug-fix costs (PO-MAINT-001) CANNOT be capitalised — always expense. Key rule: development stage = capitalise; preliminary/post-implementation/maintenance = expense. GST input tax is claimable on both capitalised dev and maintenance costs.',
+          impactOnFinancials: 'Balance Sheet: Intangible Asset +$80,000 (net $77,778 after amortisation). P&L: Amortisation $2,222 + Maintenance $5,000 = $7,222 total expense. (vs $85,000 if erroneously expensed in full)',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 11: GST Mixed Supply — Standard-Rated + Out-of-Scope in Same Invoice
+  // SG GST: government grants, insurance proceeds, dividends are OUT OF SCOPE (not GST supplies).
+  // Claude often includes them in Box 1 or Box 6 erroneously.
+  {
+    const grantAmount = 50000;    // Enterprise Development Grant (EDG) — out of scope, not a taxable supply
+    const consultingRevenue = 30000;  // Standard-rated SG consulting revenue
+
+    const transactions: SyntheticTransaction[] = [
+      // EDG grant received — NOT a supply, out of scope for GST
+      { date: '2025-05-01', description: 'Enterprise Development Grant - EDB disbursement', reference: 'EDG-2025-001', account: 'Grant', debit: grantAmount, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-05-01', description: 'Bank - EDB grant credited', reference: 'EDG-2025-001', account: 'Bank - DBS SGD', debit: grantAmount, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-05-01', description: 'Grant income recognised', reference: 'EDG-2025-001', account: 'Grant', debit: 0, credit: grantAmount, taxRateName: 'No Tax', taxAmount: 0 },
+      // Standard-rated consulting — taxable supply at 9%
+      { date: '2025-05-15', description: 'Consulting services invoice - SG client', reference: 'INV-CON-001', account: 'Accounts Receivable', debit: consultingRevenue * 1.09, credit: 0, taxRateName: 'Tax Inclusive', taxAmount: consultingRevenue * 0.09 },
+      { date: '2025-05-15', description: 'Consulting Revenue', reference: 'INV-CON-001', account: 'Subscription Fees', debit: 0, credit: consultingRevenue, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-05-15', description: 'GST Output Tax', reference: 'INV-CON-001', account: 'GST Output Tax', debit: 0, credit: consultingRevenue * 0.09, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_gst_mixed_supply_grant_out_of_scope',
+      companyType: 'saas_sg',
+      period: '2025-05',
+      transactions,
+      trialBalance: [
+        { account: 'Bank - DBS SGD', accountType: 'asset', debitBalance: grantAmount, creditBalance: 0 },
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: consultingRevenue * 1.09, creditBalance: 0 },
+        { account: 'Grant', accountType: 'revenue', debitBalance: 0, creditBalance: grantAmount },
+        { account: 'Subscription Fees', accountType: 'revenue', debitBalance: 0, creditBalance: consultingRevenue },
+        { account: 'GST Output Tax', accountType: 'liability', debitBalance: 0, creditBalance: consultingRevenue * 0.09 },
+      ],
+      pl: {
+        revenue: consultingRevenue + grantAmount, cogs: 0, grossProfit: consultingRevenue + grantAmount, grossMargin: 1.0,
+        operatingExpenses: [],
+        totalOpEx: 0, operatingIncome: consultingRevenue + grantAmount,
+        otherIncome: 0, netIncomeBeforeTax: consultingRevenue + grantAmount, incomeTax: 0, netIncome: consultingRevenue + grantAmount,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Bank - DBS SGD', amount: grantAmount }, { name: 'Accounts Receivable', amount: consultingRevenue * 1.09 }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [{ name: 'GST Output Tax', amount: consultingRevenue * 0.09 }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: consultingRevenue + grantAmount }],
+        totalAssets: grantAmount + consultingRevenue * 1.09,
+        totalLiabilities: consultingRevenue * 0.09,
+        totalEquity: consultingRevenue + grantAmount,
+        isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        // Box 1: Only standard-rated supplies ($30,000). Grant is OUT OF SCOPE — do NOT include in Box 1.
+        totalSales: consultingRevenue,
+        gstOnSales: consultingRevenue * 0.09,
+        totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: consultingRevenue * 0.09,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'EDG-2025-001', account: 'Grant', drCr: 'CR', amount: grantAmount,
+          interpretation: 'Government grant (Enterprise Development Grant from EDB) is OUT OF SCOPE for GST — it is not a supply of goods or services. Do NOT include in GST F5 Box 1 (total value of standard-rated supplies) or Box 3 (zero-rated supplies). It has no GST treatment. Consulting revenue ($30,000 at 9% GST) is standard-rated: Box 1 = $30,000, Box 6 = $2,700. Total income in P&L = $80,000 (grant + consulting), but GST Box 1 = $30,000 only.',
+          impactOnFinancials: 'P&L: Total income $80,000 ($50,000 grant + $30,000 consulting). GST F5 Box 1: $30,000. Box 6: $2,700. Grant does not affect GST returns.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 12: Accrued Expenses — Year-End Audit Fee Accrual
+  // Common error: Claude books accruals as immediate payment (debit expense / credit bank) instead of accrual.
+  {
+    const auditFee = 25000;
+
+    const transactions: SyntheticTransaction[] = [
+      // Dec 31 year-end: Accrue audit fee (service received, not yet invoiced)
+      { date: '2025-12-31', description: 'Audit Fee accrual - FY2025 (Big4 auditor, invoice pending)', reference: 'ACCR-AUD-2025', account: 'Audit Fee', debit: auditFee, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-12-31', description: 'Accrued Expenses - Audit Fee payable', reference: 'ACCR-AUD-2025', account: 'Accrued Expenses', debit: 0, credit: auditFee, taxRateName: 'No Tax', taxAmount: 0 },
+      // Feb next year: Invoice received and paid
+      { date: '2026-02-15', description: 'Audit Fee invoice received and paid - Big4', reference: 'PAY-AUD-2026', account: 'Accrued Expenses', debit: auditFee, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2026-02-15', description: 'Bank payment - audit fee settled', reference: 'PAY-AUD-2026', account: 'Bank - DBS SGD', debit: 0, credit: auditFee, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_accrued_expense_audit_fee',
+      companyType: 'saas_sg',
+      period: '2025-12',
+      transactions,
+      trialBalance: [
+        { account: 'Audit Fee', accountType: 'expense', debitBalance: auditFee, creditBalance: 0 },
+        { account: 'Accrued Expenses', accountType: 'liability', debitBalance: 0, creditBalance: auditFee },
+      ],
+      pl: {
+        revenue: 0, cogs: 0, grossProfit: 0, grossMargin: 0,
+        operatingExpenses: [{ name: 'Audit Fee', amount: auditFee }],
+        totalOpEx: auditFee, operatingIncome: -auditFee,
+        otherIncome: 0, netIncomeBeforeTax: -auditFee, incomeTax: 0, netIncome: -auditFee,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [], fixedAssets: [] },
+        liabilities: { currentLiabilities: [{ name: 'Accrued Expenses', amount: auditFee }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: -auditFee }],
+        totalAssets: 0, totalLiabilities: auditFee, totalEquity: -auditFee, isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        // Audit fee: GST is claimable ONLY when the actual tax invoice is received (not at accrual)
+        totalSales: 0, gstOnSales: 0, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'ACCR-AUD-2025', account: 'Accrued Expenses', drCr: 'CR', amount: auditFee,
+          interpretation: 'Year-end accrual for audit fee (matching principle, SFRS 1). Service received in FY2025 → expense recognised in FY2025 even though invoice arrives in 2026. Journal: Dr Audit Fee / Cr Accrued Expenses (current liability). NOT "Dr Audit Fee / Cr Bank" — no cash has been paid. When invoice is received and paid in Feb 2026: Dr Accrued Expenses / Cr Bank (the expense is already in 2025 P&L, no double-counting). GST input tax is claimable in the period the TAX INVOICE is received (Feb 2026), not the accrual date (Dec 2025).',
+          impactOnFinancials: 'FY2025 P&L: Audit Fee expense $25,000. Balance Sheet: Accrued Expenses liability $25,000. FY2026: Payment clears the accrual (balance sheet only, no P&L impact).',
+        },
+      ],
+    });
+  }
+
   return scenarios;
 }
 

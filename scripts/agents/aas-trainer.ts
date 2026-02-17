@@ -113,7 +113,7 @@ export class AASTrainerAgent extends BaseTrainingAgent {
     }
 
     this.log('FETCH', `Mode: ${this.runMode} | Dry run: ${isDryRun}`);
-    this.log('FETCH', 'Sources: SEC EDGAR (20 SaaS), FASB CoA (450 accounts), Damodaran benchmarks, ATO benchmarks, ERPNext SG/AU CoA, 22 synthetic scenarios');
+    this.log('FETCH', 'Sources: SEC EDGAR (20 SaaS), FASB CoA (450 accounts), Damodaran benchmarks, ATO benchmarks, ERPNext SG/AU CoA, 61+ synthetic scenarios');
 
     this.rawData = await fetchAllAASData(isDryRun);
 
@@ -210,9 +210,9 @@ export class AASTrainerAgent extends BaseTrainingAgent {
       return { passed: true, score: 1.0, issues: [] };
     }
 
-    // Must have all 6 packs
-    if (result.packsProcessed < 6) {
-      issues.push(`Only ${result.packsProcessed}/6 training packs processed`);
+    // Must have all 7 packs (6 original + 1 cash flow statement pack)
+    if (result.packsProcessed < 7) {
+      issues.push(`Only ${result.packsProcessed}/7 training packs processed`);
     }
 
     // Must have reasonable signal count
