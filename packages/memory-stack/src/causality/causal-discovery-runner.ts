@@ -40,6 +40,14 @@ import {
   type PairwiseScoreMatrix,
 } from './advanced-discovery';
 
+import {
+  createCausalMethodBandit,
+  type CausalMethodBanditInstance,
+  type CausalMethodBanditConfig,
+  type BanditArm,
+  BANDIT_ARMS,
+} from './causal-method-bandit';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -693,4 +701,303 @@ function scoreMatrixToGrangerResults(
     if (a.isSignificant !== b.isSignificant) return a.isSignificant ? -1 : 1;
     return b.effectSize - a.effectSize;
   });
+}
+
+// ============================================================================
+// BANDIT-GUIDED DISCOVERY — Adaptive Method Selection Per Domain Pair
+// ============================================================================
+
+/**
+ * Extended discovery result that includes bandit metadata.
+ */
+export interface BanditGuidedDiscoveryResult extends DiscoveryResult {
+  /** Per-relationship: which method was used and whether it was exploratory */
+  banditMetadata: Array<{
+    sourceDomain: string;
+    targetDomain: string;
+    selectedMethod: BanditArm;
+    wasExploratory: boolean;
+    ucbScore: number;
+  }>;
+  /** Cross-pair leaderboard: which methods are winning overall */
+  methodLeaderboard: Array<{ method: BanditArm; pairsWon: number; avgReward: number }>;
+}
+
+/**
+ * Run causal discovery with bandit-guided per-domain-pair method selection.
+ *
+ * Instead of using a single global discovery method for all domain pairs,
+ * this function uses a UCB1 multi-armed bandit to learn—from prediction
+ * outcomes—which discovery method works best for each specific pair.
+ *
+ * The learning loop:
+ *   1. selectArm(src, tgt)  → bandit picks best-known method (or explores)
+ *   2. runAdvancedDiscovery → run that method on this domain pair
+ *   3. Make prediction      → store in prediction_records table
+ *   4. Verify prediction    → check actual outcome vs predicted
+ *   5. updateBanditReward() → feed correctness back to bandit
+ *   6. Repeat              → bandit converges to best method per pair
+ *
+ * Over time the bandit learns, for example:
+ *   - "engineering→support"   best with: 'apex' (linear, high-quality data)
+ *   - "engineering→revenue"   best with: 'ksg_transfer_entropy' (nonlinear)
+ *   - "finance→churn"         best with: 'pc_structural' (hidden confounders)
+ *   - "slack→github"          best with: 'anomaly_conditioned' (event-driven)
+ *
+ * @param signals - Cross-domain signals
+ * @param organizationId - Organization ID
+ * @param bandit - The bandit instance (create with createAndLoadBandit())
+ * @param config - Discovery config (method per pair comes from bandit, not here)
+ */
+export function runBanditGuidedDiscovery(
+  signals: Array<{
+    source_domain: string;
+    signal_type: string;
+    signal_value: number;
+    signal_timestamp: string | Date;
+  }>,
+  organizationId: string,
+  bandit: CausalMethodBanditInstance,
+  config: Partial<DiscoveryConfig> = {},
+): BanditGuidedDiscoveryResult {
+  const fullConfig: DiscoveryConfig = {
+    ...DEFAULT_DISCOVERY_CONFIG,
+    ...config,
+    timeSeries: { ...DEFAULT_DISCOVERY_CONFIG.timeSeries, ...config.timeSeries },
+    granger: { ...DEFAULT_DISCOVERY_CONFIG.granger, ...config.granger },
+  };
+
+  const warnings: string[] = [];
+  const runTimestamp = new Date();
+  const banditMetadata: BanditGuidedDiscoveryResult['banditMetadata'] = [];
+
+  // ── Pre-processing (same as runCausalDiscovery) ──────────────────────────
+
+  const normalizedSignals = signals.map(s => ({
+    organization_id: organizationId,
+    source_domain: s.source_domain.toLowerCase(),
+    signal_type: s.signal_type,
+    signal_value: s.signal_value,
+    signal_timestamp: s.signal_timestamp,
+  }));
+
+  const timeSeriesMap = signalsToTimeSeries(normalizedSignals, fullConfig.timeSeries);
+  const allDomains = Array.from(timeSeriesMap.keys());
+
+  if (allDomains.length < 2) {
+    warnings.push(`Insufficient domains: ${allDomains.length} (need >= 2)`);
+    return { organization_id: organizationId, discovered_relationships: [], domains_analyzed: allDomains, pairs_tested: 0, significant_count: 0, run_timestamp: runTimestamp, config_used: fullConfig, warnings, banditMetadata: [], methodLeaderboard: bandit.getMethodLeaderboard() };
+  }
+
+  // Filter valid domains
+  const validDomains = allDomains.filter(d => {
+    const s = timeSeriesMap.get(d)!;
+    return s.values.length >= fullConfig.minObservations && s.values.filter(v => v !== 0).length >= fullConfig.minObservations / 2;
+  });
+
+  if (validDomains.length < 2) {
+    warnings.push(`Insufficient valid domains after filtering: ${validDomains.length}`);
+    return { organization_id: organizationId, discovered_relationships: [], domains_analyzed: allDomains, pairs_tested: 0, significant_count: 0, run_timestamp: runTimestamp, config_used: fullConfig, warnings, banditMetadata: [], methodLeaderboard: bandit.getMethodLeaderboard() };
+  }
+
+  // Cap and prioritize domains by data density
+  const MAX_DOMAINS = 50;
+  const selectedDomains = validDomains.length > MAX_DOMAINS
+    ? validDomains.map(d => ({ domain: d, density: timeSeriesMap.get(d)!.values.filter(v => v !== 0).length }))
+        .sort((a, b) => b.density - a.density).slice(0, MAX_DOMAINS).map(d => d.domain)
+    : validDomains;
+
+  // Stationarity pre-processing
+  const differenced = new Map<string, { values: number[]; metadata: { dayCount: number } }>();
+  for (const domain of selectedDomains) {
+    const series = timeSeriesMap.get(domain)!;
+    const adfResult = ensureStationary(series.values);
+    if (!adfResult.isStationary) warnings.push(`${domain}: Non-stationary after differencing (p=${adfResult.pValue.toFixed(3)})`);
+    differenced.set(domain, { values: adfResult.stationarySeries, metadata: { dayCount: adfResult.stationarySeries.length } });
+  }
+
+  // Align series lengths
+  const minLen = Math.min(...Array.from(differenced.values()).map(s => s.values.length));
+  for (const [d, s] of differenced) {
+    if (s.values.length > minLen) {
+      differenced.set(d, { values: s.values.slice(s.values.length - minLen), metadata: { dayCount: minLen } });
+    }
+  }
+
+  const grangerData: Record<string, number[]> = {};
+  for (const [domain, series] of differenced) {
+    grangerData[domain] = series.values;
+  }
+
+  // ── Bandit: assign methods to domain pairs ──────────────────────────────
+
+  // Map: method → list of (src, tgt) pairs assigned to it
+  const methodPairGroups = new Map<BanditArm, Array<{ src: string; tgt: string }>>();
+  for (const arm of BANDIT_ARMS) methodPairGroups.set(arm, []);
+
+  for (const src of selectedDomains) {
+    for (const tgt of selectedDomains) {
+      if (src === tgt) continue;
+      const selection = bandit.selectArm(src, tgt);
+      methodPairGroups.get(selection.selectedMethod)!.push({ src, tgt });
+      banditMetadata.push({
+        sourceDomain: src,
+        targetDomain: tgt,
+        selectedMethod: selection.selectedMethod,
+        wasExploratory: selection.isExploratory,
+        ucbScore: selection.ucbScore,
+      });
+    }
+  }
+
+  // ── Run each method once on the full domain set, then filter to assigned pairs ─
+
+  const allRelationships: CausalRelationship[] = [];
+  const seenPairs = new Set<string>();
+  let totalPairsTested = 0;
+
+  for (const [method, pairs] of methodPairGroups) {
+    if (pairs.length === 0) continue;
+
+    try {
+      const advancedResult = runAdvancedDiscovery(grangerData, {
+        method: method as AdvancedDiscoveryMethod,
+        maxLag: fullConfig.granger.maxLag ?? 14,
+        lagSelectionCriterion: fullConfig.granger.lagSelectionCriterion ?? 'AIC',
+        alpha: fullConfig.alpha,
+        ...fullConfig.advanced,
+      });
+
+      const grangerResults = scoreMatrixToGrangerResults(advancedResult, fullConfig.alpha, grangerData);
+      totalPairsTested += grangerResults.length;
+
+      const domainIndex = new Map<string, number>();
+      advancedResult.domains.forEach((d, idx) => domainIndex.set(d, idx));
+
+      const assignedSet = new Set(pairs.map(p => `${p.src}::${p.tgt}`));
+
+      for (const result of grangerResults) {
+        if (!result.isSignificant) continue;
+        const pairKey = `${result.sourceDomain}::${result.targetDomain}`;
+        if (!assignedSet.has(pairKey) || seenPairs.has(pairKey)) continue;
+        seenPairs.add(pairKey);
+
+        const observationDays = timeSeriesMap.get(result.sourceDomain)?.metadata.dayCount || 0;
+        const marginOfError = 1.96 / Math.sqrt(Math.max(1, observationDays));
+        const ti = domainIndex.get(result.targetDomain);
+        const si = domainIndex.get(result.sourceDomain);
+
+        const knockoutScore = (ti !== undefined && si !== undefined) ? advancedResult?.knockoutScores?.[ti]?.[si] : undefined;
+        const isLikelyConfounded = (ti !== undefined && si !== undefined) ? (advancedResult?.confounderFlags?.[ti]?.[si] ?? false) : false;
+        const coefficientSign = (ti !== undefined && si !== undefined) ? advancedResult?.signMatrix?.[ti]?.[si] : undefined;
+        const paradigmScores = (ti !== undefined && si !== undefined && advancedResult?.paradigmScores)
+          ? { parametric: advancedResult.paradigmScores.parametric[ti]?.[si], structural: advancedResult.paradigmScores.structural[ti]?.[si], infoTheoretic: advancedResult.paradigmScores.infoTheoretic[ti]?.[si] }
+          : undefined;
+        const judgeVerdictVal = (ti !== undefined && si !== undefined) ? advancedResult?.judgeVerdict?.[ti]?.[si] : undefined;
+
+        const votes = generateMethodVotes(result, method, knockoutScore, isLikelyConfounded, paradigmScores, judgeVerdictVal);
+        const causalVotes = votes.filter(v => v.vote === 'causal').length;
+        const totalVotes = votes.filter(v => v.vote !== 'insufficient_data').length;
+        const agreement = totalVotes > 0 ? causalVotes / totalVotes : 0;
+
+        if (agreement < 0.5 && totalVotes > 1) {
+          warnings.push(`[bandit] Contentious edge filtered: ${result.sourceDomain}→${result.targetDomain} (agreement ${(agreement * 100).toFixed(0)}%, method: ${method})`);
+          continue;
+        }
+
+        allRelationships.push({
+          organization_id: organizationId,
+          source_domain: result.sourceDomain,
+          target_domain: result.targetDomain,
+          granger_f_statistic: result.fStatistic,
+          granger_p_value: result.pValue,
+          optimal_lag_days: result.optimalLag,
+          effect_size: result.effectSize,
+          confidence_interval_lower: Math.max(0, result.effectSize - marginOfError),
+          confidence_interval_upper: Math.min(1, result.effectSize + marginOfError),
+          natural_language: interpretResult(result) + (isLikelyConfounded ? ' [possibly confounded]' : ''),
+          sample_size: observationDays,
+          observation_window_days: fullConfig.lookbackDays,
+          is_significant: true,
+          last_computed_at: runTimestamp,
+          knockout_score: knockoutScore,
+          is_likely_confounded: isLikelyConfounded,
+          coefficient_sign: coefficientSign,
+          discovery_method: method,
+          methodVotes: votes,
+          agreementRatio: agreement,
+          isContentious: agreement < 0.6 && totalVotes > 1,
+        });
+      }
+    } catch (err) {
+      warnings.push(`[bandit] Method '${method}' threw: ${(err as Error).message}. Skipped ${pairs.length} pairs.`);
+    }
+  }
+
+  return {
+    organization_id: organizationId,
+    discovered_relationships: allRelationships,
+    domains_analyzed: selectedDomains,
+    pairs_tested: totalPairsTested,
+    significant_count: allRelationships.length,
+    run_timestamp: runTimestamp,
+    config_used: fullConfig,
+    warnings,
+    banditMetadata,
+    methodLeaderboard: bandit.getMethodLeaderboard(),
+  };
+}
+
+/**
+ * Feed a verified prediction outcome back to the bandit as a reward signal.
+ *
+ * Call this from feedback-loop.ts after verifyPrediction() completes.
+ * Over time this teaches the bandit which discovery method produces the
+ * most accurate predictions for each domain pair.
+ *
+ * Reward formula:
+ *   correct direction + tight magnitude → 1.0
+ *   correct direction + loose magnitude → 0.6
+ *   wrong direction                     → 0.0
+ *
+ * @param bandit - The bandit instance
+ * @param sourceDomain - Source domain of the causal relationship
+ * @param targetDomain - Target domain of the causal relationship
+ * @param discoveryMethod - Method used (stored in CausalRelationship.discovery_method)
+ * @param wasCorrect - Whether direction prediction was correct
+ * @param magnitudeError - Normalized error: 0 = perfect, 1 = completely wrong
+ */
+export function updateBanditReward(
+  bandit: CausalMethodBanditInstance,
+  sourceDomain: string,
+  targetDomain: string,
+  discoveryMethod: string,
+  wasCorrect: boolean,
+  magnitudeError: number = 0,
+): void {
+  const arm = BANDIT_ARMS.find(a => a === discoveryMethod);
+  if (!arm) return; // Unknown method (e.g., old 'federated' runs) — skip silently
+
+  // Reward: correct direction is worth 0.6 baseline, accurate magnitude adds up to 0.4
+  const reward = wasCorrect ? 0.6 + 0.4 * Math.max(0, 1 - magnitudeError) : 0.0;
+  bandit.updateArm(sourceDomain, targetDomain, arm, reward);
+}
+
+/**
+ * Create a bandit instance and load persisted state from Supabase.
+ *
+ * @example
+ * ```typescript
+ * const { bandit } = await createAndLoadBandit({ supabase, organizationId });
+ * const result = runBanditGuidedDiscovery(signals, orgId, bandit);
+ * // ... verify predictions ...
+ * updateBanditReward(bandit, 'engineering', 'support', 'apex', true, 0.1);
+ * ```
+ */
+export async function createAndLoadBandit(
+  config: CausalMethodBanditConfig = {},
+): Promise<{ bandit: CausalMethodBanditInstance; loadedPairs: number }> {
+  const bandit = createCausalMethodBandit(config);
+  const { loaded } = await bandit.loadState();
+  return { bandit, loadedPairs: loaded };
 }

@@ -22,7 +22,11 @@
  */
 
 import { getClientForTableInEdge } from './get-brain-client';
-import { semanticDedup, type SemanticFederationConfig } from './semantic-federation';
+import {
+  semanticDedup,
+  semanticDedupAsync,
+  type SemanticFederationConfig,
+} from './semantic-federation';
 
 // ============================================================================
 // CONSTANTS
@@ -237,8 +241,12 @@ export async function federatedQuery<T = Record<string, unknown>>(
 
   if (textExtractor && orgData.length + coreData.length > 0) {
     // SEMANTIC DEDUP — The brain's pattern consolidation
+    // Use async neural version when neuralConfig is provided (catches paraphrases),
+    // fall back to sync n-gram when not (zero API calls, backward compatible).
     semanticDedupUsed = true;
-    const dedupResult = semanticDedup(orgData, coreData, textExtractor, semanticConfig);
+    const dedupResult = semanticConfig?.neuralConfig?.apiKey
+      ? await semanticDedupAsync(orgData, coreData, textExtractor, semanticConfig)
+      : semanticDedup(orgData, coreData, textExtractor, semanticConfig);
 
     merged = dedupResult.kept.map(({ item, source }) => ({
       data: item,

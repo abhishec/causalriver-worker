@@ -31,6 +31,7 @@ type JobType =
   | 'threshold_optimization'
   | 'retention'
   | 'federation'
+  | 'oracle'
   | 'all_daily';
 
 const JOB_DESCRIPTIONS: Record<JobType, string> = {
@@ -42,6 +43,7 @@ const JOB_DESCRIPTIONS: Record<JobType, string> = {
   threshold_optimization: 'Optimize signal thresholds',
   retention: 'Clean up stale data',
   federation: 'Promote knowledge to core brain',
+  oracle: 'Gap 4: Autonomous Oracle — verify pending predictions across all orgs, reward/penalise UCB1 bandit arms',
   all_daily: 'Run all daily jobs',
 };
 
@@ -75,6 +77,32 @@ async function main() {
 
   try {
     const startTime = Date.now();
+
+    // ── Oracle: runs locally via Node.js using the memory-stack directly ─────
+    // Calls createOutcomeOracle.processBatch() for all orgs, then persists
+    // bandit arm updates. Equivalent to POST /api/oracle/process for all orgs.
+    if (jobType === 'oracle') {
+      console.log(`🔮 Running Outcome Oracle (Gap 4) across all orgs...\n`);
+      const { execSync } = await import('child_process');
+      const envVars = [
+        organizationId ? `ORGANIZATION_ID=${organizationId}` : '',
+        'VERBOSE=true',
+      ].filter(Boolean).join(' ');
+
+      try {
+        execSync(
+          `${envVars} tsx scripts/run-oracle-job.ts`,
+          { stdio: 'inherit', cwd: resolve(__dirname, '..'), timeout: 600000 } // 10min timeout
+        );
+        const duration = Date.now() - startTime;
+        console.log(`\n✅ Oracle job completed in ${(duration / 1000).toFixed(1)}s`);
+        console.log('🔮 Pending predictions verified, bandit arms updated');
+      } catch (execError: any) {
+        console.error('❌ Oracle job failed:', execError.message || execError);
+        process.exit(1);
+      }
+      return;
+    }
 
     // ── Full Consolidation: runs locally via Node.js (NOT Edge Function) ──
     // This is the ONLY path to populate cognitive stack layers L3-L15.

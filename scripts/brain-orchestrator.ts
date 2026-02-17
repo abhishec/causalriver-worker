@@ -93,6 +93,7 @@ import './agents/security-hardening-agent'; // Amygdala — Security vulnerabili
 import './agents/org-updater-agent';        // Thalamus — Org heartbeat: connector sync + learning cycle (every 4h)
 import './agents/outcome-resolver-agent';   // Cerebellum — Calibration loop closure: predictions → outcomes (daily 3 AM)
 import './agents/ci-healer-agent';          // Cerebellum — CI/CD pipeline self-healing & error correction (on-demand)
+import './agents/aas-trainer';              // Insula — Accounting intelligence: TB, P&L, BS, GST (SG/AU) — daily 3 AM
 
 // ── Brain Subsystem Imports ─────────────────────────────────────────────────
 import { globalRegistry, type AgentRegistration } from './agent-framework/agent-registry';

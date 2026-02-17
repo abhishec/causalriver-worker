@@ -226,6 +226,73 @@ export {
   type DiscoveryWorkerPool,
 } from './causality/async-discovery-worker';
 
+// ── GAP 1: UCB1 Multi-Armed Bandit ─────────────────────────────────────────
+// Learns which causal discovery method works best per domain pair.
+// Runs UCB1 exploration-exploitation: selectArm() before discovery,
+// updateArm(reward) after OutcomeOracle verifies the prediction.
+export {
+  createCausalMethodBandit,
+  BANDIT_ARMS,
+  type CausalMethodBanditConfig,
+  type CausalMethodBanditInstance,
+  type BanditArm,
+  type ArmStats,
+  type DomainPairBanditState,
+  type ArmSelectionResult,
+  type RewardUpdateResult,
+} from './causality/causal-method-bandit';
+
+// ── GAP 2: Federated Causal Learning (FedAvg) ──────────────────────────────
+// Privacy-preserving cross-org knowledge sharing.
+// Each org contributes Δ(effect_size) deltas — not raw data — to the CORE brain.
+// CORE_new = CORE_old + lr × weighted_avg(deltas) across all contributing orgs.
+export {
+  snapshotCausalWeights,
+  computeAndPromoteCausalDeltas,
+  applyFedAvgToCore,
+  getCoreEffectSize,
+  getAllCoreCausalWeights,
+  type CausalWeightDelta,
+  type CausalWeightSnapshot,
+  type FederatedCausalLearningConfig,
+  type FederatedLearningResult,
+} from './federation/federated-causal-learning';
+
+// ── GAP 3: Neural Semantic Embeddings ──────────────────────────────────────
+// OpenAI text-embedding-3-small (1536→384 dims) replacing n-gram hashing.
+// Enables semantic deduplication (cosine similarity > 0.82), novelty scoring,
+// and cross-org relationship clustering in the federation path.
+export {
+  createSemanticFederation,
+  semanticDedup,
+  checkSemanticNovelty,
+  findSemanticDomains,
+  batchEmbed,
+  pairwiseSimilarity,
+  type SemanticFederationConfig,
+  type SemanticDedupResult,
+  type SemanticDomainMatch,
+  type SemanticNoveltyResult,
+} from './federation/semantic-federation';
+
+// ── GAP 4: Outcome Oracle ───────────────────────────────────────────────────
+// Autonomous prediction verification — closes the feedback loop without
+// human input. processBatch(signals) fires on every connector sync and
+// automatically rewards or penalises the bandit arm that made the prediction.
+export {
+  createOutcomeOracle,
+  buildWatchedPrediction,
+  computeActualOutcome,
+  evaluatePrediction,
+  computeBanditReward,
+  findMatchingSignals,
+  type OutcomeOracleConfig,
+  type WatchedPrediction,
+  type IncomingSignal,
+  type VerificationSummary,
+  type OracleProcessingResult,
+} from './causality/outcome-oracle';
+
 // Signal to Time Series
 export {
   signalsToTimeSeries,
