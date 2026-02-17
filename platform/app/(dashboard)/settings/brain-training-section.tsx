@@ -22,7 +22,7 @@ interface TrainingStatus {
   progress?: number;
   stats?: {
     signals: number;
-    entities: number;
+    connectorsSynced: number;
     patterns: number;
   };
   error?: string;
@@ -30,16 +30,19 @@ interface TrainingStatus {
 
 export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSectionProps) {
   const [trainingStatus, setTrainingStatus] = useState<TrainingStatus>({ status: 'idle' });
+  const [trainNowStatus, setTrainNowStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [lastTrainingDate, setLastTrainingDate] = useState<string | null>(null);
 
-  const githubConnector = connectors.find((c) => c.connector_type === 'github');
-  const hasGitHubConnected = !!githubConnector;
+  const activeConnectors = connectors.filter(
+    (c) => c.status === 'active' || c.status === 'connected'
+  );
+  const hasAnyConnector = activeConnectors.length > 0;
 
-  const handleInitialTraining = async () => {
-    if (!hasGitHubConnected) {
+  const handleSyncAndTrain = async () => {
+    if (!hasAnyConnector) {
       setTrainingStatus({
         status: 'error',
-        error: 'Please connect GitHub first to train the Brain',
+        error: 'Please connect at least one data source first',
       });
       return;
     }
@@ -47,33 +50,40 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
     setTrainingStatus({ status: 'running', step: 'Starting...', progress: 0 });
 
     try {
-      // Step 1: Sync GitHub data
-      setTrainingStatus({ status: 'running', step: 'Syncing GitHub repositories...', progress: 20 });
-      const syncResponse = await fetch('/api/connectors/github/sync', {
+      // Step 1: Sync ALL active connectors
+      setTrainingStatus({
+        status: 'running',
+        step: `Syncing ${activeConnectors.length} connector(s)...`,
+        progress: 15,
+      });
+
+      const syncResponse = await fetch('/api/connectors/sync-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizationId: orgId }),
       });
 
       if (!syncResponse.ok) {
-        throw new Error('GitHub sync failed');
+        throw new Error('Connector sync failed');
       }
 
       const syncData = await syncResponse.json();
 
-      // Step 2: Wait for signals to be ingested
+      // Step 2: Wait for signal ingestion
       setTrainingStatus({
         status: 'running',
         step: 'Ingesting signals into Brain L1...',
-        progress: 50,
-        stats: { signals: syncData.totalSignals || 0, entities: 0, patterns: 0 }
+        progress: 40,
+        stats: {
+          signals: syncData.totalSignals || 0,
+          connectorsSynced: syncData.successCount || 0,
+          patterns: 0,
+        },
       });
 
-      // Give it a few seconds for stream processor to finish
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Step 3: Run P0 Early Warning analysis
-      setTrainingStatus({ status: 'running', step: 'Running P0 Early Warning analysis...', progress: 75 });
+      setTrainingStatus({ status: 'running', step: 'Running P0 Early Warning analysis...', progress: 60 });
       const analyzeResponse = await fetch('/api/early-warning/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,20 +96,27 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
 
       const analyzeData = await analyzeResponse.json();
 
-      // Step 4: Complete
+      // Step 4: Run a lightweight brain cycle
+      setTrainingStatus({ status: 'running', step: 'Running brain training cycle...', progress: 80 });
+      await fetch('/api/brain/cycle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'lightweight' }),
+      });
+
+      // Step 5: Complete
       setTrainingStatus({
         status: 'success',
-        step: 'Brain trained successfully!',
+        step: 'Sync & training complete!',
         progress: 100,
         stats: {
           signals: syncData.totalSignals || 0,
-          entities: syncData.totalEntities || 0,
-          patterns: analyzeData.report ? 2 : 0, // velocity + bottleneck patterns
-        }
+          connectorsSynced: syncData.successCount || 0,
+          patterns: analyzeData.report ? 2 : 0,
+        },
       });
 
       setLastTrainingDate(new Date().toISOString());
-
     } catch (error: any) {
       console.error('[Brain Training] Error:', error);
       setTrainingStatus({
@@ -109,41 +126,63 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
     }
   };
 
+  const handleTrainNow = async () => {
+    setTrainNowStatus('running');
+    try {
+      const res = await fetch('/api/brain/cycle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'full' }),
+      });
+      if (!res.ok) throw new Error('Brain cycle failed');
+      setTrainNowStatus('success');
+      setTimeout(() => setTrainNowStatus('idle'), 5000);
+    } catch {
+      setTrainNowStatus('error');
+      setTimeout(() => setTrainNowStatus('idle'), 5000);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Initial Training Card */}
+      {/* Sync & Train Card */}
       <div className="rounded-xl bg-card border border-border-subtle p-5">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-lg shrink-0">
             🧠
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold mb-1">Initial Brain Training</h3>
+            <h3 className="text-sm font-semibold mb-1">Sync & Train Brain</h3>
             <p className="text-xs text-muted mb-4">
-              Run this once to train your Brain with existing GitHub data (PRs, commits, reviews).
-              This enables P0 Early Warning System and Copilot intelligence.
+              Sync all connected data sources and train your Brain. This pulls data from
+              every active connector (GitHub, Jira, Slack, Linear, etc.) and runs a training cycle.
             </p>
 
-            {/* Prerequisites */}
+            {/* Prerequisites — show all connectors */}
             <div className="mb-4">
               <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-2">
-                Prerequisites
+                Data Sources
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                {hasGitHubConnected ? (
-                  <>
-                    <StatusDot type="active" size="sm" />
-                    <span className="text-foreground">GitHub connected</span>
-                    <Badge variant="success" size="xs">Ready</Badge>
-                  </>
-                ) : (
-                  <>
-                    <StatusDot type="inactive" size="sm" />
-                    <span className="text-muted">GitHub not connected</span>
-                    <Badge variant="outline" size="xs">Required</Badge>
-                  </>
-                )}
-              </div>
+              {activeConnectors.length > 0 ? (
+                <div className="space-y-1.5">
+                  {activeConnectors.map((c) => (
+                    <div key={c.id} className="flex items-center gap-2 text-xs">
+                      <StatusDot type="active" size="sm" />
+                      <span className="text-foreground capitalize">{c.connector_type}</span>
+                      {c.display_name && (
+                        <span className="text-muted">({c.display_name})</span>
+                      )}
+                      <Badge variant="success" size="xs">Connected</Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-xs">
+                  <StatusDot type="inactive" size="sm" />
+                  <span className="text-muted">No connectors active</span>
+                  <Badge variant="outline" size="xs">Required</Badge>
+                </div>
+              )}
             </div>
 
             {/* Training Status */}
@@ -151,9 +190,9 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
               <div className="mb-4 p-3 rounded-lg bg-surface border border-border-subtle">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium">
-                    {trainingStatus.status === 'running' && '⚙️ Training in progress...'}
-                    {trainingStatus.status === 'success' && '✅ Training complete!'}
-                    {trainingStatus.status === 'error' && '❌ Training failed'}
+                    {trainingStatus.status === 'running' && 'Training in progress...'}
+                    {trainingStatus.status === 'success' && 'Training complete!'}
+                    {trainingStatus.status === 'error' && 'Training failed'}
                   </span>
                   {trainingStatus.status === 'running' && trainingStatus.progress !== undefined && (
                     <span className="text-xs text-muted">{trainingStatus.progress}%</span>
@@ -183,8 +222,8 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
                       <div className="text-sm font-semibold">{trainingStatus.stats.signals.toLocaleString()}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-muted uppercase tracking-wider mb-0.5">Entities</div>
-                      <div className="text-sm font-semibold">{trainingStatus.stats.entities.toLocaleString()}</div>
+                      <div className="text-[10px] text-muted uppercase tracking-wider mb-0.5">Sources Synced</div>
+                      <div className="text-sm font-semibold">{trainingStatus.stats.connectorsSynced}</div>
                     </div>
                     <div>
                       <div className="text-[10px] text-muted uppercase tracking-wider mb-0.5">Patterns</div>
@@ -206,33 +245,66 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
               </div>
             )}
 
-            {/* Action Button */}
-            <button
-              onClick={handleInitialTraining}
-              disabled={!hasGitHubConnected || trainingStatus.status === 'running'}
-              className={cn(
-                "px-4 py-2 rounded-lg text-xs font-medium transition-all",
-                hasGitHubConnected && trainingStatus.status !== 'running'
-                  ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                  : "bg-surface text-muted cursor-not-allowed"
-              )}
-            >
-              {trainingStatus.status === 'running' ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Training...
-                </span>
-              ) : (
-                'Run Initial Training'
-              )}
-            </button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSyncAndTrain}
+                disabled={!hasAnyConnector || trainingStatus.status === 'running'}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                  hasAnyConnector && trainingStatus.status !== 'running'
+                    ? "bg-accent text-accent-foreground hover:bg-accent/90"
+                    : "bg-surface text-muted cursor-not-allowed"
+                )}
+              >
+                {trainingStatus.status === 'running' ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Syncing & Training...
+                  </span>
+                ) : (
+                  'Sync & Train'
+                )}
+              </button>
 
-            {!hasGitHubConnected && (
+              <button
+                onClick={handleTrainNow}
+                disabled={trainNowStatus === 'running'}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-xs font-medium transition-all border",
+                  trainNowStatus === 'running'
+                    ? "bg-surface text-muted cursor-not-allowed border-border-subtle"
+                    : trainNowStatus === 'success'
+                    ? "bg-success/10 text-success border-success/30"
+                    : trainNowStatus === 'error'
+                    ? "bg-danger/10 text-danger border-danger/30"
+                    : "bg-surface text-foreground border-border hover:border-accent/30"
+                )}
+              >
+                {trainNowStatus === 'running' ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Training...
+                  </span>
+                ) : trainNowStatus === 'success' ? (
+                  'Brain cycle started!'
+                ) : trainNowStatus === 'error' ? (
+                  'Cycle failed'
+                ) : (
+                  'Train Now'
+                )}
+              </button>
+            </div>
+
+            {!hasAnyConnector && (
               <p className="text-xs text-muted mt-2">
-                → Go to <span className="font-medium">Connections</span> tab to connect GitHub first
+                Go to <span className="font-medium">Connections</span> tab to connect a data source first
               </p>
             )}
           </div>
@@ -248,9 +320,9 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
               🔄
             </div>
             <div className="flex-1">
-              <div className="text-xs font-medium mb-0.5">Engineering Domain (L1 Ingestion)</div>
+              <div className="text-xs font-medium mb-0.5">Multi-Domain Signals (L1 Ingestion)</div>
               <p className="text-xs text-muted">
-                PRs (merged, opened, closed), commits, code reviews, issues → <code className="text-[10px] px-1 py-0.5 bg-surface rounded">cross_domain_signals</code>
+                GitHub (PRs, commits, reviews), Jira (issues, sprints), Slack (activity), Linear (issues), and more
               </p>
             </div>
           </div>
@@ -272,9 +344,9 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
               🤖
             </div>
             <div className="flex-1">
-              <div className="text-xs font-medium mb-0.5">Copilot Intelligence</div>
+              <div className="text-xs font-medium mb-0.5">Brain Training Cycle (L1–L30)</div>
               <p className="text-xs text-muted">
-                Enables answering: "Why is velocity collapsing?", "Who are the bottleneck reviewers?", "How can we improve cycle time?"
+                Full cognitive pipeline: signal processing, pattern recognition, causal inference, and memory consolidation
               </p>
             </div>
           </div>
@@ -290,8 +362,9 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
           <div className="flex-1">
             <h3 className="text-sm font-semibold mb-1">Continuous Learning</h3>
             <p className="text-xs text-muted">
-              After initial training, your Brain learns automatically from real-time GitHub webhooks.
-              New PRs, reviews, and commits are ingested immediately. P0 analysis runs daily at 2 AM.
+              After initial training, your Brain learns automatically from real-time webhooks
+              across all connected sources. A full brain cycle runs daily at 2 AM,
+              or you can trigger one manually with &ldquo;Train Now&rdquo; above.
             </p>
           </div>
         </div>

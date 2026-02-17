@@ -49,6 +49,9 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
   const [rules, setRules] = useState<BusinessRule[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedPackId, setSavedPackId] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Chain form state
@@ -133,12 +136,36 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
       });
 
       if (res.ok) {
+        const data = await res.json();
         setSaved(true);
+        setSavedPackId(data.id || null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save training pack. Please try again.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleApplyNow() {
+    if (!savedPackId) return;
+    setApplying(true);
+    try {
+      const res = await fetch("/api/training-packs/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packId: savedPackId }),
+      });
+      if (res.ok) {
+        setApplied(true);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to apply training pack");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to apply training pack");
+    } finally {
+      setApplying(false);
     }
   }
 
@@ -491,13 +518,28 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Training Pack Saved</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {applied ? "Training Pack Applied!" : "Training Pack Saved"}
+                  </h3>
                   <p className="text-sm text-muted mb-4">
-                    &ldquo;{packName}&rdquo; has been saved. The brain will incorporate these relationships in the next training cycle.
+                    {applied
+                      ? `"${packName}" has been applied to the brain immediately.`
+                      : `"${packName}" has been saved. Apply it now or wait for the next training cycle (2 AM daily).`}
                   </p>
-                  <Link href="/training" className="text-accent hover:text-accent-light text-sm font-medium">
-                    &larr; Back to Training
-                  </Link>
+                  <div className="flex items-center justify-center gap-3">
+                    {!applied && savedPackId && (
+                      <button
+                        onClick={handleApplyNow}
+                        disabled={applying}
+                        className="px-5 py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground text-sm font-medium transition-colors disabled:opacity-50"
+                      >
+                        {applying ? "Applying..." : "Apply Now"}
+                      </button>
+                    )}
+                    <Link href="/training" className="text-accent hover:text-accent-light text-sm font-medium">
+                      &larr; Back to Training
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <>

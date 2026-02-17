@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic';
  * Runs the brain's GitHub connector fullSync — pulls PRs, reviews, issues,
  * CI/CD runs, commits, and file changes into cross_domain_signals.
  *
- * Body: { token: string }
+ * Body: { token?: string, organizationId?: string }
+ * Token resolved: body.token > stored OAuth access_token > stored PAT
  */
 export async function POST(request: Request) {
   try {
@@ -26,21 +27,11 @@ export async function POST(request: Request) {
 
     const orgId = await getCurrentOrgId();
 
-    // 2. Get token from body
-    const body = await request.json();
-    const { token } = body;
-    if (!token) {
-      return NextResponse.json(
-        { error: "GitHub token is required for sync" },
-        { status: 400 }
-      );
-    }
-
-    // 3. Load connector config
+    // 2. Load connector config + credentials (service client bypasses RLS)
     const service = await createServiceClient();
     const { data: connector } = await service
       .from("org_connectors")
-      .select("id, config")
+      .select("id, config, credentials")
       .eq("organization_id", orgId)
       .eq("connector_type", "github")
       .maybeSingle();
@@ -49,6 +40,17 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "GitHub connector not set up. Please connect a repository first." },
         { status: 404 }
+      );
+    }
+
+    // 3. Get token: body > stored credentials > fail
+    const body = await request.json().catch(() => ({}));
+    const credentials = connector.credentials as { access_token?: string; token?: string } | null;
+    const token = body.token || credentials?.access_token || credentials?.token;
+    if (!token) {
+      return NextResponse.json(
+        { error: "GitHub token missing. Please re-connect GitHub." },
+        { status: 400 }
       );
     }
 
