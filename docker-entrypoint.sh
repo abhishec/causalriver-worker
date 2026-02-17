@@ -72,6 +72,22 @@ case "${BRAIN_PROCESS}" in
     echo "  Dry Run: ${MAILINGLIST_TRAINER_DRY_RUN:-false}"
     exec pnpm exec tsx scripts/mailinglist-trainer-runner.ts
     ;;
+  stackexchange-trainer)
+    echo "Starting StackExchange Trainer (Q&A engineering knowledge)..."
+    echo "  Dry Run: ${STACKEXCHANGE_TRAINER_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/stackexchange-trainer-runner.ts
+    ;;
+  cicd-patterns-trainer)
+    echo "Starting CI/CD Patterns Trainer (GitHub Actions workflows)..."
+    echo "  Dry Run: ${CICD_TRAINER_DRY_RUN:-false}"
+    echo "  GitHub Token: ${GITHUB_TOKEN:+YES}${GITHUB_TOKEN:-NO}"
+    exec pnpm exec tsx scripts/cicd-patterns-trainer-runner.ts
+    ;;
+  sonarcloud-trainer)
+    echo "Starting SonarCloud Trainer (public code quality metrics)..."
+    echo "  Dry Run: ${SONARCLOUD_TRAINER_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/sonarcloud-trainer-runner.ts
+    ;;
   cost-agent)
     echo "Starting Cost Agent..."
     echo "  Mode: ${COST_AGENT_MODE:-once}"
@@ -131,6 +147,9 @@ case "${BRAIN_PROCESS}" in
     echo "  security-trainer      GHSA/OSV vulnerability intelligence (one-shot)"
     echo "  deps-trainer          npm/PyPI dependency intelligence (one-shot)"
     echo "  mailinglist-trainer   Apache mailing list communication (one-shot)"
+    echo "  stackexchange-trainer StackExchange Q&A engineering knowledge (one-shot)"
+    echo "  cicd-patterns-trainer GitHub Actions CI/CD workflow patterns (one-shot)"
+    echo "  sonarcloud-trainer    SonarCloud public code quality metrics (weekly)"
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"
