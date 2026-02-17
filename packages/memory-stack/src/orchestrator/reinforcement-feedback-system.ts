@@ -499,11 +499,13 @@ export function createReinforcementFeedbackSystem(config?: ReinforcementConfig):
       updated_at: new Date().toISOString(),
     }));
 
-    _supabase.from('brain_rl_state').upsert(rows, {
-      onConflict: 'organization_id,layer_id',
-    }).then(({ error }) => {
-      if (error) console.warn('[RL] State persistence non-fatal:', error.message);
-    });
+    if (_supabase && typeof _supabase.from === 'function') {
+      _supabase.from('brain_rl_state').upsert(rows, {
+        onConflict: 'organization_id,layer_id',
+      }).then(({ error }: { error: any }) => {
+        if (error) console.warn('[RL] State persistence non-fatal:', error.message);
+      });
+    }
   }
 
   return {
