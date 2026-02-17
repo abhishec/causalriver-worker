@@ -143,7 +143,7 @@ export class MonthlyDeepAnalysisAgent extends ManusNativeAgent {
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
       const [{ count: newSignals }, { count: totalSignals }, { count: newEdges }, { count: totalEdges }, { count: learningRuns }, { count: totalMemories }] = await Promise.all([
-        this.supabase.from('cross_domain_signals').select('*', { count: 'exact', head: true }).eq('organization_id', this.organizationId).gte('created_at', oneMonthAgo.toISOString()),
+        this.supabase.from('cross_domain_signals').select('*', { count: 'exact', head: true }).eq('organization_id', this.organizationId).gte('signal_timestamp', oneMonthAgo.toISOString()),
         this.supabase.from('cross_domain_signals').select('*', { count: 'exact', head: true }).eq('organization_id', this.organizationId),
         this.supabase.from('causal_relationships_statistical').select('*', { count: 'exact', head: true }).eq('organization_id', this.organizationId).gte('created_at', oneMonthAgo.toISOString()),
         this.supabase.from('causal_relationships_statistical').select('*', { count: 'exact', head: true }).eq('organization_id', this.organizationId),

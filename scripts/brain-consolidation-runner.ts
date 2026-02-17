@@ -160,7 +160,7 @@ async function getActiveOrgIds(supabase: ReturnType<typeof createClient>): Promi
   const { data: orgs } = await supabase
     .from('cross_domain_signals')
     .select('organization_id')
-    .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+    .gte('signal_timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
     .limit(500);
 
   if (!orgs) return [];

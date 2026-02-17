@@ -296,7 +296,7 @@ async function runVerificationJob(supabase: any, orgId: string) {
           .eq('organization_id', orgId)
           .eq('entity_type', pred.entity_type)
           .eq('entity_id', pred.entity_id)
-          .gte('created_at', pred.created_at)
+          .gte('signal_timestamp', pred.created_at)
           .limit(1)
           .maybeSingle();
 

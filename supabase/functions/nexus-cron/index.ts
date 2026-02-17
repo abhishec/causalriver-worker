@@ -75,7 +75,7 @@ serve(async (req: Request) => {
       const { data: orgs } = await supabase
         .from('cross_domain_signals')
         .select('organization_id')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .gte('signal_timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .limit(100);
 
       orgIds = [...new Set((orgs || []).map((o: any) => o.organization_id))];
@@ -205,7 +205,7 @@ serve(async (req: Request) => {
               .eq('organization_id', orgId)
               .eq('source_domain', threshold.domain)
               .eq('signal_type', threshold.signal_type)
-              .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+              .gte('signal_timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
               .limit(1000);
 
             if (!recentSignals || recentSignals.length < 20) continue;
