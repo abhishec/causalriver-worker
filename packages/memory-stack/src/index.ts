@@ -1095,7 +1095,7 @@ export {
   type LLMQueryInterpreterInstance,
   type QueryInterpretation,
   type ServiceRouteDecision,
-  type ExtractedEntity,
+  type ExtractedEntity as QueryExtractedEntity,
   type RequiredDataSignals,
 } from './orchestrator/llm-query-interpreter';
 

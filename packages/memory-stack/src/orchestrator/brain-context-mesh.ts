@@ -762,14 +762,21 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         primaryDomain: interpretation.primaryDomain,
         route: interpretation.complexity.route,
         confidence: interpretation.confidence,
-        needsAction: interpretation.complexity.route === 'action_domain' || interpretation.complexity.route === 'agent_orchestration',
-        complexity: {
-          score: interpretation.complexity.score,
-          multiDomain: interpretation.domains.length > 1,
-          temporalAnalysis: interpretation.entities?.some(e => e.type === 'date_range') ?? false,
-          needsCausalReasoning: interpretation.requiredData.needsCausalEdges,
-          needsSimulation: interpretation.intent === 'simulate',
+        complexityScore: interpretation.complexity.score,
+        complexityFactors: {
+          domainCount: interpretation.domains.length,
+          requiresTemporal: interpretation.entities?.some(e => e.type === 'date_range') ?? false,
+          requiresCausal: interpretation.requiredData.needsCausalEdges,
+          requiresCounterfactual: interpretation.intent === 'simulate',
+          requiresMultiStep: interpretation.complexity.route === 'agent_orchestration',
+          hasSpecificMetrics: interpretation.entities?.some(e => e.type === 'metric') ?? false,
+          isComparison: interpretation.intent === 'compare',
+          estimatedTokens: interpretation.tokenBudget?.total ?? totalTokenBudget,
         },
+        requiredCapabilities: [],
+        needsLLM: true,
+        needsAction: interpretation.complexity.route === 'action_domain' || interpretation.complexity.route === 'agent_orchestration',
+        latencyMs: interpretation.latencyMs,
       };
       // Use the interpretation's adaptive token budget if available
       const tokenBudget = interpretation.tokenBudget ?? computeTokenBudget(interpretation.intent, totalTokenBudget);

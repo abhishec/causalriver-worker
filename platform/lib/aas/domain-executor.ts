@@ -59,6 +59,8 @@ export interface ExecuteAccountingParams {
   jurisdiction?: string;
   /** Progress callback for SSE streaming */
   onProgress?: (progress: number, message: string) => void;
+  /** Phase 3: LLM query interpretation for targeted context retrieval */
+  interpretation?: import("@nexus-ai/memory-stack").QueryInterpretation;
 }
 
 export interface ExecuteAccountingResult {
@@ -118,10 +120,13 @@ export async function executeAccountingAgent(
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
+  // Phase 3: When interpretation is provided, mesh.assemble() uses requiredData
+  // signals to skip unneeded DB queries for targeted context retrieval.
   const mesh = createBrainContextMesh({ supabase, organizationId });
   const brainContext = await mesh.assemble(
     `accounting ${action} for ${jurisdiction} jurisdiction`,
     'aas',
+    params.interpretation,
   );
 
   // ── Step 2: Build AgentExecutionContext ──────────────────────────────────

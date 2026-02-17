@@ -88,6 +88,8 @@ export interface ExecuteDomainParams {
   organizationId: string;
   userId: string;
   anthropicApiKey?: string;
+  /** Phase 3: LLM query interpretation for targeted context retrieval */
+  interpretation?: import("@nexus-ai/memory-stack").QueryInterpretation;
 }
 
 export interface ExecuteDomainResult {
@@ -111,10 +113,13 @@ export async function executeDomain(
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
+  // Phase 3: When interpretation is provided, mesh.assemble() uses requiredData
+  // signals to skip unneeded DB queries (e.g., skip causal edges for simple lookups).
   const mesh = createBrainContextMesh({ supabase, organizationId: params.organizationId });
   const brainContext = await mesh.assemble(
     `se-aas ${params.domainType} execution`,
     'se-aas',
+    params.interpretation,
   );
 
   // ── Step 2: Build ActionDomainContext ────────────────────────────────────

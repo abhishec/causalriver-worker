@@ -395,14 +395,21 @@ export function createBrainCommander(config: BrainCommanderConfig) {
           primaryDomain: interp.primaryDomain,
           route: interp.complexity.route,
           confidence: interp.confidence,
-          needsAction: interp.complexity.route === 'action_domain' || interp.complexity.route === 'agent_orchestration',
-          complexity: {
-            score: interp.complexity.score,
-            multiDomain: interp.domains.length > 1,
-            temporalAnalysis: interp.entities?.some(e => e.type === 'date_range') ?? false,
-            needsCausalReasoning: interp.requiredData.needsCausalEdges,
-            needsSimulation: interp.intent === 'simulate',
+          complexityScore: interp.complexity.score,
+          complexityFactors: {
+            domainCount: interp.domains.length,
+            requiresTemporal: interp.entities?.some(e => e.type === 'date_range') ?? false,
+            requiresCausal: interp.requiredData.needsCausalEdges,
+            requiresCounterfactual: interp.intent === 'simulate',
+            requiresMultiStep: interp.complexity.route === 'agent_orchestration',
+            hasSpecificMetrics: interp.entities?.some(e => e.type === 'metric') ?? false,
+            isComparison: interp.intent === 'compare',
+            estimatedTokens: interp.tokenBudget?.total ?? 12000,
           },
+          requiredCapabilities: [],
+          needsLLM: true,
+          needsAction: interp.complexity.route === 'action_domain' || interp.complexity.route === 'agent_orchestration',
+          latencyMs: interp.latencyMs,
         };
       } else {
         dispatch = assessor.assess(question);

@@ -290,7 +290,6 @@ export async function POST(request: NextRequest) {
     // Falls back to regex dispatch-assessor on any failure.
     const interpreter = createLLMQueryInterpreter({
       anthropicApiKey,
-      organizationId: orgId,
     });
     let interpretation: QueryInterpretation | undefined;
     try {
@@ -568,14 +567,23 @@ export async function POST(request: NextRequest) {
       console.warn("[BrainContext] Non-fatal: could not load brain intelligence:", brainErr);
     }
 
-    // ── SE-aaS NL ROUTING ─────────────────────────────────────────────
-    // Detect when user asks about SE-aaS capabilities and route to domains.
-    // Routes: "analyze this SQL" → sql-analyzer, "generate test cases" → test-case-generator, etc.
+    // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
+    // Uses LLM interpretation for semantic service routing (replaces 350+ lines of regex).
+    // Falls back to regex detectSEaaSRoute/detectAccountingRoute if interpretation unavailable.
     let seaasResult: Record<string, unknown> | null = null;
-    const seaasRoute = detectSEaaSRoute(message);
+    let accountingResult: Record<string, unknown> | null = null;
 
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors)
     const COPILOT_NATIVE_DOMAINS = new Set(['boilerplate-generator', 'pr-review-assistant', 'codebase-qa']);
+
+    // Determine service route from LLM interpretation or regex fallback
+    const serviceRoute = interpretation?.serviceRoute;
+    const seaasRoute = serviceRoute?.type === 'se-aas' && serviceRoute.seaasDomain
+      ? { domainType: serviceRoute.seaasDomain, extractedInput: serviceRoute.seaasInput || {} }
+      : !interpretation ? detectSEaaSRoute(message) : null;
+    const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
+      ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
+      : !interpretation ? detectAccountingRoute(message) : null;
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
@@ -587,6 +595,7 @@ export async function POST(request: NextRequest) {
           organizationId: orgId,
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+          interpretation, // Phase 3: pass interpretation for targeted context
         });
 
         seaasResult = {
@@ -599,11 +608,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── AaaS NL ROUTING — Accounting queries via Brain-connected AAS executor ──
-    // Routes accounting questions to the proper AAS domain executor (with brain context).
-    let accountingResult: Record<string, unknown> | null = null;
-    const accountingRoute = detectAccountingRoute(message);
-
+    // ── AaaS ROUTING — Accounting queries via Brain-connected AAS executor ──
     if (accountingRoute && !seaasResult) {
       try {
         // Map NL route domain types to AAS executor action types
@@ -644,6 +649,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
             transactions: glData,
             jurisdiction: 'SG',
+            interpretation, // Phase 3: pass interpretation for targeted context
           });
 
           accountingResult = {
