@@ -6,7 +6,7 @@ set -euo pipefail
 
 REGION="us-east-1"
 ACCOUNT_ID="848269696611"
-CLUSTER_NAME="nexusbrain-cluster"
+CLUSTER_NAME="nexusbrain-training"
 
 echo "🏗️  NexusBrain Platform - AWS Infrastructure Setup"
 echo "===================================================="

@@ -7,7 +7,7 @@ set -euo pipefail
 REGION="us-east-1"
 ACCOUNT_ID="848269696611"
 ECR_REPO="nexusbrain-platform"
-CLUSTER_NAME="nexusbrain-cluster"
+CLUSTER_NAME="nexusbrain-training"
 SERVICE_NAME="nexusbrain-platform-service"
 TASK_FAMILY="nexusbrain-platform"
 
