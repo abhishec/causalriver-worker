@@ -184,7 +184,7 @@ export function createUpstreamPromoter(
   ): Promise<number> {
     const { data: orgRels } = await supabase
       .from('causal_relationships_statistical')
-      .select('*')
+      .select('id, source_domain, target_domain, effect_size, sample_size, evidence_weight, natural_language, is_significant, optimal_lag_days')
       .eq('organization_id', organizationId)
       .eq('is_significant', true)
       .gte('effect_size', cfg.minEffectSize)
@@ -198,7 +198,8 @@ export function createUpstreamPromoter(
     const { data: coreRels } = await supabase
       .from('causal_relationships_statistical')
       .select('source_domain, target_domain, natural_language')
-      .eq('organization_id', CORE_BRAIN_ORG_ID);
+      .eq('organization_id', CORE_BRAIN_ORG_ID)
+      .limit(2000);
 
     const coreKeys = new Set(
       (coreRels || []).map((r: any) => `${r.source_domain}::${r.target_domain}`)
@@ -306,7 +307,7 @@ export function createUpstreamPromoter(
   ): Promise<number> {
     const { data: orgMems } = await supabase
       .from('ai_memory')
-      .select('*')
+      .select('id, domain, content, title, memory_type, importance, organization_id')
       .eq('organization_id', organizationId)
       .gte('importance', cfg.minConfidence)
       .order('importance', { ascending: false })
@@ -411,7 +412,7 @@ export function createUpstreamPromoter(
   ): Promise<number> {
     const { data: orgRules } = await supabase
       .from('brain_grammar_rules')
-      .select('*')
+      .select('id, domain, rule_type, natural_language, confidence, is_active, organization_id')
       .eq('organization_id', organizationId)
       .eq('is_active', true)
       .gte('confidence', cfg.minConfidence)

@@ -469,10 +469,12 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       );
 
       // Compare with existing relationships
+      // PERF: Cap at 5000 to prevent unbounded query at scale
       const { data: previousRelationships } = await supabase
         .from('causal_relationships_statistical')
         .select('*')
-        .eq('organization_id', organizationId);
+        .eq('organization_id', organizationId)
+        .limit(5000);
 
       const newRels = previousRelationships
         ? findNewRelationships(result.discovered_relationships, previousRelationships)
@@ -1556,12 +1558,15 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       // First process any pending verifications
       const verificationsProcessed = await feedbackLoop.processPendingVerifications(supabase, organizationId);
 
-      // Get all significant relationships
+      // Get significant relationships — only columns needed for strengthening loop
+      // PERF: Previously loaded all columns unbounded; now selects only what's needed + caps at 500
       const { data: relationships } = await supabase
         .from('causal_relationships_statistical')
-        .select('*')
+        .select('id, source_domain, target_domain, evidence_weight, is_significant')
         .eq('organization_id', organizationId)
-        .eq('is_significant', true);
+        .eq('is_significant', true)
+        .order('evidence_weight', { ascending: false })
+        .limit(500);
 
       let strengthened = 0;
       let weakened = 0;

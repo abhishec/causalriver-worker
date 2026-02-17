@@ -66,7 +66,7 @@ export class ClaudeCodeGenerator {
   private client: Anthropic;
   private model: string;
 
-  constructor(apiKey: string, model: string = 'claude-3-5-sonnet-20241022') {
+  constructor(apiKey: string, model: string = 'claude-sonnet-4-20250514') {
     this.client = new Anthropic({ apiKey });
     this.model = model;
   }
@@ -501,7 +501,7 @@ For multiple files, use multiple code blocks with path comments.`;
  * Create Claude code generator instance
  *
  * @param apiKey - Anthropic API key
- * @param model - Claude model to use (default: claude-3-5-sonnet-20241022)
+ * @param model - Claude model to use (default: claude-sonnet-4-20250514)
  * @returns Code generator instance
  */
 export function createClaudeCodeGenerator(
