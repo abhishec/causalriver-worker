@@ -1256,6 +1256,7 @@ export function CopilotChat({
         response,
         {
           onText: (_text, accumulated) => {
+            if (controller.signal.aborted) return;
             finalAssistantContent = accumulated;
             setMessages((prev) => {
               const updated = [...prev];
@@ -1267,6 +1268,7 @@ export function CopilotChat({
             });
           },
           onError: (error) => {
+            if (controller.signal.aborted) return;
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
@@ -1277,6 +1279,7 @@ export function CopilotChat({
             });
           },
           onBrainMeta: (meta) => {
+            if (controller.signal.aborted) return;
             setBrainMeta(meta);
             // Bug fix #7: Forward brain meta to parent via callback
             onBrainMetaRef.current?.(meta);
@@ -1452,7 +1455,7 @@ export function CopilotChat({
 
               return (
                 <div
-                  key={i}
+                  key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
                   className={cn(
                     "group flex gap-3 max-w-4xl animate-message-in",
                     msg.role === "user"

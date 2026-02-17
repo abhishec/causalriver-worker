@@ -8,6 +8,7 @@ import { ArtifactsPanel } from "@/components/copilot/ArtifactsPanel";
 import type { Artifact } from "@/components/copilot/ArtifactsPanel";
 import { BrainContextPanel } from "@/components/copilot/BrainContextPanel";
 import { AgentRunner } from "@/components/copilot/AgentRunner";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import Link from "next/link";
 
@@ -128,6 +129,7 @@ export default function CopilotPage() {
         )}
 
         <div className="flex-1 min-h-0">
+          <ErrorBoundary section="Copilot Chat">
           <CopilotChat
             endpoint="/api/copilot/chat"
             extraParams={{ organizationId: currentOrg?.id }}
@@ -146,6 +148,7 @@ export default function CopilotPage() {
             onArtifact={handleArtifact}
             onBrainMeta={handleBrainMeta}
           />
+          </ErrorBoundary>
         </div>
       </div>
 
@@ -153,6 +156,7 @@ export default function CopilotPage() {
       {rightPanel !== "none" && (
         <div className="w-[380px] shrink-0 min-h-0 flex flex-col">
           {rightPanel === "artifacts" ? (
+            <ErrorBoundary section="Artifacts">
             <ArtifactsPanel
               artifacts={artifacts}
               activeArtifactId={activeArtifactId}
@@ -160,6 +164,7 @@ export default function CopilotPage() {
               onPinArtifact={handlePinArtifact}
               onClose={() => setRightPanel("none")}
             />
+            </ErrorBoundary>
           ) : rightPanel === "agents" ? (
             <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
               {currentOrg?.id ? (

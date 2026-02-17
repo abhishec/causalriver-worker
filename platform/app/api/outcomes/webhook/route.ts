@@ -42,14 +42,16 @@ interface OutcomeWebhookPayload {
 
 export async function POST(req: NextRequest) {
   try {
-    // 0. Verify webhook secret
+    // 0. Verify webhook secret (REQUIRED — reject if not configured)
     const webhookSecret = process.env.NEXUS_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
-      if (provided !== webhookSecret) {
-        logger.warn('Outcome webhook: invalid secret');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      logger.error('Outcome webhook: NEXUS_WEBHOOK_SECRET not configured');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+    if (provided !== webhookSecret) {
+      logger.warn('Outcome webhook: invalid secret');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 1. Get organization ID from query params
@@ -154,7 +156,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('Outcome webhook handler error', { error });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -207,13 +209,14 @@ function comparePredictionOutcome(
  */
 export async function GET(req: NextRequest) {
   try {
-    // Auth: verify webhook secret or session
+    // Auth: verify webhook secret (REQUIRED)
     const webhookSecret = process.env.NEXUS_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
-      if (provided !== webhookSecret) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+    if (provided !== webhookSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const searchParams = req.nextUrl.searchParams;

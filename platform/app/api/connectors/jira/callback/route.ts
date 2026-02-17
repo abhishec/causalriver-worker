@@ -25,9 +25,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [orgId, userId, timestamp] = state.split(':');
+    const parts = state.split(':');
+    if (parts.length < 3) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=invalid_state', request.url)
+      );
+    }
+    const [orgId, userId, timestamp] = parts;
+    const ts = parseInt(timestamp, 10);
 
-    if (Date.now() - parseInt(timestamp) > 10 * 60 * 1000) {
+    if (isNaN(ts) || Date.now() - ts > 10 * 60 * 1000) {
       return NextResponse.redirect(
         new URL('/admin/connectors?error=expired_state', request.url)
       );
@@ -156,7 +163,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Jira callback error:', error);
     return NextResponse.redirect(
-      new URL(`/admin/connectors?error=${encodeURIComponent(error.message)}`, request.url)
+      new URL('/admin/connectors?error=auth_failed', request.url)
     );
   }
 }

@@ -28,10 +28,22 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Parse state to get org_id
-    const [orgId, userId, timestamp] = state.split(':');
+    const parts = state.split(':');
+    if (parts.length < 3) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=invalid_state', request.url)
+      );
+    }
+    const [orgId, userId, timestamp] = parts;
 
     // Verify state is recent (within 10 minutes)
-    const stateAge = Date.now() - parseInt(timestamp);
+    const ts = parseInt(timestamp, 10);
+    if (isNaN(ts)) {
+      return NextResponse.redirect(
+        new URL('/admin/connectors?error=invalid_state', request.url)
+      );
+    }
+    const stateAge = Date.now() - ts;
     if (stateAge > 10 * 60 * 1000) {
       return NextResponse.redirect(
         new URL('/admin/connectors?error=expired_state', request.url)
@@ -164,7 +176,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Slack callback error:', error);
     return NextResponse.redirect(
-      new URL(`/admin/connectors?error=${encodeURIComponent(error.message)}`, request.url)
+      new URL('/admin/connectors?error=auth_failed', request.url)
     );
   }
 }

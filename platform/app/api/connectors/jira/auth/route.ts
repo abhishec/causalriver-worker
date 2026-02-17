@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentOrgId } from '@/lib/org-helpers';
+import { randomBytes } from 'crypto';
 
 /**
  * GET /api/connectors/jira/auth
@@ -60,7 +61,8 @@ export async function GET(request: NextRequest) {
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/jira/callback`;
 
-    const state = `${orgId}:${user.id}:${Date.now()}`;
+    const nonce = randomBytes(16).toString('hex');
+    const state = `${orgId}:${user.id}:${Date.now()}:${nonce}`;
 
     const authUrl = new URL('https://auth.atlassian.com/authorize');
     authUrl.searchParams.set('audience', 'api.atlassian.com');
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Jira OAuth init error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to initiate OAuth' },
+      { error: 'Failed to initiate OAuth' },
       { status: 500 }
     );
   }
