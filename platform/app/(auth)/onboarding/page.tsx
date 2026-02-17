@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -30,9 +30,29 @@ const SUGGESTED_QUESTIONS = [
   "What should I focus on this week?",
 ];
 
+// Provisioning status labels mapped to progress ranges
+const PROVISION_STAGES = [
+  { threshold: 0, label: "Initializing brain regions..." },
+  { threshold: 15, label: "Setting up storage..." },
+  { threshold: 35, label: "Registering connectors..." },
+  { threshold: 55, label: "Configuring federation..." },
+  { threshold: 70, label: "Scheduling autonomous learning..." },
+  { threshold: 85, label: "Calibrating models..." },
+  { threshold: 95, label: "Ready!" },
+];
+
+function getProvisionLabel(progress: number): string {
+  let label = PROVISION_STAGES[0].label;
+  for (const stage of PROVISION_STAGES) {
+    if (progress >= stage.threshold) label = stage.label;
+  }
+  return label;
+}
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [orgName, setOrgName] = useState("");
+  const [orgId, setOrgId] = useState<string | null>(null);
   const [industry, setIndustry] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [selectedConnectors, setSelectedConnectors] = useState<string[]>([]);
@@ -40,8 +60,11 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState("");
   const [brainProgress, setBrainProgress] = useState(0);
+  const [provisionDone, setProvisionDone] = useState(false);
+  const [provisionError, setProvisionError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
 
+  const provisionStarted = useRef(false);
   const supabase = createClient();
   const router = useRouter();
 
@@ -57,29 +80,81 @@ export default function OnboardingPage() {
     getUser();
   }, [supabase, router]);
 
-  // Brain waking animation (step 3)
-  useEffect(() => {
-    if (step !== 3) return;
-    setBrainProgress(0);
-    const interval = setInterval(() => {
-      setBrainProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [step]);
+  // ── Real provisioning call (Step 3) ─────────────────────────────
+  const runProvisioning = useCallback(async () => {
+    if (!orgId || provisionStarted.current) return;
+    provisionStarted.current = true;
+    setProvisionError(null);
 
-  // Auto-advance from step 3 after completion
+    // Start smooth progress animation (0 → 90 over ~4s)
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      currentProgress = Math.min(currentProgress + 2, 90);
+      setBrainProgress(currentProgress);
+    }, 100);
+
+    try {
+      const response = await fetch("/api/org/provision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orgId,
+          selectedConnectors,
+        }),
+      });
+
+      const result = await response.json();
+
+      clearInterval(progressInterval);
+
+      if (!response.ok || !result.success) {
+        // Partial success — show what was provisioned but flag the error
+        const errorMsg = result.errors?.length > 0
+          ? result.errors.join("; ")
+          : result.error || "Provisioning failed";
+        console.warn("[Onboarding] Provision partial/failed:", errorMsg);
+
+        // Still allow continuing if at least some things provisioned
+        if (result.provisioned?.brain_cortex_state || result.provisioned?.s3_connector) {
+          setBrainProgress(100);
+          setProvisionDone(true);
+        } else {
+          setProvisionError(errorMsg);
+          setBrainProgress(0);
+          provisionStarted.current = false;
+        }
+        return;
+      }
+
+      // Full success — animate to 100%
+      setBrainProgress(100);
+      setProvisionDone(true);
+
+      console.log("[Onboarding] Provisioning complete:", result.provisioned);
+    } catch (err) {
+      clearInterval(progressInterval);
+      const msg = err instanceof Error ? err.message : "Network error";
+      setProvisionError(msg);
+      setBrainProgress(0);
+      provisionStarted.current = false;
+      console.error("[Onboarding] Provision error:", err);
+    }
+  }, [orgId, selectedConnectors]);
+
+  // Trigger provisioning when entering Step 3
   useEffect(() => {
-    if (step === 3 && brainProgress >= 100) {
+    if (step === 3) {
+      runProvisioning();
+    }
+  }, [step, runProvisioning]);
+
+  // Auto-advance from step 3 after provisioning completes
+  useEffect(() => {
+    if (step === 3 && provisionDone && brainProgress >= 100) {
       const timer = setTimeout(() => setStep(4), 1500);
       return () => clearTimeout(timer);
     }
-  }, [step, brainProgress]);
+  }, [step, provisionDone, brainProgress]);
 
   async function handleOrgSubmit() {
     if (!orgName.trim()) {
@@ -102,7 +177,9 @@ export default function OnboardingPage() {
 
       if (memberError) throw memberError;
 
-      const orgId = membership.organization_id;
+      const currentOrgId = membership.organization_id;
+      setOrgId(currentOrgId);
+
       const newSlug =
         orgName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") +
         "-" + user.id.substring(0, 8);
@@ -110,7 +187,7 @@ export default function OnboardingPage() {
       const { error: updateError } = await supabase
         .from("organizations")
         .update({ name: orgName.trim(), slug: newSlug })
-        .eq("id", orgId);
+        .eq("id", currentOrgId);
 
       if (updateError) throw updateError;
 
@@ -241,32 +318,108 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Step 3: Brain Waking Up */}
+      {/* Step 3: Brain Provisioning (REAL — calls /api/org/provision) */}
       {step === 3 && (
         <div className="space-y-6 text-center">
           <div className="relative mx-auto w-32 h-32">
-            <div className="absolute inset-0 rounded-full bg-accent/10 animate-pulse" />
+            <div className={cn("absolute inset-0 rounded-full bg-accent/10", provisionError ? "" : "animate-pulse")} />
             <div className="absolute inset-2 rounded-full bg-accent/20 flex items-center justify-center">
               <span className="text-5xl font-bold text-accent">N</span>
             </div>
-            <div className="absolute -top-1 right-2 w-3 h-3 rounded-full bg-success animate-ping" style={{ animationDuration: "2s" }} />
-            <div className="absolute bottom-2 -left-1 w-2 h-2 rounded-full bg-warning animate-ping" style={{ animationDuration: "3s" }} />
+            {!provisionError && (
+              <>
+                <div className="absolute -top-1 right-2 w-3 h-3 rounded-full bg-success animate-ping" style={{ animationDuration: "2s" }} />
+                <div className="absolute bottom-2 -left-1 w-2 h-2 rounded-full bg-warning animate-ping" style={{ animationDuration: "3s" }} />
+              </>
+            )}
+            {provisionError && (
+              <div className="absolute -top-1 right-2 w-3 h-3 rounded-full bg-danger" />
+            )}
           </div>
+
           <div>
-            <h2 className="text-2xl font-bold mb-1">Your Causal Memory is Initializing</h2>
-            <p className="text-muted">Activating brain regions and establishing causal connections...</p>
+            <h2 className="text-2xl font-bold mb-1">
+              {provisionError ? "Provisioning Issue" : provisionDone ? "Brain is Ready!" : "Provisioning Your Brain"}
+            </h2>
+            <p className="text-muted">
+              {provisionError
+                ? "Something went wrong. You can retry."
+                : provisionDone
+                  ? "Storage, connectors, and learning schedules are all set."
+                  : "Setting up storage, connectors, federation, and learning schedules..."}
+            </p>
           </div>
+
+          {/* Progress bar */}
           <div className="w-full max-w-xs mx-auto">
             <div className="h-2 rounded-full bg-surface overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-accent to-success transition-all duration-200" style={{ width: `${brainProgress}%` }} />
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all duration-200",
+                  provisionError
+                    ? "bg-danger"
+                    : "bg-gradient-to-r from-accent to-success"
+                )}
+                style={{ width: `${brainProgress}%` }}
+              />
             </div>
             <div className="flex items-center justify-between mt-2 text-xs text-muted">
-              <span>{brainProgress < 30 ? "Activating regions..." : brainProgress < 60 ? "Building connections..." : brainProgress < 90 ? "Calibrating models..." : "Ready!"}</span>
+              <span>{provisionError ? "Failed" : getProvisionLabel(brainProgress)}</span>
               <span>{brainProgress}%</span>
             </div>
           </div>
-          {brainProgress >= 100 && (
-            <button onClick={() => setStep(4)} className="px-6 py-2.5 rounded-lg bg-success text-white font-medium transition-colors hover:bg-success/90">Causal memory is ready!</button>
+
+          {/* Provision details (checklist) */}
+          {(brainProgress > 20 || provisionDone) && !provisionError && (
+            <div className="max-w-xs mx-auto text-left space-y-1.5">
+              {[
+                { label: "Brain cortex state", done: brainProgress > 30 },
+                { label: "S3 storage prefix", done: brainProgress > 45 },
+                { label: "Connector registry", done: brainProgress > 60 },
+                { label: "Federation to Core Brain", done: brainProgress > 75 },
+                { label: "Learning schedules", done: brainProgress > 88 },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-xs">
+                  {item.done ? (
+                    <svg className="w-3.5 h-3.5 text-success flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <div className="w-3.5 h-3.5 rounded-full border border-border animate-spin flex-shrink-0">
+                      <div className="w-1 h-1 rounded-full bg-accent mt-0.5 ml-0.5" />
+                    </div>
+                  )}
+                  <span className={item.done ? "text-foreground" : "text-muted"}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Error + retry */}
+          {provisionError && (
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm text-left max-w-xs mx-auto">
+                {provisionError}
+              </div>
+              <button
+                onClick={() => {
+                  setProvisionError(null);
+                  setBrainProgress(0);
+                  provisionStarted.current = false;
+                  runProvisioning();
+                }}
+                className="px-6 py-2.5 rounded-lg bg-accent text-accent-foreground font-medium transition-colors hover:bg-accent-dark"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Success button */}
+          {provisionDone && brainProgress >= 100 && (
+            <button onClick={() => setStep(4)} className="px-6 py-2.5 rounded-lg bg-success text-white font-medium transition-colors hover:bg-success/90">
+              Causal memory is ready!
+            </button>
           )}
         </div>
       )}

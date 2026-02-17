@@ -204,14 +204,7 @@ async function seedCompanyJarvis() {
         headcount: 87,
         description: 'Series A AML compliance SaaS company selling across 5 APAC countries',
       },
-      storage_config: {
-        s3: {
-          bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
-          region: process.env.AWS_REGION || 'ap-southeast-1',
-          prefix: COMPANY_JARVIS_ORG_ID,
-          enabled: true,
-        },
-      },
+      // storage_config is auto-set by provision_new_org() DB trigger on INSERT
     }, { onConflict: 'id' });
 
   if (orgError) {

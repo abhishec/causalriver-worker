@@ -175,23 +175,10 @@ async function main() {
     process.exit(1);
   }
 
-  // 2b. Set S3 storage config
-  console.log("\n   Setting S3 storage config...");
-  await supabase
-    .from("organizations")
-    .update({
-      storage_config: {
-        s3: {
-          bucket: process.env.AWS_S3_BUCKET_NAME || "nexusbrain-org-data",
-          region: process.env.AWS_REGION || "ap-southeast-1",
-          prefix: org.id,
-          enabled: true,
-        },
-      },
-    })
-    .eq("id", org.id);
-
-  // Register S3 storage connector
+  // 2b. S3 storage config + connector (auto-provisioned by DB trigger, but ensure connector exists)
+  console.log("\n   Verifying S3 storage provisioning...");
+  // storage_config is auto-set by provision_new_org() trigger on INSERT
+  // Just ensure the s3-storage connector exists (belt + suspenders)
   const { data: existingS3 } = await supabase
     .from("org_connectors")
     .select("id")
@@ -212,7 +199,7 @@ async function main() {
     });
     console.log("   [created] S3 storage connector");
   } else {
-    console.log("   [exists] S3 storage connector");
+    console.log("   [exists] S3 storage connector (auto-provisioned)");
   }
 
   // 3. Create Tookitaki users and add to org

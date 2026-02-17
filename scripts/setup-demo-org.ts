@@ -73,14 +73,7 @@ async function createDemoOrganization(
         description: 'Competition demo org — Memory Genesis, CauseMe, CausalRivers',
         demo: true,
       },
-      storage_config: {
-        s3: {
-          bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
-          region: process.env.AWS_REGION || 'ap-southeast-1',
-          prefix: config.orgId,
-          enabled: true,
-        },
-      },
+      // storage_config is auto-set by provision_new_org() DB trigger on INSERT
       created_at: new Date().toISOString()
     });
 
