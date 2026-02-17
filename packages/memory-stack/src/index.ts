@@ -1184,6 +1184,21 @@ export {
   type Experiment,
 } from './orchestrator/early-warning-brain-integration';
 
+// Cross-Domain Linker — THE CRITICAL piece that makes GitHub↔Jira↔Slack actually connected
+// Parses PR titles/branches, commit messages, Slack messages for cross-domain references
+// Stores entity_links so Copilot can answer: "What Jira tickets are linked to velocity collapse?"
+export {
+  parseReferences,
+  linkPRToJira,
+  linkSlackMessageToCrossRefs,
+  linkCommitToJira,
+  getLinkedEntitiesForTicket,
+  getLinkedEntitiesForPR,
+  getSprintDeliveryReport,
+  type EntityLink,
+  type ParsedReferences,
+} from './connectors/cross-domain-linker';
+
 // GitHub Connector Enhanced (Phase 2) — Real GitHub API integration for PR automation
 export {
   GitHubConnectorEnhanced,

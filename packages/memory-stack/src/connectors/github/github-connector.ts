@@ -9,6 +9,7 @@ import { ConnectorBase, IngestionResult, IngestionOptions } from '../base/connec
 import { RateLimitConfig } from '../base/rate-limiter.js';
 import { Signal } from '../base/stream-processor.js';
 import { Checkpoint } from '../base/checkpoint-manager.js';
+import { linkPRToJira, linkCommitToJira } from '../cross-domain-linker.js';
 
 interface GitHubCredentials {
   accessToken: string;
@@ -138,6 +139,17 @@ export class GitHubConnector extends ConnectorBase {
           const signal = this.transformCommitToSignal(repo, commit);
           await this.streamProcessor.addSignal(signal);
           totalSignals++;
+
+          // Cross-domain linking: parse commit messages for Jira refs (incremental)
+          const commitMsg = commit.commit?.message || '';
+          if (commitMsg.length > 0) {
+            try {
+              await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
+                sha: commit.sha,
+                message: commitMsg,
+              });
+            } catch { /* non-critical */ }
+          }
         }
 
         // Updated PRs + their reviews (critical for P0 Bottleneck Detection)
@@ -146,6 +158,16 @@ export class GitHubConnector extends ConnectorBase {
           const signal = this.transformPRToSignal(repo, pr);
           await this.streamProcessor.addSignal(signal);
           totalSignals++;
+
+          // Cross-domain linking: parse PR for Jira refs (incremental)
+          try {
+            await linkPRToJira(this.supabase, this.organizationId, repo.name, {
+              number: pr.number,
+              title: pr.title,
+              body: pr.body,
+              head: { ref: pr.head?.ref },
+            });
+          } catch { /* non-critical */ }
 
           // Fetch reviews for each PR (same as initialLoad — without this, incremental
           // syncs produce zero pr_reviewed signals, breaking P0 bottleneck detection)
@@ -343,6 +365,22 @@ export class GitHubConnector extends ConnectorBase {
     const signals = commits.map((commit: any) => this.transformCommitToSignal(repo, commit));
     await this.batchInsertSignals(signals);
 
+    // Cross-domain linking: parse commit messages for Jira ticket references
+    // e.g. "fix: resolve PROJ-1234 login timeout" → entity_link record
+    for (const commit of commits) {
+      const message = commit.commit?.message || '';
+      if (message.length > 0) {
+        try {
+          await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
+            sha: commit.sha,
+            message,
+          });
+        } catch {
+          // Non-critical: continue even if linking fails
+        }
+      }
+    }
+
     return signals.length;
   }
 
@@ -360,6 +398,19 @@ export class GitHubConnector extends ConnectorBase {
     for (const pr of prs) {
       // Add PR signal
       signals.push(this.transformPRToSignal(repo, pr));
+
+      // Cross-domain linking: parse PR title/branch/body for Jira ticket references
+      // e.g. "fix/PROJ-1234-auth-bug" or "Closes PROJ-1234" → entity_link record
+      try {
+        await linkPRToJira(this.supabase, this.organizationId, repo.name, {
+          number: pr.number,
+          title: pr.title,
+          body: pr.body,
+          head: { ref: pr.head?.ref },
+        });
+      } catch (linkErr) {
+        console.warn(`[GitHub] Cross-domain link failed for PR #${pr.number}:`, linkErr);
+      }
 
       // Fetch and add review signals (critical for P0 Bottleneck Detection)
       try {
@@ -447,6 +498,24 @@ export class GitHubConnector extends ConnectorBase {
    */
   private transformFileToSignal(repo: Repository, file: TreeItem, content: string): Signal {
     const now = new Date().toISOString();
+    const language = this.detectLanguage(file.path);
+
+    // Store full content for files < 100KB (critical for SE-aaS code analysis)
+    // For larger files, store first 50KB + last 1KB (captures imports + key logic)
+    // Without full content, SE-aaS cannot do real code analysis, dependency graphs, or impact analysis
+    const MAX_FULL_CONTENT = 100_000;    // 100KB: store complete
+    const MAX_TRUNCATED = 50_000;        // 50KB prefix for large files
+    let storedContent: string;
+    let contentTruncated = false;
+
+    if (content.length <= MAX_FULL_CONTENT) {
+      storedContent = content;
+    } else {
+      // Large file: capture top (imports, exports, class defs) + tail (key logic)
+      storedContent = content.substring(0, MAX_TRUNCATED) + '\n\n... [truncated] ...\n\n' + content.substring(content.length - 1000);
+      contentTruncated = true;
+    }
+
     return {
       organization_id: this.organizationId,
       source_domain: 'engineering.github',
@@ -457,11 +526,16 @@ export class GitHubConnector extends ConnectorBase {
       signal_metadata: {
         repo: repo.full_name,
         path: file.path,
-        language: this.detectLanguage(file.path),
+        language,
         size: file.size,
         sha: file.sha,
-        content_preview: content.substring(0, 500),
+        // Full content stored (not just 500-char preview)
+        // This enables SE-aaS to actually read, analyze, and reason about code
+        content: storedContent,
         content_length: content.length,
+        content_truncated: contentTruncated,
+        // Keep preview for fast queries that don't need full content
+        content_preview: content.substring(0, 500),
       },
       created_at: now,
       signal_timestamp: now,

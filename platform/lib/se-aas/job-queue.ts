@@ -14,8 +14,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export interface SubmitJobParams {
   organizationId: string;
   domainType: string;
-  payload: Record<string, unknown>;
+  /** The domain request payload. Use `payload` or `request` — both are accepted. */
+  payload?: Record<string, unknown>;
+  /** Alias for `payload` — accepted by newer route files */
+  request?: Record<string, unknown>;
   userId: string;
+  /** Anthropic API key to include in the job payload for Claude-powered domains */
+  anthropicApiKey?: string;
   priority?: number;
 }
 
@@ -66,6 +71,9 @@ export async function submitSeAaSJob(
   supabase: SupabaseClient,
   params: SubmitJobParams
 ): Promise<{ jobId: string }> {
+  // Support both `payload` and `request` aliases
+  const domainPayload = params.payload ?? params.request ?? {};
+
   const { data, error } = await supabase
     .from("agent_queue")
     .insert({
@@ -74,8 +82,9 @@ export async function submitSeAaSJob(
       task_type: params.domainType,
       priority: params.priority ?? 5,
       payload: {
-        ...params.payload,
+        ...domainPayload,
         userId: params.userId,
+        ...(params.anthropicApiKey ? { anthropicApiKey: params.anthropicApiKey } : {}),
       },
       status: "pending",
     })

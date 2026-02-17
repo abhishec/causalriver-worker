@@ -28,6 +28,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ConnectorSignal, NexusConnector, ConnectorSyncResult } from './connector-framework';
 import { storeConnectorSignals, recordSyncResult } from './connector-framework';
 import { enrichSignalWithNLP } from '../core/nlp/signal-enricher';
+import { linkSlackMessageToCrossRefs } from './cross-domain-linker';
 
 // ============================================================================
 // TYPES
@@ -157,6 +158,18 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
 
               signals.push(signal);
               channelMsgCount++;
+
+              // Cross-domain linking: parse message for PR/Jira references (fire-and-forget)
+              // e.g. "reviewed PR #456, closes PROJ-1234" → entity_link records
+              const msgText = msg.text || '';
+              if (msgText.length > 0 && /[A-Z]{2,10}-\d+|PR\s*#?\d+|pull\/\d+/i.test(msgText)) {
+                linkSlackMessageToCrossRefs(supabase, organizationId, {
+                  ts: msg.ts,
+                  channel_id: channel,
+                  text: msgText,
+                  user: msg.user,
+                }).catch(() => { /* non-critical */ });
+              }
             }
 
             // Batch-store every 5000 signals to avoid OOM with millions of messages
@@ -262,6 +275,17 @@ export function createSlackConnector(config: SlackConnectorConfig): SlackConnect
               enrichSignalWithNLP(signal, ['text']);
 
               signals.push(signal);
+
+              // Cross-domain linking: parse message for PR/Jira references (fire-and-forget)
+              const msgText = msg.text || '';
+              if (msgText.length > 0 && /[A-Z]{2,10}-\d+|PR\s*#?\d+|pull\/\d+/i.test(msgText)) {
+                linkSlackMessageToCrossRefs(supabase, organizationId, {
+                  ts: msg.ts,
+                  channel_id: channel,
+                  text: msgText,
+                  user: msg.user,
+                }).catch(() => { /* non-critical */ });
+              }
             }
 
             // Batch-store every 5000 signals to avoid OOM
