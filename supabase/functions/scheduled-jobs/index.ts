@@ -275,39 +275,38 @@ async function runVerificationJob(supabase: any, orgId: string) {
 
       // Try direct query as fallback
       const { data: pending, error: fetchError } = await supabase
-        .from('predictions')
-        .select('id, signal_id, predicted_signal_id, predicted_at, outcome_window_end')
+        .from('prediction_records')
+        .select('id, entity_type, entity_id, predicted_value, created_at, verification_deadline')
         .eq('organization_id', orgId)
-        .eq('verification_status', 'pending')
-        .lte('outcome_window_end', new Date().toISOString())
+        .is('was_correct', null)
+        .lte('verification_deadline', new Date().toISOString())
         .limit(100);
 
       if (fetchError) {
-        // Table might not be visible in schema cache, but it exists
-        console.log('Predictions table query failed:', fetchError.message);
-        return { verificationsProcessed: 0, note: 'Table exists but schema cache needs refresh' };
+        console.log('prediction_records query failed:', fetchError.message);
+        return { verificationsProcessed: 0, note: 'Table query failed — schema cache may need refresh' };
       }
 
       let verified = 0;
       for (const pred of pending || []) {
-        // Check if predicted signal occurred
+        // Check if an outcome signal was recorded for this entity
         const { data: outcome } = await supabase
-          .from('signals')
-          .select('id')
+          .from('cross_domain_signals')
+          .select('id, signal_value')
           .eq('organization_id', orgId)
-          .eq('signal_type', pred.predicted_signal_id)
-          .gte('occurred_at', pred.predicted_at)
-          .lte('occurred_at', pred.outcome_window_end)
+          .eq('entity_type', pred.entity_type)
+          .eq('entity_id', pred.entity_id)
+          .gte('created_at', pred.created_at)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         // Update verification status
         await supabase
-          .from('predictions')
+          .from('prediction_records')
           .update({
-            verification_status: 'verified',
+            was_correct: !!outcome,
+            actual_value: outcome?.signal_value ?? null,
             verified_at: new Date().toISOString(),
-            outcome_occurred: !!outcome,
           })
           .eq('id', pred.id);
 
@@ -331,40 +330,39 @@ async function runVerificationJob(supabase: any, orgId: string) {
 async function runWeightsJob(supabase: any, orgId: string) {
   // Get causal relationships (capped for 10M scale)
   const { data: edges } = await supabase
-    .from('causal_relationships')
-    .select('id, cause_signal_id, effect_signal_id')
+    .from('causal_relationships_statistical')
+    .select('id, source_domain, target_domain, evidence_weight')
     .eq('organization_id', orgId)
+    .eq('is_significant', true)
     .limit(1000);
 
   let updated = 0;
   for (const edge of edges || []) {
-    // Count predictions for this edge
+    // Count verified predictions related to this edge's domains
     const { count: total } = await supabase
-      .from('predictions')
+      .from('prediction_records')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', orgId)
-      .eq('signal_id', edge.cause_signal_id)
-      .eq('predicted_signal_id', edge.effect_signal_id)
-      .eq('verification_status', 'verified');
+      .eq('domain', edge.source_domain)
+      .not('was_correct', 'is', null);
 
-    // Count correct predictions
     const { count: correct } = await supabase
-      .from('predictions')
+      .from('prediction_records')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', orgId)
-      .eq('signal_id', edge.cause_signal_id)
-      .eq('predicted_signal_id', edge.effect_signal_id)
-      .eq('verification_status', 'verified')
-      .eq('outcome_occurred', true);
+      .eq('domain', edge.source_domain)
+      .eq('was_correct', true);
 
     if (total && total > 0) {
-      const confidence = correct! / total;
+      const accuracy = correct! / total;
+      // Blend accuracy into evidence weight (conservative update)
+      const newWeight = (edge.evidence_weight || 1.0) * 0.8 + accuracy * 0.2;
 
       await supabase
-        .from('causal_relationships')
+        .from('causal_relationships_statistical')
         .update({
-          confidence_score: confidence,
-          observation_count: total,
+          evidence_weight: newWeight,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', edge.id);
 
@@ -381,19 +379,30 @@ async function runWeightsJob(supabase: any, orgId: string) {
 async function runDecayJob(supabase: any, orgId: string) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Decay confidence for relationships with no recent evidence
-  const { data, error } = await supabase
-    .from('causal_relationships')
-    .update({
-      confidence_score: supabase.rpc('multiply', { value: 'confidence_score', factor: 0.95 }),
-    })
+  // Decay evidence_weight for relationships with no recent validation
+  const { data: staleEdges } = await supabase
+    .from('causal_relationships_statistical')
+    .select('id, evidence_weight')
     .eq('organization_id', orgId)
-    .lt('discovered_at', thirtyDaysAgo)
-    .select();
+    .or(`last_validated_at.is.null,last_validated_at.lt.${thirtyDaysAgo}`)
+    .gt('evidence_weight', 0.1)
+    .limit(500);
 
-  if (error) throw error;
+  let decayed = 0;
+  for (const edge of staleEdges || []) {
+    const newWeight = (edge.evidence_weight || 1.0) * 0.95;
+    await supabase
+      .from('causal_relationships_statistical')
+      .update({
+        evidence_weight: newWeight,
+        is_significant: newWeight > 0.3,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', edge.id);
+    decayed++;
+  }
 
-  return { edgesDecayed: data?.length || 0 };
+  return { edgesDecayed: decayed };
 }
 
 /**
@@ -461,17 +470,17 @@ async function runRetentionJob(supabase: any, orgId: string) {
   // ── Batch-delete old predictions ──────────────────────────────
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     const { data: stalePreds } = await supabase
-      .from('predictions')
+      .from('prediction_records')
       .select('id')
       .eq('organization_id', orgId)
-      .lt('predicted_at', ninetyDaysAgo)
+      .lt('created_at', ninetyDaysAgo)
       .limit(BATCH_SIZE);
 
     const ids = (stalePreds || []).map((r: any) => r.id);
     if (ids.length === 0) break;
 
     const { count } = await supabase
-      .from('predictions')
+      .from('prediction_records')
       .delete({ count: 'exact' })
       .in('id', ids);
 

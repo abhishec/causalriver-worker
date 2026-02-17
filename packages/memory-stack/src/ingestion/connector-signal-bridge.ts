@@ -157,6 +157,7 @@ export type SignalIngestedCallback = (
   source: string
 ) => void | Promise<void>;
 
+const MAX_SIGNAL_LISTENERS = 50; // Safety cap — prevent unbounded growth
 let _signalListeners: SignalIngestedCallback[] = [];
 
 /**
@@ -168,6 +169,10 @@ let _signalListeners: SignalIngestedCallback[] = [];
  * @returns Unsubscribe function
  */
 export function onSignalsIngested(callback: SignalIngestedCallback): () => void {
+  // Safety: evict oldest listener if at capacity
+  if (_signalListeners.length >= MAX_SIGNAL_LISTENERS) {
+    _signalListeners.shift();
+  }
   _signalListeners.push(callback);
   return () => {
     _signalListeners = _signalListeners.filter(cb => cb !== callback);

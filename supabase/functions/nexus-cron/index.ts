@@ -119,6 +119,7 @@ serve(async (req: Request) => {
           const { data: pendingVerifications } = await supabase
             .from('scheduled_verifications')
             .select('*, prediction_records(*)')
+            .eq('organization_id', orgId)
             .eq('status', 'pending')
             .lte('scheduled_for', new Date().toISOString())
             .limit(100);

@@ -442,6 +442,20 @@ export function createScheduledJobs(
 
       for (const pack of pendingPacks) {
         try {
+          // Optimistic lock: mark as "applying" to prevent race with Apply Now button
+          const { data: lockResult } = await supabase
+            .from('custom_training_packs')
+            .update({ status: 'applying' })
+            .eq('id', pack.id)
+            .eq('status', 'pending')
+            .select('id')
+            .maybeSingle();
+
+          if (!lockResult) {
+            // Another process already picked this up — skip
+            continue;
+          }
+
           const packData = pack.pack_data as { chains?: Array<Record<string, unknown>>; rules?: Array<Record<string, unknown>> } | null;
           if (!packData) continue;
           const now = new Date().toISOString();
@@ -452,8 +466,6 @@ export function createScheduledJobs(
               organization_id: organizationId,
               source_domain: chain.source_domain || chain.source || 'unknown',
               target_domain: chain.target_domain || chain.target || 'unknown',
-              source_entity: chain.source_metric || chain.source_entity || '',
-              target_entity: chain.target_metric || chain.target_entity || '',
               effect_size: chain.effect_size || chain.strength || 0.5,
               optimal_lag_days: chain.lag_days || chain.optimal_lag_days || 7,
               granger_p_value: chain.p_value || chain.granger_p_value || 0.05,
@@ -468,7 +480,7 @@ export function createScheduledJobs(
 
             const { error: insertErr } = await supabase
               .from('causal_relationships_statistical')
-              .upsert(chainRows, { onConflict: 'organization_id,source_domain,target_domain,source_entity,target_entity' });
+              .upsert(chainRows, { onConflict: 'organization_id,source_domain,target_domain' });
 
             if (insertErr) {
               errors.push(`Chain batch upsert error: ${insertErr.message}`);
