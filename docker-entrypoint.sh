@@ -51,6 +51,27 @@ case "${BRAIN_PROCESS}" in
     echo "  Source: issues.apache.org (public, no auth)"
     exec pnpm exec tsx scripts/jira-trainer-runner.ts
     ;;
+  discussions-trainer)
+    echo "Starting GitHub Discussions Trainer (Slack proxy)..."
+    echo "  Dry Run: ${DISCUSSIONS_TRAINER_DRY_RUN:-false}"
+    echo "  GitHub Token: ${GITHUB_TOKEN:+YES}${GITHUB_TOKEN:-NO}"
+    exec pnpm exec tsx scripts/discussions-trainer-runner.ts
+    ;;
+  security-trainer)
+    echo "Starting Security Trainer (GHSA/OSV)..."
+    echo "  Dry Run: ${SECURITY_TRAINER_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/security-trainer-runner.ts
+    ;;
+  deps-trainer)
+    echo "Starting Dependency Intelligence Trainer (npm + PyPI)..."
+    echo "  Dry Run: ${DEPS_TRAINER_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/deps-trainer-runner.ts
+    ;;
+  mailinglist-trainer)
+    echo "Starting Mailing List Trainer (Apache dev lists)..."
+    echo "  Dry Run: ${MAILINGLIST_TRAINER_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/mailinglist-trainer-runner.ts
+    ;;
   cost-agent)
     echo "Starting Cost Agent..."
     echo "  Mode: ${COST_AGENT_MODE:-once}"
@@ -106,6 +127,10 @@ case "${BRAIN_PROCESS}" in
     echo "  benchmark-optimizer   Python benchmark tuning (one-shot)"
     echo "  git-trainer           GitHub engineering patterns (one-shot)"
     echo "  jira-trainer          Apache JIRA PM patterns (one-shot)"
+    echo "  discussions-trainer   GitHub Discussions communication (one-shot)"
+    echo "  security-trainer      GHSA/OSV vulnerability intelligence (one-shot)"
+    echo "  deps-trainer          npm/PyPI dependency intelligence (one-shot)"
+    echo "  mailinglist-trainer   Apache mailing list communication (one-shot)"
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"
