@@ -1521,6 +1521,9 @@ export {
   type CognitivePrediction,
   type CognitiveMetric,
   type CognitiveHealthReport,
+  // Streaming API — process signals in 500-signal batches, never load all into RAM
+  type StreamingCycleHandle,
+  type StreamingCycleState,
 } from './orchestrator/cognitive-stack';
 
 // Context Manager — Working Memory (Prefrontal Cortex)

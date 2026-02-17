@@ -308,6 +308,69 @@ export const GAAP_COA_MAP: Map<string, CoAAccount> = new Map([
   ['Income Tax Expense', { name: 'Income Tax Expense', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'income_tax' }],
   ['Bad Debt Expense', { name: 'Bad Debt Expense', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
   ['Loss on Disposal', { name: 'Loss on Disposal', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'other_expense' }],
+
+  // ── XERO-SPECIFIC ACCOUNT NAMES (from real ph-accounting Xero GL, 49,684 txns) ──
+  // These are the ACTUAL account names that appear in the design partner's Xero export.
+  // Without these, brain-bookkeeper keyword rules fail on unmatched names.
+  // Revenue accounts (Xero Xero naming: specific fee types, not generic "Revenue")
+  ['License Fee', { name: 'License Fee', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['License Fees', { name: 'License Fees', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Subscription Fee', { name: 'Subscription Fee', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Subscription Fees', { name: 'Subscription Fees', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Implementation Fee', { name: 'Implementation Fee', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Implementation Fees', { name: 'Implementation Fees', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Support Fee', { name: 'Support Fee', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Support Fees', { name: 'Support Fees', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Overage Fee', { name: 'Overage Fee', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Overage Fees', { name: 'Overage Fees', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  ['Grant', { name: 'Grant', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'other_income' }],
+  ['Grant Income', { name: 'Grant Income', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'other_income' }],
+  ['Government Grant', { name: 'Government Grant', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'other_income' }],
+  // Zero-rated revenue — export of services to overseas clients (GST F5 Box 1, NOT Box 6)
+  ['Zero-Rated Revenue', { name: 'Zero-Rated Revenue', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'zero_rated_revenue' }],
+  ['Export Revenue', { name: 'Export Revenue', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'zero_rated_revenue' }],
+  ['Overseas Revenue', { name: 'Overseas Revenue', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'zero_rated_revenue' }],
+  // Bank accounts (Xero tracks separately per bank/account)
+  ['Bank - DBS SGD', { name: 'Bank - DBS SGD', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset', jurisdiction: 'sg' }],
+  ['Bank - DBS Current Account', { name: 'Bank - DBS Current Account', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset', jurisdiction: 'sg' }],
+  ['Bank - UOB SGD', { name: 'Bank - UOB SGD', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset', jurisdiction: 'sg' }],
+  ['Bank - Citibank', { name: 'Bank - Citibank', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset' }],
+  ['Bank - Wise SGD', { name: 'Bank - Wise SGD', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset' }],
+  ['AMEX Clearing', { name: 'AMEX Clearing', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset' }],
+  ['Volopay Clearing', { name: 'Volopay Clearing', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset' }],
+  // Expense accounts (Xero naming conventions used in ph-accounting GL)
+  ['Salary', { name: 'Salary', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Salaries', { name: 'Salaries', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Bonus', { name: 'Bonus', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['CPF', { name: 'CPF', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense', jurisdiction: 'sg' }],
+  ['Accounting Fee', { name: 'Accounting Fee', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Accounting Fees', { name: 'Accounting Fees', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Audit Fee', { name: 'Audit Fee', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Audit Fees', { name: 'Audit Fees', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['External Contractor Fee', { name: 'External Contractor Fee', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Contractor Fee', { name: 'Contractor Fee', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Airfare Expense', { name: 'Airfare Expense', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Airfare', { name: 'Airfare', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Software Subscription', { name: 'Software Subscription', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Software Subscriptions', { name: 'Software Subscriptions', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  ['Rental', { name: 'Rental', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'operating_expense' }],
+  // FX — unrealised and realised (very common in SG multi-currency GL)
+  ['Unrealised Foreign Exchange Gain', { name: 'Unrealised Foreign Exchange Gain', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'other_income' }],
+  ['Unrealised Foreign Exchange Loss', { name: 'Unrealised Foreign Exchange Loss', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'other_expense' }],
+  ['Realised Foreign Exchange Gain', { name: 'Realised Foreign Exchange Gain', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'other_income' }],
+  ['Realised Foreign Exchange Loss', { name: 'Realised Foreign Exchange Loss', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'other_expense' }],
+  ['Unrealised foreign exchange differences', { name: 'Unrealised foreign exchange differences', type: 'expense', normalBalance: 'debit', statement: 'income_statement', subtype: 'other_expense' }],
+  // Intercompany — Tookitaki-specific (from real GL)
+  ['Advances to Subsidiary', { name: 'Advances to Subsidiary', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'non_current_asset' }],
+  ['Advances to subsidiary - Tookitaki Technologies Private Limited', { name: 'Advances to subsidiary - Tookitaki Technologies Private Limited', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'non_current_asset' }],
+  ['Intercompany Receivable', { name: 'Intercompany Receivable', type: 'asset', normalBalance: 'debit', statement: 'balance_sheet', subtype: 'current_asset' }],
+  ['Management Fee Income', { name: 'Management Fee Income', type: 'revenue', normalBalance: 'credit', statement: 'income_statement', subtype: 'operating_revenue' }],
+  // Convertible notes (common in SaaS funding rounds)
+  ['Convertible Notes', { name: 'Convertible Notes', type: 'liability', normalBalance: 'credit', statement: 'balance_sheet', subtype: 'long_term_liability' }],
+  ['Convertible notes', { name: 'Convertible notes', type: 'liability', normalBalance: 'credit', statement: 'balance_sheet', subtype: 'long_term_liability' }],
+  // WHT / Withholding Tax (SG — on payments to non-residents)
+  ['WHT Payable', { name: 'WHT Payable', type: 'liability', normalBalance: 'credit', statement: 'balance_sheet', subtype: 'current_liability', jurisdiction: 'sg' }],
+  ['Withholding Tax Payable', { name: 'Withholding Tax Payable', type: 'liability', normalBalance: 'credit', statement: 'balance_sheet', subtype: 'current_liability' }],
 ]);
 
 // ============================================================================
@@ -359,13 +422,17 @@ export const INDUSTRY_BENCHMARKS: IndustryBenchmark[] = [
 // Source: SEC EDGAR public filings, no auth required
 // ============================================================================
 
+// Pure-play SaaS only — gross margins 65-80%, subscription-first revenue models.
+// REMOVED: Oracle (ORCL CIK 0000796343) — enterprise hardware+software mix, not SaaS
+// REMOVED: Microsoft (MSFT CIK 0000789019) — diversified cloud+enterprise, skews margins
+// FIXED: HubSpot CIK was wrong (0001045810 = NVIDIA). HubSpot correct CIK = 0001404655
+// ADDED: Amplitude, Braze, Zuora, Freshworks, HashiCorp — closer to SMB SaaS profile
 export const SAAS_CIKS = [
   { cik: '0001108524', name: 'Salesforce', ticker: 'CRM', sic: '7372' },
-  { cik: '0001045810', name: 'HubSpot', ticker: 'HUBS', sic: '7372' },
+  { cik: '0001404655', name: 'HubSpot', ticker: 'HUBS', sic: '7372' },        // FIXED (was NVIDIA CIK)
   { cik: '0001707925', name: 'Atlassian', ticker: 'TEAM', sic: '7372' },
   { cik: '0001388430', name: 'Workday', ticker: 'WDAY', sic: '7372' },
   { cik: '0001574085', name: 'Veeva Systems', ticker: 'VEEV', sic: '7372' },
-  { cik: '0001518715', name: 'Zendesk', ticker: 'ZEN', sic: '7372' },
   { cik: '0001418819', name: 'ServiceNow', ticker: 'NOW', sic: '7372' },
   { cik: '0001467623', name: 'Twilio', ticker: 'TWLO', sic: '7372' },
   { cik: '0001516673', name: 'Okta', ticker: 'OKTA', sic: '7372' },
@@ -374,12 +441,13 @@ export const SAAS_CIKS = [
   { cik: '0001327567', name: 'Shopify', ticker: 'SHOP', sic: '7372' },
   { cik: '0001660134', name: 'Cloudflare', ticker: 'NET', sic: '7372' },
   { cik: '0001601712', name: 'MongoDB', ticker: 'MDB', sic: '7372' },
-  { cik: '0001372612', name: 'NetSuite', ticker: 'N', sic: '7372' },
-  { cik: '0000796343', name: 'Oracle', ticker: 'ORCL', sic: '7372' },
-  { cik: '0000789019', name: 'Microsoft', ticker: 'MSFT', sic: '7372' },
   { cik: '0001418091', name: 'Snowflake', ticker: 'SNOW', sic: '7372' },
   { cik: '0001679273', name: 'Datadog', ticker: 'DDOG', sic: '7372' },
-  { cik: '0001571123', name: 'Palantir', ticker: 'PLTR', sic: '7372' },
+  { cik: '0001816817', name: 'Amplitude', ticker: 'AMPL', sic: '7372' },      // SMB SaaS analytics ~65% GM
+  { cik: '0001835016', name: 'Braze', ticker: 'BRZE', sic: '7372' },           // Customer engagement SaaS ~67% GM
+  { cik: '0001423689', name: 'Zuora', ticker: 'ZUO', sic: '7372' },            // Subscription billing SaaS ~62% GM
+  { cik: '0001868778', name: 'Freshworks', ticker: 'FRSH', sic: '7372' },      // India-originated SaaS ~83% GM
+  { cik: '0001694426', name: 'HashiCorp', ticker: 'HCP', sic: '7372' },        // DevOps SaaS ~78% GM
 ];
 
 // GAAP tags to extract from EDGAR
@@ -700,7 +768,8 @@ export function buildSyntheticAccountingScenarios(): SyntheticAccountingScenario
   const scenarios: SyntheticAccountingScenario[] = [];
 
   // Generate 12 months × 4 company profiles = 48 base scenarios
-  // Plus 12 edge-case scenarios (deferred revenue, FX, write-offs, etc.)
+  // Plus 13 edge-case scenarios (deferred revenue, FX, write-offs, SFRS 16, bad debt, etc.)
+  // Total target: 61+ scenarios
   const profiles = [
     { id: 'saas_sg_growth', type: 'saas_sg', revenue: 180000, cogs: 54000, payroll: 72000, rdRatio: 0.20, gstRate: 0.09 },
     { id: 'saas_sg_early', type: 'saas_sg', revenue: 45000, cogs: 13500, payroll: 25000, rdRatio: 0.25, gstRate: 0.09 },
@@ -713,7 +782,7 @@ export function buildSyntheticAccountingScenarios(): SyntheticAccountingScenario
 
   let scenarioIdx = 0;
   for (const profile of profiles) {
-    for (const period of months2025.slice(0, 5)) { // 5 months per profile = 20 scenarios
+    for (const period of months2025.slice(0, 12)) { // 12 months per profile = 48 base scenarios
       scenarios.push(buildMonthEndScenario(
         `${profile.id}_${period}`,
         profile.type as any,
@@ -1040,6 +1109,75 @@ function buildEdgeCaseScenarios(): SyntheticAccountingScenario[] {
     });
   }
 
+  // Edge Case 1b: Zero-Rated Revenue (export of services to overseas clients)
+  // CRITICAL for design partner: license fees to overseas banks (HSBC, SCB) = 0% GST
+  // Include in GST F5 Box 1 (total supplies) but NOT in Box 6 (output tax)
+  // Claude typically either omits this from Box 1 or incorrectly charges 9% GST on it
+  {
+    const zeroRatedRev = 80000;   // License fee to overseas bank (zero-rated)
+    const stdRatedRev  = 40000;   // Implementation fee to SG entity (standard-rated 9%)
+    const gstRate = 0.09;
+    const gstOnStd = Math.round(stdRatedRev * gstRate);  // Only on std-rated portion
+
+    const transactions: SyntheticTransaction[] = [
+      // Zero-rated invoice (export of services — no GST charged, no Output Tax)
+      { date: '2025-02-10', description: 'License fee - HSBC Holdings (zero-rated export)', reference: 'INV-ZR-001', account: 'Accounts Receivable', debit: zeroRatedRev, credit: 0, taxRateName: 'Zero-Rated Supplies', taxAmount: 0 },
+      { date: '2025-02-10', description: 'License fee - HSBC Holdings (zero-rated export)', reference: 'INV-ZR-001', account: 'License Fees', debit: 0, credit: zeroRatedRev, taxRateName: 'Zero-Rated Supplies', taxAmount: 0 },
+      // Standard-rated invoice (domestic SG customer — GST 9%)
+      { date: '2025-02-15', description: 'Implementation fee - Singapore entity', reference: 'INV-STD-001', account: 'Accounts Receivable', debit: stdRatedRev + gstOnStd, credit: 0, taxRateName: 'GST 9%', taxAmount: gstOnStd },
+      { date: '2025-02-15', description: 'Implementation fee - Singapore entity', reference: 'INV-STD-001', account: 'Implementation Fees', debit: 0, credit: stdRatedRev, taxRateName: 'GST 9%', taxAmount: 0 },
+      { date: '2025-02-15', description: 'GST 9% on implementation fee', reference: 'INV-STD-001', account: 'GST Output Tax', debit: 0, credit: gstOnStd, taxRateName: 'GST 9%', taxAmount: gstOnStd },
+    ];
+
+    scenarios.push({
+      id: 'edge_zero_rated_revenue_sg',
+      companyType: 'saas_sg',
+      period: '2025-02',
+      transactions,
+      trialBalance: [
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: zeroRatedRev + stdRatedRev + gstOnStd, creditBalance: 0 },
+        { account: 'License Fees', accountType: 'revenue', debitBalance: 0, creditBalance: zeroRatedRev },
+        { account: 'Implementation Fees', accountType: 'revenue', debitBalance: 0, creditBalance: stdRatedRev },
+        { account: 'GST Output Tax', accountType: 'liability', debitBalance: 0, creditBalance: gstOnStd },
+      ],
+      pl: {
+        revenue: zeroRatedRev + stdRatedRev, cogs: 0, grossProfit: zeroRatedRev + stdRatedRev, grossMargin: 1.0,
+        operatingExpenses: [], totalOpEx: 0, operatingIncome: zeroRatedRev + stdRatedRev,
+        otherIncome: 0, netIncomeBeforeTax: zeroRatedRev + stdRatedRev, incomeTax: 0,
+        netIncome: zeroRatedRev + stdRatedRev,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Accounts Receivable', amount: zeroRatedRev + stdRatedRev + gstOnStd }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [{ name: 'GST Output Tax', amount: gstOnStd }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: zeroRatedRev + stdRatedRev }],
+        totalAssets: zeroRatedRev + stdRatedRev + gstOnStd,
+        totalLiabilities: gstOnStd,
+        totalEquity: zeroRatedRev + stdRatedRev,
+        isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: zeroRatedRev + stdRatedRev,  // Box 1: ALL supplies including zero-rated
+        gstOnSales: gstOnStd,                     // Box 6: ONLY output tax on std-rated
+        totalPurchases: 0, gstOnPurchases: 0,
+        netGSTPayable: gstOnStd,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'INV-ZR-001', account: 'License Fees', drCr: 'CR', amount: zeroRatedRev,
+          interpretation: 'License fee billed to overseas client (HSBC Holdings, non-SG entity). This is a zero-rated supply under IRAS GST rules — GST rate is 0%, no output tax charged. Revenue is $80,000 to P&L. Include $80,000 in GST F5 Box 1 (total supplies) but NOT in Box 6 (output tax). The full $80,000 is received without GST.',
+          impactOnFinancials: 'Increases License Fee revenue on P&L. Zero output tax. Included in GST F5 Box 1 but not Box 6.',
+        },
+        {
+          transactionRef: 'INV-STD-001', account: 'GST Output Tax', drCr: 'CR', amount: gstOnStd,
+          interpretation: 'Standard-rated implementation fee to SG entity — 9% GST applies. Output Tax $3,600 is a liability to IRAS. Include in GST F5 Box 1 (supplies) AND Box 6 (output tax). Total invoice amount = $40,000 + $3,600 GST = $43,600.',
+          impactOnFinancials: 'Increases GST Output Tax liability on Balance Sheet. Included in both Box 1 and Box 6 of GST F5.',
+        },
+      ],
+    });
+  }
+
   // Edge Case 2: GST on Imported Services (IRAS regulation — Claude often gets this wrong)
   // Under SG rules, imported services from overseas are subject to GST (reverse charge from 2020)
   {
@@ -1102,6 +1240,248 @@ function buildEdgeCaseScenarios(): SyntheticAccountingScenario[] {
           amount: gstAmt,
           interpretation: 'Imported services from overseas (AWS USA) are subject to IRAS Reverse Charge GST from Jan 2020. Self-assess GST by both debiting Input Tax (claimable) and crediting Output Tax (payable). For a fully GST-registered business, the net GST = $0.',
           impactOnFinancials: 'Net zero GST impact for fully-registered GST business on imported services.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 3: GST Rate Change Mid-Year (2023 transition: GST 7% → GST 8%)
+  // The design partner GL has transactions from 2022 (7%) and 2023 (8%) in the SAME file.
+  // Claude typically assumes a single rate; brain must check taxRateName per row.
+  {
+    const rev2022 = 50000;
+    const rev2023 = 55000;
+    const gst7 = Math.round(rev2022 * 0.07);
+    const gst8 = Math.round(rev2023 * 0.08);
+
+    const transactions: SyntheticTransaction[] = [
+      // Dec 2022 invoice — GST 7%
+      { date: '2022-12-15', description: 'License fee Q4 2022 - GST 7%', reference: 'INV-2022-Q4', account: 'Accounts Receivable', debit: rev2022 + gst7, credit: 0, taxRateName: 'GST 7%', taxAmount: gst7 },
+      { date: '2022-12-15', description: 'License fee Q4 2022', reference: 'INV-2022-Q4', account: 'License Fees', debit: 0, credit: rev2022, taxRateName: 'GST 7%', taxAmount: 0 },
+      { date: '2022-12-15', description: 'GST 7% on license fee', reference: 'INV-2022-Q4', account: 'GST Output Tax', debit: 0, credit: gst7, taxRateName: 'GST 7%', taxAmount: gst7 },
+      // Jan 2023 invoice — GST 8% (new rate from 1 Jan 2023)
+      { date: '2023-01-15', description: 'License fee Q1 2023 - GST 8%', reference: 'INV-2023-Q1', account: 'Accounts Receivable', debit: rev2023 + gst8, credit: 0, taxRateName: 'GST 8%', taxAmount: gst8 },
+      { date: '2023-01-15', description: 'License fee Q1 2023', reference: 'INV-2023-Q1', account: 'License Fees', debit: 0, credit: rev2023, taxRateName: 'GST 8%', taxAmount: 0 },
+      { date: '2023-01-15', description: 'GST 8% on license fee', reference: 'INV-2023-Q1', account: 'GST Output Tax', debit: 0, credit: gst8, taxRateName: 'GST 8%', taxAmount: gst8 },
+    ];
+
+    scenarios.push({
+      id: 'edge_gst_rate_change_7pct_to_8pct',
+      companyType: 'saas_sg',
+      period: '2022-12',
+      transactions,
+      trialBalance: [
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: rev2022 + gst7 + rev2023 + gst8, creditBalance: 0 },
+        { account: 'License Fees', accountType: 'revenue', debitBalance: 0, creditBalance: rev2022 + rev2023 },
+        { account: 'GST Output Tax', accountType: 'liability', debitBalance: 0, creditBalance: gst7 + gst8 },
+      ],
+      pl: {
+        revenue: rev2022 + rev2023, cogs: 0, grossProfit: rev2022 + rev2023, grossMargin: 1.0,
+        operatingExpenses: [], totalOpEx: 0, operatingIncome: rev2022 + rev2023,
+        otherIncome: 0, netIncomeBeforeTax: rev2022 + rev2023, incomeTax: 0, netIncome: rev2022 + rev2023,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Accounts Receivable', amount: rev2022 + gst7 + rev2023 + gst8 }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [{ name: 'GST Output Tax', amount: gst7 + gst8 }], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: rev2022 + rev2023 }],
+        totalAssets: rev2022 + gst7 + rev2023 + gst8,
+        totalLiabilities: gst7 + gst8,
+        totalEquity: rev2022 + rev2023,
+        isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.08, // Mixed — must use per-row taxRateName
+        totalSales: rev2022 + rev2023, gstOnSales: gst7 + gst8,
+        totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: gst7 + gst8,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'INV-2022-Q4', account: 'GST Output Tax', drCr: 'CR', amount: gst7,
+          interpretation: 'GST at 7% applied — transaction date Dec 2022, before rate change. ALWAYS use taxRateName from each GL row, not a single assumed rate. This GL contains BOTH "GST 7%" (pre-2023) and "GST 8%" (2023) rows.',
+          impactOnFinancials: 'Output tax at historical rate must match taxRateName field exactly.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 4: FX Revaluation — Unrealised FX Gain/Loss (very common in SG multi-currency)
+  // The design partner has USD-denominated receivables revalued at month-end SGD rates.
+  // Claude often misclassifies "Unrealised foreign exchange differences" as an operating expense.
+  {
+    const usdReceivable = 100000; // Original SGD equivalent at invoice date (e.g. USD 75k @ 1.333)
+    const fxGain = 2500;          // Month-end revaluation: SGD strengthened, receivable worth more
+
+    const transactions: SyntheticTransaction[] = [
+      // Original USD invoice (booked at historical rate)
+      { date: '2025-01-05', description: 'License fee invoice - USD (original booking)', reference: 'INV-USD-001', account: 'Accounts Receivable', debit: usdReceivable, credit: 0, taxRateName: 'Zero-Rated Supplies', taxAmount: 0 },
+      { date: '2025-01-05', description: 'License fee - overseas client USD', reference: 'INV-USD-001', account: 'License Fees', debit: 0, credit: usdReceivable, taxRateName: 'Zero-Rated Supplies', taxAmount: 0 },
+      // Month-end FX revaluation (unrealised — no cash movement, just accounting adjustment)
+      { date: '2025-01-31', description: 'Unrealised foreign exchange differences', reference: 'FX-REVAL-JAN', account: 'Accounts Receivable', debit: fxGain, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'Unrealised foreign exchange differences', reference: 'FX-REVAL-JAN', account: 'Unrealised Foreign Exchange Gain', debit: 0, credit: fxGain, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_fx_revaluation_unrealised_gain',
+      companyType: 'saas_sg',
+      period: '2025-01',
+      transactions,
+      trialBalance: [
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: usdReceivable + fxGain, creditBalance: 0 },
+        { account: 'License Fees', accountType: 'revenue', debitBalance: 0, creditBalance: usdReceivable },
+        { account: 'Unrealised Foreign Exchange Gain', accountType: 'revenue', debitBalance: 0, creditBalance: fxGain },
+      ],
+      pl: {
+        revenue: usdReceivable, cogs: 0, grossProfit: usdReceivable, grossMargin: 1.0,
+        operatingExpenses: [], totalOpEx: 0, operatingIncome: usdReceivable,
+        otherIncome: fxGain,
+        netIncomeBeforeTax: usdReceivable + fxGain, incomeTax: 0, netIncome: usdReceivable + fxGain,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Accounts Receivable', amount: usdReceivable + fxGain }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: usdReceivable + fxGain }],
+        totalAssets: usdReceivable + fxGain,
+        totalLiabilities: 0, totalEquity: usdReceivable + fxGain, isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: usdReceivable, gstOnSales: 0, // Zero-rated — no output tax
+        totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'FX-REVAL-JAN', account: 'Unrealised Foreign Exchange Gain', drCr: 'CR', amount: fxGain,
+          interpretation: 'Month-end FX revaluation of USD-denominated receivable. Unrealised gain = SGD strengthened against USD between invoice date and month-end. No cash movement — purely accounting. Credit "Unrealised Foreign Exchange Gain" to Other Income in P&L (NOT operating expense). Debit Accounts Receivable to increase carrying value.',
+          impactOnFinancials: 'Increases Accounts Receivable on Balance Sheet. Increases Other Income (Unrealised FX Gain) in P&L. Reverses when cash is received.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 5: SFRS 16 Lease Accounting (office rental capitalised as ROU Asset)
+  // Claude (and legacy accounting) often books lease payments as "Rent Expense" directly.
+  // Under SFRS 16: recognise Right-of-Use Asset + Lease Liability; lease payment splits into
+  // interest expense + liability reduction (NOT rent expense).
+  {
+    const annualRent = 120000;  // SGD 10,000/month office lease, 2-year term
+    const pvFactor = 0.95;      // Simplified PV (assume low IBR)
+    const rouAsset = Math.round(annualRent * 2 * pvFactor);  // 2-year PV
+    const leaseLiabilityTotal = rouAsset;
+    const monthlyPayment = Math.round(annualRent / 12);
+    const interestRate = 0.035; // Incremental borrowing rate 3.5%
+    const monthlyInterest = Math.round(leaseLiabilityTotal * interestRate / 12);
+    const principalRepayment = monthlyPayment - monthlyInterest;
+
+    const transactions: SyntheticTransaction[] = [
+      // Lease commencement (Month 1)
+      { date: '2025-01-01', description: 'SFRS 16 — Office lease commencement: ROU Asset recognised', reference: 'LEASE-COMM-001', account: 'Right-of-Use Assets', debit: rouAsset, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-01', description: 'SFRS 16 — Office lease commencement: Lease Liability', reference: 'LEASE-COMM-001', account: 'Lease Liability - Non-Current', debit: 0, credit: leaseLiabilityTotal, taxRateName: 'No Tax', taxAmount: 0 },
+      // Monthly depreciation of ROU Asset
+      { date: '2025-01-31', description: 'ROU Asset depreciation — office lease', reference: 'DEP-ROU-JAN', account: 'Depreciation', debit: Math.round(rouAsset / 24), credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'Accumulated depreciation — ROU Asset', reference: 'DEP-ROU-JAN', account: 'Accumulated Depreciation', debit: 0, credit: Math.round(rouAsset / 24), taxRateName: 'No Tax', taxAmount: 0 },
+      // Monthly lease payment (cash out) — splits into interest + principal
+      { date: '2025-01-31', description: 'Lease interest expense — office', reference: 'LEASE-PAY-JAN', account: 'Interest Expense', debit: monthlyInterest, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'Lease liability reduction (principal)', reference: 'LEASE-PAY-JAN', account: 'Lease Liability - Non-Current', debit: principalRepayment, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'Lease payment from bank', reference: 'LEASE-PAY-JAN', account: 'Bank', debit: 0, credit: monthlyPayment, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_sfrs16_lease_accounting',
+      companyType: 'saas_sg',
+      period: '2025-01',
+      transactions,
+      trialBalance: [
+        { account: 'Right-of-Use Assets', accountType: 'asset', debitBalance: rouAsset, creditBalance: 0 },
+        { account: 'Accumulated Depreciation', accountType: 'contra_asset', debitBalance: 0, creditBalance: Math.round(rouAsset / 24) },
+        { account: 'Bank', accountType: 'asset', debitBalance: 0, creditBalance: monthlyPayment },
+        { account: 'Lease Liability - Non-Current', accountType: 'liability', debitBalance: 0, creditBalance: leaseLiabilityTotal - principalRepayment },
+        { account: 'Depreciation', accountType: 'expense', debitBalance: Math.round(rouAsset / 24), creditBalance: 0 },
+        { account: 'Interest Expense', accountType: 'expense', debitBalance: monthlyInterest, creditBalance: 0 },
+      ],
+      pl: {
+        revenue: 0, cogs: 0, grossProfit: 0, grossMargin: 0,
+        operatingExpenses: [{ name: 'Depreciation', amount: Math.round(rouAsset / 24) }],
+        totalOpEx: Math.round(rouAsset / 24),
+        operatingIncome: -Math.round(rouAsset / 24),
+        otherIncome: 0,
+        netIncomeBeforeTax: -(Math.round(rouAsset / 24) + monthlyInterest),
+        incomeTax: 0,
+        netIncome: -(Math.round(rouAsset / 24) + monthlyInterest),
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Bank', amount: -monthlyPayment }], fixedAssets: [{ name: 'Right-of-Use Assets (net)', amount: rouAsset - Math.round(rouAsset / 24) }] },
+        liabilities: { currentLiabilities: [], longTermLiabilities: [{ name: 'Lease Liability - Non-Current', amount: leaseLiabilityTotal - principalRepayment }] },
+        equity: [{ name: 'Retained Earnings', amount: -(Math.round(rouAsset / 24) + monthlyInterest) }],
+        totalAssets: rouAsset - Math.round(rouAsset / 24) - monthlyPayment,
+        totalLiabilities: leaseLiabilityTotal - principalRepayment,
+        totalEquity: -(Math.round(rouAsset / 24) + monthlyInterest),
+        isBalanced: true,
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: 0, gstOnSales: 0, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'LEASE-COMM-001', account: 'Right-of-Use Assets', drCr: 'DR', amount: rouAsset,
+          interpretation: 'SFRS 16 lease commencement: recognise Right-of-Use Asset (PV of future lease payments) and equal Lease Liability. Do NOT book as Rent Expense. Monthly P&L impact = Depreciation (ROU Asset ÷ lease term) + Interest Expense (liability × IBR). Cash payment reduces Lease Liability principal, NOT an expense.',
+          impactOnFinancials: 'Creates ROU Asset on Balance Sheet (non-current). Creates Lease Liability (non-current). P&L shows Depreciation + Interest instead of Rent Expense.',
+        },
+      ],
+    });
+  }
+
+  // Edge Case 6: Bad Debt Write-Off (using Allowance for Doubtful Accounts)
+  // Claude often debits the expense directly to AR instead of going through the provision account.
+  {
+    const originalAR = 15000;
+    const provisionPrior = 15000; // Previously set up provision (credit-normal contra asset)
+
+    const transactions: SyntheticTransaction[] = [
+      // Step 1 (prior period — already on books): Provision set up
+      { date: '2024-12-31', description: 'Provision for doubtful debt - customer X', reference: 'PROV-2024', account: 'Bad Debt Expense', debit: provisionPrior, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2024-12-31', description: 'Allowance for doubtful accounts - customer X', reference: 'PROV-2024', account: 'Allowance for Doubtful Accounts', debit: 0, credit: provisionPrior, taxRateName: 'No Tax', taxAmount: 0 },
+      // Step 2 (current period): Write-off confirmed — clear both AR and provision
+      { date: '2025-01-31', description: 'Bad debt write-off - customer X confirmed', reference: 'WO-2025-001', account: 'Allowance for Doubtful Accounts', debit: originalAR, credit: 0, taxRateName: 'No Tax', taxAmount: 0 },
+      { date: '2025-01-31', description: 'Bad debt write-off - AR cleared', reference: 'WO-2025-001', account: 'Accounts Receivable', debit: 0, credit: originalAR, taxRateName: 'No Tax', taxAmount: 0 },
+    ];
+
+    scenarios.push({
+      id: 'edge_bad_debt_writeoff_via_provision',
+      companyType: 'saas_sg',
+      period: '2025-01',
+      transactions,
+      trialBalance: [
+        { account: 'Bad Debt Expense', accountType: 'expense', debitBalance: provisionPrior, creditBalance: 0 },
+        { account: 'Allowance for Doubtful Accounts', accountType: 'contra_asset', debitBalance: 0, creditBalance: 0 }, // Nets to zero after write-off
+        { account: 'Accounts Receivable', accountType: 'asset', debitBalance: 0, creditBalance: originalAR }, // Cleared
+      ],
+      pl: {
+        revenue: 0, cogs: 0, grossProfit: 0, grossMargin: 0,
+        operatingExpenses: [{ name: 'Bad Debt Expense', amount: provisionPrior }],
+        totalOpEx: provisionPrior, operatingIncome: -provisionPrior,
+        otherIncome: 0, netIncomeBeforeTax: -provisionPrior, incomeTax: 0, netIncome: -provisionPrior,
+      },
+      balanceSheet: {
+        assets: { currentAssets: [{ name: 'Accounts Receivable (net)', amount: -originalAR }], fixedAssets: [] },
+        liabilities: { currentLiabilities: [], longTermLiabilities: [] },
+        equity: [{ name: 'Retained Earnings', amount: -provisionPrior }],
+        totalAssets: -originalAR,
+        totalLiabilities: 0, totalEquity: -provisionPrior, isBalanced: false, // Simplified — opening equity not shown
+      },
+      gst: {
+        jurisdiction: 'sg', gstRate: 0.09,
+        totalSales: 0, gstOnSales: 0, totalPurchases: 0, gstOnPurchases: 0, netGSTPayable: 0,
+        gstOutputTaxAccount: 'GST Output Tax', gstInputTaxAccount: 'GST Input Tax', gstPayableAccount: 'IRAS Payable',
+      },
+      interpretations: [
+        {
+          transactionRef: 'WO-2025-001', account: 'Allowance for Doubtful Accounts', drCr: 'DR', amount: originalAR,
+          interpretation: 'Bad debt write-off using the allowance method (SFRS 9 expected credit loss). STEP 1 (prior period): Debit Bad Debt Expense, Credit Allowance for Doubtful Accounts (provision set up). STEP 2 (write-off period): Debit Allowance for Doubtful Accounts (use provision), Credit AR (clear the receivable). The P&L impact was already in the prior period — the write-off itself does NOT create a new expense.',
+          impactOnFinancials: 'Clears both AR and the provision. No additional P&L impact in write-off period (expense was recognised when provision was created).',
         },
       ],
     });

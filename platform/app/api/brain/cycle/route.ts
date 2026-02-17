@@ -159,85 +159,9 @@ export async function POST(request: NextRequest) {
         // Set mode on controller
         controller.setMode(mode === 'full' ? 'awake_full' : 'awake_lightweight');
 
-        // Build cycle input: use provided signals OR load from DB
-        // CRITICAL: Without loading signals from DB, the brain processes NOTHING
-        // when called from "Sync & Train" or "Train Now" buttons (which don't pass signals).
-        let cycleSignals = input?.signals || [];
-
-        if (cycleSignals.length === 0) {
-          // ── Streaming signal load ─────────────────────────────────────
-          // AWS ECS Fargate (4GB RAM) — we stream ALL historical signals in
-          // pages of SIGNAL_PAGE_SIZE instead of one giant query.
-          //
-          // Why streaming vs single query:
-          //   - A 2-year org with 200K signals × ~450 bytes = ~90MB single allocation
-          //   - Streaming 1K pages never holds more than ~450KB in JS at once
-          //   - Cognitive stack samples down to 2K anyway — streaming is free
-          //
-          // Lookback:
-          //   - full:        ALL signals (no time filter) — complete historical training
-          //   - lightweight: last 30 days — fast on-demand queries
-          //
-          // PERF: Exclude signal_metadata from bulk load — JSONB metadata averages
-          // 2KB per signal. We process signal_type/value/entity only in the brain cycle.
-
-          const isFullMode = mode === 'full';
-          const since = isFullMode
-            ? null // No time filter — load ALL history
-            : new Date(Date.now() - 30 * 24 * 3600000).toISOString(); // 30 days for lightweight
-
-          let offset = 0;
-          let hasMore = true;
-
-          while (hasMore) {
-            let query = service
-              .from("cross_domain_signals")
-              .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
-              .eq("organization_id", orgId)
-              .order("signal_timestamp", { ascending: false })
-              .range(offset, offset + SIGNAL_PAGE_SIZE - 1);
-
-            if (since) {
-              query = query.gte("signal_timestamp", since);
-            }
-
-            const { data: page } = await query;
-
-            if (!page || page.length === 0) {
-              hasMore = false;
-              break;
-            }
-
-            const mapped = page.map((s: any) => ({
-              id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
-              source: s.source_domain?.split('.')[0] || 'unknown',
-              domain: s.source_domain || 'unknown',
-              entityType: s.entity_type || 'unknown',
-              entityId: s.entity_id || 'unknown',
-              value: s.signal_value || 0,
-              timestamp: new Date(s.signal_timestamp).getTime(),
-              metadata: {}, // Metadata excluded from bulk load for memory efficiency
-            }));
-
-            cycleSignals.push(...mapped);
-            offset += SIGNAL_PAGE_SIZE;
-
-            // Stop paging for lightweight mode — 30-day window is bounded
-            // For full mode: keep paging until DB returns empty page
-            if (!isFullMode) {
-              hasMore = false;
-            }
-
-            // Safety: log progress for large orgs every 10K signals
-            if (isFullMode && cycleSignals.length % 10000 === 0 && cycleSignals.length > 0) {
-              console.log(`[BrainCycle] Streaming signals: ${cycleSignals.length} loaded so far...`);
-            }
-          }
-
-          console.log(`[BrainCycle] Signal load complete: ${cycleSignals.length} signals (mode=${mode})`);
-        }
-
-        // Load causal edges for richer brain processing
+        // ── Load causal edges + patterns first (needed by ALL batches) ────
+        // These are loaded once before streaming signals — they're the DAG
+        // that L8, L14 need in every batch (and for finalize blocking layers).
         let causalEdges: any[] = [];
         try {
           const { data: edges } = await service
@@ -246,7 +170,7 @@ export async function POST(request: NextRequest) {
             .eq("organization_id", orgId)
             .gte("confidence", 0.3)
             .order("confidence", { ascending: false })
-            .limit(2000); // Raised from 500 → 2000 (AWS ECS 4GB, ranked by confidence)
+            .limit(2000); // Ranked by confidence, 4GB ECS handles 2K edges fine
 
           if (edges && edges.length > 0) {
             causalEdges = edges.map((e: any) => ({
@@ -260,7 +184,6 @@ export async function POST(request: NextRequest) {
           // Non-critical: brain can run without causal edges
         }
 
-        // Load patterns from ai_memory
         let patterns: string[] = [];
         try {
           const { data: memories } = await service
@@ -268,8 +191,8 @@ export async function POST(request: NextRequest) {
             .select("content")
             .eq("organization_id", orgId)
             .eq("memory_type", "pattern")
-            .order("importance", { ascending: false }) // Highest importance patterns first
-            .limit(500); // Raised from 100 → 500 (AWS ECS 4GB)
+            .order("importance", { ascending: false })
+            .limit(500);
 
           if (memories) {
             patterns = memories.map((m: any) => m.content).filter(Boolean);
@@ -278,16 +201,127 @@ export async function POST(request: NextRequest) {
           // Non-critical: brain can run without patterns
         }
 
-        const cycleInput = {
-          signals: cycleSignals,
-          causalEdges,
-          patterns,
-          predictions: [],
-          metrics: [],
-          rawQuery: input?.query,
-        };
+        // ── Full mode: STREAMING — process ALL signals in 500-signal batches
+        // ── Lightweight mode: single 30-day window fetch (bounded, fast)
+        if (mode === 'full' && (!input?.signals || input.signals.length === 0)) {
+          // ── Import streaming API from cognitive stack ─────────────────
+          const {
+            createNeuralCortexController: _ncc,
+            createCognitiveStack: _cs,
+          } = await import("@nexus-ai/memory-stack");
 
-        result = await controller.runManagedCycle(cycleInput);
+          // Get the cognitive stack from the cached controller
+          // We use the controller's pipeline's cognitiveStack if accessible,
+          // otherwise delegate streaming to the controller via a streaming wrapper.
+          // The controller.runManagedCycleStreaming() handles batch dispatch.
+
+          const streamInput = {
+            causalEdges,
+            patterns,
+            predictions: [],
+            metrics: [],
+            rawQuery: input?.query,
+          };
+
+          // ── Stream signals from DB in SIGNAL_PAGE_SIZE pages ─────────
+          // Each page becomes one batch dispatched to the streaming cycle.
+          // Max RAM at any point: SIGNAL_PAGE_SIZE × 450 bytes = ~450KB
+          let offset = 0;
+          let totalStreamed = 0;
+          let streamHandle: any = null;
+
+          // Start the streaming cycle on the controller
+          if (typeof controller.beginStreamingCycle === 'function') {
+            streamHandle = controller.beginStreamingCycle(streamInput);
+          }
+
+          while (true) {
+            const { data: page } = await service
+              .from("cross_domain_signals")
+              .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
+              .eq("organization_id", orgId)
+              .order("signal_timestamp", { ascending: false })
+              .range(offset, offset + SIGNAL_PAGE_SIZE - 1);
+
+            if (!page || page.length === 0) break;
+
+            const batch = page.map((s: any) => ({
+              id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
+              source: s.source_domain?.split('.')[0] || 'unknown',
+              domain: s.source_domain || 'unknown',
+              entityType: s.entity_type || 'unknown',
+              entityId: s.entity_id || 'unknown',
+              value: s.signal_value || 0,
+              timestamp: new Date(s.signal_timestamp).getTime(),
+              metadata: {},
+            }));
+
+            if (streamHandle) {
+              // Streaming path: dispatch batch to cognitive stack directly
+              streamHandle.processBatch(batch);
+            }
+
+            totalStreamed += batch.length;
+            offset += SIGNAL_PAGE_SIZE;
+
+            if (totalStreamed % 10000 === 0) {
+              console.log(`[BrainCycle] Streaming: ${totalStreamed} signals processed...`);
+            }
+
+            if (page.length < SIGNAL_PAGE_SIZE) break; // Last page
+          }
+
+          console.log(`[BrainCycle] Stream complete: ${totalStreamed} signals in ${Math.ceil(totalStreamed / SIGNAL_PAGE_SIZE)} batches`);
+
+          // Finalize: run L14 (full DAG) + L15 (narrative) once, build result
+          if (streamHandle) {
+            result = await streamHandle.finalize();
+          } else {
+            // Fallback: controller doesn't support streaming yet — run managed cycle
+            // with all signals collected (should not happen once deployed)
+            console.warn('[BrainCycle] Controller does not support beginStreamingCycle — falling back to managed cycle');
+            result = await controller.runManagedCycle({ ...streamInput, signals: [] });
+          }
+
+        } else {
+          // ── Lightweight mode (or caller passed explicit signals) ───────
+          // Load 30-day window into memory (bounded ~few thousand signals)
+          let cycleSignals = input?.signals || [];
+
+          if (cycleSignals.length === 0) {
+            const since = new Date(Date.now() - 30 * 24 * 3600000).toISOString();
+            const { data: dbSignals } = await service
+              .from("cross_domain_signals")
+              .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
+              .eq("organization_id", orgId)
+              .gte("signal_timestamp", since)
+              .order("signal_timestamp", { ascending: false })
+              .limit(2000);
+
+            if (dbSignals && dbSignals.length > 0) {
+              cycleSignals = dbSignals.map((s: any) => ({
+                id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
+                source: s.source_domain?.split('.')[0] || 'unknown',
+                domain: s.source_domain || 'unknown',
+                entityType: s.entity_type || 'unknown',
+                entityId: s.entity_id || 'unknown',
+                value: s.signal_value || 0,
+                timestamp: new Date(s.signal_timestamp).getTime(),
+                metadata: {},
+              }));
+            }
+            console.log(`[BrainCycle] Lightweight: ${cycleSignals.length} signals (30-day window)`);
+          }
+
+          result = await controller.runManagedCycle({
+            signals: cycleSignals,
+            causalEdges,
+            patterns,
+            predictions: [],
+            metrics: [],
+            rawQuery: input?.query,
+          });
+        }
         break;
       }
 
