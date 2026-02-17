@@ -146,7 +146,7 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
   async function fetchRecentSignals(): Promise<any[]> {
     const allSignals: any[] = [];
     const PAGE_SIZE = 1000; // Supabase default max per request
-    const MAX_SIGNALS = 500_000; // Hard cap to prevent OOM — 500K is tractable for Granger O(n·p²)
+    const MAX_SIGNALS = 50_000; // Hard cap to prevent OOM — 50K is safe for 3-paradigm ensemble (Granger + PC/LiNGAM + KSG) at 4GB ECS memory
     let offset = 0;
     let hasMore = true;
 

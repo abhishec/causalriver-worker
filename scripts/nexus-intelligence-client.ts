@@ -58,17 +58,15 @@ const DEMO_ORG_NAME = 'Competition Demo 2026';
 
 /**
  * All 30 layers with metadata — maps to BOTH primary data table AND observability table.
- * Tables verified to exist in remote Supabase DB:
+ * Tables verified to exist in remote Supabase DB (all migrations applied as of 20260222000002):
  *   cross_domain_signals, resolved_entities, ai_memory, causal_relationships_statistical,
  *   brain_grammar_rules, ai_agent_activity, connector_sync_log, connector_signals,
- *   obs_signal_ingestion, obs_layer_health, obs_feedback_loops, obs_consolidation_cycles
- *
- * Tables NOT in remote DB (migration not applied):
- *   obs_deep_dreaming, obs_hierarchical_memory, obs_curiosity_engine, obs_agent_executions,
- *   domain_taxonomy_state, entity_graph_nodes, prediction_records, brain_evolution_snapshots,
- *   brain_intelligence_snapshots, brain_feedback_queue, obs_intelligence_mesh, obs_connector_operations
- *
- * For layers whose ideal table doesn't exist, we map to the closest existing table.
+ *   obs_signal_ingestion, obs_entity_resolution, obs_semantic_operations, obs_causal_calculations,
+ *   obs_pattern_learning, obs_agent_executions, obs_connector_operations, obs_feedback_loops,
+ *   obs_consolidation_cycles, obs_layer_health, obs_deep_dreaming, obs_hierarchical_memory,
+ *   obs_curiosity_engine, obs_intelligence_mesh, domain_taxonomy_state, entity_graph_nodes,
+ *   entity_graph_edges, prediction_records, brain_evolution_snapshots, brain_feedback_queue,
+ *   brain_intelligence_snapshots
  */
 const LAYER_REGISTRY: Array<{
   id: number;
@@ -84,43 +82,41 @@ const LAYER_REGISTRY: Array<{
 }> = [
   // ── BRAINSTEM (L1-L2) ────────────────────────────────────────────────
   { id: 1,  name: 'Signal Ingestion',        region: 'Brainstem',        cognitiveAnalog: 'Sensory Cortex',               dataTable: 'cross_domain_signals',              obsTable: 'obs_signal_ingestion' },
-  { id: 2,  name: 'Entity Resolution',       region: 'Brainstem',        cognitiveAnalog: 'Primary Sensory Association',  dataTable: 'resolved_entities',                 obsTable: 'obs_signal_ingestion' },
+  { id: 2,  name: 'Entity Resolution',       region: 'Brainstem',        cognitiveAnalog: 'Primary Sensory Association',  dataTable: 'resolved_entities',                 obsTable: 'obs_entity_resolution' },
   // ── LIMBIC (L3-L7) ──────────────────────────────────────────────────
-  { id: 3,  name: 'Semantic Memory',          region: 'Limbic',           cognitiveAnalog: 'Default Mode Network',         dataTable: 'ai_memory',                         obsTable: 'obs_consolidation_cycles' },
-  { id: 4,  name: 'Causal Graph Engine',     region: 'Limbic',           cognitiveAnalog: 'Hippocampus',                  dataTable: 'causal_relationships_statistical',  obsTable: 'obs_consolidation_cycles' },
-  { id: 5,  name: 'Pattern Memory',          region: 'Limbic',           cognitiveAnalog: 'Intrinsic Motivation',         dataTable: 'brain_grammar_rules',               obsTable: 'obs_consolidation_cycles' },
-  { id: 6,  name: 'Self-Modifying Cognition',region: 'Limbic',           cognitiveAnalog: 'Medial PFC',                   dataTable: 'ai_agent_activity',                 obsTable: 'obs_layer_health' },
-  { id: 7,  name: 'Connector Sync',          region: 'Limbic',           cognitiveAnalog: 'Corpus Callosum',              dataTable: 'connector_sync_log',                obsTable: 'obs_layer_health' },
+  { id: 3,  name: 'Semantic Memory',          region: 'Limbic',           cognitiveAnalog: 'Default Mode Network',         dataTable: 'ai_memory',                         obsTable: 'obs_semantic_operations' },
+  { id: 4,  name: 'Causal Graph Engine',     region: 'Limbic',           cognitiveAnalog: 'Hippocampus',                  dataTable: 'causal_relationships_statistical',  obsTable: 'obs_causal_calculations' },
+  { id: 5,  name: 'Pattern Memory',          region: 'Limbic',           cognitiveAnalog: 'Intrinsic Motivation',         dataTable: 'brain_grammar_rules',               obsTable: 'obs_pattern_learning' },
+  { id: 6,  name: 'Self-Modifying Cognition',region: 'Limbic',           cognitiveAnalog: 'Medial PFC',                   dataTable: 'ai_agent_activity',                 obsTable: 'obs_agent_executions' },
+  { id: 7,  name: 'Connector Sync',          region: 'Limbic',           cognitiveAnalog: 'Corpus Callosum',              dataTable: 'connector_sync_log',                obsTable: 'obs_connector_operations' },
   // ── NEOCORTEX (L8-L15) ──────────────────────────────────────────────
-  // L8-L10: obs tables missing → use cross_domain_signals with entity_type filter
-  { id: 8,  name: 'Deep Dreaming',           region: 'Neocortex',        cognitiveAnalog: 'Creative Cognition',           dataTable: 'ai_memory',                         obsTable: 'obs_consolidation_cycles' },
-  { id: 9,  name: 'Hierarchical Memory',     region: 'Neocortex',        cognitiveAnalog: 'Temporo-parietal Junction',    dataTable: 'ai_memory',                         obsTable: 'obs_consolidation_cycles' },
-  { id: 10, name: 'Curiosity Engine',        region: 'Neocortex',        cognitiveAnalog: 'Predictive Cortex',            dataTable: 'obs_feedback_loops',                obsTable: 'obs_feedback_loops' },
-  // L11-L15: obs_agent_executions missing → use ai_agent_activity or obs_signal_ingestion
-  { id: 11, name: 'Red Team',                region: 'Neocortex',        cognitiveAnalog: 'Amygdala + Insula',            dataTable: 'ai_agent_activity',                 obsTable: 'obs_layer_health' },
-  { id: 12, name: 'Experimentation',         region: 'Neocortex',        cognitiveAnalog: 'Scientific Method / PFC',      dataTable: 'ai_agent_activity',                 obsTable: 'obs_layer_health' },
+  { id: 8,  name: 'Deep Dreaming',           region: 'Neocortex',        cognitiveAnalog: 'Creative Cognition',           dataTable: 'ai_memory',                         obsTable: 'obs_deep_dreaming' },
+  { id: 9,  name: 'Hierarchical Memory',     region: 'Neocortex',        cognitiveAnalog: 'Temporo-parietal Junction',    dataTable: 'ai_memory',                         obsTable: 'obs_hierarchical_memory' },
+  { id: 10, name: 'Curiosity Engine',        region: 'Neocortex',        cognitiveAnalog: 'Predictive Cortex',            dataTable: 'obs_curiosity_engine',               obsTable: 'obs_curiosity_engine' },
+  { id: 11, name: 'Red Team',                region: 'Neocortex',        cognitiveAnalog: 'Amygdala + Insula',            dataTable: 'ai_agent_activity',                 obsTable: 'obs_agent_executions' },
+  { id: 12, name: 'Experimentation',         region: 'Neocortex',        cognitiveAnalog: 'Scientific Method / PFC',      dataTable: 'ai_agent_activity',                 obsTable: 'obs_intelligence_mesh' },
   { id: 13, name: 'Immune System',           region: 'Neocortex',        cognitiveAnalog: 'Pattern Recognition Immunity', dataTable: 'obs_signal_ingestion',               obsTable: 'obs_signal_ingestion' },
-  { id: 14, name: 'Goal-Backward Planning',  region: 'Neocortex',        cognitiveAnalog: 'Lateral PFC (planning)',       dataTable: 'ai_agent_activity',                 obsTable: 'obs_layer_health' },
-  { id: 15, name: 'Narrative Intelligence',  region: 'Neocortex',        cognitiveAnalog: "Broca's / Wernicke's Area",    dataTable: 'ai_memory',                         obsTable: 'obs_consolidation_cycles' },
+  { id: 14, name: 'Goal-Backward Planning',  region: 'Neocortex',        cognitiveAnalog: 'Lateral PFC (planning)',       dataTable: 'ai_agent_activity',                 obsTable: 'obs_agent_executions' },
+  { id: 15, name: 'Narrative Intelligence',  region: 'Neocortex',        cognitiveAnalog: "Broca's / Wernicke's Area",    dataTable: 'ai_memory',                         obsTable: 'obs_semantic_operations' },
   // ── SOMA (L16-L18) ──────────────────────────────────────────────────
-  { id: 16, name: 'Domain Hierarchy',        region: 'Soma',             cognitiveAnalog: 'Cerebral Organization',        dataTable: 'cross_domain_signals',              obsTable: 'obs_layer_health', dataFilter: { column: 'source_domain', value: 'engineering.github' } },
-  { id: 17, name: 'Cross-System Entity Linker', region: 'Soma',          cognitiveAnalog: 'Graph Perception',             dataTable: 'resolved_entities',                 obsTable: 'obs_layer_health' },
+  { id: 16, name: 'Domain Hierarchy',        region: 'Soma',             cognitiveAnalog: 'Cerebral Organization',        dataTable: 'domain_taxonomy_state',             obsTable: 'obs_layer_health' },
+  { id: 17, name: 'Cross-System Entity Linker', region: 'Soma',          cognitiveAnalog: 'Graph Perception',             dataTable: 'entity_graph_nodes',                obsTable: 'obs_layer_health' },
   { id: 18, name: 'Organizational Topology', region: 'Soma',             cognitiveAnalog: 'Social Topology',              dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
   // ── CORTEX (L19-L21) ────────────────────────────────────────────────
-  { id: 19, name: 'Impact Cascade Modeler',  region: 'Cortex',           cognitiveAnalog: 'Association Cortex',           dataTable: 'obs_feedback_loops',                obsTable: 'obs_feedback_loops' },
+  { id: 19, name: 'Impact Cascade Modeler',  region: 'Cortex',           cognitiveAnalog: 'Association Cortex',           dataTable: 'prediction_records',                obsTable: 'obs_feedback_loops' },
   { id: 20, name: 'Strategic Synthesis',     region: 'Cortex',           cognitiveAnalog: 'Lateral PFC (synthesis)',       dataTable: 'obs_consolidation_cycles',           obsTable: 'obs_consolidation_cycles' },
   { id: 21, name: 'Resource Allocation',     region: 'Cortex',           cognitiveAnalog: 'Dorsolateral PFC',             dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
   // ── CEREBELLUM (L22-L24) ─────────────────────────────────────────────
-  { id: 22, name: 'Knowledge Transfer',      region: 'Cerebellum',       cognitiveAnalog: 'Motor Coordination Analog',    dataTable: 'obs_layer_health',                  obsTable: 'obs_layer_health' },
+  { id: 22, name: 'Knowledge Transfer',      region: 'Cerebellum',       cognitiveAnalog: 'Motor Coordination Analog',    dataTable: 'brain_evolution_snapshots',          obsTable: 'obs_layer_health' },
   { id: 23, name: 'Process Mining',          region: 'Cerebellum',       cognitiveAnalog: 'Sequential Pattern Recognition',dataTable: 'obs_consolidation_cycles',          obsTable: 'obs_consolidation_cycles' },
-  { id: 24, name: 'Predictive Staffing',     region: 'Cerebellum',       cognitiveAnalog: 'Predictive Coding',            dataTable: 'connector_signals',                 obsTable: 'obs_layer_health' },
+  { id: 24, name: 'Predictive Staffing',     region: 'Cerebellum',       cognitiveAnalog: 'Predictive Coding',            dataTable: 'prediction_records',                obsTable: 'obs_feedback_loops' },
   // ── PREFRONTAL (L25-L27) ─────────────────────────────────────────────
   { id: 25, name: 'Competitive Intelligence',region: 'Prefrontal',       cognitiveAnalog: 'External Attention',           dataTable: 'obs_feedback_loops',                obsTable: 'obs_feedback_loops' },
-  { id: 26, name: 'Decision Audit Trail',    region: 'Prefrontal',       cognitiveAnalog: 'Self-Referential PFC',         dataTable: 'obs_consolidation_cycles',           obsTable: 'obs_consolidation_cycles' },
-  { id: 27, name: 'Org Learning Rate',       region: 'Prefrontal',       cognitiveAnalog: 'Meta-Learning',                dataTable: 'obs_consolidation_cycles',           obsTable: 'obs_consolidation_cycles' },
+  { id: 26, name: 'Decision Audit Trail',    region: 'Prefrontal',       cognitiveAnalog: 'Self-Referential PFC',         dataTable: 'brain_evolution_snapshots',          obsTable: 'obs_consolidation_cycles' },
+  { id: 27, name: 'Org Learning Rate',       region: 'Prefrontal',       cognitiveAnalog: 'Meta-Learning',                dataTable: 'brain_evolution_snapshots',          obsTable: 'obs_consolidation_cycles' },
   // ── CORPUS CALLOSUM (L28-L30) ────────────────────────────────────────
-  { id: 28, name: 'Cross-Org Transfer',      region: 'Corpus Callosum',  cognitiveAnalog: 'Inter-Brain Federation',       dataTable: 'connector_sync_log',                obsTable: 'obs_layer_health' },
-  { id: 29, name: 'Intervention Recommender',region: 'Corpus Callosum',  cognitiveAnalog: 'Integration Cortex',           dataTable: 'ai_agent_activity',                 obsTable: 'obs_layer_health' },
+  { id: 28, name: 'Cross-Org Transfer',      region: 'Corpus Callosum',  cognitiveAnalog: 'Inter-Brain Federation',       dataTable: 'connector_sync_log',                obsTable: 'obs_connector_operations' },
+  { id: 29, name: 'Intervention Recommender',region: 'Corpus Callosum',  cognitiveAnalog: 'Integration Cortex',           dataTable: 'ai_agent_activity',                 obsTable: 'obs_agent_executions' },
   { id: 30, name: 'Wisdom Layer',            region: 'Corpus Callosum',  cognitiveAnalog: 'Autobiographical Memory',      dataTable: 'ai_memory',                         obsTable: 'obs_consolidation_cycles' },
 ];
 
@@ -256,6 +252,53 @@ export class NexusIntelligenceClient {
     this.orgId = config.organizationId;
     this.config = config;
     this.repository = createSupabaseRepository(supabase, config.organizationId);
+  }
+
+  // ==========================================================================
+  // HEALTH CHECK: Validate all LAYER_REGISTRY tables exist
+  // ==========================================================================
+
+  async validateLayerTables(): Promise<{
+    allHealthy: boolean;
+    missing: Array<{ layerId: number; layerName: string; table: string; type: 'data' | 'obs' }>;
+    present: number;
+  }> {
+    const missing: Array<{ layerId: number; layerName: string; table: string; type: 'data' | 'obs' }> = [];
+    const checkedTables = new Set<string>();
+    let present = 0;
+
+    for (const layer of LAYER_REGISTRY) {
+      for (const [tbl, type] of [[layer.dataTable, 'data'], [layer.obsTable, 'obs']] as const) {
+        if (checkedTables.has(tbl)) continue;
+        checkedTables.add(tbl);
+
+        try {
+          const { error } = await this.supabase
+            .from(tbl)
+            .select('id', { count: 'exact', head: true })
+            .limit(0);
+
+          if (error) {
+            missing.push({ layerId: layer.id, layerName: layer.name, table: tbl, type });
+            logger.error(`[HealthCheck] Table "${tbl}" (L${layer.id} ${type}) does NOT exist or is inaccessible: ${error.message}`);
+          } else {
+            present++;
+          }
+        } catch (err: any) {
+          missing.push({ layerId: layer.id, layerName: layer.name, table: tbl, type });
+          logger.error(`[HealthCheck] Table "${tbl}" (L${layer.id} ${type}) query threw: ${err?.message || err}`);
+        }
+      }
+    }
+
+    const allHealthy = missing.length === 0;
+    if (allHealthy) {
+      logger.info(`[HealthCheck] All ${present} LAYER_REGISTRY tables verified in remote DB.`);
+    } else {
+      logger.error(`[HealthCheck] ${missing.length} table(s) MISSING in remote DB. ${present} present. Missing: ${missing.map(m => m.table).join(', ')}`);
+    }
+
+    return { allHealthy, missing, present };
   }
 
   // ==========================================================================
@@ -1030,17 +1073,20 @@ export class NexusIntelligenceClient {
           query = query.eq(layer.dataFilter.column, layer.dataFilter.value);
         }
 
-        const { count } = await query;
+        const { count, error: primaryError } = await query;
+        if (primaryError) throw primaryError;
         recordCount = count || 0;
-      } catch {
-        // Table might not exist yet — try obsTable as fallback
+      } catch (primaryErr: any) {
+        logger.warn(`L${layer.id} (${layer.name}): Primary table "${layer.dataTable}" failed: ${primaryErr?.message || primaryErr}. Falling back to "${layer.obsTable}".`);
         try {
-          const { count } = await this.supabase
+          const { count, error: obsError } = await this.supabase
             .from(layer.obsTable)
             .select('id', { count: 'exact', head: true })
             .eq('organization_id', this.orgId);
+          if (obsError) throw obsError;
           recordCount = count || 0;
-        } catch {
+        } catch (obsErr: any) {
+          logger.error(`L${layer.id} (${layer.name}): BOTH tables missing — "${layer.dataTable}" AND "${layer.obsTable}": ${obsErr?.message || obsErr}. Returning 0.`);
           recordCount = 0;
         }
       }

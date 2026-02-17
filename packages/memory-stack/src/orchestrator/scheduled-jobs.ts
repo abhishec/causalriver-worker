@@ -129,7 +129,7 @@ export function createScheduledJobs(
       const lookbackCutoff = new Date(
         Date.now() - fullConfig.lookbackDays * 24 * 60 * 60 * 1000
       ).toISOString();
-      const MAX_SIGNALS = 500_000; // Safety cap: ~100MB at ~200 bytes/signal
+      const MAX_SIGNALS = 50_000; // Safety cap: 50K signals safe for 3-paradigm ensemble at 4GB ECS memory
 
       const allSignals: any[] = [];
       let hitCap = false;
@@ -145,7 +145,7 @@ export function createScheduledJobs(
             .from('cross_domain_signals')
             .select('id, source_domain, signal_type, signal_value, signal_timestamp, created_at')
             .eq('organization_id', organizationId)
-            .gte('created_at', lookbackCutoff) // CRITICAL: Only fetch within lookback window
+            .gte('signal_timestamp', lookbackCutoff) // Use signal_timestamp (actual event time) not created_at (DB insert time)
             .order('id', { ascending: true })
             .limit(batchSize);
 

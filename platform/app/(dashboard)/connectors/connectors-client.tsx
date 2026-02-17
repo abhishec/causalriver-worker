@@ -9,6 +9,7 @@ import { StatusDot } from "@/components/ui/StatusDot";
 import { StatValue } from "@/components/ui/StatValue";
 import { GitHubSetupModal } from "@/components/connectors/GitHubSetupModal";
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
+import { S3UploadModal } from "@/components/connectors/S3UploadModal";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -89,6 +90,7 @@ export function ConnectorsClient({
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showS3Upload, setShowS3Upload] = useState(false);
   const [showIngestion, setShowIngestion] = useState(false);
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ type: string; success: boolean; message: string } | null>(null);
@@ -450,7 +452,17 @@ export function ConnectorsClient({
 
                 {/* Connect Action */}
                 <div className="pt-3 border-t border-border-subtle">
-                  {connector.oauth ? (
+                  {connector.type === "s3-storage" ? (
+                    <button
+                      onClick={() => setShowS3Upload(true)}
+                      className="w-full py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                      </svg>
+                      Upload Data
+                    </button>
+                  ) : connector.oauth ? (
                     <div className="flex gap-2">
                       {isGitHub ? (
                         <>
@@ -544,6 +556,23 @@ export function ConnectorsClient({
         isOpen={showSetupModal}
         onClose={() => setShowSetupModal(false)}
         onConnected={handleGitHubConnected}
+      />
+
+      {/* S3 Upload Modal */}
+      <S3UploadModal
+        isOpen={showS3Upload}
+        onClose={() => setShowS3Upload(false)}
+        onUploaded={(result) => {
+          if (result.brainIngestion?.triggered) {
+            setMessage({
+              type: "success",
+              text: `Uploaded ${result.fileName} — brain ingested ${result.brainIngestion.signalsIngested} signals from ${result.brainIngestion.transactionCount} transactions`,
+            });
+          } else {
+            setMessage({ type: "success", text: `Uploaded ${result.fileName} to S3 storage` });
+          }
+          router.refresh();
+        }}
       />
     </div>
   );

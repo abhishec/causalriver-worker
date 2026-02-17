@@ -14,6 +14,8 @@ import { formatNumber, formatUSD, timeAgo } from "@/lib/utils";
 import type { IntelligenceEvent } from "@/components/intelligence/StreamEvent";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -75,73 +77,32 @@ export function OverviewClient({
   const dayOfMonth = new Date().getDate();
   const projectedMonthly = dayOfMonth > 0 ? (costToday / Math.max(1, dayOfMonth)) * daysInMonth : 0;
 
-  /* ── First-Run / Empty State CTA ───────────────────────────────── */
-  const isFirstRun = connectors.length === 0 && totalEdges === 0 && signalsToday === 0;
+  /* ── First-Run / Onboarding Detection ──────────────────────────── */
+  const hasConnectors = connectors.length > 0;
+  const hasSignals = signalsToday > 0 || totalEdges > 0;
+  const isFirstRun = !hasConnectors && !hasSignals;
+
+  const [wizardDismissed, setWizardDismissed] = useState(false);
+  useEffect(() => {
+    const dismissed = localStorage.getItem("nexus_onboarding_dismissed");
+    if (dismissed === "true") setWizardDismissed(true);
+  }, []);
+
+  const showWizard = (isFirstRun || (!hasSignals && hasConnectors)) && !wizardDismissed;
 
   return (
     <div className="space-y-6">
-      {/* First-run onboarding CTA */}
-      {isFirstRun && (
-        <Card variant="brain-highlight" padding="lg" className="relative overflow-hidden">
-          {/* Background glow */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-brain-active/5 blur-2xl pointer-events-none" />
-
-          <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0 ring-1 ring-accent/20">
-              <svg className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-              </svg>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold tracking-tight mb-1">Welcome to NexusBrain</h2>
-              <p className="text-sm text-muted-foreground mb-3 max-w-xl">
-                Connect your first data source to start building your causal intelligence graph. NexusBrain discovers statistically-proven relationships across your systems — things no human or LLM can find alone.
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/connectors"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                  </svg>
-                  Connect a Data Source
-                </Link>
-                <Link
-                  href="/copilot"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border-subtle text-sm text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                  </svg>
-                  Try the Copilot
-                </Link>
-              </div>
-            </div>
-
-            {/* Getting started steps */}
-            <div className="shrink-0 w-full md:w-auto">
-              <div className="flex flex-row md:flex-col gap-3 text-[11px]">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-accent/20 text-accent flex items-center justify-center text-[10px] font-bold">1</div>
-                  <span className="text-muted-foreground">Connect GitHub, Jira, or Stripe</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-surface-elevated text-muted flex items-center justify-center text-[10px] font-bold ring-1 ring-border-subtle">2</div>
-                  <span className="text-muted/60">Brain discovers causal patterns</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-surface-elevated text-muted flex items-center justify-center text-[10px] font-bold ring-1 ring-border-subtle">3</div>
-                  <span className="text-muted/60">Get proactive intelligence alerts</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+      {/* Onboarding Wizard — guided 3-step flow for design partners */}
+      {showWizard && (
+        <OnboardingWizard
+          orgName="your organization"
+          hasConnectors={hasConnectors}
+          hasSignals={hasSignals}
+          onDismiss={() => {
+            setWizardDismissed(true);
+            localStorage.setItem("nexus_onboarding_dismissed", "true");
+          }}
+        />
       )}
 
       {/* ── Zone 1: Brain Vitals Strip ───────────────────────────────── */}

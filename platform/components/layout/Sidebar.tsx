@@ -8,20 +8,35 @@ import { OrgSwitcher } from "./OrgSwitcher";
 import { NotificationBell } from "./NotificationBell";
 
 /* ── Navigation Structure ─────────────────────────────────────────────────── */
+/* Primary: Always visible. Core pages design partners need for onboarding.    */
+/* Extended: Hidden behind "More" toggle. Power-user / advanced sections.      */
 
-const NAV_SECTIONS = [
+const PRIMARY_SECTIONS = [
   {
     id: "core",
     items: [
       { label: "Command Center", href: "/overview", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" },
-      { label: "Brain Explorer", href: "/brain", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
       { label: "Intelligence", href: "/copilot", icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" },
+      { label: "Connectors", href: "/connectors", icon: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" },
     ],
   },
+  {
+    id: "services",
+    label: "Services",
+    items: [
+      { label: "Accounting Jarvis", href: "/accounting-jarvis", icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" },
+      { label: "Finance Jarvis", href: "/finance-jarvis", icon: "M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+      { label: "Code Intel", href: "/code-intelligence", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
+    ],
+  },
+];
+
+const EXTENDED_SECTIONS = [
   {
     id: "discover",
     label: "Discover",
     items: [
+      { label: "Brain Explorer", href: "/brain", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
       { label: "Early Warning", href: "/early-warning", icon: "M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" },
       { label: "Services", href: "/capabilities", icon: "M11.42 15.17l-5.658-3.163A1.114 1.114 0 016 12.513V7.843c0-.387.21-.744.546-.933l5.658-3.163a1.115 1.115 0 011.092 0l5.658 3.163c.336.189.546.546.546.933v4.67c0 .387-.21.744-.546.933l-5.658 3.163a1.115 1.115 0 01-1.092 0z" },
       { label: "Predictions", href: "/predictions", icon: "M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" },
@@ -33,17 +48,7 @@ const NAV_SECTIONS = [
     id: "connect",
     label: "Connect",
     items: [
-      { label: "Connectors", href: "/connectors", icon: "M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" },
       { label: "Training", href: "/training", icon: "M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" },
-      { label: "Code Intel", href: "/code-intelligence", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
-    ],
-  },
-  {
-    id: "services",
-    label: "Services",
-    items: [
-      { label: "Finance Jarvis", href: "/finance-jarvis", icon: "M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
-      { label: "Accounting Jarvis", href: "/accounting-jarvis", icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" },
     ],
   },
   {
@@ -57,21 +62,98 @@ const NAV_SECTIONS = [
 ];
 
 const SIDEBAR_COLLAPSED_KEY = "nexus_sidebar_collapsed";
+const SIDEBAR_MORE_KEY = "nexus_sidebar_more";
+
+/* ── Helper: Render a nav section ──────────────────────────────────────── */
+
+function NavSection({
+  section,
+  pathname,
+  collapsed,
+}: {
+  section: typeof PRIMARY_SECTIONS[number];
+  pathname: string;
+  collapsed: boolean;
+}) {
+  return (
+    <div>
+      {section.label && !collapsed && (
+        <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
+          {section.label}
+        </div>
+      )}
+      {collapsed && section.label && (
+        <div className="h-px bg-border-subtle mx-2 mb-1.5" />
+      )}
+      <div className="space-y-0.5">
+        {section.items.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.label : undefined}
+              className={cn(
+                "flex items-center gap-2.5 rounded-lg text-[13px] transition-all duration-150",
+                collapsed ? "justify-center p-2.5" : "px-3 py-2",
+                isActive
+                  ? "bg-accent/10 text-accent font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
+              )}
+            >
+              <svg
+                className={cn("w-[18px] h-[18px] shrink-0", isActive ? "text-accent" : "text-muted")}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+              </svg>
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Sidebar ──────────────────────────────────────────────────────── */
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     if (saved === "true") setCollapsed(true);
+    const moreSaved = localStorage.getItem(SIDEBAR_MORE_KEY);
+    if (moreSaved === "true") setShowMore(true);
   }, []);
+
+  // Auto-expand "More" if user is on an extended section page
+  useEffect(() => {
+    const allExtendedHrefs = EXTENDED_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
+    if (allExtendedHrefs.includes(pathname)) {
+      setShowMore(true);
+    }
+  }, [pathname]);
 
   function toggleCollapse() {
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
       window.dispatchEvent(new CustomEvent("sidebar-collapse", { detail: { collapsed: next } }));
+      return next;
+    });
+  }
+
+  function toggleMore() {
+    setShowMore((prev) => {
+      const next = !prev;
+      localStorage.setItem(SIDEBAR_MORE_KEY, String(next));
       return next;
     });
   }
@@ -152,50 +234,57 @@ export function Sidebar() {
       {/* ── Org Switcher ──────────────────────────────────────────────── */}
       {!collapsed && <OrgSwitcher />}
 
-      {/* ── Navigation ────────────────────────────────────────────────── */}
+      {/* ── Primary Navigation ────────────────────────────────────────── */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
-        {NAV_SECTIONS.map((section) => (
-          <div key={section.id}>
-            {section.label && !collapsed && (
-              <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
-                {section.label}
-              </div>
-            )}
-            {collapsed && section.label && (
-              <div className="h-px bg-border-subtle mx-2 mb-1.5" />
-            )}
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={collapsed ? item.label : undefined}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-lg text-[13px] transition-all duration-150",
-                      collapsed ? "justify-center p-2.5" : "px-3 py-2",
-                      isActive
-                        ? "bg-accent/10 text-accent font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
-                    )}
-                  >
-                    <svg
-                      className={cn("w-[18px] h-[18px] shrink-0", isActive ? "text-accent" : "text-muted")}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                    </svg>
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+        {PRIMARY_SECTIONS.map((section) => (
+          <NavSection key={section.id} section={section} pathname={pathname} collapsed={collapsed} />
         ))}
+
+        {/* ── More Toggle ───────────────────────────────────────────── */}
+        {!collapsed && (
+          <button
+            onClick={toggleMore}
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all"
+          >
+            <svg
+              className={cn("w-[18px] h-[18px] text-muted transition-transform duration-200", showMore && "rotate-90")}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <span>More</span>
+            <span className="text-[10px] text-muted ml-auto">{EXTENDED_SECTIONS.reduce((c, s) => c + s.items.length, 0)}</span>
+          </button>
+        )}
+        {collapsed && (
+          <button
+            onClick={toggleMore}
+            title="More sections"
+            className="flex items-center justify-center w-full p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all"
+          >
+            <svg
+              className={cn("w-[18px] h-[18px] text-muted transition-transform duration-200", showMore && "rotate-90")}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            </svg>
+          </button>
+        )}
+
+        {/* ── Extended Sections (behind "More") ─────────────────────── */}
+        {showMore && (
+          <div className="space-y-5 animate-fade-in-up">
+            {EXTENDED_SECTIONS.map((section) => (
+              <NavSection key={section.id} section={section} pathname={pathname} collapsed={collapsed} />
+            ))}
+          </div>
+        )}
       </nav>
 
       {/* ── Settings ──────────────────────────────────────────────────── */}
