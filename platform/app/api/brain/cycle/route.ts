@@ -204,17 +204,8 @@ export async function POST(request: NextRequest) {
         // ── Full mode: STREAMING — process ALL signals in 500-signal batches
         // ── Lightweight mode: single 30-day window fetch (bounded, fast)
         if (mode === 'full' && (!input?.signals || input.signals.length === 0)) {
-          // ── Import streaming API from cognitive stack ─────────────────
-          const {
-            createNeuralCortexController: _ncc,
-            createCognitiveStack: _cs,
-          } = await import("@nexus-ai/memory-stack");
-
-          // Get the cognitive stack from the cached controller
-          // We use the controller's pipeline's cognitiveStack if accessible,
-          // otherwise delegate streaming to the controller via a streaming wrapper.
-          // The controller.runManagedCycleStreaming() handles batch dispatch.
-
+          // ── Full mode: stream ALL signals through controller.beginStreamingCycle() ──
+          // The controller holds the cognitive stack internally — no need to re-import.
           const streamInput = {
             causalEdges,
             patterns,
@@ -275,7 +266,7 @@ export async function POST(request: NextRequest) {
 
           // Finalize: run L14 (full DAG) + L15 (narrative) once, build result
           if (streamHandle) {
-            result = await streamHandle.finalize();
+            result = streamHandle.finalize();
           } else {
             // Fallback: controller doesn't support streaming yet — run managed cycle
             // with all signals collected (should not happen once deployed)
