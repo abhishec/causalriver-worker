@@ -319,7 +319,8 @@ function generateSlackSignals(orgId: string): Array<Record<string, unknown>> {
 // which requires a full causal_relationship record) and register them via the Oracle.
 function buildTestPredictions(orgId: string): WatchedPrediction[] {
   const now = Date.now();
-  const verifyIn1h = new Date(now + 1 * 3_600_000);   // verify after 1h (immediately verifiable in test)
+  // Set verifyAfter in the PAST so Oracle verifies them immediately on processBatch()
+  const verifyIn1h = new Date(now - 60_000);  // 1 minute ago — immediately verifiable
   const expireIn48h = new Date(now + 48 * 3_600_000);
 
   return [
@@ -421,13 +422,30 @@ async function buildController(orgId: string, supabase: ReturnType<typeof create
   return controller;
 }
 
-// ── Format bandit leaderboard ─────────────────────────────────────────────────
-function formatLeaderboard(lb: Array<{ method: string; ucbScore: number; wins: number; total: number }>) {
-  if (!lb || lb.length === 0) return '  (no bandit data — arms will be seeded after first reward)';
+// ── Bandit leaderboard helpers ────────────────────────────────────────────────
+// getMethodLeaderboard() returns: { method, pairsWon, avgReward }
+type BanditEntry = { method: string; pairsWon?: number; avgReward?: number; ucbScore?: number; wins?: number; total?: number };
+
+function formatLeaderboard(lb: BanditEntry[]) {
+  if (!lb || lb.length === 0) return '  (no bandit data — arms accumulate after first oracle reward)';
   return lb
     .slice(0, 6)
-    .map(m => `  ${m.method.padEnd(22)} UCB=${m.ucbScore.toFixed(4)}  wins=${m.wins}/${m.total}`)
+    .map(m => {
+      const score = ((m.avgReward ?? m.ucbScore) ?? 0).toFixed(4);
+      const wins = m.pairsWon ?? m.wins ?? 0;
+      return `  ${m.method.padEnd(22)} avgReward=${score}  pairs_won=${wins}`;
+    })
     .join('\n');
+}
+
+function getTopUCB(lb: BanditEntry[]): number {
+  if (!lb || lb.length === 0) return 0;
+  const top = lb[0];
+  return (top?.avgReward ?? top?.ucbScore) ?? 0;
+}
+
+function getTopMethod(lb: BanditEntry[]): string {
+  return lb?.[0]?.method ?? 'N/A';
 }
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
@@ -713,9 +731,8 @@ async function main() {
         };
       }
 
-      const leaderboard = bandit.getMethodLeaderboard();
+      const leaderboard: BanditEntry[] = bandit.getMethodLeaderboard() ?? [];
       banditArmsCount = leaderboard.length;
-      const top = leaderboard[0] ?? { method: 'N/A', ucbScore: 0, wins: 0, total: 0 };
       const oracleMs = Date.now() - oracleStart;
 
       console.log(`  │  C. Oracle + UCB1 Bandit        ${oracleMs}ms`);
@@ -738,8 +755,8 @@ async function main() {
         predictionsExpired: oracleResult?.predictionsExpired ?? 0,
         predictionsPending: oracleResult?.predictionsPending ?? 0,
         banditRewards: oracleResult?.banditRewardsGiven ?? 0,
-        topMethod: top.method,
-        topUCB: top.ucbScore ?? 0,
+        topMethod: getTopMethod(leaderboard),
+        topUCB: getTopUCB(leaderboard),
         banditArmsCount,
       });
     } catch (err: any) {
@@ -818,25 +835,28 @@ async function main() {
   // ── ⑥ RL Convergence Report ──────────────────────────────────────────────
   divider('⑥ Reinforcement Learning Convergence Report');
 
-  console.log(`  Rd | Learner | Brain   | Oracle | Verified | Rewards | Arms | Top Method                | UCB`);
-  console.log(`  ${'─'.repeat(100)}`);
+  console.log(`  Rd | Learner | Brain   | Oracle | Verified | Rewards | Arms | Top Method                | AvgRew`);
+  console.log(`  ${'─'.repeat(102)}`);
   for (const r of roundResults) {
+    const ucbStr = typeof r.topUCB === 'number' ? r.topUCB.toFixed(4) : '0.0000';
     console.log(
       `  ${r.round}  | ${String(r.learnerMs).padStart(5)}ms | ${String(r.brainMs).padStart(5)}ms | ${String(r.oracleMs).padStart(4)}ms |` +
       `${String(r.predictionsVerified).padStart(9)} |${String(r.banditRewards).padStart(8)} |${String(r.banditArmsCount).padStart(5)} |` +
-      ` ${r.topMethod.substring(0, 25).padEnd(25)} | ${r.topUCB.toFixed(4)}`
+      ` ${r.topMethod.substring(0, 25).padEnd(25)} | ${ucbStr}`
     );
   }
 
   hr();
   const firstUCB   = roundResults[0]?.topUCB ?? 0;
   const lastUCB    = roundResults[roundResults.length - 1]?.topUCB ?? 0;
+  const firstUCBStr = (typeof firstUCB === 'number' ? firstUCB : 0).toFixed(4);
+  const lastUCBStr  = (typeof lastUCB  === 'number' ? lastUCB  : 0).toFixed(4);
   const totalVer   = roundResults.reduce((a, r) => a + r.predictionsVerified, 0);
   const totalRew   = roundResults.reduce((a, r) => a + r.banditRewards, 0);
 
   const rlWorking = totalVer > 0 || totalRew > 0 || lastUCB > firstUCB;
 
-  console.log(`\n  UCB1 convergence: ${firstUCB.toFixed(4)} → ${lastUCB.toFixed(4)}  ${lastUCB >= firstUCB ? '↑ IMPROVING / stable' : '↓ (needs more data)'}`);
+  console.log(`\n  AvgReward convergence: ${firstUCBStr} → ${lastUCBStr}  ${lastUCB >= firstUCB ? '↑ IMPROVING / stable' : '↓ (needs more data)'}`);
   console.log(`  Total predictions verified : ${totalVer}`);
   console.log(`  Total bandit rewards given : ${totalRew}`);
   console.log(`  RL loop working            : ${rlWorking ? '✅ YES' : '⚠️  insufficient data yet (run with --rounds=5)'}`);
