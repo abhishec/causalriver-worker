@@ -44,6 +44,13 @@ case "${BRAIN_PROCESS}" in
     echo "  GitHub Token: ${GITHUB_TOKEN:+YES}${GITHUB_TOKEN:-NO}"
     exec pnpm exec tsx scripts/git-code-trainer-runner.ts
     ;;
+  jira-trainer)
+    echo "Starting JIRA Trainer Agent (Apache JIRA)..."
+    echo "  Dry Run: ${JIRA_TRAINER_DRY_RUN:-false}"
+    echo "  Mode: ${JIRA_TRAINER_MODE:-incremental}"
+    echo "  Source: issues.apache.org (public, no auth)"
+    exec pnpm exec tsx scripts/jira-trainer-runner.ts
+    ;;
   cost-agent)
     echo "Starting Cost Agent..."
     echo "  Mode: ${COST_AGENT_MODE:-once}"
@@ -98,6 +105,7 @@ case "${BRAIN_PROCESS}" in
     echo "  benchmark             LongMemEval benchmark suite (one-shot)"
     echo "  benchmark-optimizer   Python benchmark tuning (one-shot)"
     echo "  git-trainer           GitHub engineering patterns (one-shot)"
+    echo "  jira-trainer          Apache JIRA PM patterns (one-shot)"
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"
