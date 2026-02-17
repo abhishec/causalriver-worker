@@ -189,53 +189,67 @@ function generateGitHubSignals(orgId: string): Array<Record<string, unknown>> {
       signal_value: 1,
       entity_type: 'workflow_run',
       entity_id: `github/ci/${1000 + i}`,
-      signal_timestamp: daysAgo(randBetween(1, 30)),
+      // Push regular CI signals to >7 days ago (before baselineTimestamp = 7d ago)
+      // so Oracle filters them out when evaluating transfer_entropy prediction.
+      // This ensures only the oracle-target ci_failed signals (value=0.28-0.34) are used.
+      signal_timestamp: daysAgo(randBetween(8, 30)),
       signal_metadata: { workflow: 'CI', branch: i % 2 === 0 ? 'main' : `feature/pr-${100 + i}` },
     });
   }
 
   // ── ORACLE TARGET SIGNALS ─────────────────────────────────────────────────
-  // Insert 10 very recent signals (within last 2h) with the exact signal_types
-  // that the test predictions watch. This guarantees the oracle can verify them.
-  // These are the "observed outcome" signals that prove the causal predictions.
-  for (let i = 0; i < 10; i++) {
-    const reviewer = weightedPick(TEAM.engineers, TEAM.reviewerWeights);
-    const cycleTimeHours = reviewer === 'alice' ? randBetween(35, 65) : randBetween(5, 15);
+  // Insert very recent signals (within last 1.5h) calibrated to match prediction baselines/magnitudes.
+  //
+  // Oracle verification requires: magnitudeError = |actualMag - predictedMag| ≤ 0.3
+  // Formula: actualMagnitude = clamp((avg - baseline) / baseline, -1, 1)
+  // To produce reward > 0: signal avg must be ≈ baseline × (1 + predictedMagnitude)
+  //
+  // Prediction 1 (conditional): baseline=14.0, direction=increase, predictedMag=0.65
+  //   → need avg ≈ 14 * 1.65 = 23.1  → signals around 22-24
+  for (let i = 0; i < 5; i++) {
     signals.push({
       organization_id: orgId,
       source_domain: 'engineering',
-      signal_type: 'pr_merged',        // watched by predictions 1 + 2
-      signal_value: cycleTimeHours,
+      signal_type: 'pr_merged',        // watched by prediction 1
+      signal_value: 22 + Math.random() * 2,  // avg≈23 → magnitude=(23-14)/14=0.64 ≈ 0.65
       entity_type: 'pull_request',
-      entity_id: `github/pr/oracle-target-${i}`,
-      signal_timestamp: hoursAgo(randBetween(0.1, 1.5)), // within last 90min
-      signal_metadata: { reviewer, author: 'alice', cycle_time_hours: cycleTimeHours, oracle_target: true },
+      entity_id: `github/pr/oracle-target-cond-${i}`,
+      signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
+      signal_metadata: { oracle_target: true, for_prediction: 'conditional' },
     });
   }
-  // CI failures — watched by prediction 3
+  // Prediction 2 (pc_structural): baseline=14.0 (reuse pr_merged), direction=decrease, predictedMag=0.40
+  // BUT oracle uses avg of ALL matching pr_merged signals — so we use a separate target.
+  // In practice pred2 watches same domain+type as pred1, so it gets same signals.
+  // pred2: direction=decrease but signals are above baseline → wasCorrect=false → reward=0 (tests penalisation)
+  // (no extra signals needed — pred2 watches same 'engineering'/'pr_merged' and sees the same ones)
+
+  // Prediction 3 (transfer_entropy): baseline=0.2, direction=increase, predictedMag=0.55
+  //   → need avg ≈ 0.2 * 1.55 = 0.31 → signals around 0.25-0.37
   for (let i = 0; i < 5; i++) {
     signals.push({
       organization_id: orgId,
       source_domain: 'engineering',
       signal_type: 'ci_failed',        // watched by prediction 3
-      signal_value: 1,
+      signal_value: 0.28 + Math.random() * 0.06,  // avg≈0.31 → magnitude=(0.31-0.2)/0.2=0.55
       entity_type: 'workflow_run',
       entity_id: `github/ci/oracle-target-${i}`,
       signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
-      signal_metadata: { workflow: 'CI', branch: 'main', oracle_target: true },
+      signal_metadata: { workflow: 'CI', branch: 'main', oracle_target: true, for_prediction: 'transfer_entropy' },
     });
   }
-  // Sprint velocity signals — watched by prediction 4 (wrong direction)
-  for (let i = 0; i < 3; i++) {
+  // Prediction 4 (regime_conditional): baseline=30, direction=decrease, predictedMag=0.30 — WRONG DIRECTION
+  //   Signal values go UP (40+) → tests penalisation path
+  for (let i = 0; i < 5; i++) {
     signals.push({
       organization_id: orgId,
       source_domain: 'product',
       signal_type: 'sprint_completed',  // watched by prediction 4
-      signal_value: randBetween(28, 42), // velocity goes UP (proving prediction 4 wrong)
+      signal_value: randBetween(39, 43), // avg≈41, goes UP → wrong direction → reward=0
       entity_type: 'sprint',
       entity_id: `PLATFORM-sprint-oracle-${i}`,
       signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
-      signal_metadata: { oracle_target: true },
+      signal_metadata: { oracle_target: true, for_prediction: 'regime_conditional' },
     });
   }
 
@@ -369,8 +383,13 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
   const expireIn48h = new Date(now + 48 * 3_600_000);
 
   return [
-    // ① Reviewer concentration → PR cycle time ↑ (CORRECT — alice hoards reviews)
-    // discoveryMethod: 'conditional' = Conditional Granger (multivariate, controls for intermediaries)
+    // ① Reviewer concentration → PR cycle time ↑ (CORRECT)
+    // discoveryMethod: 'conditional' = Conditional Granger (multivariate)
+    //
+    // Signal reality: regular PR signals have alice reviewing 70% at 30-72h avg=~39h.
+    // Oracle averages ALL pr_merged signals → avg≈39h. baseline=14h.
+    // actualMagnitude = clamp((39-14)/14, -1, 1) = 1.0 (capped).
+    // So predictedMagnitude must be close to 1.0: |0.95 - 1.0| = 0.05 ≤ 0.3 → wasCorrect=true
     {
       predictionId: `test_pred_conditional_${now}`,
       organizationId: orgId,
@@ -379,18 +398,20 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       watchMetric: 'engineering.pr_merged',
       watchSignalType: 'pr_merged',
       watchDomain: 'engineering',
-      baselineValue: 14.0,  // 14h baseline cycle time
+      baselineValue: 14.0,  // 14h baseline (pre-alice-bottleneck era)
       baselineTimestamp: new Date(now - 7 * 86_400_000),
       predictedDirection: 'increase' as const,
-      predictedMagnitude: 0.65,
+      predictedMagnitude: 0.95,   // actual ≈ 1.0 (alice reviews 70%@30-72h) → error=0.05 ✓
       confidence: 0.78,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
       discoveryMethod: 'conditional',
       status: 'pending' as const,
     },
-    // ② After-hours Slack → PR merge rate ↓ (CORRECT — crunch day pattern in data)
-    // discoveryMethod: 'pc_structural' = PC algorithm + VarLiNGAM (catches confounders)
+    // ② After-hours Slack → PR merge rate ↓  — WRONG DIRECTION (tests penalisation)
+    // discoveryMethod: 'pc_structural' = PC algorithm + VarLiNGAM
+    // Oracle signals: pr_merged goes UP (alice bottleneck → increase), pred says decrease
+    // → directionCorrect=false → reward=0 → arm penalised ← this is the desired test
     {
       predictionId: `test_pred_pc_structural_${now}`,
       organizationId: orgId,
@@ -399,9 +420,9 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       watchMetric: 'engineering.pr_merged',
       watchSignalType: 'pr_merged',
       watchDomain: 'engineering',
-      baselineValue: 0.45,  // 45% after-hours ratio baseline
+      baselineValue: 14.0,  // same baseline (same signal domain/type as pred 1)
       baselineTimestamp: new Date(now - 7 * 86_400_000),
-      predictedDirection: 'decrease' as const,
+      predictedDirection: 'decrease' as const,   // WRONG — signals go up → penalised ✓
       predictedMagnitude: 0.40,
       confidence: 0.65,
       verifyAfter: verifyIn1h,
@@ -409,8 +430,11 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       discoveryMethod: 'pc_structural',
       status: 'pending' as const,
     },
-    // ③ High-priority Jira backlog → CI failures ↑ (CORRECT — data shows 9 open P0s)
+    // ③ High-priority Jira backlog → CI failures ↑ (CORRECT)
     // discoveryMethod: 'transfer_entropy' = KSG transfer entropy (nonlinear relationships)
+    // CI signals: signal_value=0.28-0.34, baseline=0.2 → magnitude=(0.31-0.2)/0.2=0.55
+    // The oracle-target ci_failed signals are the only ci_failed signals in the DB.
+    // magnitudeError = |0.55 - 0.55| ≈ 0 ≤ 0.3 → wasCorrect=true → reward ≈ 1.0
     {
       predictionId: `test_pred_transfer_entropy_${now}`,
       organizationId: orgId,
@@ -419,10 +443,10 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       watchMetric: 'engineering.ci_failed',
       watchSignalType: 'ci_failed',
       watchDomain: 'engineering',
-      baselineValue: 0.2,  // 20% CI failure baseline
+      baselineValue: 0.2,   // 20% CI failure rate baseline
       baselineTimestamp: new Date(now - 7 * 86_400_000),
       predictedDirection: 'increase' as const,
-      predictedMagnitude: 0.55,
+      predictedMagnitude: 0.55,   // oracle-target signals avg≈0.31 → mag≈0.55 → error≈0 ✓
       confidence: 0.70,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
@@ -430,7 +454,9 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       status: 'pending' as const,
     },
     // ④ Thread engagement → sprint velocity ↓ — WRONG DIRECTION (tests penalisation)
-    // discoveryMethod: 'regime_conditional' = Regime-conditional (regime-switching relationships)
+    // discoveryMethod: 'regime_conditional' = Regime-conditional (regime-switching)
+    // Sprint signals: oracle-target values avg≈41, baseline=30 → direction=INCREASE not decrease
+    // → directionCorrect=false → reward=0 → arm penalised ✓
     {
       predictionId: `test_pred_regime_conditional_${now}`,
       organizationId: orgId,
@@ -439,9 +465,9 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       watchMetric: 'product.sprint_completed',
       watchSignalType: 'sprint_completed',
       watchDomain: 'product',
-      baselineValue: 0.4,
+      baselineValue: 30,    // 30 points sprint velocity baseline (matches sprint signal scale)
       baselineTimestamp: new Date(now - 7 * 86_400_000),
-      predictedDirection: 'decrease' as const,  // wrong — high engagement → higher velocity
+      predictedDirection: 'decrease' as const,   // WRONG — sprint velocity goes UP → penalised ✓
       predictedMagnitude: 0.30,
       confidence: 0.50,
       verifyAfter: verifyIn1h,
@@ -791,6 +817,12 @@ async function main() {
       info(`      expired:  ${oracleResult?.predictionsExpired ?? 0}`);
       info(`      pending:  ${oracleResult?.predictionsPending ?? 0}`);
       info(`      bandit rewards: ${oracleResult?.banditRewardsGiven ?? 0}`);
+      // Show per-prediction verification details to expose wasCorrect/reward values
+      if (VERBOSE && oracleResult?.verifications?.length) {
+        oracleResult.verifications.forEach((v: any) => {
+          info(`      [${v.discoveryMethod}] dir=${v.actualDirection}(pred:${v.predictedDirection}) mag=${v.actualMagnitude?.toFixed(3)}(pred:${v.predictedMagnitude?.toFixed(3)}) err=${v.magnitudeError?.toFixed(3)} correct=${v.wasCorrect} reward=${v.banditReward?.toFixed(4)}`);
+        });
+      }
 
       if (VERBOSE || round === N_ROUNDS) {
         const lb = formatLeaderboard(leaderboard);
