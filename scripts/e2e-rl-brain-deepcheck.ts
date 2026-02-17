@@ -45,7 +45,7 @@ import {
   createCrossSystemEntityGraph,
   createBrainObservabilityBridge,
   registerAllAgents,
-  type BANDIT_ARMS,
+  type BanditArm,
 } from '../packages/memory-stack/src/index';
 import type { WatchedPrediction } from '../packages/memory-stack/src/causality/outcome-oracle';
 
@@ -194,6 +194,51 @@ function generateGitHubSignals(orgId: string): Array<Record<string, unknown>> {
     });
   }
 
+  // ── ORACLE TARGET SIGNALS ─────────────────────────────────────────────────
+  // Insert 10 very recent signals (within last 2h) with the exact signal_types
+  // that the test predictions watch. This guarantees the oracle can verify them.
+  // These are the "observed outcome" signals that prove the causal predictions.
+  for (let i = 0; i < 10; i++) {
+    const reviewer = weightedPick(TEAM.engineers, TEAM.reviewerWeights);
+    const cycleTimeHours = reviewer === 'alice' ? randBetween(35, 65) : randBetween(5, 15);
+    signals.push({
+      organization_id: orgId,
+      source_domain: 'engineering',
+      signal_type: 'pr_merged',        // watched by predictions 1 + 2
+      signal_value: cycleTimeHours,
+      entity_type: 'pull_request',
+      entity_id: `github/pr/oracle-target-${i}`,
+      signal_timestamp: hoursAgo(randBetween(0.1, 1.5)), // within last 90min
+      signal_metadata: { reviewer, author: 'alice', cycle_time_hours: cycleTimeHours, oracle_target: true },
+    });
+  }
+  // CI failures — watched by prediction 3
+  for (let i = 0; i < 5; i++) {
+    signals.push({
+      organization_id: orgId,
+      source_domain: 'engineering',
+      signal_type: 'ci_failed',        // watched by prediction 3
+      signal_value: 1,
+      entity_type: 'workflow_run',
+      entity_id: `github/ci/oracle-target-${i}`,
+      signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
+      signal_metadata: { workflow: 'CI', branch: 'main', oracle_target: true },
+    });
+  }
+  // Sprint velocity signals — watched by prediction 4 (wrong direction)
+  for (let i = 0; i < 3; i++) {
+    signals.push({
+      organization_id: orgId,
+      source_domain: 'product',
+      signal_type: 'sprint_completed',  // watched by prediction 4
+      signal_value: randBetween(28, 42), // velocity goes UP (proving prediction 4 wrong)
+      entity_type: 'sprint',
+      entity_id: `PLATFORM-sprint-oracle-${i}`,
+      signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
+      signal_metadata: { oracle_target: true },
+    });
+  }
+
   return signals;
 }
 
@@ -325,8 +370,9 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
 
   return [
     // ① Reviewer concentration → PR cycle time ↑ (CORRECT — alice hoards reviews)
+    // discoveryMethod: 'conditional' = Conditional Granger (multivariate, controls for intermediaries)
     {
-      predictionId: `test_pred_granger_${now}`,
+      predictionId: `test_pred_conditional_${now}`,
       organizationId: orgId,
       sourceDomain: 'engineering',
       targetDomain: 'engineering',
@@ -340,12 +386,13 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       confidence: 0.78,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
-      discoveryMethod: 'granger' as any,
+      discoveryMethod: 'conditional',
       status: 'pending' as const,
     },
     // ② After-hours Slack → PR merge rate ↓ (CORRECT — crunch day pattern in data)
+    // discoveryMethod: 'pc_structural' = PC algorithm + VarLiNGAM (catches confounders)
     {
-      predictionId: `test_pred_pearson_${now}`,
+      predictionId: `test_pred_pc_structural_${now}`,
       organizationId: orgId,
       sourceDomain: 'communication',
       targetDomain: 'engineering',
@@ -359,10 +406,11 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       confidence: 0.65,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
-      discoveryMethod: 'pearson' as any,
+      discoveryMethod: 'pc_structural',
       status: 'pending' as const,
     },
     // ③ High-priority Jira backlog → CI failures ↑ (CORRECT — data shows 9 open P0s)
+    // discoveryMethod: 'transfer_entropy' = KSG transfer entropy (nonlinear relationships)
     {
       predictionId: `test_pred_transfer_entropy_${now}`,
       organizationId: orgId,
@@ -378,12 +426,13 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       confidence: 0.70,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
-      discoveryMethod: 'transfer_entropy' as any,
+      discoveryMethod: 'transfer_entropy',
       status: 'pending' as const,
     },
     // ④ Thread engagement → sprint velocity ↓ — WRONG DIRECTION (tests penalisation)
+    // discoveryMethod: 'regime_conditional' = Regime-conditional (regime-switching relationships)
     {
-      predictionId: `test_pred_iv_2sls_${now}`,
+      predictionId: `test_pred_regime_conditional_${now}`,
       organizationId: orgId,
       sourceDomain: 'communication',
       targetDomain: 'product',
@@ -397,7 +446,7 @@ function buildTestPredictions(orgId: string): WatchedPrediction[] {
       confidence: 0.50,
       verifyAfter: verifyIn1h,
       expiresAt: expireIn48h,
-      discoveryMethod: 'iv_2sls' as any,
+      discoveryMethod: 'regime_conditional',
       status: 'pending' as const,
     },
   ];
@@ -923,17 +972,30 @@ async function main() {
   // ── ⑧ Cleanup ────────────────────────────────────────────────────────────
   if (!KEEP_DATA && insertedIds.length > 0) {
     divider('⑧ Cleanup (removing synthetic signals)');
-    const { error: cleanErr } = await supabase
-      .from('cross_domain_signals')
-      .delete()
-      .in('id', insertedIds);
-    if (cleanErr) {
-      fail(`Cleanup failed: ${cleanErr.message}`);
+    // Chunk deletes into batches of 100 to avoid Supabase URL length limits
+    const CHUNK = 100;
+    let deleted = 0;
+    let cleanErrors = 0;
+    for (let i = 0; i < insertedIds.length; i += CHUNK) {
+      const chunk = insertedIds.slice(i, i + CHUNK);
+      const { error: cleanErr } = await supabase
+        .from('cross_domain_signals')
+        .delete()
+        .in('id', chunk);
+      if (cleanErr) {
+        cleanErrors += chunk.length;
+        info(`Cleanup error chunk ${Math.ceil(i / CHUNK)}: ${cleanErr.message.substring(0, 60)}`);
+      } else {
+        deleted += chunk.length;
+      }
+    }
+    if (cleanErrors > 0) {
+      fail(`Cleanup partial: removed ${deleted}, failed ${cleanErrors}`);
     } else {
-      ok(`Removed ${insertedIds.length} synthetic signals`);
+      ok(`Removed ${deleted} synthetic signals`);
     }
 
-    // Also clean up test predictions
+    // Also clean up test predictions (these use text IDs starting with 'test_pred_')
     await supabase
       .from('outcome_observation_windows')
       .delete()
