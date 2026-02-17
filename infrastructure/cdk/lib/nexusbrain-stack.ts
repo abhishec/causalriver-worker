@@ -12,6 +12,7 @@ import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
@@ -141,6 +142,44 @@ export class NexusBrainStack extends cdk.Stack {
     const redisEndpoint = `redis://${redisCluster.attrRedisEndpointAddress}:${redisCluster.attrRedisEndpointPort}`;
 
     // ═════════════════════════════════════════════════════════════
+    // S3 ORG-DATA BUCKET (org-level file storage)
+    // ═════════════════════════════════════════════════════════════
+
+    const orgDataBucket = new s3.Bucket(this, 'OrgDataBucket', {
+      bucketName: `nexusbrain-org-data-${environment}`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      versioned: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: environment === 'production'
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: environment !== 'production',
+      lifecycleRules: [
+        {
+          id: 'move-to-ia-after-90-days',
+          transitions: [
+            {
+              storageClass: s3.StorageClass.INFREQUENT_ACCESS,
+              transitionAfter: cdk.Duration.days(90),
+            },
+          ],
+        },
+        {
+          id: 'expire-old-versions',
+          noncurrentVersionExpiration: cdk.Duration.days(365),
+        },
+      ],
+      cors: [
+        {
+          allowedHeaders: ['*'],
+          allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT],
+          allowedOrigins: ['*'], // restrict to domain in production
+          maxAge: 3600,
+        },
+      ],
+    });
+
+    // ═════════════════════════════════════════════════════════════
     // ECR REPOSITORY
     // ═════════════════════════════════════════════════════════════
 
@@ -175,6 +214,9 @@ export class NexusBrainStack extends cdk.Stack {
       ],
     });
 
+    // Grant S3 read/write access to ECS tasks for org-data storage
+    orgDataBucket.grantReadWrite(taskRole);
+
     const executionRole = new iam.Role(this, 'ExecutionRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
@@ -206,6 +248,8 @@ export class NexusBrainStack extends cdk.Stack {
       environment: {
         PORT: '3000',
         REDIS_URL: redisEndpoint,
+        AWS_S3_BUCKET_NAME: orgDataBucket.bucketName,
+        AWS_REGION: this.region,
       },
       secrets: {
         SUPABASE_URL: ecs.Secret.fromSecretsManager(appSecrets, 'SUPABASE_URL'),
@@ -349,6 +393,12 @@ export class NexusBrainStack extends cdk.Stack {
       value: cluster.clusterName,
       description: 'ECS cluster name',
       exportName: `${environment}-ECSClusterName`,
+    });
+
+    new cdk.CfnOutput(this, 'OrgDataBucketName', {
+      value: orgDataBucket.bucketName,
+      description: 'S3 bucket for org-level file storage',
+      exportName: `${environment}-OrgDataBucketName`,
     });
 
     new cdk.CfnOutput(this, 'HealthEndpoint', {

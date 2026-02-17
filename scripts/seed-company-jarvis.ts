@@ -204,6 +204,14 @@ async function seedCompanyJarvis() {
         headcount: 87,
         description: 'Series A AML compliance SaaS company selling across 5 APAC countries',
       },
+      storage_config: {
+        s3: {
+          bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+          region: process.env.AWS_REGION || 'ap-southeast-1',
+          prefix: COMPANY_JARVIS_ORG_ID,
+          enabled: true,
+        },
+      },
     }, { onConflict: 'id' });
 
   if (orgError) {
@@ -238,6 +246,30 @@ async function seedCompanyJarvis() {
     }
   } catch {
     console.log(`  Skipping org_members (run seed-users.ts first for user linking)`);
+  }
+
+  // Register S3 storage connector
+  const { data: existingS3 } = await supabase
+    .from('org_connectors')
+    .select('id')
+    .eq('organization_id', COMPANY_JARVIS_ORG_ID)
+    .eq('connector_type', 's3-storage')
+    .single();
+  if (!existingS3) {
+    await supabase.from('org_connectors').insert({
+      organization_id: COMPANY_JARVIS_ORG_ID,
+      connector_type: 's3-storage',
+      status: 'active',
+      config: {
+        bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+        region: process.env.AWS_REGION || 'ap-southeast-1',
+        prefix: COMPANY_JARVIS_ORG_ID,
+        purpose: 'Org-level file storage (CSV, JSON, reports)',
+      },
+    });
+    console.log('  [created] S3 storage connector');
+  } else {
+    console.log('  [exists] S3 storage connector');
   }
   console.log();
 

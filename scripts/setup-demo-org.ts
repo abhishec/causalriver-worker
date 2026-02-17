@@ -73,6 +73,14 @@ async function createDemoOrganization(
         description: 'Competition demo org — Memory Genesis, CauseMe, CausalRivers',
         demo: true,
       },
+      storage_config: {
+        s3: {
+          bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+          region: process.env.AWS_REGION || 'ap-southeast-1',
+          prefix: config.orgId,
+          enabled: true,
+        },
+      },
       created_at: new Date().toISOString()
     });
 
@@ -85,6 +93,30 @@ async function createDemoOrganization(
 
   // Link platform admin to demo org (if exists)
   await linkPlatformAdminToOrg(supabase, config.orgId);
+
+  // Register S3 storage connector
+  const { data: existingS3 } = await supabase
+    .from('org_connectors')
+    .select('id')
+    .eq('organization_id', config.orgId)
+    .eq('connector_type', 's3-storage')
+    .single();
+  if (!existingS3) {
+    await supabase.from('org_connectors').insert({
+      organization_id: config.orgId,
+      connector_type: 's3-storage',
+      status: 'active',
+      config: {
+        bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+        region: process.env.AWS_REGION || 'ap-southeast-1',
+        prefix: config.orgId,
+        purpose: 'Org-level file storage (CSV, JSON, reports)',
+      },
+    });
+    logger.info('  [created] S3 storage connector');
+  } else {
+    logger.info('  [exists] S3 storage connector');
+  }
 }
 
 async function linkPlatformAdminToOrg(supabase: any, orgId: string): Promise<void> {

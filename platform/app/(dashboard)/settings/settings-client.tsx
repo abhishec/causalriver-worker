@@ -29,6 +29,7 @@ interface SettingsClientProps {
 }
 
 const AVAILABLE_CONNECTORS = [
+  { type: "s3-storage", name: "AWS S3", icon: "📦", desc: "Org-level file storage (CSV, JSON, reports, GL data)" },
   { type: "stripe", name: "Stripe", icon: "💳", desc: "Payment processing & subscription data" },
   { type: "hubspot", name: "HubSpot", icon: "🟠", desc: "CRM contacts, deals, and pipeline data" },
   { type: "github", name: "GitHub", icon: "🐙", desc: "Repositories, PRs, issues, and deployments" },

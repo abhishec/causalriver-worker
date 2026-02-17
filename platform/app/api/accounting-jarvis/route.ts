@@ -302,15 +302,31 @@ function processGLData(transactions: GLTransaction[]) {
   };
 }
 
-// ── Load GL data from Supabase Storage (org-scoped) ─────────────────────────
-// GL data lives in Supabase Storage bucket "org-data" at {orgId}/gl-data.json
+// ── Load GL data (S3 primary → Supabase Storage fallback) ───────────────────
+// GL data lives in S3 at {orgId}/gl-data.json (or Supabase Storage as fallback).
 // In-memory cache avoids re-downloading 12MB on every request within the same
 // serverless invocation.
+import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
+
 const glCache = new Map<string, GLTransaction[]>();
 
 async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   if (glCache.has(orgId)) return glCache.get(orgId)!;
 
+  // Try S3 first (primary storage)
+  if (isS3Configured()) {
+    try {
+      const storage = getOrgStorage();
+      const transactions = await storage.downloadJSON<GLTransaction[]>(orgId, "gl-data.json");
+      glCache.set(orgId, transactions);
+      console.log(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
+      return transactions;
+    } catch (s3Err: any) {
+      console.warn(`[GL] S3 load failed for org ${orgId}, falling back to Supabase:`, s3Err?.message);
+    }
+  }
+
+  // Fallback: Supabase Storage
   const service = await createServiceClient();
   const storagePath = `${orgId}/gl-data.json`;
 
@@ -326,6 +342,7 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   const text = await data.text();
   const transactions = JSON.parse(text) as GLTransaction[];
   glCache.set(orgId, transactions);
+  console.log(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;
 }
 

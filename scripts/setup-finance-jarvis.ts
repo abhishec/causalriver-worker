@@ -260,6 +260,14 @@ async function setupFinanceJarvis() {
         countries: ['US', 'SG'],
         description: 'SEC EDGAR + startup financial intelligence — real market data brain',
       },
+      storage_config: {
+        s3: {
+          bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+          region: process.env.AWS_REGION || 'ap-southeast-1',
+          prefix: FINANCE_JARVIS_ORG_ID,
+          enabled: true,
+        },
+      },
     }, { onConflict: 'id' });
 
   if (orgError) {
@@ -290,6 +298,30 @@ async function setupFinanceJarvis() {
     } else {
       console.log(`  ✅ Platform admin already linked`);
     }
+  }
+
+  // Register S3 storage connector
+  const { data: existingS3 } = await supabase
+    .from('org_connectors')
+    .select('id')
+    .eq('organization_id', FINANCE_JARVIS_ORG_ID)
+    .eq('connector_type', 's3-storage')
+    .single();
+  if (!existingS3) {
+    await supabase.from('org_connectors').insert({
+      organization_id: FINANCE_JARVIS_ORG_ID,
+      connector_type: 's3-storage',
+      status: 'active',
+      config: {
+        bucket: process.env.AWS_S3_BUCKET_NAME || 'nexusbrain-org-data',
+        region: process.env.AWS_REGION || 'ap-southeast-1',
+        prefix: FINANCE_JARVIS_ORG_ID,
+        purpose: 'Org-level file storage (CSV, JSON, reports)',
+      },
+    });
+    console.log('  [created] S3 storage connector');
+  } else {
+    console.log('  [exists] S3 storage connector');
   }
   console.log();
 

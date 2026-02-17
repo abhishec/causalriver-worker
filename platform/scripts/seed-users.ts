@@ -175,6 +175,46 @@ async function main() {
     process.exit(1);
   }
 
+  // 2b. Set S3 storage config
+  console.log("\n   Setting S3 storage config...");
+  await supabase
+    .from("organizations")
+    .update({
+      storage_config: {
+        s3: {
+          bucket: process.env.AWS_S3_BUCKET_NAME || "nexusbrain-org-data",
+          region: process.env.AWS_REGION || "ap-southeast-1",
+          prefix: org.id,
+          enabled: true,
+        },
+      },
+    })
+    .eq("id", org.id);
+
+  // Register S3 storage connector
+  const { data: existingS3 } = await supabase
+    .from("org_connectors")
+    .select("id")
+    .eq("organization_id", org.id)
+    .eq("connector_type", "s3-storage")
+    .single();
+  if (!existingS3) {
+    await supabase.from("org_connectors").insert({
+      organization_id: org.id,
+      connector_type: "s3-storage",
+      status: "active",
+      config: {
+        bucket: process.env.AWS_S3_BUCKET_NAME || "nexusbrain-org-data",
+        region: process.env.AWS_REGION || "ap-southeast-1",
+        prefix: org.id,
+        purpose: "Org-level file storage (CSV, JSON, reports)",
+      },
+    });
+    console.log("   [created] S3 storage connector");
+  } else {
+    console.log("   [exists] S3 storage connector");
+  }
+
   // 3. Create Tookitaki users and add to org
   console.log("\n3. Tookitaki Users:");
   for (const userDef of TOOKITAKI_USERS) {
