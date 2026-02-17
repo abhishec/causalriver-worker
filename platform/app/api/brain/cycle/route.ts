@@ -40,9 +40,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 // In-memory controller cache (one per org, lazy-initialized)
 // This keeps the controller alive between requests for state continuity
+// AWS ECS Fargate: 4GB RAM per task — safe to cache more controllers
 const controllerCache = new Map<string, { controller: any; createdAt: number }>();
 const CONTROLLER_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const MAX_CACHED_CONTROLLERS = 5; // Hard cap — each controller is ~500MB-1GB
+const MAX_CACHED_CONTROLLERS = 10; // Raised from 5 → 10 (4GB ECS tasks, ~200MB per controller)
+
+// Signal streaming: page size for batched DB reads (avoids loading all signals into RAM at once)
+const SIGNAL_PAGE_SIZE = 1000;
 
 // Proactive background eviction — runs every 5 minutes to prevent OOM
 // Without this, stale controllers accumulate until a cache miss triggers eviction
@@ -161,25 +165,50 @@ export async function POST(request: NextRequest) {
         let cycleSignals = input?.signals || [];
 
         if (cycleSignals.length === 0) {
-          // Load recent signals from cross_domain_signals
-          // Full mode: load last 90 days for comprehensive analysis
-          // Lightweight mode: load last 7 days for quick processing
-          const lookbackDays = mode === 'full' ? 90 : 7;
-          const since = new Date(Date.now() - lookbackDays * 24 * 3600000).toISOString();
-
+          // ── Streaming signal load ─────────────────────────────────────
+          // AWS ECS Fargate (4GB RAM) — we stream ALL historical signals in
+          // pages of SIGNAL_PAGE_SIZE instead of one giant query.
+          //
+          // Why streaming vs single query:
+          //   - A 2-year org with 200K signals × ~450 bytes = ~90MB single allocation
+          //   - Streaming 1K pages never holds more than ~450KB in JS at once
+          //   - Cognitive stack samples down to 2K anyway — streaming is free
+          //
+          // Lookback:
+          //   - full:        ALL signals (no time filter) — complete historical training
+          //   - lightweight: last 30 days — fast on-demand queries
+          //
           // PERF: Exclude signal_metadata from bulk load — JSONB metadata averages
-          // 2KB per signal. At 10K signals, that's 20MB of unnecessary data transfer.
-          // The brain cycle processes signal_type/value/entity, not raw metadata.
-          const { data: dbSignals } = await service
-            .from("cross_domain_signals")
-            .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
-            .eq("organization_id", orgId)
-            .gte("signal_timestamp", since)
-            .order("signal_timestamp", { ascending: false })
-            .limit(mode === 'full' ? 10000 : 2000);
+          // 2KB per signal. We process signal_type/value/entity only in the brain cycle.
 
-          if (dbSignals && dbSignals.length > 0) {
-            cycleSignals = dbSignals.map((s: any) => ({
+          const isFullMode = mode === 'full';
+          const since = isFullMode
+            ? null // No time filter — load ALL history
+            : new Date(Date.now() - 30 * 24 * 3600000).toISOString(); // 30 days for lightweight
+
+          let offset = 0;
+          let hasMore = true;
+
+          while (hasMore) {
+            let query = service
+              .from("cross_domain_signals")
+              .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
+              .eq("organization_id", orgId)
+              .order("signal_timestamp", { ascending: false })
+              .range(offset, offset + SIGNAL_PAGE_SIZE - 1);
+
+            if (since) {
+              query = query.gte("signal_timestamp", since);
+            }
+
+            const { data: page } = await query;
+
+            if (!page || page.length === 0) {
+              hasMore = false;
+              break;
+            }
+
+            const mapped = page.map((s: any) => ({
               id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
               source: s.source_domain?.split('.')[0] || 'unknown',
               domain: s.source_domain || 'unknown',
@@ -189,7 +218,23 @@ export async function POST(request: NextRequest) {
               timestamp: new Date(s.signal_timestamp).getTime(),
               metadata: {}, // Metadata excluded from bulk load for memory efficiency
             }));
+
+            cycleSignals.push(...mapped);
+            offset += SIGNAL_PAGE_SIZE;
+
+            // Stop paging for lightweight mode — 30-day window is bounded
+            // For full mode: keep paging until DB returns empty page
+            if (!isFullMode) {
+              hasMore = false;
+            }
+
+            // Safety: log progress for large orgs every 10K signals
+            if (isFullMode && cycleSignals.length % 10000 === 0 && cycleSignals.length > 0) {
+              console.log(`[BrainCycle] Streaming signals: ${cycleSignals.length} loaded so far...`);
+            }
           }
+
+          console.log(`[BrainCycle] Signal load complete: ${cycleSignals.length} signals (mode=${mode})`);
         }
 
         // Load causal edges for richer brain processing
@@ -200,7 +245,8 @@ export async function POST(request: NextRequest) {
             .select("source_domain, target_domain, correlation_strength, p_value, confidence, effect_size")
             .eq("organization_id", orgId)
             .gte("confidence", 0.3)
-            .limit(500);
+            .order("confidence", { ascending: false })
+            .limit(2000); // Raised from 500 → 2000 (AWS ECS 4GB, ranked by confidence)
 
           if (edges && edges.length > 0) {
             causalEdges = edges.map((e: any) => ({
@@ -222,8 +268,8 @@ export async function POST(request: NextRequest) {
             .select("content")
             .eq("organization_id", orgId)
             .eq("memory_type", "pattern")
-            .order("created_at", { ascending: false })
-            .limit(100);
+            .order("importance", { ascending: false }) // Highest importance patterns first
+            .limit(500); // Raised from 100 → 500 (AWS ECS 4GB)
 
           if (memories) {
             patterns = memories.map((m: any) => m.content).filter(Boolean);

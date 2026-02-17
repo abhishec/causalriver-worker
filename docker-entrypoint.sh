@@ -115,6 +115,14 @@ case "${BRAIN_PROCESS}" in
     echo "Starting Monthly Deep Analysis (full historical causal discovery)..."
     exec pnpm exec tsx scripts/brain-monthly-runner.ts
     ;;
+  historical-deep-train)
+    echo "Starting Historical Deep Train (full signal history → brain)..."
+    echo "  Org ID:       ${ORGANIZATION_ID}"
+    echo "  Batch Size:   ${HISTORICAL_BATCH_DAYS:-90} days per batch"
+    echo "  Lookback:     ${HISTORICAL_LOOKBACK_YEARS:-2} years total"
+    echo "  Dry Run:      ${HISTORICAL_DRY_RUN:-false}"
+    exec pnpm exec tsx scripts/historical-deep-trainer.ts
+    ;;
   federation)
     echo "Starting Federation Agent (Core <> Org brain knowledge flow)..."
     exec pnpm exec tsx scripts/brain-orchestrator.ts --agent federation-agent
@@ -162,6 +170,7 @@ case "${BRAIN_PROCESS}" in
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"
+  echo "  historical-deep-train Full signal history → brain training in rolling batches (one-shot)"
     echo "  federation            Core <> Org knowledge federation (one-shot)"
     echo "  security              Security vulnerability scanning (one-shot)"
     echo "  proactive-intelligence  Proactive alerting & threat detection (one-shot)"

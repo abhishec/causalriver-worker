@@ -477,7 +477,11 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       // Strategy: Keep max COGNITIVE_SAMPLE signals, proportionally sampled by
       // domain to preserve diversity. Domains with < 10 signals always included.
       // ================================================================
-      const COGNITIVE_SAMPLE = 500; // Max signals per cognitive cycle
+      // AWS ECS Fargate (4GB RAM per task): raised from 500 → 2000.
+      // At 450 bytes/signal × 2000 = ~900KB in cognitive layer — well within budget.
+      // The streaming brain cycle can now pass 50K+ signals; cognitive stack
+      // intelligently samples 2000 of them via stratified domain attention.
+      const COGNITIVE_SAMPLE = 2000; // Max signals per cognitive cycle
       let sampledSignals = input.signals;
 
       if (input.signals.length > COGNITIVE_SAMPLE) {
@@ -498,7 +502,7 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
             result.push(...domainSignals);
           } else {
             // Common domain: proportional evenly-spaced sampling
-            const count = Math.max(5, Math.floor(domainSignals.length * sampleRate));
+            const count = Math.max(10, Math.floor(domainSignals.length * sampleRate));
             const step = domainSignals.length / count;
             for (let i = 0; i < count; i++) {
               result.push(domainSignals[Math.floor(i * step)]);

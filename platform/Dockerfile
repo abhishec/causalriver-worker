@@ -110,6 +110,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# AWS ECS Fargate: 4GB RAM per task — give Next.js server 3.5GB heap.
+# Brain cycle API routes stream large signal datasets; without this flag
+# Node defaults to ~1.5GB and OOMs on full historical training requests.
+ENV NODE_OPTIONS="--max-old-space-size=3584"
 
 # Security: non-root user (Alpine-compatible syntax)
 RUN addgroup -g 1001 -S nodejs && \

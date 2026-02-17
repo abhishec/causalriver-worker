@@ -116,6 +116,10 @@ USER nexusbrain
 # Environment
 ENV NODE_ENV=production
 ENV PORT=3000
+# AWS ECS Fargate: 4GB RAM per task (2048 CPU, 4096 MiB in task definition)
+# Set Node.js heap to 3.5GB — leaves 512MB headroom for OS + native modules.
+# Without this Node defaults to ~1.5GB and OOMs on large historical training runs.
+ENV NODE_OPTIONS="--max-old-space-size=3584"
 
 EXPOSE 3000
 

@@ -187,10 +187,18 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   // OOM PREVENTION: Hard caps on array sizes to prevent unbounded memory growth.
   // At 10M signals scale, repos can have 50K+ PRs, 100K+ commits, etc.
   // Without caps, fullSync() would accumulate GB of data in memory.
-  const MAX_PRS = 5000;
-  const MAX_ISSUES = 5000;
-  const MAX_WORKFLOW_RUNS = 3000;
-  const MAX_COMMITS = 5000;
+  //
+  // AWS ECS Fargate (4GB RAM per task) — raised caps significantly:
+  //   Each PR/issue/commit in memory ≈ ~2KB (with JSON detail payload)
+  //   20K PRs × 2KB = ~40MB — well within 4GB budget.
+  //   The signals written to DB are much smaller (~450 bytes each).
+  //
+  // These caps control the connector fetch, not the brain cycle.
+  // The brain cycle streams from DB in pages — fully independent.
+  const MAX_PRS = 20000;
+  const MAX_ISSUES = 20000;
+  const MAX_WORKFLOW_RUNS = 10000;
+  const MAX_COMMITS = 20000;
 
   // ── Fetch helpers ────────────────────────────────────────────────
 
