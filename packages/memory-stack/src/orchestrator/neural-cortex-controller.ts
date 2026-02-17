@@ -553,9 +553,38 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
 
   let _mode: BrainMode = 'awake_full';
   let _cycleCount = 0;
+  let _cycleCountLoaded = false; // Has cycle count been loaded from DB?
   let _lastCycleDurationMs = 0;
   let _cycleDurationEma = 0; // Exponential moving average
   let _lastEvolutionState: Partial<BrainEvolutionState> = {};
+
+  // ── WARM START: Persist cycle count across restarts ──
+  // CTO Audit Fix (P0): Without this, _cycleCount resets to 0 on every process
+  // restart, which means deep layers (L16-L30) that only run every Nth cycle
+  // get trapped — they run once at cycle 0 (0 % N === 0) then never again
+  // until the counter climbs back to N. With 6-hour trainer intervals and
+  // typical 1-cycle-per-run patterns, deep layers effectively NEVER execute.
+  //
+  // Solution: Persist cycle count to brain_cortex_state table and reload on start.
+  (async function _warmStartCycleCount() {
+    try {
+      const { data: stateRow } = await supabase
+        .from('brain_cortex_state')
+        .select('cycle_count')
+        .eq('organization_id', organizationId)
+        .maybeSingle();
+
+      if (stateRow?.cycle_count != null) {
+        _cycleCount = stateRow.cycle_count;
+        console.log(`[NeuralCortex] Warm-started cycle count: ${_cycleCount}`);
+      }
+      _cycleCountLoaded = true;
+    } catch (err: any) {
+      // Table may not exist yet — non-fatal, counter starts at 0
+      console.warn('[NeuralCortex] Cycle count warm-start non-fatal:', err?.message || err);
+      _cycleCountLoaded = true;
+    }
+  })();
 
   // ── WARM START: Load persisted RL state from previous session ──
   // Without this, the brain "forgets" its learned scheduling multipliers,
@@ -637,7 +666,13 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
       lastExecutionMs: 0,
       avgExecutionMs: 0,
       lastExecutionAt: 0,
-      runEveryNthCycle: def.runEveryNthCycle * (def.region === 'soma' || def.region === 'cortex' || def.region === 'cerebellum' || def.region === 'prefrontal' || def.region === 'corpus_callosum' ? deepLayerFrequency : 1),
+      // CTO Audit Fix (P0): Removed deepLayerFrequency MULTIPLIER.
+      // Deep layers already have their own runEveryNthCycle spacing (3, 5, 10).
+      // Multiplying by deepLayerFrequency (default 3) compounded: L24/L28/L30
+      // became every 30th cycle — effectively unreachable with typical usage.
+      // The LAYER_DEFINITIONS base frequencies are the correct schedule.
+      // RL multiplier in _getLayersToRun() handles dynamic frequency adjustment.
+      runEveryNthCycle: def.runEveryNthCycle,
       cyclesSinceLastRun: 0,
       dependsOn: def.dependsOn,
       dependedOnBy: [],
@@ -683,7 +718,13 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
       // Check mode restrictions
       if (_mode === 'emergency' && layer.priority !== 'critical') continue;
       if (_mode === 'hibernating' && layer.id !== 1) continue;
-      if (_mode === 'awake_light' && (layer.priority === 'low' || layer.priority === 'background')) continue;
+      // CTO Audit Fix (P0): awake_light previously BLOCKED all deep layers entirely.
+      // Deep layers (low/background) still need to run occasionally or they never execute.
+      // In awake_light mode, deep layers run at 3x their normal interval instead of never.
+      if (_mode === 'awake_light' && (layer.priority === 'low' || layer.priority === 'background')) {
+        // Allow deep layers to run at reduced frequency (3x slower) instead of never
+        if (layer.cyclesSinceLastRun < layer.runEveryNthCycle * 3) continue;
+      }
       if (_mode === 'sleeping' && layer.priority === 'on_demand') continue;
 
       // Check scheduling (run every Nth cycle), adjusted by RL multiplier
@@ -1045,6 +1086,29 @@ export function createNeuralCortexController(config: NeuralCortexConfig): Neural
 
       // 5. Record to observability (fire-and-forget)
       _recordToObservability(result).catch(() => {});
+
+      // 6. Persist cycle count to DB (fire-and-forget) — CTO Audit Fix (P0)
+      // This ensures deep layers resume at the correct frequency after restarts.
+      try {
+        const _upsertPromise = supabase
+          .from('brain_cortex_state')
+          .upsert(
+            {
+              organization_id: organizationId,
+              cycle_count: _cycleCount,
+              last_mode: _mode,
+              last_cycle_duration_ms: totalDurationMs,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'organization_id' }
+          );
+        // Fire-and-forget: don't await, just log errors
+        Promise.resolve(_upsertPromise).then((result: any) => {
+          if (result?.error) console.warn('[NeuralCortex] Cycle count persist non-fatal:', result.error.message);
+        }).catch(() => { /* fire-and-forget */ });
+      } catch {
+        // supabase.from may not exist in test mocks — non-fatal
+      }
 
       return result;
     },

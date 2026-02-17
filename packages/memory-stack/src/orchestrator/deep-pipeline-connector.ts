@@ -393,8 +393,36 @@ export function createDeepPipeline(config: DeepPipelineConfig): DeepPipelineInst
       domainSignals.set(domain, existing);
     }
 
-    // Build people activity from signals
+    // CTO Audit Fix (P0): Build people activity from signals.
+    // Previously this Map was always empty, starving L18 (Org Topology)
+    // and L24 (Predictive Staffing) of people data entirely.
+    // Now we extract person entities from signals to populate it.
     const peopleActivity = new Map<string, { domains: string[]; signalCount: number; lastActive: number }>();
+
+    for (const signal of brainInput.signals) {
+      // Identify people from entity types commonly tied to individuals
+      const isPerson = signal.entityType === 'user' || signal.entityType === 'person'
+        || signal.entityType === 'author' || signal.entityType === 'assignee'
+        || signal.entityType === 'reviewer' || signal.entityType === 'developer'
+        || signal.entityType === 'employee' || signal.entityType === 'member';
+
+      if (isPerson && signal.entityId) {
+        const existing = peopleActivity.get(signal.entityId);
+        if (existing) {
+          existing.signalCount++;
+          existing.lastActive = Math.max(existing.lastActive, signal.timestamp);
+          if (!existing.domains.includes(signal.domain)) {
+            existing.domains.push(signal.domain);
+          }
+        } else {
+          peopleActivity.set(signal.entityId, {
+            domains: [signal.domain],
+            signalCount: 1,
+            lastActive: signal.timestamp,
+          });
+        }
+      }
+    }
 
     return {
       cognitiveCycleOutputs: {
