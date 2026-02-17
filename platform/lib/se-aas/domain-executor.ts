@@ -331,7 +331,7 @@ async function assembleBrainContext(
         .from('cross_domain_signals')
         .select('signal_type, signal_value, signal_metadata, created_at')
         .eq('organization_id', organizationId)
-        .eq('source_domain', 'engineering')
+        .like('source_domain', 'engineering%')
         .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
         .order('created_at', { ascending: false })
         .limit(50),

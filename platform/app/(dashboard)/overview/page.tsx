@@ -16,6 +16,13 @@ export default async function OverviewPage() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
 
   // Fetch all data in parallel
+  // Wrap each query to prevent a single failure from crashing the whole page
+  const safe = <T,>(p: PromiseLike<{ data: T | null; error: any; count?: number | null }>): Promise<{ data: T | null; error: any; count?: number | null }> =>
+    Promise.resolve(p).catch((err) => {
+      console.warn("[Overview] Query failed:", err);
+      return { data: null as T | null, error: err, count: null };
+    });
+
   const [
     snapshotsResult,
     signalsResult,
@@ -30,91 +37,91 @@ export default async function OverviewPage() {
     artifactsResult,
   ] = await Promise.all([
     // Latest brain snapshots (30 days)
-    supabase
+    safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
       .eq("organization_id", CORE_ORG_ID)
       .order("snapshot_date", { ascending: false })
-      .limit(30),
+      .limit(30)),
 
     // Signals today
-    supabase
+    safe(supabase
       .from("cross_domain_signals")
       .select("id", { count: "exact", head: true })
       .eq("organization_id", CORE_ORG_ID)
-      .gte("created_at", today),
+      .gte("created_at", today)),
 
     // Total causal edges
-    supabase
+    safe(supabase
       .from("causal_relationships_statistical")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", CORE_ORG_ID),
+      .eq("organization_id", CORE_ORG_ID)),
 
     // Today's LLM cost (scoped to org)
-    supabase
+    safe(supabase
       .from("llm_cost_log")
       .select("estimated_cost_usd, component, function_name, model, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .gte("created_at", today)
       .order("created_at", { ascending: false })
-      .limit(50),
+      .limit(50)),
 
     // Budget config
-    supabase
+    safe(supabase
       .from("cost_budget_config")
       .select("*")
       .eq("organization_id", CORE_ORG_ID)
-      .single(),
+      .single()),
 
     // Recent causal discoveries for intelligence stream
-    supabase
+    safe(supabase
       .from("causal_relationships_statistical")
       .select("id, source_entity, target_entity, statistical_method, p_value, confidence_score, lag_days, source_domain, target_domain, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(10),
+      .limit(10)),
 
     // Platform events for intelligence stream
-    supabase
+    safe(supabase
       .from("platform_events")
       .select("id, event_type, event_data, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(15),
+      .limit(15)),
 
     // Signals grouped by domain (for signal rate panel)
-    supabase
+    safe(supabase
       .from("cross_domain_signals")
       .select("source_domain, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .gte("created_at", thirtyDaysAgo)
       .order("created_at", { ascending: false })
-      .limit(500),
+      .limit(500)),
 
     // Early warning: velocity collapse + bottleneck alerts
-    supabase
+    safe(supabase
       .from("cross_domain_signals")
       .select("id, signal_type, signal_value, signal_metadata, created_at")
       .eq("organization_id", CORE_ORG_ID)
-      .eq("source_domain", "engineering")
+      .like("source_domain", "engineering%")
       .in("signal_type", ["velocity_collapsed", "bottleneck_detected"])
       .order("created_at", { ascending: false })
-      .limit(5),
+      .limit(5)),
 
     // Active connectors for data flow section
-    supabase
+    safe(supabase
       .from("org_connectors")
       .select("id, connector_type, display_name, status, last_sync_at")
       .eq("organization_id", CORE_ORG_ID)
-      .order("last_sync_at", { ascending: false }),
+      .order("last_sync_at", { ascending: false })),
 
     // Recent SE-aaS artifacts
-    supabase
+    safe(supabase
       .from("se_aas_artifacts")
       .select("id, domain_type, title, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(5),
+      .limit(5)),
   ]);
 
   const snapshots = snapshotsResult.data || [];
@@ -129,8 +136,8 @@ export default async function OverviewPage() {
 
   // Calculate cost metrics
   const costToday = costRows.reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
-  const dailyBudget = budget?.daily_llm_budget || 2.0;
-  const monthlyBudget = budget?.monthly_llm_budget || 50.0;
+  const dailyBudget = (budget as any)?.daily_llm_budget || 2.0;
+  const monthlyBudget = (budget as any)?.monthly_llm_budget || 50.0;
 
   // Calculate brain age
   const oldestSnapshot = snapshots[snapshots.length - 1];

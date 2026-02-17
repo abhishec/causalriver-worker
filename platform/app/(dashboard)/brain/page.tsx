@@ -12,48 +12,64 @@ export default async function BrainPage() {
   const supabase = await createClient();
   const CORE_ORG_ID = await getCurrentOrgId();
 
-  const [causalResult, entitiesResult, snapshotResult, discoveryTimelineResult, layerHealthResult] = await Promise.all([
+  // Wrap each query to prevent a single failure from crashing the whole page
+  const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
+    Promise.resolve(p).catch((err) => {
+      console.warn("[Brain] Query failed:", err);
+      return { data: null as T | null, error: err };
+    });
+
+  const [causalResult, entitiesResult, snapshotResult, discoveryTimelineResult, layerHealthResult, signalsResult] = await Promise.all([
     // Top 50 causal relationships by strength
-    supabase
+    safe(supabase
       .from("causal_relationships_statistical")
       .select(
-        "id, source_entity, target_entity, strength, p_value, lag_periods, method, domain, created_at"
+        "id, source_entity, target_entity, strength, p_value, lag_periods, method, domain, natural_language, created_at"
       )
       .eq("organization_id", CORE_ORG_ID)
       .order("strength", { ascending: false })
-      .limit(50),
+      .limit(50)),
 
     // Top 30 resolved entities
-    supabase
+    safe(supabase
       .from("resolved_entities")
       .select("id, canonical_name, entity_type, domain, aliases, confidence, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(30),
+      .limit(30)),
 
     // Latest snapshot for discoveries and region status
-    supabase
+    safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
       .eq("organization_id", CORE_ORG_ID)
       .order("snapshot_date", { ascending: false })
-      .limit(1),
+      .limit(1)),
 
     // Recent discovery timeline (last 20 causal discoveries for replay tab)
-    supabase
+    safe(supabase
       .from("causal_relationships_statistical")
       .select("id, source_entity, target_entity, strength, p_value, statistical_method, confidence_score, lag_days, source_domain, target_domain, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(20),
+      .limit(20)),
 
     // Layer health data
-    supabase
+    safe(supabase
       .from("obs_layer_health")
       .select("layer_id, layer_name, health_score, requests_processed, errors, latency_p50, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(15),
+      .limit(15)),
+
+    // Signal activity for timeline (last 90 days, capped at 5000 for perf)
+    safe(supabase
+      .from("cross_domain_signals")
+      .select("id, domain, source_type, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(5000)),
   ]);
 
   const causalEdges = causalResult.data || [];
@@ -61,6 +77,7 @@ export default async function BrainPage() {
   const snapshot = snapshotResult.data?.[0] || null;
   const discoveryTimeline = discoveryTimelineResult.data || [];
   const layerHealth = layerHealthResult.data || [];
+  const signals = signalsResult.data || [];
 
   return (
     <BrainClient
@@ -69,6 +86,7 @@ export default async function BrainPage() {
       snapshot={snapshot}
       discoveryTimeline={discoveryTimeline}
       layerHealth={layerHealth}
+      signals={signals}
     />
   );
 }

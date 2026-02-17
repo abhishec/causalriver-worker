@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DomainTag } from "@/components/ui/Badge";
 import { ConfidenceMeter } from "@/components/ui/ConfidenceMeter";
@@ -127,6 +128,57 @@ export function BrainContextPanel({ brainMeta, isLoading, className }: BrainCont
           </p>
         </div>
       )}
+
+      {/* Quick Navigation to related pages */}
+      <div className="rounded-xl bg-card border border-border-subtle p-4">
+        <h3 className="text-xs font-medium text-muted uppercase tracking-wider mb-3">
+          Explore
+        </h3>
+        <div className="space-y-1.5">
+          <Link
+            href="/brain"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors group"
+          >
+            <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+              <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-foreground">Brain Explorer</div>
+              <div className="text-[10px] text-muted">Explore causal graph &amp; relationships</div>
+            </div>
+          </Link>
+          <Link
+            href="/early-warning"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors group"
+          >
+            <div className="w-6 h-6 rounded-md bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
+              <svg className="w-3.5 h-3.5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-foreground">Early Warning</div>
+              <div className="text-[10px] text-muted">Velocity &amp; bottleneck monitoring</div>
+            </div>
+          </Link>
+          <Link
+            href="/capabilities"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors group"
+          >
+            <div className="w-6 h-6 rounded-md bg-domain-engineering/10 flex items-center justify-center group-hover:bg-domain-engineering/20 transition-colors">
+              <svg className="w-3.5 h-3.5 text-domain-engineering" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-foreground">AI Services</div>
+              <div className="text-[10px] text-muted">All capabilities &amp; service marketplace</div>
+            </div>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

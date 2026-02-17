@@ -75,7 +75,13 @@ export default async function EarlyWarningPage() {
           </p>
         </div>
         <Link
-          href="/copilot"
+          href={`/copilot?q=${encodeURIComponent(
+            isVelocityCollapse
+              ? `Our deploy velocity dropped ${Math.abs(velocityChange).toFixed(0)}% in the last 7 days. ${latestBottleneck ? `Bottleneck risk score is ${latestBottleneck.bottleneck_risk_score?.toFixed(0) || 0}/100 (${latestBottleneck.risk_level}).` : ""} What's causing this and what should we do about it?`
+              : latestBottleneck && latestBottleneck.risk_level === 'high'
+                ? `Our bottleneck risk score is ${latestBottleneck.bottleneck_risk_score?.toFixed(0) || 0}/100 (${latestBottleneck.risk_level} risk). ${latestBottleneck.top_reviewer_login ? `Top reviewer ${latestBottleneck.top_reviewer_login} handles ${((latestBottleneck.top_reviewer_share || 0) * 100).toFixed(0)}% of reviews.` : ""} Analyze the root causes and recommend fixes.`
+                : "Give me a full early warning analysis — velocity trends, bottleneck risks, and causal factors affecting our engineering health."
+          )}`}
           className="px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground text-sm font-medium transition-colors flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -88,14 +94,22 @@ export default async function EarlyWarningPage() {
       {/* Brain Intelligence Summary */}
       {(engineeringCauses.length > 0 || (brainAlerts && brainAlerts.length > 0)) && (
         <div className="rounded-xl bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-indigo-500/20 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center text-xs">
-              🧠
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center text-xs">
+                🧠
+              </div>
+              <h3 className="text-sm font-medium">Brain Intelligence</h3>
+              <span className="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">
+                {engineeringCauses.length} causal edges
+              </span>
             </div>
-            <h3 className="text-sm font-medium">Brain Intelligence</h3>
-            <span className="text-[10px] text-muted bg-surface px-1.5 py-0.5 rounded">
-              {engineeringCauses.length} causal edges
-            </span>
+            <Link
+              href="/brain"
+              className="text-[10px] text-accent hover:text-accent/80 font-medium transition-colors"
+            >
+              Explore in Brain →
+            </Link>
           </div>
 
           {/* Brain Causal Insights */}
@@ -107,7 +121,7 @@ export default async function EarlyWarningPage() {
                   <span className={`w-1.5 h-1.5 rounded-full ${edge.effect_size > 0 ? 'bg-success' : 'bg-danger'}`} />
                   <span className="text-foreground">{edge.natural_language}</span>
                   <span className="text-muted ml-auto">
-                    {(edge.confidence * 100).toFixed(0)}% confidence
+                    {((edge.confidence || 0) * 100).toFixed(0)}% confidence
                   </span>
                 </div>
               ))}

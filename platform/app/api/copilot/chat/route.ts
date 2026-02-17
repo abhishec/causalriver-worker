@@ -449,7 +449,7 @@ export async function POST(request: NextRequest) {
           .from('cross_domain_signals')
           .select('signal_type, signal_value, signal_metadata, created_at')
           .eq('organization_id', orgId)
-          .eq('source_domain', 'engineering')
+          .like('source_domain', 'engineering%')
           .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
           .order('created_at', { ascending: false })
           .limit(100),
@@ -587,7 +587,11 @@ export async function POST(request: NextRequest) {
             .download(storagePath);
           if (fileData) {
             const text = await fileData.text();
-            glData = JSON.parse(text);
+            try {
+              glData = JSON.parse(text);
+            } catch {
+              console.warn("[AaaS] GL data is malformed JSON, skipping");
+            }
           }
         } catch {
           // No GL data available for this org
@@ -743,14 +747,16 @@ export async function POST(request: NextRequest) {
     // ── Build messages array with conversation history ──────────────────
     const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
 
-    if (conversationHistory && conversationHistory.length > 0) {
+    if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
       // Include last 4 exchanges for context
       const recent = conversationHistory.slice(-8);
       for (const msg of recent) {
-        messages.push({
-          role: msg.role,
-          content: msg.content,
-        });
+        if (msg && (msg.role === "user" || msg.role === "assistant") && typeof msg.content === "string") {
+          messages.push({
+            role: msg.role,
+            content: msg.content.slice(0, 50000), // Cap individual message length
+          });
+        }
       }
     }
 
@@ -786,6 +792,22 @@ DO NOT invent any data. Instead:
 - You can still answer general questions about NexusBrain's capabilities
 - NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
     }
+
+    // ── Visual chart instruction: teach Claude to emit inline charts ──────
+    effectiveSystemPrompt += `\n\n## VISUAL CHART OUTPUT
+When data is suitable for visualization (time series, comparisons, distributions), output an interactive chart using a fenced code block with language "chart" and a JSON body:
+
+\`\`\`chart
+{
+  "type": "bar",
+  "title": "Signal Activity by Domain",
+  "xKey": "date",
+  "series": [{"key": "engineering", "label": "Engineering", "color": "#3b82f6"}],
+  "data": [{"date": "Jan 1", "engineering": 42}, {"date": "Jan 2", "engineering": 55}]
+}
+\`\`\`
+
+Chart types: "bar", "line", "area", "stacked-bar". Always use REAL data from brain context. Combine charts with narrative explanation. Use charts when showing trends, comparisons, or distributions — they render as interactive visualizations in the UI.`;
 
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {

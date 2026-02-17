@@ -107,7 +107,7 @@ export async function analyzeVelocityCollapse(
     .from('cross_domain_signals')
     .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
-    .in('signal_type', ['ticket_resolved', 'jira_issue'])
+    .in('signal_type', ['ticket_resolved', 'jira_issue_resolved', 'jira_issue'])
     .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
     .order('created_at', { ascending: true });
 
@@ -410,7 +410,7 @@ export async function analyzeBottleneckRisk(
     .from('cross_domain_signals')
     .select('signal_metadata')
     .eq('organization_id', organizationId)
-    .in('signal_type', ['jira_issue', 'ticket_resolved'])
+    .in('signal_type', ['jira_issue', 'jira_issue_resolved', 'ticket_resolved', 'jira_issue_created'])
     .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString());
 
   // Compute Jira assignee HHI

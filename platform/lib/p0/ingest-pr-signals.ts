@@ -284,7 +284,7 @@ export async function getMergedPRSignals(
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_merged')
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
@@ -297,7 +297,7 @@ export async function getMergedPRSignals(
     author: signal.signal_metadata.author,
     mergedAt: signal.created_at,
     cycleTimeHours: signal.signal_value,
-    prSize: signal.signal_metadata.pr_size || 0,
+    prSize: signal.signal_metadata.pr_size || (signal.signal_metadata.additions || 0) + (signal.signal_metadata.deletions || 0) || 0,
   }));
 }
 
@@ -324,7 +324,7 @@ export async function getReviewSignals(
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering')
+    .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_reviewed')
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });

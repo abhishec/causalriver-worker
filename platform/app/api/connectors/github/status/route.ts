@@ -33,7 +33,7 @@ export async function GET() {
           .from("cross_domain_signals")
           .select("signal_type", { count: "exact" })
           .eq("organization_id", orgId)
-          .eq("source_domain", "engineering"),
+          .like("source_domain", "engineering%"),
         supabase
           .from("cross_domain_signals")
           .select("id", { count: "exact" })

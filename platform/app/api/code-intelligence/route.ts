@@ -122,15 +122,15 @@ export async function GET() {
       .from("causal_relationships_statistical")
       .select("*")
       .eq("organization_id", orgId)
-      .in("source_domain", ["engineering", "support", "cs"])
+      .in("source_domain", ["engineering", "engineering.github", "engineering.jira", "support", "cs"])
       .order("lag_days", { ascending: true });
 
     // 7. Recent activity — last 50 engineering signals
     const { data: recentSignals } = await service
       .from("cross_domain_signals")
-      .select("signal_type, signal_value, metadata, created_at")
+      .select("signal_type, signal_value, signal_metadata, created_at")
       .eq("organization_id", orgId)
-      .eq("source_domain", "engineering")
+      .like("source_domain", "engineering%")
       .neq("signal_type", "code_file_indexed")
       .order("created_at", { ascending: false })
       .limit(50);
@@ -142,7 +142,7 @@ export async function GET() {
       .from("cross_domain_signals")
       .select("signal_type")
       .eq("organization_id", orgId)
-      .eq("source_domain", "engineering")
+      .like("source_domain", "engineering%")
       .gte("created_at", sevenDaysAgo.toISOString());
 
     const signalDistribution: Record<string, number> = {};

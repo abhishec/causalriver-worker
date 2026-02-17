@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useId, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
+import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -379,7 +380,7 @@ function renderMarkdown(text: string) {
         // Close code block
         inCodeBlock = false;
         const code = codeBlockLines.join("\n");
-        // Mermaid diagrams → MermaidBlock, everything else → CodeBlock
+        // Mermaid diagrams → MermaidBlock, chart data → InlineChart, everything else → CodeBlock
         if (codeLanguage.toLowerCase() === "mermaid") {
           elements.push(
             <MermaidBlock
@@ -388,6 +389,20 @@ function renderMarkdown(text: string) {
               blockKey={`mermaid-${codeBlockIdx}`}
             />
           );
+        } else if (codeLanguage.toLowerCase() === "chart") {
+          const spec = parseChartSpec(code);
+          if (spec) {
+            elements.push(<InlineChart key={`chart-${codeBlockIdx}`} spec={spec} />);
+          } else {
+            elements.push(
+              <CodeBlock
+                key={`code-${codeBlockIdx}`}
+                code={code}
+                language="json"
+                blockKey={`code-${codeBlockIdx}`}
+              />
+            );
+          }
         } else {
           elements.push(
             <CodeBlock
@@ -530,6 +545,21 @@ function renderMarkdown(text: string) {
           blockKey={`mermaid-streaming-${codeBlockIdx}`}
         />
       );
+    } else if (codeLanguage.toLowerCase() === "chart") {
+      // Try to parse even partial chart data during streaming
+      const spec = parseChartSpec(code);
+      if (spec) {
+        elements.push(<InlineChart key={`chart-streaming-${codeBlockIdx}`} spec={spec} />);
+      } else {
+        elements.push(
+          <div key={`chart-loading-${codeBlockIdx}`} className="rounded-xl bg-card border border-border-subtle p-4 my-3">
+            <div className="flex items-center gap-2 text-xs text-muted">
+              <div className="w-3 h-3 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+              Generating chart...
+            </div>
+          </div>
+        );
+      }
     } else {
       elements.push(
         <CodeBlock
@@ -600,6 +630,32 @@ function extractArtifacts(
 
     // Only emit code blocks with meaningful content (>2 lines)
     if (code.split("\n").length < 2) continue;
+
+    // Chart blocks → emit as chart artifact
+    if (language.toLowerCase() === "chart") {
+      try {
+        const parsed = JSON.parse(code);
+        artifacts.push({
+          id: `artifact-${Date.now()}-chart-${blockIdx}`,
+          type: "chart",
+          title: parsed.title || "Chart",
+          language: "chart",
+          content: code,
+          createdAt: Date.now(),
+          messageIndex,
+        });
+        blockIdx++;
+        continue;
+      } catch {
+        // Fall through to regular code block handling
+      }
+    }
+
+    // Skip mermaid blocks from artifact extraction (they render inline)
+    if (language.toLowerCase() === "mermaid") {
+      blockIdx++;
+      continue;
+    }
 
     // Derive a title from context
     let title = `Code block ${blockIdx + 1}`;
@@ -957,8 +1013,21 @@ export async function consumeSSEStream(
 
 // ─── Brain Context Panel (Claude-style collapsible thought process) ─────
 
-function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta; isLoading: boolean }) {
+function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta | null; isLoading: boolean }) {
   const [expanded, setExpanded] = useState(false);
+
+  if (!meta) {
+    if (!isLoading) return null;
+    return (
+      <div className="mt-2 rounded-xl bg-accent/5 border border-accent/15 px-4 py-2.5 flex items-center gap-2 text-xs">
+        <svg className="w-3.5 h-3.5 text-accent animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+        <span className="text-accent font-medium">Brain thinking...</span>
+      </div>
+    );
+  }
 
   const confidenceColor = meta.confidence >= 0.7
     ? "text-success"

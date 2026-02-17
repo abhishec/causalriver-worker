@@ -37,19 +37,25 @@ export default async function TrainingPage() {
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 
+  const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
+    Promise.resolve(p).catch((err) => {
+      console.warn("[Training] Query failed:", err);
+      return { data: null as T | null, error: err };
+    });
+
   const [snapshotsResult, signalsByDomainResult] = await Promise.all([
-    supabase
+    safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
       .eq("organization_id", CORE_ORG_ID)
       .gte("snapshot_date", thirtyDaysAgo)
       .order("snapshot_date", { ascending: false })
-      .limit(30),
+      .limit(30)),
 
-    supabase
+    safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
-      .eq("organization_id", CORE_ORG_ID),
+      .eq("organization_id", CORE_ORG_ID)),
   ]);
 
   const snapshots = snapshotsResult.data || [];

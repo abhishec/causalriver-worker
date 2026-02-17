@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatNumber, cn } from "@/lib/utils";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -99,7 +99,7 @@ export function ConnectorsClient({
   const syncingCount = Object.keys(syncProgressMap).length;
 
   // Check URL params for OAuth callback messages
-  useState(() => {
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const success = params.get("success");
@@ -118,7 +118,7 @@ export function ConnectorsClient({
       setMessage({ type: "error", text: decodeURIComponent(error) });
       window.history.replaceState({}, "", "/connectors");
     }
-  });
+  }, []);
 
   /* ── Connect via OAuth ──────────────────────────────────────── */
   const handleOAuthConnect = useCallback((type: string) => {

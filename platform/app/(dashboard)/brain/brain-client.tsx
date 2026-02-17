@@ -6,6 +6,8 @@ import { CausalGraph } from "@/components/dashboard/CausalGraph";
 import { BrainContextSidebar } from "@/components/brain/BrainContextSidebar";
 import { NodeDetailPanel } from "@/components/brain/NodeDetailPanel";
 import { EdgeDetailPanel } from "@/components/brain/EdgeDetailPanel";
+import { SignalTimeline } from "@/components/brain/SignalTimeline";
+import { CausalLagChart } from "@/components/brain/CausalLagChart";
 import { TabGroup } from "@/components/ui/TabGroup";
 import { Badge, DomainTag } from "@/components/ui/Badge";
 import { ConfidenceMeter } from "@/components/ui/ConfidenceMeter";
@@ -26,6 +28,7 @@ interface CausalEdge {
   lag_periods: number;
   method: string;
   domain: string;
+  natural_language?: string;
   created_at: string;
 }
 
@@ -73,12 +76,20 @@ interface LayerHealthEntry {
   created_at: string;
 }
 
+interface SignalEntry {
+  id: string;
+  domain: string;
+  source_type: string;
+  created_at: string;
+}
+
 interface BrainClientProps {
   causalEdges: CausalEdge[];
   entities: Entity[];
   snapshot: Snapshot | null;
   discoveryTimeline?: DiscoveryEntry[];
   layerHealth?: LayerHealthEntry[];
+  signals?: SignalEntry[];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -154,7 +165,7 @@ function strengthLabel(strength: number): string {
 /*  Component                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline = [], layerHealth = [] }: BrainClientProps) {
+export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline = [], layerHealth = [], signals = [] }: BrainClientProps) {
   const [domainFilter, setDomainFilter] = useState<string>("all");
   const [confidenceMin, setConfidenceMin] = useState<number>(0);
   const [entitySearch, setEntitySearch] = useState<string>("");
@@ -163,6 +174,7 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
   const [selectedEdge, setSelectedEdge] = useState<CausalEdge | null>(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [timelineDateRange, setTimelineDateRange] = useState("30d");
 
   // Extract unique domains from edges
   const domains = useMemo(() => {
@@ -218,6 +230,7 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
   const tabs = [
     { id: "graph", label: "Knowledge Graph", count: filteredEdges.length },
     { id: "list", label: "Edge List" },
+    { id: "timeline", label: "Timeline", count: signals.length > 0 ? signals.length : undefined },
     { id: "discoveries", label: "Discoveries", count: discoveryTimeline.length },
     { id: "layers", label: "Layers", count: LAYERS.length },
     { id: "regions", label: "Regions", count: REGIONS.filter((r) => r.status === "active").length },
@@ -349,6 +362,9 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
                           <span className="font-medium truncate">{edge.target_entity}</span>
                         </div>
                         {edge.domain && <DomainTag domain={edge.domain} className="mt-1" />}
+                        {edge.natural_language && (
+                          <p className="text-[10px] text-muted mt-1 line-clamp-1">{edge.natural_language}</p>
+                        )}
                       </div>
                       <div className="w-24 shrink-0">
                         <div className="flex items-center justify-between mb-0.5">
@@ -364,13 +380,18 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
                           />
                         </div>
                       </div>
-                      <div className="text-right shrink-0 w-16">
-                        <div className="text-[10px] text-muted">p-value</div>
-                        <div className="text-xs font-mono text-muted-foreground">{edge.p_value?.toFixed(4)}</div>
+                      <div className="text-right shrink-0 w-20">
+                        <div className="text-[10px] text-muted">Significance</div>
+                        <div className={cn(
+                          "text-xs font-medium",
+                          edge.p_value < 0.01 ? "text-success" : edge.p_value < 0.05 ? "text-info" : "text-warning"
+                        )}>
+                          {edge.p_value < 0.001 ? "Very high" : edge.p_value < 0.01 ? "High" : edge.p_value < 0.05 ? "Good" : "Low"}
+                        </div>
                       </div>
                       <div className="shrink-0 w-14 text-right">
-                        <div className="text-[10px] text-muted">Lag</div>
-                        <div className="text-xs font-mono text-muted-foreground">{edge.lag_periods}p</div>
+                        <div className="text-[10px] text-muted">Time Lag</div>
+                        <div className="text-xs text-muted-foreground">{edge.lag_periods === 0 ? "Same day" : edge.lag_periods === 1 ? "1 day" : `${edge.lag_periods} days`}</div>
                       </div>
                     </button>
                   ))
@@ -401,6 +422,21 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Timeline Tab — Signal Activity + Causal Lag */}
+      {activeTab === "timeline" && (
+        <div className="space-y-4">
+          <SignalTimeline
+            signals={signals}
+            dateRange={timelineDateRange}
+            onDateRangeChange={setTimelineDateRange}
+          />
+          <CausalLagChart
+            edges={filteredEdges}
+            onEdgeClick={handleEdgeClick}
+          />
         </div>
       )}
 

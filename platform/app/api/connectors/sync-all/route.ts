@@ -80,8 +80,10 @@ export async function POST(request: Request) {
             // Skip connector types without a sync route (e.g. linear, hubspot)
             return {
               connector: type,
-              success: true,
+              success: false,
+              skipped: true,
               signalsGenerated: 0,
+              error: `No sync route implemented for "${type}" — skipped`,
               durationMs: Date.now() - start,
             };
         }
@@ -139,13 +141,18 @@ export async function POST(request: Request) {
       0
     );
     const successCount = results.filter((r) => r.success).length;
+    const skippedCount = results.filter((r) => (r as any).skipped).length;
+    const failedCount = results.filter((r) => !r.success && !(r as any).skipped).length;
+    const syncedCount = results.length - skippedCount;
 
     return NextResponse.json({
       results,
       totalSignals,
       successCount,
+      skippedCount,
+      failedCount,
       totalConnectors: results.length,
-      summary: `Synced ${successCount}/${results.length} connectors, ${totalSignals} signals`,
+      summary: `Synced ${successCount}/${syncedCount} connectors, ${totalSignals} signals${skippedCount > 0 ? ` (${skippedCount} skipped — no sync route)` : ""}`,
     });
   } catch (err: any) {
     console.error("Sync-all error:", err);

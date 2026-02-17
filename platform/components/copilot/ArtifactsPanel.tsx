@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
+import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -410,9 +411,20 @@ export function ArtifactsPanel({
             </div>
           </div>
 
-          {/* Code / Content viewer */}
+          {/* Code / Chart / Content viewer */}
           <div className="flex-1 overflow-auto">
-            {activeArtifact.type === "code" ? (
+            {activeArtifact.type === "chart" ? (
+              (() => {
+                const spec = parseChartSpec(activeArtifact.content);
+                return spec ? (
+                  <div className="p-4">
+                    <InlineChart spec={spec} />
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 text-sm text-muted">Could not render chart data</div>
+                );
+              })()
+            ) : activeArtifact.type === "code" ? (
               <ShikiCodeViewer
                 code={activeArtifact.content}
                 language={activeArtifact.language || ""}

@@ -26,21 +26,27 @@ export default async function ConnectorsPage() {
   const supabase = await createClient();
   const orgId = await getCurrentOrgId();
 
+  const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
+    Promise.resolve(p).catch((err) => {
+      console.warn("[Connectors] Query failed:", err);
+      return { data: null as T | null, error: err };
+    });
+
   // Fetch signal counts, all connectors, and sync progress in parallel
   const [signalsResult, connectorsResult, checkpointsResult] = await Promise.all([
-    supabase
+    safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
-      .eq("organization_id", orgId),
-    supabase
+      .eq("organization_id", orgId)),
+    safe(supabase
       .from("org_connectors")
       .select("id, connector_type, status, config, metadata, last_sync_at, signals_count, error_message, created_at")
-      .eq("organization_id", orgId),
-    supabase
+      .eq("organization_id", orgId)),
+    safe(supabase
       .from("connector_checkpoints")
       .select("connector_type, progress_pct, signals_ingested, status, state")
       .eq("organization_id", orgId)
-      .eq("status", "in_progress"),
+      .eq("status", "in_progress")),
   ]);
 
   const signals = signalsResult.data || [];

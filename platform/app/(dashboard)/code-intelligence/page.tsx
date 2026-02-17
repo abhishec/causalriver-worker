@@ -30,7 +30,7 @@ export default async function CodeIntelligencePage() {
     .from("cross_domain_signals")
     .select("id", { count: "exact", head: true })
     .eq("organization_id", orgId)
-    .eq("source_domain", "engineering");
+    .like("source_domain", "engineering%");
 
   return (
     <div className="space-y-6">

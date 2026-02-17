@@ -237,15 +237,15 @@ export async function POST(request: Request) {
     // Load PR signals to build expertise from actual contributors
     const { data: prSignals } = await service
       .from("cross_domain_signals")
-      .select("metadata, signal_type")
+      .select("signal_metadata, signal_type")
       .eq("organization_id", orgId)
-      .eq("source_domain", "engineering")
-      .in("signal_type", ["pr_merged", "pr_opened", "pr_review_submitted"])
+      .eq("source_domain", "engineering.github")
+      .in("signal_type", ["pr_merged", "pr_opened", "pr_reviewed"])
       .limit(5000);
 
     if (prSignals) {
       for (const signal of prSignals) {
-        const meta = signal.metadata as Record<string, any>;
+        const meta = (signal as any).signal_metadata as Record<string, any>;
         const contributor = meta?.author || meta?.reviewer || meta?.user;
         const files = meta?.file_paths || meta?.directories || [];
 
@@ -278,7 +278,7 @@ export async function POST(request: Request) {
       // Group by PR to find co-authors and reviewers
       const prMap = new Map<string, { author: string; reviewers: string[] }>();
       for (const signal of prSignals) {
-        const meta = signal.metadata as Record<string, any>;
+        const meta = (signal as any).signal_metadata as Record<string, any>;
         const prId = meta?.pr_number || meta?.pr_id;
         if (!prId) continue;
 

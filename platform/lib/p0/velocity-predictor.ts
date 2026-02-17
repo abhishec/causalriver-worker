@@ -344,7 +344,7 @@ async function loadTrainingData(
     .from('cross_domain_signals')
     .select('created_at, signal_value')
     .eq('organization_id', organizationId)
-    .in('signal_type', ['jira_issue', 'ticket_resolved'])
+    .in('signal_type', ['jira_issue', 'jira_issue_resolved', 'ticket_resolved', 'jira_issue_created'])
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
 

@@ -11,36 +11,43 @@ export default async function CapabilitiesPage() {
   const supabase = await createClient();
   const orgId = await getCurrentOrgId();
 
+  // Wrap queries to prevent a single failure from crashing the page
+  const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
+    Promise.resolve(p).catch((err) => {
+      console.warn("[Capabilities] Query failed:", err);
+      return { data: null as T | null, error: err };
+    });
+
   // Fetch recent SE-aaS artifacts for this org
-  const { data: recentArtifacts } = await supabase
+  const { data: recentArtifacts } = await safe(supabase
     .from("se_aas_artifacts")
     .select("id, domain_type, created_at, metadata")
     .eq("organization_id", orgId)
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(10));
 
   // Fetch agent queue for pending/running jobs
-  const { data: activeJobs } = await supabase
+  const { data: activeJobs } = await safe(supabase
     .from("agent_queue")
     .select("id, task_type, status, created_at")
     .eq("organization_id", orgId)
     .eq("agent_type", "se-aas")
     .in("status", ["pending", "running"])
     .order("created_at", { ascending: false })
-    .limit(5);
+    .limit(5));
 
   // Count total artifacts per domain
-  const { data: artifactCounts } = await supabase
+  const { data: artifactCounts } = await safe(supabase
     .rpc("count_se_aas_artifacts_by_domain", { org_id: orgId })
-    .select("*");
+    .select("*"));
 
   // Fallback: count from artifacts directly if RPC doesn't exist
   const domainCounts: Record<string, number> = {};
-  if (artifactCounts) {
-    for (const row of artifactCounts) {
+  if (artifactCounts && Array.isArray(artifactCounts)) {
+    for (const row of artifactCounts as any[]) {
       domainCounts[row.domain_type] = row.count;
     }
-  } else if (recentArtifacts) {
+  } else if (recentArtifacts && Array.isArray(recentArtifacts)) {
     // Manually count from recent artifacts
     for (const a of recentArtifacts) {
       domainCounts[a.domain_type] = (domainCounts[a.domain_type] || 0) + 1;
@@ -60,7 +67,7 @@ export default async function CapabilitiesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {activeJobs && activeJobs.length > 0 && (
+          {Array.isArray(activeJobs) && activeJobs.length > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-accent/10 text-accent">
               {activeJobs.length} job{activeJobs.length > 1 ? "s" : ""} running
             </span>
@@ -89,8 +96,8 @@ export default async function CapabilitiesPage() {
 
       <CapabilitiesClient
         domainCounts={domainCounts}
-        recentArtifacts={recentArtifacts || []}
-        activeJobs={activeJobs || []}
+        recentArtifacts={(recentArtifacts || []) as any[]}
+        activeJobs={(activeJobs || []) as any[]}
       />
     </div>
   );

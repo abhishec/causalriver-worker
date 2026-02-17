@@ -16,6 +16,7 @@ interface CausalEdge {
   lag_periods: number;
   method: string;
   domain: string;
+  natural_language?: string;
   created_at: string;
 }
 
