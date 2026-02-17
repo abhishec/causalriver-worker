@@ -366,6 +366,8 @@ export async function POST(request: NextRequest) {
     // ══════════════════════════════════════════════════════════════════════
 
     let brainContext: BrainContext | null = null;
+    // Declared here so it's accessible both inside the try block and in the system prompt builder below
+    let entityLinks: any[] = [];
 
     try {
       const {
@@ -440,7 +442,7 @@ export async function POST(request: NextRequest) {
       // ── Live Engineering Metrics for P0 Early Warning context ──────
       // Copilot needs velocity + bottleneck snapshots to answer
       // "Why is velocity dropping?" with LIVE data, not just causal edges.
-      const [velocityRes, bottleneckRes, recentSignalsRes] = await Promise.all([
+      const [velocityRes, bottleneckRes, recentSignalsRes, entityLinksRes] = await Promise.all([
         service
           .from('velocity_snapshots')
           .select('*')
@@ -461,17 +463,39 @@ export async function POST(request: NextRequest) {
           .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
           .order('created_at', { ascending: false })
           .limit(100),
+        // ── Cross-domain entity links: PR↔Jira↔Slack connections ──
+        // This is what makes the Brain able to answer:
+        // "What Jira tickets are linked to the velocity collapse?"
+        // "Which Slack threads discussed PR #456?"
+        // "Show me everything related to PROJ-1234"
+        service
+          .from('entity_links')
+          .select('source_entity_id, source_type, source_domain, target_entity_id, target_type, target_domain, link_type, confidence, evidence, created_at')
+          .eq('organization_id', orgId)
+          .order('created_at', { ascending: false })
+          .limit(200),
       ]);
 
       const velocitySnapshots = velocityRes.data || [];
       const bottleneckSnapshot = bottleneckRes.data?.[0] || null;
       const recentSignals = recentSignalsRes.data || [];
+      // entity_links may not exist yet (table created by migration 20260221000001)
+      entityLinks = entityLinksRes.error ? [] : (entityLinksRes.data || []);
 
-      // Inject engineering metrics into brain regions as live signals
+      // Inject engineering metrics + entity links into brain regions as live signals
       (brainRegions as any).liveSignals = {
         velocitySnapshots,
         bottleneckSnapshot,
         recentSignals,
+        // Cross-domain links: the Brain's connective tissue between GitHub↔Jira↔Slack
+        entityLinks,
+        entityLinksSummary: {
+          total: entityLinks.length,
+          prToJiraLinks: entityLinks.filter((l: any) => l.link_type === 'pr_references_ticket').length,
+          slackToPRLinks: entityLinks.filter((l: any) => l.link_type === 'slack_mentions_pr').length,
+          slackToJiraLinks: entityLinks.filter((l: any) => l.link_type === 'slack_mentions_ticket').length,
+          commitToJiraLinks: entityLinks.filter((l: any) => l.link_type === 'commit_references_ticket').length,
+        },
         engineeringSummary: {
           prsMergedLast7Days: velocitySnapshots[0]?.prs_merged || 0,
           avgCycleTimeHours: velocitySnapshots[0]?.mean_pr_cycle_time_hours || null,
@@ -841,6 +865,38 @@ Chart types: "bar", "line", "area", "stacked-bar". Always use REAL data from bra
 
 When the user asks about velocity, bottlenecks, or engineering health, use THESE numbers. Cite them precisely.`;
       }
+    }
+
+    // ── CROSS-DOMAIN ENTITY LINKS: The Brain's connective tissue ──────────
+    // This is what makes GitHub↔Jira↔Slack connected in the Brain.
+    // Without this, Copilot cannot answer "What Jira tickets are linked to velocity collapse?"
+    if (entityLinks.length > 0) {
+      // Group links by type for a clean context block
+      const prToJira = entityLinks.filter((l: any) => l.link_type === 'pr_references_ticket');
+      const slackToPR = entityLinks.filter((l: any) => l.link_type === 'slack_mentions_pr');
+      const slackToJira = entityLinks.filter((l: any) => l.link_type === 'slack_mentions_ticket');
+      const commitToJira = entityLinks.filter((l: any) => l.link_type === 'commit_references_ticket');
+
+      effectiveSystemPrompt += `\n\n## CROSS-DOMAIN ENTITY LINKS (Brain's Knowledge Graph — use to answer cross-system questions)
+The Brain has built ${entityLinks.length} verified connections between GitHub, Jira, and Slack:
+
+${prToJira.length > 0 ? `### PRs linked to Jira Tickets (${prToJira.length} links)
+${prToJira.slice(0, 30).map((l: any) => `- ${l.source_entity_id} → ${l.target_entity_id.replace('jira#', 'Jira:')} [${(l.confidence * 100).toFixed(0)}% confidence | ${l.evidence}]`).join('\n')}` : ''}
+
+${commitToJira.length > 0 ? `### Commits linked to Jira Tickets (${commitToJira.length} links)
+${commitToJira.slice(0, 20).map((l: any) => `- commit ${l.source_entity_id.split(':')[1]?.slice(0, 8)} in ${l.source_entity_id.split(':')[0]} → ${l.target_entity_id.replace('jira#', 'Jira:')} | ${l.evidence}`).join('\n')}` : ''}
+
+${slackToPR.length > 0 ? `### Slack Discussions about PRs (${slackToPR.length} links)
+${slackToPR.slice(0, 20).map((l: any) => `- Slack message → ${l.target_entity_id} | ${l.evidence}`).join('\n')}` : ''}
+
+${slackToJira.length > 0 ? `### Slack Discussions about Jira Tickets (${slackToJira.length} links)
+${slackToJira.slice(0, 20).map((l: any) => `- Slack message → ${l.target_entity_id.replace('jira#', 'Jira:')} | ${l.evidence}`).join('\n')}` : ''}
+
+USE THESE LINKS to:
+- Answer "What code changes are linked to [Jira ticket]?" → find PRs/commits with that ticket
+- Answer "What Slack discussions happened around [PR]?" → find Slack→PR links
+- Connect velocity collapse signals to specific Jira tickets via PR links
+- Show the full chain: Jira ticket → PR → commit → Slack discussion`;
     }
 
     // ── SE-aaS domain result injection ──────────────────────────────────
