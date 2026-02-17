@@ -119,6 +119,35 @@ export interface MeshStats {
   topContributors: { orgId: string; trustScore: number; contributions: number }[];
 }
 
+/** Serializable snapshot of the entire mesh state for persistence */
+export interface IntelligenceMeshSnapshot {
+  version: 1;
+  /** Org trust profiles (Map serialized as entries) */
+  orgTrust: Array<[string, SerializedOrgTrustProfile]>;
+  /** Recent contributions (bounded to last 500) */
+  contributions: MeshContribution[];
+  /** Collective patterns (Map serialized as entries) */
+  collectivePatterns: Array<[string, CollectivePattern]>;
+  /** Knowledge conflicts (Map serialized as entries) */
+  conflicts: Array<[string, KnowledgeConflict]>;
+  /** Internal counters */
+  counters: { conflictCounter: number; patternCounter: number };
+  /** Snapshot timestamp */
+  savedAt: number;
+}
+
+/** OrgTrustProfile with domainTrust serialized (Map → entries) */
+export interface SerializedOrgTrustProfile {
+  orgId: string;
+  trustScore: number;
+  domainTrust: Array<[string, number]>;
+  contributionsAccepted: number;
+  contributionsRejected: number;
+  avgAccuracy: number;
+  lastContribution: number;
+  trend: 'rising' | 'stable' | 'falling';
+}
+
 export interface IntelligenceMeshInstance {
   /** Register an org in the mesh */
   registerOrg: (orgId: string) => void;
@@ -136,6 +165,10 @@ export interface IntelligenceMeshInstance {
   getStats: () => MeshStats;
   /** Get all collective patterns */
   getCollectivePatterns: () => CollectivePattern[];
+  /** Serialize entire mesh state for persistence (PersistableLayer interface) */
+  getState: () => IntelligenceMeshSnapshot;
+  /** Restore mesh state from a persisted snapshot (PersistableLayer interface) */
+  loadState: (snapshot: IntelligenceMeshSnapshot) => void;
 }
 
 // ============================================================================
@@ -435,6 +468,82 @@ export function createIntelligenceMesh(config?: IntelligenceMeshConfig): Intelli
     return [...collectivePatterns.values()];
   }
 
+  // ── Persistence: getState / loadState ───────────────────────────
+
+  function getState(): IntelligenceMeshSnapshot {
+    // Serialize Maps to arrays for JSON storage
+    const serializedTrust: Array<[string, SerializedOrgTrustProfile]> = [];
+    for (const [id, profile] of orgTrust) {
+      serializedTrust.push([id, {
+        orgId: profile.orgId,
+        trustScore: profile.trustScore,
+        domainTrust: Array.from(profile.domainTrust.entries()),
+        contributionsAccepted: profile.contributionsAccepted,
+        contributionsRejected: profile.contributionsRejected,
+        avgAccuracy: profile.avgAccuracy,
+        lastContribution: profile.lastContribution,
+        trend: profile.trend,
+      }]);
+    }
+
+    // Bound contributions to last 500 to keep snapshot size manageable
+    const MAX_PERSISTED_CONTRIBUTIONS = 500;
+    const boundedContributions = contributions.length > MAX_PERSISTED_CONTRIBUTIONS
+      ? contributions.slice(-MAX_PERSISTED_CONTRIBUTIONS)
+      : [...contributions];
+
+    return {
+      version: 1,
+      orgTrust: serializedTrust,
+      contributions: boundedContributions,
+      collectivePatterns: Array.from(collectivePatterns.entries()),
+      conflicts: Array.from(conflicts.entries()),
+      counters: { conflictCounter, patternCounter },
+      savedAt: Date.now(),
+    };
+  }
+
+  function loadState(snapshot: IntelligenceMeshSnapshot): void {
+    if (!snapshot || snapshot.version !== 1) return;
+
+    // Restore org trust profiles
+    orgTrust.clear();
+    for (const [id, serialized] of snapshot.orgTrust) {
+      orgTrust.set(id, {
+        orgId: serialized.orgId,
+        trustScore: serialized.trustScore,
+        domainTrust: new Map(serialized.domainTrust),
+        contributionsAccepted: serialized.contributionsAccepted,
+        contributionsRejected: serialized.contributionsRejected,
+        avgAccuracy: serialized.avgAccuracy,
+        lastContribution: serialized.lastContribution,
+        trend: serialized.trend,
+      });
+    }
+
+    // Restore contributions
+    contributions.length = 0;
+    for (const c of snapshot.contributions) {
+      contributions.push(c);
+    }
+
+    // Restore collective patterns
+    collectivePatterns.clear();
+    for (const [id, pattern] of snapshot.collectivePatterns) {
+      collectivePatterns.set(id, pattern);
+    }
+
+    // Restore conflicts
+    conflicts.clear();
+    for (const [id, conflict] of snapshot.conflicts) {
+      conflicts.set(id, conflict);
+    }
+
+    // Restore counters
+    conflictCounter = snapshot.counters.conflictCounter;
+    patternCounter = snapshot.counters.patternCounter;
+  }
+
   return {
     registerOrg,
     contribute,
@@ -444,5 +553,7 @@ export function createIntelligenceMesh(config?: IntelligenceMeshConfig): Intelli
     updateTrust,
     getStats,
     getCollectivePatterns,
+    getState,
+    loadState,
   };
 }

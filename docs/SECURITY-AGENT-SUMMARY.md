@@ -261,7 +261,7 @@ The agent **learns from its remediation outcomes**:
 ```bash
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ... # Never commit!
-DEFAULT_ORG_ID=00000000-0000-0000-0000-000000000000
+DEFAULT_ORG_ID=00000000-0000-4000-a000-000000000001
 ```
 
 ### Optional Enhancements

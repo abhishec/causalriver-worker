@@ -131,6 +131,8 @@ export interface CognitiveStackPersistable {
   getDreaming?: () => PersistableLayer;
   /** L4: Hierarchical Memory */
   getMemory?: () => PersistableLayer;
+  /** L7: Intelligence Mesh — collective trust + patterns */
+  getMesh?: () => PersistableLayer;
   /** L9: Theory of Mind */
   getTheoryOfMind?: () => PersistableLayer;
   /** L10: Temporal Consciousness */
@@ -386,6 +388,7 @@ export function createBrainLayerPersistence(
       const layerMap: Array<{ id: number; name: string; key: string; layer?: PersistableLayer }> = [
         { id: LAYER_IDS.DEEP_DREAMING, name: 'L3 Deep Dreaming', key: 'dreaming_state', layer: stack.getDreaming?.() },
         { id: LAYER_IDS.HIERARCHICAL_MEMORY, name: 'L4 Hierarchical Memory', key: 'memory_state', layer: stack.getMemory?.() },
+        { id: LAYER_IDS.INTELLIGENCE_MESH, name: 'L7 Intelligence Mesh', key: 'mesh_state', layer: stack.getMesh?.() },
         { id: LAYER_IDS.THEORY_OF_MIND, name: 'L9 Theory of Mind', key: 'tom_state', layer: stack.getTheoryOfMind?.() },
         { id: LAYER_IDS.TEMPORAL, name: 'L10 Temporal Consciousness', key: 'temporal_state', layer: stack.getTemporal?.() },
       ];
@@ -447,6 +450,7 @@ export function saveCognitiveLayerState(
   const layers: Array<{ id: number; key: string; layer?: PersistableLayer }> = [
     { id: LAYER_IDS.DEEP_DREAMING, key: 'dreaming_state', layer: stack.getDreaming?.() },
     { id: LAYER_IDS.HIERARCHICAL_MEMORY, key: 'memory_state', layer: stack.getMemory?.() },
+    { id: LAYER_IDS.INTELLIGENCE_MESH, key: 'mesh_state', layer: stack.getMesh?.() },
     { id: LAYER_IDS.THEORY_OF_MIND, key: 'tom_state', layer: stack.getTheoryOfMind?.() },
     { id: LAYER_IDS.TEMPORAL, key: 'temporal_state', layer: stack.getTemporal?.() },
   ];

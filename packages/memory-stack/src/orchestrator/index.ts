@@ -167,3 +167,11 @@ export {
   type DeepLayersPersistable,
   LAYER_IDS,
 } from './brain-layer-persistence';
+
+// Intelligence Mesh Persistence Sync — Dedicated L7 trust + pattern persistence
+export {
+  createMeshPersistenceSync,
+  type MeshPersistenceSyncConfig,
+  type MeshPersistenceSyncInstance,
+  type MeshLoadResult,
+} from './mesh-persistence-sync';
