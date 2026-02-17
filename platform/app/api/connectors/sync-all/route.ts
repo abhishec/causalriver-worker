@@ -145,6 +145,53 @@ export async function POST(request: Request) {
     const failedCount = results.filter((r) => !r.success && !(r as any).skipped).length;
     const syncedCount = results.length - skippedCount;
 
+    // ── Auto-trigger brain cycle after successful sync ──────────
+    // If we ingested any signals, fire a lightweight brain cycle so
+    // the brain actually processes them. Without this, signals just
+    // sit in cross_domain_signals and are never used until manual trigger.
+    let brainCycleResult: any = null;
+
+    if (totalSignals > 0 && successCount > 0) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+          || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+          || "http://localhost:3000";
+
+        const cookieHeader = request.headers.get("cookie") || "";
+
+        const brainResponse = await fetch(`${baseUrl}/api/brain/cycle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: cookieHeader,
+          },
+          body: JSON.stringify({ mode: "lightweight" }),
+        });
+
+        if (brainResponse.ok) {
+          const brainData = await brainResponse.json();
+          brainCycleResult = {
+            triggered: true,
+            mode: "lightweight",
+            durationMs: brainData.duration_ms,
+          };
+          console.log(`[sync-all] Auto-triggered lightweight brain cycle (${brainData.duration_ms}ms)`);
+        } else {
+          brainCycleResult = {
+            triggered: false,
+            error: `Brain cycle returned HTTP ${brainResponse.status}`,
+          };
+          console.warn(`[sync-all] Brain cycle failed: HTTP ${brainResponse.status}`);
+        }
+      } catch (brainErr: any) {
+        brainCycleResult = {
+          triggered: false,
+          error: brainErr.message || "Brain cycle call failed",
+        };
+        console.warn("[sync-all] Brain cycle error:", brainErr.message);
+      }
+    }
+
     return NextResponse.json({
       results,
       totalSignals,
@@ -152,7 +199,8 @@ export async function POST(request: Request) {
       skippedCount,
       failedCount,
       totalConnectors: results.length,
-      summary: `Synced ${successCount}/${syncedCount} connectors, ${totalSignals} signals${skippedCount > 0 ? ` (${skippedCount} skipped — no sync route)` : ""}`,
+      brainCycle: brainCycleResult,
+      summary: `Synced ${successCount}/${syncedCount} connectors, ${totalSignals} signals${brainCycleResult?.triggered ? " → brain cycle triggered" : ""}${skippedCount > 0 ? ` (${skippedCount} skipped — no sync route)` : ""}`,
     });
   } catch (err: any) {
     console.error("Sync-all error:", err);

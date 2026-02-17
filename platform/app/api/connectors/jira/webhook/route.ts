@@ -20,6 +20,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -201,6 +202,11 @@ export async function POST(req: NextRequest) {
       if (insertError) {
         console.warn('[Jira Webhook] Signal insert error:', insertError.message);
       }
+    }
+
+    // ── Auto-trigger brain cycle if enough signals accumulated ──
+    if (signals.length > 0) {
+      maybeTriggerBrainCycle(orgId, service).catch(() => {});
     }
 
     return NextResponse.json({ ok: true, signals: signals.length });

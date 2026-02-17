@@ -21,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
+import { maybeTriggerBrainCycle } from "@/lib/brain-trigger";
 
 export const dynamic = "force-dynamic";
 
@@ -211,6 +212,11 @@ export async function POST(request: NextRequest) {
           error: "File uploaded but could not parse as GL data: " + parseErr.message,
         };
       }
+    }
+
+    // ── Auto-trigger brain cycle after signal ingestion ─────────
+    if (brainTriggerResult?.triggered && brainTriggerResult.signalsIngested > 0) {
+      maybeTriggerBrainCycle(orgId, service).catch(() => {});
     }
 
     return NextResponse.json({

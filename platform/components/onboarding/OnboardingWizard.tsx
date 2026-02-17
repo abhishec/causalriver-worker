@@ -48,17 +48,34 @@ export function OnboardingWizard({
     setTraining(true);
     setTrainingResult(null);
     try {
+      // Step 1: Sync all connectors (this now auto-triggers a lightweight brain cycle)
       const res = await fetch("/api/connectors/sync-all", { method: "POST" });
       if (res.ok) {
         const data = await res.json();
-        const totalSignals = data.results?.reduce(
-          (s: number, r: any) => s + (r.signalsGenerated || 0),
-          0
-        ) || 0;
-        setTrainingResult(`Ingested ${totalSignals} signals`);
+        const totalSignals = data.totalSignals || 0;
+        const brainTriggered = data.brainCycle?.triggered;
+
+        // Step 2: If sync-all didn't auto-trigger brain (e.g. no signals), force it
+        if (!brainTriggered && totalSignals > 0) {
+          await fetch("/api/brain/cycle", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: "lightweight" }),
+          });
+        }
+
+        setTrainingResult(
+          `Synced ${data.successCount || 0} source(s), ${totalSignals} signals${brainTriggered ? " — brain trained" : " — brain cycle queued"}`
+        );
         setCurrentStep("ask");
       } else {
-        setTrainingResult("Training started — signals will appear shortly");
+        // Even if sync failed, try to run brain on existing data
+        await fetch("/api/brain/cycle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "lightweight" }),
+        });
+        setTrainingResult("Sync had issues but brain cycle started on existing data");
         setCurrentStep("ask");
       }
     } catch {

@@ -24,6 +24,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createHmac, timingSafeEqual } from 'crypto';
+import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -237,6 +238,11 @@ export async function POST(req: NextRequest) {
       if (insertError) {
         console.warn('[Slack Webhook] Signal insert error:', insertError.message);
       }
+    }
+
+    // ── Auto-trigger brain cycle if enough signals accumulated ──
+    if (signals.length > 0) {
+      maybeTriggerBrainCycle(orgId, service).catch(() => {});
     }
 
     // Always respond 200 quickly to prevent Slack retries

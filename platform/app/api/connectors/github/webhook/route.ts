@@ -28,6 +28,7 @@ import { Octokit } from '@octokit/rest';
 import { createHmac } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { ingestPRAsSignals } from '@/lib/p0/ingest-pr-signals';
+import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -256,6 +257,14 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
         analysisTimeMs: analysis.meta.analysisTimeMs,
       },
     });
+
+    // 9. Auto-trigger brain cycle if enough signals accumulated
+    try {
+      const serviceSupabase2 = await createServiceClient();
+      await maybeTriggerBrainCycle(organizationId, serviceSupabase2);
+    } catch (triggerErr) {
+      console.warn('[PR Review] Brain auto-trigger error:', triggerErr);
+    }
 
     return NextResponse.json({
       success: true,

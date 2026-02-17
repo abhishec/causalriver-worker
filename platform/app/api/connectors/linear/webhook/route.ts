@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createLogger } from '@nexus-ai/memory-stack';
+import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 
 const logger = createLogger({ level: 'info' });
 
@@ -118,7 +119,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 8. Return success
+    // 8. Auto-trigger brain cycle if enough signals accumulated
+    if (signal) {
+      maybeTriggerBrainCycle(organizationId, supabase).catch(() => {});
+    }
+
+    // 9. Return success
     return NextResponse.json({ success: true, signal: signal?.id });
   } catch (error) {
     logger.error('Linear webhook handler error', { error });

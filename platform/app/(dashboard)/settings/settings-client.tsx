@@ -10,6 +10,7 @@ import { SettingsMembers } from "./settings-members";
 import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
+import { BrainOperationsSection } from "./brain-operations-section";
 
 interface Connector {
   id: string;
@@ -54,6 +55,7 @@ const TAB_ICONS: Record<string, string> = {
   notifications: "M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0",
   api:           "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
   danger:        "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
+  operations:    "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 15.828a5 5 0 010-7.072m5.656 0a5 5 0 010 7.072M13 12a1 1 0 11-2 0 1 1 0 012 0z",
 };
 
 export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: SettingsClientProps) {
@@ -82,6 +84,7 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
     { id: "members", label: "Members" },
     { id: "connections", label: "Connections", count: connectors.length },
     { id: "brain", label: "Brain Config" },
+    { id: "operations", label: "Brain Ops" },
     { id: "notifications", label: "Notifications" },
     { id: "api", label: "API Keys", count: apiKeys.length },
     { id: "danger", label: "Danger Zone" },
@@ -331,6 +334,15 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
                 <span className="text-xs text-success font-medium">Within budget limits</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Brain Operations Tab */}
+        {activeTab === "operations" && (
+          <div>
+            <h2 className="text-sm font-medium mb-1">Brain Operations</h2>
+            <p className="text-xs text-muted mb-6">All 4 brain trigger mechanisms — monitor, configure, and run on-demand</p>
+            <BrainOperationsSection orgId={orgId} connectors={connectors} />
           </div>
         )}
 
