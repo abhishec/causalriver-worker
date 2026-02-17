@@ -240,8 +240,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Step 4: Seed communication → engineering causal edges ────────────
-    await seedCommunicationCascade(service, orgId);
+    // ── Step 4: Derive REAL communication insights from actual signals ────
+    await deriveRealSlackInsights(service, orgId);
 
     // ── Step 5: Update connector status ─────────────────────────────────
     await service
@@ -275,71 +275,112 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Seed causal relationships the Brain should discover between
- * communication patterns and engineering/business metrics.
+ * Derive REAL communication insights from actual Slack signals.
  *
- * These are "priors" — the Brain will validate them with real data
- * and strengthen/weaken them based on evidence.
+ * Instead of seeding fake causal priors with made-up confidence scores,
+ * this function reads actual Slack cross_domain_signals and computes real
+ * org-specific observations: which channels are most active, after-hours
+ * activity patterns, thread engagement by channel, communication health.
+ *
+ * These insights get written to ai_memory as human sentences, and the
+ * Brain context formatter reads them directly to inform Claude's answers.
  */
-async function seedCommunicationCascade(
+async function deriveRealSlackInsights(
   service: any,
   orgId: string
 ): Promise<void> {
-  const cascade = [
-    {
-      organization_id: orgId,
-      source_domain: "communication",
-      target_domain: "engineering",
-      source_metric: "after_hours_activity",
-      target_metric: "velocity",
-      effect_size: -0.35,
-      confidence: 0.4,
-      granger_p_value: 0.08,
-      optimal_lag_days: 7,
-      natural_language:
-        "High after-hours Slack activity correlates with engineering velocity decline within 1 week — suggests burnout or context switching.",
-      discovery_method: "seed_prior",
-      is_significant: true,
-    },
-    {
-      organization_id: orgId,
-      source_domain: "communication",
-      target_domain: "engineering",
-      source_metric: "thread_engagement",
-      target_metric: "pr_cycle_time",
-      effect_size: -0.25,
-      confidence: 0.35,
-      granger_p_value: 0.12,
-      optimal_lag_days: 3,
-      natural_language:
-        "Higher thread engagement in Slack correlates with faster PR cycle times — indicates healthy collaboration patterns.",
-      discovery_method: "seed_prior",
-      is_significant: true,
-    },
-    {
-      organization_id: orgId,
-      source_domain: "communication",
-      target_domain: "cs",
-      source_metric: "channel_message_volume",
-      target_metric: "support_ticket_volume",
-      effect_size: 0.3,
-      confidence: 0.35,
-      granger_p_value: 0.1,
-      optimal_lag_days: 2,
-      natural_language:
-        "Spike in internal Slack messages often precedes support ticket surges — internal issues cascading to customers.",
-      discovery_method: "seed_prior",
-      is_significant: true,
-    },
-  ];
+  // Pull recent Slack signals (last 30 days)
+  const { data: signals } = await service
+    .from("cross_domain_signals")
+    .select("signal_type, signal_value, signal_metadata, created_at")
+    .eq("organization_id", orgId)
+    .like("source_domain", "communication%")
+    .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+    .order("created_at", { ascending: true })
+    .limit(5000);
 
-  for (const edge of cascade) {
-    await service
-      .from("causal_relationships_statistical")
-      .upsert(edge, {
-        onConflict:
-          "organization_id,source_domain,target_domain,source_metric,target_metric",
-        ignoreDuplicates: true,
-      });
+  if (!signals || signals.length < 5) return; // Not enough data yet
+
+  // ── 1. MOST ACTIVE CHANNELS ───────────────────────────────────────────────
+  const channelVolume: Record<string, number> = {};
+  const volumeSignals = signals.filter((s: any) => s.signal_type === "channel_message_volume");
+  for (const s of volumeSignals) {
+    const ch = s.signal_metadata?.channel_name;
+    if (ch) channelVolume[ch] = (channelVolume[ch] || 0) + (s.signal_value || 0);
   }
+  const topChannels = Object.entries(channelVolume)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  if (topChannels.length > 0) {
+    const totalMessages = Object.values(channelVolume).reduce((a, b) => a + b, 0);
+    await service.from("ai_memory").upsert({
+      organization_id: orgId,
+      memory_type: "pattern",
+      domain: "communication.channels",
+      content: JSON.stringify({
+        title: "Most Active Slack Channels",
+        insight: `In the last 30 days, the most active channels are: ${topChannels.map(([ch, vol]) => `#${ch} (${vol} messages)`).join(", ")}. Total of ${totalMessages} messages across ${Object.keys(channelVolume).length} channels.`,
+        top_channels: topChannels.map(([name, volume]) => ({ name, volume, share: volume / totalMessages })),
+        total_messages: totalMessages,
+      }),
+      importance: 0.60,
+      metadata: { source: "slack_sync_derived" },
+      created_at: new Date().toISOString(),
+    }, { onConflict: "organization_id,memory_type,domain" });
+  }
+
+  // ── 2. AFTER-HOURS ACTIVITY (burnout signal) ──────────────────────────────
+  const afterHoursSignals = signals.filter((s: any) => s.signal_type === "after_hours_activity");
+  if (afterHoursSignals.length > 0) {
+    const avgAfterHoursRatio = afterHoursSignals.reduce((a: number, s: any) => a + (s.signal_value || 0), 0) / afterHoursSignals.length;
+    const highAfterHoursChannels = afterHoursSignals
+      .filter((s: any) => s.signal_value > 0.3)
+      .map((s: any) => s.signal_metadata?.channel_name)
+      .filter(Boolean);
+
+    if (avgAfterHoursRatio > 0.1) {
+      await service.from("ai_memory").upsert({
+        organization_id: orgId,
+        memory_type: "pattern",
+        domain: "communication.after_hours",
+        content: JSON.stringify({
+          title: "After-Hours Work Pattern",
+          insight: `${(avgAfterHoursRatio * 100).toFixed(0)}% of Slack messages are sent outside business hours (8am–7pm UTC). ${avgAfterHoursRatio > 0.3 ? `This is high — it suggests burnout risk or a team working across time zones. Channels with most after-hours activity: ${[...new Set(highAfterHoursChannels)].slice(0, 3).join(", ")}.` : "This is within normal range."}`,
+          avg_after_hours_ratio: avgAfterHoursRatio,
+          high_after_hours_channels: [...new Set(highAfterHoursChannels)].slice(0, 5),
+        }),
+        importance: avgAfterHoursRatio > 0.3 ? 0.85 : 0.55,
+        metadata: { source: "slack_sync_derived" },
+        created_at: new Date().toISOString(),
+      }, { onConflict: "organization_id,memory_type,domain" });
+    }
+  }
+
+  // ── 3. THREAD ENGAGEMENT (collaboration health signal) ───────────────────
+  const threadSignals = signals.filter((s: any) => s.signal_type === "thread_engagement");
+  if (threadSignals.length > 0) {
+    const avgEngagement = threadSignals.reduce((a: number, s: any) => a + (s.signal_value || 0), 0) / threadSignals.length;
+    const highEngagementChannels = threadSignals
+      .filter((s: any) => s.signal_value > 0.4)
+      .map((s: any) => s.signal_metadata?.channel_name)
+      .filter(Boolean);
+
+    await service.from("ai_memory").upsert({
+      organization_id: orgId,
+      memory_type: "pattern",
+      domain: "communication.engagement",
+      content: JSON.stringify({
+        title: "Team Collaboration Quality",
+        insight: `${(avgEngagement * 100).toFixed(0)}% of messages spawn threaded discussions (higher = better collaboration). ${avgEngagement > 0.3 ? `High thread engagement in: ${[...new Set(highEngagementChannels)].slice(0, 3).join(", ")} — these channels are where active problem-solving happens.` : avgEngagement < 0.1 ? "Low thread engagement — discussions may be happening outside Slack or communication is one-directional." : "Thread engagement is at a healthy level."}`,
+        avg_thread_engagement: avgEngagement,
+        high_engagement_channels: [...new Set(highEngagementChannels)].slice(0, 5),
+      }),
+      importance: 0.65,
+      metadata: { source: "slack_sync_derived" },
+      created_at: new Date().toISOString(),
+    }, { onConflict: "organization_id,memory_type,domain" });
+  }
+
+  console.log(`[Brain] Derived real Slack insights from ${signals.length} signals for org ${orgId}`);
 }

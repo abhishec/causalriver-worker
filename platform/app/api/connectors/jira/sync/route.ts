@@ -158,8 +158,8 @@ export async function POST(request: Request) {
 
     const duration_ms = Date.now() - startMs;
 
-    // 5. Seed Jira → Engineering causal relationships
-    await seedJiraCascade(service, orgId);
+    // 5. Derive REAL Jira insights from actual ingested signals
+    await deriveRealJiraInsights(service, orgId);
 
     // 6. Update connector with results
     await service
@@ -222,48 +222,123 @@ async function jiraFetch(accessToken: string, siteUrl: string, endpoint: string)
 }
 
 /**
- * Seed Jira → Engineering cross-domain causal relationships
- * Brain learns: ticket_backlog → engineering_velocity, ticket_cycle_time → churn
+ * Derive REAL Jira insights from actual ingested signals.
+ *
+ * Instead of seeding fake statistical relationships with made-up p-values,
+ * this function reads actual Jira cross_domain_signals and computes real
+ * org-specific statistics: who resolves tickets, cycle times per project,
+ * backlog size, priority distribution, sprint velocity patterns.
+ *
+ * This ensures the Brain's product knowledge is ORG-SPECIFIC, not generic.
  */
-async function seedJiraCascade(supabase: any, organizationId: string) {
-  const cascade = [
-    {
-      source_domain: "product",
-      target_domain: "engineering",
-      source_metric: "ticket_backlog",
-      target_metric: "engineering_velocity",
-      effect_size: -0.35,
-      p_value: 0.02,
-      lag_days: 3,
-      confidence: 0.72,
-      natural_language:
-        "Growing Jira ticket backlog correlates with engineering velocity drops within 3 days",
-      sample_size: 90,
-    },
-    {
-      source_domain: "product",
-      target_domain: "support",
-      source_metric: "ticket_cycle_time",
-      target_metric: "customer_satisfaction",
-      effect_size: -0.45,
-      p_value: 0.01,
-      lag_days: 14,
-      confidence: 0.78,
-      natural_language:
-        "Increasing Jira ticket cycle times precede customer satisfaction drops by ~14 days",
-      sample_size: 90,
-    },
-  ];
+async function deriveRealJiraInsights(supabase: any, organizationId: string) {
+  // Pull recent Jira signals (last 90 days)
+  const { data: signals } = await supabase
+    .from("cross_domain_signals")
+    .select("signal_type, signal_value, signal_metadata, created_at, entity_id")
+    .eq("organization_id", organizationId)
+    .like("source_domain", "product%")
+    .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+    .order("created_at", { ascending: true })
+    .limit(5000);
 
-  for (const edge of cascade) {
-    await supabase.from("causal_relationships_statistical").upsert(
-      {
-        organization_id: organizationId,
-        ...edge,
-        granger_f_statistic: Math.abs(edge.effect_size) * 10,
-        discovered_at: new Date().toISOString(),
-      },
-      { onConflict: "organization_id,source_domain,target_domain,source_metric,target_metric" }
-    );
+  if (!signals || signals.length < 5) return; // Not enough data yet
+
+  // ── 1. TICKET CYCLE TIME ANALYSIS ────────────────────────────────────────
+  const resolvedTickets = signals.filter((s: any) => s.signal_type === "ticket_resolved");
+  const cycleTimes = resolvedTickets
+    .map((s: any) => s.signal_value)
+    .filter((v: any) => v > 0 && v < 10000);
+
+  if (cycleTimes.length >= 3) {
+    const avgCycleTime = cycleTimes.reduce((a: number, b: number) => a + b, 0) / cycleTimes.length;
+    const sortedTimes = [...cycleTimes].sort((a: number, b: number) => a - b);
+    const p75 = sortedTimes[Math.floor(sortedTimes.length * 0.75)];
+    const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)];
+    const slowTickets = cycleTimes.filter((t: number) => t > avgCycleTime * 2).length;
+    const slowRatio = slowTickets / cycleTimes.length;
+
+    await supabase.from("ai_memory").upsert({
+      organization_id: organizationId,
+      memory_type: "pattern",
+      domain: "product.cycle_time",
+      content: JSON.stringify({
+        title: "Jira Ticket Cycle Time",
+        insight: `This org resolves tickets in ${(avgCycleTime / 24).toFixed(0)} days on average (p75: ${(p75 / 24).toFixed(0)}d, p95: ${(p95 / 24).toFixed(0)}d). ${slowRatio > 0.25 ? `${(slowRatio * 100).toFixed(0)}% of tickets take more than 2x the average — a sign of scope creep or blocked work.` : "Ticket cycle times are fairly consistent."}`,
+        avg_hours: avgCycleTime,
+        p75_hours: p75,
+        p95_hours: p95,
+        sample_size: cycleTimes.length,
+        slow_ticket_ratio: slowRatio,
+      }),
+      importance: 0.80,
+      metadata: { source: "jira_sync_derived" },
+      created_at: new Date().toISOString(),
+    }, { onConflict: "organization_id,memory_type,domain" });
   }
+
+  // ── 2. PROJECT ACTIVITY BREAKDOWN ────────────────────────────────────────
+  const projectCounts: Record<string, number> = {};
+  for (const s of signals) {
+    const key = s.signal_metadata?.project_key;
+    if (key) projectCounts[key] = (projectCounts[key] || 0) + 1;
+  }
+  const topProjects = Object.entries(projectCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  if (topProjects.length > 0) {
+    const total = signals.length;
+    await supabase.from("ai_memory").upsert({
+      organization_id: organizationId,
+      memory_type: "pattern",
+      domain: "product.projects",
+      content: JSON.stringify({
+        title: "Most Active Jira Projects",
+        insight: `The most active projects in the last 90 days: ${topProjects.map(([k, c]) => `${k} (${c} tickets, ${((c/total)*100).toFixed(0)}%)`).join(", ")}. ${topProjects[0]?.[1] / total > 0.5 ? `${topProjects[0][0]} dominates — this project carries the most delivery risk.` : "Work is spread across multiple projects."}`,
+        top_projects: topProjects.map(([key, count]) => ({ project_key: key, ticket_count: count, share: count / total })),
+        total_tickets: total,
+      }),
+      importance: 0.70,
+      metadata: { source: "jira_sync_derived" },
+      created_at: new Date().toISOString(),
+    }, { onConflict: "organization_id,memory_type,domain" });
+  }
+
+  // ── 3. ASSIGNEE WORKLOAD CONCENTRATION ───────────────────────────────────
+  const assigneeCounts: Record<string, number> = {};
+  for (const s of signals) {
+    const assignee = s.signal_metadata?.assignee;
+    if (assignee && typeof assignee === "string") {
+      assigneeCounts[assignee] = (assigneeCounts[assignee] || 0) + 1;
+    }
+  }
+  const sortedAssignees = Object.entries(assigneeCounts)
+    .sort((a, b) => b[1] - a[1]);
+
+  if (sortedAssignees.length >= 2) {
+    const total = signals.length;
+    const top = sortedAssignees[0];
+    const topShare = top[1] / total;
+
+    if (topShare > 0.25) {
+      await supabase.from("ai_memory").upsert({
+        organization_id: organizationId,
+        memory_type: "pattern",
+        domain: "product.assignees",
+        content: JSON.stringify({
+          title: "Ticket Assignee Concentration",
+          insight: `${top[0]} owns ${(topShare * 100).toFixed(0)}% of Jira tickets (${top[1]} of ${total}). ${topShare > 0.4 ? `This is a critical workload bottleneck — if ${top[0]} is unavailable, delivery will stall.` : `Workload is moderately concentrated. Top assignees: ${sortedAssignees.slice(0, 3).map(([n, c]) => `${n} (${c})`).join(", ")}.`}`,
+          top_assignee: top[0],
+          top_share: topShare,
+          assignee_breakdown: sortedAssignees.slice(0, 5).map(([name, count]) => ({ name, count, share: count / total })),
+        }),
+        importance: topShare > 0.4 ? 0.85 : 0.65,
+        metadata: { source: "jira_sync_derived" },
+        created_at: new Date().toISOString(),
+      }, { onConflict: "organization_id,memory_type,domain" });
+    }
+  }
+
+  console.log(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
 }

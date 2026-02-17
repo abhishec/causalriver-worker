@@ -347,14 +347,14 @@ async function assembleBrainContext(
         .limit(50),
 
       // Brain insights: Recent AI-generated organizational insights (from ai_memory)
+      // NOTE: memory_type 'pattern' is the richest — deriveRealCausalInsights writes human sentences here
       supabase
         .from('ai_memory')
-        .select('content, memory_type, cognitive_layer, metadata, created_at')
+        .select('content, memory_type, domain, importance, source, created_at')
         .eq('organization_id', organizationId)
         .in('memory_type', ['insight', 'pattern', 'prediction'])
-        .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
-        .order('created_at', { ascending: false })
-        .limit(10),
+        .order('importance', { ascending: false })
+        .limit(15),
 
       // Cascade rules: Known cascade chains the Brain has learned
       supabase
@@ -402,22 +402,43 @@ async function assembleBrainContext(
     // Get latest evolution snapshot
     const latestEvolution = evolutionRes.data?.[0] || null;
 
+    // ── COLD-START DETECTION ────────────────────────────────────────────────
+    // The Brain is only "available" if it has REAL org data.
+    // This prevents Claude from hallucinating org-specific insights
+    // when all the tables are empty (fresh install, no syncs done yet).
+    const causalEdges = causalEdgesRes.data || [];
+    const patterns = patternsRes.data || [];
+    const orgPatterns = (brainInsightsRes.data || []).filter(
+      (m: any) => m.memory_type === 'pattern'
+    );
+    const recentSignals = recentSignalsRes.data || [];
+    const hasRealData =
+      causalEdges.length > 0 ||
+      orgPatterns.length > 0 ||
+      recentSignals.length > 0;
+
     return {
       organizationId,
-      causalEdges: causalEdgesRes.data || [],
-      patterns: patternsRes.data || [],
-      cognitiveStackAvailable: true,
+      causalEdges,
+      patterns,
+      // HONEST: true only when real org data has been ingested
+      cognitiveStackAvailable: hasRealData,
       // Cross-domain context for SE-aaS domains
       crossDomainContext: {
         engineering: {
           velocity: velocityRes.data?.[0] || null,
           bottleneck: bottleneckRes.data?.[0] || null,
-          recentSignals: (recentSignalsRes.data || []).slice(0, 20),
-          signalCount: recentSignalsRes.data?.length || 0,
+          recentSignals: recentSignals.slice(0, 20),
+          signalCount: recentSignals.length,
         },
       },
-      // Brain insights (recent organizational intelligence)
-      brainInsights: (brainInsightsRes.data || []).slice(0, 5),
+      // orgPatterns: human-readable insights written by deriveRealCausalInsights()
+      // These are the richest Brain context — real sentences like:
+      //   "Alice handles 67% of reviews — critical bus factor risk"
+      //   "PRs average 18h to merge, p95 is 72h"
+      orgPatterns,
+      // Brain insights (all types — insight, pattern, prediction)
+      brainInsights: (brainInsightsRes.data || []).slice(0, 8),
       // Cascade rules (cross-domain chains)
       cascadeRules: cascadeRulesRes.data || [],
       // Brain Evolution state (THE NEVER-EXISTED-BEFORE FEATURE)
@@ -455,6 +476,7 @@ async function assembleBrainContext(
       organizationId,
       causalEdges: [],
       patterns: [],
+      orgPatterns: [],
       cognitiveStackAvailable: false,
       crossDomainContext: {},
       brainInsights: [],

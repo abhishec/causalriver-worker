@@ -110,173 +110,141 @@ export function formatBrainContextForDomain(
   brain: BrainContextForDomain | Record<string, any> | undefined,
   domainName: string
 ): string {
-  if (!brain || !brain.cognitiveStackAvailable) {
-    return '';
+  if (!brain) return '';
+
+  // ── COLD-START AWARENESS ──────────────────────────────────────────────
+  // The Brain knows what it doesn't know. If there's no real org data yet,
+  // tell Claude honestly instead of pretending to have fake learned knowledge.
+  const causalEdges = (brain.causalEdges as CausalEdge[] | undefined) || [];
+  const patterns = (brain.patterns as GrammarPattern[] | undefined) || [];
+  const eng = brain.crossDomainContext?.engineering;
+  const orgPatterns = (brain as Record<string, any>).orgPatterns as any[] | undefined || [];
+  const userCorrections = (brain as Record<string, any>).userCorrections as any[] | undefined || [];
+
+  const hasRealData = causalEdges.length > 0 || patterns.length > 0 ||
+    orgPatterns.length > 0 || (eng?.signalCount && eng.signalCount > 0);
+
+  if (!hasRealData && !brain.cognitiveStackAvailable) {
+    return `\n## NexusBrain Brain Context\nThe Brain has not yet ingested enough data from this organization to provide specific insights. Once GitHub, Jira, and Slack are connected and synced, I will have org-specific knowledge to augment my analysis.\n`;
   }
 
   const sections: string[] = [];
 
-  sections.push(`\n## NexusBrain Organizational Intelligence (Memory-Augmented)`);
-  sections.push(`You are operating as part of NexusBrain's 15-layer cognitive stack, NOT as a stateless LLM.`);
-  sections.push(`The Brain has learned the following about this organization through continuous observation:\n`);
+  // ── OPENING: set the right tone ───────────────────────────────────────
+  sections.push(`\n## What I Know About This Organization (Brain Memory)`);
+  sections.push(`The following is real, observed knowledge from this org's data — not generic best practices.\n`);
 
-  // ── CAUSAL EDGES ────────────────────────────────────────────────────────
-  const causalEdges = brain.causalEdges as CausalEdge[] | undefined;
-  if (causalEdges && causalEdges.length > 0) {
-    sections.push(`### Brain-Learned Causal Relationships (L4 Causal Graph)`);
-    sections.push(`The Brain has discovered these cause-effect relationships in this organization:`);
-
-    const topEdges = causalEdges
-      .filter((e) => e.confidence >= 0.5 && e.p_value < 0.1)
-      .slice(0, 15);
-
-    if (topEdges.length > 0) {
-      for (const edge of topEdges) {
-        const lag = edge.lag > 0 ? ` (${edge.lag}d lag)` : '';
-        const direction = edge.strength > 0 ? '--->' : '---|';
-        sections.push(
-          `- ${edge.source_signal} ${direction} ${edge.target_signal} ` +
-            `[strength: ${edge.strength.toFixed(2)}, confidence: ${(edge.confidence * 100).toFixed(0)}%${lag}]`
-        );
-      }
-      sections.push(
-        `\nUse these causal relationships to provide organization-specific insights, not generic advice.`
-      );
-    }
-  }
-
-  // ── GRAMMAR PATTERNS ────────────────────────────────────────────────────
-  const patterns = brain.patterns as GrammarPattern[] | undefined;
-  if (patterns && patterns.length > 0) {
-    sections.push(`\n### Brain-Discovered Patterns (L5 Grammar Rules)`);
-    sections.push(`The Brain has identified these organizational patterns:`);
-
-    for (const pattern of patterns.slice(0, 10)) {
-      sections.push(
-        `- **${pattern.rule_name}** [${pattern.domain}]: ${pattern.rule_body} ` +
-          `(confidence: ${(pattern.confidence * 100).toFixed(0)}%)`
-      );
-    }
-    sections.push(
-      `\nLeverage these patterns to contextualize your analysis with what the Brain has learned about this organization.`
-    );
-  }
-
-  // ── ENGINEERING CONTEXT ──────────────────────────────────────────────────
-  const eng = brain.crossDomainContext?.engineering;
-  if (eng) {
-    if (eng.velocity) {
-      sections.push(`\n### Current Engineering Velocity (P0 Early Warning)`);
-      sections.push(`- PRs merged (latest snapshot): ${eng.velocity.prs_merged}`);
-      sections.push(
-        `- Mean PR cycle time: ${eng.velocity.mean_pr_cycle_time_hours?.toFixed(1) || '?'}h`
-      );
-      sections.push(`- Open PR count: ${eng.velocity.open_pr_count || '?'}`);
-      sections.push(
-        `- PRs per engineer: ${eng.velocity.prs_per_engineer?.toFixed(1) || '?'}`
-      );
-      sections.push(`- Snapshot date: ${eng.velocity.snapshot_date || '?'}`);
-    }
-
-    if (eng.bottleneck) {
-      sections.push(`\n### Bottleneck Risk Assessment (P0 Early Warning)`);
-      sections.push(
-        `- Bottleneck Risk Score: ${(eng.bottleneck.bottleneck_risk_score * 100).toFixed(0)}% (${eng.bottleneck.risk_level})`
-      );
-      sections.push(
-        `- Reviewer Gini: ${eng.bottleneck.reviewer_gini_coefficient?.toFixed(2) || '?'} (0=equal, 1=concentrated)`
-      );
-      sections.push(
-        `- Reviewer HHI: ${eng.bottleneck.reviewer_hhi?.toFixed(3) || '?'} (>0.25 = high concentration)`
-      );
-      sections.push(
-        `- Top reviewer share: ${((eng.bottleneck.top_reviewer_share || 0) * 100).toFixed(0)}%`
-      );
-      sections.push(
-        `- Max betweenness centrality: ${eng.bottleneck.max_betweenness_centrality?.toFixed(3) || '?'}`
-      );
-    }
-
-    // ── RECENT SIGNALS ────────────────────────────────────────────────────
-    const signals = eng.recentSignals;
-    if (signals && signals.length > 0) {
-      sections.push(
-        `\n### Recent Engineering Signals (Last 7 Days — ${eng.signalCount} total)`
-      );
-
-      // Group by signal type for readability
-      const grouped = new Map<string, number>();
-      for (const s of signals) {
-        grouped.set(s.signal_type, (grouped.get(s.signal_type) || 0) + 1);
-      }
-      for (const [type, count] of grouped) {
-        sections.push(`- ${type}: ${count} signal(s)`);
-      }
-
-      // Show domain-specific signals for incident diagnosis
-      if (
-        domainName === 'incident-diagnosis' ||
-        domainName === 'log-query' ||
-        domainName === 'impact-analyze'
-      ) {
-        sections.push(`\nDetailed recent signals (most recent first):`);
-        for (const s of signals.slice(0, 10)) {
-          const meta = s.signal_metadata
-            ? ` | ${JSON.stringify(s.signal_metadata).slice(0, 100)}`
-            : '';
-          sections.push(`- [${s.created_at}] ${s.signal_type}: ${s.signal_value}${meta}`);
+  // ── HUMAN-READABLE PATTERNS (from ai_memory — the richest source) ─────
+  // These are derived by deriveRealCausalInsights() after every sync.
+  // Format: tell a story, not a metric dump.
+  if (orgPatterns.length > 0) {
+    sections.push(`### What the Brain Has Observed`);
+    for (const p of orgPatterns.slice(0, 6)) {
+      try {
+        const content = typeof p.content === 'string' ? JSON.parse(p.content) : p.content;
+        if (content?.insight) {
+          // The "insight" field is already a human sentence — use it directly
+          sections.push(`- ${content.insight}`);
+        }
+      } catch {
+        // fallback: use raw content
+        if (typeof p.content === 'string' && p.content.length < 300) {
+          sections.push(`- ${p.content}`);
         }
       }
     }
+    sections.push('');
   }
 
-  // ── BRAIN EVOLUTION CONTEXT ───────────────────────────────────────────
-  const brainEvolution = (brain as Record<string, any>).brainEvolution;
-  if (brainEvolution && brainEvolution.isLearning) {
-    sections.push(`\n### Brain Evolution (Self-Learning Intelligence)`);
-    sections.push(`The Brain is actively learning from this organization:`);
-    sections.push(`- Intelligence Score: ${brainEvolution.intelligenceScore}/100`);
-    sections.push(`- Prediction Accuracy: ${(brainEvolution.accuracy * 100).toFixed(0)}%`);
-    sections.push(`- Calibration (Brier): ${brainEvolution.brierScore.toFixed(3)} (${brainEvolution.brierScore < 0.25 ? 'well-calibrated' : 'improving'})`);
-    sections.push(`- Knowledge Base: ${brainEvolution.totalEdges} causal edges, ${brainEvolution.totalEvidence} verified predictions`);
-    sections.push(`The Brain gets smarter with every interaction. Its predictions improve over time via Bayesian weight updates.`);
-  }
-
-  // ── BRAIN ACCURACY & TRACK RECORD ──────────────────────────────────────
-  const brainAccuracy = (brain as Record<string, any>).brainAccuracy;
-  if (brainAccuracy && brainAccuracy.totalPredictions > 0) {
-    sections.push(`\n### Brain Track Record (Verified Predictions)`);
-    sections.push(`Brain accuracy: ${(brainAccuracy.accuracy * 100).toFixed(0)}% (${brainAccuracy.correctPredictions}/${brainAccuracy.totalPredictions})`);
-    if (brainAccuracy.recentTrackRecord?.length > 0) {
-      sections.push(`Recent verified predictions:`);
-      for (const p of brainAccuracy.recentTrackRecord.slice(0, 3)) {
-        sections.push(`- [${p.wasCorrect ? '✓' : '✗'}] ${p.domain}: ${p.outcome} (${(p.confidence * 100).toFixed(0)}% confident)`);
+  // ── CAUSAL RELATIONSHIPS: human language, not signal IDs ─────────────
+  if (causalEdges.length > 0) {
+    const realEdges = causalEdges.filter((e) => e.confidence >= 0.5 && e.p_value < 0.1);
+    if (realEdges.length > 0) {
+      sections.push(`### Cause-Effect Relationships Observed in This Org`);
+      for (const edge of realEdges.slice(0, 8)) {
+        // Prefer natural_language description if present (from deriveRealCausalInsights)
+        const nl = (edge as any).natural_language;
+        if (nl && nl.length > 10) {
+          sections.push(`- ${nl} (${(edge.confidence * 100).toFixed(0)}% confidence)`);
+        } else {
+          // Construct a human sentence from the raw fields
+          const lagText = edge.lag > 0 ? ` within ${edge.lag} day${edge.lag !== 1 ? 's' : ''}` : '';
+          const direction = edge.strength > 0 ? 'increases' : 'decreases';
+          sections.push(
+            `- When "${edge.source_signal}" goes up, "${edge.target_signal}" tends to ${direction}${lagText}. ` +
+            `(seen ${(edge.confidence * 100).toFixed(0)}% of the time)`
+          );
+        }
       }
+      sections.push('');
     }
   }
 
-  // ── USER CORRECTIONS (highest-priority learning) ───────────────────────
-  const userCorrections = (brain as Record<string, any>).userCorrections;
-  if (userCorrections && userCorrections.length > 0) {
-    sections.push(`\n### User-Verified Corrections (High-Priority Knowledge)`);
-    sections.push(`Users have corrected the Brain on these topics — use these as ground truth:`);
+  // ── LIVE ENGINEERING STATE: plain English ─────────────────────────────
+  if (eng) {
+    if (eng.velocity) {
+      const ct = eng.velocity.mean_pr_cycle_time_hours;
+      const ctDays = ct ? (ct / 24).toFixed(1) : null;
+      const openPRs = eng.velocity.open_pr_count || 0;
+      const merged = eng.velocity.prs_merged || 0;
+
+      sections.push(`### Current Engineering State`);
+      if (ctDays) sections.push(`- PRs are taking ${ctDays} days on average to merge${ct > 48 ? ' — this is slow and is likely causing delivery delays' : ct < 8 ? ' — this is fast, good flow' : ''}.`);
+      if (merged > 0) sections.push(`- ${merged} PRs were merged in the most recent tracking period.`);
+      if (openPRs > 0) sections.push(`- ${openPRs} PRs are currently open${openPRs > 15 ? ' — high WIP, risk of context-switching overhead' : ''}.`);
+    }
+
+    if (eng.bottleneck) {
+      const topShare = eng.bottleneck.top_reviewer_share || 0;
+      const risk = eng.bottleneck.risk_level || 'unknown';
+      const gini = eng.bottleneck.reviewer_gini_coefficient || 0;
+      if (topShare > 0) {
+        sections.push(`- Review bottleneck risk is **${risk}**. One reviewer is handling ${(topShare * 100).toFixed(0)}% of all reviews${topShare > 0.5 ? ' — this is a critical single point of failure' : topShare > 0.3 ? ' — moderately concentrated' : ''}.`);
+        if (gini > 0.5) sections.push(`- Code review is highly unequal (Gini ${gini.toFixed(2)}). Most engineers are not reviewing each other's work.`);
+      }
+    }
+
+    const signals = eng.recentSignals;
+    if (signals && signals.length > 0) {
+      // Find notable recent events, not just counts
+      const incidentSignals = signals.filter((s: EngineeringSignal) => s.signal_type.includes('incident') || s.signal_type.includes('failure'));
+      const mergeSignals = signals.filter((s: EngineeringSignal) => s.signal_type === 'pr_merged');
+      const reviewSignals = signals.filter((s: EngineeringSignal) => s.signal_type === 'pr_reviewed');
+
+      if (incidentSignals.length > 0) {
+        sections.push(`- ⚠️ ${incidentSignals.length} incident/failure signal(s) detected in the last 7 days.`);
+      }
+      if (mergeSignals.length > 0) {
+        const avgCT = mergeSignals.reduce((a: number, s: EngineeringSignal) => a + s.signal_value, 0) / mergeSignals.length;
+        sections.push(`- ${mergeSignals.length} PRs merged recently (avg cycle time: ${(avgCT / 24).toFixed(1)}d).`);
+      }
+      if (reviewSignals.length > 0) {
+        const avgLatency = reviewSignals.reduce((a: number, s: EngineeringSignal) => a + s.signal_value, 0) / reviewSignals.length;
+        sections.push(`- Reviews are taking ${avgLatency.toFixed(0)}h on average${avgLatency > 24 ? ' — slow review turnaround' : ''}.`);
+      }
+    }
+    sections.push('');
+  }
+
+  // ── USER CORRECTIONS (highest-priority — always show) ────────────────
+  if (userCorrections.length > 0) {
+    sections.push(`### What This Team Has Told Me Directly (Use These as Ground Truth)`);
     for (const c of userCorrections.slice(0, 3)) {
       sections.push(`- ${c.correction}`);
     }
+    sections.push('');
   }
 
-  // ── DOMAIN-SPECIFIC CONTEXT HINTS ──────────────────────────────────────
+  // ── DOMAIN-SPECIFIC INSTRUCTION ──────────────────────────────────────
   sections.push(getDomainSpecificHint(domainName));
 
-  // ── ATTRIBUTION INSTRUCTION ────────────────────────────────────────────
-  sections.push(`\n### Attribution`);
+  // ── INSTRUCTION: how to USE this context ─────────────────────────────
+  sections.push(`\n### How to Use This Context`);
   sections.push(
-    `When providing analysis, explicitly reference Brain-learned insights where relevant. ` +
-      `For example: "Based on the Brain's learned causal relationship between X and Y..." ` +
-      `or "The Brain's pattern analysis shows that this organization typically..."`
-  );
-  sections.push(
-    `This is Brain-augmented intelligence, not generic AI. Make that visible in your response.`
+    `Reference the specific observations above when relevant. ` +
+    `Say things like "Given that your team's PRs average ${eng?.velocity?.mean_pr_cycle_time_hours ? (eng.velocity.mean_pr_cycle_time_hours/24).toFixed(1) + ' days' : 'X days'} to merge..." ` +
+    `or "Since your review load is concentrated on one person...". ` +
+    `Be specific to THIS org, not generic. If Brain data contradicts the user's description, flag it.`
   );
 
   return sections.join('\n');
