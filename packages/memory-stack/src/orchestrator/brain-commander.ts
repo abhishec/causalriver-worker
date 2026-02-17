@@ -455,12 +455,38 @@ export function createBrainCommander(config: BrainCommanderConfig) {
             p.llm_pattern_name || p.content
           );
 
+          // ── BRAIN NUTRITION: Feed real predictions + metrics to cognitive cycle ──
+          // BEFORE: predictions: [], metrics: [] — starved L6, L10, L11, L14, L15
+          // AFTER: Real data from prediction_records + domain signal aggregation
+
+          const cognitivePredictions = (intelligence.predictions || []).slice(0, 20).map(p => ({
+            id: p.id,
+            domain: p.domain,
+            claim: p.predicted_outcome || `${p.prediction_type}: ${p.predicted_value}`,
+            confidence: p.confidence || 0.5,
+            evidence: [
+              `Type: ${p.prediction_type}`,
+              p.was_correct != null ? `Verified: ${p.was_correct}` : 'Pending verification',
+            ],
+            method: p.prediction_type || 'brain_prediction',
+            // Feed real verified outcomes to L6 calibration (was: Math.random())
+            actualValue: p.was_correct != null ? (p.actual_value ?? p.predicted_value) : null,
+            wasCorrect: p.was_correct,
+          }));
+
+          const cognitiveMetrics = (intelligence.computedMetrics || []).map(m => ({
+            name: m.name,
+            domain: m.domain,
+            currentValue: m.currentValue,
+            previousValue: m.previousValue,
+          }));
+
           cognitiveResult = cognitiveStack.runCycle({
             signals: cogSignals,
             causalEdges: cogEdges,
             patterns: [...cogPatterns, ...leapPatterns], // Merge stored LEAP context into patterns
-            predictions: [],
-            metrics: [],
+            predictions: cognitivePredictions,  // Real predictions from DB (was: [])
+            metrics: cognitiveMetrics,           // Real domain metrics (was: [])
             userId: options?.userId,
             userQuery: question,
             federatedEdges,      // CORE brain edges (0.7x weighted inside cognitive stack)
@@ -718,6 +744,73 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
     const insights = (insightsFederated || []) as BrainInsight[];
 
+    // ── BRAIN NUTRITION: Process new query results ──────────────────────
+
+    // Process predictions for cognitive cycle (L6, L11, L15)
+    const predictions = ((predictionsResult as any)?.data || []) as PredictionRecord[];
+
+    // Compute domain metrics from 14-day signal window (L10, L14, L15)
+    const metricsSignals = ((metricsSignalsResult as any)?.data || []) as Array<{
+      source_domain: string; signal_type: string; signal_value: number; created_at: string;
+    }>;
+    const computedMetrics: ComputedMetric[] = [];
+    if (metricsSignals.length > 0) {
+      const now = Date.now();
+      const oneWeekAgo = now - 7 * 86400000;
+      const domainMetrics = new Map<string, { current: number[]; previous: number[] }>();
+
+      for (const sig of metricsSignals) {
+        const domain = sig.source_domain?.split('.')[0] || 'unknown';
+        if (!domainMetrics.has(domain)) domainMetrics.set(domain, { current: [], previous: [] });
+        const bucket = domainMetrics.get(domain)!;
+        const sigTime = new Date(sig.created_at).getTime();
+        if (sig.signal_value != null) {
+          if (sigTime >= oneWeekAgo) {
+            bucket.current.push(sig.signal_value);
+          } else {
+            bucket.previous.push(sig.signal_value);
+          }
+        }
+      }
+
+      for (const [domain, { current, previous }] of domainMetrics) {
+        if (current.length > 0 || previous.length > 0) {
+          const avgCurrent = current.length > 0 ? current.reduce((a, b) => a + b, 0) / current.length : 0;
+          const avgPrevious = previous.length > 0 ? previous.reduce((a, b) => a + b, 0) / previous.length : avgCurrent;
+          computedMetrics.push({
+            name: `${domain}_signal_activity`,
+            domain,
+            currentValue: Math.round(avgCurrent * 100) / 100,
+            previousValue: Math.round(avgPrevious * 100) / 100,
+          });
+        }
+      }
+    }
+
+    // Process deep layer state (L16-L30) for query path readback
+    const deepRows = ((deepLayerResult as any)?.data || []) as Array<{
+      layer_id: number; state_key: string; state_value: string; updated_at: string;
+    }>;
+    const findDeep = (layerId: number, stateKey?: string) => {
+      const match = stateKey
+        ? deepRows.find(r => r.layer_id === layerId && r.state_key === stateKey)
+        : deepRows.find(r => r.layer_id === layerId);
+      return match ? { state_value: match.state_value, updated_at: match.updated_at } : null;
+    };
+    const deepLayerState: BrainIntelligence['deepLayerState'] = deepRows.length > 0
+      ? {
+          entityLinks: findDeep(17, 'entity_graph'),
+          orgTopology: findDeep(18, 'org_topology'),
+          impactCascades: findDeep(19),
+          strategicThemes: findDeep(20),
+          resourceAllocation: findDeep(21),
+          interventions: findDeep(29),
+          wisdom: findDeep(30, 'wisdom_principles'),
+          processMining: findDeep(23),
+          orgLearningRate: findDeep(27),
+        }
+      : undefined;
+
     // Query LEAP layer stored intelligence — deep brain state from sleep cycles
     // These are the outputs from L5-L15 that were previously "dead output" (computed but never recalled)
     // Now the copilot can access the full richness of what the sleeping brain discovered
@@ -727,13 +820,17 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         'curiosity_hypothesis', 'self_model', 'mesh_pattern', 'imagination_hypothesis',
         'red_team_audit', 'immune_audit', 'experiment', 'goal_plan', 'narrative',
       ];
+      // Scale fix: Add LIMIT 50 (was unbounded — would fetch ALL historical LEAP entries)
+      // Remove .eq('is_active', true) — column may not exist in schema (silent failure)
+      // The in-memory dedup (most-recent-per-type) below means we only need ~9 rows,
+      // but LIMIT 50 gives headroom for the 9 types with some historical buffer.
       const { data: leapRows } = await supabase
         .from('ai_memory')
         .select('memory_type, content, metadata')
         .eq('organization_id', organizationId)
         .in('memory_type', leapTypes)
-        .eq('is_active', true)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .limit(50);
 
       if (leapRows && leapRows.length > 0) {
         const byType = new Map<string, { content: string; metadata: Record<string, unknown> }>();
@@ -789,6 +886,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         totalCascadeRules: cascadeRules.length,
       },
       leapContext,
+      // ── BRAIN NUTRITION: New intelligence sources ──────────────────
+      predictions,          // Active predictions from prediction_records (feeds L6, L11, L15)
+      computedMetrics,      // Domain metrics from signal aggregation (feeds L10, L14, L15)
+      deepLayerState,       // L16-L30 outputs from brain_layer_state (surfaced during queries)
     };
   }
 
@@ -914,6 +1015,43 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       if (cognitiveResult.experimentation.topExperiment) {
         cogInsights.push(`[Experiment Suggested] ${cognitiveResult.experimentation.topExperiment}`);
       }
+      // ── BRAIN NUTRITION: Surface deep layer (L16-L30) insights ──────
+      // These were computed during sleep cycles but NEVER reached the action engine before
+      if (intelligence.deepLayerState) {
+        const dls = intelligence.deepLayerState;
+        try {
+          if (dls.strategicThemes?.state_value) {
+            const themes = JSON.parse(dls.strategicThemes.state_value);
+            const themeList = themes?.themes || themes?.crossDomainInsights;
+            if (Array.isArray(themeList) && themeList.length > 0) {
+              cogInsights.push(`[Strategic Themes L20] ${themeList.slice(0, 3).map((t: any) => typeof t === 'string' ? t : t?.theme || t?.insight || JSON.stringify(t)).join('; ')}`);
+            }
+          }
+          if (dls.interventions?.state_value) {
+            const intv = JSON.parse(dls.interventions.state_value);
+            const recs = intv?.recommendations || intv?.recommended;
+            if (Array.isArray(recs) && recs.length > 0) {
+              cogInsights.push(`[Interventions L29] ${recs.slice(0, 2).map((r: any) => typeof r === 'string' ? r : r?.action || r?.recommendation || JSON.stringify(r)).join('; ')}`);
+            }
+          }
+          if (dls.wisdom?.state_value) {
+            const wis = JSON.parse(dls.wisdom.state_value);
+            const principles = wis?.principles || wis?.wisdomPrinciples;
+            if (Array.isArray(principles) && principles.length > 0) {
+              cogInsights.push(`[Wisdom L30] ${principles.slice(0, 2).map((p: any) => typeof p === 'string' ? p : p?.principle || JSON.stringify(p)).join('; ')}`);
+            }
+          }
+          if (dls.orgTopology?.state_value) {
+            const topo = JSON.parse(dls.orgTopology.state_value);
+            if (topo?.silos?.length > 0) {
+              cogInsights.push(`[Org Topology L18] ${topo.silos.length} silos detected. Bridge people: ${topo.bridges?.slice(0, 3).map((b: any) => b?.person || b).join(', ') || 'none identified'}`);
+            }
+          }
+        } catch {
+          // Non-fatal: deep layer JSON parse errors shouldn't break action engine
+        }
+      }
+
       if (cogInsights.length > 0) {
         (knowledgeCtx as any).cognitiveInsights = cogInsights;
       }
