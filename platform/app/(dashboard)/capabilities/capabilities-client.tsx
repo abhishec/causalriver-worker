@@ -42,7 +42,7 @@ const SERVICE_PACKS: ServicePack[] = [
     id: "accounting-aas",
     name: "Accounting",
     tagline: "AI bookkeeping + GL intelligence",
-    description: "2 requirements: Phase 1 (Core Bookkeeping — pure GL processing) + Phase 1.5 (NexusBrain Causal Layer — cross-system intelligence). Powered by real Xero GL data.",
+    description: "2 requirements: Phase 1 (Core Bookkeeping — pure GL processing) + Phase 1.5 (NexusBrain Causal Layer — cross-system intelligence). Powered by real Xero GL data from PH Accounting org.",
     status: "active",
     capabilityCount: 2,
     icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z",
@@ -299,19 +299,19 @@ const CAPABILITIES: Capability[] = [
   // ACCOUNTING-aaS: 2 Requirements (Phase 1 + Phase 1.5)
   // ══════════════════════════════════════════════════════════════════════════
   {
-    id: "acct-phase1", name: "Core Bookkeeping Test", servicePack: "accounting-aas",
+    id: "acct-phase1", name: "Core Bookkeeping", servicePack: "accounting-aas",
     category: "accounting-core", categoryLabel: "Phase 1 — Core Bookkeeping",
-    description: "Pure GL processing pipeline: account classification, journal entries, trial balance, P&L, Balance Sheet, and anomaly detection (Benford's Law). 6 AI agents (bookkeeper, reconciler, statement-gen, tax-compliance, audit-prep, anomaly-detective) processing 49,684 real Xero transactions.",
+    description: "Pure GL processing pipeline for PH Accounting: account classification, journal entries, trial balance, P&L, Balance Sheet, and anomaly detection (Benford's Law). 6 AI agents processing 49,684 real Xero GL transactions from the PH Accounting org.",
     status: "live", domainType: "acct-phase1",
     examplePrompts: ["Show me the profit and loss breakdown", "Classify all accounts in the general ledger", "Run Benford's Law analysis on transaction amounts"],
-    dataRequired: ["Xero GL export (xlsx)", "Chart of accounts"],
-    brainIntegration: "Phase 1 operates as a standalone GL intelligence engine — no Brain dependency. Validates pure accounting accuracy before layering causal intelligence.",
+    dataRequired: ["Xero GL export (xlsx) — PH Accounting org", "Chart of accounts"],
+    brainIntegration: "Phase 1 operates as a standalone GL intelligence engine for PH Accounting — no Brain dependency. Validates pure accounting accuracy before layering causal intelligence.",
     icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z",
   },
   {
     id: "acct-phase15", name: "NexusBrain Causal Layer", servicePack: "accounting-aas",
     category: "accounting-causal", categoryLabel: "Phase 1.5 — Causal Intelligence",
-    description: "Cross-system intelligence on top of GL data. Correlates financial signals (revenue drops, expense spikes, margin compression) with operational signals (velocity collapse, team churn, deploy frequency) via the Brain's causal knowledge graph. Enables predictions like 'revenue dropped because deploy velocity collapsed 3 sprints ago'.",
+    description: "Cross-system intelligence on top of PH Accounting GL data. Correlates financial signals (revenue drops, expense spikes, margin compression) with operational signals (velocity collapse, team churn, deploy frequency) via the Brain's causal knowledge graph. Enables predictions like 'revenue dropped because deploy velocity collapsed 3 sprints ago'.",
     status: "live", domainType: "acct-phase15",
     examplePrompts: ["Why did revenue drop last quarter?", "Correlate expense spikes with engineering events", "What operational signals predict margin compression?"],
     dataRequired: ["Phase 1 GL data", "Brain Intelligence Engine", "GitHub + Jira connectors"],
