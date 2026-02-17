@@ -1080,6 +1080,9 @@ export {
   type AasDomainContext,
   type IntentContext,
   type TokenBudget,
+  // BRAIN NUTRITION: LEAP context types (deep brain reasoning from sleep cycles)
+  type LeapContext,
+  type LeapEntry,
 } from './orchestrator/brain-context-mesh';
 
 // Brain Feedback Bus — Unified Learning Circuit

@@ -701,45 +701,42 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       // ── BRAIN NUTRITION: Feed the starving cognitive layers ──────────
 
       // NEW: Active predictions for L6 calibration + L11 red team (was: predictions: [])
-      supabase
+      Promise.resolve(supabase
         .from('prediction_records')
         .select('id, domain, prediction_type, predicted_value, predicted_outcome, confidence, actual_value, was_correct, verified_at, created_at')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false })
-        .limit(30)
-        .then(r => r)
+        .limit(30))
         .catch(() => ({ data: [] as any[] })),
 
       // NEW: Domain metrics from cross_domain_signals (14-day window for current vs previous week)
       // Feeds L10 temporal consciousness, L14 goal planning, L15 narrative
-      supabase
+      Promise.resolve(supabase
         .from('cross_domain_signals')
         .select('source_domain, signal_type, signal_value, created_at')
         .eq('organization_id', organizationId)
         .gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString())
         .order('created_at', { ascending: false })
-        .limit(500)
-        .then(r => r)
+        .limit(500))
         .catch(() => ({ data: [] as any[] })),
 
       // NEW: Deep layer state (L16-L30) from brain_layer_state for query path readback
       // These are computed during sleep cycles but were NEVER surfaced during queries
-      supabase
+      Promise.resolve(supabase
         .from('brain_layer_state')
         .select('layer_id, state_key, state_value, updated_at')
         .eq('organization_id', organizationId)
         .gte('layer_id', 16)
         .lte('layer_id', 30)
         .order('updated_at', { ascending: false })
-        .limit(60)
-        .then(r => r)
+        .limit(60))
         .catch(() => ({ data: [] as any[] })),
     ]);
 
-    const edges = (causalFederatedResult.merged.map(m => m.data) || []) as CausalEdge[];
+    const edges = (causalFederatedResult.merged.map((m: any) => m.data) || []) as CausalEdge[];
     const coreCausalEdges = (causalFederatedResult.coreResults || []) as CausalEdge[];
     const rules = (rulesResult.data || []) as BrainRule[];
-    const patterns = (patternsFederatedResult.merged.map(m => m.data) || []) as BrainPattern[];
+    const patterns = (patternsFederatedResult.merged.map((m: any) => m.data) || []) as BrainPattern[];
     const corePatterns = (patternsFederatedResult.coreResults || []) as BrainPattern[];
     const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
     const insights = (insightsFederated || []) as BrainInsight[];

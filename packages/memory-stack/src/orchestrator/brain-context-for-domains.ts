@@ -49,6 +49,25 @@ export interface BrainContextForDomain {
       signalCount: number;
     };
   };
+  /** Cross-system entity links (PR→Jira→Slack→Deploy) from L17 */
+  entityLinks?: Array<{
+    source_entity_id: string; source_type: string; source_domain: string;
+    target_entity_id: string; target_type: string; target_domain: string;
+    link_type: string; confidence: number; evidence?: string;
+  }>;
+  /** LEAP context from cognitive sleep cycles (deep brain reasoning) */
+  leapContext?: Record<string, { content: string; metadata?: Record<string, unknown> }>;
+  /** Brain evolution state (intelligence score, accuracy) */
+  brainEvolution?: {
+    intelligenceScore: number; accuracy: number; brierScore: number;
+    totalEdges: number; totalEvidence: number; isLearning: boolean;
+    recentSnapshots?: unknown[];
+  } | null;
+  /** Brain prediction accuracy */
+  brainAccuracy?: {
+    totalPredictions: number; correctPredictions: number; accuracy: number;
+    recentTrackRecord: Array<{ domain: string; wasCorrect: boolean; outcome?: string; confidence?: number }>;
+  };
 }
 
 export interface CausalEdge {
@@ -231,6 +250,43 @@ export function formatBrainContextForDomain(
     sections.push(`### What This Team Has Told Me Directly (Use These as Ground Truth)`);
     for (const c of userCorrections.slice(0, 3)) {
       sections.push(`- ${c.correction}`);
+    }
+    sections.push('');
+  }
+
+  // ── BRAIN NUTRITION: Cross-System Entity Links (L17) ────────────────
+  if (brain.entityLinks && Array.isArray(brain.entityLinks) && brain.entityLinks.length > 0) {
+    sections.push(`### Cross-System Connections (Brain L17 Entity Linker)`);
+    sections.push(`The Brain has discovered these connections across your systems:`);
+    for (const link of brain.entityLinks.slice(0, 20)) {
+      sections.push(`- ${link.source_type}:${link.source_entity_id} → ${link.target_type}:${link.target_entity_id} [${link.link_type}, confidence: ${(link.confidence || 0).toFixed(2)}]`);
+    }
+    sections.push('');
+  }
+
+  // ── BRAIN NUTRITION: LEAP Context (Deep Brain Reasoning) ──────────
+  if (brain.leapContext && typeof brain.leapContext === 'object' && Object.keys(brain.leapContext).length > 0) {
+    sections.push(`### Brain Deep Reasoning (from cognitive sleep cycles)`);
+    for (const [type, entry] of Object.entries(brain.leapContext)) {
+      const e = entry as { content?: string } | null;
+      if (e?.content) {
+        const label = type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        sections.push(`- **${label}**: ${e.content.substring(0, 300)}`);
+      }
+    }
+    sections.push('');
+  }
+
+  // ── BRAIN NUTRITION: Brain Evolution & Accuracy ────────────────────
+  if (brain.brainEvolution && brain.brainEvolution.isLearning) {
+    const evo = brain.brainEvolution;
+    const acc = brain.brainAccuracy;
+    sections.push(`### Brain Intelligence Status`);
+    sections.push(`- Intelligence Score: ${evo.intelligenceScore?.toFixed(1) || '0'}`);
+    sections.push(`- Prediction Accuracy: ${acc ? `${(acc.accuracy * 100).toFixed(0)}% (${acc.totalPredictions} verified)` : 'Not enough data'}`);
+    sections.push(`- Causal Edges: ${evo.totalEdges || 0}, Evidence Points: ${evo.totalEvidence || 0}`);
+    if (acc?.recentTrackRecord?.length > 0) {
+      sections.push(`- Recent predictions: ${acc.recentTrackRecord.slice(0, 3).map((p: any) => `${p.domain}: ${p.wasCorrect ? '✓' : '✗'}`).join(', ')}`);
     }
     sections.push('');
   }
