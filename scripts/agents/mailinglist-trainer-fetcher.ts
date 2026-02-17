@@ -67,7 +67,10 @@ async function fetchMailboxMonth(
   month: number,
 ): Promise<MailingListMessage[]> {
   const dateStr = `${year}-${String(month).padStart(2, '0')}`;
-  const url = `${PONYMAIL_BASE}/mbox.lua?list=${list}@${domain}&date=${dateStr}`;
+
+  // Use stats.lua (returns JSON) instead of mbox.lua (returns raw mbox format).
+  // stats.lua takes `list` and `domain` as SEPARATE params, date as `d`.
+  const url = `${PONYMAIL_BASE}/stats.lua?list=${list}&domain=${domain}&d=${dateStr}`;
 
   try {
     const response = await fetch(url, {
@@ -80,7 +83,7 @@ async function fetchMailboxMonth(
     const data = await response.json();
     const messages: MailingListMessage[] = [];
 
-    // Pony Mail returns messages in an object keyed by message ID
+    // stats.lua returns { emails: [...], hits: N, numparts: N, ... }
     const emails = data.emails || data.thread || [];
     if (Array.isArray(emails)) {
       for (const email of emails) {
@@ -88,9 +91,9 @@ async function fetchMailboxMonth(
           id: email.id || email.mid || `${dateStr}-${messages.length}`,
           subject: email.subject || '(no subject)',
           from: email.from || 'unknown',
-          date: email.date || email.epoch ? new Date((email.epoch || 0) * 1000).toISOString() : `${dateStr}-01T00:00:00Z`,
+          date: email.epoch ? new Date(email.epoch * 1000).toISOString() : `${dateStr}-01T00:00:00Z`,
           inReplyTo: email['in-reply-to'] || email.irt || null,
-          references: email.references ? email.references.split(/\s+/) : [],
+          references: email.references ? (typeof email.references === 'string' ? email.references.split(/\s+/) : []) : [],
           listName: `${list}@${domain}`,
         });
       }

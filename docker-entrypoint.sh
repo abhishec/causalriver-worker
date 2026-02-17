@@ -88,6 +88,14 @@ case "${BRAIN_PROCESS}" in
     echo "  Dry Run: ${SONARCLOUD_TRAINER_DRY_RUN:-false}"
     exec pnpm exec tsx scripts/sonarcloud-trainer-runner.ts
     ;;
+  seas-training-agent)
+    echo "Starting SE-aaS Training Agent (Unified Brain Training)..."
+    echo "  Sub-Trainers: 9"
+    echo "  SE-aaS Requirements: 18"
+    echo "  Dry Run: ${SEAS_DRY_RUN:-false}"
+    echo "  Target Trainer: ${SEAS_TRAINER:-all}"
+    exec pnpm exec tsx scripts/seas-training-agent.ts
+    ;;
   cost-agent)
     echo "Starting Cost Agent..."
     echo "  Mode: ${COST_AGENT_MODE:-once}"
@@ -150,6 +158,7 @@ case "${BRAIN_PROCESS}" in
     echo "  stackexchange-trainer StackExchange Q&A engineering knowledge (one-shot)"
     echo "  cicd-patterns-trainer GitHub Actions CI/CD workflow patterns (one-shot)"
     echo "  sonarcloud-trainer    SonarCloud public code quality metrics (weekly)"
+    echo "  seas-training-agent   Unified SE-aaS Training (all 9 trainers, 18 reqs)"
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"

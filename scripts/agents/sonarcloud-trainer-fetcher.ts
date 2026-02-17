@@ -149,12 +149,15 @@ async function searchProjects(
 ): Promise<SonarProject[]> {
   const maxProjects = options.maxProjectsPerOrg || 20;
 
+  // Note: /components/search_projects returns projects WITHOUT a `qualifier` field.
+  // All results from this endpoint are projects (TRK), so no qualifier filter needed.
+  // It also includes a `visibility` field ('public'|'private').
   const data = await fetchSonarAPI<{
     components: Array<{
       key: string;
       name: string;
       organization: string;
-      qualifier: string;
+      visibility: string;
     }>;
   }>('/components/search_projects', {
     filter: `query = "${query}"`,
@@ -164,12 +167,12 @@ async function searchProjects(
   if (!data || !data.components) return [];
 
   return data.components
-    .filter(c => c.qualifier === 'TRK')
+    .filter(c => c.visibility === 'public')  // Only public projects
     .map(c => ({
       key: c.key,
       name: c.name,
       organization: c.organization,
-      qualifier: c.qualifier,
+      qualifier: 'TRK',  // search_projects only returns projects
     }));
 }
 
