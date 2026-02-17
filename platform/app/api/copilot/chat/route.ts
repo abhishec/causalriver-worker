@@ -576,14 +576,16 @@ export async function POST(request: NextRequest) {
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors)
     const COPILOT_NATIVE_DOMAINS = new Set(['boilerplate-generator', 'pr-review-assistant', 'codebase-qa']);
 
-    // Determine service route from LLM interpretation or regex fallback
+    // Determine service route from LLM interpretation or regex fallback.
+    // Regex runs as safety net even when LLM interpretation is present, unless
+    // the LLM explicitly routed to a different service (se-aas takes priority).
     const serviceRoute = interpretation?.serviceRoute;
     const seaasRoute = serviceRoute?.type === 'se-aas' && serviceRoute.seaasDomain
       ? { domainType: serviceRoute.seaasDomain, extractedInput: serviceRoute.seaasInput || {} }
       : !interpretation ? detectSEaaSRoute(message) : null;
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
-      : !interpretation ? detectAccountingRoute(message) : null;
+      : serviceRoute?.type !== 'se-aas' ? detectAccountingRoute(message) : null;
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
