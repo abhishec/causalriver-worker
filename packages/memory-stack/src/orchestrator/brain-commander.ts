@@ -52,6 +52,7 @@ import {
   type BrainFeedbackSignal,
 } from './closed-loop-executor';
 import type { DecisionJournalEntry } from './domain-action-engine';
+import type { QueryInterpretation } from './llm-query-interpreter';
 import {
   createCognitiveStack,
   type CognitiveStackInstance,
@@ -373,6 +374,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       entityState?: Record<string, unknown>;
       format?: 'full' | 'compact';
       domains?: string[];
+      /** LLM query interpretation (Phase 3). When provided, replaces regex dispatch. */
+      interpretation?: QueryInterpretation;
     }
   ): Promise<CommandResult> {
     const totalStart = performance.now();
@@ -380,8 +383,30 @@ export function createBrainCommander(config: BrainCommanderConfig) {
 
     try {
       // ── Step 1: Dispatch Assessment ─────────────────────────────────
+      // If LLM interpretation is provided (Phase 3), convert it to DispatchAssessment.
+      // Otherwise fall back to regex dispatch-assessor (Phase 0 behavior).
       const dispatchStart = performance.now();
-      const dispatch = assessor.assess(question);
+      let dispatch: DispatchAssessment;
+      if (options?.interpretation) {
+        const interp = options.interpretation;
+        dispatch = {
+          intent: interp.intent,
+          domains: interp.domains,
+          primaryDomain: interp.primaryDomain,
+          route: interp.complexity.route,
+          confidence: interp.confidence,
+          needsAction: interp.complexity.route === 'action_domain' || interp.complexity.route === 'agent_orchestration',
+          complexity: {
+            score: interp.complexity.score,
+            multiDomain: interp.domains.length > 1,
+            temporalAnalysis: interp.entities?.some(e => e.type === 'date_range') ?? false,
+            needsCausalReasoning: interp.requiredData.needsCausalEdges,
+            needsSimulation: interp.intent === 'simulate',
+          },
+        };
+      } else {
+        dispatch = assessor.assess(question);
+      }
       timing.dispatch = performance.now() - dispatchStart;
 
       // Use provided domains if available, otherwise use detected

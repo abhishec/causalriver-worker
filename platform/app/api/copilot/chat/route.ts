@@ -33,7 +33,8 @@ import type {
   BrainContext,
   BrainRegions,
 } from "@nexus-ai/memory-stack";
-import { createBrainContextMesh, createBrainFeedbackBus } from "@nexus-ai/memory-stack";
+import { createBrainContextMesh, createBrainFeedbackBus, createLLMQueryInterpreter } from "@nexus-ai/memory-stack";
+import type { QueryInterpretation } from "@nexus-ai/memory-stack";
 
 import { CORE_ORG_ID } from "@/lib/org-helpers";
 
@@ -282,9 +283,26 @@ export async function POST(request: NextRequest) {
       enableMotorCommands: false,
     });
 
+    // ── Phase 3: LLM Query Interpretation ────────────────────────────
+    // Replace regex dispatch with semantic LLM interpretation (~200ms).
+    // Provides: intent classification, entity extraction, service routing,
+    // required data signals (skip unneeded DB queries), adaptive token budgets.
+    // Falls back to regex dispatch-assessor on any failure.
+    const interpreter = createLLMQueryInterpreter({
+      anthropicApiKey,
+      organizationId: orgId,
+    });
+    let interpretation: QueryInterpretation | undefined;
+    try {
+      interpretation = await interpreter.interpret(message);
+    } catch (interpErr) {
+      console.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
+    }
+
     const commandResult = await commander.command(message, {
       userId: user.id,
       entityState,
+      interpretation,
     });
 
     const { intelligence } = commandResult;
@@ -374,8 +392,9 @@ export async function POST(request: NextRequest) {
     // ══════════════════════════════════════════════════════════════════════
 
     let brainContext: BrainContext | null = null;
-    // Declared here so it's accessible both inside the try block and in the system prompt builder below
+    // Declared here so they're accessible both inside the try block and in the system prompt builder below
     let entityLinks: any[] = [];
+    let universalCtx: any = null; // BRAIN NUTRITION: LEAP context from Mesh universal layer
 
     try {
       const {
@@ -451,12 +470,12 @@ export async function POST(request: NextRequest) {
       // The Mesh handles velocity, bottleneck, signals, and entity links
       // in a single call with caching and resilience built in.
       const mesh = createBrainContextMesh({ supabase: service, organizationId: orgId });
-      const copilotDomainCtx = await mesh.getDomainContext('copilot');
+      const copilotDomainCtx = await mesh.getDomainContext('copilot') as any;
       // BRAIN NUTRITION: Also get universal context for LEAP (deep brain reasoning)
-      const universalCtx = await mesh.getUniversalContext();
+      universalCtx = await mesh.getUniversalContext();
 
-      const velocitySnapshots = copilotDomainCtx.velocitySnapshot ? [copilotDomainCtx.velocitySnapshot] : [];
-      const bottleneckSnapshot = copilotDomainCtx.bottleneckSnapshot || null;
+      const velocitySnapshots = copilotDomainCtx.velocity ? [copilotDomainCtx.velocity] : [];
+      const bottleneckSnapshot = copilotDomainCtx.bottleneck || null;
       const recentSignals = copilotDomainCtx.recentSignals || [];
       entityLinks = copilotDomainCtx.entityLinks || [];
 

@@ -25,7 +25,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createDispatchAssessor, type DispatchAssessment, type UserIntent, type BusinessDomain } from './dispatch-assessor';
 import type { RequiredDataSignals, QueryInterpretation } from './llm-query-interpreter';
-import { toDispatchAssessment as convertToDispatchAssessment } from './llm-query-interpreter';
 
 // ============================================================================
 // TYPES — Service Types
@@ -756,13 +755,25 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
   function getIntentContext(query: string, interpretation?: QueryInterpretation): Promise<IntentContext> {
     if (interpretation) {
       // Use LLM interpretation directly — much richer than regex dispatch
-      const { toDispatchAssessment } = require('./llm-query-interpreter') as typeof import('./llm-query-interpreter');
+      // Convert QueryInterpretation → DispatchAssessment for backward compatibility
+      const assessment: DispatchAssessment = {
+        intent: interpretation.intent,
+        domains: interpretation.domains,
+        primaryDomain: interpretation.primaryDomain,
+        route: interpretation.complexity.route,
+        confidence: interpretation.confidence,
+        needsAction: interpretation.complexity.route === 'action_domain' || interpretation.complexity.route === 'agent_orchestration',
+        complexity: {
+          score: interpretation.complexity.score,
+          multiDomain: interpretation.domains.length > 1,
+          temporalAnalysis: interpretation.entities?.some(e => e.type === 'date_range') ?? false,
+          needsCausalReasoning: interpretation.requiredData.needsCausalEdges,
+          needsSimulation: interpretation.intent === 'simulate',
+        },
+      };
       // Use the interpretation's adaptive token budget if available
       const tokenBudget = interpretation.tokenBudget ?? computeTokenBudget(interpretation.intent, totalTokenBudget);
-      return Promise.resolve({
-        assessment: toDispatchAssessment(interpretation),
-        tokenBudget,
-      });
+      return Promise.resolve({ assessment, tokenBudget });
     }
     // Fallback: regex dispatch
     const assessment = dispatchAssessor.assess(query);
@@ -772,12 +783,15 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
 
   // ── Full Assembly ───────────────────────────────────────────────────────
 
-  async function assemble(query: string, serviceType: ServiceType): Promise<AssembledBrainContext> {
-    // Run all 3 layers in parallel
+  async function assemble(query: string, serviceType: ServiceType, interpretation?: QueryInterpretation): Promise<AssembledBrainContext> {
+    // Extract requiredData from interpretation for targeted DB retrieval
+    const requiredData = interpretation?.requiredData;
+
+    // Run all 3 layers in parallel — with optional skip signals for selective loading
     const [universal, domain, intent] = await Promise.all([
-      getUniversalContext(),
-      getDomainContext(serviceType),
-      getIntentContext(query),
+      getUniversalContext(requiredData),
+      getDomainContext(serviceType, requiredData),
+      getIntentContext(query, interpretation),
     ]);
 
     // Extract domain-specific fields

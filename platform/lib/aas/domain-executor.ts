@@ -79,7 +79,7 @@ export interface ExecuteAccountingResult {
 // AGENT REGISTRY — Maps actions to accounting agents
 // ============================================================================
 
-const ACCOUNTING_AGENT_MAP: Record<string, { agent: AgentDefinition; name: string }> = {
+const ACCOUNTING_AGENT_MAP: Record<string, { agent: AgentDefinition<any, any>; name: string }> = {
   'bookkeep':         { agent: brainBookkeeperAgent, name: 'brain-bookkeeper' },
   'reconcile':        { agent: brainReconcilerAgent, name: 'brain-reconciler' },
   'statements':       { agent: brainStatementGeneratorAgent, name: 'brain-statement-generator' },
