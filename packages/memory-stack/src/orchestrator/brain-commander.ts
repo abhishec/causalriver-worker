@@ -705,25 +705,27 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
       // Direct SQL: rules (no federated function exists for ai_memory type=rule)
-      supabase
+      Promise.resolve(supabase
         .from('ai_memory')
         .select('content, importance, domain, metadata')
         .or(orgFilter)
         .eq('memory_type', 'rule')
         .order('importance', { ascending: false })
-        .limit(maxMemoryItems),
+        .limit(maxMemoryItems))
+        .catch(() => ({ data: [] as any[] })),
 
       // Federated: patterns (ORG + CORE, preserve both merged and CORE-only)
       getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: maxMemoryItems })
         .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
       // Direct SQL: cascade rules (separate table, no federated function)
-      supabase
+      Promise.resolve(supabase
         .from('org_cascade_rules')
         .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
         .or(orgFilter)
         .eq('is_active', true)
-        .limit(maxMemoryItems),
+        .limit(maxMemoryItems))
+        .catch(() => ({ data: [] as any[] })),
 
       // Federated: insights (ORG + CORE merged, deduplicated by title)
       getFederatedPatterns(organizationId, { memoryType: 'insight', limit: maxMemoryItems })
@@ -853,13 +855,14 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       // Remove .eq('is_active', true) — column may not exist in schema (silent failure)
       // The in-memory dedup (most-recent-per-type) below means we only need ~9 rows,
       // but LIMIT 50 gives headroom for the 9 types with some historical buffer.
-      const { data: leapRows } = await supabase
+      const { data: leapRows } = await Promise.resolve(supabase
         .from('ai_memory')
         .select('memory_type, content, metadata')
         .eq('organization_id', organizationId)
         .in('memory_type', leapTypes)
         .order('updated_at', { ascending: false })
-        .limit(50);
+        .limit(50))
+        .catch(() => ({ data: null as any }));
 
       if (leapRows && leapRows.length > 0) {
         const byType = new Map<string, { content: string; metadata: Record<string, unknown> }>();

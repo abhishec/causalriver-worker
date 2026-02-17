@@ -77,7 +77,8 @@ export async function POST(request: NextRequest) {
 
     // Emit feedback signal to Brain (meta-learning)
     // Tagged as 'outcome' so Loop 1B (Embodied Grounding) picks it up
-    await service.from("cross_domain_signals").insert({
+    // Non-blocking: feedback was already saved to copilot_response_feedback above
+    await Promise.resolve(service.from("cross_domain_signals").insert({
       organization_id: organizationId,
       source_domain: "brain.feedback",
       signal_type: `copilot_feedback_${rating}`,
@@ -91,6 +92,8 @@ export async function POST(request: NextRequest) {
         domain: domain || "general",
         userId: user.id,
       },
+    })).catch((err: unknown) => {
+      console.warn("[feedback] Signal emit non-fatal:", err instanceof Error ? err.message : String(err));
     });
 
     // ── WIRE: UI Feedback → Closed-Loop Learning Engine (Loop 3) ──
@@ -98,7 +101,7 @@ export async function POST(request: NextRequest) {
     // so we queue feedback to a table that Loop 3 picks up on next cycle.
     // Without this wire: Loop 3 processes 0 feedback → brain never adapts
     // based on user corrections → same mistakes repeat indefinitely.
-    await service.from("brain_feedback_queue").insert({
+    await Promise.resolve(service.from("brain_feedback_queue").insert({
       organization_id: organizationId,
       conversation_id: conversationId,
       message_index: messageIndex,
@@ -106,11 +109,9 @@ export async function POST(request: NextRequest) {
       correction: correction || null,
       domain: domain || null,
       processed: false,
-    }).then(({ error: queueError }) => {
-      if (queueError) {
-        // Non-fatal: feedback was already saved to copilot_response_feedback
-        console.warn("[feedback] Queue insert non-fatal:", queueError.message);
-      }
+    })).catch((err: unknown) => {
+      // Non-fatal: feedback was already saved to copilot_response_feedback
+      console.warn("[feedback] Queue insert non-fatal:", err instanceof Error ? err.message : String(err));
     });
 
     return NextResponse.json({
@@ -217,7 +218,7 @@ async function learnFromCorrection(
   domain: string | null,
   conversationId: string
 ): Promise<void> {
-  await supabase.from("ai_memory").insert({
+  await Promise.resolve(supabase.from("ai_memory").insert({
     organization_id: organizationId,
     content: correction,
     memory_type: "correction",
@@ -230,5 +231,8 @@ async function learnFromCorrection(
       learnedAt: new Date().toISOString(),
       feedbackType: "user_correction",
     },
+  })).catch((err: unknown) => {
+    // Non-fatal: correction feedback is enrichment, not critical path
+    console.warn("[feedback] learnFromCorrection non-fatal:", err instanceof Error ? err.message : String(err));
   });
 }

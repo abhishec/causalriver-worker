@@ -318,13 +318,15 @@ async function suggestReviewers(
   author: string
 ): Promise<PRAnalysisResult['reviewers']> {
   // Query expertise graph for contributors with expertise in changed files
-  const { data: experts } = await supabase
+  // Resilient: DB failure returns empty experts instead of crashing reviewer suggestions
+  const { data: experts } = await Promise.resolve(supabase
     .from('contributor_expertise')
     .select('contributor_id, topic, expertise_score')
     .eq('organization_id', organizationId)
-    .in('topic', changedFiles.map((f) => `code_change:${f}`))
+    .in('topic', changedFiles.map((f: string) => `code_change:${f}`))
     .order('expertise_score', { ascending: false })
-    .limit(10);
+    .limit(10))
+    .catch(() => ({ data: [] as any[] }));
 
   if (!experts || experts.length === 0) {
     return [];

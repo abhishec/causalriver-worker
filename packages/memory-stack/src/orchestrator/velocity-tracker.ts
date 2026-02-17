@@ -117,40 +117,38 @@ export async function buildVelocityTimeSeries(
   startDate.setDate(startDate.getDate() - lookbackDays);
 
   // Query GitHub signals for PRs merged (Brain L1: cross_domain_signals)
-  const { data: prSignals, error: prError } = await supabase
+  // Resilient: DB failure returns empty data instead of crashing the velocity pipeline
+  const { data: prSignals } = await Promise.resolve(supabase
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_merged')
     .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
-
-  if (prError) throw new Error(`Failed to fetch PR signals: ${prError.message}`);
+    .order('signal_timestamp'))
+    .catch(() => ({ data: [] as any[] }));
 
   // Query deployment signals (Brain L1: cross_domain_signals)
-  const { data: deploySignals, error: deployError } = await supabase
+  const { data: deploySignals } = await Promise.resolve(supabase
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'deployment')
     .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
-
-  if (deployError) throw new Error(`Failed to fetch deployment signals: ${deployError.message}`);
+    .order('signal_timestamp'))
+    .catch(() => ({ data: [] as any[] }));
 
   // Query PR state signals for WIP (Brain L1: cross_domain_signals)
-  const { data: prStateSignals, error: stateError } = await supabase
+  const { data: prStateSignals } = await Promise.resolve(supabase
     .from('cross_domain_signals')
     .select('signal_timestamp, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_opened')
     .gte('signal_timestamp', startDate.toISOString())
-    .order('signal_timestamp');
-
-  if (stateError) throw new Error(`Failed to fetch PR state signals: ${stateError.message}`);
+    .order('signal_timestamp'))
+    .catch(() => ({ data: [] as any[] }));
 
   // Aggregate by day
   const dailyMetrics = new Map<string, VelocityMetrics>();

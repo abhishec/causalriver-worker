@@ -410,13 +410,14 @@ export async function POST(request: NextRequest) {
       } = await import("@nexus-ai/memory-stack");
 
       // Check if GitHub connector is active with ingested data
-      const { data: ghConnector } = await service
+      const { data: ghConnector } = await Promise.resolve(service
         .from("org_connectors")
         .select("config")
         .eq("organization_id", orgId)
         .eq("connector_type", "github")
         .eq("status", "active")
-        .maybeSingle();
+        .maybeSingle())
+        .catch(() => ({ data: null as any }));
 
       const ingestionStats = (ghConnector?.config as Record<string, any>)?.ingestion_progress?.stats;
 
@@ -931,14 +932,15 @@ Use this data to answer the user's accounting question with precision. Cite spec
     // This closes the loop: user corrects → stored in ai_memory → next answer uses correction.
     {
       const correctionDomain = brainContext?.domains?.[0] || "general";
-      const { data: corrections } = await service
+      const { data: corrections } = await Promise.resolve(service
         .from("ai_memory")
         .select("content, importance, domain, created_at")
         .eq("organization_id", orgId)
         .eq("memory_type", "correction")
         .order("importance", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(8);
+        .limit(8))
+        .catch(() => ({ data: null as any[] | null }));
 
       if (corrections && corrections.length > 0) {
         // Prioritize domain-relevant corrections, but include cross-domain ones too
