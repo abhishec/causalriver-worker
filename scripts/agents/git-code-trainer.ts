@@ -270,8 +270,8 @@ export class GitCodeTrainerAgent extends BaseTrainingAgent {
     // Run causal discovery on stored signals
     try {
       this.log('TRAIN', 'Running causal discovery on new signals...');
-      const jobs = createScheduledJobs(this.supabase, this.organizationId);
-      await jobs.runDailyCausalDiscovery();
+      const jobs = createScheduledJobs(this.supabase);
+      await jobs.runDailyCausalDiscovery(this.organizationId);
       this.log('TRAIN', 'Causal discovery complete');
     } catch (err) {
       this.logError('TRAIN', 'Causal discovery failed (non-fatal)', err);
