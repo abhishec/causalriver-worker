@@ -574,8 +574,8 @@ export function createScheduledJobs(
               .eq('organization_id', organizationId)
               .eq('source_domain', pred.domain)
               .eq('signal_type', pred.entity_type)
-              .gt('created_at', pred.created_at)
-              .order('created_at', { ascending: false })
+              .gt('signal_timestamp', pred.created_at)
+              .order('signal_timestamp', { ascending: false })
               .limit(10);
 
             if (!actualSignals || actualSignals.length === 0) continue;

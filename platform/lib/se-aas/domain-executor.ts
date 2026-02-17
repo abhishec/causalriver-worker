@@ -18,7 +18,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 
-// Import all 12 SE-aaS domains (8 original + 4 P1 gap closure)
+// Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import {
   testDataGeneratorDomain,
   sqlAnalyzerDomain,
@@ -33,6 +33,10 @@ import {
   designDocGeneratorDomain,
   performanceProfilerDomain,
   deadCodeDetectorDomain,
+  // SWE Gap Closure: 3 remaining capabilities to complete 17-capability spec
+  prReviewDomain,
+  boilerplateScaffoldDomain,
+  codebaseQADomain,
   // Brain Evolution Engine — feedback loop integration
   runBrainEvolutionCycle,
   // Brain Observability Bridge — domain execution audit trail
@@ -40,8 +44,10 @@ import {
 } from "@nexus-ai/memory-stack";
 
 // ============================================================================
-// DOMAIN REGISTRY — All 12 SE-aaS Brain-Augmented Domains
+// DOMAIN REGISTRY — All 15 SE-aaS Brain-Augmented Domains (17 capabilities)
 // ============================================================================
+// 2 P0 capabilities (velocity collapse + bottleneck) are handled by /api/early-warning
+// 15 P1 capabilities are handled here via domain executor
 
 const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   // === Sprint 1-3 (Original 8) ===
@@ -53,11 +59,15 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "impact-analysis": { domain: impactAnalysisDomain, sync: false },
   "data-lineage": { domain: dataLineageDomain, sync: true },
   "log-query": { domain: logQueryDomain, sync: false },
-  // === P1 Gap Closure (4 new from CTO spec) ===
+  // === P1 Gap Closure (4 from CTO spec) ===
   "dependency-upgrade": { domain: dependencyUpgradeDomain, sync: false },
   "design-doc-generator": { domain: designDocGeneratorDomain, sync: false },
   "performance-profiler": { domain: performanceProfilerDomain, sync: false },
   "dead-code-detector": { domain: deadCodeDetectorDomain, sync: true },
+  // === SWE Gap Closure (3 remaining to complete 17-capability spec) ===
+  "pr-review": { domain: prReviewDomain, sync: false },
+  "boilerplate-scaffold": { domain: boilerplateScaffoldDomain, sync: false },
+  "codebase-qa": { domain: codebaseQADomain, sync: false },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {

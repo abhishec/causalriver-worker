@@ -1137,6 +1137,23 @@ export {
   type DeadCodeResult,
 } from './orchestrator/action-domains-missing-p1';
 
+// SWE-aaS Gap Closure: 3 missing capabilities (PR Review, Boilerplate, Codebase Q&A)
+// Completes the full 17-capability SWE-aaS spec
+export {
+  prReviewDomain,
+  boilerplateScaffoldDomain,
+  codebaseQADomain,
+  ALL_MISSING_SWE_DOMAINS,
+  type PRReviewRequest,
+  type PRReviewResult,
+  type PRReviewComment,
+  type BoilerplateRequest,
+  type BoilerplateResult,
+  type BoilerplateFile,
+  type CodebaseQARequest,
+  type CodebaseQAResult,
+} from './orchestrator/action-domains-missing-swe';
+
 // Early Warning System — Velocity Collapse + Bottleneck Detection
 // @deprecated - Use Brain-integrated version below for design partners
 export {

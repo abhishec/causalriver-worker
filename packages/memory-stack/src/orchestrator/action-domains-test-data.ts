@@ -22,6 +22,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
 
 // ============================================================================
 // TYPES
@@ -111,7 +112,35 @@ export const testDataGeneratorDomain = {
    */
   async execute(ctx: ActionDomainContext): Promise<ActionDomainResult> {
     const request = ctx.input as TestDataRequest;
+    const anthropicApiKey = (ctx as any).anthropicApiKey ?? process.env.ANTHROPIC_API_KEY;
+    const brainContext = formatBrainContextForDomain(ctx, 'engineering');
+    const brainAttribution = buildBrainAttribution(ctx, 'test-data-generator');
 
+    // ── CLAUDE-POWERED MODE ─────────────────────────────────────────────────
+    // Use Claude to generate realistic, scenario-aware synthetic data
+    if (anthropicApiKey) {
+      try {
+        const claudeResult = await generateTestDataWithClaude(request, anthropicApiKey, brainContext);
+        return {
+          type: 'test-data-generator',
+          data: { ...claudeResult, claudePowered: true, ...brainAttribution },
+          confidence: 0.95,
+          narrative: `Claude generated ${claudeResult.stats.totalRecords} synthetic records across ${claudeResult.stats.tablesGenerated} tables for ${request.scenario} scenario`,
+          interventions: [],
+          evidence: [
+            {
+              type: 'claude_generation',
+              description: `Claude Sonnet generated realistic ${request.scenario} scenario data with zero PII`,
+              weight: 0.95,
+            },
+          ],
+        };
+      } catch (claudeError: any) {
+        console.warn('[Test Data] Claude generation failed, falling back to heuristic:', claudeError.message);
+      }
+    }
+
+    // ── HEURISTIC FALLBACK MODE ─────────────────────────────────────────────
     // 1. Parse schema
     const schema = await parseSchema(request.schema, ctx);
 
@@ -661,4 +690,82 @@ function generateSQLInserts(
  */
 function formatNarrative(result: TestDataResult, request: TestDataRequest): string {
   return `Generated ${result.stats.totalRecords} synthetic ${request.scenario} records across ${result.stats.tablesGenerated} tables. All data is synthetic (no PII) with ${result.stats.integrityViolations} referential integrity violations fixed automatically.`;
+}
+
+// ============================================================================
+// CLAUDE-POWERED TEST DATA GENERATION
+// ============================================================================
+
+/**
+ * Use Claude Sonnet 4 to generate realistic, scenario-aware synthetic test data.
+ * Claude understands business context (fraud patterns, AML flags, edge cases)
+ * and generates data that matches real production distributions.
+ */
+async function generateTestDataWithClaude(
+  request: TestDataRequest,
+  anthropicApiKey: string,
+  brainContext: string
+): Promise<TestDataResult> {
+  const prompt = `You are an expert data engineer within NexusBrain's cognitive stack. Generate realistic synthetic test data.
+
+${brainContext}
+
+Generate synthetic test data for:
+Schema: ${request.schema.slice(0, 3000)}
+Scenario: ${request.scenario}
+Count per table: ${request.count}
+Tables: ${request.tables?.join(', ') || 'all tables in schema'}
+Ensure referential integrity: ${request.ensureIntegrity !== false}
+
+Rules:
+- NO real PII (use fake names, emails, SSNs)
+- Match realistic business patterns for ${request.scenario} scenario
+- For "fraud" scenario: include suspicious patterns (unusual amounts, timing, locations)
+- For "aml" scenario: include structuring patterns, high-risk jurisdictions
+- For "high_value" scenario: large transaction amounts, enterprise customers
+- For "edge_case" scenario: nulls, boundaries, unicode, special chars, max/min values
+- Ensure foreign keys reference valid records
+
+Return ONLY valid JSON:
+{
+  "data": {
+    "users": [
+      {"id": "uuid-1", "email": "john.doe@example.com", "name": "John Doe", "created_at": "2024-01-15T10:30:00Z"}
+    ],
+    "transactions": [
+      {"id": "uuid-t1", "user_id": "uuid-1", "amount": 1500.00, "currency": "USD", "status": "completed"}
+    ]
+  },
+  "lineage": "synthetic",
+  "scenario": "${request.scenario}",
+  "stats": {
+    "totalRecords": 20,
+    "tablesGenerated": 2,
+    "integrityViolations": 0
+  },
+  "sqlStatements": [
+    "INSERT INTO users (id, email, name, created_at) VALUES ('uuid-1', 'john.doe@example.com', 'John Doe', '2024-01-15T10:30:00Z');"
+  ]
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': anthropicApiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!response.ok) throw new Error(`Claude API error: ${response.status}`);
+  const data = await response.json();
+  const text = data.content[0].text;
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON in Claude response');
+  return JSON.parse(jsonMatch[0]) as TestDataResult;
 }
