@@ -378,8 +378,8 @@ export interface StreamingCycleState {
   batchesProcessed: number;
   totalSignalsProcessed: number;
 
-  // L13 immune — cumulative quality stats
-  immune: { passed: number; quarantined: number; rejected: number };
+  // L13 immune — cumulative quality stats (field names match CognitiveCycleResult.immune exactly)
+  immune: { signalsChecked: number; signalsPassed: number; signalsQuarantined: number; signalsRejected: number; avgQuality: number; _qualitySum: number };
 
   // L3 dreaming — accumulated associations across batches
   dreaming: { associationsFound: number; surfacedInsights: number; crossDomainConnections: number };
@@ -396,8 +396,8 @@ export interface StreamingCycleState {
   // L7 mesh — accumulated contributions
   mesh: { patternsContributed: number; collectivePatterns: number; conflicts: number };
 
-  // L8 imagination — accumulated hypotheses
-  imagination: { hypothesesGenerated: number; topInsight: string };
+  // L8 imagination — accumulated hypotheses (matches CognitiveCycleResult.imagination exactly)
+  imagination: { hypothesesGenerated: number; scenariosPlanned: number; analogiesFound: number; topInsight: string };
 
   // L9 theory of mind — last perspective
   theoryOfMind: { userModelUpdated: boolean; predictedIntent: string; cognitiveState: string; perspective: string };
@@ -1506,13 +1506,13 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
       const state: StreamingCycleState = {
         batchesProcessed: 0,
         totalSignalsProcessed: 0,
-        immune: { passed: 0, quarantined: 0, rejected: 0 },
+        immune: { signalsChecked: 0, signalsPassed: 0, signalsQuarantined: 0, signalsRejected: 0, avgQuality: 0, _qualitySum: 0 },
         dreaming: { associationsFound: 0, surfacedInsights: 0, crossDomainConnections: 0 },
         memory: { itemsEncoded: 0, workingMemorySize: 0, episodesRecorded: 0 },
         curiosity: { hypothesesGenerated: 0, knowledgeGaps: 0, explorationBudgetUsed: 0 },
         selfModel: { calibrationScore: 0, weaknesses: [], suggestedModifications: 0 },
         mesh: { patternsContributed: 0, collectivePatterns: 0, conflicts: 0 },
-        imagination: { hypothesesGenerated: 0, topInsight: '' },
+        imagination: { hypothesesGenerated: 0, scenariosPlanned: 0, analogiesFound: 0, topInsight: '' },
         theoryOfMind: { userModelUpdated: false, predictedIntent: 'unknown', cognitiveState: 'exploring', perspective: '' },
         temporal: { rhythmsDetected: 0, goalsTracked: 0, temporalHealth: 'stable' },
         redTeam: { predictionsTested: 0, robustnessAvg: 1, criticalWeaknesses: [] },
@@ -1577,9 +1577,16 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
             } as any),
           }));
           passedSignals = immuneResults.filter(r => r.response.action === 'pass').map(r => r.signal);
-          state.immune.passed += passedSignals.length;
-          state.immune.quarantined += immuneResults.filter(r => r.response.action === 'quarantine').length;
-          state.immune.rejected += immuneResults.filter(r => r.response.action === 'reject').length;
+          const batchQuarantined = immuneResults.filter(r => r.response.action === 'quarantine').length;
+          const batchRejected = immuneResults.filter(r => r.response.action === 'reject').length;
+          // Running quality: quality = passed / checked (0–1)
+          const batchQuality = sampledBatch.length > 0 ? passedSignals.length / sampledBatch.length : 1;
+          state.immune.signalsChecked += sampledBatch.length;
+          state.immune.signalsPassed += passedSignals.length;
+          state.immune.signalsQuarantined += batchQuarantined;
+          state.immune.signalsRejected += batchRejected;
+          state.immune._qualitySum += batchQuality;
+          state.immune.avgQuality = state.immune._qualitySum / state.batchesProcessed;
         } catch (err: any) {
           batchErrors.push({ layer: 13, name: 'Immune System', error: err?.message || String(err) });
         }
@@ -1698,6 +1705,8 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
           const imgResult = imagination.imagine(imgEdges as any, domains);
           allImagHypotheses.push(...imgResult.hypotheses);
           state.imagination.hypothesesGenerated += imgResult.hypotheses.length;
+          state.imagination.scenariosPlanned += (imgResult.scenarios?.length ?? 0);
+          state.imagination.analogiesFound += (imgResult.analogies?.length ?? 0);
           if (imgResult.topInsight && !state.imagination.topInsight) state.imagination.topInsight = imgResult.topInsight;
         } catch (err: any) {
           batchErrors.push({ layer: 8, name: 'Causal Imagination', error: err?.message || String(err) });
