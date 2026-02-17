@@ -13,13 +13,16 @@
 | Data ingestion pipeline (GitHub, Slack, Jira) | ✅ **WORKS** | Code in place, connectors built |
 | Signal storage (cross_domain_signals table) | ✅ **WORKS** | Schema fixed, writing to correct table |
 | PR review ingestion (P0 bottleneck detection) | ✅ **WORKS** | Fixed in commit 853ba8d4e |
-| Cross-domain linking (PR↔Jira↔Slack) | ✅ **WORKS** | Built in commit 4b5545b1e |
+| Cross-domain linking (PR↔Jira↔Slack) | ✅ **WORKS** | Built in commit 4b5545b1e, wired to Copilot in 9c5b49dd3 |
 | Full code content storage | ✅ **WORKS** | Fixed in commit 4b5545b1e (was 500-char preview) |
 | All 17 SE-aaS capabilities (API endpoints) | ✅ **WORKS** | All 17 domains have routes + executors |
 | Claude Sonnet 4 powering SE-aaS domains | ✅ **WORKS** | All 17 domains use Claude when key is present |
 | Async job queue + polling | ✅ **WORKS** | agent_queue + se_aas_artifacts tables |
 | Brain training UI | ✅ **WORKS** | Settings → Brain Config → Sync & Train |
 | P0 Early Warning System | ✅ **WORKS** | Velocity Collapse + Bottleneck Detection |
+| Brain derives REAL org-specific insights | ✅ **WORKS** | Fixed in commit 6a89802ce (was fake seeded data) |
+| Brain context is human narrative (not metrics) | ✅ **WORKS** | Fixed in commit 6a89802ce (was machine format) |
+| Brain cold-start honesty | ✅ **WORKS** | Fixed in commit 6a89802ce (was cognitiveStackAvailable: true hardcoded) |
 | Real AST dependency graph | ❌ **NOT YET** | Regex-only parsing currently |
 | Code embeddings (vector search) | ❌ **NOT YET** | Infrastructure exists, not populated |
 | Log ingestion pipeline | ❌ **NOT YET** | Log Query domain exists, no log source |
@@ -179,6 +182,41 @@ Every answer Claude gives is enriched with YOUR org's 1-year knowledge:
 | `d0cd962e4` | Brain Training UI (Settings → Brain Config → Sync & Train button) |
 | `7da6132b4` | SE-aaS gap closure: PR Review + Boilerplate + Codebase Q&A (completes all 17 domains) |
 | `4b5545b1e` | Cross-domain linking (PR↔Jira↔Slack entity_links) + full code content storage + SE-aaS type fixes |
+| `9c5b49dd3` | Wired entity_links into Copilot system prompt — Brain cross-domain questions now work |
+| `6a89802ce` | **Brain Intelligence Upgrade** — real data, human narrative, honest cold-start (see below) |
+
+### Brain Intelligence Upgrade (`6a89802ce`) — What Changed
+
+**Before:** The Brain injected fake machine metadata into Claude:
+```
+engineering ---> engineering [strength: -0.55, confidence: 82%, p=0.021]
+reviewer_gini: 0.68, HHI: 0.32, cognitiveStackAvailable: true
+```
+Every org got the same 4 hardcoded "seed" rows with made-up p-values.
+
+**After:** The Brain derives REAL org-specific insights and tells Claude in plain English:
+```
+- Alice handles 67% of code reviews (82 of 122 reviews). This is a critical bus
+  factor risk — if Alice is unavailable, PRs will stack up.
+- PRs are taking 2.4 days on average to merge (p75: 4.1d, p95: 9.2d). 23% of PRs
+  take more than 2x the average — a sign of review bottlenecks or large PRs.
+- Most changed files: src/auth/middleware.ts (34 changes), api/checkout.ts (28 changes).
+  These carry the highest regression risk.
+- #incidents channel had 38% after-hours messages — high burnout signal.
+```
+
+**All 3 sync routes now compute real statistics:**
+| Sync | What's Derived |
+|------|----------------|
+| GitHub | PR cycle times (avg/p75/p95), reviewer concentration + Gini, hotspot files, top contributors |
+| Jira | Ticket cycle times, most active projects, assignee workload concentration |
+| Slack | Channel activity, after-hours ratio (burnout signal), thread engagement (collaboration health) |
+
+**Brain context formatter rewritten:**
+- Cold-start awareness: tells Claude honestly when no data has been synced yet
+- `cognitiveStackAvailable` is now HONEST (was always hardcoded `true`)
+- All context in plain English sentences, not metric dumps
+- `orgPatterns` from ai_memory injected directly — these are the rich human-sentence insights
 
 ---
 
