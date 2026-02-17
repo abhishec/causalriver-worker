@@ -118,6 +118,8 @@ export interface FetchOptions {
 
 const GITHUB_API = 'https://api.github.com';
 
+const FETCH_TIMEOUT_MS = 15_000; // 15 seconds per request
+
 async function githubFetch(endpoint: string, token?: string, _retryCount: number = 0): Promise<any> {
   const MAX_RETRIES = 3;
   const headers: Record<string, string> = {
@@ -129,7 +131,20 @@ async function githubFetch(endpoint: string, token?: string, _retryCount: number
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${GITHUB_API}${endpoint}`, { headers });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${GITHUB_API}${endpoint}`, { headers, signal: controller.signal });
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error(`GitHub API request timed out after ${FETCH_TIMEOUT_MS / 1000}s: ${endpoint}`);
+    }
+    throw err;
+  }
+  clearTimeout(timeout);
 
   if (response.status === 403) {
     if (_retryCount >= MAX_RETRIES) {
@@ -142,7 +157,7 @@ async function githubFetch(endpoint: string, token?: string, _retryCount: number
       const resetDate = new Date(parseInt(resetAt) * 1000);
       const waitMs = Math.max(0, resetDate.getTime() - Date.now()) + 1000;
       console.log(`[GitFetcher] Primary rate limit hit. Waiting ${(waitMs / 1000).toFixed(0)}s until reset...`);
-      if (waitMs < 600000) { // Wait up to 10 minutes
+      if (waitMs < 60_000) { // Wait up to 60 seconds (was 10 min — too long)
         await sleep(waitMs);
         return githubFetch(endpoint, token, _retryCount + 1);
       }
@@ -150,7 +165,7 @@ async function githubFetch(endpoint: string, token?: string, _retryCount: number
     }
     // Secondary rate limit (abuse detection) — wait and retry
     const retryAfter = response.headers.get('retry-after');
-    const waitSec = retryAfter ? parseInt(retryAfter) : 60;
+    const waitSec = Math.min(retryAfter ? parseInt(retryAfter) : 30, 60); // Cap at 60s
     console.log(`[GitFetcher] Secondary rate limit hit (attempt ${_retryCount + 1}/${MAX_RETRIES}). Waiting ${waitSec}s...`);
     await sleep(waitSec * 1000);
     return githubFetch(endpoint, token, _retryCount + 1);
@@ -440,17 +455,17 @@ export async function fetchAllRepos(
       failedRepos.push(repos[i]);
     }
 
-    // Longer delay between repos to avoid secondary rate limiting (3s with token, 10s without)
+    // Delay between repos to avoid secondary rate limiting (1s with token, 5s without)
     if (i < repos.length - 1) {
-      const delay = token ? 3000 : 10000;
+      const delay = token ? 1000 : 5000;
       await sleep(delay);
     }
   }
 
   // ── Retry failed repos with longer backoff ──
   if (failedRepos.length > 0) {
-    console.log(`\n[GitFetcher] Retrying ${failedRepos.length} failed repos after 60s cooldown...\n`);
-    await sleep(60000); // 60-second cooldown before retries
+    console.log(`\n[GitFetcher] Retrying ${failedRepos.length} failed repos after 15s cooldown...\n`);
+    await sleep(15000); // 15-second cooldown before retries
 
     for (let i = 0; i < failedRepos.length; i++) {
       const [owner, repo] = failedRepos[i].split('/');

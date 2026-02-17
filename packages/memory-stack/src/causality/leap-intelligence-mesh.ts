@@ -193,6 +193,7 @@ export function createIntelligenceMesh(config?: IntelligenceMeshConfig): Intelli
   // Internal state
   const orgTrust: Map<string, OrgTrustProfile> = new Map();
   const contributions: MeshContribution[] = [];
+  const MAX_CONTRIBUTIONS = 2000; // Bounded — evict oldest when full
   const collectivePatterns: Map<string, CollectivePattern> = new Map();
   const conflicts: Map<string, KnowledgeConflict> = new Map();
   let conflictCounter = 0;
@@ -229,6 +230,10 @@ export function createIntelligenceMesh(config?: IntelligenceMeshConfig): Intelli
       return false;
     }
 
+    // Evict oldest contributions when at capacity
+    if (contributions.length >= MAX_CONTRIBUTIONS) {
+      contributions.splice(0, contributions.length - MAX_CONTRIBUTIONS + 1);
+    }
     contributions.push(contribution);
     orgProfile.contributionsAccepted++;
     orgProfile.lastContribution = Date.now();
@@ -291,52 +296,71 @@ export function createIntelligenceMesh(config?: IntelligenceMeshConfig): Intelli
       }
     }
 
-    // Step 3: Detect conflicts (contradictory patterns in same domain)
-    const byDomain = new Map<string, CollectivePattern[]>();
+    // Step 3: Detect conflicts — keyword-indexed O(n) instead of O(n²)
+    // Build per-domain keyword buckets for opposing term pairs
+    const OPPOSING_PAIRS: Array<[string, string]> = [
+      ['increase', 'decrease'],
+      ['positive', 'negative'],
+      ['cause', 'not cause'],
+    ];
+
+    // Index only NEW collective patterns (from this sensing cycle)
+    const newPatternSet = new Set(newCollective.map(p => p.id));
+
+    const byDomainKeyword = new Map<string, CollectivePattern[]>();
     for (const cp of collectivePatterns.values()) {
-      const arr = byDomain.get(cp.domain) || [];
-      arr.push(cp);
-      byDomain.set(cp.domain, arr);
+      const lower = cp.pattern.toLowerCase();
+      for (const [termA, termB] of OPPOSING_PAIRS) {
+        if (lower.includes(termA)) {
+          const key = `${cp.domain}:${termA}`;
+          const arr = byDomainKeyword.get(key) || [];
+          arr.push(cp);
+          byDomainKeyword.set(key, arr);
+        }
+        if (lower.includes(termB)) {
+          const key = `${cp.domain}:${termB}`;
+          const arr = byDomainKeyword.get(key) || [];
+          arr.push(cp);
+          byDomainKeyword.set(key, arr);
+        }
+      }
     }
 
-    for (const [domain, domainPatterns] of byDomain) {
-      for (let i = 0; i < domainPatterns.length; i++) {
-        for (let j = i + 1; j < domainPatterns.length; j++) {
-          const p1 = domainPatterns[i];
-          const p2 = domainPatterns[j];
+    // Only check conflicts between opposing buckets (O(bucket_a × bucket_b), NOT O(n²))
+    const checkedPairs = new Set<string>();
+    for (const [termA, termB] of OPPOSING_PAIRS) {
+      for (const domain of new Set([...collectivePatterns.values()].map(p => p.domain))) {
+        const bucketA = byDomainKeyword.get(`${domain}:${termA}`) || [];
+        const bucketB = byDomainKeyword.get(`${domain}:${termB}`) || [];
+        for (const p1 of bucketA) {
+          for (const p2 of bucketB) {
+            if (p1.id === p2.id) continue;
+            // Only create conflicts involving at least one NEW pattern
+            if (!newPatternSet.has(p1.id) && !newPatternSet.has(p2.id)) continue;
+            const pairKey = [p1.id, p2.id].sort().join(':');
+            if (checkedPairs.has(pairKey)) continue;
+            checkedPairs.add(pairKey);
 
-          // Simple contradiction detection: opposing patterns
-          const p1Lower = p1.pattern.toLowerCase();
-          const p2Lower = p2.pattern.toLowerCase();
-          const contradicts = (
-            (p1Lower.includes('increase') && p2Lower.includes('decrease')) ||
-            (p1Lower.includes('positive') && p2Lower.includes('negative')) ||
-            (p1Lower.includes('cause') && p2Lower.includes('not cause'))
-          );
-
-          if (contradicts) {
             conflictCounter++;
             const conflictId = `conflict_${conflictCounter}`;
-            if (!conflicts.has(conflictId)) {
-              conflicts.set(conflictId, {
-                id: conflictId,
-                description: `Contradictory patterns in ${domain}`,
-                domain,
-                positionA: {
-                  orgIds: p1.contributorIds,
-                  claim: p1.pattern,
-                  confidence: p1.collectiveConfidence,
-                  evidence: p1.totalEvidence,
-                },
-                positionB: {
-                  orgIds: p2.contributorIds,
-                  claim: p2.pattern,
-                  confidence: p2.collectiveConfidence,
-                  evidence: p2.totalEvidence,
-                },
-                status: 'active',
-              });
-            }
+            conflicts.set(conflictId, {
+              id: conflictId,
+              description: `Contradictory patterns in ${domain}`,
+              domain,
+              positionA: {
+                orgIds: p1.contributorIds,
+                claim: p1.pattern,
+                confidence: p1.collectiveConfidence,
+                evidence: p1.totalEvidence,
+              },
+              positionB: {
+                orgIds: p2.contributorIds,
+                claim: p2.pattern,
+                confidence: p2.collectiveConfidence,
+                evidence: p2.totalEvidence,
+              },
+              status: 'active',
+            });
           }
         }
       }

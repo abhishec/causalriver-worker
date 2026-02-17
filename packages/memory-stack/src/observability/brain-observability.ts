@@ -819,12 +819,13 @@ export function createBrainObservability(
   }
 
   async function getAllLayersHealth(): Promise<LayerHealthSnapshot[]> {
-    // Get latest snapshot for each layer
+    // Get latest snapshot for each layer — cap to 300 rows (30 layers × ~10 snapshots)
     const { data, error } = await supabase
       .from('obs_layer_health')
       .select('*')
       .eq('organization_id', organizationId)
-      .order('snapshot_at', { ascending: false });
+      .order('snapshot_at', { ascending: false })
+      .limit(300);
 
     if (error) {
       logger.error('obs:get_all_layers_health:error', { error: error.message });
@@ -858,7 +859,8 @@ export function createBrainObservability(
       .eq('entity_type', entityType)
       .eq('entity_id', entityId)
       .gte('created_at', new Date(Date.now() - hours * 60 * 60 * 1000).toISOString())
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(500);
 
     if (error) {
       logger.error('obs:get_signal_history:error', { error: error.message });
@@ -880,7 +882,8 @@ export function createBrainObservability(
       .eq('source_domain', sourceDomain)
       .eq('target_domain', targetDomain)
       .gte('created_at', new Date(Date.now() - hours * 60 * 60 * 1000).toISOString())
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(500);
 
     if (error) {
       logger.error('obs:get_causal_calculation_history:error', { error: error.message });
@@ -900,7 +903,8 @@ export function createBrainObservability(
       .eq('organization_id', organizationId)
       .eq('agent_type', agentType)
       .gte('created_at', new Date(Date.now() - hours * 60 * 60 * 1000).toISOString())
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(200);
 
     if (error) {
       logger.error('obs:get_agent_execution_history:error', { error: error.message });

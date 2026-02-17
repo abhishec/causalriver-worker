@@ -444,72 +444,69 @@ export function createScheduledJobs(
         try {
           const packData = pack.pack_data as { chains?: Array<Record<string, unknown>>; rules?: Array<Record<string, unknown>> } | null;
           if (!packData) continue;
+          const now = new Date().toISOString();
 
-          // Apply causal chains as statistical relationships
-          if (packData.chains && Array.isArray(packData.chains)) {
-            for (const chain of packData.chains) {
-              const { error: insertErr } = await supabase
-                .from('causal_relationships_statistical')
-                .upsert({
-                  organization_id: organizationId,
-                  source_domain: chain.source_domain || chain.source || 'unknown',
-                  target_domain: chain.target_domain || chain.target || 'unknown',
-                  source_entity: chain.source_metric || chain.source_entity || '',
-                  target_entity: chain.target_metric || chain.target_entity || '',
-                  effect_size: chain.effect_size || chain.strength || 0.5,
-                  optimal_lag_days: chain.lag_days || chain.optimal_lag_days || 7,
-                  granger_p_value: chain.p_value || chain.granger_p_value || 0.05,
-                  granger_f_statistic: chain.f_statistic || 0,
-                  sample_size: chain.sample_size || 1,
-                  is_significant: true,
-                  natural_language: chain.description || chain.natural_language || null,
-                  discovery_method: 'training_pack',
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                }, { onConflict: 'organization_id,source_domain,target_domain,source_entity,target_entity' });
+          // Apply causal chains as statistical relationships — BATCH upsert
+          if (packData.chains && Array.isArray(packData.chains) && packData.chains.length > 0) {
+            const chainRows = packData.chains.map(chain => ({
+              organization_id: organizationId,
+              source_domain: chain.source_domain || chain.source || 'unknown',
+              target_domain: chain.target_domain || chain.target || 'unknown',
+              source_entity: chain.source_metric || chain.source_entity || '',
+              target_entity: chain.target_metric || chain.target_entity || '',
+              effect_size: chain.effect_size || chain.strength || 0.5,
+              optimal_lag_days: chain.lag_days || chain.optimal_lag_days || 7,
+              granger_p_value: chain.p_value || chain.granger_p_value || 0.05,
+              granger_f_statistic: chain.f_statistic || 0,
+              sample_size: chain.sample_size || 1,
+              is_significant: true,
+              natural_language: chain.description || chain.natural_language || null,
+              discovery_method: 'training_pack',
+              created_at: now,
+              updated_at: now,
+            }));
 
-              if (insertErr) {
-                errors.push(`Chain insert error: ${insertErr.message}`);
-              } else {
-                chainsCreated++;
-              }
+            const { error: insertErr } = await supabase
+              .from('causal_relationships_statistical')
+              .upsert(chainRows, { onConflict: 'organization_id,source_domain,target_domain,source_entity,target_entity' });
+
+            if (insertErr) {
+              errors.push(`Chain batch upsert error: ${insertErr.message}`);
+            } else {
+              chainsCreated += chainRows.length;
             }
           }
 
-          // Apply business rules as ai_memory entries
-          if (packData.rules && Array.isArray(packData.rules)) {
-            for (const rule of packData.rules) {
-              try {
-                const { error: memErr } = await supabase.from('ai_memory').insert({
-                  organization_id: organizationId,
-                  memory_type: 'business_rule',
-                  domain: (rule.domain as string) || 'general',
-                  content: (rule.rule as string) || (rule.content as string) || JSON.stringify(rule),
-                  importance: (rule.importance as number) || 0.7,
-                  metadata: {
-                    source: 'training_pack',
-                    packId: pack.id,
-                    title: rule.title || rule.name || '',
-                    createdBy: pack.created_by,
-                  },
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                });
-                if (memErr) {
-                  errors.push(`Memory insert error: ${memErr.message}`);
-                } else {
-                  rulesCreated++;
-                }
-              } catch (memErr: any) {
-                errors.push(`Rule upsert error: ${memErr.message}`);
-              }
+          // Apply business rules as ai_memory entries — BATCH insert
+          if (packData.rules && Array.isArray(packData.rules) && packData.rules.length > 0) {
+            const ruleRows = packData.rules.map(rule => ({
+              organization_id: organizationId,
+              memory_type: 'business_rule',
+              domain: (rule.domain as string) || 'general',
+              content: (rule.rule as string) || (rule.content as string) || JSON.stringify(rule),
+              importance: (rule.importance as number) || 0.7,
+              metadata: {
+                source: 'training_pack',
+                packId: pack.id,
+                title: rule.title || rule.name || '',
+                createdBy: pack.created_by,
+              },
+              created_at: now,
+              updated_at: now,
+            }));
+
+            const { error: memErr } = await supabase.from('ai_memory').insert(ruleRows);
+            if (memErr) {
+              errors.push(`Rule batch insert error: ${memErr.message}`);
+            } else {
+              rulesCreated += ruleRows.length;
             }
           }
 
           // Mark pack as applied
           await supabase
             .from('custom_training_packs')
-            .update({ status: 'applied', applied_at: new Date().toISOString() })
+            .update({ status: 'applied', applied_at: now })
             .eq('id', pack.id);
 
           packsApplied++;

@@ -379,11 +379,22 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
   async function storeSignals(signals: NormalizedSignal[]): Promise<number> {
     if (signals.length === 0) return 0;
 
+    // Deduplicate signals by (domain, metric, timestamp) before storing
+    const seen = new Set<string>();
+    const deduped: NormalizedSignal[] = [];
+    for (const s of signals) {
+      const key = `${s.domain}|${s.metricName}|${s.timestamp}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(s);
+      }
+    }
+
     let stored = 0;
     const batchSize = 100;
 
-    for (let i = 0; i < signals.length; i += batchSize) {
-      const batch = signals.slice(i, i + batchSize);
+    for (let i = 0; i < deduped.length; i += batchSize) {
+      const batch = deduped.slice(i, i + batchSize);
       const rows = batch.map(s => ({
         organization_id: organizationId,
         source_domain: s.domain,
@@ -395,15 +406,31 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
         signal_metadata: { source: s.source },
       }));
 
+      // Use upsert to avoid duplicate rows on re-ingestion
       const { error } = await supabase
         .from('cross_domain_signals')
-        .insert(rows);
+        .upsert(rows, {
+          onConflict: 'organization_id,source_domain,signal_type,signal_timestamp,entity_id',
+          ignoreDuplicates: true,
+        });
 
       if (!error) {
         stored += rows.length;
       } else {
-        log(`Batch insert failed (${batch.length} signals): ${error.message}`);
+        // Fall back to insert (table may not have the unique constraint yet)
+        const { error: insertErr } = await supabase
+          .from('cross_domain_signals')
+          .insert(rows);
+        if (!insertErr) {
+          stored += rows.length;
+        } else {
+          log(`Batch store failed (${batch.length} signals): ${insertErr.message}`);
+        }
       }
+    }
+
+    if (deduped.length < signals.length) {
+      log(`Deduped ${signals.length - deduped.length} duplicate signals before storage`);
     }
 
     return stored;
@@ -435,33 +462,36 @@ export function createPublicDataLearner(config: PublicDataLearnerConfig) {
         hackernews: fetchHackerNews,
       };
 
-      // Fetch from each source
-      for (const source of activeSources) {
-        const fetcher = fetchers[source];
-        if (!fetcher) continue;
+      // Fetch from all sources in parallel (they're independent APIs)
+      const fetchPromises = activeSources
+        .filter(source => fetchers[source])
+        .map(async (source) => {
+          const fetcher = fetchers[source];
+          const start = Date.now();
+          try {
+            const signals = await fetcher();
+            return { source, signals, success: true, durationMs: Date.now() - start };
+          } catch (err: any) {
+            return { source, signals: [] as NormalizedSignal[], success: false, error: err.message, durationMs: Date.now() - start };
+          }
+        });
 
-        const start = Date.now();
-        try {
-          const signals = await fetcher();
-          for (const s of signals) {
+      const fetchResults = await Promise.allSettled(fetchPromises);
+
+      for (const settled of fetchResults) {
+        if (settled.status === 'fulfilled') {
+          const r = settled.value;
+          for (const s of r.signals) {
             allSignals.push(s);
           }
           results.push({
-            source,
-            signalCount: signals.length,
-            success: true,
-            durationMs: Date.now() - start,
+            source: r.source,
+            signalCount: r.signals.length,
+            success: r.success,
+            error: r.success ? undefined : r.error,
+            durationMs: r.durationMs,
           });
-          log(`${source}: ${signals.length} signals`);
-        } catch (err: any) {
-          results.push({
-            source,
-            signalCount: 0,
-            success: false,
-            error: err.message,
-            durationMs: Date.now() - start,
-          });
-          log(`${source}: FAILED (${err.message})`);
+          log(`${r.source}: ${r.signals.length} signals`);
         }
       }
 
