@@ -389,7 +389,8 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
         body: JSON.stringify({
           model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for conversational responses
           max_tokens: maxTokens,
-          system: systemPrompt,
+          // Enable prompt caching for system prompts — saves ~90% on repeated system prompts
+          system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
           messages: messages.map((m) => ({
             role: m.role === 'assistant' ? 'assistant' : 'user',
             content: m.content,

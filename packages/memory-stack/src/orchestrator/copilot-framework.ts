@@ -1041,7 +1041,7 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     adapter,
     provider,
     apiKey,
-    model = 'claude-sonnet-4-5-20250929',
+    model = 'claude-sonnet-4-20250514', // Cost optimization: Sonnet 4 default (callers should pass selectModel() for smart routing)
     maxTokens = 8192,
     enableMemory = true,
     brainContext,

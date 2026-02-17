@@ -316,7 +316,7 @@ export async function POST(request: NextRequest) {
 
     if (useFramework && anthropicKey) {
       try {
-        const { createCopilotInstance, extractDomains, normalizeEntityState } = await import("@nexus-ai/memory-stack");
+        const { createCopilotInstance, extractDomains, normalizeEntityState, selectModel } = await import("@nexus-ai/memory-stack");
         const { createNexusBrainAdapter } = await import("@/lib/nexus-copilot-adapter");
 
         // Detect domains for the adapter
@@ -332,12 +332,19 @@ export async function POST(request: NextRequest) {
           detectedDomains,
         });
 
+        // Smart model routing: Haiku for simple queries, Sonnet for complex — saves 60-70% LLM cost
+        const smartModel = selectModel(message, {
+          commanderComplexity: commandResult?.dispatch?.complexityScore,
+          hasConversationHistory: conversationHistory && conversationHistory.length > 0,
+          conversationTurns: conversationHistory?.length,
+        });
+
         // Create the copilot instance
         const copilot = createCopilotInstance({
           adapter,
           provider: "anthropic",
           apiKey: anthropicKey,
-          model: "claude-sonnet-4-5-20250929",
+          model: smartModel,
           maxTokens: 8192,
         });
 
@@ -963,6 +970,16 @@ RULES FOR CORRECTIONS:
       }
     }
 
+    // ── Smart model selection: Haiku for simple, Sonnet for complex ──
+    const { selectModel: selectSmartModel } = await import("@nexus-ai/memory-stack");
+    const v4SmartModel = selectSmartModel(message, {
+      commanderComplexity: commandResult?.dispatch?.complexityScore,
+      hasConversationHistory: conversationHistory && conversationHistory.length > 0,
+      conversationTurns: conversationHistory?.length,
+      hasBrainArtifacts: !!actionArtifact,
+      hasDomainResults: !!seaasResult || !!accountingResult,
+    });
+
     // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
@@ -1047,9 +1064,10 @@ RULES FOR CORRECTIONS:
         }
 
         const anthropicStream = anthropic.messages.stream({
-          model: "claude-sonnet-4-5-20250929",
+          model: v4SmartModel,
           max_tokens: 8192,
-          system: effectiveSystemPrompt,
+          // Enable prompt caching — saves ~90% on repeated system prompts (brain context is often similar)
+          system: [{ type: 'text' as const, text: effectiveSystemPrompt, cache_control: { type: 'ephemeral' as const } }],
           messages,
         });
 

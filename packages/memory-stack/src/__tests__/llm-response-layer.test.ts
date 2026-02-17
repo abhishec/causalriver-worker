@@ -317,9 +317,10 @@ describe('LLM Response Layer', () => {
 
       await llm.query('Why is churn up?', mockNexusContext);
 
-      // System prompt should include the assembled context
-      expect(capturedBody.system).toContain('pricing_changes');
-      expect(capturedBody.system).toContain('Causal Relationships');
+      // System prompt should include the assembled context (prompt caching wraps in array)
+      const systemText = Array.isArray(capturedBody.system) ? capturedBody.system[0].text : capturedBody.system;
+      expect(systemText).toContain('pricing_changes');
+      expect(systemText).toContain('Causal Relationships');
     });
 
     it('should use custom system prompt prefix', async () => {
@@ -339,7 +340,9 @@ describe('LLM Response Layer', () => {
 
       await llm.query('Test', mockNexusContext);
 
-      expect(capturedBody.system).toContain('You are a custom brain assistant.');
+      // System prompt uses prompt caching format (array)
+      const systemText2 = Array.isArray(capturedBody.system) ? capturedBody.system[0].text : capturedBody.system;
+      expect(systemText2).toContain('You are a custom brain assistant.');
     });
   });
 

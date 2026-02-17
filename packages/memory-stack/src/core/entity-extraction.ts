@@ -360,6 +360,7 @@ Return ONLY the JSON array, no other text.`;
       body: JSON.stringify({
         model: config?.model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for structured JSON extraction
         max_tokens: 1024,
+        system: [{ type: 'text', text: 'You are an entity extraction system. Extract all entities from the given text and return a JSON array.', cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: prompt }],
       }),
     });

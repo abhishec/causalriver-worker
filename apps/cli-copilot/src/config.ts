@@ -62,7 +62,7 @@ export function loadConfig(): CliConfig {
     orgId: required.ORG_ID!,
     coreOrgId: process.env.CORE_ORG_ID || CORE_ORG_ID,
     orgName: process.env.ORG_NAME || 'NexusBrain Copilot',
-    model: process.env.MODEL || 'claude-sonnet-4-5-20250929',
+    model: process.env.MODEL || 'claude-sonnet-4-20250514', // Cost optimization: Sonnet 4 default (set MODEL=claude-sonnet-4-5-20250929 for premium)
     maxTokens: parseInt(process.env.MAX_TOKENS || '8192', 10),
   };
 }

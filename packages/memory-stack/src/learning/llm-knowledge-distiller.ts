@@ -307,7 +307,8 @@ ${text.slice(0, 12000)}`;
         body: JSON.stringify({
           model: model || 'claude-3-5-haiku-20241022', // Cost control: Haiku is 10x cheaper than Sonnet for structured extraction
           max_tokens: maxTokens,
-          system: EXTRACTION_SYSTEM_PROMPT,
+          // Enable prompt caching for extraction system prompt — saves ~90% on repeated calls
+          system: [{ type: 'text', text: EXTRACTION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: userMessage }],
         }),
       });

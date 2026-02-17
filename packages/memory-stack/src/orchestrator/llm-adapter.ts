@@ -211,7 +211,8 @@ async function callAnthropic(
     body: JSON.stringify({
       model: opts.model,
       max_tokens: opts.maxTokens,
-      system: systemPrompt,
+      // Enable prompt caching — saves ~90% on repeated system prompts
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     }),
   });

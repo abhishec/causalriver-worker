@@ -447,6 +447,17 @@ export {
   type EnhancedDecisionIntelligence,
 } from './orchestrator/llm-brain-amplifier';
 
+// Smart Model Router — Cost-Optimized LLM Model Selection
+export {
+  routeModel,
+  selectModel,
+  routeActionDomainModel,
+  MODEL_FAST,
+  MODEL_DEEP,
+  MODEL_PREMIUM,
+  type ComplexityResult,
+} from './infra/smart-model-router';
+
 // Response Feedback Loop (query → correction → memory)
 export {
   createResponseFeedbackLoop,
@@ -866,6 +877,10 @@ export {
   queryCacheDomain,
   executionProfileDomain,
   robustnessCheckDomain,
+  // V9 — Accounting Intelligence Pro Domains (Isabel Reqs)
+  doubleEntryBookkeepDomain,
+  reconcileAccountsDomain,
+  causalAnomalyDetectDomain,
   ALL_ACTION_DOMAINS,
   registerAllActionDomains,
 } from './orchestrator/action-domains';
@@ -921,6 +936,8 @@ export {
   metacognitionAuditorAgent,
   qualityGateAgent,
   continuousLearnerAgent,
+  // V9 — Accounting Intelligence Pro Agent
+  brainCausalAccountantAgent,
   // V8 — Dev Jarvis (Developer Intelligence Executive)
   devJarvisAgent,
   ALL_DEV_JARVIS_AGENTS,
