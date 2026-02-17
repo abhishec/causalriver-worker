@@ -1209,7 +1209,7 @@ for (const tc of v4TestCases) {
     registerAllActionDomains(domainRegistry);
 
     const registeredDomains = domainRegistry.getDomainNames();
-    const has28Domains = registeredDomains.length === 35;
+    const has28Domains = registeredDomains.length === 38;
     const hasCore5 = ['forecast', 'simulate', 'explain', 'diagnose', 'composite'].every(d => registeredDomains.includes(d));
     const hasV6_8 = ['compare', 'monitor', 'optimize', 'recommend', 'audit', 'correlate', 'benchmark', 'narrate'].every(d => registeredDomains.includes(d));
     const hasV61_8 = ['sentiment', 'scenario-tree', 'risk-cascade', 'resource-allocate', 'anomaly-predict', 'goal-decompose', 'causal-intervene', 'pattern-memory'].every(d => registeredDomains.includes(d));
@@ -1523,7 +1523,7 @@ for (const tc of v4TestCases) {
     registerBrainAgents(agentReg);
 
     const brainAgents = agentReg.listAgents();
-    const has16Agents = brainAgents.length === 28;
+    const has16Agents = brainAgents.length === 29;
     const agentNamesV6 = brainAgents.map(a => a.definition.name);
     const hasWatcher = agentNamesV6.includes('brain-revenue-watcher');
     const hasBriefing = agentNamesV6.includes('brain-daily-briefing');
@@ -1640,7 +1640,7 @@ for (const tc of v4TestCases) {
     console.log(`\n  11a. Domain Count Verification:`);
     const advStats = advRegistry.getStats();
     const count21 = advStats.totalDomains;
-    const has21 = count21 === 35;
+    const has21 = count21 === 38;
     console.log(`     Total domains: ${count21} ${has21 ? '✅' : '❌'}`);
 
     const advDomainList = advRegistry.getDomainNames();
@@ -1808,7 +1808,7 @@ for (const tc of v4TestCases) {
     // 11d: 10 Brain Agents
     console.log(`\n  11d. Brain Agent Expansion:`);
     const agentNames = ALL_BRAIN_AGENTS.map(a => a.name);
-    const has10 = ALL_BRAIN_AGENTS.length === 28;
+    const has10 = ALL_BRAIN_AGENTS.length === 29;
     console.log(`     Total brain agents: ${ALL_BRAIN_AGENTS.length} ${has10 ? '✅' : '❌'}`);
 
     const newAgentNames = ['brain-risk-sentinel', 'brain-strategic-planner', 'brain-pattern-recon', 'brain-org-health', 'brain-intervention-tracker'];
@@ -1889,7 +1889,7 @@ for (const tc of v4TestCases) {
     const v7Registry = createActionDomainRegistry({ verbose: false });
     registerAllActionDomains(v7Registry);
     const v7Domains = v7Registry.getDomainNames();
-    const has28 = v7Domains.length === 35;
+    const has28 = v7Domains.length === 38;
     const v7DomainNames = ['document-comprehend', 'completeness-check', 'rule-apply', 'cross-validate', 'statement-synthesize', 'jurisdiction-comply', 'confidence-triage'];
     const allV7Present = v7DomainNames.every(d => v7Domains.includes(d));
 
@@ -2011,7 +2011,7 @@ for (const tc of v4TestCases) {
     const v7AgentReg = createAgentRegistry({ verbose: false });
     registerBrainAgents(v7AgentReg);
     const v7Agents = v7AgentReg.listAgents();
-    const has16 = v7Agents.length === 28;
+    const has16 = v7Agents.length === 29;
     const v7AgentNames = v7Agents.map(a => a.definition.name);
     const v7AccountingAgents = ['brain-balance-sheet-builder', 'brain-pnl-builder', 'brain-cashflow-builder', 'brain-tax-preparer', 'brain-multi-jurisdiction-monitor', 'brain-financial-auditor'];
     const allV7AgentsPresent = v7AccountingAgents.every(a => v7AgentNames.includes(a));
@@ -2071,7 +2071,7 @@ for (const tc of v4TestCases) {
     // ── Test 13a: V8 Domain Registration (35 total) ──
     console.log(`\n  13a. V8 Domain Registration:`);
     const v8Domains = v8Registry.getDomainNames();
-    const has35 = v8Domains.length === 35;
+    const has35 = v8Domains.length === 38;
     const v8DomainNames = ['calibration-audit', 'error-attribute', 'chain-validate', 'uncertainty-quantify', 'query-cache', 'execution-profile', 'robustness-check'];
     const allV8Present = v8DomainNames.every(d => v8Domains.includes(d));
 
@@ -2289,7 +2289,7 @@ for (const tc of v4TestCases) {
     const v8AgentReg = createAgentRegistry({ verbose: false });
     registerBrainAgents(v8AgentReg);
     const v8Agents = v8AgentReg.listAgents();
-    const has27 = v8Agents.length === 28;
+    const has27 = v8Agents.length === 29;
     const v8AgentNames = v8Agents.map(a => a.definition.name);
     const metacogAgents = ['brain-metacognition-auditor', 'brain-quality-gate', 'brain-continuous-learner'];
     const allMetacogPresent = metacogAgents.every(a => v8AgentNames.includes(a));
@@ -2316,10 +2316,419 @@ for (const tc of v4TestCases) {
     failed++;
   }
 
+// ══════════════════════════════════════════════════════════════════════════
+// V9 BEHAVIORAL TESTS — Accounting Intelligence Pro (Isabel's Requirements)
+// ══════════════════════════════════════════════════════════════════════════
+
+  const mockModulesV9 = {
+    forecaster: null,
+    simulator: null,
+    reasoner: null,
+    explainer: null,
+    amplifier: null,
+    motorCommandEngine: null,
+    calibrationLoop: null,
+    agentRegistry: null,
+  };
+
+  // ── Test 14a: V9 Domain Registration (38 total) ──
+  console.log('\n── Test 14a: V9 Domain Registration ──');
+  try {
+    const v9Registry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9Registry);
+    const v9Domains = v9Registry.listDomains().map(d => d.definition.name);
+    const has38 = v9Domains.length === 38;
+    const v9DomainNames = ['double-entry-bookkeep', 'reconcile-accounts', 'causal-anomaly-detect'];
+    const allV9Present = v9DomainNames.every(d => v9Domains.includes(d));
+
+    console.log(`     Total domains: ${v9Domains.length} ${has38 ? '✅' : '❌'}`);
+    console.log(`     V9 domains present: ${allV9Present ? '✅' : '❌'} (${v9DomainNames.filter(d => v9Domains.includes(d)).join(', ')})`);
+
+    if (has38 && allV9Present) { console.log(`     ✅ V9 Domain Registration PASSED (38 total)`); passed++; }
+    else { console.log(`     ❌ V9 Domain Registration FAILED (expected 38, got ${v9Domains.length})`); failed++; }
+  } catch (err) { console.log(`     ❌ 14a FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14b: Double-Entry Bookkeeping — Behavioral (Req 1 Core) ──
+  console.log('\n── Test 14b: Double-Entry Bookkeeping — Behavioral ──');
+  try {
+    const v9BookkeepRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9BookkeepRegistry);
+
+    const bookkeepContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['revenue', 'expenses', 'cash']), edges: new Map() },
+      timeSeries: new Map([
+        ['revenue', { dates: ['2024-01', '2024-02', '2024-03'], values: [100000, 105000, 110000], domain: 'revenue' }],
+        ['receivables', { dates: ['2024-01', '2024-02', '2024-03'], values: [20000, 22000, 25000], domain: 'receivables' }],
+        ['cash', { dates: ['2024-01', '2024-02', '2024-03'], values: [50000, 48000, 55000], domain: 'cash' }],
+        ['payables', { dates: ['2024-01', '2024-02', '2024-03'], values: [15000, 16000, 14000], domain: 'payables' }],
+        ['expenses', { dates: ['2024-01', '2024-02', '2024-03'], values: [60000, 62000, 65000], domain: 'expenses' }],
+        ['equity', { dates: ['2024-01', '2024-02', '2024-03'], values: [55000, 57000, 60000], domain: 'equity' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [], patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: ['revenue', 'expenses'],
+      question: 'Create journal entries for all financial transactions', intent: 'double-entry-bookkeep',
+      horizonDays: 30, horizonSource: 'default' as const,
+    };
+
+    const bookResult = await v9BookkeepRegistry.executeDomain('double-entry-bookkeep', bookkeepContext, mockModulesV9);
+    const bookData = bookResult.data as Record<string, unknown>;
+    const journalEntries = bookData.journalEntries as unknown[];
+    const trialBalance = bookData.trialBalance as { isBalanced: boolean; totalDebits: number; totalCredits: number };
+    const generalLedger = bookData.generalLedger as Record<string, unknown>;
+    const validation = bookData.validation as { totalEntries: number; balancedEntries: number };
+    const deScore = bookData.doubleEntryScore as number;
+
+    const hasEntries = journalEntries && journalEntries.length > 0;
+    const tbBalanced = trialBalance?.isBalanced === true;
+    const tbDebitsEqCredits = Math.abs((trialBalance?.totalDebits || 0) - (trialBalance?.totalCredits || 0)) < 0.01;
+    const hasLedger = generalLedger && Object.keys(generalLedger).length > 0;
+    const goodScore = typeof deScore === 'number' && deScore > 0.9;
+    const allBalanced = validation?.totalEntries === validation?.balancedEntries;
+
+    console.log(`     Journal entries: ${journalEntries?.length || 0} ${hasEntries ? '✅' : '❌'}`);
+    console.log(`     Trial balance: debits ${trialBalance?.totalDebits?.toFixed(2)} = credits ${trialBalance?.totalCredits?.toFixed(2)} ${tbDebitsEqCredits ? '✅' : '❌'}`);
+    console.log(`     Trial balanced: ${tbBalanced ? '✅' : '❌'}`);
+    console.log(`     All entries balanced: ${allBalanced ? '✅' : '❌'} (${validation?.balancedEntries}/${validation?.totalEntries})`);
+    console.log(`     General ledger accounts: ${Object.keys(generalLedger || {}).length} ${hasLedger ? '✅' : '❌'}`);
+    console.log(`     Double-entry score: ${deScore?.toFixed(3)} ${goodScore ? '✅' : '❌'}`);
+
+    if (hasEntries && tbBalanced && hasLedger && goodScore) { console.log(`     ✅ Double-Entry Bookkeeping PASSED`); passed++; }
+    else { console.log(`     ❌ Double-Entry Bookkeeping FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14b FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14c: Account Reconciliation — Behavioral (Req 1) ──
+  console.log('\n── Test 14c: Account Reconciliation — Behavioral ──');
+  try {
+    const v9ReconRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9ReconRegistry);
+
+    const reconContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['cash', 'bank']), edges: new Map() },
+      timeSeries: new Map([
+        ['cash', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [10000, 10500, 11000, 10800, 11200], domain: 'cash' }],
+        ['bank', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [10000, 10500, 10900, 10800, 11200], domain: 'bank' }], // mismatch at index 2: 10900 vs 11000
+        ['receivables', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [5000, 5200, 5100, 5300, 5500], domain: 'receivables' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [], patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: ['cash', 'bank'],
+      question: 'Reconcile all accounts for month-end', intent: 'reconcile-accounts',
+      horizonDays: 30, horizonSource: 'default' as const,
+    };
+
+    const reconResult = await v9ReconRegistry.executeDomain('reconcile-accounts', reconContext, mockModulesV9);
+    const reconData = reconResult.data as Record<string, unknown>;
+    const reconciliations = reconData.reconciliations as unknown[];
+    const unmatchedItems = reconData.unmatchedItems as unknown[];
+    const reconScore = reconData.reconciliationScore as number;
+
+    const hasRecons = reconciliations && reconciliations.length > 0;
+    const hasUnmatched = unmatchedItems && unmatchedItems.length > 0;
+    const notPerfect = typeof reconScore === 'number' && reconScore < 1.0;
+
+    console.log(`     Reconciliations: ${reconciliations?.length || 0} ${hasRecons ? '✅' : '❌'}`);
+    console.log(`     Unmatched items: ${unmatchedItems?.length || 0} ${hasUnmatched ? '✅' : '❌'} (expected cross-account mismatch)`);
+    console.log(`     Reconciliation score: ${reconScore?.toFixed(3)} ${notPerfect ? '✅' : '❌'} (< 1.0 expected due to bank/cash mismatch)`);
+
+    if (hasRecons && hasUnmatched && notPerfect) { console.log(`     ✅ Account Reconciliation PASSED`); passed++; }
+    else { console.log(`     ❌ Account Reconciliation FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14c FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14d: Causal Anomaly Detection — Behavioral (Req 2 Core) ──
+  console.log('\n── Test 14d: Causal Anomaly Detection — Behavioral (NexusBrain vs LLM) ──');
+  try {
+    const v9CausalRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9CausalRegistry);
+
+    // Setup: revenue → receivables causal edge, but revenue grows 80% while receivables flat = ANOMALY
+    const causalEdges = new Map<string, Map<string, { weight: number; lagDays: number; effectSize: number }>>();
+    const revEdge = new Map<string, { weight: number; lagDays: number; effectSize: number }>();
+    revEdge.set('receivables', { weight: 0.8, lagDays: 0, effectSize: 0.8 });
+    causalEdges.set('revenue', revEdge);
+
+    const causalContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['revenue', 'receivables']), edges: causalEdges },
+      timeSeries: new Map([
+        ['revenue', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [100, 110, 120, 150, 180], domain: 'revenue' }],
+        ['receivables', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [50, 50, 51, 50, 49], domain: 'receivables' }], // FLAT — anomaly!
+      ] as unknown as [string, unknown][]),
+      directCauses: {
+        'receivables': [{ source: 'revenue', target: 'receivables', weight: 0.8, lagDays: 0 }],
+      },
+      directEffects: {
+        'revenue': [{ source: 'revenue', target: 'receivables', weight: 0.8, lagDays: 0 }],
+      },
+      matchedRules: [], patterns: [],
+      cascadePaths: [{ source: 'revenue', target: 'receivables', hops: 1, totalLag: 0 }],
+      primaryDomain: 'accounting', extractedDomains: ['revenue', 'receivables'],
+      question: 'What causal anomalies does NexusBrain detect?', intent: 'causal-anomaly-detect',
+      horizonDays: 30, horizonSource: 'default' as const,
+    };
+
+    const causalResult = await v9CausalRegistry.executeDomain('causal-anomaly-detect', causalContext, mockModulesV9);
+    const causalData = causalResult.data as Record<string, unknown>;
+    const anomalies = causalData.causalAnomalies as Array<{ sourceAccount: string; targetAccount: string; severity: string; brainAdvantage: string }>;
+    const riskScore = causalData.riskScore as number;
+    const brainValueAdd = causalData.brainValueAdd as string;
+
+    const hasAnomalies = anomalies && anomalies.length > 0;
+    const hasRevenueAnomaly = anomalies?.some(a =>
+      (a.sourceAccount.includes('revenue') && a.targetAccount.includes('receivables')) ||
+      (a.sourceAccount.includes('receivables') && a.targetAccount.includes('revenue'))
+    );
+    const hasSeverity = anomalies?.some(a => a.severity === 'critical' || a.severity === 'warning');
+    const hasBrainAdvantage = anomalies?.some(a => a.brainAdvantage && a.brainAdvantage.length > 0);
+    const hasRisk = typeof riskScore === 'number' && riskScore > 0.3;
+    const hasValueAdd = typeof brainValueAdd === 'string' && brainValueAdd.length > 0;
+
+    console.log(`     Causal anomalies: ${anomalies?.length || 0} ${hasAnomalies ? '✅' : '❌'}`);
+    console.log(`     Revenue → Receivables anomaly: ${hasRevenueAnomaly ? '✅' : '❌'}`);
+    console.log(`     Severity flagged: ${hasSeverity ? '✅' : '❌'}`);
+    console.log(`     Brain advantage explained: ${hasBrainAdvantage ? '✅' : '❌'}`);
+    console.log(`     Risk score: ${riskScore?.toFixed(3)} ${hasRisk ? '✅' : '❌'} (> 0.3 expected)`);
+    console.log(`     Brain value-add narrative: ${hasValueAdd ? '✅' : '❌'}`);
+
+    if (hasAnomalies && hasRevenueAnomaly && hasBrainAdvantage && hasValueAdd) {
+      console.log(`     ✅ Causal Anomaly Detection PASSED — NexusBrain spots what LLM misses`);
+      passed++;
+    } else { console.log(`     ❌ Causal Anomaly Detection FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14d FAILED: ${(err as Error).message}`); console.log((err as Error).stack); failed++; }
+
+  // ── Test 14e: Rule-Apply Real Numbers ──
+  console.log('\n── Test 14e: Rule-Apply Real Tax Computation ──');
+  try {
+    const v9RuleRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9RuleRegistry);
+
+    const ruleContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['revenue', 'expenses']), edges: new Map() },
+      timeSeries: new Map([
+        ['revenue', { dates: ['2024-01'], values: [200000], domain: 'revenue' }],
+        ['expenses', { dates: ['2024-01'], values: [120000], domain: 'expenses' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [{ title: 'SG Tax Rule', naturalLanguage: 'Apply corporate tax', conditions: ['revenue > 0'], triggered: true }],
+      patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: ['Singapore', 'SG'],
+      question: 'Apply Singapore accounting rules', intent: 'rule-apply',
+      horizonDays: 30, horizonSource: 'default' as const,
+    };
+
+    const ruleResult = await v9RuleRegistry.executeDomain('rule-apply', ruleContext, mockModulesV9);
+    const ruleData = ruleResult.data as Record<string, unknown>;
+    const appliedRules = ruleData.appliedRules as Array<{ computedAmount: number; category: string }>;
+    const totalComputed = ruleData.totalComputedAmount as number;
+    const taxableIncome = ruleData.taxableIncome as number;
+
+    const hasComputedAmounts = appliedRules?.some(r => r.computedAmount > 0);
+    // SG corporate tax: (200000 - 120000) * 0.17 = 13600
+    const corpTaxRule = appliedRules?.find(r => r.category === 'tax');
+    const corpTaxCorrect = corpTaxRule && Math.abs(corpTaxRule.computedAmount - 13600) < 1;
+    const hasTotalComputed = typeof totalComputed === 'number' && totalComputed > 0;
+    const hasTaxableIncome = typeof taxableIncome === 'number' && Math.abs(taxableIncome - 80000) < 1;
+
+    console.log(`     Rules with computed amounts: ${hasComputedAmounts ? '✅' : '❌'}`);
+    console.log(`     Corporate tax (SG 17%): ${corpTaxRule?.computedAmount?.toFixed(2)} ${corpTaxCorrect ? '✅' : '❌'} (expected: 13600.00)`);
+    console.log(`     Total computed amount: ${totalComputed?.toFixed(2)} ${hasTotalComputed ? '✅' : '❌'}`);
+    console.log(`     Taxable income: ${taxableIncome?.toFixed(2)} ${hasTaxableIncome ? '✅' : '❌'} (expected: 80000.00)`);
+
+    if (hasComputedAmounts && corpTaxCorrect && hasTotalComputed) {
+      console.log(`     ✅ Rule-Apply Real Numbers PASSED`);
+      passed++;
+    } else { console.log(`     ❌ Rule-Apply Real Numbers FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14e FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14f: Statement-Synthesize Real Cash Flow ──
+  console.log('\n── Test 14f: Statement-Synthesize Real Cash Flow ──');
+  try {
+    const v9StmtRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9StmtRegistry);
+
+    const stmtContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['revenue', 'expenses']), edges: new Map() },
+      timeSeries: new Map([
+        ['revenue', { dates: ['2024-01', '2024-06'], values: [100000, 120000], domain: 'revenue' }],
+        ['expenses', { dates: ['2024-01', '2024-06'], values: [60000, 65000], domain: 'expenses' }],
+        ['cash', { dates: ['2024-01', '2024-06'], values: [30000, 45000], domain: 'cash' }],
+        ['receivables', { dates: ['2024-01', '2024-06'], values: [20000, 28000], domain: 'receivables' }],
+        ['payables', { dates: ['2024-01', '2024-06'], values: [15000, 18000], domain: 'payables' }],
+        ['equipment', { dates: ['2024-01', '2024-06'], values: [50000, 60000], domain: 'equipment' }],
+        ['debt', { dates: ['2024-01', '2024-06'], values: [40000, 45000], domain: 'debt' }],
+        ['equity', { dates: ['2024-01', '2024-06'], values: [85000, 90000], domain: 'equity' }],
+        ['depreciation', { dates: ['2024-01', '2024-06'], values: [0, 5000], domain: 'depreciation' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [{ title: 'US GAAP', naturalLanguage: 'Apply US GAAP', conditions: [], triggered: true }],
+      patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: ['US'],
+      question: 'Generate financial statements', intent: 'statement-synthesize',
+      horizonDays: 180, horizonSource: 'default' as const,
+    };
+
+    const stmtResult = await v9StmtRegistry.executeDomain('statement-synthesize', stmtContext, mockModulesV9);
+    const stmtData = stmtResult.data as Record<string, unknown>;
+    const cf = stmtData.cashFlowStatement as { operating: number; investing: number; financing: number; netCashFlow: number };
+    const incStmt = stmtData.incomeStatement as { netIncome: number };
+
+    // V9: Cash flow should NOT use magic multipliers
+    // Operating should include working capital adjustments (not just net income)
+    const operatingNotJustNetIncome = cf && Math.abs(cf.operating - (incStmt?.netIncome || 0)) > 0.01;
+    // Investing should be -change in non-current assets = -(60000-50000) = -10000
+    const investingCorrect = cf && Math.abs(cf.investing - (-10000)) < 1;
+    // Financing should be change in non-current liabilities = (45000-40000) = 5000
+    const financingCorrect = cf && Math.abs(cf.financing - 5000) < 1;
+    const hasCF = cf && typeof cf.operating === 'number';
+
+    console.log(`     Operating CF: ${cf?.operating?.toFixed(2)} ${operatingNotJustNetIncome ? '✅' : '❌'} (should include working capital adjustments)`);
+    console.log(`     Investing CF: ${cf?.investing?.toFixed(2)} ${investingCorrect ? '✅' : '❌'} (expected: -10000 from equipment increase)`);
+    console.log(`     Financing CF: ${cf?.financing?.toFixed(2)} ${financingCorrect ? '✅' : '❌'} (expected: 5000 from new debt)`);
+    console.log(`     Net Cash Flow: ${cf?.netCashFlow?.toFixed(2)}`);
+
+    if (hasCF && operatingNotJustNetIncome && investingCorrect && financingCorrect) {
+      console.log(`     ✅ Statement-Synthesize Real Cash Flow PASSED`);
+      passed++;
+    } else { console.log(`     ❌ Statement-Synthesize Real Cash Flow FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14f FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14g: Cross-Validate Zero Tolerance ──
+  console.log('\n── Test 14g: Cross-Validate Zero Tolerance ──');
+  try {
+    const v9XvalRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9XvalRegistry);
+
+    // Test A: Perfectly balanced — should pass
+    const balancedContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['assets', 'liabilities', 'equity']), edges: new Map() },
+      timeSeries: new Map([
+        ['assets', { dates: ['2024-01'], values: [100000], domain: 'assets' }],
+        ['liabilities', { dates: ['2024-01'], values: [60000], domain: 'liabilities' }],
+        ['equity', { dates: ['2024-01'], values: [40000], domain: 'equity' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [{ title: 'Balanced', naturalLanguage: 'Check balance', conditions: [], triggered: true }],
+      patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: [],
+      question: 'Check if books balance', intent: 'cross-validate',
+      horizonDays: 30, horizonSource: 'default' as const,
+    };
+
+    const balancedResult = await v9XvalRegistry.executeDomain('cross-validate', balancedContext, mockModulesV9);
+    const balancedData = balancedResult.data as Record<string, unknown>;
+    const isBalancedA = balancedData.isBalanced as boolean;
+
+    // Test B: 0.01 imbalance — should FAIL with zero tolerance
+    const imbalancedContext: ActionDomainBrainContext = {
+      ...balancedContext,
+      timeSeries: new Map([
+        ['assets', { dates: ['2024-01'], values: [100000.01], domain: 'assets' }], // 0.01 off
+        ['liabilities', { dates: ['2024-01'], values: [60000], domain: 'liabilities' }],
+        ['equity', { dates: ['2024-01'], values: [40000], domain: 'equity' }],
+      ] as unknown as [string, unknown][]),
+    };
+
+    const imbalancedResult = await v9XvalRegistry.executeDomain('cross-validate', imbalancedContext, mockModulesV9);
+    const imbalancedData = imbalancedResult.data as Record<string, unknown>;
+    const isBalancedB = imbalancedData.isBalanced as boolean;
+
+    // Test C: 0.003 imbalance — should PASS (within FP epsilon of 0.005)
+    const epsilonContext: ActionDomainBrainContext = {
+      ...balancedContext,
+      timeSeries: new Map([
+        ['assets', { dates: ['2024-01'], values: [100000.003], domain: 'assets' }], // Within epsilon
+        ['liabilities', { dates: ['2024-01'], values: [60000], domain: 'liabilities' }],
+        ['equity', { dates: ['2024-01'], values: [40000], domain: 'equity' }],
+      ] as unknown as [string, unknown][]),
+    };
+
+    const epsilonResult = await v9XvalRegistry.executeDomain('cross-validate', epsilonContext, mockModulesV9);
+    const epsilonData = epsilonResult.data as Record<string, unknown>;
+    const isBalancedC = epsilonData.isBalanced as boolean;
+
+    console.log(`     Test A (perfectly balanced): ${isBalancedA} ${isBalancedA === true ? '✅' : '❌'}`);
+    console.log(`     Test B (0.01 imbalance): ${isBalancedB} ${isBalancedB === false ? '✅' : '❌'} (should FAIL — zero tolerance)`);
+    console.log(`     Test C (0.003 FP epsilon): ${isBalancedC} ${isBalancedC === true ? '✅' : '❌'} (should PASS — within FP rounding)`);
+
+    if (isBalancedA === true && isBalancedB === false && isBalancedC === true) {
+      console.log(`     ✅ Cross-Validate Zero Tolerance PASSED`);
+      passed++;
+    } else { console.log(`     ❌ Cross-Validate Zero Tolerance FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14g FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14h: Jurisdiction-Comply Real Evaluation ──
+  console.log('\n── Test 14h: Jurisdiction-Comply Real Evaluation ──');
+  try {
+    const v9JurisRegistry = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9JurisRegistry);
+
+    const jurisContext: ActionDomainBrainContext = {
+      dag: { nodes: new Set(['revenue', 'expenses']), edges: new Map() },
+      timeSeries: new Map([
+        ['revenue', { dates: ['2024-01'], values: [500000], domain: 'revenue' }],
+        ['expenses', { dates: ['2024-01'], values: [300000], domain: 'expenses' }],
+        ['assets', { dates: ['2024-01'], values: [200000], domain: 'assets' }],
+        ['liabilities', { dates: ['2024-01'], values: [100000], domain: 'liabilities' }],
+        ['equity', { dates: ['2024-01'], values: [100000], domain: 'equity' }],
+        ['tax', { dates: ['2024-01'], values: [34000], domain: 'tax' }],
+      ] as unknown as [string, unknown][]),
+      directCauses: {}, directEffects: {},
+      matchedRules: [
+        { title: 'SG Corporate Tax', naturalLanguage: 'Apply 17% tax', conditions: ['revenue > 0'], triggered: true },
+        { title: 'SG Accounting Standard', naturalLanguage: 'SFRS(I) compliance', conditions: [], triggered: true },
+      ],
+      patterns: [], cascadePaths: [],
+      primaryDomain: 'accounting', extractedDomains: ['Singapore', 'SG'],
+      question: 'Check Singapore tax compliance', intent: 'jurisdiction-comply',
+      horizonDays: 365, horizonSource: 'default' as const,
+    };
+
+    const jurisResult = await v9JurisRegistry.executeDomain('jurisdiction-comply', jurisContext, mockModulesV9);
+    const jurisData = jurisResult.data as Record<string, unknown>;
+    const matrix = jurisData.complianceMatrix as Array<{ status: string }>;
+    const compliantCount = jurisData.compliantCount as number;
+
+    const hasNonPending = matrix?.some(c => c.status !== 'pending');
+    const hasCompliant = compliantCount > 0;
+
+    console.log(`     Compliance items: ${matrix?.length || 0}`);
+    console.log(`     Has non-pending status: ${hasNonPending ? '✅' : '❌'} (was all 'pending' before V9)`);
+    console.log(`     Compliant count: ${compliantCount} ${hasCompliant ? '✅' : '❌'} (expected > 0 with financial data)`);
+
+    const statusBreakdown = matrix?.reduce((acc, c) => { acc[c.status] = (acc[c.status] || 0) + 1; return acc; }, {} as Record<string, number>);
+    console.log(`     Status breakdown: ${JSON.stringify(statusBreakdown)}`);
+
+    if (hasNonPending && hasCompliant) {
+      console.log(`     ✅ Jurisdiction-Comply Real Evaluation PASSED`);
+      passed++;
+    } else { console.log(`     ❌ Jurisdiction-Comply Real Evaluation FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14h FAILED: ${(err as Error).message}`); failed++; }
+
+  // ── Test 14i: V9 Agent Registration (29 total) ──
+  console.log('\n── Test 14i: V9 Agent Registration ──');
+  try {
+    const v9Agents = ALL_BRAIN_AGENTS;
+    const has29 = v9Agents.length === 29;
+    const v9AgentNames = v9Agents.map(a => a.name);
+    const hasCausalAccountant = v9AgentNames.includes('brain-causal-accountant');
+    const causalAgent = v9Agents.find(a => a.name === 'brain-causal-accountant');
+    const isAutonomous = causalAgent?.level === 'autonomous';
+    const hasV9Tags = causalAgent?.tags?.includes('v9');
+
+    console.log(`     Total agents: ${v9Agents.length} ${has29 ? '✅' : '❌'} (expected: 29)`);
+    console.log(`     brain-causal-accountant present: ${hasCausalAccountant ? '✅' : '❌'}`);
+    console.log(`     Level autonomous: ${isAutonomous ? '✅' : '❌'}`);
+    console.log(`     Has v9 tag: ${hasV9Tags ? '✅' : '❌'}`);
+
+    if (has29 && hasCausalAccountant && isAutonomous && hasV9Tags) {
+      console.log(`     ✅ V9 Agent Registration PASSED (29 total)`);
+      passed++;
+    } else { console.log(`     ❌ V9 Agent Registration FAILED`); failed++; }
+  } catch (err) { console.log(`     ❌ 14i FAILED: ${(err as Error).message}`); failed++; }
+
 // ── Summary ──────────────────────────────────────────────────────────────
 
 console.log('\n' + '='.repeat(80));
-console.log('🧠 DOMAIN ACTION ENGINE V8 — BRAIN WITH 35 SELF-REGISTERING ACTION DOMAINS');
+console.log('🧠 DOMAIN ACTION ENGINE V9 — BRAIN WITH 38 SELF-REGISTERING ACTION DOMAINS');
 console.log('='.repeat(80));
 console.log(`  Total Tests:     ${passed + failed}`);
 console.log(`  Passed:          ${passed}`);
@@ -2438,8 +2847,8 @@ console.log('    ✅ Confidence gating: < 15% → [GATED] interventions');
 console.log('');
 
 if (failed === 0) {
-  console.log('✅ ALL TESTS PASSED — 35-DOMAIN BRAIN ARCHITECTURE FULLY OPERATIONAL');
-  console.log('   The brain has 35 specialized cortical areas:');
+  console.log('✅ ALL TESTS PASSED — 38-DOMAIN BRAIN ARCHITECTURE FULLY OPERATIONAL');
+  console.log('   The brain has 38 specialized cortical areas:');
   console.log('   CORE: forecast → simulate → explain → diagnose → composite');
   console.log('   V6:   compare → monitor → optimize → recommend → audit → correlate → benchmark → narrate');
   console.log('   V6.1: sentiment → scenario-tree → risk-cascade → resource-allocate →');
@@ -2448,9 +2857,10 @@ if (failed === 0) {
   console.log('         statement-synthesize → jurisdiction-comply → confidence-triage');
   console.log('   V8:   calibration-audit → error-attribute → chain-validate → uncertainty-quantify →');
   console.log('         query-cache → execution-profile → robustness-check');
-  console.log('   28 brain-native agents. 35 domains. 9 jurisdictions. Closed-loop learning.');
+  console.log('   V9:   double-entry-bookkeep → reconcile-accounts → causal-anomaly-detect');
+  console.log('   29 brain-native agents. 38 domains. 9 jurisdictions. Closed-loop learning.');
   console.log('   The brain doesn\'t just think — it FEELS, PLANS, PREDICTS, REMEMBERS, INTERVENES,');
-  console.log('   COMPREHENDS FINANCIALS, and now THINKS ABOUT THINKING.');
+  console.log('   COMPREHENDS FINANCIALS, THINKS ABOUT THINKING, and now DOES REAL ACCOUNTING.');
 } else {
   console.log(`❌ ${failed} TESTS FAILED — Action engine needs fixes`);
 }

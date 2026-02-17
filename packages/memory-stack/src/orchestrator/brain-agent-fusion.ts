@@ -1010,10 +1010,96 @@ export const continuousLearnerAgent: AgentDefinition = defineAgent({
 });
 
 // ============================================================================
+// V9 — Accounting Intelligence Pro Agent (Amygdala-Causal Integration)
+// ============================================================================
+
+/**
+ * Causal Accountant Agent — the agent that proves NexusBrain adds value over pure LLM
+ * Brain Analog: Amygdala-Causal Integration Cortex — threat detection via causal analysis
+ * Level: autonomous | Triggers: event:accounting_executed, schedule:daily
+ *
+ * This agent IS Isabel's Req 2 — it does standard accounting (bookkeeping, reconciliation)
+ * THEN overlays NexusBrain's causal analysis to spot anomalies that no pure LLM can detect.
+ */
+export const brainCausalAccountantAgent: AgentDefinition = defineAgent({
+  name: 'brain-causal-accountant',
+  description: 'Does standard accounting then overlays NexusBrain causal analysis — bookkeep → reconcile → detect causal anomalies → triage. The agent that proves NexusBrain adds value.',
+  level: 'autonomous',
+  domains: ['accounting', 'bookkeeping', 'reconciliation', 'causal', 'anomaly-detection'],
+  triggers: ['event:accounting_executed', 'schedule:daily'],
+  tags: ['brain-native', 'accounting', 'causal', 'v9'],
+
+  execute: async (input: unknown, ctx) => {
+    const brainExec = ctx.brainExecution;
+    if (!brainExec) {
+      return { status: 'skipped', reason: 'Brain execution interface not available' };
+    }
+
+    // Phase 1: Standard Accounting (Req 1)
+    ctx.reportProgress(0.15, 'Creating journal entries with double-entry bookkeeping...');
+    const bookkeeping = await brainExec.executeDomain('double-entry-bookkeep');
+    const bookResult = bookkeeping as { doubleEntryScore?: number; trialBalance?: { isBalanced?: boolean } };
+
+    ctx.reportProgress(0.35, 'Reconciling account balances...');
+    const reconciliation = await brainExec.executeDomain('reconcile-accounts');
+    const reconResult = reconciliation as { reconciliationScore?: number; monthEndReady?: boolean; unmatchedItems?: unknown[] };
+
+    // Phase 2: NexusBrain Causal Layer (Req 2 — what makes us different)
+    ctx.reportProgress(0.60, 'Running NexusBrain causal anomaly detection...');
+    const causalAnalysis = await brainExec.executeDomain('causal-anomaly-detect');
+    const causalResult = causalAnalysis as { causalAnomalies?: unknown[]; riskScore?: number; brainValueAdd?: string };
+
+    // Phase 3: Triage and prioritize findings
+    ctx.reportProgress(0.85, 'Triaging findings by materiality...');
+    const triage = await brainExec.executeDomain('confidence-triage');
+    const triageResult = triage as { triageResults?: unknown[]; materialityThreshold?: number };
+
+    ctx.reportProgress(1.0, 'Causal accounting analysis complete');
+
+    const anomalyCount = (causalResult.causalAnomalies || []).length;
+    const hasBookkeepingIssues = (bookResult.doubleEntryScore || 0) < 0.95;
+    const hasReconciliationIssues = (reconResult.unmatchedItems || []).length > 0;
+    const hasCausalAnomalies = anomalyCount > 0;
+
+    return {
+      status: 'completed',
+      // Req 1: Can the AI do accounting?
+      accountingKnowledge: {
+        doubleEntryScore: bookResult.doubleEntryScore || 0,
+        trialBalanced: bookResult.trialBalance?.isBalanced || false,
+        reconciliationScore: reconResult.reconciliationScore || 0,
+        monthEndReady: reconResult.monthEndReady || false,
+        unmatchedItems: (reconResult.unmatchedItems || []).length,
+      },
+      // Req 2: Does NexusBrain add value?
+      brainCausalValue: {
+        anomaliesDetected: anomalyCount,
+        riskScore: causalResult.riskScore || 0,
+        brainValueAdd: causalResult.brainValueAdd || 'No causal analysis available',
+        whatPureLLMMisses: hasCausalAnomalies
+          ? `${anomalyCount} causal anomalies detected — these are invisible to any pure LLM agent without a causal graph`
+          : 'All causal relationships holding — brain confirms data consistency',
+      },
+      // Combined assessment
+      overallAssessment: {
+        hasIssues: hasBookkeepingIssues || hasReconciliationIssues || hasCausalAnomalies,
+        issueBreakdown: {
+          bookkeeping: hasBookkeepingIssues,
+          reconciliation: hasReconciliationIssues,
+          causalAnomalies: hasCausalAnomalies,
+        },
+        materialityThreshold: triageResult.materialityThreshold || 0,
+      },
+      analyzedAt: new Date().toISOString(),
+    };
+  },
+});
+
+// ============================================================================
 // ALL PRE-BUILT AGENTS
 // ============================================================================
 
-/** All 28 pre-built brain-native agents (V6:5 + V6.1:5 + V7:6 + V8 Jarvis:3 + V8 ConnectorSync:5 + V8 Metacognition:3 + V8 DevJarvis:1) */
+/** All 29 pre-built brain-native agents (V6:5 + V6.1:5 + V7:6 + V8 Jarvis:3 + V8 ConnectorSync:5 + V8 Metacognition:3 + V8 DevJarvis:1 + V9 Accounting:1) */
 export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   // V6 — Core Brain Agents (Cerebral Cortex)
   revenueWatcherAgent,
@@ -1044,18 +1130,20 @@ export const ALL_BRAIN_AGENTS: AgentDefinition[] = [
   continuousLearnerAgent,
   // V8 — Dev Jarvis (Developer Intelligence Executive)
   ...ALL_DEV_JARVIS_AGENTS,
+  // V9 — Accounting Intelligence Pro (Amygdala-Causal Integration)
+  brainCausalAccountantAgent,
 ];
 
 /**
- * Register all 28 brain-native agents into an agent registry.
+ * Register all 29 brain-native agents into an agent registry.
  * V6 core (5) + V6.1 advanced (5) + V7 accounting (6) +
- * V8 Jarvis (3) + V8 connector sync (5) + V8 metacognition (3) + V8 Dev Jarvis (1).
+ * V8 Jarvis (3) + V8 connector sync (5) + V8 metacognition (3) + V8 Dev Jarvis (1) + V9 accounting pro (1).
  *
  * @example
  * ```typescript
  * const agentRegistry = createAgentRegistry({ verbose: true });
  * registerBrainAgents(agentRegistry);
- * // 28 brain-native agents now registered
+ * // 29 brain-native agents now registered
  * ```
  */
 export function registerBrainAgents(

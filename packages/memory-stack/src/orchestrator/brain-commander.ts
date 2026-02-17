@@ -525,18 +525,33 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         timing.calibration = performance.now() - calibrationStart;
       }
 
-      // ── Step 5b: Quality Gate (V8 Metacognition, optional) ──────────
+      // ── Step 5b: Quality Gate (V8/V9 Metacognition, optional) ────────
+      // V9: Enhanced quality gate — checks confidence, driver diversity, narrative quality, and intervention coverage
+      // Future: wire to chain-validate + robustness-check domains via action engine dependency injection
       let qualityGate: { qualityScore: number; passesGate: boolean } | undefined;
       if (config.enableQualityGate && artifact) {
         const qgStart = performance.now();
         try {
-          // Run chain-validate + uncertainty-quantify + robustness-check via the quality gate agent pattern
-          // Lightweight inline quality gate: check artifact confidence and driver consistency
           const artConf = (artifact as { confidence?: number }).confidence;
-          const artDrivers = (artifact as { drivers?: unknown[] }).drivers;
+          const artDrivers = (artifact as { drivers?: Array<{ domain: string; weight: number }> }).drivers;
+          const artNarrative = (artifact as { narrative?: string }).narrative;
+          const artInterventions = (artifact as { interventions?: unknown[] }).interventions;
+
+          // 1. Confidence score (0-1)
           const confScore = typeof artConf === 'number' ? artConf : 0.5;
-          const driverScore = Array.isArray(artDrivers) && artDrivers.length > 0 ? Math.min(1, artDrivers.length / 5) : 0.3;
-          const qualityScore = Math.round((confScore * 0.6 + driverScore * 0.4) * 1000) / 1000;
+
+          // 2. Driver diversity — more unique domains = better supported conclusion
+          const uniqueDriverDomains = Array.isArray(artDrivers) ? new Set(artDrivers.map(d => d.domain)).size : 0;
+          const driverScore = Math.min(1, uniqueDriverDomains / 3); // 3+ unique driver domains = max score
+
+          // 3. Narrative substance — longer, more detailed narrative = better explained
+          const narrativeLen = typeof artNarrative === 'string' ? artNarrative.length : 0;
+          const narrativeScore = Math.min(1, narrativeLen / 200); // 200+ chars = max
+
+          // 4. Intervention coverage — actionable results are higher quality
+          const interventionScore = Array.isArray(artInterventions) && artInterventions.length > 0 ? Math.min(1, artInterventions.length / 2) : 0.2;
+
+          const qualityScore = Math.round((confScore * 0.4 + driverScore * 0.25 + narrativeScore * 0.15 + interventionScore * 0.2) * 1000) / 1000;
           qualityGate = { qualityScore, passesGate: qualityScore >= 0.6 };
         } catch (qgErr) {
           console.warn('[BrainCommander] Quality gate error (non-fatal):', qgErr instanceof Error ? qgErr.message : qgErr);

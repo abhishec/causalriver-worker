@@ -102,6 +102,10 @@ export type SemanticIntent =
   | 'query-cache'          // Working memory buffer stats
   | 'execution-profile'    // Performance self-observation
   | 'robustness-check'    // Perturbation sensitivity analysis
+  // V9 — Accounting Intelligence Pro (Isabel Reqs)
+  | 'double-entry-bookkeep'   // Journal entry formation, debit-credit pairing
+  | 'reconcile-accounts'      // Account reconciliation, matching, balance verification
+  | 'causal-anomaly-detect'   // Causal relationship violation detection in financial data
   // V9 — P1 Gap Closure (SE-aaS expansion)
   | 'dependency-upgrade'   // Outdated dependency + security analysis
   | 'design-doc-generate'  // HLD/LLD document generation
@@ -232,6 +236,8 @@ export interface ActionDomainExecutionContext {
   executionId: string;
   /** Abort signal for cancellation */
   abortSignal?: AbortSignal;
+  /** V9: Results from upstream domains in composition pipeline — enables inter-domain data flow */
+  parentResults: Map<string, ActionDomainResult>;
 }
 
 /** Result from executing an action domain */
@@ -826,6 +832,7 @@ export function createActionDomainRegistry(config: ActionDomainRegistryConfig = 
       },
       depth,
       executionId,
+      parentResults,
     };
 
     try {
