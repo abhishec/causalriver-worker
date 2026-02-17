@@ -2407,7 +2407,7 @@ for (const tc of v4TestCases) {
       dag: { nodes: new Set(['cash', 'bank']), edges: new Map() },
       timeSeries: new Map([
         ['cash', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [10000, 10500, 11000, 10800, 11200], domain: 'cash' }],
-        ['bank', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [10000, 10500, 10900, 10800, 11200], domain: 'bank' }], // mismatch at index 2: 10900 vs 11000
+        ['bank', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [10000, 10500, 10900, 10800, 11100], domain: 'bank' }], // ending 11100 vs cash 11200 = 100 cross-account mismatch
         ['receivables', { dates: ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'], values: [5000, 5200, 5100, 5300, 5500], domain: 'receivables' }],
       ] as unknown as [string, unknown][]),
       directCauses: {}, directEffects: {},
@@ -2552,10 +2552,10 @@ for (const tc of v4TestCases) {
         ['expenses', { dates: ['2024-01', '2024-06'], values: [60000, 65000], domain: 'expenses' }],
         ['cash', { dates: ['2024-01', '2024-06'], values: [30000, 45000], domain: 'cash' }],
         ['receivables', { dates: ['2024-01', '2024-06'], values: [20000, 28000], domain: 'receivables' }],
-        ['payables', { dates: ['2024-01', '2024-06'], values: [15000, 18000], domain: 'payables' }],
+        ['payables', { dates: ['2024-01', '2024-06'], values: [15000, 22000], domain: 'payables' }], // +7000 increase (source of cash)
         ['equipment', { dates: ['2024-01', '2024-06'], values: [50000, 60000], domain: 'equipment' }],
         ['debt', { dates: ['2024-01', '2024-06'], values: [40000, 45000], domain: 'debt' }],
-        ['equity', { dates: ['2024-01', '2024-06'], values: [85000, 90000], domain: 'equity' }],
+        ['equity', { dates: ['2024-01', '2024-06'], values: [85000, 85000], domain: 'equity' }], // no equity change
         ['depreciation', { dates: ['2024-01', '2024-06'], values: [0, 5000], domain: 'depreciation' }],
       ] as unknown as [string, unknown][]),
       directCauses: {}, directEffects: {},
@@ -2573,14 +2573,15 @@ for (const tc of v4TestCases) {
 
     // V9: Cash flow should NOT use magic multipliers
     // Operating should include working capital adjustments (not just net income)
+    // Expected: 39500 (net income after tax) + 5000 (depreciation) + 7000 (payables ↑) - 8000 (receivables ↑) = 43500
     const operatingNotJustNetIncome = cf && Math.abs(cf.operating - (incStmt?.netIncome || 0)) > 0.01;
     // Investing should be -change in non-current assets = -(60000-50000) = -10000
     const investingCorrect = cf && Math.abs(cf.investing - (-10000)) < 1;
-    // Financing should be change in non-current liabilities = (45000-40000) = 5000
+    // Financing should be change in non-current liabilities + equity = (45000-40000) + 0 = 5000
     const financingCorrect = cf && Math.abs(cf.financing - 5000) < 1;
     const hasCF = cf && typeof cf.operating === 'number';
 
-    console.log(`     Operating CF: ${cf?.operating?.toFixed(2)} ${operatingNotJustNetIncome ? '✅' : '❌'} (should include working capital adjustments)`);
+    console.log(`     Operating CF: ${cf?.operating?.toFixed(2)} ${operatingNotJustNetIncome ? '✅' : '❌'} (should include working capital adjustments, ≠ net income ${incStmt?.netIncome?.toFixed(2)})`);
     console.log(`     Investing CF: ${cf?.investing?.toFixed(2)} ${investingCorrect ? '✅' : '❌'} (expected: -10000 from equipment increase)`);
     console.log(`     Financing CF: ${cf?.financing?.toFixed(2)} ${financingCorrect ? '✅' : '❌'} (expected: 5000 from new debt)`);
     console.log(`     Net Cash Flow: ${cf?.netCashFlow?.toFixed(2)}`);
@@ -2618,6 +2619,9 @@ for (const tc of v4TestCases) {
     const isBalancedA = balancedData.isBalanced as boolean;
 
     // Test B: 0.01 imbalance — should FAIL with zero tolerance
+    // Use fresh registry to avoid query cache hit from Test A (same domain+question = same cache key)
+    const v9XvalRegistryB = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9XvalRegistryB);
     const imbalancedContext: ActionDomainBrainContext = {
       ...balancedContext,
       timeSeries: new Map([
@@ -2627,11 +2631,14 @@ for (const tc of v4TestCases) {
       ] as unknown as [string, unknown][]),
     };
 
-    const imbalancedResult = await v9XvalRegistry.executeDomain('cross-validate', imbalancedContext, mockModulesV9);
+    const imbalancedResult = await v9XvalRegistryB.executeDomain('cross-validate', imbalancedContext, mockModulesV9);
     const imbalancedData = imbalancedResult.data as Record<string, unknown>;
     const isBalancedB = imbalancedData.isBalanced as boolean;
 
     // Test C: 0.003 imbalance — should PASS (within FP epsilon of 0.005)
+    // Use fresh registry to avoid query cache hit
+    const v9XvalRegistryC = createActionDomainRegistry({ verbose: false });
+    registerAllActionDomains(v9XvalRegistryC);
     const epsilonContext: ActionDomainBrainContext = {
       ...balancedContext,
       timeSeries: new Map([
@@ -2641,7 +2648,7 @@ for (const tc of v4TestCases) {
       ] as unknown as [string, unknown][]),
     };
 
-    const epsilonResult = await v9XvalRegistry.executeDomain('cross-validate', epsilonContext, mockModulesV9);
+    const epsilonResult = await v9XvalRegistryC.executeDomain('cross-validate', epsilonContext, mockModulesV9);
     const epsilonData = epsilonResult.data as Record<string, unknown>;
     const isBalancedC = epsilonData.isBalanced as boolean;
 

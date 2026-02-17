@@ -6246,9 +6246,13 @@ export const reconcileAccountsDomain: ActionDomainDefinition = defineActionDomai
       }
     }
 
-    // Compute reconciliation score
+    // Compute reconciliation score — factors in both per-account AND cross-account reconciliation
     const reconciledCount = reconciliations.filter(r => r.status === 'reconciled').length;
-    const reconciliationScore = reconciliations.length > 0 ? reconciledCount / reconciliations.length : 1;
+    const perAccountScore = reconciliations.length > 0 ? reconciledCount / reconciliations.length : 1;
+    // Cross-account mismatches reduce the score — even if individual accounts reconcile,
+    // bank vs cash mismatches indicate reconciliation is incomplete
+    const crossAccountPenalty = unmatchedItems.length > 0 ? Math.min(0.2, unmatchedItems.length * 0.05) : 0;
+    const reconciliationScore = Math.max(0, perAccountScore - crossAccountPenalty);
     const monthEndReady = reconciliationScore >= 0.9 && unmatchedItems.length === 0;
 
     const confidence = reconciliationScore > 0.9 ? 0.85 : reconciliationScore > 0.7 ? 0.65 : 0.4;
