@@ -42,6 +42,36 @@ import { NextRequest, NextResponse } from "next/server";
 // This keeps the controller alive between requests for state continuity
 const controllerCache = new Map<string, { controller: any; createdAt: number }>();
 const CONTROLLER_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const MAX_CACHED_CONTROLLERS = 5; // Hard cap — each controller is ~500MB-1GB
+
+// Proactive background eviction — runs every 5 minutes to prevent OOM
+// Without this, stale controllers accumulate until a cache miss triggers eviction
+const EVICTION_INTERVAL_MS = 5 * 60 * 1000;
+let _evictionTimer: ReturnType<typeof setInterval> | null = null;
+
+function startProactiveEviction(): void {
+  if (_evictionTimer) return;
+  _evictionTimer = setInterval(() => {
+    const now = Date.now();
+    let evicted = 0;
+    for (const [key, entry] of controllerCache) {
+      if (now - entry.createdAt > CONTROLLER_TTL_MS) {
+        controllerCache.delete(key);
+        evicted++;
+      }
+    }
+    if (evicted > 0) {
+      console.log(`[BrainCycle] Proactive eviction: removed ${evicted} stale controller(s), ${controllerCache.size} remaining`);
+    }
+  }, EVICTION_INTERVAL_MS);
+  // Don't prevent process exit
+  if (_evictionTimer && typeof _evictionTimer === 'object' && 'unref' in _evictionTimer) {
+    (_evictionTimer as NodeJS.Timeout).unref();
+  }
+}
+
+// Start eviction on module load
+startProactiveEviction();
 
 export async function POST(request: NextRequest) {
   try {
@@ -137,9 +167,12 @@ export async function POST(request: NextRequest) {
           const lookbackDays = mode === 'full' ? 90 : 7;
           const since = new Date(Date.now() - lookbackDays * 24 * 3600000).toISOString();
 
+          // PERF: Exclude signal_metadata from bulk load — JSONB metadata averages
+          // 2KB per signal. At 10K signals, that's 20MB of unnecessary data transfer.
+          // The brain cycle processes signal_type/value/entity, not raw metadata.
           const { data: dbSignals } = await service
             .from("cross_domain_signals")
-            .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_metadata, signal_timestamp")
+            .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
             .eq("organization_id", orgId)
             .gte("signal_timestamp", since)
             .order("signal_timestamp", { ascending: false })
@@ -154,7 +187,7 @@ export async function POST(request: NextRequest) {
               entityId: s.entity_id || 'unknown',
               value: s.signal_value || 0,
               timestamp: new Date(s.signal_timestamp).getTime(),
-              metadata: s.signal_metadata || {},
+              metadata: {}, // Metadata excluded from bulk load for memory efficiency
             }));
           }
         }
@@ -400,18 +433,35 @@ async function getOrCreateController(
   // Register all 25+ agents
   registerAllAgents(controller);
 
-  // Cache the controller
-  controllerCache.set(organizationId, {
-    controller,
-    createdAt: Date.now(),
-  });
-
-  // Evict stale entries
+  // Evict stale entries first
+  const now = Date.now();
   for (const [key, entry] of controllerCache) {
-    if (Date.now() - entry.createdAt > CONTROLLER_TTL_MS) {
+    if (now - entry.createdAt > CONTROLLER_TTL_MS) {
       controllerCache.delete(key);
     }
   }
+
+  // LRU eviction if at max capacity — remove oldest controller
+  if (controllerCache.size >= MAX_CACHED_CONTROLLERS) {
+    let oldestKey: string | null = null;
+    let oldestTime = Infinity;
+    for (const [key, entry] of controllerCache) {
+      if (entry.createdAt < oldestTime) {
+        oldestTime = entry.createdAt;
+        oldestKey = key;
+      }
+    }
+    if (oldestKey) {
+      controllerCache.delete(oldestKey);
+      console.log(`[BrainCycle] LRU eviction: removed controller for org ${oldestKey}, cache at max (${MAX_CACHED_CONTROLLERS})`);
+    }
+  }
+
+  // Cache the controller
+  controllerCache.set(organizationId, {
+    controller,
+    createdAt: now,
+  });
 
   return controller;
 }

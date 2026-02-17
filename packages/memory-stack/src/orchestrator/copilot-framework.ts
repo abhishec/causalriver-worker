@@ -1168,7 +1168,7 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
         const anthropicStream = anthropic.messages.stream({
           model,
           max_tokens: maxTokens,
-          system: systemPrompt,
+          system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }] as any,
           messages,
         });
 

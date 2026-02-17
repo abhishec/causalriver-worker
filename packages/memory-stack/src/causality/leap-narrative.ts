@@ -245,7 +245,7 @@ async function callAnthropicNarrative(
           body: JSON.stringify({
             model: opts.model,
             max_tokens: opts.maxTokens,
-            system: systemPrompt,
+            system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
             messages: [{ role: 'user', content: userMessage }],
           }),
           ...(controller ? { signal: controller.signal } : {}),

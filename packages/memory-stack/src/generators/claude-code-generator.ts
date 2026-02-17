@@ -85,7 +85,7 @@ export class ClaudeCodeGenerator {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 4096,
-        system: systemPrompt,
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }] as any,
         messages: [
           {
             role: 'user',
@@ -150,7 +150,7 @@ Return the test file in this format:
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 4096,
-        system: systemPrompt,
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }] as any,
         messages: [{ role: 'user', content: userPrompt }],
       });
 
@@ -204,7 +204,7 @@ Format as Markdown.`;
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 4096,
-        system: systemPrompt,
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }] as any,
         messages: [{ role: 'user', content: userPrompt }],
       });
 
@@ -265,7 +265,7 @@ Provide the refactored code with explanations.`;
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 4096,
-        system: systemPrompt,
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }] as any,
         messages: [{ role: 'user', content: userPrompt }],
       });
 

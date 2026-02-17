@@ -184,6 +184,14 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   // Track recent deploy failures per branch for rollback detection
   const recentDeployFailures = new Map<string, number>(); // branch → timestamp
 
+  // OOM PREVENTION: Hard caps on array sizes to prevent unbounded memory growth.
+  // At 10M signals scale, repos can have 50K+ PRs, 100K+ commits, etc.
+  // Without caps, fullSync() would accumulate GB of data in memory.
+  const MAX_PRS = 5000;
+  const MAX_ISSUES = 5000;
+  const MAX_WORKFLOW_RUNS = 3000;
+  const MAX_COMMITS = 5000;
+
   // ── Fetch helpers ────────────────────────────────────────────────
 
   async function fetchJSON<T>(path: string, params?: Record<string, string>): Promise<T> {
@@ -203,7 +211,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     const allPRs: GitHubPR[] = [];
     let page = 1;
 
-    while (true) {
+    while (allPRs.length < MAX_PRS) {
       const params: Record<string, string> = {
         state: 'all',
         sort: 'updated',
@@ -220,6 +228,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
 
       // Fetch detailed stats for each PR (additions/deletions)
       for (const pr of prs) {
+        if (allPRs.length >= MAX_PRS) break;
         if (since && new Date(pr.updated_at) < since) continue;
         try {
           const detail = await fetchJSON<GitHubPR>(`/repos/${owner}/${repo}/pulls/${pr.number}`);
@@ -240,7 +249,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     const allIssues: GitHubIssue[] = [];
     let page = 1;
 
-    while (true) {
+    while (allIssues.length < MAX_ISSUES) {
       const params: Record<string, string> = {
         state: 'all',
         sort: 'updated',
@@ -257,7 +266,11 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       if (!items || items.length === 0) break;
 
       // Filter out pull requests (GitHub API includes PRs in issues endpoint)
-      allIssues.push(...items.filter((i) => !(i as any).pull_request));
+      const filtered = items.filter((i) => !(i as any).pull_request);
+      for (const issue of filtered) {
+        if (allIssues.length >= MAX_ISSUES) break;
+        allIssues.push(issue);
+      }
 
       if (items.length < 100) break; // Last page
       page++;
@@ -270,7 +283,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     const allRuns: GitHubWorkflowRun[] = [];
     let page = 1;
 
-    while (true) {
+    while (allRuns.length < MAX_WORKFLOW_RUNS) {
       const params: Record<string, string> = {
         per_page: '100',
         page: String(page),
@@ -286,7 +299,10 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       const runs = data.workflow_runs || [];
       if (runs.length === 0) break;
 
-      allRuns.push(...runs);
+      for (const run of runs) {
+        if (allRuns.length >= MAX_WORKFLOW_RUNS) break;
+        allRuns.push(run);
+      }
 
       if (runs.length < 100) break; // Last page
       page++;
@@ -299,7 +315,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     const allCommits: GitHubCommit[] = [];
     let page = 1;
 
-    while (true) {
+    while (allCommits.length < MAX_COMMITS) {
       const params: Record<string, string> = {
         per_page: '100',
         page: String(page),
@@ -311,7 +327,10 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       const commits = await fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
       if (!commits || commits.length === 0) break;
 
-      allCommits.push(...commits);
+      for (const commit of commits) {
+        if (allCommits.length >= MAX_COMMITS) break;
+        allCommits.push(commit);
+      }
 
       if (commits.length < 100) break; // Last page
       page++;
@@ -402,6 +421,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       }
 
       // PR opened
+      // NOTE: file_paths excluded from pr_opened to prevent 6-8x metadata duplication.
+      // File paths are already emitted in the dedicated pr_files_changed signal above.
       signals.push({
         organization_id: orgId,
         source_domain: 'engineering.github',
@@ -417,8 +438,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           files_changed: pr.changed_files,
           is_bug_fix: isBug,
           created_at: pr.created_at,
-          file_paths: filePaths,
-          directories_changed: directoriesChanged,
+          directory_count: directoriesChanged.length,
           reviewers_requested: pr.requested_reviewers?.map((r) => r.login) || [],
         },
       });
@@ -441,6 +461,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           const sentiment = review.body ? analyzeSentiment(review.body) : null;
           const topics = review.body ? extractTopics(review.body) : null;
 
+          // NOTE: file_paths excluded — already in pr_files_changed signal
           signals.push({
             organization_id: orgId,
             source_domain: 'engineering.github',
@@ -457,8 +478,6 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
               sentiment_score: sentiment?.score ?? 0,
               sentiment_label: sentiment?.label ?? 'neutral',
               topics: topics?.keywords.map((k) => k.word) || [],
-              file_paths: filePaths,
-              directories_changed: directoriesChanged,
             },
           });
         }
@@ -470,6 +489,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           (new Date(pr.merged_at).getTime() - new Date(pr.created_at).getTime()) /
           (1000 * 60 * 60 * 24);
 
+        // NOTE: file_paths excluded — already in pr_files_changed signal
         signals.push({
           organization_id: orgId,
           source_domain: 'engineering.github',
@@ -484,8 +504,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             lines_changed: linesChanged,
             review_time_days: Math.round(reviewDays * 10) / 10,
             is_bug_fix: isBug,
-            file_paths: filePaths,
-            directories_changed: directoriesChanged,
+            directory_count: directoriesChanged.length,
             reviewers_who_approved: reviewersWhoApproved,
             review_rounds: reviewersWhoApproved.length,
           },

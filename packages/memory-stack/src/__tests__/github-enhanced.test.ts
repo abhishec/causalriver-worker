@@ -157,8 +157,12 @@ describe('GitHub Connector — Enhanced Signals', () => {
       const storedRows = supabase._insert.mock.calls[0]?.[0] || [];
       const prOpened = storedRows.find((r: any) => r.signal_type === 'pr_opened');
       expect(prOpened).toBeDefined();
-      expect(prOpened.metadata.file_paths).toContain('src/payments/checkout.ts');
-      expect(prOpened.metadata.directories_changed).toContain('src/payments');
+      // file_paths are now only in pr_files_changed signal to prevent 6-8x metadata duplication
+      expect(prOpened.metadata.directory_count).toBeGreaterThan(0);
+      // Verify file paths exist in the dedicated pr_files_changed signal
+      const prFilesChanged = storedRows.find((r: any) => r.signal_type === 'pr_files_changed');
+      expect(prFilesChanged).toBeDefined();
+      expect(prFilesChanged.metadata.file_paths).toContain('src/payments/checkout.ts');
     });
   });
 
@@ -245,8 +249,8 @@ describe('GitHub Connector — Enhanced Signals', () => {
       expect(mergedSignal.metadata.reviewers_who_approved).toContain('bob');
       expect(mergedSignal.metadata.reviewers_who_approved).toContain('carol');
       expect(mergedSignal.metadata.review_rounds).toBe(2);
-      expect(mergedSignal.metadata.file_paths).toContain('src/feature/index.ts');
-      expect(mergedSignal.metadata.directories_changed).toContain('src/feature');
+      // file_paths now only in pr_files_changed signal to prevent metadata duplication
+      expect(mergedSignal.metadata.directory_count).toBeGreaterThan(0);
     });
   });
 
