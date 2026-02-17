@@ -2141,17 +2141,17 @@ async function getCollaborationNetwork(
   if (edges.length === 0) {
     const { data: engSignals } = await supabase
       .from('cross_domain_signals')
-      .select('signal_type, metadata, created_at')
+      .select('signal_type, signal_metadata, created_at')
       .eq('organization_id', organizationId)
-      .eq('source_domain', 'engineering')
-      .in('signal_type', ['pr_merged', 'pr_review_submitted', 'pr_opened'])
+      .like('source_domain', 'engineering%')
+      .in('signal_type', ['pr_merged', 'prs_merged', 'pr_review_submitted', 'pr_reviewed', 'pr_opened'])
       .gte('created_at', cutoffDate)
       .limit(200);
 
     // Derive collaboration from PR signals (author ↔ reviewer)
     const dynamicEdges = new Map<string, any>();
     for (const s of (engSignals || [])) {
-      const meta = s.metadata || {};
+      const meta = (s as any).signal_metadata || {};
       const author = meta.author;
       const reviewer = meta.reviewer;
       if (author && reviewer && author !== reviewer) {

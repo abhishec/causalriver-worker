@@ -284,8 +284,8 @@ export async function getMergedPRSignals(
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering.github')
-    .eq('signal_type', 'pr_merged')
+    .like('source_domain', 'engineering%')
+    .in('signal_type', ['pr_merged', 'prs_merged'])
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
 
@@ -293,10 +293,10 @@ export async function getMergedPRSignals(
 
   return (data || []).map((signal) => ({
     prNumber: signal.signal_metadata.pr_number,
-    repo: signal.signal_metadata.repo,
-    author: signal.signal_metadata.author,
+    repo: signal.signal_metadata.repo || signal.signal_metadata.repository || '',
+    author: signal.signal_metadata.author || signal.signal_metadata.pr_author || '',
     mergedAt: signal.created_at,
-    cycleTimeHours: signal.signal_value,
+    cycleTimeHours: signal.signal_value || signal.signal_metadata.cycle_time_hours || 0,
     prSize: signal.signal_metadata.pr_size || (signal.signal_metadata.additions || 0) + (signal.signal_metadata.deletions || 0) || 0,
   }));
 }
@@ -324,8 +324,8 @@ export async function getReviewSignals(
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
-    .eq('source_domain', 'engineering.github')
-    .eq('signal_type', 'pr_reviewed')
+    .like('source_domain', 'engineering%')
+    .in('signal_type', ['pr_reviewed', 'pr_review_submitted'])
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
 
@@ -333,10 +333,10 @@ export async function getReviewSignals(
 
   return (data || []).map((signal) => ({
     prNumber: signal.signal_metadata.pr_number,
-    repo: signal.signal_metadata.repo,
+    repo: signal.signal_metadata.repo || signal.signal_metadata.repository || '',
     reviewer: signal.signal_metadata.reviewer,
-    prAuthor: signal.signal_metadata.pr_author || '',
+    prAuthor: signal.signal_metadata.pr_author || signal.signal_metadata.author || '',
     reviewedAt: signal.created_at,
-    reviewLatencyHours: signal.signal_value,
+    reviewLatencyHours: signal.signal_value || signal.signal_metadata.review_latency_hours || 0,
   }));
 }

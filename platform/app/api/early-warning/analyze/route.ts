@@ -111,13 +111,24 @@ export async function POST(req: NextRequest) {
     if (velocityAnalysis.velocityTimeSeries.length > 0) {
       const latest = velocityAnalysis.velocityTimeSeries[velocityAnalysis.velocityTimeSeries.length - 1];
 
-      await supabase.from('velocity_snapshots').upsert({
+      // Delete+insert pattern: COALESCE unique index can't be targeted by PostgREST onConflict
+      const vsDate = new Date().toISOString().split('T')[0];
+      const vsTeamId = teamId || null;
+      const delQ = supabase.from('velocity_snapshots')
+        .delete()
+        .eq('organization_id', organizationId)
+        .eq('snapshot_date', vsDate)
+        .eq('window_type', '7day');
+      if (vsTeamId) { delQ.eq('team_id', vsTeamId); } else { delQ.is('team_id', null); }
+      await delQ;
+
+      await supabase.from('velocity_snapshots').insert({
         organization_id: organizationId,
-        snapshot_date: new Date().toISOString().split('T')[0],
+        snapshot_date: vsDate,
         window_start: latest.windowStart,
         window_end: latest.windowEnd,
         window_type: '7day',
-        team_id: teamId || null,
+        team_id: vsTeamId,
         repo_id: null,
         prs_merged: latest.prsMerged,
         mean_pr_cycle_time_hours: latest.avgCycleTimeHours,
@@ -125,9 +136,6 @@ export async function POST(req: NextRequest) {
         mean_review_latency_hours: bottleneckAnalysis.avgReviewLatencyHours,
         open_pr_count: latest.openPrCount,
         prs_per_engineer: latest.prsPerEngineer,
-      }, {
-        onConflict: 'organization_id,snapshot_date,window_type,team_id,repo_id',
-        ignoreDuplicates: false,
       });
     }
 
@@ -141,16 +149,25 @@ export async function POST(req: NextRequest) {
       bottleneckAnalysis.topReviewer
     );
 
-    await supabase.from('bottleneck_snapshots').upsert({
+    // Delete+insert pattern: COALESCE unique index can't be targeted by PostgREST onConflict
+    const bnDate = new Date().toISOString().split('T')[0];
+    const bnTeamId = teamId || null;
+    const bnDelQ = supabase.from('bottleneck_snapshots')
+      .delete()
+      .eq('organization_id', organizationId)
+      .eq('snapshot_date', bnDate);
+    if (bnTeamId) { bnDelQ.eq('team_id', bnTeamId); } else { bnDelQ.is('team_id', null); }
+    await bnDelQ;
+
+    await supabase.from('bottleneck_snapshots').insert({
       organization_id: organizationId,
-      snapshot_date: new Date().toISOString().split('T')[0],
+      snapshot_date: bnDate,
       window_start: new Date(Date.now() - lookbackDays * 86400000).toISOString(),
       window_end: new Date().toISOString(),
-      team_id: teamId || null,
+      team_id: bnTeamId,
       top_reviewer_id: topReviewerEngineerId,
-      top_reviewer_login: bottleneckAnalysis.topReviewer,
+      top_reviewer: bottleneckAnalysis.topReviewer,
       top_reviewer_share: bottleneckAnalysis.reviewShare,
-      top3_reviewer_share: bottleneckAnalysis.top3Share,
       reviewer_gini_coefficient: bottleneckAnalysis.giniCoefficient,
       reviewer_hhi: bottleneckAnalysis.hhi,
       max_betweenness_centrality: bottleneckAnalysis.maxBetweennessCentrality,
@@ -159,9 +176,7 @@ export async function POST(req: NextRequest) {
       bottleneck_risk_score: bottleneckAnalysis.riskScore,
       risk_level: bottleneckAnalysis.riskLevel,
       reviewer_breakdown: bottleneckAnalysis.reviewerBreakdown,
-    }, {
-      onConflict: 'organization_id,snapshot_date,team_id',
-      ignoreDuplicates: false,
+      reviewer_count: bottleneckAnalysis.reviewerBreakdown?.length || 0,
     });
 
     // ========================================================================

@@ -949,7 +949,9 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     evidenceType: 'code_change' | 'review' | 'issue_resolution' | 'discussion' | 'documentation' | 'incident_response';
   }> = {
     'pr_merged': { contributorField: 'author', topicFields: ['directories_changed'], evidenceType: 'code_change' },
+    'prs_merged': { contributorField: 'author', topicFields: ['directories_changed'], evidenceType: 'code_change' },
     'pr_review_submitted': { contributorField: 'reviewer', topicFields: ['directories_changed'], evidenceType: 'review' },
+    'pr_reviewed': { contributorField: 'reviewer', topicFields: ['directories_changed'], evidenceType: 'review' },
     'issue_resolved': { contributorField: 'assignee', topicFields: ['labels'], evidenceType: 'issue_resolution' },
     'incident_resolved': { contributorField: 'responder', topicFields: ['service_name'], evidenceType: 'incident_response' },
     'message_sent': { contributorField: 'user', topicFields: ['topics'], evidenceType: 'discussion' },
@@ -1046,7 +1048,9 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     teamField?: string;
   }> = {
     'pr_review_submitted': { contributorAField: 'reviewer', contributorBField: 'author', interactionType: 'code_review', teamField: 'directories_changed' },
+    'pr_reviewed': { contributorAField: 'reviewer', contributorBField: 'author', interactionType: 'code_review', teamField: 'directories_changed' },
     'pr_merged': { contributorAField: 'author', contributorBField: 'reviewers_who_approved', interactionType: 'approval' },
+    'prs_merged': { contributorAField: 'author', contributorBField: 'reviewers_who_approved', interactionType: 'approval' },
     'incident_resolved': { contributorAField: 'responder', contributorBField: 'escalated_to', interactionType: 'incident_collab' },
     'thread_reply': { contributorAField: 'user', contributorBField: 'thread_starter', interactionType: 'thread_reply' },
   };

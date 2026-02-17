@@ -257,7 +257,7 @@ export async function POST(request: Request) {
               contributorId: contributor,
               contributorName: contributor,
               topic,
-              evidenceType: signal.signal_type === "pr_review_submitted"
+              evidenceType: (signal.signal_type === "pr_review_submitted" || signal.signal_type === "pr_reviewed")
                 ? "review"
                 : "code_change",
             });
@@ -287,7 +287,7 @@ export async function POST(request: Request) {
           const entry = prMap.get(prId)!;
           entry.author = meta?.author || "";
         }
-        if (signal.signal_type === "pr_review_submitted") {
+        if (signal.signal_type === "pr_review_submitted" || signal.signal_type === "pr_reviewed") {
           if (!prMap.has(prId)) prMap.set(prId, { author: "", reviewers: [] });
           const entry = prMap.get(prId)!;
           const reviewer = meta?.reviewer || meta?.user || "";

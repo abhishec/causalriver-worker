@@ -27,7 +27,7 @@ ALTER TABLE brain_cortex_state ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own org cortex state" ON brain_cortex_state
   FOR SELECT USING (
     organization_id IN (
-      SELECT organization_id FROM organization_members
+      SELECT organization_id FROM org_members
       WHERE user_id = auth.uid()
     )
   );

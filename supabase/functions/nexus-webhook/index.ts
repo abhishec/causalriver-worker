@@ -320,7 +320,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (action === 'opened' || action === 'reopened') {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_opened',
           signal_value: 1,
           entity_type: 'pull_request',
@@ -339,7 +339,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (action === 'closed' && pr.merged) {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_merged',
           signal_value: 1,
           entity_type: 'pull_request',
@@ -358,7 +358,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (action === 'closed' && !pr.merged) {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_abandoned',
           signal_value: -0.5,
           entity_type: 'pull_request',
@@ -374,7 +374,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (review && payload.action === 'submitted') {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: 'pr_review_submitted',
           signal_value: review.state === 'approved' ? 1 : review.state === 'changes_requested' ? -0.3 : 0.5,
           entity_type: 'pull_request_review',
@@ -397,7 +397,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (payload.action === 'opened') {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isBug ? 'bug_opened' : 'issue_opened',
           signal_value: isBug ? -0.5 : 0.3,
           entity_type: 'issue',
@@ -414,7 +414,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (payload.action === 'closed') {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: isBug ? 'bug_closed' : 'issue_closed',
           signal_value: isBug ? 0.5 : 0.3,
           entity_type: 'issue',
@@ -433,7 +433,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
       if (run && payload.action === 'completed') {
         signals.push({
           organization_id: organizationId,
-          source_domain: 'engineering',
+          source_domain: 'engineering.github',
           signal_type: run.conclusion === 'success' ? 'ci_passed' : 'ci_failed',
           signal_value: run.conclusion === 'success' ? 0.3 : -0.5,
           entity_type: 'workflow_run',
@@ -458,7 +458,7 @@ function transformGitHubEvent(payload: any, organizationId: string, headers: Hea
         if (isSuccess || isFailure) {
           signals.push({
             organization_id: organizationId,
-            source_domain: 'engineering',
+            source_domain: 'engineering.github',
             signal_type: isSuccess ? 'deploy_success' : 'deploy_failure',
             signal_value: isSuccess ? 0.8 : -0.8,
             entity_type: 'deployment',

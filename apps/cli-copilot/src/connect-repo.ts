@@ -376,16 +376,16 @@ async function main() {
     const expertiseGraph = createExpertiseGraph();
     const { data: prSignals } = await supabase
       .from('cross_domain_signals')
-      .select('metadata, signal_type')
+      .select('signal_metadata, signal_type')
       .eq('organization_id', config.orgId)
-      .eq('source_domain', 'engineering')
-      .in('signal_type', ['pr_merged', 'pr_opened', 'pr_review_submitted'])
+      .like('source_domain', 'engineering%')
+      .in('signal_type', ['pr_merged', 'prs_merged', 'pr_opened', 'pr_review_submitted', 'pr_reviewed'])
       .limit(5000);
 
     if (prSignals) {
       for (const signal of prSignals) {
-        const meta = signal.metadata as Record<string, any>;
-        const contributor = meta?.author || meta?.reviewer || meta?.user;
+        const meta = (signal as any).signal_metadata as Record<string, any>;
+        const contributor = meta?.author || meta?.pr_author || meta?.reviewer || meta?.user;
         const files = meta?.file_paths || meta?.directories || [];
         if (contributor && files.length > 0) {
           for (const file of files.slice(0, 10)) {
@@ -394,7 +394,7 @@ async function main() {
               contributorId: contributor,
               contributorName: contributor,
               topic,
-              evidenceType: signal.signal_type === 'pr_review_submitted' ? 'review' : 'code_change',
+              evidenceType: (signal.signal_type === 'pr_review_submitted' || signal.signal_type === 'pr_reviewed') ? 'review' : 'code_change',
             });
           }
         }
@@ -412,15 +412,15 @@ async function main() {
     if (prSignals) {
       const prMap = new Map<string, { author: string; reviewers: string[] }>();
       for (const signal of prSignals) {
-        const meta = signal.metadata as Record<string, any>;
+        const meta = (signal as any).signal_metadata as Record<string, any>;
         const prId = meta?.pr_number || meta?.pr_id;
         if (!prId) continue;
 
-        if (signal.signal_type === 'pr_merged' || signal.signal_type === 'pr_opened') {
+        if (signal.signal_type === 'pr_merged' || signal.signal_type === 'prs_merged' || signal.signal_type === 'pr_opened') {
           if (!prMap.has(prId)) prMap.set(prId, { author: '', reviewers: [] });
-          prMap.get(prId)!.author = meta?.author || '';
+          prMap.get(prId)!.author = meta?.author || meta?.pr_author || '';
         }
-        if (signal.signal_type === 'pr_review_submitted') {
+        if (signal.signal_type === 'pr_review_submitted' || signal.signal_type === 'pr_reviewed') {
           if (!prMap.has(prId)) prMap.set(prId, { author: '', reviewers: [] });
           const reviewer = meta?.reviewer || meta?.user || '';
           if (reviewer && !prMap.get(prId)!.reviewers.includes(reviewer)) {

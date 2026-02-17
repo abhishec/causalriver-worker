@@ -389,7 +389,17 @@ export class NexusIntelligenceClient {
       const isClosed = Math.random() < 0.7; // 70% resolved
       const cycleTimeHours = isClosed ? Math.floor(Math.random() * 336) + 2 : 0; // 2h to 14 days
       const closedAt = isClosed ? new Date(createdAt.getTime() + cycleTimeHours * 3600000) : null;
-      const storyPoints = issueType === 'Story' ? [1, 2, 3, 5, 8, 13][Math.floor(Math.random() * 6)] : 0;
+      // All ticket types get story points (realistic estimation)
+      const pointOptions: Record<string, number[]> = {
+        'Epic': [13, 21, 34],
+        'Story': [1, 2, 3, 5, 8, 13],
+        'Task': [1, 2, 3, 5],
+        'Bug': [1, 2, 3, 5, 8],
+        'Spike': [2, 3, 5],
+        'Sub-task': [1, 2, 3],
+      };
+      const pts = pointOptions[issueType] || [1, 2, 3];
+      const storyPoints = pts[Math.floor(Math.random() * pts.length)];
 
       // Signal: jira_issue_created
       signals.push({
@@ -417,12 +427,12 @@ export class NexusIntelligenceClient {
         },
       });
 
-      // Signal: jira_issue_resolved (if closed)
+      // Signal: ticket_resolved (if closed) — matches velocity-analysis.ts expected type
       if (isClosed) {
         signals.push({
           organization_id: this.orgId,
           source_domain: 'engineering.jira',
-          signal_type: 'jira_issue_resolved',
+          signal_type: 'ticket_resolved',
           signal_value: cycleTimeHours,
           entity_id: issueKey,
           entity_type: 'jira_ticket',
@@ -439,6 +449,35 @@ export class NexusIntelligenceClient {
           },
         });
       }
+
+      // Signal: jira_issue (state snapshot — matches velocity-analysis.ts expected type)
+      // Production connector emits this as a current-state snapshot for every ticket
+      const updatedAt = isClosed ? closedAt! : new Date(createdAt.getTime() + Math.random() * 7 * 86400000);
+      signals.push({
+        organization_id: this.orgId,
+        source_domain: 'engineering.jira',
+        signal_type: 'jira_issue',
+        signal_value: 1,
+        entity_id: issueKey,
+        entity_type: 'issue',
+        signal_timestamp: updatedAt.toISOString(),
+        created_at: updatedAt.toISOString(),
+        signal_metadata: {
+          issue_key: issueKey,
+          project: project,
+          issue_type: issueType,
+          priority: priority,
+          assignee: assignee,
+          reporter: reporter,
+          component: component,
+          sprint: `Sprint ${sprint + 1}`,
+          team: `Team-${projects[team % projects.length]}`,
+          labels: [label],
+          story_points: storyPoints,
+          status: isClosed ? 'Done' : (Math.random() < 0.5 ? 'In Progress' : 'To Do'),
+          summary: `[${issueType}] ${component} - ${label} improvement #${i}`,
+        },
+      });
 
       // Signal: jira_comment (1-5 comments per ticket)
       const commentCount = Math.floor(Math.random() * 5) + 1;
@@ -517,6 +556,203 @@ export class NexusIntelligenceClient {
         totalInserted += batch.length;
       }
     }
+
+    // ── SPRINT VELOCITY AGGREGATION SIGNALS ─────────────────────────────
+    // Compute per-sprint velocity (story points completed) + cycle time
+    logger.info('Computing sprint velocity aggregation signals...');
+    const sprintAgg: Record<string, { team: string; sprint: string; pointsCompleted: number; ticketsCompleted: number; ticketsCreated: number; totalCycleHours: number; bugsOpened: number; bugsClosed: number; sprintStart: Date; }> = {};
+
+    for (const sig of signals) {
+      const meta = sig.signal_metadata as any;
+      if (!meta?.sprint || !meta?.team) continue;
+      const key = `${meta.team}|${meta.sprint}`;
+      if (!sprintAgg[key]) {
+        // Estimate sprint start from sprint number
+        const sprintNum = parseInt((meta.sprint as string).replace('Sprint ', '')) || 1;
+        const sprintStart = new Date(nowMs - (sprintCount - sprintNum + 1) * sprintDays * 86400000);
+        sprintAgg[key] = { team: meta.team, sprint: meta.sprint, pointsCompleted: 0, ticketsCompleted: 0, ticketsCreated: 0, totalCycleHours: 0, bugsOpened: 0, bugsClosed: 0, sprintStart };
+      }
+      const agg = sprintAgg[key];
+      if (sig.signal_type === 'jira_issue_created') { agg.ticketsCreated++; }
+      if (sig.signal_type === 'ticket_resolved') {
+        agg.ticketsCompleted++;
+        agg.pointsCompleted += meta.story_points || 0;
+        agg.totalCycleHours += meta.cycle_time_hours || 0;
+      }
+      if (sig.signal_type === 'bug_opened') agg.bugsOpened++;
+      if (sig.signal_type === 'bug_closed') agg.bugsClosed++;
+    }
+
+    const velocitySignals: Array<Record<string, unknown>> = [];
+    const sprintEntries = Object.values(sprintAgg);
+    const allVelocities = sprintEntries.map(s => s.pointsCompleted);
+    const meanVelocity = allVelocities.reduce((a, b) => a + b, 0) / (allVelocities.length || 1);
+    const stdVelocity = Math.sqrt(allVelocities.reduce((sum, v) => sum + (v - meanVelocity) ** 2, 0) / (allVelocities.length || 1));
+
+    for (const s of sprintEntries) {
+      const avgCycle = s.ticketsCompleted > 0 ? s.totalCycleHours / s.ticketsCompleted : 0;
+      const isCollapsing = s.pointsCompleted < (meanVelocity - stdVelocity) || s.pointsCompleted < meanVelocity * 0.75;
+      velocitySignals.push({
+        organization_id: this.orgId,
+        source_domain: 'engineering.jira',
+        signal_type: 'sprint_velocity',
+        signal_value: s.pointsCompleted,
+        entity_id: `${s.team}|${s.sprint}`,
+        entity_type: 'sprint',
+        signal_timestamp: new Date(s.sprintStart.getTime() + sprintDays * 86400000).toISOString(),
+        created_at: new Date(s.sprintStart.getTime() + sprintDays * 86400000).toISOString(),
+        signal_metadata: {
+          team: s.team,
+          sprint: s.sprint,
+          story_points_completed: s.pointsCompleted,
+          tickets_completed: s.ticketsCompleted,
+          tickets_created: s.ticketsCreated,
+          avg_cycle_time_hours: Math.round(avgCycle),
+          bugs_opened: s.bugsOpened,
+          bugs_closed: s.bugsClosed,
+          velocity_mean_3sprint: Math.round(meanVelocity),
+          velocity_std: Math.round(stdVelocity),
+          is_velocity_collapse: isCollapsing,
+          collapse_threshold: Math.round(meanVelocity - stdVelocity),
+        },
+      });
+    }
+
+    // Insert velocity signals
+    for (let offset = 0; offset < velocitySignals.length; offset += BATCH_SIZE) {
+      const batch = velocitySignals.slice(offset, offset + BATCH_SIZE);
+      const { error } = await this.supabase.from('cross_domain_signals').insert(batch);
+      if (!error) totalInserted += batch.length;
+    }
+    logger.info(`Sprint velocity signals: ${velocitySignals.length} (${sprintEntries.filter(s => s.pointsCompleted < meanVelocity * 0.75).length} velocity collapse warnings)`);
+
+    // ── SYNTHETIC PR REVIEW SIGNALS (human reviewers) ────────────────────
+    // Generate realistic PR review data with skewed reviewer distribution
+    logger.info('Generating synthetic PR review signals with human reviewers...');
+    const reviewSignals: Array<Record<string, unknown>> = [];
+
+    // Skewed reviewer distribution: top 2 reviewers handle disproportionate share
+    const reviewerWeights = [0.30, 0.22, 0.12, 0.10, 0.08, 0.06, 0.04, 0.03, 0.02, 0.01, 0.01, 0.005, 0.005, 0.005, 0.005, 0.005];
+    const totalPRsToReview = Math.min(ticketCount, 2000); // ~2000 PR reviews
+    const reviewerCounts: Record<string, number> = {};
+
+    for (let i = 0; i < totalPRsToReview; i++) {
+      // Select reviewer based on weighted distribution (creates bottleneck)
+      const r = Math.random();
+      let cumulative = 0;
+      let reviewerIdx = 0;
+      for (let j = 0; j < reviewerWeights.length; j++) {
+        cumulative += reviewerWeights[j];
+        if (r <= cumulative) { reviewerIdx = j; break; }
+      }
+      const reviewer = devs[reviewerIdx];
+      const author = devs[(reviewerIdx + 1 + Math.floor(Math.random() * (devs.length - 1))) % devs.length];
+      reviewerCounts[reviewer] = (reviewerCounts[reviewer] || 0) + 1;
+
+      const daysAgo = Math.floor(Math.random() * 180);
+      const reviewDate = new Date(nowMs - daysAgo * 86400000);
+      const reviewLatencyHours = Math.floor(Math.random() * 72) + 1; // 1-72 hours
+      const state = Math.random() < 0.7 ? 'APPROVED' : Math.random() < 0.5 ? 'CHANGES_REQUESTED' : 'COMMENTED';
+
+      const syntheticRepos = ['acme/platform', 'acme/api', 'acme/mobile', 'acme/infra', 'acme/data-pipeline'];
+      const repoName = syntheticRepos[i % syntheticRepos.length];
+      reviewSignals.push({
+        organization_id: this.orgId,
+        source_domain: 'engineering.github',
+        signal_type: 'pr_reviewed',
+        signal_value: reviewLatencyHours, // velocity-analysis reads signal_value as review_latency_hours
+        entity_id: `pr_review_${i}`,
+        entity_type: 'pull_request_review',
+        signal_timestamp: reviewDate.toISOString(),
+        created_at: reviewDate.toISOString(),
+        signal_metadata: {
+          reviewer: reviewer,
+          author: author,
+          pr_author: author, // velocity-analysis reads signal_metadata.pr_author
+          pr_number: 100 + (i % 500),
+          repo: repoName, // velocity-analysis reads signal_metadata.repo
+          state: state,
+          review_latency_hours: reviewLatencyHours,
+          file_paths: [],
+          sentiment_label: state === 'APPROVED' ? 'positive' : state === 'CHANGES_REQUESTED' ? 'negative' : 'neutral',
+          sentiment_score: state === 'APPROVED' ? 0.8 : state === 'CHANGES_REQUESTED' ? -0.3 : 0,
+          review_body_length: Math.floor(Math.random() * 500),
+          directories_changed: [],
+        },
+      });
+    }
+
+    // Insert review signals
+    for (let offset = 0; offset < reviewSignals.length; offset += BATCH_SIZE) {
+      const batch = reviewSignals.slice(offset, offset + BATCH_SIZE);
+      const { error } = await this.supabase.from('cross_domain_signals').insert(batch);
+      if (!error) totalInserted += batch.length;
+    }
+    logger.info(`PR review signals: ${reviewSignals.length} from ${Object.keys(reviewerCounts).length} human reviewers`);
+
+    // ── BOTTLENECK CONCENTRATION METRICS ─────────────────────────────────
+    // Compute Gini coefficient, HHI, top reviewer share
+    logger.info('Computing bottleneck concentration metrics...');
+    const totalReviews = Object.values(reviewerCounts).reduce((a, b) => a + b, 0);
+    const sortedCounts = Object.values(reviewerCounts).sort((a, b) => b - a);
+    const topReviewerShare = sortedCounts[0] / totalReviews;
+    const top3ReviewerShare = sortedCounts.slice(0, 3).reduce((a, b) => a + b, 0) / totalReviews;
+
+    // Gini coefficient
+    const n = sortedCounts.length;
+    const sortedAsc = [...sortedCounts].sort((a, b) => a - b);
+    let giniNum = 0;
+    for (let i = 0; i < n; i++) { giniNum += (2 * (i + 1) - n - 1) * sortedAsc[i]; }
+    const gini = giniNum / (n * sortedCounts.reduce((a, b) => a + b, 0));
+
+    // HHI (Herfindahl-Hirschman Index)
+    const hhi = sortedCounts.reduce((sum, c) => sum + (c / totalReviews) ** 2, 0);
+
+    // Risk score (0-100)
+    const bottleneckRiskScore = Math.min(100, Math.round(
+      (topReviewerShare > 0.4 ? 40 : topReviewerShare * 100) +
+      (hhi > 0.25 ? 30 : hhi * 120) +
+      (gini > 0.5 ? 30 : gini * 60)
+    ));
+
+    const isHighRisk = topReviewerShare > 0.4 || hhi > 0.25 || gini > 0.6;
+
+    const concentrationSignals = [
+      {
+        organization_id: this.orgId,
+        source_domain: 'engineering.github',
+        signal_type: 'reviewer_concentration',
+        signal_value: bottleneckRiskScore,
+        entity_id: 'org_bottleneck_risk',
+        entity_type: 'bottleneck_metric',
+        signal_timestamp: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        signal_metadata: {
+          gini_coefficient: parseFloat(gini.toFixed(4)),
+          hhi_index: parseFloat(hhi.toFixed(4)),
+          top_reviewer: devs[0],
+          top_reviewer_share: parseFloat(topReviewerShare.toFixed(4)),
+          top_3_reviewer_share: parseFloat(top3ReviewerShare.toFixed(4)),
+          total_reviewers: Object.keys(reviewerCounts).length,
+          total_reviews: totalReviews,
+          bottleneck_risk_score: bottleneckRiskScore,
+          is_high_risk: isHighRisk,
+          risk_factors: [
+            topReviewerShare > 0.4 ? `Top reviewer handles ${(topReviewerShare * 100).toFixed(0)}% of PRs` : null,
+            hhi > 0.25 ? `HHI=${hhi.toFixed(3)} exceeds 0.25 threshold` : null,
+            gini > 0.6 ? `Gini=${gini.toFixed(3)} shows high inequality` : null,
+          ].filter(Boolean),
+          reviewer_distribution: Object.fromEntries(
+            Object.entries(reviewerCounts).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, { reviews: v, share: parseFloat((v / totalReviews).toFixed(4)) }])
+          ),
+        },
+      },
+    ];
+
+    // Insert concentration signals
+    const { error: concErr } = await this.supabase.from('cross_domain_signals').insert(concentrationSignals);
+    if (!concErr) totalInserted += concentrationSignals.length;
+    logger.info(`Bottleneck metrics: Risk=${bottleneckRiskScore}/100 | Gini=${gini.toFixed(3)} | HHI=${hhi.toFixed(3)} | Top reviewer=${(topReviewerShare * 100).toFixed(0)}% | ${isHighRisk ? '🔴 HIGH RISK' : '🟢 OK'}`);
 
     const duration = Date.now() - startTime;
     logger.info(`Jira signals generated: ${totalInserted} signals from ${ticketCount} tickets in ${duration}ms`);
@@ -939,7 +1175,7 @@ export class NexusIntelligenceClient {
         .select('signal_type, signal_value, entity_id, signal_metadata, created_at')
         .eq('organization_id', this.orgId)
         .in('signal_type', [
-          'pr_review_submitted', 'pr_reviewed',
+          'pr_reviewed',
           'pr_review_approved', 'pr_review_changes_requested', 'pr_review_commented',
         ])
         .limit(10000),
