@@ -65,7 +65,7 @@ SELECT cron.schedule(
   '0 5 * * *',  -- 5 AM UTC daily (1 hour after consolidation)
   $$
     SELECT net.http_post(
-      url := (SELECT value FROM system_config WHERE key = 'platform_base_url') || '/api/brain/cycle',
+      url := (SELECT value FROM public.nexus_system_config WHERE key = 'platform_base_url') || '/api/brain/cycle',
       headers := jsonb_build_object(
               'Content-Type', 'application/json',
               'Authorization', 'Bearer ' || get_system_config('supabase_service_role_key')
@@ -94,7 +94,7 @@ SELECT cron.schedule(
 );
 
 -- Insert platform_base_url config if not exists (needed for brain-cycle cron)
-INSERT INTO system_config (key, value, description)
+INSERT INTO public.nexus_system_config (key, value, description)
 VALUES (
   'platform_base_url',
   'https://platform.usebrainos.com',
