@@ -313,6 +313,17 @@ export async function POST(request: NextRequest) {
             rawQuery: input?.query,
           });
         }
+        // ── Invalidate brain intelligence cache after any cycle ──────────
+        // The BrainCommander caches causal edges, rules, patterns and LEAP context
+        // for 5 minutes per org. After a training cycle the brain has new knowledge,
+        // so we bust the cache so the next copilot query sees fresh data immediately.
+        try {
+          const { invalidateBrainCache } = await import("@nexus-ai/memory-stack");
+          invalidateBrainCache(orgId);
+          console.log(`[BrainCycle] Brain intelligence cache invalidated for org ${orgId}`);
+        } catch {
+          // Non-critical: cache will naturally expire after 5 minutes
+        }
         break;
       }
 

@@ -832,6 +832,7 @@ export {
   type BrainPattern,
   type CascadeRule as CommanderCascadeRule,
   type BrainInsight as CommanderBrainInsight,
+  invalidateBrainCache,
 } from './orchestrator/brain-commander';
 
 // PR Analyzer V1 ("Code Review Specialist") — automated PR analysis with cognitive stack

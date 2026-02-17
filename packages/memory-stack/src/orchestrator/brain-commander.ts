@@ -64,6 +64,49 @@ import {
 } from '../federation/federated-brain';
 
 // ============================================================================
+// BRAIN INTELLIGENCE CACHE
+// ============================================================================
+//
+// Stable brain knowledge (causal edges, rules, patterns, cascade rules, LEAP
+// context) changes only when a new brain cycle completes — not per-query.
+// Caching it for 5 minutes eliminates 6-8 parallel DB round-trips per chat
+// message without any staleness risk for Q&A.
+//
+// Volatile data (predictions, computedMetrics, deepLayerState) is always
+// fetched fresh since it reflects the last 30 active predictions and the
+// 14-day signal window.
+//
+// Cache invalidation:
+//  - TTL: 5 minutes (auto-expiry)
+//  - Manual: call invalidateBrainCache(orgId) after a brain cycle completes
+
+interface StableIntelligenceCache {
+  cachedAt: number;
+  causalEdges: any[];
+  coreCausalEdges: any[];
+  rules: any[];
+  patterns: any[];
+  corePatterns: any[];
+  cascadeRules: any[];
+  insights: any[];
+  causalGraph: any;
+  impactAnalysis: any;
+  stats: any;
+  leapContext: any;
+}
+
+const INTELLIGENCE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const _intelligenceCache = new Map<string, StableIntelligenceCache>();
+
+/**
+ * Manually invalidate the brain intelligence cache for an org.
+ * Call this after a brain cycle completes so the next query sees fresh data.
+ */
+export function invalidateBrainCache(organizationId: string): void {
+  _intelligenceCache.delete(organizationId);
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -695,46 +738,170 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     const orgIds = [...new Set([organizationId, coreOrgId])];
     const orgFilter = orgIds.map(id => `organization_id.eq.${id}`).join(',');
 
-    // Disconnection #3 FIX: Use federated queries for causal edges, patterns, and insights
-    // This merges ORG + CORE brain data with deduplication (ORG wins over CORE)
-    // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
-    // IMPORTANT: Preserve CORE-only results separately for cognitive stack 0.7x weighting
-    const [causalFederatedResult, rulesResult, patternsFederatedResult, cascadeResult, insightsFederated, predictionsResult, metricsSignalsResult, deepLayerResult] = await Promise.all([
-      // Federated: causal relationships (ORG + CORE, preserve both merged and CORE-only)
-      getFederatedCausalRelationships(organizationId, { limit: maxCausalEdges })
-        .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
+    // ── Stable intelligence cache ──────────────────────────────────────────
+    // Causal edges, rules, patterns, cascade rules, insights, and LEAP context
+    // only change after a brain cycle — not per-query. Cache them for 5 minutes
+    // to eliminate 5 parallel DB round-trips on every chat message.
+    // Volatile data (predictions, 14-day metrics, deep layer state) is always fresh.
+    const now = Date.now();
+    const cached = _intelligenceCache.get(organizationId);
+    const cacheHit = cached && (now - cached.cachedAt) < INTELLIGENCE_CACHE_TTL_MS;
 
-      // Direct SQL: rules (no federated function exists for ai_memory type=rule)
-      Promise.resolve(supabase
-        .from('ai_memory')
-        .select('content, importance, domain, metadata')
-        .or(orgFilter)
-        .eq('memory_type', 'rule')
-        .order('importance', { ascending: false })
-        .limit(maxMemoryItems))
-        .catch(() => ({ data: [] as any[] })),
+    let edges: CausalEdge[];
+    let coreCausalEdges: CausalEdge[];
+    let rules: BrainRule[];
+    let patterns: BrainPattern[];
+    let corePatterns: BrainPattern[];
+    let cascadeRules: CascadeRule[];
+    let insights: BrainInsight[];
+    let causalGraph: BrainIntelligence['causalGraph'];
+    let impactAnalysis: BrainIntelligence['impactAnalysis'];
+    let stats: BrainIntelligence['stats'];
+    let leapContext: BrainIntelligence['leapContext'];
 
-      // Federated: patterns (ORG + CORE, preserve both merged and CORE-only)
-      getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: maxMemoryItems })
-        .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
+    if (cacheHit) {
+      // ── Cache HIT: use stable knowledge, skip 5 DB queries ─────────────
+      edges = cached.causalEdges as CausalEdge[];
+      coreCausalEdges = cached.coreCausalEdges as CausalEdge[];
+      rules = cached.rules as BrainRule[];
+      patterns = cached.patterns as BrainPattern[];
+      corePatterns = cached.corePatterns as BrainPattern[];
+      cascadeRules = cached.cascadeRules as CascadeRule[];
+      insights = cached.insights as BrainInsight[];
+      causalGraph = cached.causalGraph;
+      impactAnalysis = cached.impactAnalysis;
+      stats = cached.stats;
+      leapContext = cached.leapContext;
+      console.log(`[BrainCommander] Intelligence cache HIT for org ${organizationId} (age: ${Math.round((now - cached.cachedAt) / 1000)}s)`);
+    } else {
+      // ── Cache MISS: fetch stable knowledge from DB ──────────────────────
+      // Disconnection #3 FIX: Use federated queries for causal edges, patterns, and insights
+      // This merges ORG + CORE brain data with deduplication (ORG wins over CORE)
+      // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
+      // IMPORTANT: Preserve CORE-only results separately for cognitive stack 0.7x weighting
+      const [causalFederatedResult, rulesResult, patternsFederatedResult, cascadeResult, insightsFederated] = await Promise.all([
+        // Federated: causal relationships (ORG + CORE, preserve both merged and CORE-only)
+        getFederatedCausalRelationships(organizationId, { limit: maxCausalEdges })
+          .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
-      // Direct SQL: cascade rules (separate table, no federated function)
-      Promise.resolve(supabase
-        .from('org_cascade_rules')
-        .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
-        .or(orgFilter)
-        .eq('is_active', true)
-        .limit(maxMemoryItems))
-        .catch(() => ({ data: [] as any[] })),
+        // Direct SQL: rules (no federated function exists for ai_memory type=rule)
+        Promise.resolve(supabase
+          .from('ai_memory')
+          .select('content, importance, domain, metadata')
+          .or(orgFilter)
+          .eq('memory_type', 'rule')
+          .order('importance', { ascending: false })
+          .limit(maxMemoryItems))
+          .catch(() => ({ data: [] as any[] })),
 
-      // Federated: insights (ORG + CORE merged, deduplicated by title)
-      getFederatedPatterns(organizationId, { memoryType: 'insight', limit: maxMemoryItems })
-        .then(r => r.merged.map(m => m.data))
-        .catch(() => [] as any[]),
+        // Federated: patterns (ORG + CORE, preserve both merged and CORE-only)
+        getFederatedPatterns(organizationId, { memoryType: 'pattern', limit: maxMemoryItems })
+          .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
 
-      // ── BRAIN NUTRITION: Feed the starving cognitive layers ──────────
+        // Direct SQL: cascade rules (separate table, no federated function)
+        Promise.resolve(supabase
+          .from('org_cascade_rules')
+          .select('rule_name, trigger_domain, trigger_signal_type, propagation_chain, is_active')
+          .or(orgFilter)
+          .eq('is_active', true)
+          .limit(maxMemoryItems))
+          .catch(() => ({ data: [] as any[] })),
 
-      // NEW: Active predictions for L6 calibration + L11 red team (was: predictions: [])
+        // Federated: insights (ORG + CORE merged, deduplicated by title)
+        getFederatedPatterns(organizationId, { memoryType: 'insight', limit: maxMemoryItems })
+          .then(r => r.merged.map(m => m.data))
+          .catch(() => [] as any[]),
+      ]);
+
+      edges = (causalFederatedResult.merged.map((m: any) => m.data) || []) as CausalEdge[];
+      coreCausalEdges = (causalFederatedResult.coreResults || []) as CausalEdge[];
+      rules = (rulesResult.data || []) as BrainRule[];
+      patterns = (patternsFederatedResult.merged.map((m: any) => m.data) || []) as BrainPattern[];
+      corePatterns = (patternsFederatedResult.coreResults || []) as BrainPattern[];
+      cascadeRules = (cascadeResult.data || []) as CascadeRule[];
+      insights = (insightsFederated || []) as BrainInsight[];
+
+      // Build causal graph + impact analysis (moved up so we can cache them)
+      causalGraph = buildCausalGraph(edges, domains);
+      impactAnalysis = buildImpactAnalysis(edges, domains);
+      const allDomains = new Set([
+        ...edges.map((e: CausalEdge) => e.source_domain),
+        ...edges.map((e: CausalEdge) => e.target_domain),
+      ]);
+      stats = {
+        totalDomains: allDomains.size,
+        totalCausalEdges: edges.length,
+        totalPatterns: patterns.length,
+        totalRules: rules.length,
+        totalCascadeRules: cascadeRules.length,
+      };
+
+      // Fetch LEAP context (also stable — computed during sleep cycles, changes only after brain cycle)
+      leapContext = undefined;
+      try {
+        const leapTypes = [
+          'curiosity_hypothesis', 'self_model', 'mesh_pattern', 'imagination_hypothesis',
+          'red_team_audit', 'immune_audit', 'experiment', 'goal_plan', 'narrative',
+        ];
+        // Scale fix: Add LIMIT 50 (was unbounded — would fetch ALL historical LEAP entries)
+        // Remove .eq('is_active', true) — column may not exist in schema (silent failure)
+        // The in-memory dedup (most-recent-per-type) below means we only need ~9 rows,
+        // but LIMIT 50 gives headroom for the 9 types with some historical buffer.
+        const { data: leapRows } = await Promise.resolve(supabase
+          .from('ai_memory')
+          .select('memory_type, content, metadata')
+          .eq('organization_id', organizationId)
+          .in('memory_type', leapTypes)
+          .order('updated_at', { ascending: false })
+          .limit(50))
+          .catch(() => ({ data: null as any }));
+
+        if (leapRows && leapRows.length > 0) {
+          const byType = new Map<string, { content: string; metadata: Record<string, unknown> }>();
+          for (const row of leapRows) {
+            // Take the most recent per type (already ordered by updated_at desc)
+            if (!byType.has(row.memory_type)) {
+              byType.set(row.memory_type, { content: row.content, metadata: row.metadata || {} });
+            }
+          }
+          leapContext = {
+            curiosity: byType.get('curiosity_hypothesis') || null,
+            selfModel: byType.get('self_model') || null,
+            meshPatterns: byType.get('mesh_pattern') || null,
+            imagination: byType.get('imagination_hypothesis') || null,
+            redTeam: byType.get('red_team_audit') || null,
+            immune: byType.get('immune_audit') || null,
+            experiments: byType.get('experiment') || null,
+            goalPlans: byType.get('goal_plan') || null,
+            narrative: byType.get('narrative') || null,
+          };
+        }
+      } catch {
+        // Non-critical: copilot works without LEAP context, just less rich
+      }
+
+      // ── Write stable intelligence to cache ────────────────────────────
+      _intelligenceCache.set(organizationId, {
+        cachedAt: now,
+        causalEdges: edges,
+        coreCausalEdges,
+        rules,
+        patterns,
+        corePatterns,
+        cascadeRules,
+        insights,
+        causalGraph,
+        impactAnalysis,
+        stats,
+        leapContext,
+      });
+      console.log(`[BrainCommander] Intelligence cache MISS → fetched and cached for org ${organizationId} (edges: ${edges.length}, patterns: ${patterns.length}, rules: ${rules.length})`);
+    } // end else (cache miss)
+
+    // ── Volatile fetches: always fresh (predictions, 14-day metrics, deep layer state) ──
+    // These change frequently and are cheap to fetch (small row counts).
+    const [predictionsResult, metricsSignalsResult, deepLayerResult] = await Promise.all([
+      // Active predictions for L6 calibration + L11 red team
       Promise.resolve(supabase
         .from('prediction_records')
         .select('id, domain, prediction_type, predicted_value, predicted_outcome, confidence, actual_value, was_correct, verified_at, created_at')
@@ -743,7 +910,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .limit(30))
         .catch(() => ({ data: [] as any[] })),
 
-      // NEW: Domain metrics from cross_domain_signals (14-day window for current vs previous week)
+      // Domain metrics from cross_domain_signals (14-day window for current vs previous week)
       // Feeds L10 temporal consciousness, L14 goal planning, L15 narrative
       Promise.resolve(supabase
         .from('cross_domain_signals')
@@ -754,7 +921,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .limit(500))
         .catch(() => ({ data: [] as any[] })),
 
-      // NEW: Deep layer state (L16-L30) from brain_layer_state for query path readback
+      // Deep layer state (L16-L30) from brain_layer_state for query path readback
       // These are computed during sleep cycles but were NEVER surfaced during queries
       Promise.resolve(supabase
         .from('brain_layer_state')
@@ -767,15 +934,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .catch(() => ({ data: [] as any[] })),
     ]);
 
-    const edges = (causalFederatedResult.merged.map((m: any) => m.data) || []) as CausalEdge[];
-    const coreCausalEdges = (causalFederatedResult.coreResults || []) as CausalEdge[];
-    const rules = (rulesResult.data || []) as BrainRule[];
-    const patterns = (patternsFederatedResult.merged.map((m: any) => m.data) || []) as BrainPattern[];
-    const corePatterns = (patternsFederatedResult.coreResults || []) as BrainPattern[];
-    const cascadeRules = (cascadeResult.data || []) as CascadeRule[];
-    const insights = (insightsFederated || []) as BrainInsight[];
-
-    // ── BRAIN NUTRITION: Process new query results ──────────────────────
+    // ── BRAIN NUTRITION: Process volatile query results ──────────────────
 
     // Process predictions for cognitive cycle (L6, L11, L15)
     const predictions = ((predictionsResult as any)?.data || []) as PredictionRecord[];
@@ -786,8 +945,8 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     }>;
     const computedMetrics: ComputedMetric[] = [];
     if (metricsSignals.length > 0) {
-      const now = Date.now();
-      const oneWeekAgo = now - 7 * 86400000;
+      const tsNow = Date.now();
+      const oneWeekAgo = tsNow - 7 * 86400000;
       const domainMetrics = new Map<string, { current: number[]; previous: number[] }>();
 
       for (const sig of metricsSignals) {
@@ -842,64 +1001,6 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         }
       : undefined;
 
-    // Query LEAP layer stored intelligence — deep brain state from sleep cycles
-    // These are the outputs from L5-L15 that were previously "dead output" (computed but never recalled)
-    // Now the copilot can access the full richness of what the sleeping brain discovered
-    let leapContext: BrainIntelligence['leapContext'];
-    try {
-      const leapTypes = [
-        'curiosity_hypothesis', 'self_model', 'mesh_pattern', 'imagination_hypothesis',
-        'red_team_audit', 'immune_audit', 'experiment', 'goal_plan', 'narrative',
-      ];
-      // Scale fix: Add LIMIT 50 (was unbounded — would fetch ALL historical LEAP entries)
-      // Remove .eq('is_active', true) — column may not exist in schema (silent failure)
-      // The in-memory dedup (most-recent-per-type) below means we only need ~9 rows,
-      // but LIMIT 50 gives headroom for the 9 types with some historical buffer.
-      const { data: leapRows } = await Promise.resolve(supabase
-        .from('ai_memory')
-        .select('memory_type, content, metadata')
-        .eq('organization_id', organizationId)
-        .in('memory_type', leapTypes)
-        .order('updated_at', { ascending: false })
-        .limit(50))
-        .catch(() => ({ data: null as any }));
-
-      if (leapRows && leapRows.length > 0) {
-        const byType = new Map<string, { content: string; metadata: Record<string, unknown> }>();
-        for (const row of leapRows) {
-          // Take the most recent per type (already ordered by updated_at desc)
-          if (!byType.has(row.memory_type)) {
-            byType.set(row.memory_type, { content: row.content, metadata: row.metadata || {} });
-          }
-        }
-        leapContext = {
-          curiosity: byType.get('curiosity_hypothesis') || null,
-          selfModel: byType.get('self_model') || null,
-          meshPatterns: byType.get('mesh_pattern') || null,
-          imagination: byType.get('imagination_hypothesis') || null,
-          redTeam: byType.get('red_team_audit') || null,
-          immune: byType.get('immune_audit') || null,
-          experiments: byType.get('experiment') || null,
-          goalPlans: byType.get('goal_plan') || null,
-          narrative: byType.get('narrative') || null,
-        };
-      }
-    } catch (err) {
-      // Non-critical: copilot works without LEAP context, just less rich — err instanceof Error ? err.message : String(err) logged for debugging
-    }
-
-    // Build causal graph
-    const causalGraph = buildCausalGraph(edges, domains);
-
-    // Build impact analysis
-    const impactAnalysis = buildImpactAnalysis(edges, domains);
-
-    // Stats
-    const allDomains = new Set([
-      ...edges.map(e => e.source_domain),
-      ...edges.map(e => e.target_domain),
-    ]);
-
     return {
       causalEdges: edges,
       coreCausalEdges,
@@ -910,13 +1011,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       insights,
       causalGraph,
       impactAnalysis,
-      stats: {
-        totalDomains: allDomains.size,
-        totalCausalEdges: edges.length,
-        totalPatterns: patterns.length,
-        totalRules: rules.length,
-        totalCascadeRules: cascadeRules.length,
-      },
+      stats,
       leapContext,
       // ── BRAIN NUTRITION: New intelligence sources ──────────────────
       predictions,          // Active predictions from prediction_records (feeds L6, L11, L15)
