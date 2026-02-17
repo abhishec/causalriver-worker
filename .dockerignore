@@ -64,6 +64,23 @@ supabase/
 # ── Website (separate deployment) ──
 website/
 
+# ── CI/CD (not needed inside containers) ──
+.github
+
+# ── Grafana (local monitoring only) ──
+grafana/
+
+# ── Claude/AI config ──
+.claude/
+
+# ── Audit/debug scripts (not needed in prod images) ──
+AGENT-*.md
+scripts/db-*.ts
+scripts/uc-*.ts
+scripts/query-*.ts
+scripts/clear-*.ts
+scripts/check-*.ts
+
 # ── Docker files themselves ──
 Dockerfile*
 docker-compose*
