@@ -8,9 +8,14 @@
 -- Path convention: org-data/{organization_id}/filename.json
 
 -- Enable RLS on storage.objects (if not already enabled)
+-- storage.objects is owned by supabase_storage_admin, so we must switch role
+SET ROLE supabase_storage_admin;
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+RESET ROLE;
 
 -- Policy: Org members can SELECT (read/download) files in their org's folder
+-- Must be created as supabase_storage_admin (table owner)
+SET ROLE supabase_storage_admin;
 CREATE POLICY "org_members_read_own_org_data" ON storage.objects
   FOR SELECT
   USING (
@@ -32,6 +37,7 @@ CREATE POLICY "org_members_read_own_org_data" ON storage.objects
       )
     )
   );
+RESET ROLE;
 
 -- Policy: Only service-role can INSERT (upload) files
 -- No user-level INSERT policy — uploads are done via service-role key in API routes
