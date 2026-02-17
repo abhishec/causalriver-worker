@@ -578,13 +578,19 @@ export async function POST(request: NextRequest) {
 
     if (accountingRoute && !seaasResult) {
       try {
-        // Load GL data from pre-parsed JSON (same source as /api/accounting-jarvis)
+        // Load GL data from Supabase Storage (org-scoped)
         let glData: Array<Record<string, unknown>> = [];
         try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          glData = require('@/lib/accounting-jarvis/gl-data.json');
+          const storagePath = `${orgId}/gl-data.json`;
+          const { data: fileData } = await service.storage
+            .from("org-data")
+            .download(storagePath);
+          if (fileData) {
+            const text = await fileData.text();
+            glData = JSON.parse(text);
+          }
         } catch {
-          // No GL data available
+          // No GL data available for this org
         }
 
         if (glData.length > 0) {

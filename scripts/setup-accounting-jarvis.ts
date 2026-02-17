@@ -12,7 +12,7 @@
  *   npx tsx scripts/setup-accounting-jarvis.ts --input "/path/to/GL.xlsx"
  *
  * Output:
- *   - platform/lib/accounting-jarvis/gl-data.json (parsed transactions)
+ *   - Writes gl-data.json locally (then run migrate-gl-data-to-storage.ts to upload to Supabase Storage)
  *   - Seeds ai_memory, causal_relationships_statistical, cross_domain_signals
  */
 

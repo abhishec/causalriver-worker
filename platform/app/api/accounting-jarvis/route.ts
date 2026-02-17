@@ -13,7 +13,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -302,25 +302,34 @@ function processGLData(transactions: GLTransaction[]) {
   };
 }
 
-// ── Load GL data from pre-parsed JSON (seeded by setup script) ──────────────
-let cachedGLData: GLTransaction[] | null = null;
+// ── Load GL data from Supabase Storage (org-scoped) ─────────────────────────
+// GL data lives in Supabase Storage bucket "org-data" at {orgId}/gl-data.json
+// In-memory cache avoids re-downloading 12MB on every request within the same
+// serverless invocation.
+const glCache = new Map<string, GLTransaction[]>();
 
-function getGLData(): GLTransaction[] {
-  if (cachedGLData) return cachedGLData;
+async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
+  if (glCache.has(orgId)) return glCache.get(orgId)!;
 
-  // Try to load from the parsed JSON file (created by setup script)
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const data = require('@/lib/accounting-jarvis/gl-data.json');
-    cachedGLData = data as GLTransaction[];
-    return cachedGLData;
-  } catch {
-    // Return empty if no data loaded yet
+  const service = await createServiceClient();
+  const storagePath = `${orgId}/gl-data.json`;
+
+  const { data, error } = await service.storage
+    .from("org-data")
+    .download(storagePath);
+
+  if (error || !data) {
+    console.warn(`[GL] No data in storage for org ${orgId}:`, error?.message);
     return [];
   }
+
+  const text = await data.text();
+  const transactions = JSON.parse(text) as GLTransaction[];
+  glCache.set(orgId, transactions);
+  return transactions;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Auth check
     const supabase = await createClient();
@@ -329,10 +338,60 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const transactions = getGLData();
+    // Resolve org — check query param or find user's org with GL data
+    const url = new URL(request.url);
+    let orgId = url.searchParams.get("orgId");
+
+    if (!orgId) {
+      // Find user's org memberships and try each for GL data
+      const { data: memberships } = await supabase
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id);
+
+      // Also check if platform admin
+      const { data: adminCheck } = await supabase
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("is_platform_admin", true)
+        .limit(1);
+
+      const orgIds = memberships?.map((m) => m.organization_id) || [];
+
+      // If platform admin, also include PH Accounting org
+      if (adminCheck && adminCheck.length > 0) {
+        const { data: phOrg } = await supabase
+          .from("organizations")
+          .select("id")
+          .eq("slug", "ph-accounting")
+          .single();
+        if (phOrg && !orgIds.includes(phOrg.id)) {
+          orgIds.push(phOrg.id);
+        }
+      }
+
+      // Try each org until we find one with GL data
+      for (const oid of orgIds) {
+        const txns = await getGLDataFromStorage(oid);
+        if (txns.length > 0) {
+          orgId = oid;
+          break;
+        }
+      }
+    }
+
+    if (!orgId) {
+      return NextResponse.json({
+        error: "No GL data found. Upload Xero GL data for your organization first.",
+        analysis: null,
+      }, { status: 200 });
+    }
+
+    const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data loaded. Run the setup script first: npx tsx scripts/setup-accounting-jarvis.ts",
+        error: "No GL data found for this organization in storage.",
         analysis: null,
       }, { status: 200 });
     }
@@ -341,7 +400,8 @@ export async function GET() {
 
     return NextResponse.json({
       analysis,
-      company: 'Design Partner', // Anonymized
+      company: 'PH Accounting', // Org-scoped
+      organizationId: orgId,
       summary: {
         transactions: transactions.length,
         accounts: analysis.summary.totalAccounts,
