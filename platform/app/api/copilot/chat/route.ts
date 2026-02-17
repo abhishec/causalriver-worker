@@ -452,6 +452,8 @@ export async function POST(request: NextRequest) {
       // in a single call with caching and resilience built in.
       const mesh = createBrainContextMesh({ supabase: service, organizationId: orgId });
       const copilotDomainCtx = await mesh.getDomainContext('copilot');
+      // BRAIN NUTRITION: Also get universal context for LEAP (deep brain reasoning)
+      const universalCtx = await mesh.getUniversalContext();
 
       const velocitySnapshots = copilotDomainCtx.velocitySnapshot ? [copilotDomainCtx.velocitySnapshot] : [];
       const bottleneckSnapshot = copilotDomainCtx.bottleneckSnapshot || null;
@@ -839,6 +841,35 @@ USE THESE LINKS to:
 - Answer "What Slack discussions happened around [PR]?" → find Slack→PR links
 - Connect velocity collapse signals to specific Jira tickets via PR links
 - Show the full chain: Jira ticket → PR → commit → Slack discussion`;
+    }
+
+    // ── BRAIN NUTRITION: LEAP Context (Deep Brain Reasoning from Sleep Cycles) ──
+    // These are the richest cognitive outputs — curiosity hypotheses, imagination
+    // scenarios, self-model audits, goal plans. They represent what the Brain has
+    // been "thinking about" during its autonomous cognitive cycles.
+    if (universalCtx?.leapContext) {
+      const lc = universalCtx.leapContext;
+      const leapEntries: string[] = [];
+      if (lc.narrative?.content) leapEntries.push(`**Narrative Intelligence**: ${lc.narrative.content.substring(0, 300)}`);
+      if (lc.curiosity?.content) leapEntries.push(`**Curiosity Hypothesis**: ${lc.curiosity.content.substring(0, 300)}`);
+      if (lc.imagination?.content) leapEntries.push(`**Imagination Scenario**: ${lc.imagination.content.substring(0, 300)}`);
+      if (lc.goalPlans?.content) leapEntries.push(`**Goal Plans**: ${lc.goalPlans.content.substring(0, 300)}`);
+      if (lc.selfModel?.content) leapEntries.push(`**Self-Model Assessment**: ${lc.selfModel.content.substring(0, 200)}`);
+      if (lc.experiments?.content) leapEntries.push(`**Active Experiments**: ${lc.experiments.content.substring(0, 200)}`);
+      if (lc.redTeam?.content) leapEntries.push(`**Red Team Findings**: ${lc.redTeam.content.substring(0, 200)}`);
+
+      if (leapEntries.length > 0) {
+        effectiveSystemPrompt += `\n\n## BRAIN DEEP REASONING (from autonomous cognitive sleep cycles)
+The Brain has been actively reasoning about this organization during its sleep cycles.
+These insights come from its curiosity engine, imagination layer, and goal-planning system:
+
+${leapEntries.join('\n\n')}
+
+USE THESE to:
+- Reference the Brain's own hypotheses when answering questions about organizational health
+- Connect current queries to the Brain's ongoing investigations
+- Share the Brain's imagination scenarios when users ask "what if" questions`;
+      }
     }
 
     // ── SE-aaS domain result injection ──────────────────────────────────

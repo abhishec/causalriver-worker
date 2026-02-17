@@ -25,6 +25,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createDispatchAssessor, type DispatchAssessment, type UserIntent, type BusinessDomain } from './dispatch-assessor';
 import type { RequiredDataSignals, QueryInterpretation } from './llm-query-interpreter';
+import { toDispatchAssessment as convertToDispatchAssessment } from './llm-query-interpreter';
 
 // ============================================================================
 // TYPES — Service Types
@@ -407,6 +408,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       leapRes,
     ] = await Promise.all([
       // Causal edges the Brain has learned
+      skipCausal ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('causal_relationships_statistical')
         .select('source_signal, target_signal, strength, confidence, lag, p_value, source_domain, target_domain, effect_size, evidence_weight')
@@ -416,6 +418,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Patterns + insights from ai_memory
+      skipPatterns ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('ai_memory')
         .select('content, memory_type, domain, importance, source, created_at')
@@ -426,6 +429,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Cascade rules
+      skipCascade ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('brain_cascade_rules')
         .select('source_domain, target_domain, cascade_type, severity, confidence, description')
@@ -436,6 +440,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Brain evolution snapshots
+      skipEvolution ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('brain_evolution_snapshots')
         .select('intelligence_score, accuracy, brier_score, total_edges, total_evidence, snapshot_date')
@@ -445,6 +450,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // User corrections (high-priority learning)
+      skipCorrections ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('ai_memory')
         .select('content, metadata, created_at')
@@ -455,6 +461,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Verified predictions (Brain's track record)
+      skipPredictions ? Promise.resolve(emptyResult) :
       Promise.resolve(supabase
         .from('prediction_records')
         .select('domain, predicted_outcome, was_correct, confidence, verified_at')
@@ -557,23 +564,29 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
 
   // ── Layer 2: Domain-Specific Context ────────────────────────────────────
 
-  async function getDomainContext(serviceType: ServiceType): Promise<DomainContext> {
+  async function getDomainContext(serviceType: ServiceType, requiredData?: RequiredDataSignals): Promise<DomainContext> {
     switch (serviceType) {
       case 'copilot':
-        return getCopilotDomainContext();
+        return getCopilotDomainContext(requiredData);
       case 'se-aas':
-        return getSeaasDomainContext();
+        return getSeaasDomainContext(requiredData);
       case 'aas':
-        return getAasDomainContext();
+        return getAasDomainContext(requiredData);
       default:
-        return getSeaasDomainContext();
+        return getSeaasDomainContext(requiredData);
     }
   }
 
-  async function getCopilotDomainContext(): Promise<CopilotDomainContext> {
+  async function getCopilotDomainContext(requiredData?: RequiredDataSignals): Promise<CopilotDomainContext> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const emptyRes = { data: [] as any[] };
+    const skipVelocity = requiredData ? !requiredData.needsVelocityData : false;
+    const skipBottleneck = requiredData ? !requiredData.needsBottleneckData : false;
+    const skipEntityLinks = requiredData ? !requiredData.needsEntityLinks : false;
+    const skipSignals = requiredData ? !requiredData.needsSignals : false;
 
     const [velocityRes, bottleneckRes, entityLinksRes, signalsRes] = await Promise.all([
+      skipVelocity ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('velocity_snapshots')
         .select('prs_merged, mean_pr_cycle_time_hours, pr_cycle_time_variance, open_pr_count, prs_per_engineer, snapshot_date')
@@ -582,6 +595,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(1)
       ).catch(() => ({ data: [] as any[] })),
 
+      skipBottleneck ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('bottleneck_snapshots')
         .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share, max_betweenness_centrality')
@@ -590,6 +604,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(1)
       ).catch(() => ({ data: [] as any[] })),
 
+      skipEntityLinks ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('entity_links')
         .select('source_entity_id, target_entity_id, link_type, confidence, source_domain, target_domain')
@@ -598,6 +613,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(100)
       ).catch(() => ({ data: [] as any[] })),
 
+      skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
@@ -619,8 +635,13 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     };
   }
 
-  async function getSeaasDomainContext(): Promise<SeaasDomainContext> {
+  async function getSeaasDomainContext(requiredData?: RequiredDataSignals): Promise<SeaasDomainContext> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const emptyRes = { data: [] as any[] };
+    const skipVelocity = requiredData ? !requiredData.needsVelocityData : false;
+    const skipBottleneck = requiredData ? !requiredData.needsBottleneckData : false;
+    const skipSignals = requiredData ? !requiredData.needsSignals : false;
+    const skipEntityLinks = requiredData ? !requiredData.needsEntityLinks : false;
 
     // BRAIN NUTRITION: SE-aaS now gets entity links (was: only Copilot had them)
     // Cross-system PR→Jira→Slack→Deploy connections are critical for:
@@ -628,6 +649,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     //   - impact-analysis: "what does this code change affect across systems?"
     //   - pr-review: "related Jira context for this PR"
     const [velocityRes, bottleneckRes, signalsRes, entityLinksRes] = await Promise.all([
+      skipVelocity ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('velocity_snapshots')
         .select('prs_merged, mean_pr_cycle_time_hours, pr_cycle_time_variance, open_pr_count, prs_per_engineer, snapshot_date')
@@ -636,6 +658,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(1)
       ).catch(() => ({ data: [] as any[] })),
 
+      skipBottleneck ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('bottleneck_snapshots')
         .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share, max_betweenness_centrality')
@@ -644,6 +667,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(1)
       ).catch(() => ({ data: [] as any[] })),
 
+      skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
@@ -655,6 +679,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // BRAIN NUTRITION: Entity links for SE-aaS domains
+      skipEntityLinks ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('entity_links')
         .select('source_entity_id, target_entity_id, link_type, confidence, source_domain, target_domain')
@@ -675,11 +700,16 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     };
   }
 
-  async function getAasDomainContext(): Promise<AasDomainContext> {
+  async function getAasDomainContext(requiredData?: RequiredDataSignals): Promise<AasDomainContext> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const emptyRes = { data: [] as any[] };
+    const skipAccountingPatterns = requiredData ? !requiredData.needsAccountingPatterns : false;
+    const skipFinancialEdges = requiredData ? !requiredData.needsFinancialEdges : false;
+    const skipSignals = requiredData ? !requiredData.needsSignals : false;
 
     const [accountingPatternsRes, financialEdgesRes, accountingSignalsRes] = await Promise.all([
       // Accounting-specific patterns the Brain has learned
+      skipAccountingPatterns ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('ai_memory')
         .select('content, memory_type, domain, importance, source, created_at')
@@ -691,6 +721,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Causal edges involving financial domains
+      skipFinancialEdges ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('causal_relationships_statistical')
         .select('source_signal, target_signal, strength, confidence, lag, p_value, source_domain, target_domain, effect_size, evidence_weight')
@@ -701,6 +732,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       ).catch(() => ({ data: [] as any[] })),
 
       // Recent accounting/finance signals
+      skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
@@ -721,7 +753,18 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
 
   // ── Layer 3: Intent-Driven Context ──────────────────────────────────────
 
-  function getIntentContext(query: string): Promise<IntentContext> {
+  function getIntentContext(query: string, interpretation?: QueryInterpretation): Promise<IntentContext> {
+    if (interpretation) {
+      // Use LLM interpretation directly — much richer than regex dispatch
+      const { toDispatchAssessment } = require('./llm-query-interpreter') as typeof import('./llm-query-interpreter');
+      // Use the interpretation's adaptive token budget if available
+      const tokenBudget = interpretation.tokenBudget ?? computeTokenBudget(interpretation.intent, totalTokenBudget);
+      return Promise.resolve({
+        assessment: toDispatchAssessment(interpretation),
+        tokenBudget,
+      });
+    }
+    // Fallback: regex dispatch
     const assessment = dispatchAssessor.assess(query);
     const tokenBudget = computeTokenBudget(assessment.intent, totalTokenBudget);
     return Promise.resolve({ assessment, tokenBudget });

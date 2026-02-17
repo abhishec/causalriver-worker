@@ -141,7 +141,7 @@ export async function executeAccountingAgent(
       };
     },
 
-    // brainContext from the Mesh
+    // brainContext from the Mesh — feeds ALL Brain intelligence to accounting agents
     brainContext: {
       causalEdges: brainContext.causalEdges.map(e => ({
         source: e.source_signal,
@@ -158,6 +158,40 @@ export async function executeAccountingAgent(
         domain: p.domain || 'accounting',
       })),
       domains: brainContext.domains as string[],
+
+      // ── BRAIN NUTRITION: LEAP context for accounting agents ──────────
+      // Deep brain reasoning from sleep cycles — curiosity hypotheses, self-model,
+      // imagination scenarios. Enables: "The Brain hypothesized X about your revenue
+      // patterns during its last analysis cycle."
+      leapContext: (() => {
+        const lc = brainContext.leapContext;
+        if (!lc) return {};
+        const entries: Record<string, string> = {};
+        if (lc.curiosity?.content) entries.curiosity = lc.curiosity.content;
+        if (lc.selfModel?.content) entries.selfModel = lc.selfModel.content;
+        if (lc.imagination?.content) entries.imagination = lc.imagination.content;
+        if (lc.narrative?.content) entries.narrative = lc.narrative.content;
+        if (lc.experiments?.content) entries.experiments = lc.experiments.content;
+        if (lc.goalPlans?.content) entries.goalPlans = lc.goalPlans.content;
+        return entries;
+      })(),
+
+      // ── BRAIN NUTRITION: Entity links for cross-system accounting intelligence ──
+      // Connects financial signals to engineering signals:
+      //   "Revenue dip correlates with deployment failures (entity link: deploy→revenue)"
+      entityLinks: (brainContext.entityLinks || []).slice(0, 20).map(l => ({
+        source: `${l.source_domain || ''}:${l.source_entity_id}`,
+        target: `${l.target_domain || ''}:${l.target_entity_id}`,
+        type: l.link_type,
+        confidence: l.confidence,
+      })),
+
+      // Brain intelligence metadata
+      brainEvolution: {
+        intelligenceScore: brainContext.brainEvolution.intelligenceScore,
+        accuracy: brainContext.brainAccuracy.accuracy,
+        isLearning: brainContext.brainEvolution.isLearning,
+      },
     },
 
     // brainExecution — for V9 causal accountant agent
