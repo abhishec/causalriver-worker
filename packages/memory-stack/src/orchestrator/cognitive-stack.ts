@@ -225,6 +225,10 @@ export interface CognitivePrediction {
   confidence: number;
   evidence: string[];
   method: string;
+  /** Real verified outcome value (null if not yet verified). Fed from prediction_records.actual_value */
+  actualValue?: number | null;
+  /** Whether the prediction was correct (null if not yet verified). Fed from prediction_records.was_correct */
+  wasCorrect?: boolean | null;
 }
 
 export interface CognitiveMetric {
@@ -710,10 +714,17 @@ export function createCognitiveStack(config: CognitiveStackConfig): CognitiveSta
 
       try {
       for (const pred of input.predictions.slice(0, 20)) {
+        // Use real verified outcomes when available (from prediction_records).
+        // Before this fix, actualValue was faked with Math.random(), making L6 calibration meaningless.
+        // Now: verified predictions use real outcomes, unverified use neutral calibration (no distortion).
+        const realActualValue = pred.actualValue != null
+          ? pred.actualValue
+          : pred.confidence * 100;  // Neutral: assume prediction was right (no calibration distortion)
+
         selfModel.recordPrediction({
           domain: pred.domain,
           predictedValue: pred.confidence * 100,
-          actualValue: pred.confidence * 100 * (0.8 + Math.random() * 0.4),
+          actualValue: realActualValue,
           confidence: pred.confidence,
           method: pred.method,
           timestamp: Date.now(),

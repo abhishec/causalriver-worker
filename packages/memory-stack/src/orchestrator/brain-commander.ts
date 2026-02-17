@@ -171,6 +171,44 @@ export interface BrainIntelligence {
     /** L15 narratives (most recent) */
     narrative?: { content: string; metadata: Record<string, unknown> } | null;
   };
+  /** Active predictions from prediction_records — feeds L6 calibration, L11 red team */
+  predictions?: PredictionRecord[];
+  /** Computed domain metrics — feeds L10 temporal, L14 goal planning, L15 narrative */
+  computedMetrics?: ComputedMetric[];
+  /** Deep layer state (L16-L30) read back from brain_layer_state — surfaced during queries */
+  deepLayerState?: {
+    entityLinks?: { state_value: string; updated_at: string } | null;
+    orgTopology?: { state_value: string; updated_at: string } | null;
+    impactCascades?: { state_value: string; updated_at: string } | null;
+    strategicThemes?: { state_value: string; updated_at: string } | null;
+    resourceAllocation?: { state_value: string; updated_at: string } | null;
+    interventions?: { state_value: string; updated_at: string } | null;
+    wisdom?: { state_value: string; updated_at: string } | null;
+    processMining?: { state_value: string; updated_at: string } | null;
+    orgLearningRate?: { state_value: string; updated_at: string } | null;
+  };
+}
+
+/** Raw prediction record from prediction_records table */
+export interface PredictionRecord {
+  id: string;
+  domain: string;
+  prediction_type: string;
+  predicted_value: number | null;
+  predicted_outcome: string | null;
+  confidence: number;
+  actual_value: number | null;
+  was_correct: boolean | null;
+  verified_at: string | null;
+  created_at: string;
+}
+
+/** Computed domain metric for cognitive cycle (current vs previous period) */
+export interface ComputedMetric {
+  name: string;
+  domain: string;
+  currentValue: number;
+  previousValue: number;
 }
 
 export interface CausalEdge {
@@ -603,7 +641,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
     // This merges ORG + CORE brain data with deduplication (ORG wins over CORE)
     // Keep direct SQL for: rules (no federated function) and cascade rules (different table)
     // IMPORTANT: Preserve CORE-only results separately for cognitive stack 0.7x weighting
-    const [causalFederatedResult, rulesResult, patternsFederatedResult, cascadeResult, insightsFederated] = await Promise.all([
+    const [causalFederatedResult, rulesResult, patternsFederatedResult, cascadeResult, insightsFederated, predictionsResult, metricsSignalsResult, deepLayerResult] = await Promise.all([
       // Federated: causal relationships (ORG + CORE, preserve both merged and CORE-only)
       getFederatedCausalRelationships(organizationId, { limit: maxCausalEdges })
         .catch(() => ({ orgResults: [], coreResults: [], merged: [], stats: { orgCount: 0, coreCount: 0, duplicatesRemoved: 0, federatedAt: '' } })),
@@ -633,6 +671,43 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       getFederatedPatterns(organizationId, { memoryType: 'insight', limit: maxMemoryItems })
         .then(r => r.merged.map(m => m.data))
         .catch(() => [] as any[]),
+
+      // ── BRAIN NUTRITION: Feed the starving cognitive layers ──────────
+
+      // NEW: Active predictions for L6 calibration + L11 red team (was: predictions: [])
+      supabase
+        .from('prediction_records')
+        .select('id, domain, prediction_type, predicted_value, predicted_outcome, confidence, actual_value, was_correct, verified_at, created_at')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false })
+        .limit(30)
+        .then(r => r)
+        .catch(() => ({ data: [] as any[] })),
+
+      // NEW: Domain metrics from cross_domain_signals (14-day window for current vs previous week)
+      // Feeds L10 temporal consciousness, L14 goal planning, L15 narrative
+      supabase
+        .from('cross_domain_signals')
+        .select('source_domain, signal_type, signal_value, created_at')
+        .eq('organization_id', organizationId)
+        .gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(500)
+        .then(r => r)
+        .catch(() => ({ data: [] as any[] })),
+
+      // NEW: Deep layer state (L16-L30) from brain_layer_state for query path readback
+      // These are computed during sleep cycles but were NEVER surfaced during queries
+      supabase
+        .from('brain_layer_state')
+        .select('layer_id, state_key, state_value, updated_at')
+        .eq('organization_id', organizationId)
+        .gte('layer_id', 16)
+        .lte('layer_id', 30)
+        .order('updated_at', { ascending: false })
+        .limit(60)
+        .then(r => r)
+        .catch(() => ({ data: [] as any[] })),
     ]);
 
     const edges = (causalFederatedResult.merged.map(m => m.data) || []) as CausalEdge[];
