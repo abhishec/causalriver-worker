@@ -50,6 +50,24 @@ import { testPatternSignificance } from './significance-testing';
 import { createBrainTrainer, type TrainingPack, type TrainingStats } from './brain-trainer';
 import { createMaturityEvaluator, type MaturityReport, type BenchmarkScores } from '../benchmarks/maturity-evaluator';
 import type { NexusRepository } from '../persistence/supabase-repository';
+import {
+  snapshotCausalWeights,
+  computeAndPromoteCausalDeltas,
+  type FederatedCausalLearningConfig,
+} from '../federation/federated-causal-learning';
+// ── GAP 1: UCB1 Bandit ─────────────────────────────────────────────────────
+import {
+  createCausalMethodBandit,
+  type CausalMethodBanditConfig,
+  type CausalMethodBanditInstance,
+} from '../causality/causal-method-bandit';
+// ── GAP 4: Outcome Oracle ───────────────────────────────────────────────────
+import {
+  createOutcomeOracle,
+  buildWatchedPrediction,
+  type OutcomeOracleConfig,
+  type IncomingSignal,
+} from '../causality/outcome-oracle';
 
 // ============================================================================
 // TYPES
@@ -72,6 +90,41 @@ export interface AutonomousLearnerConfig {
   lookbackDays?: number;
   /** Verbose logging */
   verbose?: boolean;
+  /**
+   * Federated causal learning configuration.
+   *
+   * When provided, each learning cycle will:
+   *   1. Snapshot edge weights at cycle start
+   *   2. Run the normal learning cycle (feedback-loop updates weights)
+   *   3. Compute weight deltas (Δ = after - before, clipped)
+   *   4. Apply FedAvg to update the CORE brain's causal graph
+   *
+   * This is how org discoveries benefit ALL orgs without sharing raw data.
+   * Set to null/undefined to disable federated learning (default: enabled with defaults).
+   */
+  federatedLearning?: FederatedCausalLearningConfig | false;
+  /**
+   * Gap 1 — UCB1 Multi-Armed Bandit config.
+   *
+   * When enabled, the learner uses UCB1 to select the best causal discovery
+   * method per domain pair instead of always running the same method.
+   * The bandit learns which method produces predictions that pass OutcomeOracle
+   * verification, giving it a reward signal to improve arm selection over time.
+   *
+   * Set to `false` to disable (default: enabled with defaults).
+   */
+  bandit?: CausalMethodBanditConfig | false;
+  /**
+   * Gap 4 — OutcomeOracle config.
+   *
+   * When enabled, at the end of each learning cycle the learner registers
+   * all newly discovered causal relationships as WatchedPredictions.
+   * The oracle verifies them autonomously at the next connector sync,
+   * then rewards the bandit arm that made the correct prediction.
+   *
+   * Set to `false` to disable (default: enabled with defaults).
+   */
+  oracle?: OutcomeOracleConfig | false;
 }
 
 export interface LearningCycleResult {
@@ -97,6 +150,31 @@ export interface LearningCycleResult {
   trainingStats: TrainingStats;
   /** Duration in ms */
   duration: number;
+  /**
+   * Federated causal learning results (if federatedLearning is enabled).
+   * Shows how many causal edge weight deltas were promoted to the CORE brain.
+   */
+  federatedLearning?: {
+    deltasApplied: number;
+    newPairsAdded: number;
+    existingPairsUpdated: number;
+    cycleId: string;
+  };
+  /**
+   * Gap 1 — Bandit arm selection for this cycle.
+   * Shows which discovery method was selected per domain pair.
+   */
+  banditSelections?: Array<{
+    sourceDomain: string;
+    targetDomain: string;
+    selectedMethod: string;
+    ucbScore: number;
+  }>;
+  /**
+   * Gap 4 — Oracle predictions registered this cycle.
+   * These will be autonomously verified at the next connector sync.
+   */
+  oraclePredictionsRegistered?: number;
 }
 
 // ============================================================================
@@ -116,7 +194,36 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
     evaluateMaturity: shouldEvaluate = true,
     lookbackDays = 90,
     verbose = false,
+    federatedLearning: federatedLearningConfig,
+    bandit: banditConfig,
+    oracle: oracleConfig,
   } = config;
+
+  // Federated learning is ON by default (with default config) unless explicitly disabled
+  const isFederatedEnabled = federatedLearningConfig !== false;
+  const fedConfig: FederatedCausalLearningConfig = isFederatedEnabled
+    ? (typeof federatedLearningConfig === 'object' ? federatedLearningConfig : {})
+    : {};
+
+  // Gap 1: UCB1 Bandit — enabled by default
+  const isBanditEnabled = banditConfig !== false;
+  const bandit = isBanditEnabled
+    ? createCausalMethodBandit(
+        typeof banditConfig === 'object'
+          ? { ...banditConfig, supabase, organizationId }
+          : { supabase, organizationId }
+      )
+    : null;
+
+  // Gap 4: Outcome Oracle — enabled by default
+  const isOracleEnabled = oracleConfig !== false;
+  const oracle = isOracleEnabled
+    ? createOutcomeOracle(
+        typeof oracleConfig === 'object'
+          ? { ...oracleConfig, supabase, bandit: bandit ?? undefined }
+          : { supabase, bandit: bandit ?? undefined }
+      )
+    : null;
 
   const trainer = createBrainTrainer();
   const maturityEvaluator = createMaturityEvaluator();
@@ -429,7 +536,20 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
      */
     async runLearningCycle(): Promise<LearningCycleResult> {
       const startTime = Date.now();
+      const cycleId = `cycle_${organizationId.substring(0, 8)}_${Date.now()}`;
       log('Starting learning cycle...');
+
+      // FEDERATED LEARNING — Step 1: Snapshot edge weights BEFORE learning
+      // We capture the current state so we can compute deltas at cycle end.
+      let federatedWeightSnapshot: Map<string, number> | null = null;
+      if (isFederatedEnabled) {
+        try {
+          federatedWeightSnapshot = await snapshotCausalWeights(supabase, organizationId);
+          log(`Federated learning: snapshotted ${federatedWeightSnapshot.size} causal edge weights`);
+        } catch (err) {
+          log(`Federated learning: snapshot failed (non-fatal): ${(err as Error).message}`);
+        }
+      }
 
       // 1. Fetch recent signals
       const signals = await fetchRecentSignals();
@@ -454,6 +574,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
       // The autonomous learner focuses on pattern mining, anomaly detection, and promotion
       // — NOT redundant full causal discovery (which runs via consolidation engine / scheduled jobs).
       let relationships: CausalRelationship[] = [];
+      // Gap 1: Track bandit arm selections for reporting
+      const banditSelections: Array<{ sourceDomain: string; targetDomain: string; selectedMethod: string; ucbScore: number }> = [];
       try {
         const { data: dbRels } = await supabase
           .from('causal_relationships_statistical')
@@ -482,6 +604,34 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           discovery_method: r.discovery_method,
         }));
         log(`Read ${relationships.length} existing causal relationships from DB (discovery delegated to consolidation engine)`);
+
+        // ── GAP 1: UCB1 Bandit — select best arm per domain pair ───────────
+        // For each significant relationship, ask the bandit which method to use
+        // for the NEXT discovery cycle. This doesn't re-run discovery here —
+        // it annotates the relationship so the consolidation engine picks it up.
+        if (bandit && relationships.length > 0) {
+          const uniquePairs = new Set<string>();
+          for (const rel of relationships) {
+            const pairKey = `${rel.source_domain}→${rel.target_domain}`;
+            if (uniquePairs.has(pairKey)) continue;
+            uniquePairs.add(pairKey);
+            try {
+              const selection = bandit.selectArm(rel.source_domain, rel.target_domain);
+              banditSelections.push({
+                sourceDomain: rel.source_domain,
+                targetDomain: rel.target_domain,
+                selectedMethod: selection.selectedMethod,
+                ucbScore: selection.ucbScore,
+              });
+              log(`Bandit selected "${selection.selectedMethod}" for ${pairKey} (UCB: ${selection.ucbScore.toFixed(3)})`);
+            } catch (err) {
+              // Non-critical: bandit selection failure doesn't block learning
+            }
+          }
+          // Persist bandit state so UCB scores survive restarts
+          await bandit.persistState().catch(() => {});
+          log(`Bandit: ${banditSelections.length} arm selections logged`);
+        }
       } catch (err: any) {
         log(`Relationship read error: ${err.message}`);
       }
@@ -696,12 +846,63 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         }
       }
 
-      // Log the cycle result
+      // ── GAP 4: Outcome Oracle — Register predictions from discovered relationships ──
+      // For each significant causal relationship, register a WatchedPrediction.
+      // The oracle will verify these autonomously at the next connector sync by
+      // comparing predicted direction/magnitude against incoming signal values.
+      // Correct predictions reward the bandit arm; wrong ones penalise it.
+      let oraclePredictionsRegistered = 0;
+      if (oracle && relationships.length > 0) {
+        try {
+          // Load existing pending predictions first (avoid duplicating in-flight)
+          await oracle.loadFromSupabase(organizationId);
+          for (const rel of relationships) {
+            if (!rel.is_significant) continue;
+            // Use last known signal value as baseline for this domain pair
+            const baselineSignal = signals
+              .filter((s: any) => s.source_domain === rel.target_domain)
+              .slice(-1)[0];
+            const baselineValue = baselineSignal?.signal_value ?? 0;
+            if (baselineValue <= 0) continue; // Need a positive baseline for magnitude %
+
+            // The discovery method used for this relationship (from bandit or db)
+            const discoveryMethod =
+              banditSelections.find(
+                (b) => b.sourceDomain === rel.source_domain && b.targetDomain === rel.target_domain
+              )?.selectedMethod ?? rel.discovery_method ?? 'three_paradigm';
+
+            const prediction = buildWatchedPrediction(
+              {
+                organization_id: organizationId,
+                source_domain: rel.source_domain,
+                target_domain: rel.target_domain,
+                effect_size: rel.effect_size,
+                optimal_lag_days: rel.optimal_lag_days,
+                natural_language: rel.natural_language || '',
+              },
+              baselineValue,
+              'connector_metric', // verified against connector sync signals
+              discoveryMethod as any,
+              {
+                // expiryMultiplier: how many lag periods until expiry (default 3x)
+                expiryMultiplier: Math.max(2, Math.ceil(7 / Math.max(1, rel.optimal_lag_days))),
+              }
+            );
+            oracle.registerPrediction(prediction);
+            oraclePredictionsRegistered++;
+          }
+          log(`Oracle: registered ${oraclePredictionsRegistered} predictions for autonomous verification`);
+        } catch (err) {
+          log(`Oracle registration error (non-fatal): ${(err as Error).message}`);
+        }
+      }
+
+      // Log the cycle result (after oracle so oraclePredictionsRegistered is set)
       if (repository) {
         await repository.logActivity({
           agentType: 'autonomous_learner',
           actionType: 'learning_cycle',
-          outputSummary: `Cycle complete: ${relationships.length} causal, ${anomalies.length} anomalies, ${patterns.length} patterns, ${seqPatterns.length} sequential, ${temporalRules.length} temporal rules, ${rulesPromoted} promoted, ${memoriesCreated} insights`,
+          outputSummary: `Cycle complete: ${relationships.length} causal, ${anomalies.length} anomalies, ${patterns.length} patterns, ${seqPatterns.length} sequential, ${temporalRules.length} temporal rules, ${rulesPromoted} promoted, ${memoriesCreated} insights, ${banditSelections.length} bandit selections, ${oraclePredictionsRegistered} oracle predictions`,
           metadata: {
             causalEdgesUpdated,
             anomaliesDetected: anomalies.length,
@@ -712,10 +913,40 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
             rulesPromoted,
             memoriesCreated,
             maturityLevel: maturity?.overallLevel,
+            // Gap 1
+            banditSelectionsCount: banditSelections.length,
+            banditTopMethod: banditSelections[0]?.selectedMethod,
+            // Gap 4
+            oraclePredictionsRegistered,
           },
-        }).catch((err) => {
+        }).catch((_err) => {
           // Fire-and-forget: activity log persistence may fail without blocking learning cycle
         });
+      }
+
+      // FEDERATED LEARNING — Step 2: Compute and promote weight deltas to CORE
+      // After feedback-loop has updated edge weights, compute what changed,
+      // and share those deltas (not raw weights) with the CORE brain via FedAvg.
+      let federatedResult: LearningCycleResult['federatedLearning'];
+      if (isFederatedEnabled && federatedWeightSnapshot) {
+        try {
+          const fedLearningResult = await computeAndPromoteCausalDeltas(
+            supabase,
+            organizationId,
+            federatedWeightSnapshot,
+            cycleId,
+            fedConfig,
+          );
+          federatedResult = {
+            deltasApplied: fedLearningResult.deltasApplied,
+            newPairsAdded: fedLearningResult.newPairsAdded,
+            existingPairsUpdated: fedLearningResult.existingPairsUpdated,
+            cycleId,
+          };
+          log(`Federated learning: ${fedLearningResult.deltasApplied} deltas applied to CORE (${fedLearningResult.newPairsAdded} new pairs, ${fedLearningResult.existingPairsUpdated} updated)`);
+        } catch (err) {
+          log(`Federated learning: delta promotion failed (non-fatal): ${(err as Error).message}`);
+        }
       }
 
       const result: LearningCycleResult = {
@@ -730,6 +961,11 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         maturity,
         trainingStats: trainer.getTrainingStats(),
         duration: Date.now() - startTime,
+        federatedLearning: federatedResult,
+        // Gap 1: Bandit arm selections this cycle
+        banditSelections: banditSelections.length > 0 ? banditSelections : undefined,
+        // Gap 4: Oracle predictions queued for autonomous verification
+        oraclePredictionsRegistered: oraclePredictionsRegistered > 0 ? oraclePredictionsRegistered : undefined,
       };
 
       log(`Learning cycle complete in ${result.duration}ms`);

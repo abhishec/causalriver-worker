@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
-import { createGitHubConnector } from "@nexus-ai/memory-stack";
+import { createGitHubConnector, createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 
 export const dynamic = 'force-dynamic';
 
@@ -93,6 +93,38 @@ export async function POST(request: Request) {
     // (replaces fake seeded data with org-specific statistics)
     await deriveRealCausalInsights(service, orgId);
 
+    // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
+    // Convert synced signals into IncomingSignal format and run Oracle.
+    // This fires on every GitHub sync and verifies any pending predictions
+    // made by the autonomous learner, rewarding/penalising bandit arms.
+    let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;
+    try {
+      const { data: recentSignals } = await service
+        .from("cross_domain_signals")
+        .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
+        .eq("organization_id", orgId)
+        .eq("source_domain", "engineering")
+        .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("signal_timestamp", { ascending: false })
+        .limit(500);
+
+      if (recentSignals && recentSignals.length > 0) {
+        const bandit = createCausalMethodBandit({ supabase: service, organizationId: orgId });
+        const oracle = createOutcomeOracle({ supabase: service, bandit });
+        await oracle.loadFromSupabase(orgId);
+        const result = await oracle.processBatch(recentSignals);
+        oracleResult = {
+          predictionsVerified: result.predictionsVerified,
+          predictionsExpired: result.predictionsExpired,
+          averageReward: result.banditRewardsGiven ?? 0,
+        };
+        console.log(`[GitHub sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired, bandit rewards: ${result.banditRewardsGiven ?? 0}`);
+      }
+    } catch (oracleErr: any) {
+      // Non-critical: oracle verification errors don't fail the sync
+      console.warn("[GitHub sync] Oracle error (non-fatal):", oracleErr.message);
+    }
+
     // 7. Update connector with results
     await service
       .from("org_connectors")
@@ -122,6 +154,7 @@ export async function POST(request: Request) {
       recordsProcessed: syncResult.recordsProcessed,
       errors: syncResult.errors,
       duration_ms: syncResult.duration_ms,
+      oracle: oracleResult,
     });
   } catch (err: any) {
     console.error("GitHub sync error:", err);

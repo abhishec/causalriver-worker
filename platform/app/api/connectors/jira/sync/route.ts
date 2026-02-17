@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
+import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 
 export const dynamic = 'force-dynamic';
 
@@ -161,6 +162,34 @@ export async function POST(request: Request) {
     // 5. Derive REAL Jira insights from actual ingested signals
     await deriveRealJiraInsights(service, orgId);
 
+    // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
+    let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;
+    try {
+      const { data: recentSignals } = await service
+        .from("cross_domain_signals")
+        .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
+        .eq("organization_id", orgId)
+        .in("source_domain", ["product", "engineering", "support"])
+        .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("signal_timestamp", { ascending: false })
+        .limit(500);
+
+      if (recentSignals && recentSignals.length > 0) {
+        const bandit = createCausalMethodBandit({ supabase: service, organizationId: orgId });
+        const oracle = createOutcomeOracle({ supabase: service, bandit });
+        await oracle.loadFromSupabase(orgId);
+        const result = await oracle.processBatch(recentSignals);
+        oracleResult = {
+          predictionsVerified: result.predictionsVerified,
+          predictionsExpired: result.predictionsExpired,
+          averageReward: result.banditRewardsGiven ?? 0,
+        };
+        console.log(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+      }
+    } catch (oracleErr: any) {
+      console.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
+    }
+
     // 6. Update connector with results
     await service
       .from("org_connectors")
@@ -188,6 +217,7 @@ export async function POST(request: Request) {
       recordsProcessed,
       errors,
       duration_ms,
+      oracle: oracleResult,
     });
   } catch (err: any) {
     console.error("Jira sync error:", err);

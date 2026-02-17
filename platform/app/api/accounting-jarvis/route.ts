@@ -534,9 +534,9 @@ export async function POST(request: Request) {
 
     // SSE streaming setup
     const encoder = new TextEncoder();
-    let controller: ReadableStreamDefaultController | null = null;
+    let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
 
-    const stream = new ReadableStream({
+    const stream = new ReadableStream<Uint8Array>({
       start(c) {
         controller = c;
       },
@@ -559,7 +559,7 @@ export async function POST(request: Request) {
           action,
           organizationId: orgId!,
           userId: user.id,
-          transactions: transactions as Array<Record<string, unknown>>,
+          transactions: transactions as unknown as Array<Record<string, unknown>>,
           period,
           jurisdiction,
           onProgress: (progress: number, message: string) => {
@@ -577,12 +577,12 @@ export async function POST(request: Request) {
         }));
 
         send("[DONE]");
-        controller?.close();
+        controller!.close();
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Agent execution failed";
         send(JSON.stringify({ type: 'error', error: msg }));
         send("[DONE]");
-        controller?.close();
+        controller!.close();
       }
     })();
 

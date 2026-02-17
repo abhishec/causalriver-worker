@@ -29,7 +29,7 @@ export default async function AdminUsersPage() {
     });
   });
 
-  const members = (membersResult.data || []) as Array<{
+  const members = (membersResult.data || []) as unknown as Array<{
     id: string;
     user_id: string;
     role: string;

@@ -145,6 +145,71 @@ jobs:
         run: echo "✅ All pre-flight checks passed"
 
   # ---------------------------------------------------------------
+  # Migrate: Run DB migrations before any code deploys
+  # ---------------------------------------------------------------
+  migrate:
+    name: Run DB Migrations
+    runs-on: ubuntu-latest
+    needs: [gate, preflight]
+    if: |
+      always() &&
+      needs.gate.result == 'success' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped') &&
+      vars.SUPABASE_PROJECT_REF != ''
+    outputs:
+      migrations_applied: ${{ steps.push.outputs.migrations_applied }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Apply pending migrations
+        id: push
+        run: |
+          OUTPUT=$(supabase db push --linked 2>&1)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "Applying migration"; then
+            echo "migrations_applied=true" >> $GITHUB_OUTPUT
+            echo "✅ Migrations applied"
+          else
+            echo "migrations_applied=false" >> $GITHUB_OUTPUT
+            echo "✅ No pending migrations — DB is up to date"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Verify no drift remains
+        run: |
+          STATUS=$(supabase db push --linked --dry-run 2>&1 || true)
+          echo "$STATUS"
+          if echo "$STATUS" | grep -q "Applying migration"; then
+            echo "::error::Migration drift detected after push — some migrations may have failed"
+            exit 1
+          fi
+          echo "✅ DB schema matches migrations — no drift"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Migration summary
+        run: |
+          echo "## 🗄️ Migration Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Applied** | ${{ steps.push.outputs.migrations_applied }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Project** | \`${{ vars.SUPABASE_PROJECT_REF }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Drift check** | ✅ Clean |" >> $GITHUB_STEP_SUMMARY
+
+  # ---------------------------------------------------------------
   # Build Platform Docker Image
   # ---------------------------------------------------------------
   build-platform:
@@ -292,11 +357,12 @@ jobs:
   deploy:
     name: Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    needs: [gate, preflight, build-platform, build-orchestrator]
+    needs: [gate, preflight, migrate, build-platform, build-orchestrator]
     if: |
       always() &&
       needs.gate.result == 'success' &&
       (needs.preflight.result == 'success' || needs.preflight.result == 'skipped') &&
+      (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') &&
       (needs.build-platform.result == 'success' || needs.build-platform.result == 'skipped') &&
       (needs.build-orchestrator.result == 'success' || needs.build-orchestrator.result == 'skipped')
     environment: ${{ inputs.environment }}
@@ -341,6 +407,48 @@ jobs:
             --force-new-deployment \
             --region ${{ env.AWS_REGION }} 2>/dev/null || \
           echo "No orchestrator service found — scheduled tasks will pick up :latest on next run"
+
+      # Post-Deploy DB Health Check
+      - name: Wait for platform to be reachable
+        if: needs.gate.outputs.deploy_platform == 'true' && vars.PLATFORM_URL != ''
+        run: |
+          echo "⏳ Waiting for platform to respond..."
+          MAX_RETRIES=12
+          RETRY_DELAY=10
+          for i in $(seq 1 $MAX_RETRIES); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.PLATFORM_URL }}/api/health" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Platform is up (attempt $i)"
+              break
+            fi
+            echo "  Attempt $i/$MAX_RETRIES — HTTP $STATUS — retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+            if [ "$i" = "$MAX_RETRIES" ]; then
+              echo "::error::Platform did not become healthy after $((MAX_RETRIES * RETRY_DELAY))s"
+              exit 1
+            fi
+          done
+
+      - name: Verify platform health (public endpoint)
+        if: needs.gate.outputs.deploy_platform == 'true' && vars.PLATFORM_URL != ''
+        run: |
+          echo "🗄️  Verifying platform is serving and DB is reachable..."
+          RESPONSE=$(curl -s "${{ vars.PLATFORM_URL }}/api/health" || echo '{"status":"unreachable"}')
+          echo "$RESPONSE"
+
+          STATUS=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
+
+          if [ "$STATUS" = "healthy" ] || [ "$STATUS" = "ok" ]; then
+            echo "✅ Platform healthy — DB connection live"
+          else
+            echo "::warning::Platform returned status '$STATUS' — check ECS logs"
+          fi
+
+          echo "## 🏥 Post-Deploy Health" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Platform status** | \`$STATUS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Migrations applied** | ${{ needs.migrate.outputs.migrations_applied || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
 
       # Verify
       - name: Verify deployments
