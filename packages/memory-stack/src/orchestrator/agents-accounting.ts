@@ -114,6 +114,9 @@ export interface ReconciliationResult {
  *  e.g. "cpf payable" (liability) must come before "cpf" (expense).
  */
 const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassification['type']; subType?: string }> = {
+  // ── Intercompany Recharges (BEFORE general patterns) ──
+  'intercompany recharge': { type: 'revenue', subType: 'intercompany' },
+  'thpl': { type: 'revenue', subType: 'intercompany' },
   // ── Liabilities (BEFORE expenses — specific patterns first) ──
   'cpf payable': { type: 'liability', subType: 'statutory' },
   'accrued expense': { type: 'liability', subType: 'accrued' },
@@ -124,6 +127,7 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'gst summary': { type: 'liability', subType: 'tax' },
   'wht payable': { type: 'liability', subType: 'tax' },
   'philippine vat': { type: 'liability', subType: 'tax' },
+  'vat payable': { type: 'liability', subType: 'tax' },
   'deferred revenue': { type: 'liability', subType: 'deferred' },
   'deposits collected': { type: 'liability', subType: 'deposit' },
   'intercompany payable': { type: 'liability', subType: 'intercompany' },
@@ -155,8 +159,8 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'share application': { type: 'equity', subType: 'capital' },
   'retained earnings': { type: 'equity', subType: 'retained' },
   'share based payment': { type: 'equity', subType: 'reserves' },
-  'founder\'s share': { type: 'equity', subType: 'reserves' },
   'founders share': { type: 'equity', subType: 'reserves' },
+  "founder's share": { type: 'equity', subType: 'reserves' },
   'share warrant': { type: 'equity', subType: 'reserves' },
   'historical adjustment': { type: 'equity', subType: 'adjustment' },
   // ── Bank ──
@@ -178,9 +182,25 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'support fee': { type: 'revenue', subType: 'support' },
   'overage fee': { type: 'revenue', subType: 'overage' },
   'fees from pilot': { type: 'revenue', subType: 'pilot' },
+  // Tookitaki product lines (IA = IndicatorAI, TRM, FRAML)
+  'ia - ': { type: 'revenue', subType: 'product' },
+  'ia ns': { type: 'revenue', subType: 'product' },
+  'framl': { type: 'revenue', subType: 'product' },
+  'prs - ': { type: 'revenue', subType: 'product' },
+  'ps - ': { type: 'revenue', subType: 'product' },
+  'ttmfs': { type: 'revenue', subType: 'product' },
+  'shared typology': { type: 'revenue', subType: 'product' },
+  'trm tmiad': { type: 'revenue', subType: 'product' },
+  'ts iad': { type: 'revenue', subType: 'product' },
+  'automated exceptions': { type: 'revenue', subType: 'product' },
+  'automated matching': { type: 'revenue', subType: 'product' },
+  'case management': { type: 'revenue', subType: 'product' },
+  'transaction screening': { type: 'revenue', subType: 'product' },
+  'approval max': { type: 'revenue', subType: 'product' },
   'interest income': { type: 'revenue', subType: 'interest' },
   'miscellaneous income': { type: 'revenue', subType: 'other' },
   'other income': { type: 'revenue', subType: 'other' },
+  'fair value gain': { type: 'revenue', subType: 'other' },
   'grant': { type: 'revenue', subType: 'grant' },
   // ── Expenses (general patterns — LAST) ──
   'salary': { type: 'expense', subType: 'payroll' },
@@ -192,8 +212,9 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'ex-gratia': { type: 'expense', subType: 'payroll' },
   'director remuneration': { type: 'expense', subType: 'payroll' },
   'directors remuneration': { type: 'expense', subType: 'payroll' },
-  'directors\' allowance': { type: 'expense', subType: 'payroll' },
   'directors allowance': { type: 'expense', subType: 'payroll' },
+  "directors' allowance": { type: 'expense', subType: 'payroll' },
+  'employment pass': { type: 'expense', subType: 'payroll' },
   'provident fund': { type: 'expense', subType: 'payroll' },
   'workmen compensation': { type: 'expense', subType: 'benefits' },
   'rental': { type: 'expense', subType: 'occupancy' },
@@ -206,8 +227,8 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'bank charges': { type: 'expense', subType: 'finance' },
   'interest on convertible': { type: 'expense', subType: 'finance' },
   'interest expense': { type: 'expense', subType: 'finance' },
-  'rou interest': { type: 'expense', subType: 'finance' },
   'od interest': { type: 'expense', subType: 'finance' },
+  'rou interest': { type: 'expense', subType: 'finance' },
   'cna singapore': { type: 'expense', subType: 'insurance' },
   'insurance': { type: 'expense', subType: 'insurance' },
   'travel': { type: 'expense', subType: 'travel' },
@@ -225,6 +246,8 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'consulting fee': { type: 'expense', subType: 'professional' },
   'patent fee': { type: 'expense', subType: 'professional' },
   'external contractor': { type: 'expense', subType: 'contractors' },
+  'caas': { type: 'expense', subType: 'software' },
+  'technology support': { type: 'expense', subType: 'software' },
   'subscription': { type: 'expense', subType: 'software' },
   'software': { type: 'expense', subType: 'software' },
   'it maintenance': { type: 'expense', subType: 'software' },
@@ -236,6 +259,20 @@ const ACCOUNT_CLASSIFICATION_KEYWORDS: Record<string, { type: AccountClassificat
   'employee insurance': { type: 'expense', subType: 'benefits' },
   'general expense': { type: 'expense', subType: 'general' },
   'office supplies': { type: 'expense', subType: 'general' },
+  'office designing': { type: 'expense', subType: 'general' },
+  'postage': { type: 'expense', subType: 'general' },
+  'printing': { type: 'expense', subType: 'general' },
+  'stationery': { type: 'expense', subType: 'general' },
+  'repair': { type: 'expense', subType: 'general' },
+  'maintenance': { type: 'expense', subType: 'general' },
+  'telephone': { type: 'expense', subType: 'general' },
+  'internet': { type: 'expense', subType: 'general' },
+  'food & beverage': { type: 'expense', subType: 'general' },
+  'meeting & conference': { type: 'expense', subType: 'general' },
+  'other purchases': { type: 'expense', subType: 'general' },
+  'other statutory': { type: 'expense', subType: 'payroll' },
+  'facility fee': { type: 'expense', subType: 'finance' },
+  'fair value loss': { type: 'expense', subType: 'other' },
   'other expense': { type: 'expense', subType: 'general' },
   'product development': { type: 'expense', subType: 'r&d' },
   'partner commission': { type: 'expense', subType: 'sales' },
@@ -760,6 +797,19 @@ export const brainStatementGeneratorAgent: AgentDefinition<
       openingCash: number;
       closingCash: number;
     };
+    trialBalance: {
+      accounts: Array<{ account: string; type: string; debit: number; credit: number; netDebit: number; netCredit: number }>;
+      totalDebits: number;
+      totalCredits: number;
+      balanced: boolean;
+      period: string;
+    };
+    transactionSummary: {
+      totalTransactions: number;
+      period: string;
+      bySource: Array<{ source: string; count: number; totalAmount: number }>;
+      topTransactions: Array<{ date: string; account: string; description: string; debit: number; credit: number; classification: string }>;
+    };
     keyRatios: {
       currentRatio: number;
       debtToEquity: number;
@@ -797,11 +847,15 @@ export const brainStatementGeneratorAgent: AgentDefinition<
     const { transactions, period, jurisdiction = 'SG' } = input;
     ctx.log(`[brain-statement-generator] Generating statements for ${period.from} to ${period.to}`);
 
-    // Filter transactions for period
+    // P&L uses period-filtered transactions only (income statement = period activity)
     const periodTxns = transactions.filter(t => {
       const d = t.date.slice(0, 10);
       return d >= period.from && d <= period.to;
     });
+
+    // Balance Sheet uses ALL transactions up to period end (balance sheet = cumulative position)
+    // This is correct: equity, assets and liabilities accumulate over the entity's life
+    const cumulativeTxns = transactions.filter(t => t.date.slice(0, 10) <= period.to);
 
     // Step 1: Check completeness
     ctx.reportProgress(0.1, 'Checking data completeness...');
@@ -817,7 +871,7 @@ export const brainStatementGeneratorAgent: AgentDefinition<
       question: `Apply ${jurisdiction} recognition and measurement rules`,
     });
 
-    // Step 3: Aggregate by account and type
+    // Step 3a: P&L account balances — period only (income/expense accounts reset each period)
     ctx.reportProgress(0.4, 'Aggregating account balances...');
     const accountBalances = new Map<string, { type: string; subType?: string; debit: number; credit: number; net: number }>();
 
@@ -835,6 +889,25 @@ export const brainStatementGeneratorAgent: AgentDefinition<
       bal.debit += txn.debit;
       bal.credit += txn.credit;
       bal.net = bal.debit - bal.credit;
+    }
+
+    // Step 3b: Balance Sheet account balances — cumulative (asset/liability/equity are permanent accounts)
+    const bsAccountBalances = new Map<string, { type: string; subType?: string; debit: number; credit: number; net: number }>();
+    for (const txn of cumulativeTxns) {
+      const acctType = classifyAccount(txn.account);
+      if (acctType !== 'revenue' && acctType !== 'expense') {
+        if (!bsAccountBalances.has(txn.account)) {
+          bsAccountBalances.set(txn.account, {
+            type: acctType,
+            subType: getAccountSubType(txn.account),
+            debit: 0, credit: 0, net: 0,
+          });
+        }
+        const b = bsAccountBalances.get(txn.account)!;
+        b.debit += txn.debit;
+        b.credit += txn.credit;
+        b.net = b.debit - b.credit;
+      }
     }
 
     // Step 4: Build P&L
@@ -883,19 +956,19 @@ export const brainStatementGeneratorAgent: AgentDefinition<
 
     const netProfit = profitBeforeTax - taxExpense;
 
-    // Step 5: Build Balance Sheet
+    // Step 5: Build Balance Sheet (uses cumulative balances — permanent accounts)
     ctx.reportProgress(0.65, 'Building Balance Sheet...');
 
-    const assetEntries = [...accountBalances.entries()]
+    const assetEntries = [...bsAccountBalances.entries()]
       .filter(([_, b]) => b.type === 'asset' || b.type === 'bank')
       .map(([name, b]) => ({ account: name, amount: b.debit - b.credit })) // Assets are debit-normal
       .filter(a => a.amount !== 0);
 
-    const currentAssetKeywords = ['debtor', 'receivable', 'prepayment', 'deposit', 'cash', 'bank', 'uob', 'wise', 'citibank', 'clearing', 'accrued income', 'gst', 'staff loan'];
+    const currentAssetKeywords = ['debtor', 'receivable', 'prepayment', 'deposit', 'cash', 'bank', 'uob', 'wise', 'citibank', 'cimb', 'tt bank', 'clearing', 'accrued income', 'gst', 'staff loan'];
     const currentAssets = assetEntries.filter(a => currentAssetKeywords.some(k => a.account.toLowerCase().includes(k)));
     const nonCurrentAssets = assetEntries.filter(a => !currentAssetKeywords.some(k => a.account.toLowerCase().includes(k)));
 
-    const liabilityEntries = [...accountBalances.entries()]
+    const liabilityEntries = [...bsAccountBalances.entries()]
       .filter(([_, b]) => b.type === 'liability')
       .map(([name, b]) => ({ account: name, amount: b.credit - b.debit })) // Liabilities are credit-normal
       .filter(a => a.amount !== 0);
@@ -910,7 +983,7 @@ export const brainStatementGeneratorAgent: AgentDefinition<
       a.account.toLowerCase().includes('non current') || a.account.toLowerCase().includes('non-current')
     );
 
-    const equityEntries = [...accountBalances.entries()]
+    const equityEntries = [...bsAccountBalances.entries()]
       .filter(([_, b]) => b.type === 'equity')
       .map(([name, b]) => ({ account: name, amount: b.credit - b.debit }))
       .filter(a => a.amount !== 0);
@@ -922,7 +995,7 @@ export const brainStatementGeneratorAgent: AgentDefinition<
     // Step 6: Cash flow summary
     ctx.reportProgress(0.8, 'Building cash flow summary...');
 
-    const bankAccounts = [...accountBalances.entries()]
+    const bankAccounts = [...bsAccountBalances.entries()]
       .filter(([_, b]) => b.type === 'bank')
       .map(([name, b]) => ({ account: name, net: b.debit - b.credit }));
     const closingCash = bankAccounts.reduce((s, a) => s + a.net, 0);
@@ -932,14 +1005,62 @@ export const brainStatementGeneratorAgent: AgentDefinition<
     const investingCashFlow = nonCurrentAssets.reduce((s, a) => s - a.amount, 0);
     const financingCashFlow = closingCash - operatingCashFlow - investingCashFlow;
 
-    // Step 7: Cross-validate
+    // Step 7: Build Trial Balance (all accounts, period transactions)
+    ctx.reportProgress(0.85, 'Building Trial Balance...');
+    const trialBalanceAllBalances = new Map<string, { type: string; debit: number; credit: number }>();
+    for (const txn of periodTxns) {
+      if (!trialBalanceAllBalances.has(txn.account)) {
+        trialBalanceAllBalances.set(txn.account, { type: classifyAccount(txn.account), debit: 0, credit: 0 });
+      }
+      const b = trialBalanceAllBalances.get(txn.account)!;
+      b.debit += txn.debit;
+      b.credit += txn.credit;
+    }
+    const trialBalanceAccounts = [...trialBalanceAllBalances.entries()]
+      .map(([account, b]) => ({
+        account,
+        type: b.type,
+        debit: b.debit,
+        credit: b.credit,
+        netDebit: b.debit > b.credit ? b.debit - b.credit : 0,
+        netCredit: b.credit > b.debit ? b.credit - b.debit : 0,
+      }))
+      .sort((a, b) => a.account.localeCompare(b.account));
+    const tbTotalDebits = trialBalanceAccounts.reduce((s, a) => s + a.debit, 0);
+    const tbTotalCredits = trialBalanceAccounts.reduce((s, a) => s + a.credit, 0);
+
+    // Step 7b: Transaction Summary — by source + top transactions
+    const sourceMap = new Map<string, { count: number; total: number }>();
+    for (const t of periodTxns) {
+      if (!sourceMap.has(t.source)) sourceMap.set(t.source, { count: 0, total: 0 });
+      const s = sourceMap.get(t.source)!;
+      s.count++;
+      s.total += Math.max(t.debit, t.credit);
+    }
+    const bySource = [...sourceMap.entries()]
+      .map(([source, d]) => ({ source, count: d.count, totalAmount: d.total }))
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+
+    const topTransactions = [...periodTxns]
+      .sort((a, b) => Math.max(b.debit, b.credit) - Math.max(a.debit, a.credit))
+      .slice(0, 20)
+      .map(t => ({
+        date: t.date.slice(0, 10),
+        account: t.account,
+        description: t.description.slice(0, 100),
+        debit: t.debit,
+        credit: t.credit,
+        classification: classifyAccount(t.account),
+      }));
+
+    // Step 8: Cross-validate
     ctx.reportProgress(0.9, 'Cross-validating statements...');
     await ctx.callAgent('cross-validate', {
       domain: 'accounting',
       question: 'Verify Assets = Liabilities + Equity and trial balance',
     });
 
-    // Step 8: Compute key ratios
+    // Step 9: Compute key ratios
     const currentAssetsTotal = currentAssets.reduce((s, a) => s + a.amount, 0);
     const currentLiabilitiesTotal = currentLiabilities.reduce((s, a) => s + a.amount, 0);
     const monthlyBurn = totalOperatingExpenses / Math.max(1,
@@ -984,6 +1105,19 @@ export const brainStatementGeneratorAgent: AgentDefinition<
         netCashChange: operatingCashFlow + investingCashFlow + financingCashFlow,
         openingCash: 0,
         closingCash,
+      },
+      trialBalance: {
+        accounts: trialBalanceAccounts,
+        totalDebits: tbTotalDebits,
+        totalCredits: tbTotalCredits,
+        balanced: Math.abs(tbTotalDebits - tbTotalCredits) < 0.01,
+        period: `${period.from} to ${period.to}`,
+      },
+      transactionSummary: {
+        totalTransactions: periodTxns.length,
+        period: `${period.from} to ${period.to}`,
+        bySource,
+        topTransactions,
       },
       keyRatios: {
         currentRatio: currentLiabilitiesTotal > 0 ? currentAssetsTotal / currentLiabilitiesTotal : 0,
@@ -1126,22 +1260,48 @@ export const brainTaxComplianceAgent: AgentDefinition<
     const corporateTaxRate = taxRates[jurisdiction] || 0.17;
     const estimatedTax = Math.max(0, taxableIncome * corporateTaxRate);
 
-    // Step 4: GST/VAT computation
+    // Step 4: GST/VAT computation (IRAS GST F5 format)
     ctx.reportProgress(0.6, 'Computing GST/VAT...');
 
-    const gstTxns = periodTxns.filter(t => t.taxRateName && t.taxRateName !== 'No Tax');
-    const outputTaxTxns = gstTxns.filter(t => classifyAccount(t.account) === 'revenue');
-    const inputTaxTxns = gstTxns.filter(t => classifyAccount(t.account) === 'expense');
+    // All GST-tagged transactions
+    const gstTxns = periodTxns.filter(t => t.taxRateName && t.taxRateName !== 'No Tax' && t.tax !== 0);
+
+    // Output tax = GST charged on sales/revenue (Box 6: Output Tax)
+    // For Singapore: revenue side = standard-rated supplies
+    const outputTaxTxns = gstTxns.filter(t => {
+      const acctType = classifyAccount(t.account);
+      return acctType === 'revenue';
+    });
+
+    // Input tax = GST paid on purchases/expenses (Box 7: Input Tax)
+    // For Singapore: expense + asset + bank side = input claims
+    const inputTaxTxns = gstTxns.filter(t => {
+      const acctType = classifyAccount(t.account);
+      return acctType === 'expense' || acctType === 'asset' || acctType === 'bank';
+    });
 
     const outputTax = outputTaxTxns.reduce((s, t) => s + t.tax, 0);
     const inputTax = inputTaxTxns.reduce((s, t) => s + t.tax, 0);
 
-    const standardRatedSupplies = outputTaxTxns.reduce((s, t) => s + (t.credit - t.debit), 0);
+    // Box 1: Total value of standard-rated supplies (supplies taxed at 9%/8%/7%)
+    const standardRatedSupplies = outputTaxTxns.reduce((s, t) => s + Math.max(t.credit - t.debit, 0), 0);
+
+    // Box 2: Zero-rated supplies (international services — most of Tookitaki revenue)
     const zeroRatedTxns = periodTxns.filter(t =>
       t.taxRateName?.toLowerCase().includes('zero') ||
-      t.taxRateName?.toLowerCase().includes('export')
+      t.taxRateName?.toLowerCase().includes('export') ||
+      t.taxRateName?.toLowerCase().includes('international')
     );
-    const zeroRatedSupplies = zeroRatedTxns.reduce((s, t) => s + Math.max(t.debit, t.credit), 0);
+    // Revenue with No Tax = zero-rated supplies (exported services)
+    const zeroRatedRevenueTxns = periodTxns.filter(t =>
+      (t.taxRateName === 'No Tax' || t.taxRateName === '') &&
+      classifyAccount(t.account) === 'revenue'
+    );
+    const zeroRatedSupplies = zeroRatedRevenueTxns.reduce((s, t) => s + Math.max(t.credit - t.debit, 0), 0)
+      + zeroRatedTxns.reduce((s, t) => s + Math.max(t.debit, t.credit), 0);
+
+    // Box 5: Total value of taxable purchases (standard + zero rated input)
+    const taxablePurchases = inputTaxTxns.reduce((s, t) => s + Math.max(t.debit, t.credit), 0);
 
     // Step 5: Filing checklist
     ctx.reportProgress(0.75, 'Building filing checklist...');
@@ -1199,13 +1359,26 @@ export const brainTaxComplianceAgent: AgentDefinition<
         ] : [],
       },
       gstReturn: {
+        // IRAS GST F5 boxes
+        box1StandardRatedSupplies: standardRatedSupplies,            // Box 1
+        box2ZeroRatedSupplies: zeroRatedSupplies,                    // Box 2
+        box3ExemptSupplies: 0,                                       // Box 3
+        box4TotalSupplies: standardRatedSupplies + zeroRatedSupplies, // Box 4
+        box5TaxablePurchases: taxablePurchases,                      // Box 5
+        box6OutputTax: outputTax,                                    // Box 6
+        box7InputTax: inputTax,                                      // Box 7
+        netGST: outputTax - inputTax,                                // Box 8 (negative = refund)
+        // Summary
         outputTax,
         inputTax,
-        netGST: outputTax - inputTax,
         standardRatedSupplies,
         zeroRatedSupplies,
         exemptSupplies: 0,
         taxableImports: 0,
+        gstRefundExpected: (outputTax - inputTax) < 0,
+        note: zeroRatedSupplies > standardRatedSupplies
+          ? 'Predominantly zero-rated supplier (international services). Net GST refund position expected.'
+          : undefined,
       },
       filingChecklist: forms,
       withholdingTax,
