@@ -16,6 +16,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createPIISanitizer, type PIISanitizerConfig, type SanitizationResult } from './pii-sanitizer';
 import { createFederationApprovalManager } from './federation-approval-manager';
+import { checkSemanticNovelty, domainSimilarity } from './semantic-federation';
 
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
@@ -193,30 +194,51 @@ export function createUpstreamPromoter(
 
     if (!orgRels || orgRels.length === 0) return 0;
 
-    // Fetch existing core brain relationships for dedup
+    // Fetch existing core brain relationships for dedup (semantic + exact)
     const { data: coreRels } = await supabase
       .from('causal_relationships_statistical')
-      .select('source_domain, target_domain')
+      .select('source_domain, target_domain, natural_language')
       .eq('organization_id', CORE_BRAIN_ORG_ID);
 
     const coreKeys = new Set(
       (coreRels || []).map((r: any) => `${r.source_domain}::${r.target_domain}`)
     );
 
+    // Build semantic comparison texts from existing CORE relationships
+    const coreRelTexts = (coreRels || []).map((r: any) => ({
+      text: `${r.source_domain} causes ${r.target_domain} ${r.natural_language || ''}`.trim(),
+    }));
+
     let promoted = 0;
 
     for (const rel of orgRels) {
-      // Check excluded domains
-      if (excludedDomains.has(rel.source_domain) || excludedDomains.has(rel.target_domain)) {
+      // Check excluded domains (also check semantic domain similarity for excluded)
+      const isExcluded = Array.from(excludedDomains).some(excluded =>
+        rel.source_domain === excluded ||
+        rel.target_domain === excluded ||
+        domainSimilarity(rel.source_domain, excluded) > 0.85 ||
+        domainSimilarity(rel.target_domain, excluded) > 0.85
+      );
+      if (isExcluded) {
         result.itemsSkippedExcluded++;
         continue;
       }
 
-      // Check dedup
+      // Check dedup: exact string match first, then semantic novelty
       const key = `${rel.source_domain}::${rel.target_domain}`;
       if (coreKeys.has(key)) {
         result.itemsSkippedDuplicate++;
         continue;
+      }
+
+      // Semantic novelty: "eng → churn" and "engineering → customer_loss" are the same insight
+      if (coreRelTexts.length > 0) {
+        const relText = `${rel.source_domain} causes ${rel.target_domain} ${rel.natural_language || ''}`.trim();
+        const novelty = checkSemanticNovelty(relText, coreRelTexts);
+        if (!novelty.isNovel) {
+          result.itemsSkippedDuplicate++;
+          continue;
+        }
       }
 
       // Sanitize
@@ -292,23 +314,32 @@ export function createUpstreamPromoter(
 
     if (!orgMems || orgMems.length === 0) return 0;
 
-    // Fetch existing core brain memories for dedup
+    // Fetch existing core brain memories for semantic dedup
     const { data: coreMems } = await supabase
       .from('ai_memory')
-      .select('domain, content')
-      .eq('organization_id', CORE_BRAIN_ORG_ID);
+      .select('domain, content, title')
+      .eq('organization_id', CORE_BRAIN_ORG_ID)
+      .limit(200);
 
-    const coreKeys = new Set(
-      (coreMems || []).map((m: any) => `${m.domain}::${(m.content || '').substring(0, 80)}`)
-    );
+    // Build semantic comparison corpus from CORE memories
+    const coreMemTexts = (coreMems || []).map((m: any) => ({
+      text: `${m.title || ''} ${m.domain || ''} ${
+        typeof m.content === 'string' ? m.content.substring(0, 200) : JSON.stringify(m.content || '').substring(0, 200)
+      }`.trim(),
+    }));
 
     let promoted = 0;
 
     for (const mem of orgMems) {
-      // Check excluded domains
-      if (mem.domain && excludedDomains.has(mem.domain)) {
-        result.itemsSkippedExcluded++;
-        continue;
+      // Check excluded domains (with semantic domain similarity)
+      if (mem.domain) {
+        const isExcluded = Array.from(excludedDomains).some(excluded =>
+          mem.domain === excluded || domainSimilarity(mem.domain, excluded) > 0.85
+        );
+        if (isExcluded) {
+          result.itemsSkippedExcluded++;
+          continue;
+        }
       }
 
       // Sanitize
@@ -318,11 +349,16 @@ export function createUpstreamPromoter(
         continue;
       }
 
-      // Check dedup (after sanitization, since content changes)
-      const key = `${sanitized.domain}::${(sanitized.content || '').substring(0, 80)}`;
-      if (coreKeys.has(key)) {
-        result.itemsSkippedDuplicate++;
-        continue;
+      // Semantic novelty check (replaces string-based dedup)
+      if (coreMemTexts.length > 0) {
+        const memText = `${sanitized.title || mem.title || ''} ${sanitized.domain || ''} ${
+          typeof sanitized.content === 'string' ? sanitized.content.substring(0, 200) : JSON.stringify(sanitized.content || '').substring(0, 200)
+        }`.trim();
+        const novelty = checkSemanticNovelty(memText, coreMemTexts);
+        if (!novelty.isNovel) {
+          result.itemsSkippedDuplicate++;
+          continue;
+        }
       }
 
       if (approvalManager) {
@@ -355,7 +391,6 @@ export function createUpstreamPromoter(
         if (!error) {
           result.memoriesPromoted++;
           promoted++;
-          coreKeys.add(key);
 
           await logPromotion('memory', mem.id, report);
         }
@@ -385,25 +420,30 @@ export function createUpstreamPromoter(
 
     if (!orgRules || orgRules.length === 0) return 0;
 
-    // Fetch existing core brain rules for dedup
+    // Fetch existing core brain rules for semantic dedup
     const { data: coreRules } = await supabase
       .from('brain_grammar_rules')
       .select('domain, rule_type, natural_language')
-      .eq('organization_id', CORE_BRAIN_ORG_ID);
+      .eq('organization_id', CORE_BRAIN_ORG_ID)
+      .limit(200);
 
-    const coreKeys = new Set(
-      (coreRules || []).map(
-        (r: any) => `${r.domain}::${r.rule_type}::${(r.natural_language || '').substring(0, 50)}`
-      )
-    );
+    // Build semantic comparison corpus from CORE rules
+    const coreRuleTexts = (coreRules || []).map((r: any) => ({
+      text: `${r.rule_type || ''} ${r.domain || ''} ${r.natural_language || ''}`.trim(),
+    }));
 
     let promoted = 0;
 
     for (const rule of orgRules) {
-      // Check excluded domains
-      if (rule.domain && excludedDomains.has(rule.domain)) {
-        result.itemsSkippedExcluded++;
-        continue;
+      // Check excluded domains (with semantic domain similarity)
+      if (rule.domain) {
+        const isExcluded = Array.from(excludedDomains).some(excluded =>
+          rule.domain === excluded || domainSimilarity(rule.domain, excluded) > 0.85
+        );
+        if (isExcluded) {
+          result.itemsSkippedExcluded++;
+          continue;
+        }
       }
 
       // Sanitize
@@ -413,11 +453,14 @@ export function createUpstreamPromoter(
         continue;
       }
 
-      // Check dedup (after sanitization)
-      const key = `${sanitized.domain}::${sanitized.rule_type}::${(sanitized.natural_language || '').substring(0, 50)}`;
-      if (coreKeys.has(key)) {
-        result.itemsSkippedDuplicate++;
-        continue;
+      // Semantic novelty check (replaces string-based dedup)
+      if (coreRuleTexts.length > 0) {
+        const ruleText = `${sanitized.rule_type || ''} ${sanitized.domain || ''} ${sanitized.natural_language || ''}`.trim();
+        const novelty = checkSemanticNovelty(ruleText, coreRuleTexts);
+        if (!novelty.isNovel) {
+          result.itemsSkippedDuplicate++;
+          continue;
+        }
       }
 
       if (approvalManager) {
@@ -450,7 +493,6 @@ export function createUpstreamPromoter(
         if (!error) {
           result.rulesPromoted++;
           promoted++;
-          coreKeys.add(key);
 
           await logPromotion('rule', rule.id, report);
         }

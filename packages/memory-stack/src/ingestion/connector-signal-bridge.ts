@@ -42,6 +42,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { createRetry } from '../infra/retry';
 import type { DomainTaxonomyInstance } from '../domain-hierarchy/domain-taxonomy';
 import { OUTCOME_SIGNAL_TYPES, type SignalCategory } from '../connectors/connector-framework';
+import { findSemanticDomains, type SemanticDomainMatch } from '../federation/semantic-federation';
 
 // ============================================================================
 // TYPES
@@ -380,8 +381,14 @@ export async function storeDualWriteConnectorSignals(
   const retry = createRetry({ maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 });
 
   // ── 2. PREPARE ENRICHED ROWS ──────────────────────────────────────────────
-  // Now includes signal_category for embodied grounding (Phase 2).
-  // Outcome signals feed into RL reward + prediction verification.
+  // Now includes:
+  // - signal_category for embodied grounding (Phase 2)
+  // - semantic_domains for cross-domain discovery (Semantic Federation)
+  //
+  // Semantic domain routing enables the brain to discover relationships that
+  // string matching cannot: a "deploy_failure" signal routes to BOTH
+  // "engineering" AND "customer_impact" because the embedding captures
+  // the semantic overlap between deployment failures and customer experience.
   const enrichedRows: CrossDomainSignalRow[] = signals.map((s) => {
     const source = s.source.toLowerCase();
     const metadata = s.metadata || {};
@@ -391,9 +398,35 @@ export async function storeDualWriteConnectorSignals(
       metadata,
     );
 
+    const primaryDomain = deriveDomain(source, metadata);
+
+    // Semantic domain routing: find all semantically related domains
+    // This is the brain's association cortex — signals don't just go to
+    // their primary domain, they also activate semantically related domains.
+    const signalText = `${source} ${s.signal_type} ${
+      metadata?.description || metadata?.title || metadata?.summary || ''
+    }`.trim();
+
+    let semanticDomains: Array<{ domain: string; similarity: number }> | undefined;
+    try {
+      const matches = findSemanticDomains(signalText, primaryDomain);
+      // Only include matches above routing threshold (default 0.65)
+      // Filter out the primary domain (it's already assigned)
+      const secondaryMatches = matches
+        .filter(m => m.domain !== primaryDomain && !m.isPrimary)
+        .slice(0, 5) // Max 5 secondary domains per signal
+        .map(m => ({ domain: m.domain, similarity: Math.round(m.similarity * 100) / 100 }));
+
+      if (secondaryMatches.length > 0) {
+        semanticDomains = secondaryMatches;
+      }
+    } catch {
+      // Semantic routing is non-critical — never block signal ingestion
+    }
+
     return {
       organization_id: organizationId,
-      source_domain: deriveDomain(source, metadata),
+      source_domain: primaryDomain,
       signal_type: s.signal_type,
       signal_value: s.signal_value,
       signal_timestamp: s.signal_timestamp
@@ -407,6 +440,7 @@ export async function storeDualWriteConnectorSignals(
       signal_metadata: {
         ...metadata,
         signal_category: category,
+        ...(semanticDomains ? { semantic_domains: semanticDomains } : {}),
       },
     };
   });

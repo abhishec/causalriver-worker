@@ -22,6 +22,7 @@
  */
 
 import { getClientForTableInEdge } from './get-brain-client';
+import { semanticDedup, type SemanticFederationConfig } from './semantic-federation';
 
 // ============================================================================
 // CONSTANTS
@@ -58,6 +59,10 @@ export interface FederatedQueryResult<T = Record<string, unknown>> {
     orgCount: number;
     coreCount: number;
     duplicatesRemoved: number;
+    /** Whether semantic dedup was used (vs string-based) */
+    semanticDedupUsed: boolean;
+    /** Number of semantic comparisons performed */
+    semanticComparisons?: number;
     federatedAt: string;
   };
 }
@@ -66,6 +71,26 @@ export interface FederatedQueryResult<T = Record<string, unknown>> {
 export interface FederatedQueryOptions<T = Record<string, unknown>> {
   /** Field to deduplicate on (ORG wins over CORE). Use string key from the result type. */
   deduplicateBy?: string;
+  /**
+   * Enable semantic deduplication using cosine similarity on embeddings.
+   * When enabled, items with similarity > threshold (default 0.82) are treated
+   * as duplicates even if their text differs. ORG always wins.
+   *
+   * Requires `semanticTextField` to extract embeddable text from each item.
+   * Falls back to string-based dedup if not provided.
+   */
+  semanticDedup?: boolean;
+  /**
+   * Field(s) to extract text from for semantic embedding.
+   * Can be a single field name or a function that extracts text from an item.
+   * Only used when `semanticDedup` is true.
+   */
+  semanticTextField?: string | ((item: T) => string);
+  /**
+   * Configuration for semantic federation (thresholds, dimensions).
+   * Only used when `semanticDedup` is true.
+   */
+  semanticConfig?: SemanticFederationConfig;
   /** Whether to include CORE brain data. Default: true */
   includeCoreData?: boolean;
   /** Max CORE results to return (limits baseline noise). Default: same as ORG limit */
@@ -131,7 +156,15 @@ export async function federatedQuery<T = Record<string, unknown>>(
   queryBuilder: (client: ReturnType<typeof getClientForTableInEdge>, orgId: string, maxAgeCutoff?: string) => Promise<{ data: T[] | null; error: any }>,
   options: FederatedQueryOptions<T> = {}
 ): Promise<FederatedQueryResult<T>> {
-  const { deduplicateBy, includeCoreData = true, coreMaxAgeDays = 365, queryTimeoutMs = 5000 } = options;
+  const {
+    deduplicateBy,
+    semanticDedup: useSemanticDedup = false,
+    semanticTextField,
+    semanticConfig,
+    includeCoreData = true,
+    coreMaxAgeDays = 365,
+    queryTimeoutMs = 5000,
+  } = options;
   const client = getClientForTableInEdge(tableName);
 
   // Time-based partitioning for CORE queries: at 10M+ signals, scanning all CORE data is O(n).
@@ -174,38 +207,77 @@ export async function federatedQuery<T = Record<string, unknown>>(
   const orgData = (orgResult.data || []) as T[];
   const coreData = (coreResult.data || []) as T[];
 
-  // Label results with source
-  const labeledOrg: LabeledResult<T>[] = orgData.map(item => ({
-    data: item,
-    source: 'org' as SourceLabel,
-    priority: 1
-  }));
+  // ──────────────────────────────────────────────────────────────────────
+  // MERGE + DEDUP: Two strategies based on configuration
+  //
+  // 1. SEMANTIC DEDUP (new): Cosine similarity on embeddings. Catches
+  //    paraphrases, synonyms, and rephrased knowledge that string matching
+  //    misses entirely. "PR velocity declining" ≈ "Pull request throughput
+  //    dropping" → detected as duplicate, ORG wins.
+  //
+  // 2. STRING DEDUP (legacy): Exact field equality. Fast but blind to
+  //    semantic equivalence. Used as fallback when no text extractor.
+  // ──────────────────────────────────────────────────────────────────────
 
-  const labeledCore: LabeledResult<T>[] = coreData.map(item => ({
-    data: item,
-    source: 'core' as SourceLabel,
-    priority: 2
-  }));
-
-  // Merge: ORG first, then CORE
-  let merged = [...labeledOrg, ...labeledCore];
+  let merged: LabeledResult<T>[];
   let duplicatesRemoved = 0;
+  let semanticDedupUsed = false;
+  let semanticComparisons: number | undefined;
 
-  // Deduplicate: ORG wins over CORE when same dedup key exists
-  if (deduplicateBy && merged.length > 0) {
-    const seen = new Set<string>();
-    const deduplicated: LabeledResult<T>[] = [];
+  // Build text extractor function from config
+  const textExtractor: ((item: T) => string) | undefined =
+    useSemanticDedup && semanticTextField
+      ? typeof semanticTextField === 'function'
+        ? semanticTextField
+        : (item: T) => {
+            const val = (item as any)[semanticTextField as string];
+            return typeof val === 'string' ? val : JSON.stringify(val || '');
+          }
+      : undefined;
 
-    for (const item of merged) {
-      const key = String((item.data as any)[deduplicateBy] || '');
-      if (key && seen.has(key)) {
-        duplicatesRemoved++;
-      } else {
-        if (key) seen.add(key);
-        deduplicated.push(item);
+  if (textExtractor && orgData.length + coreData.length > 0) {
+    // SEMANTIC DEDUP — The brain's pattern consolidation
+    semanticDedupUsed = true;
+    const dedupResult = semanticDedup(orgData, coreData, textExtractor, semanticConfig);
+
+    merged = dedupResult.kept.map(({ item, source }) => ({
+      data: item,
+      source: source as SourceLabel,
+      priority: source === 'org' ? 1 : 2,
+    }));
+    duplicatesRemoved = dedupResult.stats.totalRemoved;
+    semanticComparisons = dedupResult.stats.comparisons;
+  } else {
+    // STRING DEDUP — Legacy fallback
+    const labeledOrg: LabeledResult<T>[] = orgData.map(item => ({
+      data: item,
+      source: 'org' as SourceLabel,
+      priority: 1
+    }));
+
+    const labeledCore: LabeledResult<T>[] = coreData.map(item => ({
+      data: item,
+      source: 'core' as SourceLabel,
+      priority: 2
+    }));
+
+    merged = [...labeledOrg, ...labeledCore];
+
+    if (deduplicateBy && merged.length > 0) {
+      const seen = new Set<string>();
+      const deduplicated: LabeledResult<T>[] = [];
+
+      for (const item of merged) {
+        const key = String((item.data as any)[deduplicateBy] || '');
+        if (key && seen.has(key)) {
+          duplicatesRemoved++;
+        } else {
+          if (key) seen.add(key);
+          deduplicated.push(item);
+        }
       }
+      merged = deduplicated;
     }
-    merged = deduplicated;
   }
 
   return {
@@ -216,6 +288,8 @@ export async function federatedQuery<T = Record<string, unknown>>(
       orgCount: orgData.length,
       coreCount: coreData.length,
       duplicatesRemoved,
+      semanticDedupUsed,
+      semanticComparisons,
       federatedAt: new Date().toISOString()
     }
   };
@@ -262,7 +336,15 @@ export async function getFederatedPatterns(
 
       return query.limit(limit);
     },
-    { deduplicateBy: 'title', includeCoreData }
+    {
+      deduplicateBy: 'title',
+      semanticDedup: true,
+      semanticTextField: (item: any) =>
+        `${item.title || ''} ${item.memory_type || ''} ${item.domain || ''} ${
+          typeof item.content === 'string' ? item.content : JSON.stringify(item.content || '')
+        }`.trim(),
+      includeCoreData,
+    }
   );
 }
 
@@ -297,7 +379,13 @@ export async function getFederatedCausalRelationships(
 
       return query;
     },
-    { deduplicateBy: 'id', includeCoreData }
+    {
+      deduplicateBy: 'id',
+      semanticDedup: true,
+      semanticTextField: (item: any) =>
+        `${item.source_domain || ''} causes ${item.target_domain || ''} ${item.natural_language || ''}`.trim(),
+      includeCoreData,
+    }
   );
 }
 
@@ -331,7 +419,14 @@ export async function getFederatedGrammarRules(
 
       return query.limit(limit);
     },
-    { deduplicateBy: 'rule_type', includeCoreData, coreMaxAgeDays }
+    {
+      deduplicateBy: 'rule_type',
+      semanticDedup: true,
+      semanticTextField: (item: any) =>
+        `${item.rule_type || ''} ${item.natural_language || ''} ${item.domain || ''}`.trim(),
+      includeCoreData,
+      coreMaxAgeDays,
+    }
   );
 }
 
@@ -664,21 +759,31 @@ export async function percolateToCore(
     return { percolated: 0, skippedDuplicates: 0 };
   }
 
-  // 2. Check which titles already exist in CORE (avoid duplicates)
-  const titles = candidates.map((c: any) => c.title);
+  // 2. Check which patterns already exist in CORE (semantic + exact dedup)
+  //    Before: Only exact title matching → "High churn risk" ≠ "Elevated customer attrition"
+  //    After:  Semantic novelty check → catches paraphrases, synonyms, rephrased insights
   const { data: existingCore } = await client
     .from('ai_memory')
-    .select('title')
+    .select('title, content, domain')
     .eq('organization_id', CORE_ORGANIZATION_ID)
-    .in('title', titles);
+    .limit(200);
 
-  const existingTitles = new Set((existingCore || []).map((e: any) => e.title));
+  const existingCoreTexts = (existingCore || []).map((e: any) => ({
+    text: `${e.title || ''} ${e.domain || ''} ${typeof e.content === 'string' ? e.content : JSON.stringify(e.content || '')}`.trim(),
+    metadata: { title: e.title },
+  }));
+
   let skippedDuplicates = 0;
 
-  // 3. Anonymize and insert new patterns into CORE
+  // 3. Anonymize and insert new patterns into CORE (with semantic novelty check)
+  const { checkSemanticNovelty: checkNovelty } = await import('./semantic-federation');
+
   const toPercolate = candidates
     .filter((c: any) => {
-      if (existingTitles.has(c.title)) {
+      // Semantic novelty check: Is this genuinely new knowledge for the CORE brain?
+      const candidateText = `${c.title || ''} ${c.domain || ''} ${typeof c.content === 'string' ? c.content : JSON.stringify(c.content || '')}`.trim();
+      const novelty = checkNovelty(candidateText, existingCoreTexts);
+      if (!novelty.isNovel) {
         skippedDuplicates++;
         return false;
       }
