@@ -82,6 +82,64 @@ async function createDemoOrganization(
   }
 
   logger.info(`✓ Created organization: ${config.orgId}\n`);
+
+  // Link platform admin to demo org (if exists)
+  await linkPlatformAdminToOrg(supabase, config.orgId);
+}
+
+async function linkPlatformAdminToOrg(supabase: any, orgId: string): Promise<void> {
+  logger.info(`\n👤 Linking users to demo org...\n`);
+  try {
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const adminUser = existingUsers?.users?.find((u: { email?: string }) => u.email === 'abhishek@monetiz3.com');
+
+    if (adminUser) {
+      const { data: existingMember } = await supabase
+        .from('org_members')
+        .select('id')
+        .eq('organization_id', orgId)
+        .eq('user_id', adminUser.id)
+        .single();
+
+      if (!existingMember) {
+        await supabase.from('org_members').insert({
+          organization_id: orgId,
+          user_id: adminUser.id,
+          role: 'admin',
+          is_platform_admin: true,
+        });
+        logger.info(`   ✓ Linked platform admin (abhishek@monetiz3.com) to demo org`);
+      } else {
+        logger.info(`   ✓ Platform admin already linked to demo org`);
+      }
+    } else {
+      logger.info(`   ⚠️ Platform admin not found — run seed-users.ts first`);
+    }
+
+    // Also link Tookitaki owner for demo access
+    const tookitakiUser = existingUsers?.users?.find((u: { email?: string }) => u.email === 'abhishek@tookitaki.com');
+    if (tookitakiUser) {
+      const { data: existingMember } = await supabase
+        .from('org_members')
+        .select('id')
+        .eq('organization_id', orgId)
+        .eq('user_id', tookitakiUser.id)
+        .single();
+
+      if (!existingMember) {
+        await supabase.from('org_members').insert({
+          organization_id: orgId,
+          user_id: tookitakiUser.id,
+          role: 'member',
+        });
+        logger.info(`   ✓ Linked abhishek@tookitaki.com as member`);
+      } else {
+        logger.info(`   ✓ abhishek@tookitaki.com already linked`);
+      }
+    }
+  } catch (err) {
+    logger.info(`   ⚠️ Skipping user linking (run seed-users.ts first for user creation)`);
+  }
 }
 
 async function ingestSyntheticData(
