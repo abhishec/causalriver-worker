@@ -439,20 +439,25 @@ class BrainOrchestrator {
   /**
    * Internal: Execute an agent with a specific AgentManager instance.
    */
+  /** Max time per individual agent execution: 30 minutes */
+  private static readonly AGENT_TIMEOUT_MS = 30 * 60 * 1000;
+
   private async _executeAgentWithManager(
     agent: AgentRegistration,
     orgId: string,
     manager: AgentManager,
   ): Promise<void> {
     const orgLabel = orgId === CORE_ORG_ID ? 'core' : orgId.substring(0, 8);
-    log('EXECUTE', `Running agent: ${agent.name} [org:${orgLabel}]`);
+    log('EXECUTE', `Running agent: ${agent.name} [org:${orgLabel}] (timeout: ${BrainOrchestrator.AGENT_TIMEOUT_MS / 60000}m)`);
 
     const startTime = Date.now();
 
     try {
-      const result = await manager.runWithRetry(agent.name, 2, {
+      // Performance fix: Enforce per-agent timeout to prevent stuck tasks
+      const agentPromise = manager.runWithRetry(agent.name, 2, {
         organizationId: orgId,
         verbose: true,
+        timeoutMs: BrainOrchestrator.AGENT_TIMEOUT_MS,
         enableBayesian: true,
         enableEmbedding: true,
         enableContrastive: true,
@@ -463,6 +468,15 @@ class BrainOrchestrator {
         enableAgentRegistry: true,
         enableBrainPipeline: true,
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(
+          `Agent "${agent.name}" timed out after ${BrainOrchestrator.AGENT_TIMEOUT_MS / 60000} minutes. ` +
+          `Killed to prevent runaway AWS costs.`
+        )), BrainOrchestrator.AGENT_TIMEOUT_MS)
+      );
+
+      const result = await Promise.race([agentPromise, timeoutPromise]);
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       log('EXECUTE', `Agent ${agent.name} [org:${orgLabel}] completed in ${duration}s (${result.signalsGenerated} signals, ${result.packsProcessed} packs, ${result.errorsEncountered.length} errors)`);
@@ -831,6 +845,27 @@ class BrainOrchestrator {
       this.httpServer?.close();
       process.exit(0);
     });
+
+    // Performance fix: Auto-restart after 4 hours to prevent memory leaks
+    // Brain Analog: The circadian rhythm — the brain needs periodic "reboots"
+    // to clear metabolic waste (glymphatic system). Without this, tasks were
+    // running 23+ hours and degrading.
+    const MAX_UPTIME_MS = 4 * 60 * 60 * 1000; // 4 hours
+    const autoRestartJob = new CronJob('*/5 * * * *', () => {
+      const uptimeMs = process.uptime() * 1000;
+      if (uptimeMs >= MAX_UPTIME_MS) {
+        log('AUTO-RESTART', `Uptime ${(uptimeMs / 3600000).toFixed(1)}h exceeds ${MAX_UPTIME_MS / 3600000}h limit. Graceful restart...`);
+        this.shutdownRequested = true;
+        this.healthCheckJob?.stop();
+        this.scheduleCheckJob?.stop();
+        autoRestartJob.stop();
+        this.httpServer?.close();
+        // Exit with code 0 — ECS/Docker will restart the container
+        process.exit(0);
+      }
+    });
+    autoRestartJob.start();
+    log('INIT', `Auto-restart enabled: process will restart every ${MAX_UPTIME_MS / 3600000}h to prevent memory leaks`);
 
     log('INIT', 'Orchestrator running ✓');
 

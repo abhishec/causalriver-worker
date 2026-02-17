@@ -35,12 +35,16 @@ import { createConsolidationEngine } from '../../packages/memory-stack/src/orche
 // TYPES
 // ============================================================================
 
+/** Maximum agent execution time: 30 minutes (prevents runaway tasks that burn AWS) */
+const DEFAULT_AGENT_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
 export interface AgentConfig {
   supabaseUrl: string;
   supabaseKey: string;
   organizationId?: string;
   dryRun?: boolean;
   maxRetries?: number;
+  /** Max execution time per run in ms (default: 30 min). Prevents runaway tasks. */
   timeoutMs?: number;
   verbose?: boolean;
 }
@@ -263,13 +267,34 @@ export abstract class BaseTrainingAgent {
 
   async run(): Promise<AgentRunResult> {
     const startedAt = new Date();
+    const timeoutMs = this.config.timeoutMs ?? DEFAULT_AGENT_TIMEOUT_MS;
     const stages: StageResult[] = [];
     let signalsGenerated = 0;
     let packsProcessed = 0;
 
+    // Performance fix: Enforce timeout to prevent runaway tasks (23h+ runs)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`Agent "${this.name}" timed out after ${(timeoutMs / 60000).toFixed(0)} minutes. Forcing graceful shutdown to prevent memory leaks and runaway AWS costs.`));
+      }, timeoutMs);
+    });
+
+    // Wrap the entire execution in a race against the timeout
+    return Promise.race([this._runInternal(startedAt, stages, signalsGenerated, packsProcessed), timeoutPromise]);
+  }
+
+  private async _runInternal(
+    startedAt: Date,
+    stages: StageResult[],
+    signalsGenerated: number,
+    packsProcessed: number,
+  ): Promise<AgentRunResult> {
+    const timeoutMs = this.config.timeoutMs ?? DEFAULT_AGENT_TIMEOUT_MS;
+
     this.log('RUN', `Starting ${this.name} v${this.version}: ${this.description}`);
     this.log('RUN', `Organization: ${this.organizationId}`);
     this.log('RUN', `Dry run: ${this.config.dryRun ? 'YES' : 'NO'}`);
+    this.log('RUN', `Timeout: ${(timeoutMs / 60000).toFixed(0)} minutes`);
 
     // ── Stage 1: FETCH ──
     let fetchResult: FetchResult = { data: null, sources: [], recordCount: 0 };
