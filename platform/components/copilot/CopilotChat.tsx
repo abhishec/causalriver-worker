@@ -30,6 +30,65 @@ export interface CopilotArtifact {
   messageIndex?: number;
 }
 
+// ─── Domain Result Types (AAS + SE-aaS structured outputs) ──────────────────
+
+export interface AccountingDomainData {
+  period?: string;
+  profitAndLoss?: {
+    revenue: number;
+    expenses: number;
+    netIncome: number;
+    revenueBreakdown?: Array<{ account: string; amount: number }>;
+    expenseBreakdown?: Array<{ account: string; amount: number }>;
+  };
+  balanceSheet?: {
+    totalAssets: number;
+    totalLiabilities: number;
+    totalEquity: number;
+    assets?: Array<{ account: string; balance: number }>;
+    liabilities?: Array<{ account: string; balance: number }>;
+    equity?: Array<{ account: string; balance: number }>;
+  };
+  trialBalance?: {
+    accounts: Array<{ account: string; type: string; debit: number; credit: number; netDebit: number; netCredit: number }>;
+    totalDebits: number;
+    totalCredits: number;
+    balanced: boolean;
+    period: string;
+  };
+  gstF5?: {
+    box1_standardRatedSupplies: number;
+    box2_zeroRatedSupplies: number;
+    box3_exemptSupplies: number;
+    box4_totalSupplies: number;
+    box5_taxableSupplies: number;
+    box6_outputTax: number;
+    box7_inputTax: number;
+    box8_netTaxPayable: number;
+  };
+  transactionSummary?: {
+    totalTransactions: number;
+    period: string;
+    bySource?: Array<{ source: string; count: number; totalAmount: number }>;
+    topTransactions?: Array<{ date: string; account: string; description: string; debit: number; credit: number; classification: string }>;
+  };
+  anomalies?: Array<{ type: string; description: string; severity: string; transactions?: unknown[] }>;
+  narrative?: string;
+}
+
+export interface SEaaSDomainData {
+  analysisType?: string;
+  summary?: string;
+  findings?: Array<{ severity: string; title: string; description: string; file?: string; line?: number }>;
+  recommendations?: Array<{ priority: string; action: string; rationale: string }>;
+  metrics?: Record<string, number | string>;
+  codeSnippets?: Array<{ language: string; code: string; title: string }>;
+}
+
+export type DomainResult =
+  | { service: "aas"; data: AccountingDomainData }
+  | { service: "seaas"; data: SEaaSDomainData };
+
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
   endpoint?: string;
@@ -52,6 +111,10 @@ export interface CopilotChatProps {
   onArtifact?: (artifact: CopilotArtifact) => void;
   /** Callback when brain metadata is received from the SSE stream */
   onBrainMeta?: (meta: BrainMeta) => void;
+  /** Callback when a structured domain result arrives (AAS accounting data or SE-aaS result) */
+  onDomainResult?: (result: DomainResult) => void;
+  /** Active service mode — changes context sent to backend */
+  activeService?: "general" | "aas" | "seaas";
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -931,6 +994,7 @@ export interface SSECallbacks {
   onText: (text: string, accumulated: string) => void;
   onError: (error: string) => void;
   onBrainMeta: (meta: BrainMeta) => void;
+  onDomainResult: (result: DomainResult) => void;
   onDone: () => void;
 }
 
@@ -977,6 +1041,13 @@ export async function consumeSSEStream(
             if (parsed.error) {
               callbacks.onError(parsed.error);
             }
+            // Domain results: structured outputs from AAS / SE-aaS agents
+            if (parsed.accountingResult) {
+              callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
+            }
+            if (parsed.seaasResult) {
+              callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1003,6 +1074,8 @@ export async function consumeSSEStream(
               callbacks.onText(parsed.text, accumulated);
             }
             if (parsed.error) callbacks.onError(parsed.error);
+            if (parsed.accountingResult) callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
+            if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
           } catch { /* skip */ }
         }
       }
@@ -1157,6 +1230,8 @@ export function CopilotChat({
   showHeader = true,
   onArtifact,
   onBrainMeta,
+  onDomainResult,
+  activeService = "general",
 }: CopilotChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1177,6 +1252,8 @@ export function CopilotChat({
   onArtifactRef.current = onArtifact;
   const onBrainMetaRef = useRef(onBrainMeta);
   onBrainMetaRef.current = onBrainMeta;
+  const onDomainResultRef = useRef(onDomainResult);
+  onDomainResultRef.current = onDomainResult;
 
   const color = persona.color || "accent";
 
@@ -1243,6 +1320,7 @@ export function CopilotChat({
         body: JSON.stringify({
           message: trimmed,
           conversationHistory: history.length > 0 ? history : undefined,
+          serviceMode: activeService !== "general" ? activeService : undefined,
           ...extraParams,
         }),
         signal: controller.signal,
@@ -1283,6 +1361,10 @@ export function CopilotChat({
             setBrainMeta(meta);
             // Bug fix #7: Forward brain meta to parent via callback
             onBrainMetaRef.current?.(meta);
+          },
+          onDomainResult: (result) => {
+            if (controller.signal.aborted) return;
+            onDomainResultRef.current?.(result);
           },
           onDone: () => {
             // Bug fix #4: Don't emit artifacts if aborted

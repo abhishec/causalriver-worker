@@ -230,6 +230,9 @@ export function CopilotOverlay() {
           onBrainMeta: () => {
             // Overlay doesn't display brain meta
           },
+          onDomainResult: () => {
+            // Overlay doesn't display domain results
+          },
           onDone: () => {},
         },
         controller.signal
