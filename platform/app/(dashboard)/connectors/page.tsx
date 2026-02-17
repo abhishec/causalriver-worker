@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: "Connectors" };
 
 const CONNECTORS = [
+  { name: "AWS S3", type: "s3-storage", domain: "operations", icon: "📦", description: "Org-level file storage — CSV, JSON, reports, GL data", oauth: false },
   { name: "GitHub", type: "github", domain: "engineering", icon: "🐙", description: "Commits, PRs, issues, deployments, CI/CD events", oauth: true },
   { name: "Slack", type: "slack", domain: "communication", icon: "💬", description: "Channel activity, reaction patterns, thread engagement", oauth: true },
   { name: "Jira", type: "jira", domain: "engineering", icon: "📋", description: "Issues, comments, and project workflows", oauth: true },
