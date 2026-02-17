@@ -12,6 +12,7 @@
 -- No SET ROLE or ALTER TABLE needed.
 
 -- Policy: Org members can SELECT (read/download) files in their org's folder
+DROP POLICY IF EXISTS "org_members_read_own_org_data" ON storage.objects;
 CREATE POLICY "org_members_read_own_org_data" ON storage.objects
   FOR SELECT
   USING (
