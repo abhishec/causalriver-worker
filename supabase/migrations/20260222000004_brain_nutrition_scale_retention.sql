@@ -147,17 +147,17 @@ EXCEPTION
     RAISE NOTICE 'pg_cron not available, skipping schedule creation';
 END $$;
 
-DO $$
+DO $outer$
 BEGIN
   PERFORM cron.schedule(
     'brain-nutrition-cleanup-daily',
     '0 4 * * *',  -- Every day at 4:00 AM UTC
-    $$SELECT cleanup_brain_nutrition_tables()$$
+    'SELECT cleanup_brain_nutrition_tables()'
   );
 EXCEPTION
   WHEN undefined_function THEN
     RAISE NOTICE 'pg_cron not available, skipping schedule creation';
-END $$;
+END $outer$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- END OF MIGRATION

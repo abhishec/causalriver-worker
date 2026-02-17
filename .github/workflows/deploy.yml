@@ -175,7 +175,7 @@ jobs:
         id: push
         run: |
           set +e
-          supabase db push --linked --include-all 2>&1 | tee /tmp/migrate-output.txt
+          supabase db push --linked 2>&1 | tee /tmp/migrate-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           echo "--- supabase exit code: $EXIT_CODE ---"
           if [ $EXIT_CODE -ne 0 ]; then
@@ -195,7 +195,7 @@ jobs:
 
       - name: Verify no drift remains
         run: |
-          supabase db push --linked --include-all --dry-run 2>&1 | tee /tmp/drift-output.txt || true
+          supabase db push --linked --dry-run 2>&1 | tee /tmp/drift-output.txt || true
           if grep -q "Applying migration" /tmp/drift-output.txt; then
             echo "::error::Migration drift detected after push — some migrations may have failed"
             exit 1
