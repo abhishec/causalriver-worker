@@ -37,10 +37,10 @@ import {
   prReviewDomain,
   boilerplateScaffoldDomain,
   codebaseQADomain,
-  // Brain Evolution Engine — feedback loop integration
-  runBrainEvolutionCycle,
-  // Brain Observability Bridge — domain execution audit trail
-  createBrainObservabilityBridge,
+  // Brain Context Mesh — Unified Brain Context SDK (replaces inline assembleBrainContext)
+  createBrainContextMesh,
+  // Brain Feedback Bus — Unified Learning Circuit (replaces inline feedBrainFromExecution)
+  createBrainFeedbackBus,
 } from "@nexus-ai/memory-stack";
 
 // ============================================================================
@@ -97,6 +97,9 @@ export interface ExecuteDomainResult {
 
 /**
  * Execute an SE-aaS domain and persist the result as an artifact.
+ *
+ * Uses the Brain Context Mesh for unified context assembly and
+ * Brain Feedback Bus for unified learning circuit.
  */
 export async function executeDomain(
   supabase: SupabaseClient,
@@ -107,11 +110,14 @@ export async function executeDomain(
     throw new Error(`Unknown domain: ${params.domainType}`);
   }
 
-  // Build ActionDomainContext with Brain context for cognitive enrichment
-  // Brain context provides causal edges, patterns, and trained knowledge
-  // so domains can leverage the 15-layer cognitive stack
-  const brainContext = await assembleBrainContext(supabase, params.organizationId);
+  // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
+  const mesh = createBrainContextMesh({ supabase, organizationId: params.organizationId });
+  const brainContext = await mesh.assemble(
+    `se-aas ${params.domainType} execution`,
+    'se-aas',
+  );
 
+  // ── Step 2: Build ActionDomainContext ────────────────────────────────────
   const ctx = {
     organizationId: params.organizationId,
     userId: params.userId,
@@ -123,11 +129,12 @@ export async function executeDomain(
     supabase,
   };
 
+  // ── Step 3: Execute the domain ──────────────────────────────────────────
   const startMs = Date.now();
   const result = await info.domain.execute(ctx);
   const durationMs = Date.now() - startMs;
 
-  // Save artifact
+  // ── Step 4: Save artifact ───────────────────────────────────────────────
   const { artifactId } = await saveArtifact(supabase, {
     organizationId: params.organizationId,
     domainType: params.domainType,
@@ -143,41 +150,56 @@ export async function executeDomain(
     createdBy: params.userId,
   });
 
-  // ============================================================================
-  // BRAIN FEEDBACK LOOP — Every Execution Teaches the Brain
-  // ============================================================================
-  // This is THE differentiator. Every SE-aaS domain execution:
-  // 1. Emits a signal → Brain observes
-  // 2. Records prediction (if domain generated one) → Brain verifies later
-  // 3. Triggers lightweight evolution cycle → Brain weights update in real-time
-  //
-  // Result: The more you use NexusBrain, the smarter it gets. This is a MOAT.
-  await feedBrainFromExecution(supabase, params, result, brainContext, durationMs).catch(() => {
+  // ── Step 5: Brain Feedback Loop via Bus ─────────────────────────────────
+  // All 5 channels in one shot — signal, prediction, evolution, observability
+  const bus = createBrainFeedbackBus({ supabase, organizationId: params.organizationId });
+  const interventions = (result as any).interventions ?? [];
+
+  await Promise.all([
+    // Channel 1: Signal — Brain observes this domain execution
+    bus.emitSignal({
+      sourceDomain: `se-aas.${params.domainType}`,
+      signalType: 'domain_execution',
+      signalValue: (result as any).confidence ?? 0.5,
+      entityType: 'se_aas_artifact',
+      entityId: `${params.domainType}_${Date.now()}`,
+      metadata: {
+        domainType: params.domainType,
+        claudePowered: (result as any).data?.claudePowered ?? false,
+        brainAugmented: brainContext.cognitiveStackAvailable,
+        causalEdgesUsed: brainContext.causalEdges?.length ?? 0,
+        durationMs,
+        userId: params.userId,
+        interventionsCount: interventions.length,
+        hasNarrative: !!(result as any).narrative,
+      },
+    }),
+
+    // Channel 2: Predictions — store interventions for later verification
+    interventions.length > 0
+      ? bus.recordInterventionPredictions(
+          interventions,
+          params.domainType,
+          (result as any).confidence ?? 0.5,
+        )
+      : Promise.resolve(),
+
+    // Channel 3: Evolution — trigger Bayesian weight updates
+    bus.triggerEvolution(),
+
+    // Channel 4: Observability — audit trail
+    bus.recordExecution({
+      service: 'se-aas',
+      domainType: params.domainType,
+      durationMs,
+      claudePowered: (result as any).data?.claudePowered ?? false,
+      brainAugmented: brainContext.cognitiveStackAvailable,
+      causalEdgesUsed: brainContext.causalEdges?.length ?? 0,
+      patternsUsed: brainContext.patterns?.length ?? 0,
+    }),
+  ]).catch(() => {
     // Non-blocking: feedback failure should NEVER break domain execution
   });
-
-  // ============================================================================
-  // OBSERVABILITY WIRE — Record domain execution to obs_* tables
-  // ============================================================================
-  // This AUGMENTS the feedback loop above by also writing to observability tables.
-  // The bridge records to obs_agent_executions AND emits cross_domain_signals
-  // so the dashboard shows every SE-aaS execution with timing, Claude usage, etc.
-  try {
-    const bridge = createBrainObservabilityBridge({
-      supabase,
-      organizationId: params.organizationId,
-    });
-    await bridge.recordDomainExecution(
-      params.domainType,
-      durationMs,
-      (result as any).data?.claudePowered ?? false,
-      brainContext.cognitiveStackAvailable ?? false,
-      brainContext.causalEdges?.length ?? 0,
-      brainContext.patterns?.length ?? 0,
-    );
-  } catch {
-    // Non-blocking: observability failure should NEVER break domain execution
-  }
 
   return {
     result: { ...result, timing: { totalMs: durationMs } },
@@ -186,304 +208,7 @@ export async function executeDomain(
 }
 
 // ============================================================================
-// BRAIN FEEDBACK LOOP — The Learning Circuit
+// NOTE: assembleBrainContext() and feedBrainFromExecution() have been replaced
+// by the shared Brain Context Mesh and Brain Feedback Bus from @nexus-ai/memory-stack.
+// All services (Copilot, SE-aaS, AAS) now share one unified brain context layer.
 // ============================================================================
-
-/**
- * After every SE-aaS domain execution, feed the result back into the Brain.
- *
- * This closes the loop:
- *   User request → Brain-augmented Claude → Result → Brain learns → Better next time
- *
- * THREE feedback channels:
- * 1. SIGNAL: Domain execution emitted as cross_domain_signal (Brain observes activity)
- * 2. PREDICTION: If result contains a prediction/confidence → stored for later verification
- * 3. EVOLUTION: Lightweight Brain evolution cycle triggered (Bayesian weight updates)
- */
-async function feedBrainFromExecution(
-  supabase: SupabaseClient,
-  params: ExecuteDomainParams,
-  result: Record<string, unknown>,
-  brainContext: Record<string, any>,
-  durationMs: number
-): Promise<void> {
-  const { organizationId, domainType, userId } = params;
-
-  // Channel 1: SIGNAL — Brain observes this domain execution
-  await supabase.from("cross_domain_signals").insert({
-    organization_id: organizationId,
-    source_domain: `se-aas.${domainType}`,
-    signal_type: "domain_execution",
-    signal_value: (result as any).confidence ?? 0.5,
-    entity_type: "se_aas_artifact",
-    entity_id: `${domainType}_${Date.now()}`,
-    signal_metadata: {
-      domainType,
-      claudePowered: (result as any).data?.claudePowered ?? false,
-      brainAugmented: brainContext.cognitiveStackAvailable,
-      causalEdgesUsed: brainContext.causalEdges?.length ?? 0,
-      durationMs,
-      userId,
-      interventionsCount: ((result as any).interventions ?? []).length,
-      hasNarrative: !!(result as any).narrative,
-    },
-  });
-
-  // Channel 2: PREDICTION — If domain generated predictions, store for verification
-  const interventions = (result as any).interventions ?? [];
-  if (interventions.length > 0) {
-    for (const intervention of interventions.slice(0, 5)) {
-      await supabase.from("prediction_records").insert({
-        organization_id: organizationId,
-        domain: domainType,
-        predicted_outcome: intervention.description,
-        predicted_value: null,
-        confidence: (result as any).confidence ?? 0.5,
-        entity_type: "se_aas_intervention",
-        entity_id: intervention.type ?? domainType,
-        source_rule_id: null,
-      });
-    }
-  }
-
-  // Channel 3: EVOLUTION — Trigger lightweight Brain evolution cycle
-  // (verifies past predictions + Bayesian weight updates)
-  // Only trigger every ~10 executions to avoid overhead
-  const { count: recentExecs } = await supabase
-    .from("cross_domain_signals")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId)
-    .eq("source_domain", `se-aas.${domainType}`)
-    .gte("created_at", new Date(Date.now() - 3600000).toISOString());
-
-  if ((recentExecs ?? 0) % 10 === 0) {
-    await runBrainEvolutionCycle(supabase, organizationId, "lightweight").catch(() => {});
-  }
-}
-
-// ============================================================================
-// BRAIN CONTEXT ASSEMBLY
-// ============================================================================
-
-/**
- * Assemble Brain context for SE-aaS domain execution.
- *
- * THE CRITICAL DIFFERENTIATOR: This is what makes NexusBrain's P1 domains
- * "Brain-augmented Claude" instead of "stateless Claude".
- *
- * THE WORLD'S MOST COMPREHENSIVE BRAIN CONTEXT — 10 parallel queries:
- * - L4: Causal edges (what causes what in THIS organization)
- * - L5: Grammar rules / discovered patterns
- * - P0: Velocity snapshots + bottleneck risk
- * - L1: Recent cross-domain engineering signals
- * - Brain insights: Recent AI-generated organizational insights
- * - Cascade rules: Known cascade chains the Brain has learned
- * - Dependency graph: Code/module dependency relationships (structural intelligence)
- * - Brain evolution: Latest intelligence score, accuracy, learning velocity
- * - User corrections: Recent user corrections (high-priority learning)
- * - Brain predictions: Recent verified predictions (accuracy context)
- *
- * Every domain gets the FULL Brain context. This is NEVER stateless Claude.
- */
-async function assembleBrainContext(
-  supabase: SupabaseClient,
-  organizationId: string
-): Promise<Record<string, any>> {
-  try {
-    // Parallel load: FULL cognitive stack for Brain-augmented Claude (10 queries)
-    const [
-      causalEdgesRes,
-      patternsRes,
-      velocityRes,
-      bottleneckRes,
-      recentSignalsRes,
-      brainInsightsRes,
-      cascadeRulesRes,
-      evolutionRes,
-      correctionsRes,
-      verifiedPredictionsRes,
-    ] = await Promise.all([
-      // L4: Causal relationships Brain has learned
-      supabase
-        .from('causal_relationships_statistical')
-        .select('source_signal, target_signal, strength, confidence, lag, p_value, source_domain, target_domain, effect_size, evidence_weight')
-        .eq('organization_id', organizationId)
-        .order('updated_at', { ascending: false })
-        .limit(50),
-
-      // L5: Grammar rules / patterns Brain has discovered
-      supabase
-        .from('brain_grammar_rules')
-        .select('rule_name, rule_body, confidence, domain')
-        .eq('organization_id', organizationId)
-        .gte('confidence', 0.5)
-        .order('confidence', { ascending: false })
-        .limit(20),
-
-      // Cross-domain: latest velocity snapshot (P0 engineering metrics)
-      supabase
-        .from('velocity_snapshots')
-        .select('prs_merged, mean_pr_cycle_time_hours, pr_cycle_time_variance, open_pr_count, prs_per_engineer, snapshot_date')
-        .eq('organization_id', organizationId)
-        .order('snapshot_date', { ascending: false })
-        .limit(1),
-
-      // Cross-domain: latest bottleneck snapshot (P0 bottleneck risk)
-      supabase
-        .from('bottleneck_snapshots')
-        .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share, max_betweenness_centrality')
-        .eq('organization_id', organizationId)
-        .order('snapshot_date', { ascending: false })
-        .limit(1),
-
-      // Cross-domain: recent engineering signals (for incident diagnosis context)
-      supabase
-        .from('cross_domain_signals')
-        .select('signal_type, signal_value, signal_metadata, created_at')
-        .eq('organization_id', organizationId)
-        .like('source_domain', 'engineering%')
-        .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
-        .order('created_at', { ascending: false })
-        .limit(50),
-
-      // Brain insights: Recent AI-generated organizational insights (from ai_memory)
-      // NOTE: memory_type 'pattern' is the richest — deriveRealCausalInsights writes human sentences here
-      supabase
-        .from('ai_memory')
-        .select('content, memory_type, domain, importance, source, created_at')
-        .eq('organization_id', organizationId)
-        .in('memory_type', ['insight', 'pattern', 'prediction'])
-        .order('importance', { ascending: false })
-        .limit(15),
-
-      // Cascade rules: Known cascade chains the Brain has learned
-      supabase
-        .from('brain_cascade_rules')
-        .select('source_domain, target_domain, cascade_type, severity, confidence, description')
-        .eq('organization_id', organizationId)
-        .gte('confidence', 0.5)
-        .order('confidence', { ascending: false })
-        .limit(15),
-
-      // Brain Evolution: Latest intelligence score (THE differentiator visualization)
-      supabase
-        .from('brain_evolution_snapshots')
-        .select('intelligence_score, accuracy, brier_score, total_edges, total_evidence, snapshot_date')
-        .eq('organization_id', organizationId)
-        .order('snapshot_date', { ascending: false })
-        .limit(7),
-
-      // User corrections: High-priority learning from feedback (most recent)
-      supabase
-        .from('ai_memory')
-        .select('content, metadata, created_at')
-        .eq('organization_id', organizationId)
-        .eq('memory_type', 'correction')
-        .order('created_at', { ascending: false })
-        .limit(5),
-
-      // Verified predictions: Brain's track record (accuracy context for domains)
-      supabase
-        .from('prediction_records')
-        .select('domain, predicted_outcome, was_correct, confidence, verified_at')
-        .eq('organization_id', organizationId)
-        .not('was_correct', 'is', null)
-        .order('verified_at', { ascending: false })
-        .limit(20),
-    ]);
-
-    // Compute Brain accuracy from verified predictions
-    const verifiedPreds = verifiedPredictionsRes.data || [];
-    const correctPreds = verifiedPreds.filter(p => p.was_correct);
-    const brainAccuracy = verifiedPreds.length > 0
-      ? correctPreds.length / verifiedPreds.length
-      : 0;
-
-    // Get latest evolution snapshot
-    const latestEvolution = evolutionRes.data?.[0] || null;
-
-    // ── COLD-START DETECTION ────────────────────────────────────────────────
-    // The Brain is only "available" if it has REAL org data.
-    // This prevents Claude from hallucinating org-specific insights
-    // when all the tables are empty (fresh install, no syncs done yet).
-    const causalEdges = causalEdgesRes.data || [];
-    const patterns = patternsRes.data || [];
-    const orgPatterns = (brainInsightsRes.data || []).filter(
-      (m: any) => m.memory_type === 'pattern'
-    );
-    const recentSignals = recentSignalsRes.data || [];
-    const hasRealData =
-      causalEdges.length > 0 ||
-      orgPatterns.length > 0 ||
-      recentSignals.length > 0;
-
-    return {
-      organizationId,
-      causalEdges,
-      patterns,
-      // HONEST: true only when real org data has been ingested
-      cognitiveStackAvailable: hasRealData,
-      // Cross-domain context for SE-aaS domains
-      crossDomainContext: {
-        engineering: {
-          velocity: velocityRes.data?.[0] || null,
-          bottleneck: bottleneckRes.data?.[0] || null,
-          recentSignals: recentSignals.slice(0, 20),
-          signalCount: recentSignals.length,
-        },
-      },
-      // orgPatterns: human-readable insights written by deriveRealCausalInsights()
-      // These are the richest Brain context — real sentences like:
-      //   "Alice handles 67% of reviews — critical bus factor risk"
-      //   "PRs average 18h to merge, p95 is 72h"
-      orgPatterns,
-      // Brain insights (all types — insight, pattern, prediction)
-      brainInsights: (brainInsightsRes.data || []).slice(0, 8),
-      // Cascade rules (cross-domain chains)
-      cascadeRules: cascadeRulesRes.data || [],
-      // Brain Evolution state (THE NEVER-EXISTED-BEFORE FEATURE)
-      brainEvolution: {
-        intelligenceScore: latestEvolution?.intelligence_score ?? 0,
-        accuracy: latestEvolution?.accuracy ?? 0,
-        brierScore: latestEvolution?.brier_score ?? 0.25,
-        totalEdges: latestEvolution?.total_edges ?? 0,
-        totalEvidence: latestEvolution?.total_evidence ?? 0,
-        recentSnapshots: (evolutionRes.data || []).slice(0, 7),
-        isLearning: (latestEvolution?.total_evidence ?? 0) > 0,
-      },
-      // Brain accuracy (from real prediction verification)
-      brainAccuracy: {
-        totalPredictions: verifiedPreds.length,
-        correctPredictions: correctPreds.length,
-        accuracy: brainAccuracy,
-        recentTrackRecord: verifiedPreds.slice(0, 5).map(p => ({
-          domain: p.domain,
-          outcome: p.predicted_outcome,
-          wasCorrect: p.was_correct,
-          confidence: p.confidence,
-        })),
-      },
-      // User corrections (highest-priority learning from feedback loop)
-      userCorrections: (correctionsRes.data || []).map(c => ({
-        correction: c.content,
-        learnedAt: c.created_at,
-        source: (c.metadata as any)?.source ?? 'unknown',
-      })),
-    };
-  } catch {
-    // Non-blocking: domains work without Brain context (degraded mode)
-    return {
-      organizationId,
-      causalEdges: [],
-      patterns: [],
-      orgPatterns: [],
-      cognitiveStackAvailable: false,
-      crossDomainContext: {},
-      brainInsights: [],
-      cascadeRules: [],
-      brainEvolution: null,
-      brainAccuracy: { totalPredictions: 0, correctPredictions: 0, accuracy: 0, recentTrackRecord: [] },
-      userCorrections: [],
-    };
-  }
-}

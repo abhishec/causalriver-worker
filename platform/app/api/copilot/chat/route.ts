@@ -33,6 +33,7 @@ import type {
   BrainContext,
   BrainRegions,
 } from "@nexus-ai/memory-stack";
+import { createBrainContextMesh, createBrainFeedbackBus } from "@nexus-ai/memory-stack";
 
 import { CORE_ORG_ID } from "@/lib/org-helpers";
 
@@ -446,55 +447,22 @@ export async function POST(request: NextRequest) {
         brainRegions.brainHealthMonitor = createBrainHealthMonitor();
       }
 
-      // ── Live Engineering Metrics for P0 Early Warning context ──────
-      // Copilot needs velocity + bottleneck snapshots to answer
-      // "Why is velocity dropping?" with LIVE data, not just causal edges.
-      const [velocityRes, bottleneckRes, recentSignalsRes, entityLinksRes] = await Promise.all([
-        service
-          .from('velocity_snapshots')
-          .select('*')
-          .eq('organization_id', orgId)
-          .order('snapshot_date', { ascending: false })
-          .limit(7),
-        service
-          .from('bottleneck_snapshots')
-          .select('*')
-          .eq('organization_id', orgId)
-          .order('snapshot_date', { ascending: false })
-          .limit(1),
-        service
-          .from('cross_domain_signals')
-          .select('signal_type, signal_value, signal_metadata, created_at')
-          .eq('organization_id', orgId)
-          .like('source_domain', 'engineering%')
-          .gte('created_at', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
-          .order('created_at', { ascending: false })
-          .limit(100),
-        // ── Cross-domain entity links: PR↔Jira↔Slack connections ──
-        // This is what makes the Brain able to answer:
-        // "What Jira tickets are linked to the velocity collapse?"
-        // "Which Slack threads discussed PR #456?"
-        // "Show me everything related to PROJ-1234"
-        service
-          .from('entity_links')
-          .select('source_entity_id, source_type, source_domain, target_entity_id, target_type, target_domain, link_type, confidence, evidence, created_at')
-          .eq('organization_id', orgId)
-          .order('created_at', { ascending: false })
-          .limit(200),
-      ]);
+      // ── Live Engineering Metrics via Brain Context Mesh ──────────────
+      // The Mesh handles velocity, bottleneck, signals, and entity links
+      // in a single call with caching and resilience built in.
+      const mesh = createBrainContextMesh({ supabase: service, organizationId: orgId });
+      const copilotDomainCtx = await mesh.getDomainContext('copilot');
 
-      const velocitySnapshots = velocityRes.data || [];
-      const bottleneckSnapshot = bottleneckRes.data?.[0] || null;
-      const recentSignals = recentSignalsRes.data || [];
-      // entity_links may not exist yet (table created by migration 20260221000001)
-      entityLinks = entityLinksRes.error ? [] : (entityLinksRes.data || []);
+      const velocitySnapshots = copilotDomainCtx.velocitySnapshot ? [copilotDomainCtx.velocitySnapshot] : [];
+      const bottleneckSnapshot = copilotDomainCtx.bottleneckSnapshot || null;
+      const recentSignals = copilotDomainCtx.recentSignals || [];
+      entityLinks = copilotDomainCtx.entityLinks || [];
 
       // Inject engineering metrics + entity links into brain regions as live signals
       (brainRegions as any).liveSignals = {
         velocitySnapshots,
         bottleneckSnapshot,
         recentSignals,
-        // Cross-domain links: the Brain's connective tissue between GitHub↔Jira↔Slack
         entityLinks,
         entityLinksSummary: {
           total: entityLinks.length,
@@ -610,13 +578,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── AaaS NL ROUTING — Accounting queries ──────────────────────────
-    // Detect accounting/finance questions and route to GL data processing.
+    // ── AaaS NL ROUTING — Accounting queries via Brain-connected AAS executor ──
+    // Routes accounting questions to the proper AAS domain executor (with brain context).
     let accountingResult: Record<string, unknown> | null = null;
     const accountingRoute = detectAccountingRoute(message);
 
     if (accountingRoute && !seaasResult) {
       try {
+        // Map NL route domain types to AAS executor action types
+        const ACCT_ACTION_MAP: Record<string, string> = {
+          'statement-generator': 'statements',
+          'reconciler': 'reconcile',
+          'bookkeeper': 'bookkeep',
+          'tax-compliance': 'tax',
+          'anomaly-detective': 'anomaly',
+          'audit-preparer': 'audit',
+        };
+        const aasAction = ACCT_ACTION_MAP[accountingRoute.domainType] || 'causal-analysis';
+
         // Load GL data from Supabase Storage (org-scoped)
         let glData: Array<Record<string, unknown>> = [];
         try {
@@ -637,63 +616,19 @@ export async function POST(request: NextRequest) {
         }
 
         if (glData.length > 0) {
-          // Compute accounting analysis inline (lightweight — same logic as accounting-jarvis route)
-          const accountBalances = new Map<string, { type: string; debit: number; credit: number; count: number }>();
-          for (const txn of glData as any[]) {
-            const key = txn.account as string;
-            if (!accountBalances.has(key)) {
-              accountBalances.set(key, { type: classifyAccountForCopilot(key), debit: 0, credit: 0, count: 0 });
-            }
-            const bal = accountBalances.get(key)!;
-            bal.debit += txn.debit || 0;
-            bal.credit += txn.credit || 0;
-            bal.count++;
-          }
-
-          // P&L summary
-          const revenueAccounts = Array.from(accountBalances.entries())
-            .filter(([_, b]) => b.type === 'revenue')
-            .map(([name, b]) => ({ account: name, amount: b.credit - b.debit }))
-            .filter(a => a.amount !== 0)
-            .sort((a, b) => b.amount - a.amount);
-          const expenseAccounts = Array.from(accountBalances.entries())
-            .filter(([_, b]) => b.type === 'expense')
-            .map(([name, b]) => ({ account: name, amount: b.debit - b.credit }))
-            .filter(a => a.amount !== 0)
-            .sort((a, b) => b.amount - a.amount);
-
-          const totalRevenue = revenueAccounts.reduce((s, a) => s + a.amount, 0);
-          const totalExpenses = expenseAccounts.reduce((s, a) => s + a.amount, 0);
-          const netProfit = totalRevenue - totalExpenses;
-
-          // Balance sheet totals
-          const totalAssets = Array.from(accountBalances.entries())
-            .filter(([_, b]) => b.type === 'asset' || b.type === 'bank')
-            .reduce((s, [_, b]) => s + (b.debit - b.credit), 0);
-          const totalLiabilities = Array.from(accountBalances.entries())
-            .filter(([_, b]) => b.type === 'liability')
-            .reduce((s, [_, b]) => s + (b.credit - b.debit), 0);
+          const { executeAccountingAgent } = await import("@/lib/aas/domain-executor");
+          const aasResult = await executeAccountingAgent(service, {
+            action: aasAction as any,
+            organizationId: orgId,
+            userId: user.id,
+            transactions: glData,
+            jurisdiction: 'SG',
+          });
 
           accountingResult = {
             domainType: accountingRoute.domainType,
-            data: {
-              transactions: glData.length,
-              accounts: accountBalances.size,
-              currency: 'SGD',
-              jurisdiction: 'SG',
-              profitAndLoss: {
-                totalRevenue,
-                totalExpenses,
-                netProfit,
-                netMargin: totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) + '%' : 'N/A',
-                topRevenue: revenueAccounts.slice(0, 5),
-                topExpenses: expenseAccounts.slice(0, 10),
-              },
-              balanceSheet: {
-                totalAssets,
-                totalLiabilities,
-              },
-            },
+            brainAugmented: aasResult.brainMetadata.brainAugmented,
+            ...aasResult.result,
           };
         }
       } catch (acctErr) {
@@ -1090,6 +1025,41 @@ RULES FOR CORRECTIONS:
         }
 
         clearTimeout(streamTimeout);
+
+        // ── Brain Feedback: teach the Brain from Copilot interaction ──
+        const bus = createBrainFeedbackBus({ supabase: service, organizationId: orgId });
+        await Promise.all([
+          bus.emitSignal({
+            sourceDomain: 'copilot.chat',
+            signalType: 'copilot_interaction',
+            signalValue: brainContext?.confidence ?? 0.5,
+            entityType: 'copilot_chat',
+            entityId: `copilot_${Date.now()}`,
+            metadata: {
+              intent: detectedIntent,
+              domains: detectedDomains,
+              model: v4SmartModel,
+              hadBrainContext: !!brainContext,
+              hadActionArtifact: !!actionArtifact,
+              hadSeaasResult: !!seaasResult,
+              hadAccountingResult: !!accountingResult,
+              userId: user.id,
+            },
+          }),
+          bus.recordExecution({
+            service: 'copilot',
+            domainType: detectedIntent,
+            durationMs: Date.now() - Date.now(), // approximate
+            claudePowered: true,
+            brainAugmented: !!brainContext,
+            causalEdgesUsed: causalEdges.length,
+            patternsUsed: patterns.length,
+          }),
+          bus.triggerEvolution(),
+        ]).catch(() => {
+          // Non-blocking
+        });
+
         close();
       } catch (err) {
         const errorMessage =
@@ -1476,23 +1446,5 @@ function detectAccountingRoute(
   return null;
 }
 
-/**
- * Lightweight account classification for Copilot GL data injection.
- * Mirrors the CLASSIFICATION_RULES from /api/accounting-jarvis/route.ts
- */
-function classifyAccountForCopilot(name: string): string {
-  const lower = name.toLowerCase();
-  // Liabilities
-  if (/cpf payable|accrued|creditor|deferred revenue|gst summary|wht payable|lease liability|director|convertible|loan/.test(lower)) return 'liability';
-  // Assets
-  if (/debtor|advance to|prepayment|fixed deposit|computer|furniture|renovation|rou asset|accumulated depreciation/.test(lower)) return 'asset';
-  // Equity
-  if (/paid up capital|retained earnings|share based/.test(lower)) return 'equity';
-  // Bank
-  if (/uob|citibank|wise|amex clearing|volopay clearing/.test(lower)) return 'bank';
-  // Revenue
-  if (/license fee|subscription fee|implementation fee|support fee|overage fee|interest income|other income|grant/.test(lower)) return 'revenue';
-  // Expenses
-  if (/salary|salaries|cpf|bonus|depreciation|amortisation|bank charge|insurance|rental|travel|marketing|accounting fee|audit fee|legal|contractor|subscription|software|foreign exchange/.test(lower)) return 'expense';
-  return 'unclassified';
-}
+// NOTE: classifyAccountForCopilot() has been removed — accounting analysis
+// is now delegated to the AAS domain executor via executeAccountingAgent().

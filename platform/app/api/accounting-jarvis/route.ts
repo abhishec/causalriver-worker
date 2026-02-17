@@ -1,21 +1,30 @@
 /**
- * Accounting Jarvis API — Processes real Xero GL data through AaaS agents
+ * Accounting Jarvis API — Brain-Connected Accounting Intelligence
  *
- * Runs the 6 accounting agents against uploaded GL data:
- *   1. brain-bookkeeper     → Categorize & create journal entries
- *   2. brain-reconciler     → Month-end account reconciliation
- *   3. brain-statement-gen  → P&L, Balance Sheet, Cash Flow
- *   4. brain-tax-compliance → GST/tax computation
- *   5. brain-audit-preparer → Audit readiness & workpapers
- *   6. brain-anomaly-detect → Benford's Law, duplicates, vendor concentration
+ * GET  /api/accounting-jarvis — Raw GL analysis (backward compat for dashboard)
+ * POST /api/accounting-jarvis — Brain-connected agent execution via SSE streaming
+ *
+ * POST runs the 6 accounting agents + V9 causal accountant against GL data:
+ *   1. brain-bookkeeper       → Categorize & create journal entries
+ *   2. brain-reconciler       → Month-end account reconciliation
+ *   3. brain-statement-gen    → P&L, Balance Sheet, Cash Flow
+ *   4. brain-tax-compliance   → GST/tax computation
+ *   5. brain-audit-preparer   → Audit readiness & workpapers
+ *   6. brain-anomaly-detect   → Benford's Law, duplicates, vendor concentration
+ *   7. brain-causal-accountant → V9: Standard accounting + NexusBrain causal overlay
+ *
+ * Every execution feeds back into the Brain (signal + prediction + evolution).
+ * Cross-service intelligence: AAS anomalies show up in Copilot context.
  *
  * Design Partner: Tookitaki Holding Pte. Ltd. (Singapore, SFRS/IRAS)
  */
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { executeAccountingAgent, type AccountingAction } from "@/lib/aas/domain-executor";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // Allow up to 120s for agent execution
 
 // ── Xero GL Transaction type ────────────────────────────────────────────────
 interface GLTransaction {
@@ -423,15 +432,165 @@ export async function GET(request: Request) {
       .eq("id", orgId)
       .single();
 
+    // Check brain availability (non-blocking)
+    let brainMetadata: Record<string, unknown> = { connected: false };
+    try {
+      const { createBrainContextMesh } = await import("@nexus-ai/memory-stack");
+      const mesh = createBrainContextMesh({ supabase, organizationId: orgId });
+      const universal = await mesh.getUniversalContext();
+      brainMetadata = {
+        connected: true,
+        coldStart: universal.coldStartDetected,
+        causalEdges: universal.causalEdges.length,
+        patterns: universal.patterns.length,
+        intelligenceScore: universal.brainEvolution.intelligenceScore,
+        accuracy: universal.brainAccuracy.accuracy,
+        isLearning: universal.brainEvolution.isLearning,
+      };
+    } catch {
+      // Brain unavailable — GET still works without it
+    }
+
     return NextResponse.json({
       analysis,
       company: org?.name || "Unknown Organization",
       organizationId: orgId,
+      brainMetadata,
       summary: {
         transactions: transactions.length,
         accounts: analysis.summary.totalAccounts,
         dateRange: analysis.summary.dateRange,
         doubleEntryBalanced: analysis.summary.doubleEntryBalanced,
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Internal error";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
+// ============================================================================
+// POST — Brain-Connected Agent Execution (SSE Streaming)
+// ============================================================================
+
+/**
+ * POST /api/accounting-jarvis
+ *
+ * Body: {
+ *   action: 'bookkeep' | 'reconcile' | 'statements' | 'tax' | 'audit' | 'anomaly' | 'causal-analysis' | 'full',
+ *   period?: { from: string, to: string },
+ *   jurisdiction?: string,
+ *   orgId?: string
+ * }
+ *
+ * Response: SSE stream with progress events and final result.
+ */
+export async function POST(request: Request) {
+  try {
+    // Auth check
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Parse request body
+    const body = await request.json();
+    const action = (body.action || 'full') as AccountingAction;
+    const jurisdiction = body.jurisdiction || 'SG';
+    const period = body.period;
+
+    // Resolve org
+    let orgId = body.orgId as string | null;
+    if (!orgId) {
+      const { data: memberships } = await supabase
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id);
+
+      const orgIds = memberships?.map((m) => m.organization_id) || [];
+      for (const oid of orgIds) {
+        const txns = await getGLDataFromStorage(oid);
+        if (txns.length > 0) {
+          orgId = oid;
+          break;
+        }
+      }
+    }
+
+    if (!orgId) {
+      return NextResponse.json({
+        error: "No GL data found. Upload Xero GL data first.",
+      }, { status: 400 });
+    }
+
+    // Load GL transactions
+    const transactions = await getGLDataFromStorage(orgId);
+    if (transactions.length === 0) {
+      return NextResponse.json({
+        error: "No GL data found for this organization.",
+      }, { status: 400 });
+    }
+
+    // SSE streaming setup
+    const encoder = new TextEncoder();
+    let controller: ReadableStreamDefaultController | null = null;
+
+    const stream = new ReadableStream({
+      start(c) {
+        controller = c;
+      },
+    });
+
+    const send = (data: string) => {
+      controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+    };
+
+    // Run agent execution asynchronously while streaming
+    (async () => {
+      try {
+        send(JSON.stringify({
+          type: 'progress',
+          progress: 0.05,
+          message: `Starting ${action} analysis with Brain context...`,
+        }));
+
+        const result = await executeAccountingAgent(supabase, {
+          action,
+          organizationId: orgId!,
+          userId: user.id,
+          transactions: transactions as Array<Record<string, unknown>>,
+          period,
+          jurisdiction,
+          onProgress: (progress: number, message: string) => {
+            send(JSON.stringify({ type: 'progress', progress, message }));
+          },
+        });
+
+        send(JSON.stringify({
+          type: 'result',
+          data: result.result,
+          agentName: result.agentName,
+          action: result.action,
+          timing: result.timing,
+          brainMetadata: result.brainMetadata,
+        }));
+
+        send("[DONE]");
+        controller?.close();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Agent execution failed";
+        send(JSON.stringify({ type: 'error', error: msg }));
+        send("[DONE]");
+        controller?.close();
+      }
+    })();
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
       },
     });
   } catch (err) {
