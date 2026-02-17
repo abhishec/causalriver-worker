@@ -183,30 +183,31 @@ export async function PATCH(request: NextRequest) {
 
     const service = await createServiceClient();
 
-    // Load the task
+    // Get user's org memberships first (before loading task data)
+    const { data: memberships } = await supabase
+      .from("org_members")
+      .select("organization_id, role")
+      .eq("user_id", user.id);
+
+    const memberOrgIds = (memberships || []).map((m) => m.organization_id);
+
+    if (memberOrgIds.length === 0) {
+      return NextResponse.json(
+        { error: "Not a member of any organization" },
+        { status: 403 }
+      );
+    }
+
+    // Load the task — filter by org_id to prevent cross-tenant data access
     const { data: task } = await service
       .from("brain_agent_tasks")
       .select("id, organization_id, status, prompt, result_artifacts, confidence_score")
       .eq("id", taskId)
+      .in("organization_id", memberOrgIds)
       .single();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
-    }
-
-    // Verify membership
-    const { data: membership } = await supabase
-      .from("org_members")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("organization_id", task.organization_id)
-      .single();
-
-    if (!membership) {
-      return NextResponse.json(
-        { error: "Not a member of this organization" },
-        { status: 403 }
-      );
     }
 
     // ── APPROVE ──────────────────────────────────────────────────

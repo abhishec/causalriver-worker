@@ -143,11 +143,19 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Brain Commander with Motor Commands enabled ───────────────────
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+      return NextResponse.json(
+        { error: "ANTHROPIC_API_KEY not configured. Contact your administrator." },
+        { status: 503 }
+      );
+    }
+
     const { createBrainCommander } = await import("@nexus-ai/memory-stack");
     const commander = createBrainCommander({
       supabase,
       organizationId: orgId,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      anthropicApiKey,
       enableActions: true,
       enableMotorCommands: true, // KEY: Enable motor command execution
     });
@@ -210,26 +218,19 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/brain/execute — Capabilities endpoint
+ * GET /api/brain/execute — Health check (auth required)
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   return NextResponse.json({
     name: "NexusBrain Motor Execution API",
     version: "2.0.0",
-    capabilities: [
-      "motor_command_execution",
-      "slack_alerts",
-      "email_digests",
-      "task_creation",
-      "decision_logging",
-      "github_pr_comments",
-      "jira_integration",
-    ],
-    usage: {
-      naturalLanguage: "POST with { command: 'Post this to Slack: Hello!' }",
-      explicit: "POST with { action: 'slack_alert', payload: { ... } }",
-    },
-    auth: ["supabase_session", "api_key (Bearer nxb_...)"],
-    docs: "Motor Cortex API - Brain can ACT through connectors",
+    status: "operational",
   });
 }

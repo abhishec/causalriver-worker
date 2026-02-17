@@ -72,7 +72,8 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Permissions-Policy', permissionsPolicy);
 
   // Cross-Origin policies
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  // Use 'credentialless' instead of 'require-corp' to allow OAuth flows and CDN resources
+  response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
 

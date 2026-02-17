@@ -99,8 +99,17 @@ export function TopBar() {
         {brainStats && (
           <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-full bg-surface border border-border-subtle text-[11px] text-muted">
             <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-brain-active brain-pulse" />
-              Active
+              {brainStats.edges > 0 || brainStats.signalsHr > 0 ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-brain-active brain-pulse" />
+                  Active
+                </>
+              ) : (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
+                  Awaiting data
+                </>
+              )}
             </span>
             <span className="text-border-subtle">|</span>
             <span className="tabular-nums">{brainStats.edges.toLocaleString()} edges</span>

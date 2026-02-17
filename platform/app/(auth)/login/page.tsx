@@ -5,18 +5,17 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-// Force dynamic rendering - don't pre-render at build time
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
-
 function LoginForm() {
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
+  const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    authError === "auth_failed" ? "Authentication failed. Please try again or use a different sign-in method." : null
+  );
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const supabase = createClient();

@@ -252,6 +252,15 @@ export async function POST(request: NextRequest) {
     // ── Create service client once for the entire request lifecycle ──────
     const service = await createServiceClient();
 
+    // ── Validate API key early ────────────────────────────────────────
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+      return NextResponse.json(
+        { error: "ANTHROPIC_API_KEY not configured. Contact your administrator." },
+        { status: 503 }
+      );
+    }
+
     // ── Brain Commander: Unified intelligence pipeline ──────────────────
     // Replace manual DB queries with Commander — single source of truth
     // for intelligence gathering, dispatch assessment, and permission filtering.
@@ -259,7 +268,7 @@ export async function POST(request: NextRequest) {
     const commander = createBrainCommander({
       supabase,
       organizationId: orgId,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+      anthropicApiKey,
       enableActions: false, // We handle action engine separately below for copilot
       enableMotorCommands: false,
     });
