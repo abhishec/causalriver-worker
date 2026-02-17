@@ -153,6 +153,9 @@ export interface AssembledBrainContext {
 
   // BRAIN NUTRITION: LEAP context (deep brain reasoning from cognitive sleep cycles)
   leapContext: LeapContext;
+
+  // Phase 3: Token budget used for this assembly (enables downstream consumers to see budget)
+  tokenBudget?: TokenBudget;
 }
 
 // ============================================================================
@@ -302,6 +305,45 @@ function computeTokenBudget(intent: UserIntent, totalBudget: number = DEFAULT_TO
     rules:    Math.floor(totalBudget * ratios.rules / 100),
     domain:   Math.floor(totalBudget * ratios.domain / 100),
   };
+}
+
+// ============================================================================
+// TOKEN BUDGET ENFORCEMENT — Prune loaded data to fit budget
+// ============================================================================
+
+/**
+ * Rough token estimate: ~4 chars per token for JSON-ish content.
+ * This is a fast heuristic — not a precise tokenizer, but sufficient
+ * for budget enforcement (we're targeting 80K→10-15K, not exact counts).
+ */
+function estimateTokensForItem(item: Record<string, unknown> | string): number {
+  const str = typeof item === 'string' ? item : JSON.stringify(item);
+  return Math.ceil(str.length / 4);
+}
+
+/**
+ * Prune an array of items to fit within a token budget.
+ * Items are assumed to be pre-sorted by relevance (most important first).
+ * Returns a prefix of the array that fits within the budget.
+ */
+function pruneArrayToTokenBudget<T extends Record<string, unknown>>(
+  items: T[],
+  budgetTokens: number,
+): T[] {
+  if (budgetTokens <= 0) return [];
+  if (items.length === 0) return items;
+
+  let usedTokens = 0;
+  let keepCount = 0;
+
+  for (const item of items) {
+    const itemTokens = estimateTokensForItem(item);
+    if (usedTokens + itemTokens > budgetTokens && keepCount > 0) break;
+    usedTokens += itemTokens;
+    keepCount++;
+  }
+
+  return keepCount >= items.length ? items : items.slice(0, keepCount);
 }
 
 // ============================================================================
@@ -851,43 +893,105 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       orgPatterns.length > 0 ||
       signalCount > 0;
 
+    // ── Phase 3: Token Budget Enforcement ────────────────────────────────
+    // The token budget determines HOW MUCH data to include in the assembled context.
+    // Without enforcement, skipping DB queries (via requiredData flags) reduces the
+    // number of queries but the loaded data is still unbounded.
+    // With enforcement: 80K tokens → 10-15K tokens (targeted retrieval + pruning).
+    const budget = intent.tokenBudget;
+
+    // Prune each data category to fit its budget allocation
+    const prunedCausalEdges = pruneArrayToTokenBudget(
+      universal.causalEdges as unknown as Array<Record<string, unknown>>,
+      budget.causal,
+    ) as unknown as CausalEdgeRow[];
+
+    const prunedPatterns = pruneArrayToTokenBudget(
+      universal.patterns as unknown as Array<Record<string, unknown>>,
+      budget.patterns,
+    ) as unknown as MemoryRow[];
+
+    const prunedCascadeRules = pruneArrayToTokenBudget(
+      universal.cascadeRules as unknown as Array<Record<string, unknown>>,
+      budget.rules,
+    ) as unknown as CascadeRuleRow[];
+
+    // Signals pruned from domain budget
+    const signalBudget = Math.floor(budget.domain * 0.4); // 40% of domain budget for signals
+    const entityLinkBudget = Math.floor(budget.domain * 0.3); // 30% for entity links
+    const domainPatternBudget = Math.floor(budget.domain * 0.3); // 30% for domain-specific patterns
+
+    const prunedSignals = pruneArrayToTokenBudget(
+      recentSignals as unknown as Array<Record<string, unknown>>,
+      signalBudget,
+    ) as unknown as SignalRow[];
+
+    const prunedEntityLinks = entityLinks
+      ? pruneArrayToTokenBudget(
+          entityLinks as unknown as Array<Record<string, unknown>>,
+          entityLinkBudget,
+        ) as unknown as EntityLinkRow[]
+      : undefined;
+
+    const prunedAccountingPatterns = accountingPatterns
+      ? pruneArrayToTokenBudget(
+          accountingPatterns as unknown as Array<Record<string, unknown>>,
+          domainPatternBudget,
+        ) as unknown as MemoryRow[]
+      : undefined;
+
+    const prunedFinancialEdges = financialCausalEdges
+      ? pruneArrayToTokenBudget(
+          financialCausalEdges as unknown as Array<Record<string, unknown>>,
+          Math.floor(budget.causal * 0.3), // 30% of causal budget for financial-specific edges
+        ) as unknown as CausalEdgeRow[]
+      : undefined;
+
+    const prunedOrgPatterns = pruneArrayToTokenBudget(
+      orgPatterns as unknown as Array<Record<string, unknown>>,
+      Math.floor(budget.patterns * 0.6), // 60% of pattern budget for org patterns
+    ) as unknown as MemoryRow[];
+
     return {
       organizationId,
       serviceType,
 
-      // Layer 1
-      causalEdges: universal.causalEdges,
-      patterns: universal.patterns,
-      cascadeRules: universal.cascadeRules,
+      // Layer 1 — pruned to token budget
+      causalEdges: prunedCausalEdges,
+      patterns: prunedPatterns,
+      cascadeRules: prunedCascadeRules,
       brainEvolution: universal.brainEvolution,
       userCorrections: universal.userCorrections,
       brainAccuracy: universal.brainAccuracy,
       cognitiveStackAvailable: hasRealData,
 
-      // Layer 2
+      // Layer 2 — pruned to token budget
       crossDomainContext: {
         engineering: {
           velocity,
           bottleneck,
-          recentSignals: recentSignals.slice(0, 20),
+          recentSignals: prunedSignals.slice(0, 20),
           signalCount,
         },
       },
-      orgPatterns,
-      brainInsights: universal.patterns.slice(0, 8),
+      orgPatterns: prunedOrgPatterns,
+      brainInsights: prunedPatterns.slice(0, 8),
 
       // Layer 3
       intent: intent.assessment.intent,
       domains: intent.assessment.domains,
 
-      // Service-specific
-      accountingPatterns,
-      financialCausalEdges,
-      entityLinks,
+      // Service-specific — pruned to token budget
+      accountingPatterns: prunedAccountingPatterns,
+      financialCausalEdges: prunedFinancialEdges,
+      entityLinks: prunedEntityLinks,
 
       // BRAIN NUTRITION: LEAP context (deep brain reasoning from sleep cycles)
       // Shared across ALL services — curiosity, imagination, self-model, experiments, etc.
       leapContext: universal.leapContext,
+
+      // Phase 3: Expose token budget for downstream consumers
+      tokenBudget: budget,
     };
   }
 
