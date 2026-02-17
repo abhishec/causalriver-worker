@@ -174,7 +174,7 @@ jobs:
       - name: Apply pending migrations
         id: push
         run: |
-          OUTPUT=$(supabase db push --linked 2>&1)
+          OUTPUT=$(supabase db push --linked --include-all 2>&1)
           echo "$OUTPUT"
           if echo "$OUTPUT" | grep -q "Applying migration"; then
             echo "migrations_applied=true" >> $GITHUB_OUTPUT
@@ -189,7 +189,7 @@ jobs:
 
       - name: Verify no drift remains
         run: |
-          STATUS=$(supabase db push --linked --dry-run 2>&1 || true)
+          STATUS=$(supabase db push --linked --include-all --dry-run 2>&1 || true)
           echo "$STATUS"
           if echo "$STATUS" | grep -q "Applying migration"; then
             echo "::error::Migration drift detected after push — some migrations may have failed"
