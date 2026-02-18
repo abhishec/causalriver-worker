@@ -1350,6 +1350,7 @@ export {
   linkJiraToGitHub,
   getLinkedEntitiesForTicket,
   getLinkedEntitiesForPR,
+  getLinkedEntitiesForBranch,
   getSprintDeliveryReport,
   type EntityLink,
   type ParsedReferences,
