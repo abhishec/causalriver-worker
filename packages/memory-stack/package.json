@@ -54,7 +54,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "node --max-old-space-size=4096 node_modules/.bin/tsup",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
