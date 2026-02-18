@@ -465,6 +465,9 @@ export {
   createAgentContextEnricher,
   createFeedbackBridge,
   createObservationBridge,
+  // Phase 4: Entity Resolution Bridge (NB-051)
+  createEntityResolutionBridge,
+  withEntityResolution,
   type BridgeConfig,
   type AgentContextCache,
   type StructuredObservation,
@@ -472,6 +475,9 @@ export {
   type ObservationCascade,
   type ObservationStore,
   type ObservationTag,
+  type EntityResolutionBridgeConfig,
+  type EntityResolutionBridge,
+  type ResolutionStats,
 } from './bridges';
 
 // ============================================================================

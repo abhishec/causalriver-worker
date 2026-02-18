@@ -5,7 +5,7 @@
  * Each bridge subscribes to events on the event bus and
  * triggers the next layer in the processing pipeline.
  *
- * Signal → EventBus → CausalDiscovery → PatternLearning → AgentContext → Feedback
+ * EntityResolution → Signal → EventBus → CausalDiscovery → PatternLearning → AgentContext → Feedback
  */
 
 import { createSignalBridge } from './signal-to-eventbus';
@@ -26,6 +26,13 @@ import {
   type ObservationStore,
   type ObservationTag,
 } from './observation-bridge';
+import {
+  createEntityResolutionBridge,
+  withEntityResolution,
+  type EntityResolutionBridgeConfig,
+  type EntityResolutionBridge,
+  type ResolutionStats,
+} from './entity-resolution-bridge';
 
 // Re-export everything
 export { createSignalBridge };
@@ -34,6 +41,7 @@ export { createLearningBridge, type LearningBridgeConfig };
 export { createAgentContextEnricher, type AgentContextCache, type CachedPattern, type CachedRelationship };
 export { createFeedbackBridge };
 export { createObservationBridge, type StructuredObservation, type ObservationRule, type ObservationCascade, type ObservationStore, type ObservationTag };
+export { createEntityResolutionBridge, withEntityResolution, type EntityResolutionBridgeConfig, type EntityResolutionBridge, type ResolutionStats };
 
 // Re-export event bus types for convenience
 export type { CausalEvent, EventBusConfig } from '../causality/event-bus';
@@ -50,6 +58,20 @@ export interface BridgeConfig {
   continuousLearner?: { processEvent: (event: any) => any };
   /** Minimum relationships before pattern mining (default: 5) */
   minRelationshipsForMining?: number;
+  /**
+   * Entity resolution config.
+   * When provided, Bridge 0 (entity resolution) is activated and all
+   * signals passing through `signalBridge.onSignalsCollected` will
+   * have their entity IDs canonicalised before entering the event bus.
+   * Requires a Supabase client and the current org ID.
+   */
+  entityResolution?: {
+    supabase: any;
+    organizationId: string;
+    fuzzyThreshold?: number;
+    asyncMode?: boolean;
+    skipEntityTypes?: string[];
+  };
 }
 
 /**
@@ -76,8 +98,26 @@ export function wireNexusBridges(
   eventBus: any,
   config: BridgeConfig = {}
 ) {
+  // Bridge 0: Entity Resolution (optional — activated when entityResolution config is provided)
+  // Canonicalises entity IDs across all systems (GitHub, Jira, Slack, Freshworks, etc.)
+  // BEFORE signals reach the event bus, ensuring causal discovery operates on
+  // consistent identities.  NB-051: Phase 4 — Entity Resolution.
+  let entityResolutionBridge: EntityResolutionBridge | null = null;
+  if (config.entityResolution) {
+    entityResolutionBridge = createEntityResolutionBridge(config.entityResolution);
+  }
+
   // Bridge 1: Signal → EventBus
   const signalBridge = createSignalBridge(eventBus);
+
+  // If entity resolution is active, wrap the signal bridge so every batch
+  // of signals is automatically resolved before entering the event bus.
+  if (entityResolutionBridge) {
+    signalBridge.onSignalsCollected = withEntityResolution(
+      entityResolutionBridge,
+      signalBridge.onSignalsCollected
+    ) as typeof signalBridge.onSignalsCollected;
+  }
 
   // Bridge 2: EventBus → Causal Discovery
   const causalSubscriber = createCausalSubscriber(eventBus, {
@@ -106,6 +146,7 @@ export function wireNexusBridges(
   const observationBridge = createObservationBridge(eventBus);
 
   return {
+    entityResolutionBridge,
     signalBridge,
     causalSubscriber,
     learningBridge,
@@ -116,6 +157,7 @@ export function wireNexusBridges(
     /** Get stats from all bridges */
     getStats() {
       return {
+        entityResolution: entityResolutionBridge?.getStats() ?? null,
         signals: signalBridge.getStats(),
         causal: causalSubscriber.getStats(),
         learning: learningBridge.getStats(),

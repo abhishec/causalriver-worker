@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (Phase 3 complete — branch wired end-to-end; CTO audit: 6 bugs fixed across P1/P2) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (Phase 4 complete — branch selector UI + backend fully connected; trackedBranches exposed in GitHub status API) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -28,15 +28,15 @@
 
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
-| Data Pipeline / Brain | 8 | 6 | 2 | 0 |
-| SE-aaS / Connectors | 11 | 11 | 0 | 0 |
+| Data Pipeline / Brain | 9 | 8 | 1 | 0 |
+| SE-aaS / Connectors | 12 | 12 | 0 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 3 | 0 | 0 |
 | Training / RL | 5 | 5 | 0 | 0 |
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
-| **TOTAL** | **51** | **49** | **2** | **0** |
+| **TOTAL** | **53** | **52** | **1** | **0** |
 
 ---
 
@@ -573,6 +573,42 @@
 
 ---
 
+### NB-052 🟠 ✅
+**Phase 4: Entity Resolution Bridge — One entity across all systems**
+- Area: Data Pipeline / Brain
+- Priority: High
+- Status: ✅ Done (Phase 4 complete — entity resolution bridge live)
+- Detail: Implemented Phase 4 of PLAN-10X.md: cross-system identity resolution so causal discovery operates on consistent entity IDs regardless of which connector ingested the signal (GitHub, Jira, Slack, Freshworks, HubSpot, etc.).
+  **New files:**
+  1. **`packages/memory-stack/src/bridges/entity-resolution-bridge.ts`** (280 lines) — Bridge 0 in the signal pipeline. For every incoming signal, extracts entity attributes (source, externalId, name, email, domain) and calls the 3-tier entity resolver (exact → fuzzy → federated). Canonicalises `entity_id` to the resolved UUID. Raw external ID preserved in `signal_metadata._raw_entity_id`. Non-blocking: resolution failures pass signal through unchanged. Exposes `withEntityResolution()` pipeline helper that wraps any `onSignalsCollected` handler.
+  2. **`platform/app/api/entities/route.ts`** — REST API surface for the `resolved_entities` table:
+     - `GET /api/entities` — paginated list with `type`, `q` (fuzzy name search), `limit`, `offset` params
+     - `GET /api/entities?id=<uuid>` — single entity + full unified view (signals + causal relationships)
+     - `POST /api/entities` — manually resolve/create a canonical entity from `{ source, externalId, name, email, domain, entityType }`
+     - `PATCH /api/entities` — update `canonicalName`, `aliases`, or `metadata` (metadata is merged not replaced)
+  **Modified files:**
+  3. **`packages/memory-stack/src/bridges/index.ts`** — Added Bridge 0 to `wireNexusBridges()`. When `config.entityResolution` is provided, wraps `signalBridge.onSignalsCollected` with `withEntityResolution()`. Returns `entityResolutionBridge` in the object and includes resolution stats in `getStats()`. Updated pipeline comment: `EntityResolution → Signal → EventBus → Causal → ...`
+  4. **`packages/memory-stack/src/index.ts`** — Exported `createEntityResolutionBridge`, `withEntityResolution`, `EntityResolutionBridgeConfig`, `EntityResolutionBridge`, `ResolutionStats` from the bridges section.
+  **DB:** `resolved_entities` table confirmed present in migration `20250207000001_nexus_brain_core.sql` — no new migration required.
+- Files: `packages/memory-stack/src/bridges/entity-resolution-bridge.ts`, `packages/memory-stack/src/bridges/index.ts`, `packages/memory-stack/src/index.ts`, `platform/app/api/entities/route.ts`
+
+---
+
+### NB-053 🟠 ✅
+**Phase 4: Branch selector UI + backend fully connected for SE-aaS code intelligence**
+- Area: SE-aaS / Connectors
+- Priority: High
+- Status: ✅ Done (Phase 4 complete — UI + backend wired end-to-end)
+- Detail: Wired the `branch` parameter from the connected GitHub org into the SE-aaS UI and backend dispatch chain. Four files changed:
+  1. **`platform/app/api/connectors/github/status/route.ts`** — Added `trackedBranches` field to GET response: `Array.isArray(config?.trackedBranches) ? config.trackedBranches : []`. Previously this config JSONB field was silently dropped — now exposed to the frontend.
+  2. **`platform/components/copilot/CopilotChat.tsx`** — Added `trackedBranches` prop override. On mount, fetches `/api/connectors/github/status` and auto-populates `trackedBranches` state + auto-selects the first branch (code intelligence on by default). Added branch selector pill strip above the input bar: clickable branch pills, "Code intelligence active" label when a branch is selected. Added `selectedBranchRef` (stable ref for sendMessage closure). Includes `branch` in every POST body to `/api/copilot/chat` when a branch is selected.
+  3. **`platform/app/api/copilot/chat/route.ts`** — Extracted `branch` from POST body. Forwarded into `executeDomain()` call by merging it into `request`: `{ ...seaasRoute.extractedInput, branch }`. Phase 3's `domain-executor.ts` already reads `params.request.branch` and passes it to `createBrainContextMesh({ branch })` — no change needed there.
+- Data flow: User selects branch pill → `CopilotChat` sends `{ message, branch }` → `/api/copilot/chat` extracts branch → `executeDomain({ request: { ...input, branch } })` → `domain-executor.ts` → `createBrainContextMesh({ branch })` → symbol index + dep graph injected into Claude system prompt
+- Impact: All 17 SE-aaS domains now receive branch-scoped code intelligence (symbol index + dependency graph) from the copilot UI. Tookitaki two-team scenario: Team 1 selects `release/6.3.4`, Team 2 selects `release/5.11.5-enterprise` — their symbols never collide (entity_id: `repo:path::Symbol@branch`).
+- Files: `platform/app/api/connectors/github/status/route.ts`, `platform/components/copilot/CopilotChat.tsx`, `platform/app/api/copilot/chat/route.ts`
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -581,9 +617,8 @@
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
 | NB-032 | 🟡 | Performance | Brain cold-start monitoring — ongoing (currently at 3000ms budget) |
-| NB-050 | 🟠 | SE-aaS | Phase 2 code dep graph injection — complete (no open work) |
 
-> 🎉 **48/50 issues resolved.** Only NB-032 (monitoring alert for cold-start creep) remains as an ongoing operational concern.
+> 🎉 **52/53 issues resolved.** Only NB-032 (monitoring alert for cold-start creep) remains as an ongoing operational concern.
 
 ### All Security Issues
 | ID | Priority | Status | Title |
@@ -631,6 +666,8 @@
 | NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | 573d4b5a5 |
 | NB-050 | Phase 2: Code dep graph + symbol index injected into Brain context (all 17 SE-aaS domains) | phase-2 |
 | NB-051 | Phase 3: branch wired into domain-executor + 6 audit bugs fixed (P1: sig, count, method; P2: errors, log, null) | phase-3 |
+| NB-052 | Phase 4: Entity Resolution Bridge — one entity across all systems (entity-resolution-bridge.ts + /api/entities) | pending |
+| NB-053 | Phase 4 UI: Branch selector + backend wired — trackedBranches in status API, branch pill UI, branch forwarded to SE-aaS domains | phase-4 |
 | NB-019 | Log ingestion connector (CloudWatch/Datadog/ELK/Generic) — Log Query domain now has real data | 36d162865 |
 | NB-020 | Freshworks suite — Freshsales + Freshchat connectors + /api/connectors/freshworks/sync route | 36d162865 |
 | NB-022 | Connector monitoring dashboard — GET /api/connectors/monitoring with ETA, throughput, health | 36d162865 |
