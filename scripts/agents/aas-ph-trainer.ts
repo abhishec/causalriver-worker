@@ -136,7 +136,7 @@ export class AASPHTrainerAgent extends BaseTrainingAgent {
     if (this.config.dryRun) { this.log('TRAIN', `[DRY RUN] ${signals.length} signals + ${packs.length} packs. Key: PH VAT 12% WITH input credit; mandatory 13th month pay; SSS/PhilHealth/Pag-IBIG.`); result.signalsStored = signals.length; result.packsProcessed = packs.length; return result; }
     const BATCH = 500;
     for (let i = 0; i < signals.length; i += BATCH) { try { await storeConnectorSignals(this.supabase, signals.slice(i, i + BATCH)); result.signalsStored += Math.min(BATCH, signals.length - i); } catch (e) { this.errors.push(String(e)); } }
-    try { const r = await createBrainTrainer().trainBatch(this.supabase, this.organizationId, packs); result.packsProcessed = packs.length; result.discoveries = r?.casesLoaded ?? 0; } catch (e) { this.errors.push(String(e)); }
+    try { const r = await createBrainTrainer().trainBatch(this.supabase, this.organizationId, packs); result.packsProcessed = packs.length; result.discoveries = r?.causalEdgesLoaded ?? 0; } catch (e) { this.errors.push(String(e)); }
     try { await createScheduledJobs(this.supabase).runDailyCausalDiscovery(this.organizationId); } catch { }
     try { await this.supabase.from('agent_run_history').insert({ agent_name: this.name, agent_version: this.version, organization_id: this.organizationId, status: 'success', signals_stored: result.signalsStored, packs_processed: result.packsProcessed, discoveries: result.discoveries, run_mode: 'full', completed_at: new Date().toISOString() }); } catch { }
     return result;

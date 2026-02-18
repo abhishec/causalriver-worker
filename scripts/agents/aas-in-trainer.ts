@@ -306,7 +306,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     try {
       const r = await createBrainTrainer().trainBatch(this.supabase, this.organizationId, packs);
       result.packsProcessed = packs.length;
-      result.discoveries = r?.casesLoaded ?? 0;
+      result.discoveries = r?.causalEdgesLoaded ?? 0;
     } catch (e) { this.errors.push(String(e)); }
     try { await createScheduledJobs(this.supabase).runDailyCausalDiscovery(this.organizationId); } catch { }
     try {
