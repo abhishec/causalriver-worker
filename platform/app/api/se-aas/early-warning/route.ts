@@ -80,13 +80,13 @@ export async function GET(request: NextRequest) {
 
         // 1. Record velocity collapse prediction for Brain verification
         if (report.velocityCollapse) {
-          const vc = report.velocityCollapse.prediction;
+          const vc = report.velocityCollapse;
           await service.from("prediction_records").insert({
             organization_id: orgId,
             domain: "velocity",
             predicted_outcome: `Velocity collapse predicted: ${vc.predictedDrop}% drop in ${vc.daysUntilCollapse} days`,
             predicted_value: vc.predictedDrop ?? null,
-            confidence: report.velocityCollapse.confidence,
+            confidence: report.confidence,
             entity_type: "early_warning",
             entity_id: `velocity_${new Date().toISOString().split("T")[0]}`,
           });
@@ -94,13 +94,13 @@ export async function GET(request: NextRequest) {
 
         // 2. Record critical/high bottleneck predictions for Brain verification
         for (const risk of report.bottleneckRisks ?? []) {
-          if (risk.metrics.giniCoefficient > 0.6) {
+          if (risk.giniCoefficient > 0.6) {
             await service.from("prediction_records").insert({
               organization_id: orgId,
               domain: risk.domain ?? "bottleneck",
-              predicted_outcome: `Bottleneck risk in ${risk.domain}: Gini ${risk.metrics.giniCoefficient.toFixed(2)}, bus factor ${risk.metrics.busFactor}`,
-              predicted_value: risk.metrics.giniCoefficient,
-              confidence: risk.confidence,
+              predicted_outcome: `Bottleneck risk in ${risk.domain}: Gini ${risk.giniCoefficient.toFixed(2)}, bus factor ${risk.busFactor}`,
+              predicted_value: risk.giniCoefficient,
+              confidence: report.confidence,
               entity_type: "early_warning",
               entity_id: `bottleneck_${risk.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
             });

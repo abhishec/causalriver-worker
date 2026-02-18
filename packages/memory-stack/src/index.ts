@@ -1340,6 +1340,10 @@ export {
   type StressTestResult,
 } from './orchestrator/early-warning-brain-integration';
 
+// Re-export underlying metric types used by BrainEarlyWarningReport consumers
+export { type VelocityCollapseAlert } from './orchestrator/velocity-tracker';
+export { type BottleneckMetrics } from './orchestrator/bottleneck-detector';
+
 // Cross-Domain Linker — THE CRITICAL piece that makes GitHub↔Jira↔Slack actually connected
 // Parses PR titles/branches, commit messages, Slack messages for cross-domain references
 // Stores entity_links so Copilot can answer: "What Jira tickets are linked to velocity collapse?"

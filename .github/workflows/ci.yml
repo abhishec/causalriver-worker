@@ -50,6 +50,14 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
+      - name: Build memory-stack (required for platform tsc)
+        # The platform imports @nexus-ai/memory-stack which resolves to dist/index.d.ts.
+        # dist/ is gitignored — must be built before tsc can type-check platform routes.
+        run: pnpm --filter @nexus-ai/memory-stack run build
+        if: matrix.node-version == 20
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
       - name: TypeScript type check (platform)
         run: cd platform && pnpm exec tsc --noEmit
         if: matrix.node-version == 20
