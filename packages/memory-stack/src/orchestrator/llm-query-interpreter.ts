@@ -693,7 +693,9 @@ export function createLLMQueryInterpreter(config: LLMQueryInterpreterConfig): LL
       }
 
       // Extract JSON from response
-      const text = response.content
+      // Cast to any[] first: SDK ^0.74 adds ThinkingBlock to ContentBlock union
+      // which the DTS builder fails to narrow through a user-defined type guard.
+      const text = (response.content as any[])
         .filter((block): block is { type: 'text'; text: string } => block.type === 'text')
         .map(block => block.text)
         .join('');
