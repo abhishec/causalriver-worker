@@ -31,9 +31,18 @@ import {
   createBrainFeedbackBus,
   snapshotCausalWeights,
   computeAndPromoteCausalDeltas,
+  // Federated Brain — CORE → ORG real-time injection (NB-065)
+  pushCoreInsightsToOrg,
   type AgentDefinition,
   type AssembledBrainContext,
 } from '@nexus-ai/memory-stack';
+
+// ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
+// Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
+// the CORE table on every agent call — we only push once per TTL window.
+// Module-level so it persists across requests within the same process instance.
+const _corePushLastMs = new Map<string, number>();
+const CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 // ============================================================================
 // TYPES
@@ -132,6 +141,25 @@ export async function executeAccountingAgent(
     causalWeightsBefore = await snapshotCausalWeights(supabase, organizationId);
   } catch {
     // Non-fatal — federation is best-effort
+  }
+
+  // ── Step 0.5: CORE → ORG real-time injection (NB-065) ───────────────────
+  // pushCoreInsightsToOrg writes strong CORE causal priors (evidence_weight ≥ 10,
+  // effect_size ≥ 0.7) into the ORG's own causal_relationships_statistical rows.
+  // We AWAIT this before mesh.assemble() so the priors are in the DB when the
+  // mesh queries causal edges for this org. Conflict resolution is already in
+  // pushCoreInsightsToOrg: org's own strong data always wins; CORE only fills
+  // gaps or blends with weak org data (0.7 × CORE + 0.3 × org).
+  //
+  // TTL guard prevents hammering on every request — at most once per 10 minutes
+  // per org per process instance. Fire-and-forget on failure (non-fatal).
+  if ((Date.now() - (_corePushLastMs.get(organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
+    _corePushLastMs.set(organizationId, Date.now()); // set before await to avoid races
+    try {
+      await pushCoreInsightsToOrg(organizationId, supabase as any);
+    } catch {
+      // Non-fatal — if CORE push fails, org continues with its own causal edges
+    }
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────

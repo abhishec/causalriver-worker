@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (NB-064 FIXED — SE-AAS Gap 3 pushInsight, Gap 4 leapContext/entityLinks ctx surfacing, Gap 5 AAS Promise.all. Full SE-AAS ↔ AAS parity now achieved. NB-062 ajv CVE: dev-only, accepted risk) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (NB-065 FIXED — CORE→ORG real-time injection wired in SE-AAS and AAS executors via Step 0.5 + 10-min TTL guard. Both federated directions now real-time per-request. NB-062 ajv CVE: dev-only, accepted risk) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -29,7 +29,7 @@
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
 | Data Pipeline / Brain | 9 | 8 | 1 | 0 |
-| SE-aaS / Connectors | 14 | 14 | 0 | 0 |
+| SE-aaS / Connectors | 15 | 15 | 0 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 3 | 0 | 0 |
@@ -40,7 +40,7 @@
 | Website / Lint | 1 | 1 | 0 | 0 |
 | Platform / TypeScript | 1 | 1 | 0 | 0 |
 | Security / CVE | 1 | 0 | 1 | 0 |
-| **TOTAL** | **64** | **63** | **1** | **0** |
+| **TOTAL** | **65** | **64** | **1** | **0** |
 
 ---
 
@@ -713,6 +713,25 @@
 
 ---
 
+### NB-065 🟠 ✅
+**CORE → ORG federated learning was eventual-only — wired real-time injection in SE-AAS and AAS executors**
+- Area: SE-aaS / AAS / Brain / Federated Learning
+- Priority: High
+- Status: ✅ Fixed (2026-02-18)
+- Root cause: `pushCoreInsightsToOrg` (in `packages/memory-stack/src/federation/federated-brain.ts`) already existed and was correct — it reads CORE causal edges (`evidence_weight ≥ 10`, `effect_size ≥ 0.7`) and upserts them into the org's `causal_relationships_statistical` table with smart conflict resolution (org wins if strong, CORE fills gaps, `0.7×CORE + 0.3×org` blend for weak org data). BUT it was only called inside `autonomous-learner.ts → runLearningCycle()`, which is decoupled from the API hot path. Result: design partners only received CORE knowledge when the background learning cycle happened to fire — not on every domain call.
+- Fix: Added **Step 0.5** to both `se-aas/domain-executor.ts` and `aas/domain-executor.ts`, inserted AFTER Step 0 (`snapshotCausalWeights`) and BEFORE Step 1 (`mesh.assemble()`). This ordering is critical: `pushCoreInsightsToOrg` writes CORE priors into the org's `causal_relationships_statistical` table; `mesh.assemble()` then queries that same table (filtered by `organizationId`) — so CORE priors are naturally picked up by the mesh with zero mesh changes.
+- TTL guard: Module-level `Map<orgId, timestampMs>` with 10-minute TTL prevents hitting the CORE table on every request. First call per org per 10min → push fires (awaited, non-fatal). Subsequent calls within TTL → skip (CORE priors already in org table from previous push).
+- Conflict resolution (from `pushCoreInsightsToOrg`):
+  - Org has NO edge for this pair → write as `discovery_method: 'core_prior'` (full CORE value)
+  - Org has weak own data → `discovery_method: 'core_prior_blended'`, `effect_size = 0.7×CORE + 0.3×org`
+  - Org has strong own data (`evidence_weight ≥ 10`) → skip, org data takes precedence
+- `pushCoreInsightsToOrg` already exported from `@nexus-ai/memory-stack` (`packages/memory-stack/src/index.ts` lines 267–273) — no package changes needed.
+- Files:
+  - `platform/lib/se-aas/domain-executor.ts` (import + TTL map + Step 0.5)
+  - `platform/lib/aas/domain-executor.ts` (import + TTL map + Step 0.5)
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -722,7 +741,7 @@
 |----|----------|------|-------|
 | NB-062 | 🟡 | Security | ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) — dev-only, nested eslint bundle resists pnpm override. Accepted risk. |
 
-> **63/64 issues resolved.** 1 remaining: NB-062 ajv CVE is dev-only (not in production bundle) — accepted risk pending eslint upgrade.
+> **64/65 issues resolved.** 1 remaining: NB-062 ajv CVE is dev-only (not in production bundle) — accepted risk pending eslint upgrade.
 
 ---
 
@@ -830,6 +849,7 @@
 | NB-059 | Federated Causal Learning (FedAvg delta promotion to CORE brain) | db43aada6a |
 | NB-063 | SE-AAS federated learning loop fixed — ORG → CORE now works for both SE-AAS and AAS | 2026-02-18 |
 | NB-064 | SE-AAS/AAS parity gaps fixed — pushInsight (Ch5), leapContext/entityLinks ctx surfacing, AAS Promise.all | 2026-02-18 |
+| NB-065 | CORE→ORG real-time injection — Step 0.5 + 10-min TTL guard wired in SE-AAS and AAS executors | 2026-02-18 |
 
 ---
 

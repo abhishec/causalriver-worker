@@ -44,9 +44,18 @@ import {
   // Federated Causal Learning — ORG → CORE delta promotion (NB-063)
   snapshotCausalWeights,
   computeAndPromoteCausalDeltas,
+  // Federated Brain — CORE → ORG real-time injection (NB-065)
+  pushCoreInsightsToOrg,
   // SE-aaS Delivery Intelligence — Pod Match (Sprint 5 WOW Artifact #3)
   podMatchDomain,
 } from "@nexus-ai/memory-stack";
+
+// ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
+// Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
+// the CORE table on every domain call — we only push once per TTL window.
+// Module-level so it persists across requests within the same process instance.
+const _corePushLastMs = new Map<string, number>();
+const CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 // ============================================================================
 // DOMAIN REGISTRY — All 15 SE-aaS Brain-Augmented Domains (17 capabilities)
@@ -136,6 +145,25 @@ export async function executeDomain(
     // Non-fatal — federation is best-effort, never blocks domain execution
   }
 
+  // ── Step 0.5: CORE → ORG real-time injection (NB-065) ───────────────────
+  // pushCoreInsightsToOrg writes strong CORE causal priors (evidence_weight ≥ 10,
+  // effect_size ≥ 0.7) into the ORG's own causal_relationships_statistical rows.
+  // We AWAIT this before mesh.assemble() so the priors are in the DB when the
+  // mesh queries causal edges for this org. Conflict resolution is already in
+  // pushCoreInsightsToOrg: org's own strong data always wins; CORE only fills
+  // gaps or blends with weak org data (0.7 × CORE + 0.3 × org).
+  //
+  // TTL guard prevents hammering on every request — at most once per 10 minutes
+  // per org per process instance. Fire-and-forget on failure (non-fatal).
+  if ((Date.now() - (_corePushLastMs.get(params.organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
+    _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
+    try {
+      await pushCoreInsightsToOrg(params.organizationId, supabase as any);
+    } catch {
+      // Non-fatal — if CORE push fails, org continues with its own causal edges
+    }
+  }
+
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
   // Branch scoping: the request payload may include a `branch` field (e.g. 'release/6.3.4').
   // When present, the mesh loads the code dependency graph + symbol index for that branch
@@ -174,11 +202,11 @@ export async function executeDomain(
     leapContext: brainContext.leapContext ?? null,
     // Entity links: cross-system connections (PR→Jira→Slack→Deploy)
     // loaded by the mesh's Layer 2 SE-AAS domain context (getSeaasDomainContext)
-    entityLinks: (brainContext.entityLinks ?? []).slice(0, 20).map((l: Record<string, unknown>) => ({
-      source: `${l['source_domain'] ?? ''}:${l['source_entity_id']}`,
-      target: `${l['target_domain'] ?? ''}:${l['target_entity_id']}`,
-      type: l['link_type'],
-      confidence: l['confidence'],
+    entityLinks: (brainContext.entityLinks ?? []).slice(0, 20).map(l => ({
+      source: `${l.source_domain ?? ''}:${l.source_entity_id}`,
+      target: `${l.target_domain ?? ''}:${l.target_entity_id}`,
+      type: l.link_type,
+      confidence: l.confidence,
     })),
     supabase,
   };
