@@ -100,13 +100,21 @@ function countTrainingPacks(): number {
   return 20;
 }
 
+type CausalRiversResult = { auroc: number; var_baseline: number; delta: number };
+type LongMemEvalResult = {
+  overall_accuracy: number;
+  type_accuracies: Record<string, number>;
+  total_questions: number;
+  total_correct: number;
+};
+
 function loadBenchmarkResults(): {
-  causalrivers: Record<string, any>;
-  longmemeval: Record<string, any>;
+  causalrivers: Record<string, CausalRiversResult>;
+  longmemeval: Partial<LongMemEvalResult>;
 } {
   const results = {
-    causalrivers: {} as Record<string, any>,
-    longmemeval: {} as Record<string, any>,
+    causalrivers: {} as Record<string, CausalRiversResult>,
+    longmemeval: {} as Partial<LongMemEvalResult>,
   };
 
   try {
@@ -209,7 +217,7 @@ export const BENCHMARK_RESULTS = {
     bestAUROC: ${bestAUROC},
     results: ${JSON.stringify(
       Object.entries(benchmarks.causalrivers).reduce(
-        (acc, [k, v]: [string, any]) => {
+        (acc, [k, v]) => {
           acc[k] = {
             auroc: v.auroc,
             varBaseline: v.var_baseline,
@@ -217,7 +225,7 @@ export const BENCHMARK_RESULTS = {
           };
           return acc;
         },
-        {} as Record<string, any>
+        {} as Record<string, { auroc: number; varBaseline: number; delta: number }>
       ),
       null,
       4
@@ -230,7 +238,7 @@ export const BENCHMARK_RESULTS = {
     temporalReasoningFormatted: "${(temporalReasoning * 100).toFixed(1)}%",
     typeAccuracies: ${JSON.stringify(
       Object.entries(benchmarks.longmemeval.type_accuracies || {}).reduce(
-        (acc, [k, v]: [string, any]) => {
+        (acc, [k, v]) => {
           acc[k] = Number((v * 100).toFixed(1));
           return acc;
         },

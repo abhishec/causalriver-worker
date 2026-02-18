@@ -128,6 +128,11 @@ export function LiveBrainPulse() {
     return () => clearInterval(interval);
   }, []);
 
+  // Seed initial messages separately (not inside the interval effect)
+  useEffect(() => {
+    setMessages(activityMessages.slice(0, 3));
+  }, [activityMessages]);
+
   // Cycle through activity messages
   useEffect(() => {
     const msgs = activityMessages;
@@ -136,10 +141,8 @@ export function LiveBrainPulse() {
       setMessages((prev) => [msgs[messageIndexRef.current], ...prev].slice(0, 5));
     }, 3500);
 
-    // Seed initial messages
-    setMessages(msgs.slice(0, 3));
-
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activityMessages.length, isLive]);
 
   return (

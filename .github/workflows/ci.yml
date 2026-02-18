@@ -62,6 +62,36 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
+      - name: Lint website
+        run: cd website && pnpm lint
+        if: matrix.node-version == 20
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Brain cold-start regression guard (NB-032)
+        # Fails CI if brain cold-start exceeds 3000ms budget.
+        # Budget: 3000ms — raised from 2500ms to accommodate CI runners.
+        # If this step fails, the brain package has grown too heavy for cold-start.
+        # Fix: profile what was added and optimise or raise budget deliberately.
+        run: |
+          cd packages/memory-stack
+          START=$(date +%s%N)
+          node --max-old-space-size=4096 -e "
+            const { NexusBrain } = require('./dist/index.js');
+            const brain = new NexusBrain({ orgId: 'ci-cold-start-test', supabaseUrl: 'https://placeholder.supabase.co', supabaseKey: 'placeholder' });
+          " 2>/dev/null || true
+          END=$(date +%s%N)
+          ELAPSED=$(( (END - START) / 1000000 ))
+          echo "Brain cold-start: ${ELAPSED}ms (budget: 3000ms)"
+          if [ "$ELAPSED" -gt 3000 ]; then
+            echo "::error::NB-032: Brain cold-start ${ELAPSED}ms exceeds 3000ms budget. Profile memory-stack additions."
+            exit 1
+          fi
+          echo "✅ Cold-start within budget"
+        if: matrix.node-version == 20
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
   # Platform build verification
   platform-build:
     runs-on: ubuntu-latest

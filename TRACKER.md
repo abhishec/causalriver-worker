@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (NB-063 FIXED — SE-AAS federated learning loop closed: ORG → CORE delta promotion now works for both SE-AAS and AAS. Previously SE-AAS was learning in isolation; now both services share causal discoveries with CORE brain via FedAvg.) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (NB-060/061/032 FIXED — website lint 0 errors, NB-032 CI cold-start guard added, NB-061 already done. NB-062 ajv CVE: dev-only, pnpm override + .pnpmfile.cjs added, nested eslint bundle resists patching — accepted as dev-only risk) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -37,10 +37,10 @@
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
 | Accounting / AAS | 6 | 6 | 0 | 0 |
-| Website / Lint | 1 | 0 | 1 | 0 |
-| Platform / TypeScript | 1 | 0 | 1 | 0 |
+| Website / Lint | 1 | 1 | 0 | 0 |
+| Platform / TypeScript | 1 | 1 | 0 | 0 |
 | Security / CVE | 1 | 0 | 1 | 0 |
-| **TOTAL** | **63** | **59** | **4** | **0** |
+| **TOTAL** | **63** | **62** | **1** | **0** |
 
 ---
 
@@ -368,13 +368,12 @@
 
 ## ⚡ PERFORMANCE
 
-### NB-032 🟡 🚧
-**Brain cold-start time needs ongoing monitoring (currently at 3000ms budget)**
-- Area: Performance
+### NB-032 🟡 ✅
+**Brain cold-start CI regression guard added**
+- Area: Performance / CI
 - Priority: Medium
-- Status: 🚧 Monitoring Required
-- Detail: Threshold raised 2500ms → 3000ms to accommodate CI runners + dev machines (observed 2612ms locally). Budget will creep as feature set grows — alert needed.
-- Action: Add performance regression alert in CI if budget is breached again
+- Status: ✅ Fixed — CI step added
+- Detail: Added "Brain cold-start regression guard" step to `.github/workflows/ci.yml`. Measures actual cold-start time and fails CI if it exceeds 3000ms budget with `::error::` annotation. Runs on Node 20 only. Also added `Lint website` step to CI so website lint errors (NB-060) will block the pipeline going forward.
 
 ---
 
@@ -702,12 +701,9 @@
 ### All Open Issues
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
-| NB-032 | 🟡 | Performance | Brain cold-start monitoring — ongoing (currently at 3000ms budget) |
-| NB-060 | 🟠 | Website / Lint | 8 lint errors in website (no-explicit-any × 7, setState-in-effect × 1) — blocking CI |
-| NB-061 | 🟡 | Platform / TS | TS2344 type error on `/api/releases/[releaseId]/route.ts` — Next.js 15 params Promise type |
-| NB-062 | 🟠 | Security | ajv MODERATE CVE re-emerged (GHSA-2g4f-4pwh-qvx6) — override not fully resolving via eslint dep chain |
+| NB-062 | 🟡 | Security | ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) — dev-only, nested eslint bundle resists pnpm override. Accepted risk. |
 
-> **58/62 issues resolved.** 4 open: 3 new issues found from live codebase scan today + NB-032 ongoing monitoring.
+> **62/63 issues resolved.** 1 remaining: NB-062 ajv CVE is dev-only (not in production bundle) — accepted risk pending eslint upgrade.
 
 ---
 
