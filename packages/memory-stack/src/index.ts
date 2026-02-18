@@ -1632,6 +1632,22 @@ export { createGenericAppConnector, type GenericAppConnectorConfig, type Generic
 // Brain-OS Platform Connector
 export { createBrainOSConnector, brainOSConnector } from './connectors/brain-os';
 
+// ─── NB-020: Freshworks Suite Connectors ─────────────────────────────────────
+export { FreshdeskConnector } from './connectors/freshworks/freshdesk-connector';
+export { FreshsalesConnector } from './connectors/freshworks/freshsales-connector';
+export { FreshchatConnector } from './connectors/freshworks/freshchat-connector';
+
+// ─── NB-019: Log Ingestion Connector (CloudWatch / Datadog / ELK / Generic) ──
+export {
+  LogConnector,
+  type LogProvider,
+  type CloudWatchCredentials,
+  type DatadogCredentials,
+  type ElkCredentials,
+  type GenericLogCredentials,
+  type LogCredentials,
+} from './connectors/logs/log-connector';
+
 // Sync Manager
 export {
   createSyncManager,
