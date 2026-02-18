@@ -37,6 +37,8 @@ import { createSyncManager, type SyncManagerConfig } from '../connectors/sync-ma
 import type { NexusConnector, ConnectorSyncResult } from '../connectors/connector-framework';
 import { createAutonomousLearner, type LearningCycleResult as AutonomousLearningResult } from '../learning/autonomous-learner';
 import { onSignalsIngested } from '../ingestion/connector-signal-bridge';
+import { runDeliveryHealthAggregation } from '../se-aas/delivery-health-signals';
+import { runAllEngagementHealthScores } from '../se-aas/engagement-health-score';
 
 // ============================================================================
 // TYPES
@@ -964,6 +966,15 @@ export function createScheduledJobs(
           await this.runAutonomousLearning(organizationId);
         } catch (err: any) {
           console.warn('[scheduled-jobs] Reactive learning non-fatal:', err?.message || err);
+        }
+
+        // SE-aaS: Run delivery health aggregation after every significant sync
+        // Computes review burden, velocity index, ticket lag, scope velocity per engagement
+        try {
+          await runDeliveryHealthAggregation({ supabase, organizationId: orgId });
+          await runAllEngagementHealthScores(supabase, orgId);
+        } catch (err: any) {
+          console.warn('[scheduled-jobs] Delivery health aggregation non-fatal:', err?.message || err);
         }
       });
     },

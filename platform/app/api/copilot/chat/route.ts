@@ -579,6 +579,7 @@ export async function POST(request: NextRequest) {
     // Falls back to regex detectSEaaSRoute/detectAccountingRoute if interpretation unavailable.
     let seaasResult: Record<string, unknown> | null = null;
     let accountingResult: Record<string, unknown> | null = null;
+    let deliveryIntelligenceResult: Record<string, unknown> | null = null;
 
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors)
     const COPILOT_NATIVE_DOMAINS = new Set(['boilerplate-generator', 'pr-review-assistant', 'codebase-qa']);
@@ -609,11 +610,40 @@ export async function POST(request: NextRequest) {
           interpretation, // Phase 3: pass interpretation for targeted context
         });
 
-        seaasResult = {
-          domainType: seaasRoute.domainType,
-          artifactId: domainResult.artifactId,
-          ...domainResult.result,
-        };
+        const isDeliveryDomain = seaasRoute.domainType === 'pod-match' || seaasRoute.domainType === 'delivery-intelligence';
+
+        if (isDeliveryDomain) {
+          // Pod-match and delivery-intelligence route to the SEaaSDeliveryPanel
+          // Fetch the full delivery intelligence data from the dedicated API
+          try {
+            const healthRes = await fetch(
+              `${request.nextUrl.origin}/api/se-aas/engagement-health`,
+              { headers: { cookie: request.headers.get('cookie') || '' } }
+            );
+            if (healthRes.ok) {
+              const healthData = await healthRes.json();
+              deliveryIntelligenceResult = {
+                ...healthData,
+                podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+              };
+            } else {
+              // Fallback: just the pod recommendation without health scores
+              deliveryIntelligenceResult = {
+                podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+              };
+            }
+          } catch {
+            deliveryIntelligenceResult = {
+              podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+            };
+          }
+        } else {
+          seaasResult = {
+            domainType: seaasRoute.domainType,
+            artifactId: domainResult.artifactId,
+            ...domainResult.result,
+          };
+        }
       } catch (seaasErr) {
         console.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
       }
@@ -1197,6 +1227,11 @@ RULES FOR CORRECTIONS:
           send(JSON.stringify({ accountingResult }));
         }
 
+        // Send SE-aaS Delivery Intelligence result (pod-match + health scores) for SEaaSDeliveryPanel
+        if (deliveryIntelligenceResult) {
+          send(JSON.stringify({ deliveryIntelligenceResult }));
+        }
+
         // Send brain context metadata to frontend for display
         if (brainContext) {
           send(JSON.stringify({
@@ -1549,6 +1584,20 @@ function detectSEaaSRoute(
       extractedInput: {
         question: message,
         includeGitHistory: true,
+      },
+    };
+  }
+
+  // ── Pod Match / Delivery Intelligence (Sprint 5 — SE-aaS WOW) ──────────
+  if (
+    /(?:assign|recommend|which|best|right)\s+pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)|delivery\s+intelligence|engagement\s+health|scope\s+(?:creep|drift|alert)/i.test(lower)
+  ) {
+    return {
+      domainType: 'delivery-intelligence',
+      extractedInput: {
+        query: message,
+        // Extract engagement ID or name if mentioned (best-effort)
+        engagementName: message.match(/(?:for|on|about)\s+["']?([A-Z][A-Za-z0-9\s\-]+?)["']?\s+(?:engagement|client|project)/i)?.[1]?.trim(),
       },
     };
   }

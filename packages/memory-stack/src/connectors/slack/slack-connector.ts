@@ -289,6 +289,52 @@ export class SlackConnector extends ConnectorBase {
       await this.batchInsertSignals(signals);
       messagesIngested += signals.length;
 
+      // SE-aaS: Compute weekly slack_sentiment_index for this channel batch
+      // Uses a lightweight keyword-based sentiment score (-1..+1) so we don't
+      // need an external NLP import in the connector layer.
+      if (signals.length > 0) {
+        const sentimentScores = signals
+          .filter((s: Signal) => {
+            const meta = s.signal_metadata as Record<string, unknown> | null;
+            return meta?.content && typeof meta.content === 'string' && (meta.content as string).length > 5;
+          })
+          .map((s: Signal) => {
+            const text = ((s.signal_metadata as Record<string, unknown>)?.content as string || '').toLowerCase();
+            const positive = (text.match(/\b(great|good|awesome|thanks|done|shipped|resolved|fixed|love|excellent|perfect|yes|👍|✅|🎉)\b/g) || []).length;
+            const negative = (text.match(/\b(broken|bug|issue|fail|error|blocked|stuck|help|problem|urgent|behind|delay|wrong|no|😢|❌|🔥)\b/g) || []).length;
+            const total = positive + negative;
+            return total === 0 ? 0 : (positive - negative) / total;
+          });
+
+        if (sentimentScores.length > 0) {
+          const avgSentiment = sentimentScores.reduce((a: number, b: number) => a + b, 0) / sentimentScores.length;
+          const weekStart = new Date();
+          const dayOfWeek = weekStart.getUTCDay();
+          weekStart.setUTCDate(weekStart.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+          const weekStartStr = weekStart.toISOString().split('T')[0];
+
+          const resolvedDomain = this.resolveChannelDomain(channel);
+          const sentimentSignal: Signal = {
+            source_domain: resolvedDomain,
+            signal_type: 'slack_sentiment_index',
+            signal_value: avgSentiment,
+            entity_type: 'channel',
+            entity_id: `slack#${channel.id}`,
+            signal_metadata: {
+              source: 'slack',
+              channel_id: channel.id,
+              channel_name: channel.name,
+              message_count: sentimentScores.length,
+              week_start: weekStartStr,
+            },
+            organization_id: this.organizationId,
+            created_at: new Date().toISOString(),
+            signal_timestamp: new Date().toISOString(),
+          };
+          await this.batchInsertSignals([sentimentSignal]);
+        }
+      }
+
       // Check for more pages
       hasMore = response.has_more || false;
       cursor = response.response_metadata?.next_cursor;

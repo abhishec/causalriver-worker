@@ -2632,6 +2632,42 @@ export {
 } from './mcp/nexus-mcp-server';
 
 // ============================================================================
+// SE-aaS DELIVERY INTELLIGENCE (Sprint 5 — WOW Artifacts)
+// ============================================================================
+// Three WOW artifacts for SE-aaS marketplace:
+//   #1 Engagement Health Score (live 0-100)
+//   #2 Predictive Delivery Timeline
+//   #3 Pod Match Card (which internal pod to assign)
+
+export {
+  podMatchDomain,
+  type PodEvidence,
+} from './orchestrator/action-domain-pod-match';
+
+export {
+  runDeliveryHealthAggregation,
+  computeReviewBurden,
+  computeVelocityIndex,
+  computeTicketResponseLag,
+  computeEngagementScopeVelocity,
+  type DeliveryHealthConfig,
+  type EngagementRef,
+  type AggregationResult,
+} from './se-aas/delivery-health-signals';
+
+export {
+  computeEngagementHealthScore,
+  computeAuthorshipHHI,
+  forecastDeliveryCompletion,
+  computeAndPersistEngagementHealth,
+  runAllEngagementHealthScores,
+  type EngagementRow,
+  type EngagementHealthComponents,
+  type DeliveryForecast,
+  type EngagementHealthResult,
+} from './se-aas/engagement-health-score';
+
+// ============================================================================
 // TYPES
 // ============================================================================
 

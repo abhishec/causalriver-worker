@@ -116,6 +116,15 @@ export const OUTCOME_SIGNAL_TYPES: Record<string, SignalCategory> = {
   'expense_approved': 'outcome',
   'expense_rejected': 'outcome',
   'reimbursement_processed': 'outcome',
+
+  // ── SE-aaS Delivery Intelligence ──
+  'engineer_review_burden':    'metric',   // PRs assigned as reviewer per engineer per week
+  'engineer_velocity_index':   'metric',   // PRs merged per author per week
+  'story_point_delta':         'outcome',  // Scope creep signal (Oracle watches this)
+  'ticket_response_lag':       'metric',   // Hours: ticket created → first comment per assignee
+  'slack_sentiment_index':     'metric',   // Slack channel sentiment weekly rollup
+  'engagement_scope_velocity': 'outcome',  // Rate of scope growth (L10 anomaly watcher)
+  'engagement_health_score':   'outcome',  // Composite engagement health (Oracle verifies)
 };
 
 export interface ConnectorSyncResult {

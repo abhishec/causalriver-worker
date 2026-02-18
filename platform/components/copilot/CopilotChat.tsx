@@ -85,9 +85,15 @@ export interface SEaaSDomainData {
   codeSnippets?: Array<{ language: string; code: string; title: string }>;
 }
 
+// DeliveryIntelligenceData matches the shape of GET /api/se-aas/engagement-health
+// and the SEaaSDeliveryPanel's prop type.
+import type { DeliveryIntelligenceData as _DeliveryIntelligenceData } from "@/components/copilot/SEaaSDeliveryPanel";
+export type DeliveryIntelligenceData = _DeliveryIntelligenceData;
+
 export type DomainResult =
   | { service: "aas"; data: AccountingDomainData }
-  | { service: "seaas"; data: SEaaSDomainData };
+  | { service: "seaas"; data: SEaaSDomainData }
+  | { service: "delivery-intelligence"; data: DeliveryIntelligenceData };
 
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
@@ -1050,6 +1056,9 @@ export async function consumeSSEStream(
             if (parsed.seaasResult) {
               callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
             }
+            if (parsed.deliveryIntelligenceResult) {
+              callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1078,6 +1087,7 @@ export async function consumeSSEStream(
             if (parsed.error) callbacks.onError(parsed.error);
             if (parsed.accountingResult) callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
             if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
+            if (parsed.deliveryIntelligenceResult) callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
           } catch { /* skip */ }
         }
       }

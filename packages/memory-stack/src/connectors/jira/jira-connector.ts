@@ -340,6 +340,33 @@ export class JiraConnector extends ConnectorBase {
       await this.streamProcessor.addSignal(resolvedSignal);
     }
 
+    // 2b. Story point delta signal — SE-aaS scope creep tracking
+    //     Emitted for sprint-bound issues that carry story points.
+    //     The delivery health aggregator sums these per sprint to detect scope drift.
+    const sprintId = (fields as any).sprint?.id;
+    const sprintName = (fields as any).sprint?.name;
+    const rawStoryPoints = (fields as any).story_points ?? (fields as any).customfield_10028;
+    const storyPoints = rawStoryPoints != null ? Number(rawStoryPoints) : null;
+    if (sprintId && storyPoints != null && storyPoints > 0) {
+      const storyPointSignal: Signal = {
+        source_domain: 'engineering.jira',
+        signal_type: 'story_point_delta',
+        signal_value: storyPoints,
+        entity_type: 'sprint',
+        entity_id: `jira_sprint#${sprintId}`,
+        signal_metadata: {
+          ...baseMetadata,
+          sprint_id: sprintId,
+          sprint_name: sprintName,
+          operation: 'add',
+        },
+        organization_id: this.organizationId,
+        created_at: issue.fields.created,
+        signal_timestamp: issue.fields.created,
+      };
+      await this.streamProcessor.addSignal(storyPointSignal);
+    }
+
     // 3. Current state snapshot (for brain context — the original jira_issue signal)
     const snapshotSignal: Signal = {
       source_domain: 'engineering.jira',
