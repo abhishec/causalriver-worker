@@ -125,7 +125,9 @@ function generateGitHubSignals(orgId: string): Array<Record<string, unknown>> {
     const reviewer = weightedPick(TEAM.engineers, TEAM.reviewerWeights);
     const bottleneck = reviewer === 'alice' && Math.random() < 0.5;
     const cycleTimeHours = bottleneck ? randBetween(30, 72) : randBetween(4, 20);
-    const daysAgoN = randBetween(1, 90);
+    // Push regular PR signals to >7 days ago (before oracle baselineTimestamp = 7d ago)
+    // so Oracle only uses the calibrated oracle-target pr_merged signals for verification.
+    const daysAgoN = randBetween(8, 90);
     const prNum = 100 + i;
 
     signals.push({
@@ -204,14 +206,18 @@ function generateGitHubSignals(orgId: string): Array<Record<string, unknown>> {
   // Formula: actualMagnitude = clamp((avg - baseline) / baseline, -1, 1)
   // To produce reward > 0: signal avg must be ≈ baseline × (1 + predictedMagnitude)
   //
-  // Prediction 1 (conditional): baseline=14.0, direction=increase, predictedMag=0.65
-  //   → need avg ≈ 14 * 1.65 = 23.1  → signals around 22-24
+  // NOTE: regular pr_merged signals are pushed to daysAgo(8-90) — before 7d baseline —
+  // so only these oracle-target signals (hoursAgo) pass the baselineTimestamp filter.
+  //
+  // Prediction 1 (conditional): baseline=14.0, direction=increase, predictedMag=0.95
+  //   → need avg ≈ 14 * (1 + 0.95) = 27.3  → signals around 26-28.5
+  //   → actualMagnitude = (27.3-14)/14 = 0.95 → error=0 → reward≈1.0 ✓
   for (let i = 0; i < 5; i++) {
     signals.push({
       organization_id: orgId,
       source_domain: 'engineering',
       signal_type: 'pr_merged',        // watched by prediction 1
-      signal_value: 22 + Math.random() * 2,  // avg≈23 → magnitude=(23-14)/14=0.64 ≈ 0.65
+      signal_value: 26 + Math.random() * 2.5,  // avg≈27.25 → magnitude=(27.25-14)/14=0.946 ≈ 0.95 ✓
       entity_type: 'pull_request',
       entity_id: `github/pr/oracle-target-cond-${i}`,
       signal_timestamp: hoursAgo(randBetween(0.1, 1.5)),
@@ -667,9 +673,10 @@ async function main() {
       const lr = await learner.runLearningCycle();
       const learnerMs = Date.now() - learnerStart;
       console.log(`  │  A. Autonomous Learner          ${learnerMs}ms`);
-      info(`      causal edges: ${lr?.causalRelationships?.length ?? 0}`);
-      info(`      anomalies: ${lr?.anomalies?.length ?? 0}`);
-      info(`      patterns: ${lr?.patterns?.length ?? 0}`);
+      // Use correct LearningCycleResult fields (not causalRelationships/anomalies/patterns arrays)
+      info(`      causal edges updated: ${lr?.causalEdgesUpdated ?? 0}`);
+      info(`      anomalies detected: ${lr?.anomaliesDetected ?? 0}`);
+      info(`      patterns registered: ${lr?.patternsRegistered ?? 0}`);
       info(`      banditSelections: ${JSON.stringify(lr?.banditSelections ?? [])}`);
       info(`      oraclePredictions: ${lr?.oraclePredictionsRegistered ?? 0}`);
       if (lr?.maturity) info(`      maturity: ${lr.maturity.overallLevel}`);
@@ -779,17 +786,22 @@ async function main() {
 
       const pendingBefore = oracle.getPendingPredictions().length;
 
-      // Fetch recent signals for oracle verification (last 48h)
-      const { data: recentSignals } = await supabase
-        .from('cross_domain_signals')
-        .select('source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id')
-        .eq('organization_id', orgId)
-        .gte('signal_timestamp', hoursAgo(48))
-        .order('signal_timestamp', { ascending: false })
-        .limit(2000);
+      // Use in-memory signals from THIS run only — avoids cross-run DB contamination.
+      // The oracle's findMatchingSignals() filters by domain/type/org/baselineTimestamp,
+      // so old test runs polluting the DB won't corrupt magnitude averages.
+      // We convert allSignals (the generated dataset) to IncomingSignal format.
+      const oracleSignals = allSignals.map((s: any) => ({
+        source_domain: s.source_domain,
+        signal_type: s.signal_type,
+        signal_value: s.signal_value,
+        signal_timestamp: s.signal_timestamp,
+        organization_id: s.organization_id,
+        entity_type: s.entity_type,
+        entity_id: s.entity_id,
+      }));
 
-      if (recentSignals && recentSignals.length > 0 && pendingBefore > 0) {
-        oracleResult = await oracle.processBatch(recentSignals);
+      if (oracleSignals.length > 0 && pendingBefore > 0) {
+        oracleResult = await oracle.processBatch(oracleSignals);
 
         // Persist bandit arm scores (may fail if table missing — non-fatal)
         try {

@@ -42,6 +42,7 @@
     "test:stress:C": "tsx scripts/stress-test-brain.ts --suite=C --verbose",
     "test:stress:D": "tsx scripts/stress-test-brain.ts --suite=D --verbose",
     "test:stress:E": "tsx scripts/stress-test-brain.ts --suite=E --verbose",
+    "test:stress:F": "tsx scripts/stress-test-brain.ts --suite=F --verbose",
     "check:jobs": "tsx scripts/check-job-execution.ts",
     "check:production": "tsx scripts/production-deployment-check.ts",
     "ingest:initial": "tsx scripts/run-batch-ingestion.ts --mode initial --sources slack,jira,github --verbose",
