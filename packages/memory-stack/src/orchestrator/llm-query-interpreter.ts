@@ -33,6 +33,7 @@ import {
   type ComplexityFactors,
 } from './dispatch-assessor';
 import type { TokenBudget, ServiceType } from './brain-context-mesh';
+import { MODEL_FAST } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES — Query Interpretation
@@ -148,7 +149,7 @@ export interface LLMQueryInterpreterInstance {
 // ============================================================================
 
 /** Haiku model for fast classification (~200ms) */
-const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
+const HAIKU_MODEL = MODEL_FAST;
 
 /** Valid SE-aaS domains */
 const VALID_SEAAS_DOMAINS = new Set([

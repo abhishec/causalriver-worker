@@ -8,6 +8,7 @@
 import type { NexusQueryResult } from './nexus-orchestrator';
 import { createSemanticCache, type SemanticCacheInstance } from '../infra/llm-semantic-cache';
 import { createRedisClient, type RedisClientInstance } from '../infra/redis-client';
+import { MODEL_FAST } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -145,7 +146,7 @@ ${nexusContext.assembledContext}
     if (provider === 'anthropic') {
       result = await callAnthropic(systemPrompt, userMessage, {
         apiKey,
-        model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for basic copilot chat
+        model: model || MODEL_FAST, // Cost optimization: Haiku for basic copilot chat
         maxTokens,
       });
     } else {
@@ -158,7 +159,7 @@ ${nexusContext.assembledContext}
 
     // Store response in cache for future similar queries
     if (cache && result.text) {
-      const usedModel = model || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini');
+      const usedModel = model || (provider === 'anthropic' ? MODEL_FAST : 'gpt-4o-mini');
       const tokensUsed = (result.usage?.inputTokens || 0) + (result.usage?.outputTokens || 0);
       await cache.store(userMessage, result.text, {
         model: usedModel,

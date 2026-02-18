@@ -50,6 +50,8 @@
  * @packageDocumentation
  */
 
+import { MODEL_DEEP } from '../infra/smart-model-router';
+
 /** Framework version — adapters can check compatibility */
 export const COPILOT_FRAMEWORK_VERSION = '2.0.0';
 
@@ -1041,7 +1043,7 @@ export function createCopilotInstance(config: CopilotConfig): CopilotInstance {
     adapter,
     provider,
     apiKey,
-    model = 'claude-sonnet-4-20250514', // Cost optimization: Sonnet 4 default (callers should pass selectModel() for smart routing)
+    model = MODEL_DEEP, // Smart router default — callers should pass selectModel() for query-specific routing
     maxTokens = 8192,
     enableMemory = true,
     brainContext,

@@ -25,6 +25,8 @@
  * @packageDocumentation
  */
 
+import { MODEL_FAST } from '../infra/smart-model-router';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -305,7 +307,7 @@ ${text.slice(0, 12000)}`;
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: model || 'claude-3-5-haiku-20241022', // Cost control: Haiku is 10x cheaper than Sonnet for structured extraction
+          model: model || MODEL_FAST, // Cost control: Haiku is 10x cheaper than Sonnet for structured extraction
           max_tokens: maxTokens,
           // Enable prompt caching for extraction system prompt — saves ~90% on repeated calls
           system: [{ type: 'text', text: EXTRACTION_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
@@ -314,7 +316,7 @@ ${text.slice(0, 12000)}`;
       });
 
       const data = (await response.json()) as any;
-      const usedModel = model || 'claude-3-5-haiku-20241022';
+      const usedModel = model || MODEL_FAST;
       const tokens = { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 };
       sessionTokensUsed += tokens.input + tokens.output;
 

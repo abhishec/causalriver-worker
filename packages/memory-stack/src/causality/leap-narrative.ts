@@ -15,6 +15,7 @@
  */
 
 import { getDefaultLogger, type NexusLogger } from '../observability';
+import { MODEL_FAST } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -351,7 +352,7 @@ export function createNarrativeIntelligence(config: NarrativeConfig = {}): Narra
   } = config;
 
   const anthropicApiKey = config.anthropicApiKey;
-  const llmModel = config.llmModel || 'claude-3-5-haiku-20241022';
+  const llmModel = config.llmModel || MODEL_FAST;
   const llmMaxTokens = config.llmMaxTokens || 1024;
 
   const logger = config.logger ?? getDefaultLogger().child({ module: 'narrative' });

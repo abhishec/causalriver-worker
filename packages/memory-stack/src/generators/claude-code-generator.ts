@@ -12,6 +12,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { CodeStructure } from '../parsers/ast-parser';
+import { MODEL_DEEP } from '../infra/smart-model-router';
 
 export interface GenerationContext {
   /** Feature description/specification */
@@ -66,7 +67,7 @@ export class ClaudeCodeGenerator {
   private client: Anthropic;
   private model: string;
 
-  constructor(apiKey: string, model: string = 'claude-sonnet-4-20250514') {
+  constructor(apiKey: string, model: string = MODEL_DEEP) {
     this.client = new Anthropic({ apiKey });
     this.model = model;
   }

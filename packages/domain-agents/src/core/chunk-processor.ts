@@ -11,6 +11,7 @@
 import { DOMAIN_PERSONAS, buildDomainSystemPrompt, getDomainResponseFormat, PERSONA_VERSION, type GoalContextForPersona } from './domain-personas.ts';
 import { classifyException, generateFallbackResponse, getExtendedTimeout, logShieldaEvent, ShieldaContext } from './shielda-handler.ts';
 import { CLAUDE_MODEL, ANTHROPIC_API_URL } from './claude-config.ts';
+import { MODEL_DEEP } from '@nexus-ai/memory-stack';
 
 // Goal loading utilities for Goal-Centric Intelligence Engine
 export async function loadGoalsForDomain(
@@ -80,8 +81,8 @@ export async function loadGoalsForDomain(
   }
 }
 
-// Fallback model for retry scenarios (same as main model for consistency)
-const CLAUDE_MODEL_FALLBACK: typeof CLAUDE_MODEL = 'claude-sonnet-4-20250514';
+// Fallback model for retry scenarios — routes through smart model router
+const CLAUDE_MODEL_FALLBACK: string = MODEL_DEEP;
 
 // Token estimation constants
 const CHARS_PER_TOKEN = 4;

@@ -41,6 +41,7 @@ import {
   classifyIntent,
   type IntentGuide,
 } from '../intelligence/reasoning-framework';
+import { MODEL_FAST } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -387,7 +388,7 @@ export function createLLMResponseLayer(config: LLMResponseConfig) {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: model || 'claude-3-5-haiku-20241022', // Cost optimization: Haiku for conversational responses
+          model: model || MODEL_FAST, // Cost optimization: Haiku for conversational responses
           max_tokens: maxTokens,
           // Enable prompt caching for system prompts — saves ~90% on repeated system prompts
           system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
@@ -578,7 +579,7 @@ ${nexusContext.assembledContext}
           contextSections: Object.entries(contextUsed)
             .filter(([, v]) => v > 0)
             .map(([k]) => k),
-          model: model || (provider === 'anthropic' ? 'claude-3-5-haiku-20241022' : 'gpt-4o-mini'),
+          model: model || (provider === 'anthropic' ? MODEL_FAST : 'gpt-4o-mini'),
         },
       });
 

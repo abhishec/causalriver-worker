@@ -45,6 +45,7 @@ import {
   formatFullBrainContextForAgent,
   buildFullBrainAttribution,
 } from './brain-context-for-domains';
+import { MODEL_DEEP } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -191,7 +192,7 @@ export function createBrainAgentRuntime(config: BrainAgentRuntimeConfig): BrainA
     cortex,
     closedLoop,
     defaultAnthropicApiKey,
-    defaultModel = 'claude-sonnet-4-20250514',
+    defaultModel = MODEL_DEEP,
     defaultMaxTokens = 4096,
     verbose = false,
   } = config;

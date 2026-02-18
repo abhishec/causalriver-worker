@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { MODEL_FAST } from "@nexus-ai/memory-stack";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ Please give me 3–4 specific, actionable bullet points.`;
     const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-20250514",  // Fast + cheap — baseline doesn't need Sonnet
+      model: MODEL_FAST,  // Fast + cheap — baseline doesn't need Sonnet
       max_tokens: 400,
       messages: [{ role: "user", content: prompt }],
       system:

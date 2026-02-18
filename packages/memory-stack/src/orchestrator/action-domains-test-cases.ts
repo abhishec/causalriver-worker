@@ -26,6 +26,7 @@
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+import { MODEL_DEEP } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -457,7 +458,7 @@ Generate complete, runnable test code with:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514', // Use latest Claude Sonnet
+      model: MODEL_DEEP,
       max_tokens: 4096,
       messages: [
         {

@@ -23,6 +23,8 @@
  * If LLM fails, the statistical output stands alone.
  */
 
+import { MODEL_FAST, MODEL_DEEP } from '../infra/smart-model-router';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -239,8 +241,8 @@ const INITIAL_RETRY_DELAY_MS = 1_000;
 const MAX_RETRY_DELAY_MS = 10_000;
 const LLM_CALL_TIMEOUT_MS = 30_000;
 
-const DEFAULT_FAST_MODEL = 'claude-3-5-haiku-20241022';
-const DEFAULT_DEEP_MODEL = 'claude-sonnet-4-20250514'; // Cost control: regular Sonnet (3x cheaper than 4.5) for deep analysis
+const DEFAULT_FAST_MODEL = MODEL_FAST;
+const DEFAULT_DEEP_MODEL = MODEL_DEEP; // Cost control: routed via smart-model-router
 const DEFAULT_MAX_TOKENS = 1024;
 
 // ============================================================================
