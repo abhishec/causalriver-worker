@@ -572,7 +572,7 @@
 | NB-035 | 🔴 | ✅ | Cross-domain linker isolation fixed |
 | NB-036 | 🟠 | ✅ | xlsx dependency removed |
 | NB-037 | 🟠 | ✅ | Dependabot HIGH CVE — fixed via pnpm override (fast-xml-parser) |
-| NB-038 | 🟡 | 🚧 | Dependabot MODERATE CVEs — partial fix (ajv override applied) |
+| NB-038 | 🟡 | ✅ | Dependabot MODERATE CVEs — fully resolved (pnpm audit clean) |
 | NB-039 | 🟡 | ✅ | RLS + encrypted credentials in place |
 | NB-040 | 🟡 | ✅ | Supabase security coverage validated |
 | NB-041 | 🟡 | ✅ | Security scanner 10/10 |
@@ -609,11 +609,11 @@
 | NB-046 | Orchestrator stub files confirmed present, tracker corrected | 573d4b5a5 |
 | NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | 573d4b5a5 |
 | NB-050 | Phase 2: Code dep graph + symbol index injected into Brain context (all 17 SE-aaS domains) | phase-2 |
-| NB-019 | Log ingestion connector (CloudWatch/Datadog/ELK/Generic) — Log Query domain now has real data | TBD |
-| NB-020 | Freshworks suite — Freshsales + Freshchat connectors + /api/connectors/freshworks/sync route | TBD |
-| NB-022 | Connector monitoring dashboard — GET /api/connectors/monitoring with ETA, throughput, health | TBD |
-| NB-034 | Load test scaffold confirmed present (scripts/load-test-10m.ts), tracker corrected | TBD |
-| NB-038 | All CVEs resolved — pnpm audit returns "No known vulnerabilities found" | TBD |
+| NB-019 | Log ingestion connector (CloudWatch/Datadog/ELK/Generic) — Log Query domain now has real data | 36d162865 |
+| NB-020 | Freshworks suite — Freshsales + Freshchat connectors + /api/connectors/freshworks/sync route | 36d162865 |
+| NB-022 | Connector monitoring dashboard — GET /api/connectors/monitoring with ETA, throughput, health | 36d162865 |
+| NB-034 | Load test scaffold confirmed present (scripts/load-test-10m.ts), tracker corrected | 36d162865 |
+| NB-038 | All CVEs resolved — pnpm audit returns "No known vulnerabilities found" | 36d162865 |
 | NB-047 | Stale tracker emoji fixed (📦 ❌ → 📦 ✅) | tracker-fix |
 | NB-048 | Stale tracker emoji fixed (📦 ❌ → 📦 ✅) | tracker-fix |
 
