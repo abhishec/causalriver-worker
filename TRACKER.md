@@ -666,7 +666,7 @@
 | NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | 573d4b5a5 |
 | NB-050 | Phase 2: Code dep graph + symbol index injected into Brain context (all 17 SE-aaS domains) | phase-2 |
 | NB-051 | Phase 3: branch wired into domain-executor + 6 audit bugs fixed (P1: sig, count, method; P2: errors, log, null) | phase-3 |
-| NB-052 | Phase 4: Entity Resolution Bridge — one entity across all systems (entity-resolution-bridge.ts + /api/entities) | pending |
+| NB-052 | Phase 4: Entity Resolution Bridge — one entity across all systems (entity-resolution-bridge.ts + /api/entities) | 1c78f75cf |
 | NB-053 | Phase 4 UI: Branch selector + backend wired — trackedBranches in status API, branch pill UI, branch forwarded to SE-aaS domains | phase-4 |
 | NB-019 | Log ingestion connector (CloudWatch/Datadog/ELK/Generic) — Log Query domain now has real data | 36d162865 |
 | NB-020 | Freshworks suite — Freshsales + Freshchat connectors + /api/connectors/freshworks/sync route | 36d162865 |
