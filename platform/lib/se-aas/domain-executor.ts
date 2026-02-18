@@ -41,6 +41,11 @@ import {
   createBrainContextMesh,
   // Brain Feedback Bus — Unified Learning Circuit (replaces inline feedBrainFromExecution)
   createBrainFeedbackBus,
+  // Federated Causal Learning — ORG → CORE delta promotion (NB-063)
+  snapshotCausalWeights,
+  computeAndPromoteCausalDeltas,
+  // SE-aaS Delivery Intelligence — Pod Match (Sprint 5 WOW Artifact #3)
+  podMatchDomain,
 } from "@nexus-ai/memory-stack";
 
 // ============================================================================
@@ -68,6 +73,11 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "pr-review": { domain: prReviewDomain, sync: false },
   "boilerplate-scaffold": { domain: boilerplateScaffoldDomain, sync: false },
   "codebase-qa": { domain: codebaseQADomain, sync: false },
+  // === SE-aaS Delivery Intelligence (Sprint 5 — WOW Artifacts) ===
+  "pod-match": { domain: podMatchDomain, sync: true },
+  // "delivery-intelligence" is handled by the dedicated API endpoint,
+  // but can also be invoked via copilot as a pod-match + health score composite
+  "delivery-intelligence": { domain: podMatchDomain, sync: true },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {
@@ -110,6 +120,20 @@ export async function executeDomain(
   const info = getDomainInfo(params.domainType);
   if (!info) {
     throw new Error(`Unknown domain: ${params.domainType}`);
+  }
+
+  // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
+  // NB-063: Mirrors AAS executor Step 0. We capture the org's causal graph
+  // state RIGHT NOW, before the domain runs and before the feedback bus fires
+  // (bus.triggerEvolution may update edge weights). At the end (Step 6) we
+  // compute only what CHANGED and promote deltas to CORE via FedAvg.
+  // This is fire-and-forget safe — if it fails we still run the domain.
+  let causalWeightsBefore: Map<string, number> = new Map();
+  const federationCycleId = `seas_${params.domainType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
+  try {
+    causalWeightsBefore = await snapshotCausalWeights(supabase, params.organizationId);
+  } catch {
+    // Non-fatal — federation is best-effort, never blocks domain execution
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
@@ -223,6 +247,49 @@ export async function executeDomain(
   _runDomainSideEffects(supabase, params.organizationId, params.domainType, result, confidence, durationMs).catch(() => {
     // Non-blocking: side-effect failure should NEVER break domain execution
   });
+
+  // ── Step 7: Federated Causal Learning — ORG → CORE delta promotion ───────
+  // NB-063: This was the missing piece in SE-AAS vs AAS. AAS had this since
+  // NB-059; SE-AAS was learning internally (bus.triggerEvolution updates the
+  // org's own causal graph) but those learnings NEVER reached the CORE brain.
+  //
+  // Now: after the feedback bus fires (Step 5) and has potentially updated
+  // the org's causal edge weights via triggerEvolution(), we compute what
+  // CHANGED vs the Step 0 snapshot and promote only the deltas to CORE.
+  //
+  // Privacy guarantee: only delta effect sizes (not raw data, not absolute
+  // weights, not org identifiers) leave the org boundary. Deltas are clipped
+  // to [-0.15, +0.15] to prevent any single org from dominating CORE.
+  //
+  // Fire-and-forget: wrapping in an IIFE that is NOT awaited ensures this
+  // NEVER slows down the domain response returned to the user.
+  (async () => {
+    try {
+      if (causalWeightsBefore.size === 0) return; // No baseline — nothing to diff
+      const federationResult = await computeAndPromoteCausalDeltas(
+        supabase,
+        params.organizationId,
+        causalWeightsBefore,
+        federationCycleId,
+        {
+          fedAvgLearningRate: 0.3,  // New deltas get 30% weight vs existing CORE
+          maxDelta: 0.15,           // Max effect-size change per cycle (outlier clip)
+          minDelta: 0.01,           // Ignore noise — only promote meaningful changes
+          minSampleSize: 10,        // Only promote if enough observations back it up
+          maxPairsPerRun: 20,       // Limit CORE updates per domain run
+        },
+      );
+      console.log(
+        `[SE-AAS federation] org=${params.organizationId.slice(0, 8)} domain=${params.domainType} ` +
+        `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
+        `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
+        `took=${federationResult.durationMs}ms`
+      );
+    } catch (err: any) {
+      // Federation is best-effort — never block domain execution or the response
+      console.warn('[SE-AAS federation] Delta promotion failed (non-fatal):', err?.message);
+    }
+  })();
 
   return {
     result: { ...result, timing: { totalMs: durationMs } },

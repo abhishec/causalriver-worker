@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (Sprint 4 COMPLETE — AAS full build shipped: NB-054–059 committed + pushed. Transaction interpretations, causal bootstrap, S3→Supabase fallback, balance sheet fix, FedAvg federation, 5 structured result renderers, artifact framework.) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (NB-063 FIXED — SE-AAS federated learning loop closed: ORG → CORE delta promotion now works for both SE-AAS and AAS. Previously SE-AAS was learning in isolation; now both services share causal discoveries with CORE brain via FedAvg.) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -29,7 +29,7 @@
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
 | Data Pipeline / Brain | 9 | 8 | 1 | 0 |
-| SE-aaS / Connectors | 12 | 12 | 0 | 0 |
+| SE-aaS / Connectors | 13 | 13 | 0 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 3 | 0 | 0 |
@@ -37,7 +37,10 @@
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
 | Accounting / AAS | 6 | 6 | 0 | 0 |
-| **TOTAL** | **59** | **58** | **1** | **0** |
+| Website / Lint | 1 | 0 | 1 | 0 |
+| Platform / TypeScript | 1 | 0 | 1 | 0 |
+| Security / CVE | 1 | 0 | 1 | 0 |
+| **TOTAL** | **63** | **59** | **4** | **0** |
 
 ---
 
@@ -676,6 +679,22 @@
 
 ---
 
+### NB-063 🔴 ✅
+**SE-AAS federated learning loop was broken — ORG → CORE never fired for SE-AAS**
+- Area: SE-aaS / Brain / Federation
+- Priority: Critical
+- Status: ✅ Fixed (2026-02-18)
+- Root cause: `se-aas/domain-executor.ts` was missing two things that `aas/domain-executor.ts` had since NB-059:
+  1. **Step 0** — `snapshotCausalWeights()` call before domain execution (no baseline = nothing to diff)
+  2. **Step 7** — `computeAndPromoteCausalDeltas()` fire-and-forget IIFE after the feedback bus fires
+  Result: SE-AAS orgs were learning internally (the feedback bus updated the org's own causal graph via `triggerEvolution()`) but those learnings NEVER reached the CORE brain. Every SE-AAS org was learning in complete isolation. AAS was correctly federated; SE-AAS was not.
+- Fix: Added Step 0 (pre-snapshot) and Step 7 (FedAvg promotion) to `se-aas/domain-executor.ts`, mirroring the AAS executor exactly. Also added `snapshotCausalWeights` and `computeAndPromoteCausalDeltas` to the import block from `@nexus-ai/memory-stack`. Both functions were already exported from `packages/memory-stack/src/index.ts` lines 252–253 — no package changes needed.
+- Config (same as AAS): `fedAvgLearningRate: 0.3`, `maxDelta: 0.15`, `minDelta: 0.01`, `minSampleSize: 10`, `maxPairsPerRun: 20`
+- `FederationCycleId` pattern: `seas_{domainType}_{orgId8}_{timestamp}` (distinguishable from AAS cycles in logs)
+- File: `platform/lib/se-aas/domain-executor.ts`
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -684,8 +703,54 @@
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
 | NB-032 | 🟡 | Performance | Brain cold-start monitoring — ongoing (currently at 3000ms budget) |
+| NB-060 | 🟠 | Website / Lint | 8 lint errors in website (no-explicit-any × 7, setState-in-effect × 1) — blocking CI |
+| NB-061 | 🟡 | Platform / TS | TS2344 type error on `/api/releases/[releaseId]/route.ts` — Next.js 15 params Promise type |
+| NB-062 | 🟠 | Security | ajv MODERATE CVE re-emerged (GHSA-2g4f-4pwh-qvx6) — override not fully resolving via eslint dep chain |
 
-> **58/59 issues resolved.** 1 ongoing monitoring concern (NB-032). Sprint 4 AAS build fully shipped.
+> **58/62 issues resolved.** 4 open: 3 new issues found from live codebase scan today + NB-032 ongoing monitoring.
+
+---
+
+## 🆕 NEW ISSUES (found 2026-02-18 live scan)
+
+### NB-060 🟠 ❌
+**Website lint: 8 errors blocking CI — `no-explicit-any` × 7, `setState-in-useEffect` × 1**
+- Area: Website / Lint
+- Priority: High — blocks `website#lint` CI step, causes `pnpm run lint` to exit code 1
+- Status: ❌ Open
+- Files:
+  - `website/components/landing/Hero.tsx` — `any` types in props/handlers
+  - `website/components/landing/LiveBrainPulse.tsx:140` — `setState` called synchronously inside `useEffect` (cascading renders risk)
+  - `website/components/landing/LiveDemo.tsx` — `any` types
+  - `website/lib/use-brain-data.ts` — `any` types
+  - `website/scripts/generate-stats.ts` — `any` types
+- Also: 4 warnings (unused vars: `ageDays`, `history`, `_date`; missing `useEffect` dep: `activityMessages`)
+- Fix: Replace `any` with proper TS types; move `setState` out of synchronous effect path
+- Note: Website lint does NOT block the **platform** app — platform build ✅ passes clean
+
+---
+
+### NB-061 🟡 ❌
+**Platform TS: Next.js 15 route params must be `Promise<{...}>` — `releases/[releaseId]/route.ts` not updated**
+- Area: Platform / TypeScript
+- Priority: Medium — `tsc --noEmit` flags it but `next build` currently passes (Next.js builds more permissively than strict tsc)
+- Status: ❌ Open
+- File: `platform/.next/types/app/api/releases/[releaseId]/route.ts:166`
+- Error: `TS2344: Type '{ params: { releaseId: string } }' does not satisfy constraint 'ParamCheck<RouteContext>'` — Next.js 15 changed route `params` to be `Promise<{ releaseId: string }>` not a plain object
+- Fix: Update route handler signature: `export async function POST(req: Request, { params }: { params: Promise<{ releaseId: string }> })` then `const { releaseId } = await params`
+
+---
+
+### NB-062 🟠 ❌
+**Security: ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) re-emerged — `pnpm audit` shows 1 vulnerability**
+- Area: Security
+- Priority: High — was marked fixed (NB-038) but re-emerged via `@typescript-eslint/parser → eslint → @eslint/eslintrc → ajv@6.12.6`
+- Status: ❌ Open
+- CVE: GHSA-2g4f-4pwh-qvx6 (ajv < 8.x prototype pollution / schema injection)
+- Dependency path: `@typescript-eslint/parser@6.21.0 > eslint@9.39.2 > @eslint/eslintrc@3.3.3 > ajv@6.12.6`
+- Previous fix (NB-038) used `"ajv@>=8.18.0"` override but the eslint dep chain pins to ajv@6 explicitly
+- Fix options: (1) Add explicit `pnpm.overrides` for `ajv@6.12.6` → `6.12.7` (patch, not semver break); (2) Upgrade `@typescript-eslint/parser` to v7+ which uses eslint v9 without the eslintrc bridge; (3) Accept as dev-only (ajv in eslint is never in production bundle — assess actual risk level)
+- Note: This is a **dev dependency** chain — not in the production runtime bundle. Risk is limited to CI environment.
 
 ### All Security Issues
 | ID | Priority | Status | Title |
@@ -748,6 +813,7 @@
 | NB-057 | Gross margin COGS-based calculation (replaces 15% heuristic) | d695a4eaeb |
 | NB-058 | S3 → Supabase Storage fallback for GL uploads | d695a4eaeb |
 | NB-059 | Federated Causal Learning (FedAvg delta promotion to CORE brain) | db43aada6a |
+| NB-063 | SE-AAS federated learning loop fixed — ORG → CORE now works for both SE-AAS and AAS | 2026-02-18 |
 
 ---
 
