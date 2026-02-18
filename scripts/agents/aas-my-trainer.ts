@@ -93,20 +93,20 @@ export class AASMYTrainerAgent extends BaseTrainingAgent {
 
     // Account classification signals
     for (const acct of accounts) {
-      signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_account_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'my_account', entity_id: `my_acct/${acct.name.replace(/\s/g, '_')}`, metadata: { accountName: acct.name, type: acct.type, normalBalance: acct.normalBalance, statement: acct.statement, subtype: acct.subtype, rule: acct.rule, jurisdiction: 'my', source: 'mfrs_masb' } });
+      signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_account_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'my_account', entity_id: `my_acct/${acct.name.replace(/\s/g, '_')}`, metadata: { accountName: acct.name, type: acct.type, normalBalance: acct.normalBalance, statement: acct.statement, subtype: acct.subtype, rule: acct.rule, jurisdiction: 'my', source: 'mfrs_masb' } });
     }
 
     // SST no-input-credit signal (critical difference from SG/AU)
-    signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_gst_input_tax_rate', signal_value: 0.0, signal_timestamp: today, entity_type: 'sst_rule', entity_id: 'my_sst/no_input_credit', metadata: { jurisdiction: 'my', rule: 'CRITICAL: Malaysia SST has NO input tax credit. Unlike SG GST (which has input tax recovery), MY SST paid on purchases is a COST to the business. There is no Service Tax claimable asset account. Service Tax paid = expense or capitalise to cost of asset.', sstServiceTaxRate: 0.08, sstSalesTaxRate: '5-10% on goods', source: 'rmcd_sst_guide' } });
+    signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_gst_input_tax_rate', signal_value: 0.0, signal_timestamp: today, entity_type: 'sst_rule', entity_id: 'my_sst/no_input_credit', metadata: { jurisdiction: 'my', rule: 'CRITICAL: Malaysia SST has NO input tax credit. Unlike SG GST (which has input tax recovery), MY SST paid on purchases is a COST to the business. There is no Service Tax claimable asset account. Service Tax paid = expense or capitalise to cost of asset.', sstServiceTaxRate: 0.08, sstSalesTaxRate: '5-10% on goods', source: 'rmcd_sst_guide' } });
 
     // Benchmark signals
     for (const bench of benchmarks) {
-      signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_gross_margin_ratio', signal_value: bench.grossMarginMedian, signal_timestamp: today, entity_type: 'my_benchmark', entity_id: `my_bench/${bench.industry.replace(/\s/g, '_')}`, metadata: { ...bench, source: 'bnm_dosm_bursa_2023' } });
+      signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_gross_margin_ratio', signal_value: bench.grossMarginMedian, signal_timestamp: today, entity_type: 'my_benchmark', entity_id: `my_bench/${bench.industry.replace(/\s/g, '_')}`, metadata: { ...bench, source: 'bnm_dosm_bursa_2023' } });
     }
 
     // SST-02 signals
     for (const box of sst02Boxes) {
-      signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_gst_net_payable', signal_value: 1.0, signal_timestamp: today, entity_type: 'sst02_box', entity_id: `my_sst02/${box.box.replace(/[^a-z0-9]/gi, '_').substring(0, 40)}`, metadata: { box: box.box, accounts: (box as any).accounts || [], rule: box.rule, source: 'rmcd_sst02_form' } });
+      signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_gst_net_payable', signal_value: 1.0, signal_timestamp: today, entity_type: 'sst02_box', entity_id: `my_sst02/${box.box.replace(/[^a-z0-9]/gi, '_').substring(0, 40)}`, metadata: { box: box.box, accounts: (box as any).accounts || [], rule: box.rule, source: 'rmcd_sst02_form' } });
     }
 
     const packs: TrainingPack[] = [
@@ -118,7 +118,7 @@ export class AASMYTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal'],
         confidence: 0.94,
         tags: ['my', 'sst', 'service-tax', 'rmcd', 'aas', 'rw2'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.94, lagDays: 60, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.94, lagDays: 60, coefficientSign: 1 }],
         businessRules: [
           { id: 'my-sst-no-input-credit', condition: 'jurisdiction = my AND sst_paid_on_purchase', action: 'CRITICAL: Malaysia SST has NO input tax credit mechanism. Service tax paid on purchases is a direct cost — Debit Expense (or capitalise), NOT a claimable asset. This is fundamentally different from Singapore GST (which has full input tax recovery) and Australia GST.', confidence: 1.0, source: 'rmcd_sst_guide_2018' },
           { id: 'my-service-tax-8pct', condition: 'jurisdiction = my AND is_taxable_service AND service_date >= 2024-03-01', action: 'MY Service Tax rate 8% (from 1 Mar 2024; was 6% before). Applies to: IT services, professional services, hotels, telecom. Debit AR (inclusive), Credit Revenue (exclusive), Credit Service Tax Payable (8%). File SST-02 bi-monthly.', confidence: 1.0, source: 'rmcd_service_tax_amendment_2024' },

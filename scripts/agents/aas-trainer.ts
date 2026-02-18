@@ -22,7 +22,7 @@
  *   3. Damodaran 2024 — SaaS industry benchmarks (hardcoded)
  *   4. ATO Benchmarks — SG/AU SMB cost ratios (hardcoded)
  *   5. ERPNext CoA — SG + AU chart of accounts (GitHub raw)
- *   6. Synthetic Scenarios — 22 mathematically-correct double-entry scenarios
+ *   6. Synthetic Scenarios — 61 mathematically-correct double-entry scenarios
  *
  * Usage:
  *   pnpm exec tsx scripts/aas-trainer-runner.ts
@@ -113,7 +113,7 @@ export class AASTrainerAgent extends BaseTrainingAgent {
     }
 
     this.log('FETCH', `Mode: ${this.runMode} | Dry run: ${isDryRun}`);
-    this.log('FETCH', 'Sources: SEC EDGAR (20 SaaS), FASB CoA (450 accounts), Damodaran benchmarks, ATO benchmarks, ERPNext SG/AU CoA, 61+ synthetic scenarios');
+    this.log('FETCH', 'Sources: SEC EDGAR (20 SaaS), FASB CoA (450 accounts), Damodaran benchmarks, ATO benchmarks, ERPNext SG/AU CoA, 61 synthetic scenarios');
 
     this.rawData = await fetchAllAASData(isDryRun);
 
@@ -159,44 +159,74 @@ export class AASTrainerAgent extends BaseTrainingAgent {
       return result;
     }
 
-    // Store signals in batches
+    // ── MULTI-ORG SEEDING ────────────────────────────────────────────────────
+    // AAS signals are seeded into:
+    //   1. CORE org (federated baseline — available to ALL orgs)
+    //   2. ph-accounting org directly (design partner — gets accounting rules immediately
+    //      without waiting for upstream promotion which requires minEffectSize ≥ 0.15)
+    // Add more design-partner orgs here as AAS expands.
+    const DESIGN_PARTNER_ORGS: Array<{ id: string; name: string }> = [
+      { id: '05a458a8-e3ab-4b6e-ba8e-108de42d7bbf', name: 'PH Accounting' },
+    ];
+
+    const orgsToSeed = [
+      { id: this.organizationId, name: 'CORE Brain' },
+      ...DESIGN_PARTNER_ORGS,
+    ];
+
+    // Store signals in batches — for EACH org
     const BATCH_SIZE = 500;
-    for (let i = 0; i < signals.length; i += BATCH_SIZE) {
-      const batch = signals.slice(i, i + BATCH_SIZE);
+    for (const org of orgsToSeed) {
+      const orgSignals = signals.map(s => ({ ...s, organization_id: org.id }));
+      let orgStored = 0;
+      for (let i = 0; i < orgSignals.length; i += BATCH_SIZE) {
+        const batch = orgSignals.slice(i, i + BATCH_SIZE);
+        try {
+          await storeConnectorSignals(this.supabase, batch);
+          orgStored += batch.length;
+        } catch (err) {
+          this.logError('TRAIN', `Signal batch ${Math.floor(i / BATCH_SIZE) + 1} failed for ${org.name}`, err);
+          this.errors.push(`Signal batch failed (${org.name}): ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+      this.log('TRAIN', `Stored ${orgStored} signals → ${org.name} (${org.id.slice(0, 8)})`);
+      if (org.id === this.organizationId) result.signalsStored = orgStored;
+    }
+
+    // Run brain trainer with packs — seed into CORE + each design partner
+    const trainer = createBrainTrainer();
+    let totalCausalEdges = 0;
+    let totalRules = 0;
+    for (const org of orgsToSeed) {
       try {
-        await storeConnectorSignals(this.supabase, batch);
-        result.signalsStored += batch.length;
-        this.log('TRAIN', `Stored batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(signals.length / BATCH_SIZE)}: ${batch.length} signals`);
+        const trainResult = await trainer.trainBatch(this.supabase, org.id, packs);
+        const edges = trainResult?.causalEdgesLoaded ?? 0;
+        const rules = trainResult?.rulesLoaded ?? 0;
+        totalCausalEdges += edges;
+        totalRules += rules;
+        this.log('TRAIN', `Brain trainer → ${org.name}: ${packs.length} packs, ${edges} causal edges, ${rules} rules`);
       } catch (err) {
-        this.logError('TRAIN', `Signal batch ${Math.floor(i / BATCH_SIZE) + 1} failed`, err);
-        this.errors.push(`Signal batch failed: ${err instanceof Error ? err.message : String(err)}`);
+        this.logError('TRAIN', `Brain trainer failed for ${org.name}`, err);
+        this.errors.push(`Brain trainer (${org.name}): ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+    result.packsProcessed = packs.length;
+    result.discoveries = totalCausalEdges; // Fix: was reporting casesLoaded (wrong metric)
+    this.log('TRAIN', `Total: ${packs.length} packs, ${totalCausalEdges} causal edges, ${totalRules} rules loaded across ${orgsToSeed.length} orgs`);
+
+    // Run causal discovery on CORE + design partners
+    for (const org of orgsToSeed) {
+      try {
+        this.log('TRAIN', `Running causal discovery for ${org.name}...`);
+        const jobs = createScheduledJobs(this.supabase);
+        await jobs.runDailyCausalDiscovery(org.id);
+      } catch (err) {
+        this.logError('TRAIN', `Causal discovery failed for ${org.name} (non-fatal)`, err);
       }
     }
 
-    // Run brain trainer with packs
-    try {
-      const trainer = createBrainTrainer();
-      const trainResult = await trainer.trainBatch(this.supabase, this.organizationId, packs);
-      result.packsProcessed = packs.length;
-      result.discoveries = trainResult?.casesLoaded ?? 0;
-      this.log('TRAIN', `Brain trainer: ${packs.length} packs, ${trainResult?.causalEdgesLoaded ?? 0} causal edges, ${trainResult?.rulesLoaded ?? 0} rules loaded`);
-    } catch (err) {
-      this.logError('TRAIN', 'Brain trainer failed', err);
-      this.errors.push(`Brain trainer: ${err instanceof Error ? err.message : String(err)}`);
-    }
-
-    // Run causal discovery to find cross-domain patterns
-    try {
-      this.log('TRAIN', 'Running causal discovery on accounting signals...');
-      const jobs = createScheduledJobs(this.supabase);
-      await jobs.runDailyCausalDiscovery(this.organizationId);
-      this.log('TRAIN', 'Causal discovery complete');
-    } catch (err) {
-      this.logError('TRAIN', 'Causal discovery failed (non-fatal)', err);
-    }
-
     await this.recordRunCompletion(result);
-    this.log('TRAIN', `Run recorded. Next run will detect incremental mode.`);
+    this.log('TRAIN', `Run recorded. Signals seeded to ${orgsToSeed.length} orgs. Next run: incremental.`);
 
     return result;
   }

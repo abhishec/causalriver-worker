@@ -772,16 +772,18 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(20)
       ).catch(() => ({ data: [] as any[] })),
 
-      // Recent accounting/finance signals
+      // Recent accounting/finance signals — prioritise aas.* over generic finance signals
+      // aas.finance signals (acc_*) come from AAS trainer and are authoritative accounting rules.
+      // Plain 'finance' signals are macroeconomic (GDP, CPI) and should NOT crowd out acc_* rules.
       skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
         .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
         .eq('organization_id', organizationId)
-        .or('source_domain.like.aas%,source_domain.like.finance%,source_domain.like.accounting%')
-        .gte('created_at', sevenDaysAgo)
+        .or('source_domain.like.aas%,source_domain.like.accounting%')
+        .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()) // 30 days (AAS retrains daily)
         .order('created_at', { ascending: false })
-        .limit(30)
+        .limit(50)
       ).catch(() => ({ data: [] as any[] })),
     ]);
 

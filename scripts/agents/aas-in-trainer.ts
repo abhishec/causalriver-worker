@@ -133,7 +133,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     for (const acct of accounts) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_account_classification',
         signal_value: 1.0,
         signal_timestamp: today,
@@ -146,7 +146,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     // India GST dual structure signal — CRITICAL distinction from SG/AU/PH
     signals.push({
       organization_id: this.organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gst_output_tax_rate',
       signal_value: 0.18,
       signal_timestamp: today,
@@ -165,7 +165,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     // India GST WITH input credit (unlike Malaysia SST)
     signals.push({
       organization_id: this.organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gst_input_tax_rate',
       signal_value: 0.18,
       signal_timestamp: today,
@@ -185,7 +185,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     for (const tds of tdsRules) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_transaction_classification',
         signal_value: 1.0,
         signal_timestamp: today,
@@ -199,7 +199,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     for (const ic of intercompany) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_journal_entry_validity',
         signal_value: 1.0,
         signal_timestamp: today,
@@ -224,7 +224,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     // Advance tax signals
     signals.push({
       organization_id: this.organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_transaction_classification',
       signal_value: 1.0,
       signal_timestamp: today,
@@ -237,7 +237,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
     for (const bench of benchmarks) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gross_margin_ratio',
         signal_value: bench.grossMarginMedian,
         signal_timestamp: today,
@@ -256,7 +256,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal'],
         confidence: 0.97,
         tags: ['in', 'gst', 'igst', 'cgst', 'sgst', 'gstr3b', 'aas', 'rw2'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.97, lagDays: 20, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.97, lagDays: 20, coefficientSign: 1 }],
         businessRules: [
           { id: 'in-gst-dual-determine', condition: 'jurisdiction = in AND has_gst_transaction', action: 'ALWAYS determine supply type first: if customer state ≠ supplier state → INTERSTATE → use IGST only. If customer state = supplier state → INTRASTATE → split 50/50 into CGST + SGST. NEVER use a single "GST payable" account for India.', confidence: 1.0, source: 'cgst_igst_act_2017' },
           { id: 'in-gst-saas-rate', condition: 'jurisdiction = in AND supply_type = software_services OR saas', action: 'SaaS / software services: GST rate = 18% (SAC code 998314 / 998315). Interstate: IGST 18%. Intrastate: CGST 9% + SGST 9%. Export of services (to non-resident like SG parent): ZERO-RATED — file LUT, charge 0% GST, claim ITC on inputs.', confidence: 1.0, source: 'gstn_sac_998314_circular' },
@@ -275,7 +275,7 @@ export class AASINTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal'],
         confidence: 0.95,
         tags: ['in', 'tookitaki', 'intercompany', 'transfer-pricing', 'wht-195', 'rcm', 'aas', 'rw2'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_journal_entry_validity', effectSize: 0.95, lagDays: 30, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_journal_entry_validity', effectSize: 0.95, lagDays: 30, coefficientSign: 1 }],
         businessRules: [
           { id: 'in-sg-dev-services-export', condition: 'entity = tookitaki_in AND payment_from = tookitaki_sg AND service_type = software_development', action: 'India entity renders dev services to SG parent → Export of services (zero-rated GST). Dr Intercompany Receivable | Cr Revenue. File LUT each year. Receive USD/SGD, file FIRC with bank. Report in GSTR-3B Box 3.1(b). No WHT from SG side.', confidence: 1.0, source: 'igst_zero_rated_exports_lut' },
           { id: 'in-sg-mgmt-fee-rcm', condition: 'entity = tookitaki_in AND payment_to = tookitaki_sg AND type = management_fees', action: 'India pays management fee to SG parent → Import of services. STEP 1: Deduct WHT u/s 195 at 10% (India-SG DTAA FTS rate). File Form 15CA/15CB before remitting. STEP 2: Pay RCM GST at 18% IGST via cash ledger. STEP 3: Claim RCM IGST as ITC in next month if service used for taxable supplies. Dr Management Fee Expense (gross) | Cr Intercompany Payable (net) | Cr WHT Payable-s195 (10%) | Cr RCM IGST Payable (18%).', confidence: 1.0, source: 'cbdt_s195_dtaa_rcm_igst' },

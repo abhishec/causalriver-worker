@@ -146,7 +146,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
     for (const rate of gstRateHistory) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gst_output_tax_rate',
         signal_value: rate.rate,
         signal_timestamp: rate.effectiveFrom,
@@ -159,7 +159,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
     // GST transition signal (rate change on same GL)
     signals.push({
       organization_id: this.organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gst_output_tax_rate',
       signal_value: 0.09,
       signal_timestamp: today,
@@ -172,7 +172,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
     for (const s of gstScenarios) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gst_output_tax_rate',
         signal_value: s.gstRate,
         signal_timestamp: `${s.period}-15`,
@@ -186,7 +186,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
     for (const acct of statutoryAccounts) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_account_classification',
         signal_value: 1.0,
         signal_timestamp: today,
@@ -196,7 +196,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
       });
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_debit_credit_normal',
         signal_value: acct.normalBalance === 'debit' ? 1.0 : -1.0,
         signal_timestamp: today,
@@ -210,7 +210,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
     for (const box of formCSMapping) {
       signals.push({
         organization_id: this.organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_revenue_recognition',
         signal_value: 1.0,
         signal_timestamp: today,
@@ -230,7 +230,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal'],
         confidence: 0.99,
         tags: ['sg', 'gst', 'rate-change', 'iras', 'aas', 'rw1'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_gst_output_tax_rate', effectSize: 0.99, lagDays: 0, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_gst_output_tax_rate', effectSize: 0.99, lagDays: 0, coefficientSign: 1 }],
         businessRules: [
           { id: 'sg-gst-7pct', condition: 'sg_transaction_date < 2023-01-01', action: 'Apply GST 7%. Xero taxRateName = "GST 7%". Output tax = amount × 0.07 (exclusive) or amount × 7/107 (inclusive).', confidence: 1.0, source: 'iras_gst_announcement_2002' },
           { id: 'sg-gst-8pct', condition: 'sg_transaction_date >= 2023-01-01 AND sg_transaction_date < 2024-01-01', action: 'Apply GST 8%. Xero taxRateName = "GST 8%". Output tax = amount × 0.08 (exclusive) or amount × 8/108 (inclusive).', confidence: 1.0, source: 'iras_gst_announcement_nov2022' },
@@ -251,8 +251,8 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
         confidence: 0.97,
         tags: ['sg', 'cpf', 'sdl', 'fwl', 'sfrs16', 'acra', 'aas', 'rw1'],
         causalChains: [
-          { source: 'finance', target: 'hr', metric: 'acc_opex_ratio', effectSize: 0.82, lagDays: 0, coefficientSign: -1 },
-          { source: 'finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.90, lagDays: 30, coefficientSign: 1 },
+          { source: 'aas.finance', target: 'hr', metric: 'acc_opex_ratio', effectSize: 0.82, lagDays: 0, coefficientSign: -1 },
+          { source: 'aas.finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.90, lagDays: 30, coefficientSign: 1 },
         ],
         businessRules: [
           { id: 'sg-cpf-employer', condition: 'sg_employee AND age <= 55', action: 'Employer CPF = 17% of ordinary wages (OW). Debit Employer CPF Expense, Credit CPF Payable. Remit by 14th of following month. OW cap $6,800/month (2024).', confidence: 1.0, source: 'cpf_board_contribution_rates_2024' },
@@ -273,7 +273,7 @@ export class AASSGDeepTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal'],
         confidence: 0.95,
         tags: ['sg', 'form-cs', 'iras', 'corporate-tax', 'aas', 'rw2'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_net_profit_margin', effectSize: 0.90, lagDays: 90, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_net_profit_margin', effectSize: 0.90, lagDays: 90, coefficientSign: 1 }],
         businessRules: [
           { id: 'sg-form-cs-eligible', condition: 'sg_company AND revenue <= 5_000_000_SGD AND not_claiming_capital_allowance_over_100k', action: 'File Form C-S (simplified) instead of Form C. Due 30 Nov each year. No financial statements required — just key income/expense figures.', confidence: 0.97, source: 'iras_form_cs_guide' },
           { id: 'sg-corp-tax-rate', condition: 'sg_company AND year_of_assessment >= 2010', action: 'Singapore corporate tax rate: 17% flat. SME cash grant: 40% tax rebate on first $100,000 chargeable income (2024). Effective rate for SMEs may be lower.', confidence: 1.0, source: 'iras_corporate_tax_guide' },

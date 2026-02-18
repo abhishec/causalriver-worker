@@ -54,7 +54,7 @@ export function convertEDGARToSignals(
         const grossMargin = period.grossProfit / period.revenues;
         signals.push({
           organization_id: organizationId,
-          source_domain: 'finance',
+          source_domain: 'aas.finance',
           signal_type: 'acc_gross_margin_ratio',
           signal_value: Math.max(0, Math.min(1, grossMargin)),
           signal_timestamp: ts,
@@ -74,7 +74,7 @@ export function convertEDGARToSignals(
         const netMargin = period.netIncome / period.revenues;
         signals.push({
           organization_id: organizationId,
-          source_domain: 'finance',
+          source_domain: 'aas.finance',
           signal_type: 'acc_net_profit_margin',
           signal_value: Math.max(-1, Math.min(1, netMargin)),
           signal_timestamp: ts,
@@ -95,7 +95,7 @@ export function convertEDGARToSignals(
         const balanceScore = lhsMinusRhs < (period.totalAssets * 0.001) ? 1.0 : 0.0; // Within 0.1%
         signals.push({
           organization_id: organizationId,
-          source_domain: 'finance',
+          source_domain: 'aas.finance',
           signal_type: 'acc_balance_sheet_equation',
           signal_value: balanceScore,
           signal_timestamp: ts,
@@ -119,7 +119,7 @@ export function convertEDGARToSignals(
         const normalised = Math.min(1, arTurnover / 20);
         signals.push({
           organization_id: organizationId,
-          source_domain: 'finance',
+          source_domain: 'aas.finance',
           signal_type: 'acc_ar_turnover',
           signal_value: normalised,
           signal_timestamp: ts,
@@ -167,7 +167,7 @@ export function convertCoAToSignals(
     const isDebitNormal = debitNormalTypes.includes(accountType);
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_account_classification',
       signal_value: 1.0, // Signal value = classification is correct
       signal_timestamp: today,
@@ -183,7 +183,7 @@ export function convertCoAToSignals(
 
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_debit_credit_normal',
       signal_value: isDebitNormal ? 1.0 : -1.0, // 1 = debit-normal, -1 = credit-normal
       signal_timestamp: today,
@@ -201,7 +201,7 @@ export function convertCoAToSignals(
   for (const gstAcct of gstAccounts) {
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gst_output_tax_rate',
       signal_value: gstAcct.gstType === 'output' ? 1.0 : 0.0,
       signal_timestamp: today,
@@ -245,7 +245,7 @@ export function convertGSTToSignals(
       const effectiveRate = gst.gstOnSales / gst.totalSales;
       signals.push({
         organization_id: organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gst_output_tax_rate',
         signal_value: effectiveRate,
         signal_timestamp: ts,
@@ -267,7 +267,7 @@ export function convertGSTToSignals(
       const effectiveInputRate = gst.gstOnPurchases / gst.totalPurchases;
       signals.push({
         organization_id: organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gst_input_tax_rate',
         signal_value: effectiveInputRate,
         signal_timestamp: ts,
@@ -287,7 +287,7 @@ export function convertGSTToSignals(
     // Net GST payable signal
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gst_net_payable',
       signal_value: gst.netGSTPayable > 0 ? 1.0 : 0.0, // 1 = payable, 0 = refund
       signal_timestamp: ts,
@@ -310,7 +310,7 @@ export function convertGSTToSignals(
     const isBalanced = Math.abs(tbDebitTotal - tbCreditTotal) < 1;
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_trial_balance_balance',
       signal_value: isBalanced ? 1.0 : 0.0,
       signal_timestamp: ts,
@@ -330,7 +330,7 @@ export function convertGSTToSignals(
     if (scenario.pl.revenue > 0) {
       signals.push({
         organization_id: organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_gross_margin_ratio',
         signal_value: Math.max(0, Math.min(1, scenario.pl.grossMargin)),
         signal_timestamp: ts,
@@ -351,7 +351,7 @@ export function convertGSTToSignals(
     const bsBalanced = scenario.balanceSheet.isBalanced;
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_balance_sheet_equation',
       signal_value: bsBalanced ? 1.0 : 0.0,
       signal_timestamp: ts,
@@ -375,7 +375,7 @@ export function convertGSTToSignals(
       const ts = scenario.transactions[0]?.date || `${scenario.period}-15`;
       signals.push({
         organization_id: organizationId,
-        source_domain: 'finance',
+        source_domain: 'aas.finance',
         signal_type: 'acc_transaction_classification',
         signal_value: 1.0,
         signal_timestamp: ts,
@@ -398,7 +398,7 @@ export function convertGSTToSignals(
     const isValid = Math.abs(txDebitTotal - txCreditTotal) < 1;
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_journal_entry_validity',
       signal_value: isValid ? 1.0 : 0.0,
       signal_timestamp: `${scenario.period}-28`,
@@ -434,7 +434,7 @@ export function convertBenchmarksToSignals(
 
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_gross_margin_ratio',
       signal_value: bench.grossMarginMedian,
       signal_timestamp: today,
@@ -451,7 +451,7 @@ export function convertBenchmarksToSignals(
 
     signals.push({
       organization_id: organizationId,
-      source_domain: 'finance',
+      source_domain: 'aas.finance',
       signal_type: 'acc_opex_ratio',
       signal_value: bench.payrollToRevenueMedian, // Payroll as primary OpEx signal
       signal_timestamp: today,
@@ -517,8 +517,8 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'trial-balance', 'double-entry', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_trial_balance_balance',
         effectSize: 0.95,
         lagDays: 0, // Instantaneous — math not time-dependent
@@ -588,15 +588,15 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'profit-loss', 'income-statement', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_gross_margin_ratio',
         effectSize: 0.88,
         lagDays: 0,
         coefficientSign: 1,
       },
       {
-        source: 'finance',
+        source: 'aas.finance',
         target: 'product',
         metric: 'acc_revenue_recognition',
         effectSize: 0.72,
@@ -687,8 +687,8 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'balance-sheet', 'financial-statements', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_balance_sheet_equation',
         effectSize: 1.0,
         lagDays: 0,
@@ -767,7 +767,7 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'gst', 'tax', 'singapore', 'australia', 'iras', 'ato', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
+        source: 'aas.finance',
         target: 'legal',
         metric: 'acc_gst_net_payable',
         effectSize: 0.90,
@@ -859,8 +859,8 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'transaction-interpretation', 'natural-language', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_transaction_classification',
         effectSize: 0.85,
         lagDays: 0,
@@ -922,7 +922,7 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'benchmarks', 'saas', 'ratios', 'health-check', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
+        source: 'aas.finance',
         target: 'product',
         metric: 'acc_gross_margin_ratio',
         effectSize: 0.72,
@@ -930,7 +930,7 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
         coefficientSign: 1,
       },
       {
-        source: 'finance',
+        source: 'aas.finance',
         target: 'hr',
         metric: 'acc_opex_ratio',
         effectSize: 0.68,
@@ -938,7 +938,7 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
         coefficientSign: -1, // Higher payroll ratio → lower margin
       },
       {
-        source: 'finance',
+        source: 'aas.finance',
         target: 'customer_health',
         metric: 'acc_ar_turnover',
         effectSize: 0.65,
@@ -1012,16 +1012,16 @@ export function buildAASTrainingPacks(rawData: AASRawData): TrainingPack[] {
     tags: ['accounting', 'cash-flow', 'sfrs7', 'ias7', 'indirect-method', 'aas', 'phase1-validation'],
     causalChains: [
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_operating_cash_flow',
         effectSize: 0.85,
         lagDays: 0,
         coefficientSign: 1,
       },
       {
-        source: 'finance',
-        target: 'finance',
+        source: 'aas.finance',
+        target: 'aas.finance',
         metric: 'acc_free_cash_flow',
         effectSize: 0.80,
         lagDays: 0,

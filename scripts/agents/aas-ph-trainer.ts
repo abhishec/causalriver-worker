@@ -89,20 +89,20 @@ export class AASPHTrainerAgent extends BaseTrainingAgent {
     const today = new Date().toISOString().substring(0, 10);
 
     for (const acct of accounts) {
-      signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_account_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_account', entity_id: `ph_acct/${acct.name.replace(/\s/g, '_')}`, metadata: { accountName: acct.name, type: acct.type, normalBalance: acct.normalBalance, statement: acct.statement, rule: acct.rule, jurisdiction: 'ph', source: 'pfrs_bir' } });
+      signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_account_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_account', entity_id: `ph_acct/${acct.name.replace(/\s/g, '_')}`, metadata: { accountName: acct.name, type: acct.type, normalBalance: acct.normalBalance, statement: acct.statement, rule: acct.rule, jurisdiction: 'ph', source: 'pfrs_bir' } });
     }
 
     // PH VAT has INPUT CREDIT (unlike MY SST) — important distinction
-    signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_gst_input_tax_rate', signal_value: 0.12, signal_timestamp: today, entity_type: 'ph_vat_rule', entity_id: 'ph_vat/input_credit', metadata: { jurisdiction: 'ph', vatRate: 0.12, rule: 'PH VAT: 12% standard rate WITH input tax credit (unlike Malaysia SST). Input VAT on purchases from VAT-registered suppliers is claimable against Output VAT. Net VAT = Output - Input. Similar structure to Singapore GST but at 12%.', source: 'bir_tax_code_ph' } });
+    signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_gst_input_tax_rate', signal_value: 0.12, signal_timestamp: today, entity_type: 'ph_vat_rule', entity_id: 'ph_vat/input_credit', metadata: { jurisdiction: 'ph', vatRate: 0.12, rule: 'PH VAT: 12% standard rate WITH input tax credit (unlike Malaysia SST). Input VAT on purchases from VAT-registered suppliers is claimable against Output VAT. Net VAT = Output - Input. Similar structure to Singapore GST but at 12%.', source: 'bir_tax_code_ph' } });
 
     // Withholding tax signals (complex PH-specific system)
-    signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_transaction_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_wht_rule', entity_id: 'ph_wht/ewt_professional', metadata: { jurisdiction: 'ph', whtType: 'Expanded Withholding Tax (EWT)', rate: 0.10, condition: 'Professional fees to individuals earning ≤₱3M/year = 10%. Above ₱3M = 15%.', account: 'Expanded Withholding Tax Payable', journalEntry: 'Debit Professional Fees (gross), Credit Cash (net paid), Credit EWT Payable (10% withheld)', source: 'bir_revenue_regulations_11_2018' } });
+    signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_transaction_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_wht_rule', entity_id: 'ph_wht/ewt_professional', metadata: { jurisdiction: 'ph', whtType: 'Expanded Withholding Tax (EWT)', rate: 0.10, condition: 'Professional fees to individuals earning ≤₱3M/year = 10%. Above ₱3M = 15%.', account: 'Expanded Withholding Tax Payable', journalEntry: 'Debit Professional Fees (gross), Credit Cash (net paid), Credit EWT Payable (10% withheld)', source: 'bir_revenue_regulations_11_2018' } });
 
     // 13th month pay (unique to Philippines)
-    signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_transaction_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_13th_month', entity_id: 'ph_payroll/13th_month', metadata: { jurisdiction: 'ph', rule: 'PH mandatory 13th month pay: Accrue 1/12 of basic salary monthly. Debit 13th Month Pay Expense, Credit 13th Month Pay Payable. Pay by Dec 24. Tax-exempt up to ₱90,000 (PH TRAIN Law).', account: '13th Month Pay Expense', source: 'ph_pd_851_13th_month_pay' } });
+    signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_transaction_classification', signal_value: 1.0, signal_timestamp: today, entity_type: 'ph_13th_month', entity_id: 'ph_payroll/13th_month', metadata: { jurisdiction: 'ph', rule: 'PH mandatory 13th month pay: Accrue 1/12 of basic salary monthly. Debit 13th Month Pay Expense, Credit 13th Month Pay Payable. Pay by Dec 24. Tax-exempt up to ₱90,000 (PH TRAIN Law).', account: '13th Month Pay Expense', source: 'ph_pd_851_13th_month_pay' } });
 
     for (const bench of benchmarks) {
-      signals.push({ organization_id: this.organizationId, source_domain: 'finance', signal_type: 'acc_gross_margin_ratio', signal_value: bench.grossMarginMedian, signal_timestamp: today, entity_type: 'ph_benchmark', entity_id: `ph_bench/${bench.industry.replace(/\s/g, '_')}`, metadata: { ...bench, source: 'pse_bir_soi_2023' } });
+      signals.push({ organization_id: this.organizationId, source_domain: 'aas.finance', signal_type: 'acc_gross_margin_ratio', signal_value: bench.grossMarginMedian, signal_timestamp: today, entity_type: 'ph_benchmark', entity_id: `ph_bench/${bench.industry.replace(/\s/g, '_')}`, metadata: { ...bench, source: 'pse_bir_soi_2023' } });
     }
 
     const packs: TrainingPack[] = [
@@ -114,7 +114,7 @@ export class AASPHTrainerAgent extends BaseTrainingAgent {
         domains: ['finance', 'legal', 'hr'],
         confidence: 0.92,
         tags: ['ph', 'vat', 'bir', 'withholding-tax', '13th-month', 'aas', 'rw2'],
-        causalChains: [{ source: 'finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.92, lagDays: 20, coefficientSign: 1 }],
+        causalChains: [{ source: 'aas.finance', target: 'legal', metric: 'acc_gst_net_payable', effectSize: 0.92, lagDays: 20, coefficientSign: 1 }],
         businessRules: [
           { id: 'ph-vat-12pct', condition: 'jurisdiction = ph AND is_vat_registered AND taxable_supply', action: 'PH VAT 12% on gross selling price. Output VAT = amount × 12%. Input VAT claimable on purchases. Net VAT payable = Output - Input. File Form 2550M monthly by 20th.', confidence: 1.0, source: 'bir_nirc_sec_106_108' },
           { id: 'ph-ewt-professional', condition: 'jurisdiction = ph AND payment_to = professional_individual', action: 'Expanded Withholding Tax on professional fees: 10% if income ≤₱3M/year, 15% if >₱3M. Payor withholds and remits. Issue BIR Form 2307 to payee.', confidence: 1.0, source: 'bir_rr_11_2018' },
