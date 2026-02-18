@@ -50,10 +50,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const credentials = connector.credentials as { access_token?: string; refresh_token?: string };
-    if (!credentials?.access_token) {
+    const credentials = connector.credentials as {
+      access_token?: string;
+      refresh_token?: string;
+      auth_type?: string;  // "basic" for API-token connections
+      email?: string;
+      api_token?: string;
+      site_url?: string;
+    };
+
+    const isBasicAuth = credentials?.auth_type === "basic";
+    const isOAuth = !!credentials?.access_token;
+
+    if (!isBasicAuth && !isOAuth) {
       return NextResponse.json(
-        { error: "Jira access token missing. Please re-authorize Jira." },
+        { error: "Jira credentials missing. Please re-authorize Jira or reconnect via the admin route." },
         { status: 400 }
       );
     }
@@ -110,7 +121,7 @@ export async function POST(request: Request) {
     // 4. Fetch Jira data and transform to Brain L1 signals
     const startMs = Date.now();
     const config = connector.config as Record<string, any>;
-    const siteUrl = config?.site_url || config?.cloud_id || '';
+    const siteUrl = config?.site_url || credentials.site_url || config?.cloud_id || '';
 
     let signalsGenerated = 0;
     let recordsProcessed = 0;
@@ -118,7 +129,7 @@ export async function POST(request: Request) {
 
     try {
       // Fetch accessible projects
-      const projectsRes = await jiraFetch(credentials.access_token, siteUrl, '/rest/api/3/project/search?maxResults=50');
+      const projectsRes = await jiraFetch(credentials, siteUrl, '/rest/api/3/project/search?maxResults=50');
       const projects = projectsRes?.values || [];
 
       for (const project of projects) {

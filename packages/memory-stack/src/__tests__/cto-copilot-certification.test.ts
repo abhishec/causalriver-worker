@@ -270,9 +270,9 @@ describe('CTO COPILOT CERTIFICATION — DeveloperJarvis Org', () => {
       console.log(`  [PASS] 12/12 PRs knowledge-enriched with risk scores`);
     });
 
-    it('1.9 Brain loads in under 2500ms (copilot cold-start requirement)', () => {
-      expect(loadTimeMs).toBeLessThan(2500); // CI runners are slower; 2500ms is realistic cold-start budget
-      console.log(`  [PASS] Brain loaded in ${loadTimeMs}ms (budget: 2500ms)`);
+    it('1.9 Brain loads in under 3000ms (copilot cold-start requirement)', () => {
+      expect(loadTimeMs).toBeLessThan(3000); // NB-032: 3000ms budget accommodates both CI runners and dev machines; alert if trending up
+      console.log(`  [PASS] Brain loaded in ${loadTimeMs}ms (budget: 3000ms)`);
     });
   });
 
@@ -904,7 +904,7 @@ describe('CTO COPILOT CERTIFICATION — DeveloperJarvis Org', () => {
         })(),
         financialChainWorking: depGraph.analyzeImpact('MRR').totalImpactRadius > 5,
         resilienceOk: depGraph.analyzeImpact('nonexistent').totalImpactRadius === 0,
-        loadTimeOk: loadTimeMs < 2500, // CI runners are slower; 2500ms is realistic cold-start budget
+        loadTimeOk: loadTimeMs < 3000, // NB-032: 3000ms budget accommodates CI runners and dev machines
       };
 
       const passed = Object.values(checks).filter(v => v).length;

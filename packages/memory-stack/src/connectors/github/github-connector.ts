@@ -18,6 +18,9 @@ import { RateLimitConfig } from '../base/rate-limiter.js';
 import { Signal } from '../base/stream-processor.js';
 import { Checkpoint } from '../base/checkpoint-manager.js';
 import { linkPRToJira, linkCommitToJira } from '../cross-domain-linker.js';
+import { createCodeParser } from '../../code-indexing/code-parser.js';
+import { createCodeEmbedder } from '../../code-indexing/code-embedder.js';
+import { generateEmbedding, hashContent } from '../../core/embeddings/embedding-engine.js';
 
 interface GitHubCredentials {
   accessToken: string;
@@ -63,6 +66,10 @@ interface TreeItem {
 
 export class GitHubConnector extends ConnectorBase {
   readonly connectorType = 'github';
+
+  // Singletons: factories are stateless, create once per connector instance
+  private readonly codeParser = createCodeParser();
+  private readonly codeEmbedder = createCodeEmbedder();
 
   constructor(
     organizationId: string,
@@ -412,9 +419,26 @@ export class GitHubConnector extends ConnectorBase {
         })
         .filter((s): s is Signal => s !== null);
 
-      // Batch insert
+      // Batch insert signals
       await this.batchInsertSignals(signals);
       filesIngested += signals.length;
+
+      // Parse symbols + emit dependency signals (NB-017 + NB-018)
+      // Run after signal insert so a parse failure never blocks file ingestion.
+      // Parallelise within each batch of 50 — each file is independent.
+      await Promise.allSettled(
+        fileContents.map((content, idx) => {
+          if (!content) return Promise.resolve();
+          return this.parseAndEmbedFile(
+            content,
+            batch[idx].path,
+            repo.full_name,
+            targetBranch,
+            releaseVersion,
+            teamLabel,
+          );
+        })
+      );
 
       // Save checkpoint every 500 files
       if (filesIngested % 500 === 0) {
@@ -584,6 +608,112 @@ export class GitHubConnector extends ConnectorBase {
       return null;
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Parse file content into symbols and embed them into entity_embeddings.
+   * Runs synchronously after file content is fetched — NB-017 + NB-018 fix.
+   *
+   * Symbol entity_id is branch-scoped so Team 6.3.4 and Team 5.11.5 symbols
+   * never collide in the same org's entity_embeddings table.
+   */
+  private async parseAndEmbedFile(
+    content: string,
+    filePath: string,
+    repoFullName: string,
+    branchName?: string,
+    releaseVersion?: string,
+    teamLabel?: string,
+  ): Promise<void> {
+    try {
+      const fileIndex = this.codeParser.parseSource(content, filePath);
+
+      if (fileIndex.symbols.length === 0 && fileIndex.imports.length === 0) return;
+
+      // Embed symbols — override entity_id to be branch-scoped
+      for (const symbol of fileIndex.symbols) {
+        try {
+          const { formatSymbolForEmbedding } = this.codeEmbedder;
+          const contentText = formatSymbolForEmbedding(symbol);
+
+          // Import hashContent from embedding-engine via embedder internals is not
+          // exposed, so compute a simple hash inline for branch-scoped entity_id.
+          const branchSuffix = branchName ? `@${branchName}` : '';
+          const entityId = symbol.parentSymbol
+            ? `${repoFullName}:${filePath}::${symbol.parentSymbol}.${symbol.name}${branchSuffix}`
+            : `${repoFullName}:${filePath}::${symbol.name}${branchSuffix}`;
+
+          const embedding = generateEmbedding(contentText);
+          const contentHashVal = hashContent(contentText);
+
+          await this.supabase.from('entity_embeddings').upsert(
+            {
+              organization_id: this.organizationId,
+              entity_type: 'code_symbol',
+              entity_id: entityId,
+              content: contentText,
+              content_hash: contentHashVal,
+              embedding: JSON.stringify(embedding),
+              metadata: {
+                kind: symbol.kind,
+                filePath: symbol.filePath,
+                name: symbol.name,
+                parentSymbol: symbol.parentSymbol,
+                startLine: symbol.startLine,
+                endLine: symbol.endLine,
+                isExported: symbol.isExported,
+                language: fileIndex.language,
+                repo: repoFullName,
+                branch: branchName,
+                release_version: releaseVersion,
+                team_label: teamLabel,
+              },
+              importance_score: symbol.isExported ? 0.8 : 0.5,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'organization_id,entity_type,entity_id' }
+          );
+        } catch {
+          // Non-critical: skip failed symbols, continue with rest
+        }
+      }
+
+      // Emit code_dependency signals from import graph (enables real impact analysis)
+      const now = new Date().toISOString();
+      for (const importedModule of fileIndex.imports) {
+        // Only track relative imports (intra-repo dependencies, not npm packages)
+        if (!importedModule.startsWith('.')) continue;
+
+        const depSignal: Signal = {
+          organization_id: this.organizationId,
+          source_domain: 'engineering.github',
+          signal_type: 'code_dependency',
+          signal_value: 1,
+          entity_type: 'code_file',
+          entity_id: branchName
+            ? `${repoFullName}:${filePath}@${branchName}`
+            : `${repoFullName}:${filePath}`,
+          branch_name: branchName,
+          release_version: releaseVersion,
+          team_label: teamLabel,
+          signal_metadata: {
+            repo: repoFullName,
+            importer: filePath,
+            importee: importedModule,
+            language: fileIndex.language,
+            branch: branchName,
+            release_version: releaseVersion,
+            team_label: teamLabel,
+          },
+          created_at: now,
+          signal_timestamp: now,
+        };
+
+        await this.streamProcessor.addSignal(depSignal);
+      }
+    } catch {
+      // Non-critical: parsing failures must never break file ingestion
     }
   }
 
