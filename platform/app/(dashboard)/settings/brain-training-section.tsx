@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
@@ -28,10 +28,35 @@ interface TrainingStatus {
   error?: string;
 }
 
+interface RLStats {
+  total: number;
+  helpful: number;
+  notHelpful: number;
+  incorrect: number;
+  satisfactionRate: number;
+}
+
 export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSectionProps) {
   const [trainingStatus, setTrainingStatus] = useState<TrainingStatus>({ status: 'idle' });
   const [trainNowStatus, setTrainNowStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [lastTrainingDate, setLastTrainingDate] = useState<string | null>(null);
+  const [rlStats, setRlStats] = useState<RLStats | null>(null);
+
+  // Poll RL feedback stats every 60s so the indicator stays live
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchRLStats() {
+      try {
+        const res = await fetch(`/api/copilot/feedback?organizationId=${orgId}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        if (data.stats) setRlStats(data.stats);
+      } catch { /* non-critical */ }
+    }
+    fetchRLStats();
+    const interval = setInterval(fetchRLStats, 60_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [orgId]);
 
   const activeConnectors = connectors.filter(
     (c) => c.status === 'active' || c.status === 'connected'
@@ -405,20 +430,116 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
         </div>
       </div>
 
-      {/* Continuous Learning */}
+      {/* ── Reinforcement Learning Status ─────────────────────────────── */}
       <div className="rounded-xl bg-card border border-border-subtle p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center text-base shrink-0">
-            ✓
+        <div className="flex items-center gap-2 mb-4">
+          {/* Animated pulse dot indicating RL is actively running */}
+          <div className="relative flex items-center justify-center w-5 h-5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-20 animate-ping" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent" />
           </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold mb-1">Continuous Learning</h3>
-            <p className="text-xs text-muted">
-              After initial training, your Brain learns automatically from real-time webhooks
-              across all connected sources. A full brain cycle runs nightly at 5 AM UTC
-              and memory consolidation runs at 4 AM UTC — or trigger either manually above.
+          <h3 className="text-sm font-semibold">Reinforcement Learning — Active</h3>
+          <Badge variant="success" size="xs">Live</Badge>
+        </div>
+
+        {/* How the RL loop works — 3 steps */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          {/* Step 1 */}
+          <div className="rounded-lg bg-surface border border-border-subtle p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center text-[11px] font-bold text-accent">1</div>
+              <span className="text-xs font-medium">You give feedback</span>
+            </div>
+            <p className="text-[11px] text-muted leading-relaxed">
+              👍 / 👎 / ✗ on any Copilot answer gets queued instantly into the learning pipeline
             </p>
           </div>
+          {/* Step 2 */}
+          <div className="rounded-lg bg-surface border border-border-subtle p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center text-[11px] font-bold text-accent">2</div>
+              <span className="text-xs font-medium">Brain drains queue</span>
+            </div>
+            <p className="text-[11px] text-muted leading-relaxed">
+              Loop 3 (Closed-Loop Engine) drains up to 50 feedback items per brain cycle, adjusting causal weights
+            </p>
+          </div>
+          {/* Step 3 */}
+          <div className="rounded-lg bg-surface border border-border-subtle p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center text-[11px] font-bold text-accent">3</div>
+              <span className="text-xs font-medium">Next answer improves</span>
+            </div>
+            <p className="text-[11px] text-muted leading-relaxed">
+              Corrections go straight to ai_memory (L4). The next similar question benefits immediately
+            </p>
+          </div>
+        </div>
+
+        {/* Live RL stats from feedback API */}
+        {rlStats !== null && (
+          <div className="rounded-lg bg-surface border border-border-subtle p-3">
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-2.5">
+              Feedback — lifetime learning signals
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              <div>
+                <div className="text-base font-bold tabular-nums">{rlStats.total.toLocaleString()}</div>
+                <div className="text-[10px] text-muted">Total feedback</div>
+              </div>
+              <div>
+                <div className="text-base font-bold text-success tabular-nums">{rlStats.helpful.toLocaleString()}</div>
+                <div className="text-[10px] text-muted">👍 Helpful</div>
+              </div>
+              <div>
+                <div className="text-base font-bold text-warning tabular-nums">{rlStats.notHelpful.toLocaleString()}</div>
+                <div className="text-[10px] text-muted">👎 Not helpful</div>
+              </div>
+              <div>
+                <div className="text-base font-bold text-accent tabular-nums">
+                  {rlStats.total > 0 ? `${Math.round(rlStats.satisfactionRate * 100)}%` : '—'}
+                </div>
+                <div className="text-[10px] text-muted">Satisfaction</div>
+              </div>
+            </div>
+            {rlStats.incorrect > 0 && (
+              <div className="mt-2.5 pt-2.5 border-t border-border-subtle flex items-center gap-1.5 text-[11px] text-accent">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>
+                  <span className="font-semibold">{rlStats.incorrect}</span> correction{rlStats.incorrect !== 1 ? 's' : ''} already applied to memory (L4 — immediate effect)
+                </span>
+              </div>
+            )}
+            {rlStats.total === 0 && (
+              <p className="mt-2 text-[11px] text-muted">
+                No feedback yet — use 👍 / 👎 on any Copilot answer to start improving the Brain
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Cron schedule */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted">
+          <span className="flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            RL cycle runs at <span className="font-medium text-foreground">5 AM UTC</span> daily
+          </span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            Memory consolidation at <span className="font-medium text-foreground">4 AM UTC</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Connector auto-sync: <span className="font-medium text-foreground">hourly</span>
+          </span>
         </div>
       </div>
     </div>

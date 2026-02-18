@@ -33,8 +33,8 @@ export default async function ConnectorsPage() {
       return { data: null as T | null, error: err };
     });
 
-  // Fetch signal counts, all connectors, and sync progress in parallel
-  const [signalsResult, connectorsResult, checkpointsResult] = await Promise.all([
+  // Fetch signal counts, all connectors, sync progress, and last brain training run in parallel
+  const [signalsResult, connectorsResult, checkpointsResult, lastBrainRunResult] = await Promise.all([
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
@@ -48,11 +48,23 @@ export default async function ConnectorsPage() {
       .select("connector_type, progress_pct, signals_ingested, status, state")
       .eq("organization_id", orgId)
       .eq("status", "in_progress")),
+    // Last successful full brain cycle — used to show "Brain last trained X ago" on connector cards
+    safe(supabase
+      .from("scheduled_job_runs")
+      .select("completed_at, job_type")
+      .eq("organization_id", orgId)
+      .eq("status", "success")
+      .in("job_type", ["brain_cycle_full", "brain_cycle_sleep"])
+      .order("completed_at", { ascending: false })
+      .limit(1)),
   ]);
 
   const signals = signalsResult.data || [];
   const orgConnectors = connectorsResult.data || [];
   const checkpoints = checkpointsResult.data || [];
+  const lastBrainRuns = lastBrainRunResult.data || [];
+  const lastBrainTrainedAt: string | null =
+    lastBrainRuns.length > 0 ? (lastBrainRuns[0] as { completed_at: string }).completed_at : null;
 
   // Count signals by domain
   const domainCounts: Record<string, number> = {};
@@ -113,6 +125,7 @@ export default async function ConnectorsPage() {
       connectorStatusMap={connectorStatusMap}
       syncProgressMap={syncProgressMap}
       totalSignals={signals.length}
+      lastBrainTrainedAt={lastBrainTrainedAt}
     />
   );
 }

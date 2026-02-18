@@ -46,6 +46,8 @@ interface ConnectorsClientProps {
   connectorStatusMap: Record<string, ConnectorStatus>;
   syncProgressMap: Record<string, SyncProgress>;
   totalSignals: number;
+  /** Timestamp of the last successful full or sleep brain cycle — null if never trained */
+  lastBrainTrainedAt: string | null;
 }
 
 /* ── Domain colors ─────────────────────────────────────────────── */
@@ -88,6 +90,7 @@ export function ConnectorsClient({
   connectorStatusMap,
   syncProgressMap,
   totalSignals,
+  lastBrainTrainedAt,
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
@@ -308,8 +311,20 @@ export function ConnectorsClient({
       {/* ── Connected Connectors ──────────────────────────────── */}
       {connectedConnectors.length > 0 && (
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
-            Connected ({connectedConnectors.length})
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
+              Connected ({connectedConnectors.length})
+            </div>
+            {lastBrainTrainedAt ? (
+              <div className="flex items-center gap-1.5 text-[11px] text-accent">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                Brain learning from these connectors · last cycle {formatRelativeTime(new Date(lastBrainTrainedAt))}
+              </div>
+            ) : (
+              <div className="text-[11px] text-muted">
+                Go to <span className="font-medium">Settings → Brain</span> to run first training cycle
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             {connectedConnectors.map((connector) => {
@@ -330,7 +345,7 @@ export function ConnectorsClient({
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="text-sm font-semibold">{connector.name}</span>
                         <Badge variant="success" size="xs" pulse>Connected</Badge>
                         <Badge
@@ -342,6 +357,12 @@ export function ConnectorsClient({
                         </Badge>
                         {isSyncing && (
                           <Badge variant="info" size="xs" pulse>Syncing</Badge>
+                        )}
+                        {lastBrainTrainedAt && !isSyncing && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                            RL Active
+                          </span>
                         )}
                       </div>
                       <p className="text-xs text-muted mb-2">{connector.description}</p>
@@ -358,6 +379,18 @@ export function ConnectorsClient({
                           Last sync:{" "}
                           <span className="text-foreground font-medium">
                             {status.lastSyncAt ? formatRelativeTime(new Date(status.lastSyncAt)) : "Never"}
+                          </span>
+                        </span>
+                        <span className="text-muted flex items-center gap-1">
+                          <svg className="w-3 h-3 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          Brain trained:{" "}
+                          <span className={cn(
+                            "font-medium",
+                            lastBrainTrainedAt ? "text-accent" : "text-muted"
+                          )}>
+                            {lastBrainTrainedAt ? formatRelativeTime(new Date(lastBrainTrainedAt)) : "Not yet — run Sync & Train"}
                           </span>
                         </span>
                         {status.metadata?.team_name && (
