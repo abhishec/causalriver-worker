@@ -11,25 +11,23 @@
 --   - Two-branch isolation is complete end-to-end (not just in release_entity_links)
 -- ============================================================================
 
-ALTER TABLE entity_links
-  ADD COLUMN IF NOT EXISTS branch_name     TEXT,
-  ADD COLUMN IF NOT EXISTS release_version TEXT;
+-- Wrap in DO block so this migration is safe to run before or after
+-- 20260221000001_entity_links.sql (which creates the table). If the table
+-- does not exist yet, this migration is a no-op; the columns will be added
+-- by 20260221000001 which already includes them via CREATE TABLE.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'entity_links' AND table_schema = 'public') THEN
+    ALTER TABLE entity_links
+      ADD COLUMN IF NOT EXISTS branch_name     TEXT,
+      ADD COLUMN IF NOT EXISTS release_version TEXT;
 
--- Index for branch-scoped cross-domain queries
--- e.g. "All Jira tickets linked from PRs on release/6.3.4"
-CREATE INDEX IF NOT EXISTS entity_links_branch_idx
-  ON entity_links (organization_id, branch_name, target_type)
-  WHERE branch_name IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS entity_links_branch_idx
+      ON entity_links (organization_id, branch_name, target_type)
+      WHERE branch_name IS NOT NULL;
 
--- Index for release-version-scoped queries
-CREATE INDEX IF NOT EXISTS entity_links_release_version_idx
-  ON entity_links (organization_id, release_version, target_type)
-  WHERE release_version IS NOT NULL;
-
-COMMENT ON COLUMN entity_links.branch_name IS
-  'Git branch that produced this link, e.g. "release/6.3.4". '
-  'Enables branch-scoped cross-domain queries to isolate Team A from Team B.';
-
-COMMENT ON COLUMN entity_links.release_version IS
-  'Release version string matching jira_fix_version, e.g. "6.3.4". '
-  'Set from GitHubConnector releaseVersionMap at ingestion time.';
+    CREATE INDEX IF NOT EXISTS entity_links_release_version_idx
+      ON entity_links (organization_id, release_version, target_type)
+      WHERE release_version IS NOT NULL;
+  END IF;
+END $$;
