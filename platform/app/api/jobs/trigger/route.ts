@@ -21,7 +21,7 @@
  *
  * Body: {
  *   job_type: 'verification' | 'weights' | 'decay' | 'threshold_optimization' |
- *             'retention' | 'federation' | 'consolidation' | 'all_daily' |
+ *             'retention' | 'federation' | 'sleep_cycle' | 'consolidation' | 'all_daily' |
  *             'causal_discovery' | 'connector_sync' | 'training_packs' | 'prediction_outcomes',
  *   organization_id?: string,   // Defaults to user's current org
  *   mode?: 'edge' | 'node',     // Default: 'edge' for light jobs, 'node' for heavy
@@ -41,6 +41,7 @@ const EDGE_FUNCTION_JOBS = [
   'threshold_optimization',
   'retention',
   'federation',
+  'sleep_cycle',
   'consolidation',
   'all_daily',
 ] as const;

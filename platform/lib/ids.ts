@@ -262,6 +262,16 @@ export async function detectThreats(request: Request): Promise<ThreatDetection> 
  * Use this in your Next.js middleware
  */
 export async function securityMiddleware(request: Request): Promise<Response | null> {
+  // Internal cron bypass: requests from Supabase Edge Functions (nexus-cron /
+  // scheduled-jobs) carry x-internal-cron: true + the service role Bearer token.
+  // Deno's fetch has no User-Agent, which would otherwise trigger SUSPICIOUS_USER_AGENT.
+  const internalCron = request.headers.get('x-internal-cron') === 'true';
+  const authHeader = request.headers.get('authorization') || '';
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (internalCron && serviceKey && authHeader === `Bearer ${serviceKey}`) {
+    return null; // Trusted internal cron — skip IDS
+  }
+
   const detection = await detectThreats(request);
 
   if (detection.blocked && detection.response) {

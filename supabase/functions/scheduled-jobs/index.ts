@@ -33,6 +33,7 @@ interface JobRequest {
     | 'threshold_optimization'
     | 'retention'
     | 'federation'
+    | 'sleep_cycle'
     | 'all_daily';
   organization_id?: string;
 }
@@ -203,6 +204,10 @@ async function processJob(
 
       case 'federation':
         result = await runFederationJob(supabase, organizationId);
+        break;
+
+      case 'sleep_cycle':
+        result = await runSleepCycleJob(organizationId);
         break;
 
       case 'consolidation':
@@ -577,6 +582,57 @@ async function runFederationJob(supabase: any, orgId: string) {
 }
 
 /**
+ * Sleep Cycle: POST /api/brain/cycle?mode=sleep for the given org.
+ *
+ * Drains brain_feedback_queue (Loop 3), runs prediction verification (Loop 1),
+ * Bayesian weight updates (Loop 2), intervention outcome tracking (Loop 4),
+ * auto-retraining (Loop 5), agent outcome learning (Loop 6), and federation
+ * validation (Loop 7). Runs hourly for all active orgs via all_daily schedule.
+ *
+ * Uses an internal HTTP call to the Next.js API — the brain/cycle route owns
+ * all 30 NCC layers and the closed-loop learning engine. Running it from Deno
+ * directly is not feasible (memory-stack is Node.js only).
+ */
+async function runSleepCycleJob(organizationId: string) {
+  const platformUrl = Deno.env.get('PLATFORM_URL') || Deno.env.get('NEXT_PUBLIC_APP_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+  if (!platformUrl || !serviceKey) {
+    return { error: 'PLATFORM_URL or SUPABASE_SERVICE_ROLE_KEY not configured' };
+  }
+
+  try {
+    const url = `${platformUrl}/api/brain/cycle?mode=sleep&organizationId=${organizationId}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+        'x-internal-cron': 'true',
+      },
+      body: JSON.stringify({ organizationId, mode: 'sleep', triggeredBy: 'scheduled-jobs-cron' }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { error: `Sleep cycle HTTP error: ${response.status}`, details: errorText.slice(0, 500) };
+    }
+
+    const result = await response.json().catch(() => ({}));
+    return {
+      status: 'success',
+      mode: 'sleep',
+      organizationId,
+      loopsRun: result.loopsRun ?? 'unknown',
+      feedbackDrained: result.feedbackDrained ?? 0,
+      durationMs: result.durationMs ?? 0,
+    };
+  } catch (err: any) {
+    return { error: `Sleep cycle unreachable: ${err.message}` };
+  }
+}
+
+/**
  * Consolidation: Brain consolidation via Edge Function.
  *
  * This is the Deno-compatible "light sleep" consolidation that handles:
@@ -683,12 +739,17 @@ async function runAllDailyJobs(supabase: any, orgId: string) {
     runDecayJob(supabase, orgId),
   ]);
 
+  // Sleep cycle: drain brain_feedback_queue + run all 7 learning loops
+  // Runs last so it picks up any signals produced by the maintenance jobs above
+  const sleepResult = await runSleepCycleJob(orgId).catch((err: any) => ({ error: err.message }));
+
   return {
     retention: retention.status === 'fulfilled' ? retention.value : { error: retention.reason?.message },
     verification: verification.status === 'fulfilled' ? verification.value : { error: verification.reason?.message },
     threshold: threshold.status === 'fulfilled' ? threshold.value : { error: threshold.reason?.message },
     weights: weights.status === 'fulfilled' ? weights.value : { error: weights.reason?.message },
     decay: decay.status === 'fulfilled' ? decay.value : { error: decay.reason?.message },
+    sleep_cycle: sleepResult,
   };
 }
 

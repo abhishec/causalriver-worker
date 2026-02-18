@@ -58,6 +58,7 @@ serve(async (req: Request) => {
       'prediction_verification',
       'threshold_optimization',
       'evidence_decay',
+      'sleep_cycle',
     ];
     const specificOrgId = body.organizationId;
 
@@ -367,6 +368,76 @@ serve(async (req: Request) => {
         } catch (err: any) {
           results.push({
             task: 'data_retention_cleanup',
+            organizationId: orgId,
+            status: 'error',
+            details: { error: err.message },
+            durationMs: Date.now() - start,
+          });
+        }
+      }
+
+      // -----------------------------------------------------------------
+      // Task 5: Sleep Cycle — Drain brain_feedback_queue + 7 learning loops
+      // Runs hourly via this cron. Calls /api/brain/cycle?mode=sleep on the
+      // Next.js platform so Node.js memory-stack runs the full closed-loop
+      // learning engine (Loops 1-7: prediction verify, Bayesian updates,
+      // user corrections, intervention tracking, auto-retrain, agent outcomes,
+      // federation validation).
+      // -----------------------------------------------------------------
+      if (requestedTasks.includes('sleep_cycle')) {
+        const start = Date.now();
+        try {
+          const platformUrl = Deno.env.get('PLATFORM_URL') || Deno.env.get('NEXT_PUBLIC_APP_URL');
+          const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+          if (!platformUrl || !serviceKey) {
+            results.push({
+              task: 'sleep_cycle',
+              organizationId: orgId,
+              status: 'error',
+              details: { error: 'PLATFORM_URL or SUPABASE_SERVICE_ROLE_KEY not set' },
+              durationMs: 0,
+            });
+          } else {
+            const response = await fetch(
+              `${platformUrl}/api/brain/cycle?mode=sleep&organizationId=${orgId}`,
+              {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${serviceKey}`,
+                  'Content-Type': 'application/json',
+                  'x-internal-cron': 'true',
+                },
+                body: JSON.stringify({ organizationId: orgId, mode: 'sleep', triggeredBy: 'nexus-cron' }),
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json().catch(() => ({}));
+              results.push({
+                task: 'sleep_cycle',
+                organizationId: orgId,
+                status: 'success',
+                details: {
+                  loopsRun: data.loopsRun ?? 'unknown',
+                  feedbackDrained: data.feedbackDrained ?? 0,
+                },
+                durationMs: Date.now() - start,
+              });
+            } else {
+              const errorText = await response.text().catch(() => '');
+              results.push({
+                task: 'sleep_cycle',
+                organizationId: orgId,
+                status: 'error',
+                details: { error: `HTTP ${response.status}`, details: errorText.slice(0, 200) },
+                durationMs: Date.now() - start,
+              });
+            }
+          }
+        } catch (err: any) {
+          results.push({
+            task: 'sleep_cycle',
             organizationId: orgId,
             status: 'error',
             details: { error: err.message },

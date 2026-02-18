@@ -104,9 +104,6 @@ export interface BrainFeedbackBusInstance {
 // CREATE BUS — Factory Function
 // ============================================================================
 
-/** Execution counter for evolution throttling (per org, in-memory) */
-const executionCounters = new Map<string, number>();
-
 export function createBrainFeedbackBus(config: BrainFeedbackBusConfig): BrainFeedbackBusInstance {
   const { supabase, organizationId } = config;
 
@@ -151,17 +148,14 @@ export function createBrainFeedbackBus(config: BrainFeedbackBusConfig): BrainFee
 
   async function triggerEvolution(opts?: { force?: boolean; cycleType?: 'lightweight' | 'full' }): Promise<void> {
     try {
-      const counter = (executionCounters.get(organizationId) ?? 0) + 1;
-      executionCounters.set(organizationId, counter);
-
-      // Only trigger every ~10 executions to avoid overhead (unless forced)
-      if (opts?.force || counter % 10 === 0) {
-        await runBrainEvolutionCycle(
-          supabase,
-          organizationId,
-          opts?.cycleType ?? 'lightweight',
-        );
-      }
+      // runBrainEvolutionCycle is lightweight and idempotent — no throttle needed.
+      // Prior in-memory counter (Map<string,number>) was unreliable across serverless
+      // restarts: it would reset to 0 and fire on the very first execution post-coldstart.
+      await runBrainEvolutionCycle(
+        supabase,
+        organizationId,
+        opts?.cycleType ?? 'lightweight',
+      );
     } catch {
       // Non-blocking
     }
