@@ -32,6 +32,30 @@ CREATE TABLE IF NOT EXISTS public.teams (
 CREATE INDEX IF NOT EXISTS idx_teams_org_id ON public.teams(organization_id);
 
 -- ============================================================================
+-- GUARD: Ensure `engineers` table exists before referencing it.
+-- Created by 20260217000002_p0_early_warning_schema.sql, same caveat as above.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.engineers (
+  id               UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  organization_id  UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  github_user_id   TEXT,
+  github_login     TEXT,
+  jira_user_id     TEXT,
+  email            TEXT,
+  name             TEXT NOT NULL,
+  team_id          UUID,
+  metadata         JSONB DEFAULT '{}',
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(organization_id, github_user_id),
+  UNIQUE(organization_id, jira_user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_engineers_org_id    ON public.engineers(organization_id);
+CREATE INDEX IF NOT EXISTS idx_engineers_team_id   ON public.engineers(team_id);
+CREATE INDEX IF NOT EXISTS idx_engineers_github_user ON public.engineers(github_user_id) WHERE github_user_id IS NOT NULL;
+
+-- ============================================================================
 -- 1. ENGAGEMENTS — Registry of client engagements
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.engagements (
