@@ -131,12 +131,18 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Build memory-stack
         run: pnpm --filter @nexus-ai/memory-stack run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: TypeScript check
         run: cd platform && pnpm exec tsc --noEmit
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Security audit
         run: pnpm audit --audit-level=high || true
