@@ -72,7 +72,7 @@ COPY scripts/ ./scripts/
 # ── Layer 5: Build memory-stack (validates types + creates dist/) ──
 # Some imports might reference dist/ in edge cases, so build it.
 # If the build fails here, it's a real error — don't swallow it.
-RUN cd packages/memory-stack && pnpm build
+RUN cd packages/memory-stack && NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # Install tsx globally for runtime TypeScript execution
 RUN npm install -g tsx
