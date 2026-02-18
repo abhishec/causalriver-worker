@@ -16,7 +16,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import type { IntelligenceEvent } from "./StreamEvent";
 
@@ -26,54 +25,72 @@ interface AnomalyDetailPanelProps {
 }
 
 interface CausalContext {
-  upstreamCause?: string;
+  upstreamCause?: string;        // humanised label e.g. "Consulting Fees"
   lagDays?: number;
   cascadeRisk?: string;
-  affectedDomains?: string[];
+  affectedDomains?: string[];    // already humanised by API e.g. "Cash Flow"
   lastOccurrence?: string;
   lastOutcome?: string;
+  dataAgeLabel?: string;         // real: "6 months of your data" not hardcoded "8 months"
 }
 
 // Static fallback — shown while the live Claude call is loading or if it fails
 function getClaudeBaselineFallback(event: IntelligenceEvent): string[] {
-  const domain = event.domain || "this area";
+  const domain = event.domain
+    ? event.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "this area";
   return [
-    `This metric appears to be higher than usual in ${domain}.`,
-    "You may want to review recent transactions to identify the cause.",
-    "Consider monitoring this area closely over the next few weeks.",
-    "If the trend continues, it may be worth investigating further.",
+    `This looks higher than usual in ${domain} — possibly a one-off or seasonal shift.`,
+    "Review recent transactions to identify if there's a specific driver.",
+    "Monitor this metric over the next 2–4 weeks before acting.",
+    "If the trend continues, consider raising it with your finance team.",
   ];
 }
 
-// Brain's response — what you get WITH causal context from your own data
+// Brain's response — built from real org causal data
 function getBrainInsights(event: IntelligenceEvent, causal: CausalContext | null): string[] {
   const insights: string[] = [];
 
+  // 1. What actually happened (the event description, already in business English)
   if (event.description) {
     insights.push(event.description);
   }
 
+  // 2. Why it happened — causal upstream cause with lag
   if (causal?.upstreamCause && causal?.lagDays) {
     insights.push(
-      `This is likely caused by your ${causal.upstreamCause} from ${causal.lagDays} days ago — that's the pattern in your data.`
+      `This is likely driven by your ${causal.upstreamCause} from ${causal.lagDays} days ago — Brain has seen this pattern repeat in your data.`
+    );
+  } else if (causal?.upstreamCause) {
+    insights.push(
+      `Your ${causal.upstreamCause} is the most likely upstream cause — Brain mapped this relationship in your data.`
     );
   }
 
+  // 3. What happened last time
   if (causal?.lastOccurrence && causal?.lastOutcome) {
     insights.push(
       `Last time this happened (${causal.lastOccurrence}): ${causal.lastOutcome}`
     );
   }
 
+  // 4. What it could cascade into
   if (causal?.cascadeRisk && causal?.affectedDomains?.length) {
+    const domains = causal.affectedDomains.slice(0, 2).join(" and ");
+    const timeWindow = causal.lagDays ? `${causal.lagDays * 2} days` : "4–6 weeks";
+    const riskWord =
+      causal.cascadeRisk === "high" ? "will likely" :
+      causal.cascadeRisk === "medium" ? "may" : "could";
     insights.push(
-      `Watch out: if this isn't resolved, it could affect your ${causal.affectedDomains.join(" and ")} within ${causal.lagDays ? causal.lagDays * 2 : 30} days.`
+      `If unresolved, this ${riskWord} affect your ${domains} within ${timeWindow}.`
     );
   }
 
+  // 5. No-data state: Brain is brand new for this org — honest about it
   if (insights.length === 0) {
     insights.push(
-      "Brain is analysing the causal chain behind this anomaly — check back shortly for full context."
+      "Brain hasn't seen enough patterns in your data yet to pinpoint a cause.",
+      "Upload more financial data or connect your accounting system to unlock causal analysis.",
     );
   }
 
@@ -81,11 +98,10 @@ function getBrainInsights(event: IntelligenceEvent, causal: CausalContext | null
 }
 
 function WhatToDoNext({ event }: { event: IntelligenceEvent }) {
-  const domain = event.domain || "finance";
   const actions = [
     {
       label: "Ask Brain for root cause",
-      description: "Get the full causal chain — what caused this and what it will affect",
+      description: "Get the full causal chain — what caused this and what it will affect next",
       href: `/copilot?q=${encodeURIComponent(`Why is my ${event.title}? What caused it and what should I do?`)}`,
       primary: true,
     },
@@ -138,24 +154,25 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
     }
 
     setLoading(true);
+    setCausal(null);
 
-    // Fetch causal edges for this domain to build context
     fetch(`/api/brain/causal-context?domain=${encodeURIComponent(event.domain || "finance")}`)
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data?.topEdge) {
-          setCausal({
-            upstreamCause: data.topEdge.source_domain?.replace(/_/g, " "),
-            lagDays: data.topEdge.lag_days,
-            cascadeRisk: data.cascadeRisk,
-            affectedDomains: data.affectedDomains || [],
-            lastOccurrence: data.lastOccurrence,
-            lastOutcome: data.lastOutcome,
-          });
-        }
+        if (!data) return;
+        // Always store what we got — even if topEdge is null we get dataAgeLabel
+        setCausal({
+          upstreamCause: data.topEdge?.source_domain_label ?? data.topEdge?.source_domain?.replace(/_/g, " "),
+          lagDays: data.topEdge?.lag_days,
+          cascadeRisk: data.cascadeRisk,
+          affectedDomains: data.affectedDomains || [],
+          lastOccurrence: data.lastOccurrence,
+          lastOutcome: data.lastOutcome,
+          dataAgeLabel: data.dataAgeLabel,
+        });
       })
       .catch(() => {
-        // Silently fail — we still show the Brain vs Claude panel with available data
+        // Silently fail — Brain vs Claude panel still shows with available data
       })
       .finally(() => setLoading(false));
   }, [event?.id, event?.domain]);
@@ -163,7 +180,6 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
   // Fetch the real Claude baseline — what Claude says with ZERO business context
   useEffect(() => {
     if (!event || event.type !== "anomaly") return;
-    // Avoid re-fetching for the same event
     if (lastClaudeFetchId.current === event.id) return;
 
     lastClaudeFetchId.current = event.id;
@@ -187,7 +203,7 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
         }
       })
       .catch(() => {
-        // Silently fail — fallback shown
+        // Silently fail — static fallback shown
       })
       .finally(() => setClaudeLoading(false));
   }, [event?.id]);
@@ -196,8 +212,19 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
 
   const isAnomaly = event.type === "anomaly";
   const brainInsights = getBrainInsights(event, causal);
-  // Real Claude response if available, else static fallback
   const claudeBaseline = claudeBullets ?? getClaudeBaselineFallback(event);
+
+  // Differentiator copy — uses real data age when available
+  const brainContextDescription = causal?.dataAgeLabel
+    ? `your causal graph, ${causal.dataAgeLabel}, and your typical spend patterns`
+    : causal
+    ? "your causal graph and financial data"
+    : "your financial data and transaction history";
+
+  // Human-readable domain label for causal chain viz
+  const domainLabel = event.domain
+    ? event.domain.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "this metric";
 
   return (
     <Drawer
@@ -217,7 +244,7 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
             </Badge>
             {event.domain && (
               <Badge variant="domain" domain={event.domain} size="xs">
-                {event.domain}
+                {domainLabel}
               </Badge>
             )}
           </div>
@@ -250,8 +277,12 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
 
                 {loading ? (
                   <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="h-3 bg-surface-hover rounded animate-pulse" style={{ width: `${70 + i * 8}%` }} />
+                    {[78, 86, 70, 92].map((w, i) => (
+                      <div
+                        key={i}
+                        className="h-2.5 bg-surface-hover rounded animate-pulse"
+                        style={{ width: `${w}%`, animationDelay: `${i * 100}ms` }}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -294,7 +325,6 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
                 </div>
 
                 {claudeLoading ? (
-                  // Loading skeleton while waiting for real Claude response
                   <div className="space-y-2">
                     {[65, 85, 72, 78].map((w, i) => (
                       <div
@@ -324,10 +354,10 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
               </div>
             </div>
 
-            {/* Differentiator callout */}
+            {/* Differentiator callout — dynamic data age, honest when brand new */}
             <div className="mt-3 rounded-lg bg-accent/5 border border-accent/10 px-3 py-2.5 text-[11px] text-muted leading-relaxed">
               <span className="font-medium text-accent">Why Brain wins: </span>
-              Brain loaded {causal ? "your causal graph, 8 months of history, and your typical spend patterns" : "your financial data and transaction history"} before answering.
+              Brain loaded {brainContextDescription} before answering.
               {claudeBullets
                 ? " The right column is Claude's real live response — given only the alert text, no business context."
                 : " Claude has none of that — it's answering from general knowledge only."
@@ -356,12 +386,14 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
                 <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>
-                <span className="text-[9px] text-muted">{causal.lagDays}d lag</span>
+                <span className="text-[9px] text-muted">
+                  {causal.lagDays ? `${causal.lagDays}d lag` : "causes"}
+                </span>
               </div>
 
               <div className="flex flex-col items-center">
                 <div className="px-2.5 py-1 rounded-lg bg-warning/10 border border-warning/20 text-[11px] font-medium text-warning">
-                  {event.domain || "this metric"}
+                  {domainLabel}
                 </div>
                 <span className="text-[9px] text-muted mt-1">anomaly here</span>
               </div>

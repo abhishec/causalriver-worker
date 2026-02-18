@@ -249,21 +249,41 @@ export default async function OverviewPage() {
   // Prediction accuracy from latest snapshot
   const predictionAccuracy = latest?.prediction_accuracy ?? 0;
 
+  // Convert snake_case entity/domain names to readable business labels
+  function toBusinessLabel(raw: string | null | undefined): string {
+    if (!raw) return "";
+    return raw
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .replace(/\bAnd\b/g, "and")
+      .replace(/\bOf\b/g, "of");
+  }
+
   // Build intelligence stream events from causal discoveries
-  const discoveryEvents = recentEdges.map((edge) => ({
-    id: `discovery-${edge.id}`,
-    type: "discovery" as const,
-    title: `${edge.source_entity} → ${edge.target_entity}`,
-    description: `Causal relationship discovered via ${edge.statistical_method || "Granger causality"}${edge.lag_days ? ` with ${edge.lag_days}-day lag` : ""}`,
-    timestamp: edge.created_at,
-    domain: edge.source_domain,
-    domains: edge.source_domain !== edge.target_domain
-      ? [edge.source_domain, edge.target_domain].filter(Boolean)
-      : undefined,
-    confidence: edge.confidence_score,
-    pValue: edge.p_value,
-    method: edge.statistical_method,
-  }));
+  // Use natural_language if available (written by the brain), otherwise compose a plain-English title
+  const discoveryEvents = recentEdges.map((edge) => {
+    const srcLabel = toBusinessLabel(edge.source_entity || edge.source_domain);
+    const tgtLabel = toBusinessLabel(edge.target_entity || edge.target_domain);
+    const lagText = edge.lag_days ? ` ${edge.lag_days} days later` : "";
+    const title = `When your ${srcLabel} moves, your ${tgtLabel} follows${lagText}`;
+    const description = edge.lag_days
+      ? `Brain found a ${edge.lag_days}-day causal link between ${srcLabel} and ${tgtLabel} — it's now watching for breaks in this pattern.`
+      : `Brain mapped a causal relationship between ${srcLabel} and ${tgtLabel} in your data.`;
+    return {
+      id: `discovery-${edge.id}`,
+      type: "discovery" as const,
+      title,
+      description,
+      timestamp: edge.created_at,
+      domain: edge.source_domain,
+      domains: edge.source_domain !== edge.target_domain
+        ? [edge.source_domain, edge.target_domain].filter(Boolean)
+        : undefined,
+      confidence: edge.confidence_score,
+      pValue: edge.p_value,
+      method: edge.statistical_method,
+    };
+  });
 
   // Build intelligence stream events from platform events
   const activityEvents = platformEvents.map((evt) => {
@@ -304,15 +324,18 @@ export default async function OverviewPage() {
   const earlyWarningEvents = earlyWarningSignals.map((sig: any) => {
     const meta = sig.signal_metadata || {};
     const isCollapse = sig.signal_type === "velocity_collapsed";
+    const drop = meta.percent_drop != null ? `${Number(meta.percent_drop).toFixed(0)}%` : null;
+    const reviewer = meta.top_reviewer || "one reviewer";
+    const share = meta.review_share != null ? `${(Number(meta.review_share) * 100).toFixed(0)}%` : null;
     return {
       id: `ew-${sig.id}`,
       type: "alert" as const,
       title: isCollapse
-        ? `⚠️ Velocity Collapse: ${meta.percent_drop?.toFixed(1) || 0}% drop`
-        : `🚨 Bottleneck: ${meta.top_reviewer || "unknown"} (${(meta.review_share * 100)?.toFixed(0) || 0}% of reviews)`,
+        ? `Engineering output dropped${drop ? ` ${drop}` : ""} — ships-per-week is well below your usual pace`
+        : `Code review bottleneck: ${reviewer} is approving ${share || "most"} of all merges`,
       description: isCollapse
-        ? `Deploy velocity dropped to ${meta.current_velocity || 0} (historical mean: ${meta.historical_mean?.toFixed(1) || 0}). Confidence: ${(meta.confidence * 100)?.toFixed(0) || 0}%`
-        : `Risk score: ${meta.risk_score?.toFixed(0) || 0}/100. Gini: ${meta.gini_coefficient?.toFixed(2) || 0}`,
+        ? `Your team is shipping ${meta.current_velocity || 0} deploys/week vs a normal pace of ${meta.historical_mean?.toFixed(1) || "—"}. If this continues, feature timelines will slip.`
+        : `When one person reviews ${share || "most"} of your code, any absence stalls your whole pipeline. Brain flagged this before it becomes a crisis.`,
       timestamp: sig.created_at,
       domain: "engineering",
       confidence: meta.confidence,
