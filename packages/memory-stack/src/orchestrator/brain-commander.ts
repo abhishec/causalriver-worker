@@ -219,6 +219,13 @@ export interface BrainIntelligence {
   predictions?: PredictionRecord[];
   /** Computed domain metrics — feeds L10 temporal, L14 goal planning, L15 narrative */
   computedMetrics?: ComputedMetric[];
+  /**
+   * Verified predictions from outcome_observation_windows — Gap 4 Oracle output.
+   * These are predictions the brain made that have since been autonomously verified
+   * against real connector signals. They power the "Why did X happen?" answer with
+   * historical accuracy: "we predicted this 8 times, 6 were correct (75%)."
+   */
+  verifiedPredictions?: VerifiedPrediction[];
   /** Deep layer state (L16-L30) read back from brain_layer_state — surfaced during queries */
   deepLayerState?: {
     entityLinks?: { state_value: string; updated_at: string } | null;
@@ -243,6 +250,28 @@ export interface PredictionRecord {
   confidence: number;
   actual_value: number | null;
   was_correct: boolean | null;
+  verified_at: string | null;
+  created_at: string;
+}
+
+/**
+ * A verified prediction from outcome_observation_windows (Gap 4 Oracle output).
+ * Represents a causal prediction that has been autonomously checked against
+ * real connector signals and marked correct or incorrect by the OutcomeOracle.
+ */
+export interface VerifiedPrediction {
+  id: string;
+  source_domain: string;
+  target_domain: string;
+  watch_metric: string | null;
+  predicted_direction: string | null;
+  predicted_magnitude: number | null;
+  baseline_value: number | null;
+  actual_value: number | null;
+  actual_direction: string | null;
+  was_correct: boolean | null;
+  bandit_reward: number | null;
+  discovery_method: string | null;
   verified_at: string | null;
   created_at: string;
 }
@@ -898,9 +927,10 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       console.log(`[BrainCommander] Intelligence cache MISS → fetched and cached for org ${organizationId} (edges: ${edges.length}, patterns: ${patterns.length}, rules: ${rules.length})`);
     } // end else (cache miss)
 
-    // ── Volatile fetches: always fresh (predictions, 14-day metrics, deep layer state) ──
+    // ── Volatile fetches: always fresh (predictions, 14-day metrics, deep layer state,
+    //    verified predictions from Oracle) ──────────────────────────────────────────────
     // These change frequently and are cheap to fetch (small row counts).
-    const [predictionsResult, metricsSignalsResult, deepLayerResult] = await Promise.all([
+    const [predictionsResult, metricsSignalsResult, deepLayerResult, verifiedPredictionsResult] = await Promise.all([
       // Active predictions for L6 calibration + L11 red team
       Promise.resolve(supabase
         .from('prediction_records')
@@ -932,12 +962,29 @@ export function createBrainCommander(config: BrainCommanderConfig) {
         .order('updated_at', { ascending: false })
         .limit(60))
         .catch(() => ({ data: [] as any[] })),
+
+      // ── GAP 4 ORACLE: Verified predictions from outcome_observation_windows ──
+      // The OutcomeOracle autonomously verifies predictions made by the brain.
+      // These results are the "memory of what the brain got right and wrong".
+      // Surfacing them in the copilot prompt enables: "We predicted this 8 times —
+      // 6 were correct (75%). Last verified: engineering→revenue on 2025-02-14."
+      Promise.resolve(supabase
+        .from('outcome_observation_windows')
+        .select('id, source_domain, target_domain, watch_metric, predicted_direction, predicted_magnitude, baseline_value, actual_value, actual_direction, was_correct, bandit_reward, discovery_method, verified_at, created_at')
+        .eq('organization_id', organizationId)
+        .eq('status', 'verified')
+        .order('verified_at', { ascending: false })
+        .limit(30))
+        .catch(() => ({ data: [] as any[] })),
     ]);
 
     // ── BRAIN NUTRITION: Process volatile query results ──────────────────
 
     // Process predictions for cognitive cycle (L6, L11, L15)
     const predictions = ((predictionsResult as any)?.data || []) as PredictionRecord[];
+
+    // Process Gap 4 Oracle verified predictions (for copilot causal reasoning)
+    const verifiedPredictions = ((verifiedPredictionsResult as any)?.data || []) as VerifiedPrediction[];
 
     // Compute domain metrics from 14-day signal window (L10, L14, L15)
     const metricsSignals = ((metricsSignalsResult as any)?.data || []) as Array<{
@@ -1017,6 +1064,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
       predictions,          // Active predictions from prediction_records (feeds L6, L11, L15)
       computedMetrics,      // Domain metrics from signal aggregation (feeds L10, L14, L15)
       deepLayerState,       // L16-L30 outputs from brain_layer_state (surfaced during queries)
+      verifiedPredictions,  // Gap 4 Oracle: autonomously verified predictions (powers "Why did X happen?" with accuracy history)
     };
   }
 

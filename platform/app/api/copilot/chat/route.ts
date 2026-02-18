@@ -394,6 +394,8 @@ export async function POST(request: NextRequest) {
     // Declared here so they're accessible both inside the try block and in the system prompt builder below
     let entityLinks: any[] = [];
     let universalCtx: any = null; // BRAIN NUTRITION: LEAP context from Mesh universal layer
+    // Hoisted so causal reasoning blocks (after the try) can access causalDAG + reasoners
+    let brainRegions: any = {};
 
     try {
       const {
@@ -422,7 +424,8 @@ export async function POST(request: NextRequest) {
       const ingestionStats = (ghConnector?.config as Record<string, any>)?.ingestion_progress?.stats;
 
       // Build BrainRegions — ALL available intelligence in one object
-      const brainRegions: Partial<BrainRegions> = {};
+      // (variable hoisted above try block so causal reasoning blocks can access it after)
+      brainRegions = {} as Partial<BrainRegions>;
 
       // ── Structural Intelligence: load if code has been ingested ──────
       if (ingestionStats?.filesProcessed > 0) {
@@ -897,6 +900,165 @@ USE THESE to:
 - Reference the Brain's own hypotheses when answering questions about organizational health
 - Connect current queries to the Brain's ongoing investigations
 - Share the Brain's imagination scenarios when users ask "what if" questions`;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // CAUSAL REASONING BLOCKS — Gap 4 wiring
+    // These blocks fire intent-specifically and inject structured causal
+    // reasoning into the prompt BEFORE Claude sees the question.
+    // Without these, Claude has edge counts but not causal explanations.
+    //
+    // Pattern: detect intent → call the right causal module → inject result.
+    // All blocks are non-fatal: a module failure degrades gracefully.
+    // ══════════════════════════════════════════════════════════════════════
+
+    const causalIntent = brainContext?.intent;
+    const verifiedPredictions = (intelligence as any).verifiedPredictions as Array<{
+      source_domain: string; target_domain: string; watch_metric: string | null;
+      predicted_direction: string | null; predicted_magnitude: number | null;
+      actual_direction: string | null; actual_value: number | null;
+      was_correct: boolean | null; bandit_reward: number | null;
+      discovery_method: string | null; verified_at: string | null;
+    }> | undefined;
+
+    // ── A. VERIFIED PREDICTION HISTORY — always inject if oracle data exists ──
+    // Powers: "We predicted this X times — Y% correct. Last verified: [date]."
+    // This is the oracle feedback loop made visible in the copilot.
+    if (verifiedPredictions && verifiedPredictions.length > 0) {
+      // Group by domain pair to compute per-pair accuracy
+      const pairStats = new Map<string, { total: number; correct: number; method: string | null; lastVerified: string | null }>();
+      for (const vp of verifiedPredictions) {
+        const key = `${vp.source_domain}→${vp.target_domain}`;
+        const existing = pairStats.get(key) || { total: 0, correct: 0, method: vp.discovery_method, lastVerified: vp.verified_at };
+        existing.total++;
+        if (vp.was_correct) existing.correct++;
+        if (!existing.lastVerified || (vp.verified_at && vp.verified_at > existing.lastVerified)) existing.lastVerified = vp.verified_at;
+        pairStats.set(key, existing);
+      }
+      const pairLines = Array.from(pairStats.entries())
+        .sort((a, b) => b[1].total - a[1].total)
+        .slice(0, 10)
+        .map(([pair, s]) => {
+          const acc = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
+          const lastDate = s.lastVerified ? new Date(s.lastVerified).toISOString().split('T')[0] : 'unknown';
+          return `- ${pair}: ${s.correct}/${s.total} correct (${acc}%) | method: ${s.method || 'unknown'} | last verified: ${lastDate}`;
+        });
+      effectiveSystemPrompt += `\n\n## ORACLE PREDICTION ACCURACY (Gap 4 — autonomous verification history)
+The Brain has autonomously verified ${verifiedPredictions.length} causal predictions against real connector data.
+Use this to ground "Why did X happen?" answers with historical accuracy.
+
+${pairLines.join('\n')}
+
+When asked WHY something happened, cite the relevant pair's accuracy. E.g.: "The Brain predicted engineering→revenue effects 6 times — 5 were correct (83%). Based on this pattern…"`;
+    }
+
+    // ── B. CAUSAL CHAIN DIAGNOSIS — fires for explain/diagnose intents ──
+    // Uses multiHopReasoner.diagnose() to find upstream causes of the queried domain.
+    // Without this: Claude sees edge counts. With this: Claude sees the actual causal chain.
+    if ((causalIntent === 'explain' || causalIntent === 'diagnose') &&
+        brainRegions.causalDAG && brainRegions.multiHopReasoner && causalEdges.length > 0) {
+      try {
+        // Extract the domain being asked about from brainContext
+        const affectedDomain = brainContext?.domains?.[0];
+        if (affectedDomain) {
+          const reasoner = brainRegions.multiHopReasoner as any;
+          const diagnosis = reasoner.diagnose(brainRegions.causalDAG, affectedDomain);
+          if (diagnosis && diagnosis.rootCauses && diagnosis.rootCauses.length > 0) {
+            const causeLines = diagnosis.rootCauses.slice(0, 5).map((rc: any) =>
+              `- ${rc.domain} → ${affectedDomain} | path confidence: ${rc.pathConfidence != null ? (rc.pathConfidence * 100).toFixed(0) + '%' : 'N/A'} | via: ${rc.pathSummary || 'direct'}`
+            );
+            effectiveSystemPrompt += `\n\n## CAUSAL CHAIN DIAGNOSIS for "${affectedDomain}" (multi-hop reasoning)
+The Brain traced upstream causes for the domain you're asking about:
+
+${causeLines.join('\n')}
+
+${diagnosis.explanation || ''}
+
+Use this causal chain in your answer. Don't just say "X affects Y" — explain the path and cite the confidence.`;
+          }
+        }
+      } catch (diagErr) {
+        // Non-fatal: degrade to edge-count reasoning
+        console.warn('[Copilot] Causal diagnosis non-fatal:', (diagErr as Error).message);
+      }
+    }
+
+    // ── C. COUNTERFACTUAL SIMULATION — fires for whatif/predict intents ──
+    // Uses counterfactualSimulator.findLeveragePoints() to answer "What if we change X?"
+    // Without this: Claude reasons from memory. With this: Claude reasons from the causal DAG.
+    if ((causalIntent === 'whatif' || causalIntent === 'predict') &&
+        brainRegions.causalDAG && brainRegions.counterfactualSimulator && causalEdges.length > 0) {
+      try {
+        const simulator = brainRegions.counterfactualSimulator as any;
+        const leveragePoints = simulator.findLeveragePoints(brainRegions.causalDAG);
+        if (leveragePoints && leveragePoints.length > 0) {
+          const topLevers = leveragePoints.slice(0, 5).map((lp: any) =>
+            `- ${lp.domain}: ${lp.description || 'leverage point'} | impact score: ${lp.impactScore != null ? (lp.impactScore * 100).toFixed(0) + '%' : 'N/A'} | affects: ${(lp.affectedDomains || []).join(', ')}`
+          );
+          effectiveSystemPrompt += `\n\n## COUNTERFACTUAL LEVERAGE POINTS (causal DAG simulation)
+These are the highest-impact intervention points in the causal graph — where changes propagate furthest.
+Use these when answering "What if we change X?" or "What should we do to improve Y?":
+
+${topLevers.join('\n')}
+
+When answering what-if questions, base your answer on these leverage points and their downstream effects through the causal graph.`;
+        }
+      } catch (cfErr) {
+        // Non-fatal: degrade to semantic reasoning
+        console.warn('[Copilot] Counterfactual simulation non-fatal:', (cfErr as Error).message);
+      }
+    }
+
+    // ── D. CASCADE CHAIN — fires for cascade intent ──
+    // Uses multiHopReasoner to find all reachable domains from the source.
+    if (causalIntent === 'cascade' &&
+        brainRegions.causalDAG && brainRegions.multiHopReasoner && causalEdges.length > 0) {
+      try {
+        const reasoner = brainRegions.multiHopReasoner as any;
+        const sourceDomain = brainContext?.domains?.[0];
+        if (sourceDomain) {
+          const reachable = reasoner.findReachableDomains(brainRegions.causalDAG, sourceDomain);
+          if (reachable && reachable.length > 0) {
+            const cascadeLines = reachable.slice(0, 8).map((r: any) =>
+              `- ${sourceDomain} → ${r.domain} (${r.hops} hop${r.hops !== 1 ? 's' : ''}, confidence: ${r.confidence != null ? (r.confidence * 100).toFixed(0) + '%' : 'N/A'})`
+            );
+            effectiveSystemPrompt += `\n\n## CASCADE CHAIN from "${sourceDomain}" (ripple effect analysis)
+A change in ${sourceDomain} propagates through the causal graph to these downstream domains:
+
+${cascadeLines.join('\n')}
+
+When answering cascade/ripple questions, use this chain. Show the path and confidence at each hop.`;
+          }
+        }
+      } catch (cascadeErr) {
+        console.warn('[Copilot] Cascade chain non-fatal:', (cascadeErr as Error).message);
+      }
+    }
+
+    // ── E. BANDIT METHOD ATTRIBUTION — enrich edge descriptions ──
+    // Without this: "engineering→revenue: effect_size=0.72"
+    // With this: "engineering→revenue: effect_size=0.72, discovered by APEX (74% win rate)"
+    if (causalEdges.length > 0 && verifiedPredictions && verifiedPredictions.length > 0) {
+      // Build method win rate map from verified predictions
+      const methodStats = new Map<string, { wins: number; total: number }>();
+      for (const vp of verifiedPredictions) {
+        if (!vp.discovery_method) continue;
+        const s = methodStats.get(vp.discovery_method) || { wins: 0, total: 0 };
+        s.total++;
+        if (vp.was_correct) s.wins++;
+        methodStats.set(vp.discovery_method, s);
+      }
+      if (methodStats.size > 0) {
+        const methodLeaderboard = Array.from(methodStats.entries())
+          .map(([method, s]) => `${method}: ${Math.round((s.wins / s.total) * 100)}% accuracy (${s.total} predictions)`)
+          .sort()
+          .join(', ');
+        effectiveSystemPrompt += `\n\n## CAUSAL DISCOVERY METHOD PERFORMANCE (UCB1 Bandit — Gap 1)
+The Brain uses a bandit algorithm to learn which causal discovery method works best per domain pair.
+Current method accuracy: ${methodLeaderboard}
+
+When explaining how a causal relationship was discovered, you can cite the method and its accuracy.`;
       }
     }
 
