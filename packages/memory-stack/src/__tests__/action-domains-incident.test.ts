@@ -31,13 +31,45 @@ import type {
 // MOCK CONTEXT
 // ============================================================================
 
-function createMockContext(input: IncidentDiagnosisRequest): ActionDomainContext {
+/** Fake artifact rows for similar-incident tests */
+const MOCK_ARTIFACT_ROWS = [
+  {
+    id: 'a1',
+    artifact_data: {
+      input: { description: 'API timeout errors causing 504 responses' },
+      remediationSteps: ['Increase upstream timeout', 'Add circuit breaker'],
+    },
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'a2',
+    artifact_data: {
+      input: { description: 'Out of memory error in node process' },
+      remediationSteps: ['Increase memory limit', 'Fix memory leak in handler'],
+    },
+    created_at: new Date().toISOString(),
+  },
+];
+
+/** Chainable supabase query builder mock */
+function makeSupabaseMock(rows = MOCK_ARTIFACT_ROWS) {
+  const chain = {
+    select: () => chain,
+    eq: () => chain,
+    gte: () => chain,
+    order: () => chain,
+    limit: () => Promise.resolve({ data: rows, error: null }),
+  };
+  return { from: () => chain };
+}
+
+function createMockContext(input: IncidentDiagnosisRequest, rows = MOCK_ARTIFACT_ROWS): ActionDomainContext {
   return {
     organizationId: 'org_test',
     userId: 'user_test',
     input,
     brain: {} as any,
-    supabase: {} as any,
+    supabase: makeSupabaseMock(rows) as any,
   };
 }
 
@@ -520,11 +552,12 @@ describe('Incident Diagnosis - Time to Resolve', () => {
       }),
     } as Response);
 
+    // Pass empty history so estimation falls through to root-cause type switch
     const ctx = createMockContext({
       description: 'Config error',
       severity: 'medium',
       anthropicApiKey: 'test-key',
-    });
+    }, []);
 
     const result = await incidentDiagnosisDomain.execute(ctx);
     const data = result.data as IncidentDiagnosisResult;
