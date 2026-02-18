@@ -1326,23 +1326,18 @@ export {
 } from './orchestrator/early-warning-system';
 
 // Brain-Integrated Early Warning (RECOMMENDED for design partners)
-// Routes through BrainCommander → 15-Layer Cognitive Stack (L3-L15)
-// Produces Brain intelligence with Theory of Mind, stress-tested predictions,
-// goal-backward intervention plans, and AI-generated executive narratives
+// Architecture: Real engines first (Gini, Granger causality) → Brain enrichment on top
+// (L3 Dreaming, L5 Curiosity, L6 Self-Modifying, L9 Theory of Mind,
+//  L11 Red Team, L14 Goal-Backward, L15 Narrative)
 export {
   runBrainEarlyWarning,
   type BrainEarlyWarningConfig,
   type BrainEarlyWarningReport,
-  type BrainBottleneckRisk,
-  type BrainVelocityPrediction,
-  type ContributorImpact,
-  type CascadeEffect,
   type InterventionPlan as EarlyWarningInterventionPlan,
   type InterventionPath as EarlyWarningInterventionPath,
   type InterventionStep as EarlyWarningInterventionStep,
   type RootCauseAnalysis,
   type StressTestResult,
-  type Experiment,
 } from './orchestrator/early-warning-brain-integration';
 
 // Cross-Domain Linker — THE CRITICAL piece that makes GitHub↔Jira↔Slack actually connected

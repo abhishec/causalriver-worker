@@ -54,16 +54,11 @@ export {
   runBrainEarlyWarning,
   type BrainEarlyWarningConfig,
   type BrainEarlyWarningReport,
-  type BrainBottleneckRisk,
-  type BrainVelocityPrediction,
-  type ContributorImpact,
-  type CascadeEffect,
   type InterventionPlan,
   type InterventionPath,
   type InterventionStep,
   type RootCauseAnalysis,
   type StressTestResult,
-  type Experiment,
 } from './early-warning-brain-integration';
 
 // ============================================================================
