@@ -50,7 +50,9 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
     setTrainingStatus({ status: 'running', step: 'Starting...', progress: 0 });
 
     try {
-      // Step 1: Sync ALL active connectors
+      // ── Step 1: Sync ALL active connectors ────────────────────────────
+      // Pass skipBrainCycle=true so sync-all does NOT auto-fire a brain cycle
+      // internally — we call it ourselves below so we can show accurate progress.
       setTrainingStatus({
         status: 'running',
         step: `Syncing ${activeConnectors.length} connector(s)...`,
@@ -60,63 +62,101 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
       const syncResponse = await fetch('/api/connectors/sync-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organizationId: orgId, skipBrainCycle: true }),
       });
 
       if (!syncResponse.ok) {
-        throw new Error('Connector sync failed');
+        const syncErr = await syncResponse.json().catch(() => ({}));
+        throw new Error((syncErr as any).error || 'Connector sync failed');
       }
 
       const syncData = await syncResponse.json();
+      const totalSignals: number = syncData.totalSignals || 0;
+      const connectorsSynced: number = syncData.successCount || 0;
 
-      // Step 2: Wait for signal ingestion
+      // ── Step 2: P0 Early Warning analysis (non-blocking) ──────────────
+      // Detects velocity collapse, bottleneck risk, and P0 patterns.
+      // If this step fails we log it but continue — sync+brain still succeeded.
       setTrainingStatus({
         status: 'running',
-        step: 'Ingesting signals into Brain L1...',
+        step: 'Running P0 Early Warning analysis...',
         progress: 40,
-        stats: {
-          signals: syncData.totalSignals || 0,
-          connectorsSynced: syncData.successCount || 0,
-          patterns: 0,
-        },
+        stats: { signals: totalSignals, connectorsSynced, patterns: 0 },
       });
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Step 3: Run P0 Early Warning analysis
-      setTrainingStatus({ status: 'running', step: 'Running P0 Early Warning analysis...', progress: 60 });
-      const analyzeResponse = await fetch('/api/early-warning/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organizationId: orgId, lookbackDays: 90 }),
-      });
-
-      if (!analyzeResponse.ok) {
-        throw new Error('P0 analysis failed');
+      let patternsFound = 0;
+      try {
+        const analyzeResponse = await fetch('/api/early-warning/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organizationId: orgId, lookbackDays: 90 }),
+        });
+        if (analyzeResponse.ok) {
+          const analyzeData = await analyzeResponse.json();
+          // Use real counts from the report, not a hardcoded guess
+          patternsFound =
+            (analyzeData.report?.velocityAlerts?.length ?? 0) +
+            (analyzeData.report?.bottlenecks?.length ?? 0) +
+            (analyzeData.patterns?.length ?? 0);
+        }
+      } catch (p0Err) {
+        console.warn('[BrainTraining] P0 analysis non-fatal:', p0Err);
       }
 
-      const analyzeData = await analyzeResponse.json();
-
-      // Step 4: Run a FULL brain cycle (all 30 layers) for design partner WOW
-      // Previously was 'lightweight' (L1-L15 only), upgraded to 'full' (L1-L30)
-      // so design partners get deep analysis: strategic synthesis, entity linking,
-      // impact cascades, competitive intel, and organizational wisdom.
-      setTrainingStatus({ status: 'running', step: 'Running full brain training cycle (30 layers)...', progress: 80 });
-      await fetch('/api/brain/cycle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'full' }),
+      // ── Step 3: Full brain training cycle (all 30 layers) ─────────────
+      // Full cognitive pipeline: signal processing → causal inference →
+      // entity linking → strategic synthesis → memory consolidation.
+      setTrainingStatus({
+        status: 'running',
+        step: 'Running full brain training cycle (30 layers)...',
+        progress: 65,
+        stats: { signals: totalSignals, connectorsSynced, patterns: patternsFound },
       });
 
-      // Step 5: Complete
+      const brainResponse = await fetch('/api/brain/cycle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organizationId: orgId, mode: 'full' }),
+      });
+
+      if (!brainResponse.ok) {
+        const brainErr = await brainResponse.json().catch(() => ({}));
+        throw new Error((brainErr as any).error || 'Brain training cycle failed');
+      }
+
+      const brainData = await brainResponse.json();
+      const brainPatterns: number =
+        brainData.result?.patterns?.length ||
+        brainData.result?.surfacedInsights ||
+        0;
+      const finalPatterns = Math.max(patternsFound, brainPatterns);
+
+      // ── Step 4: Sleep cycle — consolidate memory ───────────────────────
+      // Strengthens high-confidence causal edges and crystallises new
+      // knowledge into long-term memory. Non-blocking.
+      setTrainingStatus({
+        status: 'running',
+        step: 'Consolidating memory (sleep cycle)...',
+        progress: 88,
+        stats: { signals: totalSignals, connectorsSynced, patterns: finalPatterns },
+      });
+
+      try {
+        await fetch('/api/brain/cycle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organizationId: orgId, mode: 'sleep' }),
+        });
+      } catch (sleepErr) {
+        console.warn('[BrainTraining] Sleep cycle non-fatal:', sleepErr);
+      }
+
+      // ── Complete ───────────────────────────────────────────────────────
       setTrainingStatus({
         status: 'success',
         step: 'Sync & training complete!',
         progress: 100,
-        stats: {
-          signals: syncData.totalSignals || 0,
-          connectorsSynced: syncData.successCount || 0,
-          patterns: analyzeData.report ? 2 : 0,
-        },
+        stats: { signals: totalSignals, connectorsSynced, patterns: finalPatterns },
       });
 
       setLastTrainingDate(new Date().toISOString());
@@ -135,7 +175,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
       const res = await fetch('/api/brain/cycle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'full' }),
+        body: JSON.stringify({ organizationId: orgId, mode: 'full' }),
       });
       if (!res.ok) throw new Error('Brain cycle failed');
       setTrainNowStatus('success');
@@ -190,12 +230,21 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
 
             {/* Training Status */}
             {trainingStatus.status !== 'idle' && (
-              <div className="mb-4 p-3 rounded-lg bg-surface border border-border-subtle">
+              <div className={cn(
+                "mb-4 p-3 rounded-lg border",
+                trainingStatus.status === 'success' ? "bg-success/5 border-success/20"
+                : trainingStatus.status === 'error' ? "bg-danger/5 border-danger/20"
+                : "bg-surface border-border-subtle"
+              )}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-medium">
+                  <span className={cn(
+                    "text-xs font-medium",
+                    trainingStatus.status === 'success' && "text-success",
+                    trainingStatus.status === 'error' && "text-danger",
+                  )}>
                     {trainingStatus.status === 'running' && 'Training in progress...'}
-                    {trainingStatus.status === 'success' && 'Training complete!'}
-                    {trainingStatus.status === 'error' && 'Training failed'}
+                    {trainingStatus.status === 'success' && '✓ Training complete!'}
+                    {trainingStatus.status === 'error' && '✗ Training failed'}
                   </span>
                   {trainingStatus.status === 'running' && trainingStatus.progress !== undefined && (
                     <span className="text-xs text-muted">{trainingStatus.progress}%</span>
@@ -206,11 +255,11 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
                   <p className="text-xs text-muted mb-2">{trainingStatus.step}</p>
                 )}
 
-                {trainingStatus.progress !== undefined && (
+                {trainingStatus.progress !== undefined && trainingStatus.status !== 'error' && (
                   <div className="h-1.5 bg-surface rounded-full overflow-hidden">
                     <div
                       className={cn(
-                        "h-full transition-all duration-300",
+                        "h-full transition-all duration-500 ease-in-out",
                         trainingStatus.status === 'success' ? 'bg-success' : 'bg-accent'
                       )}
                       style={{ width: `${trainingStatus.progress}%` }}
@@ -366,8 +415,8 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
             <h3 className="text-sm font-semibold mb-1">Continuous Learning</h3>
             <p className="text-xs text-muted">
               After initial training, your Brain learns automatically from real-time webhooks
-              across all connected sources. A full brain cycle runs daily at 2 AM,
-              or you can trigger one manually with &ldquo;Train Now&rdquo; above.
+              across all connected sources. A full brain cycle runs nightly at 5 AM UTC
+              and memory consolidation runs at 4 AM UTC — or trigger either manually above.
             </p>
           </div>
         </div>
