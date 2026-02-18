@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
-import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
+import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from "@nexus-ai/memory-stack";
 
 export const dynamic = 'force-dynamic';
 
@@ -191,6 +191,27 @@ export async function POST(request: Request) {
           }
 
           recordsProcessed += issues.length;
+
+          // NB-016: Back-link Jira issues → GitHub PRs referenced in their descriptions/comments.
+          // Runs after signals are inserted so failures here never block signal ingestion.
+          for (const issue of issues) {
+            try {
+              const fields = issue.fields || {};
+              const commentTexts: string[] = (fields.comment?.comments || []).map(
+                (c: any) => (typeof c.body === 'string' ? c.body : JSON.stringify(c.body ?? ''))
+              );
+              await linkJiraToGitHub(service, orgId, {
+                key: issue.key,
+                summary: fields.summary || '',
+                description: typeof fields.description === 'string'
+                  ? fields.description
+                  : JSON.stringify(fields.description ?? ''),
+                commentTexts,
+              });
+            } catch {
+              // Non-fatal — entity_links table may not exist in this env
+            }
+          }
         } catch (projectErr: any) {
           errors.push(`${project.key}: ${projectErr.message}`);
         }

@@ -277,6 +277,79 @@ export async function linkCommitToJira(
 }
 
 // ============================================================================
+// JIRA ISSUE → GITHUB PR LINKER  (NB-016 — reverse direction)
+// ============================================================================
+
+/**
+ * When a Jira issue is ingested, parse its description and comments for GitHub PR
+ * references.  Creates entity_links: jira_issue → pull_request (reverse of linkPRToJira).
+ *
+ * This closes the bi-directional gap identified in NB-016: GitHub PRs already
+ * reference Jira tickets via linkPRToJira/linkCommitToJira, but Jira issues
+ * that contain GitHub PR URLs in their own fields were never back-linked.
+ *
+ * Evidence hierarchy:
+ *  - github.com/.../pull/N URL  → confidence 0.95
+ *  - "#N" or "PR N" bare number → confidence 0.70 (could be any issue/PR number)
+ */
+export async function linkJiraToGitHub(
+  supabase: SupabaseClient,
+  organizationId: string,
+  issue: {
+    key: string;                 // e.g. "PROJ-1234"
+    summary: string;
+    description?: string | null;
+    commentTexts?: string[];     // pre-extracted plain-text bodies of comments
+  }
+): Promise<EntityLink[]> {
+  const links: EntityLink[] = [];
+
+  const textsToParse = [
+    issue.summary,
+    issue.description || '',
+    ...(issue.commentTexts || []),
+  ].join('\n');
+
+  const refs = parseReferences(textsToParse);
+
+  // Only create links for PR numbers we found via an unambiguous GitHub URL;
+  // bare PR numbers (#123) are also included but at lower confidence.
+  const urlPrNumbers = new Set<number>();
+  const urlRegex = new RegExp(GITHUB_PR_URL_REGEX.source, 'gi');
+  let m;
+  while ((m = urlRegex.exec(textsToParse)) !== null) {
+    urlPrNumbers.add(parseInt(m[1], 10));
+  }
+
+  for (const prNumber of refs.prNumbers) {
+    const fromUrl = urlPrNumbers.has(prNumber);
+    links.push({
+      organization_id: organizationId,
+      source_entity_id: `jira#${issue.key}`,
+      source_domain: 'product',
+      source_type: 'jira_issue',
+      // We don't always know the repo name from Jira alone, so we use a
+      // placeholder that downstream resolvers can enrich via entity_links joins.
+      target_entity_id: `pr#${prNumber}`,
+      target_domain: 'engineering',
+      target_type: 'pull_request',
+      link_type: 'ticket_references_pr',
+      confidence: fromUrl ? 0.95 : 0.70,
+      evidence: fromUrl
+        ? `GitHub PR URL found in Jira issue ${issue.key}`
+        : `PR number #${prNumber} mentioned in Jira issue ${issue.key}`,
+      created_at: new Date().toISOString(),
+    });
+  }
+
+  if (links.length > 0) {
+    await saveEntityLinks(supabase, links);
+  }
+
+  return links;
+}
+
+// ============================================================================
 // SAVE ENTITY LINKS TO DATABASE
 // ============================================================================
 

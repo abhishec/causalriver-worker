@@ -9,6 +9,7 @@ import { ConnectorBase, IngestionResult } from '../base/connector-base.js';
 import { RateLimitConfig } from '../base/rate-limiter.js';
 import { Signal } from '../base/stream-processor.js';
 import { Checkpoint } from '../base/checkpoint-manager.js';
+import { linkJiraToGitHub } from '../cross-domain-linker.js';
 
 interface JiraCredentials {
   accessToken: string;
@@ -352,6 +353,24 @@ export class JiraConnector extends ConnectorBase {
       signal_timestamp: issue.fields.updated,
     };
     await this.streamProcessor.addSignal(snapshotSignal);
+
+    // 4. NB-016: Back-link Jira issue → GitHub PRs referenced in description/comments.
+    //    Completes bi-directional linking: GitHub→Jira (linkPRToJira) already existed;
+    //    this adds the Jira→GitHub reverse direction.
+    try {
+      const commentTexts = (issue.fields.comment?.comments || []).map((c) =>
+        this.extractText(c.body)
+      );
+      await linkJiraToGitHub(this.supabase, this.organizationId, {
+        key: issue.key,
+        summary: issue.fields.summary,
+        description: this.extractText(issue.fields.description),
+        commentTexts,
+      });
+    } catch (linkErr: any) {
+      // Non-fatal — entity_links may not exist yet
+      console.warn(`[Jira] linkJiraToGitHub failed for ${issue.key}:`, linkErr.message);
+    }
   }
 
   /**
