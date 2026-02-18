@@ -637,7 +637,7 @@ export function createBrainCommander(config: BrainCommanderConfig) {
           const mc = cmd as Record<string, unknown>;
           try {
             closedLoop.trackCommand({
-              commandId: (mc.id as string) || `cmd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+              commandId: (mc.id as string) || `cmd_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`,
               actionType: (mc.actionType as string) || 'unknown',
               target: (mc.target as string) || '',
               causalEdge: dispatch.domains.length > 0

@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.log(`[Slack sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+        console.info(`[Slack sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
       }
     } catch (oracleErr: any) {
       console.warn("[Slack sync] Oracle error (non-fatal):", oracleErr.message);
@@ -412,5 +412,5 @@ async function deriveRealSlackInsights(
     }, { onConflict: "organization_id,memory_type,domain" });
   }
 
-  console.log(`[Brain] Derived real Slack insights from ${signals.length} signals for org ${orgId}`);
+  console.info(`[Brain] Derived real Slack insights from ${signals.length} signals for org ${orgId}`);
 }

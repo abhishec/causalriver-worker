@@ -127,7 +127,7 @@ export function trackIntervention(
   aggregationPeriodDays: number = 30
 ): InterventionRecord {
   return {
-    id: `int_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `int_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`,
     signalId,
     entityType,
     entityId,

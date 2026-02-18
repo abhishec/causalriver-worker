@@ -1343,7 +1343,7 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
 
     async recordInterventionRecommended(params): Promise<string> {
       const windowEnd = new Date(Date.now() + params.windowDays * 86400_000);
-      const id = `iw_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const id = `iw_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
 
       await supabase.from('outcome_observation_windows').insert({
         id,

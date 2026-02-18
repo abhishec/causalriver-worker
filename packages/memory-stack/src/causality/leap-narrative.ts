@@ -356,7 +356,7 @@ export function createNarrativeIntelligence(config: NarrativeConfig = {}): Narra
 
   const logger = config.logger ?? getDefaultLogger().child({ module: 'narrative' });
 
-  const generateId = () => `narr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const generateId = () => `narr_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
 
   // Identify the dominant narrative arc
   const identifyArc = (input: NarrativeInput): { type: string; headline: string; tone: string } => {

@@ -746,7 +746,7 @@ export function createDeepLayers(config: DeepLayersConfig): DeepLayersInstance {
 
       for (const change of significantChanges) {
         const decision: DecisionRecord = {
-          id: `decision_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          id: `decision_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`,
           domain: change.domain,
           description: `${change.name} changed ${((change.currentValue - change.previousValue) / Math.max(0.01, change.previousValue) * 100).toFixed(1)}%`,
           timestamp: Date.now(),
@@ -898,7 +898,7 @@ export function createDeepLayers(config: DeepLayersConfig): DeepLayersInstance {
             existingPrinciple.confidence = Math.min(1, existingPrinciple.confidence + 0.05);
           } else {
             wisdomPrinciples.push({
-              id: `wisdom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              id: `wisdom_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`,
               principle: `Consistent workflow: ${pair}`,
               domain: pair.split(':')[0],
               evidence: [`Observed ${count} times`],

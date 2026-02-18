@@ -374,7 +374,7 @@ export function createHardenedSecurity(config: SecurityConfig): HardenedSecurity
       }
 
       // Add this request
-      await redis.zadd(windowKey, now, `${now}-${Math.random().toString(36).substr(2, 6)}`);
+      await redis.zadd(windowKey, now, `${now}-${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`);
       await redis.expire(windowKey, rateLimitWindowSeconds * 2);
 
       return {

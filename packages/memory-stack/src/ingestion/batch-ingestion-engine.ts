@@ -117,7 +117,7 @@ export class BatchIngestionEngine {
    * Create a new ingestion job for a data source.
    */
   createJob(source: IngestionSource, mode: 'initial' | 'incremental' = 'initial'): IngestionJob {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const jobId = `job_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 32)}`;
 
     const job: IngestionJob = {
       jobId,

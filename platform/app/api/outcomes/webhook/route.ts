@@ -68,8 +68,12 @@ export async function POST(req: NextRequest) {
     });
 
     // 3. Initialize Supabase
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Outcomes Webhook] Missing SUPABASE env vars');
+      return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 });
+    }
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // 4. Find the prediction
@@ -223,8 +227,12 @@ export async function GET(req: NextRequest) {
     const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
     const predictionId = searchParams.get('predictionId');
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Outcomes Webhook] Missing SUPABASE env vars');
+      return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 });
+    }
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let query = supabase

@@ -213,7 +213,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
   // Uses timestamp + 6-char random suffix for ~2 billion combinations per millisecond
   let _idCounter = 0;
   function obsId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${(++_idCounter).toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    return `${prefix}_${Date.now()}_${(++_idCounter).toString(36)}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
   }
 
   // ============================================================================

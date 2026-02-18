@@ -332,7 +332,7 @@ function deriveEntityId(metadata: Record<string, unknown>): string {
 
   // Generate deterministic ID from metadata hash (satisfies NOT NULL constraint)
   // Using timestamp + random ensures uniqueness
-  return `auto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `auto_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
 }
 
 // ============================================================================

@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     const payload = JSON.parse(body);
     const webhookEvent = payload.webhookEvent || payload.issue_event_type_name || '';
 
-    console.log(`[Jira Webhook] Received event: ${webhookEvent}`);
+    console.info(`[Jira Webhook] Received event: ${webhookEvent}`);
 
     // ── Step 2: Resolve organization ────────────────────────────────
     const service = await createServiceClient();

@@ -495,7 +495,7 @@ export class AuditLogger {
   }
 
   private generateLogId(): string {
-    return `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `audit_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
   }
 }
 

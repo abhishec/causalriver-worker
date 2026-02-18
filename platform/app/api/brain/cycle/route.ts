@@ -65,7 +65,7 @@ function startProactiveEviction(): void {
       }
     }
     if (evicted > 0) {
-      console.log(`[BrainCycle] Proactive eviction: removed ${evicted} stale controller(s), ${controllerCache.size} remaining`);
+      console.info(`[BrainCycle] Proactive eviction: removed ${evicted} stale controller(s), ${controllerCache.size} remaining`);
     }
   }, EVICTION_INTERVAL_MS);
   // Don't prevent process exit
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
             if (!page || page.length === 0) break;
 
             const batch = page.map((s: any) => ({
-              id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
+              id: s.id || `sig_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
               source: s.source_domain?.split('.')[0] || 'unknown',
               domain: s.source_domain || 'unknown',
               entityType: s.entity_type || 'unknown',
@@ -256,13 +256,13 @@ export async function POST(request: NextRequest) {
             offset += SIGNAL_PAGE_SIZE;
 
             if (totalStreamed % 10000 === 0) {
-              console.log(`[BrainCycle] Streaming: ${totalStreamed} signals processed...`);
+              console.info(`[BrainCycle] Streaming: ${totalStreamed} signals processed...`);
             }
 
             if (page.length < SIGNAL_PAGE_SIZE) break; // Last page
           }
 
-          console.log(`[BrainCycle] Stream complete: ${totalStreamed} signals in ${Math.ceil(totalStreamed / SIGNAL_PAGE_SIZE)} batches`);
+          console.info(`[BrainCycle] Stream complete: ${totalStreamed} signals in ${Math.ceil(totalStreamed / SIGNAL_PAGE_SIZE)} batches`);
 
           // Finalize: run L14 (full DAG) + L15 (narrative) once, build result
           if (streamHandle) {
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
 
             if (dbSignals && dbSignals.length > 0) {
               cycleSignals = dbSignals.map((s: any) => ({
-                id: s.id || `sig_${Math.random().toString(36).substr(2, 9)}`,
+                id: s.id || `sig_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
                 source: s.source_domain?.split('.')[0] || 'unknown',
                 domain: s.source_domain || 'unknown',
                 entityType: s.entity_type || 'unknown',
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
                 metadata: {},
               }));
             }
-            console.log(`[BrainCycle] Lightweight: ${cycleSignals.length} signals (30-day window)`);
+            console.info(`[BrainCycle] Lightweight: ${cycleSignals.length} signals (30-day window)`);
           }
 
           result = await controller.runManagedCycle({
@@ -320,7 +320,7 @@ export async function POST(request: NextRequest) {
         try {
           const { invalidateBrainCache } = await import("@nexus-ai/memory-stack");
           invalidateBrainCache(orgId);
-          console.log(`[BrainCycle] Brain intelligence cache invalidated for org ${orgId}`);
+          console.info(`[BrainCycle] Brain intelligence cache invalidated for org ${orgId}`);
         } catch {
           // Non-critical: cache will naturally expire after 5 minutes
         }
@@ -535,7 +535,7 @@ async function getOrCreateController(
     }
     if (oldestKey) {
       controllerCache.delete(oldestKey);
-      console.log(`[BrainCycle] LRU eviction: removed controller for org ${oldestKey}, cache at max (${MAX_CACHED_CONTROLLERS})`);
+      console.info(`[BrainCycle] LRU eviction: removed controller for org ${oldestKey}, cache at max (${MAX_CACHED_CONTROLLERS})`);
     }
   }
 

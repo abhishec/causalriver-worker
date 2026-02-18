@@ -60,7 +60,7 @@ export function createPrioritiesAPI(config: PrioritiesAPIConfig) {
    * Brain Analog: Teaching the Amygdala a new importance rule.
    */
   async function setPriority(input: PriorityInput): Promise<StrategicPriority> {
-    const id = `prio_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const id = `prio_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
     const now = new Date().toISOString();
 
     const priority: StrategicPriority = {

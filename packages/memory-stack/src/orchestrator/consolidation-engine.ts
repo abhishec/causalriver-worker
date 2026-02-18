@@ -2223,7 +2223,7 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
      * - Returns 'skipped' status if another consolidation is already running
      */
     async runConsolidation(): Promise<ConsolidationResult> {
-      const runId = `consolidation-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      const runId = `consolidation-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
       const startedAt = new Date().toISOString();
       const startTime = Date.now();
       const steps: ConsolidationStepResult[] = [];

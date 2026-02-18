@@ -156,7 +156,7 @@ export async function POST(request: Request) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.log(`[GitHub sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired, bandit rewards: ${result.banditRewardsGiven ?? 0}`);
+        console.info(`[GitHub sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired, bandit rewards: ${result.banditRewardsGiven ?? 0}`);
       }
     } catch (oracleErr: any) {
       // Non-critical: oracle verification errors don't fail the sync
@@ -402,5 +402,5 @@ async function deriveRealCausalInsights(
     }, { onConflict: "organization_id,memory_type,domain" });
   }
 
-  console.log(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId}`);
+  console.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId}`);
 }

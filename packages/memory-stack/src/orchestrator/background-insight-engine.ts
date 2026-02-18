@@ -129,7 +129,7 @@ export function createBackgroundInsightEngine(config: DMNConfig) {
   }
 
   function generateId(): string {
-    return `insight-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    return `insight-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
   }
 
   // ── Scanner 1: Unexpected Correlations ───────────────────────────

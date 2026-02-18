@@ -140,7 +140,7 @@ export async function POST(request: Request) {
             predictionsExpired: result.predictionsExpired,
             averageReward: result.banditRewardsGiven ?? 0,
           };
-          console.log(`[Linear sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+          console.info(`[Linear sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
         }
       } catch (oracleErr: any) {
         // Non-critical: oracle verification errors don't fail the sync

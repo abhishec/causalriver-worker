@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
           uploadedAt: new Date().toISOString(),
         },
       });
-      console.log(`[Upload] S3: ${s3Key} for org ${orgId} (${buffer.length} bytes)`);
+      console.info(`[Upload] S3: ${s3Key} for org ${orgId} (${buffer.length} bytes)`);
     } else {
       // Fallback: Supabase Storage (bucket: org-data)
       const storagePath = `${orgId}/${s3Key}`;
@@ -148,10 +148,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Storage upload failed: ${storageErr.message}` }, { status: 500 });
       }
       uploadResult = { key: storagePath, bucket: "org-data (Supabase)" };
-      console.log(`[Upload] Supabase Storage: ${storagePath} for org ${orgId} (${buffer.length} bytes)`);
+      console.info(`[Upload] Supabase Storage: ${storagePath} for org ${orgId} (${buffer.length} bytes)`);
     }
 
-    console.log(`[Upload] Complete: ${s3Key} for org ${orgId}`);
+    console.info(`[Upload] Complete: ${s3Key} for org ${orgId}`);
 
     // ── Upsert org_connectors record ───────────────────────────────
     const { error: upsertError } = await service
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
         // These are domain-expert priors, not learned — they represent the
         // accounting relationships every accountant knows.
         const causalSeedResult = await bootstrapAccountingCausalGraph(service, orgId, transactions);
-        console.log(`[S3Upload] Causal bootstrap: ${causalSeedResult.seeded} edges seeded (${causalSeedResult.status})`);
+        console.info(`[S3Upload] Causal bootstrap: ${causalSeedResult.seeded} edges seeded (${causalSeedResult.status})`);
 
         // Update connector signals count
         await service
@@ -276,7 +276,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        console.log(`[S3Upload] GL brain ingestion: ${signals.length} signals from ${transactions.length} txns`);
+        console.info(`[S3Upload] GL brain ingestion: ${signals.length} signals from ${transactions.length} txns`);
       } catch (parseErr: any) {
         console.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);
         brainTriggerResult = {
@@ -578,7 +578,7 @@ async function bootstrapAccountingCausalGraph(
     }
 
     const edgeNames = fundamentalEdges.map((e: any) => `${e.source_signal} → ${e.target_signal}`);
-    console.log(`[S3Upload] Bootstrapped ${edgesToInsert.length} accounting causal edges for org ${orgId} (${status})`);
+    console.info(`[S3Upload] Bootstrapped ${edgesToInsert.length} accounting causal edges for org ${orgId} (${status})`);
 
     return { seeded: edgesToInsert.length, status, edges: edgeNames };
   } catch (err: any) {

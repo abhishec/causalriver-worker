@@ -291,7 +291,7 @@ export function createDiscoveryWorkerPool(maxConcurrent: number = 2): DiscoveryW
   }> = [];
 
   function generateJobId(): string {
-    return `disc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    return `disc_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
   }
 
   async function processQueue(): Promise<void> {

@@ -161,7 +161,7 @@ export function createExperimentEngine(config: ExperimentConfig = {}): Experimen
     },
 
     designExperiment(suggestion, options = {}) {
-      const id = `exp_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const id = `exp_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
       const sampleSize = this.calculateSampleSize(
         suggestion.potentialImpact,
         1.0, // default variance

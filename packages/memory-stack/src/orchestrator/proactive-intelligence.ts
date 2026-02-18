@@ -236,7 +236,7 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
 }
 
 function generateAlertId(): string {
-  return `alert_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return `alert_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
 }
 
 // ============================================================================

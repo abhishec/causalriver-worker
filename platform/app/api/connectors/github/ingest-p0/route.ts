@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     let hasMore = true;
     const allPRs: any[] = [];
 
-    console.log(`[P0 Ingest] Fetching PRs for ${owner}/${repo} since ${since.toISOString()}`);
+    console.info(`[P0 Ingest] Fetching PRs for ${owner}/${repo} since ${since.toISOString()}`);
 
     while (hasMore && page <= 10) { // Max 10 pages = 1000 PRs
       try {
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log(`[P0 Ingest] Found ${allPRs.length} PRs`);
+    console.info(`[P0 Ingest] Found ${allPRs.length} PRs`);
 
     // ========================================================================
     // Step 3: Process each PR + upsert engineers + reviews
@@ -310,7 +310,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log(`[P0 Ingest] Complete:`, results);
+    console.info(`[P0 Ingest] Complete:`, results);
 
     return NextResponse.json({
       success: true,

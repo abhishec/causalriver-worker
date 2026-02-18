@@ -718,7 +718,7 @@ export function createImpactScorer(config: ImpactScorerConfig) {
      * Set/update a strategic priority.
      */
     async setPriority(priority: Omit<StrategicPriority, 'id' | 'organizationId' | 'createdAt'>): Promise<void> {
-      const id = `priority-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+      const id = `priority-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
 
       const { error } = await supabase
         .from('strategic_priorities')

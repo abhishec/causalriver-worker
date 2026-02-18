@@ -505,7 +505,7 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
       const storage = getOrgStorage();
       const transactions = await storage.downloadJSON<GLTransaction[]>(orgId, "gl-data.json");
       glCache.set(orgId, transactions);
-      console.log(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
+      console.info(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
       return transactions;
     } catch (s3Err: any) {
       console.warn(`[GL] S3 load failed for org ${orgId}, falling back to Supabase:`, s3Err?.message);
@@ -528,7 +528,7 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   const text = await data.text();
   const transactions = JSON.parse(text) as GLTransaction[];
   glCache.set(orgId, transactions);
-  console.log(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
+  console.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;
 }
 

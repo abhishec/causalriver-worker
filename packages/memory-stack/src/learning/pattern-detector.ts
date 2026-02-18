@@ -598,7 +598,7 @@ export function registerPattern(
   domainsInvolved: string[],
   evidence: PatternEvidence
 ): DiscoveredPattern {
-  const id = `pattern_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const id = `pattern_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
   
   // Generate natural language explanation
   const effectDirection = evidence.effectSize > 1 ? 'more likely' : 'less likely';

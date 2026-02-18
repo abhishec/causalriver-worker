@@ -383,7 +383,7 @@ export function createRedisStreamsBus(config: RedisStreamsBusConfig): RedisStrea
     },
 
     subscribe(options) {
-      const id = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const id = `sub_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
       subscriptions.set(id, options);
       return id;
     },

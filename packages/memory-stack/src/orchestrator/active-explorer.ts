@@ -116,7 +116,7 @@ export function createActiveExplorer(config: ActiveExplorerConfig) {
   }
 
   function generateId(): string {
-    return `datareq-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    return `datareq-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
   }
 
   // ── Gap Detector 1: Disconnected Domains ──────────────────────────

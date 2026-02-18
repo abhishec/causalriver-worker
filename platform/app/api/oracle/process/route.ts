@@ -138,7 +138,7 @@ export async function POST(request: Request) {
 
     const duration_ms = Date.now() - startMs;
 
-    console.log(
+    console.info(
       `[Oracle] Processed ${signals.length} signals: ${result.predictionsVerified} verified, ` +
       `${result.predictionsExpired} expired, ${result.predictionsPending} pending, ` +
       `bandit rewards: ${result.banditRewardsGiven ?? 0} (${duration_ms}ms)`

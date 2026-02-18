@@ -157,7 +157,7 @@ export interface MemoryRecallResult {
 // ============================================================================
 
 function generateMemoryId(): string {
-  return `mem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return `mem_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
 }
 
 /**

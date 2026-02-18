@@ -583,7 +583,7 @@ export interface CascadeStats {
  * Generate unique cascade ID
  */
 function generateCascadeId(): string {
-  return `cascade-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  return `cascade-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`;
 }
 
 /**

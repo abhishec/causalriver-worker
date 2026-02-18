@@ -336,7 +336,7 @@ export function createWorkerPool(config: WorkerPoolConfig): WorkerPoolInstance {
   return {
     async addJob<T, R>(definition: JobDefinition<T, R>): Promise<Job<T>> {
       const job: Job<T> = {
-        id: `job_${Date.now()}_${++jobIdCounter}_${Math.random().toString(36).substr(2, 6)}`,
+        id: `job_${Date.now()}_${++jobIdCounter}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`,
         name: definition.name,
         data: definition.data,
         tier: definition.tier,

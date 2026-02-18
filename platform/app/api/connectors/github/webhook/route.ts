@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     const event = req.headers.get('x-github-event');
     const payload = JSON.parse(body);
 
-    console.log(`[GitHub Webhook] Received ${event} event`);
+    console.info(`[GitHub Webhook] Received ${event} event`);
 
     // 3. Handle PR events
     if (event === 'pull_request') {
@@ -103,7 +103,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Action ${action} ignored` });
   }
 
-  console.log(
+  console.info(
     `[PR Review] Processing PR #${pull_request.number} in ${repository.full_name}`
   );
 
@@ -177,6 +177,10 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
 
     // 5. Run PR analysis through cognitive stack
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+      console.warn('[PR Review] ANTHROPIC_API_KEY not set — skipping AI analysis');
+      return NextResponse.json({ ok: true, analysis: 'skipped_no_key' });
+    }
     const analyzer = createPRAnalyzer({
       supabase,
       organizationId,
@@ -185,7 +189,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
 
     const analysis = await analyzer.analyzePR(prMetadata);
 
-    console.log(
+    console.info(
       `[PR Review] Analysis complete: ${analysis.riskLevel} risk, ${analysis.reviewers.length} suggested reviewers`
     );
 
@@ -197,7 +201,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
       body: analysis.reviewComment,
     });
 
-    console.log(`[PR Review] Posted review comment on PR #${pull_request.number}`);
+    console.info(`[PR Review] Posted review comment on PR #${pull_request.number}`);
 
     // 6b. P0: Ingest PR as Brain signals (for velocity/bottleneck tracking)
     try {
@@ -232,7 +236,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
         (reviews || []).filter((r): r is typeof r & { user: NonNullable<typeof r.user> } => r.user !== null) as any[]
       );
 
-      console.log(`[P0] Ingested PR #${pull_request.number} signals to Brain`);
+      console.info(`[P0] Ingested PR #${pull_request.number} signals to Brain`);
     } catch (p0Error) {
       // Don't fail webhook on P0 error
       console.error('[P0] Error ingesting PR signals:', p0Error);
@@ -299,7 +303,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Review action ${action} ignored` });
   }
 
-  console.log(
+  console.info(
     `[PR Review Outcome] Recording review outcome for PR #${pull_request.number}`
   );
 
@@ -330,7 +334,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
     recorded_at: new Date().toISOString(),
   });
 
-  console.log(`[PR Review Outcome] Recorded outcome: ${outcome}`);
+  console.info(`[PR Review Outcome] Recorded outcome: ${outcome}`);
 
   return NextResponse.json({ success: true, outcome });
 }
@@ -342,7 +346,7 @@ async function handleIssuesEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Issue action ${action} ignored` });
   }
 
-  console.log(`[Issue Outcome] Issue #${issue.number} closed`);
+  console.info(`[Issue Outcome] Issue #${issue.number} closed`);
 
   // Record for metrics — look up from org_connectors (canonical table).
   const { data: issueConnectors } = await supabase

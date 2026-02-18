@@ -12,16 +12,21 @@
  * a structured report at the end of each pass.
  *
  * Audit categories (checked every pass):
- *   1. TypeScript type errors (pnpm tsc --noEmit)
- *   2. Lint errors (eslint — no-explicit-any, react hooks rules, etc.)
- *   3. Federation completeness (SE-AAS + AAS both have Step 0, 0.5, 7)
- *   4. Feedback bus completeness (all 5 channels present in both executors)
- *   5. Missing organization_id scoping in DB queries
- *   6. Hardcoded mock/stub data in API routes or components
- *   7. Unhandled Promise rejections (floating .then() without .catch())
- *   8. Missing error boundaries in API routes (no try/catch around DB calls)
- *   9. TODO / FIXME / HACK / Not implemented stubs
- *  10. TRACKER.md accuracy (open items vs actual code state)
+ *   1.  TypeScript type errors (pnpm tsc --noEmit)
+ *   2.  Lint errors (eslint — no-explicit-any, react hooks rules, etc.)
+ *   3.  Federation completeness (SE-AAS + AAS both have Step 0, 0.5, 7)
+ *   4.  Feedback bus completeness (all 5 channels present in both executors)
+ *   5.  Missing organization_id scoping in DB queries
+ *   6.  Hardcoded mock/stub data in API routes or components
+ *   7.  Unhandled Promise rejections (floating .then() without .catch())
+ *   8.  Missing error boundaries in API routes (no try/catch around DB calls)
+ *   9.  TODO / FIXME / HACK / Not implemented stubs
+ *  10.  TRACKER.md accuracy (open items vs actual code state)
+ *  11.  Environment variable validation (non-null assertions, unguarded critical vars)
+ *  12.  Math.random() used for ID generation (not collision-safe)
+ *  13.  Webhook routes that are stubs (return {ok:true} without persisting events)
+ *  14.  ANTHROPIC_API_KEY missing early-exit guard in LLM routes
+ *  15.  console.log debug noise in production API routes
  *
  * Usage:
  *   npx tsx scripts/agents/codebase-auditor.ts
@@ -32,7 +37,7 @@
  *
  * Flags:
  *   --max-passes N    Maximum audit loop iterations (default: 10)
- *   --category NAME   Run only one category (tsc|lint|federation|bus|orgscope|mocks|promises|trycatch|stubs|tracker)
+ *   --category NAME   Run only one category (tsc|lint|federation|bus|orgscope|mocks|promises|trycatch|stubs|tracker|envvars|randomids|webhooks|anthropic|consolelogs)
  *   --dry-run         Audit only — report issues but do not write any fixes
  *   --verbose         Print every check, not just failures
  *   --no-loop         Run a single pass and exit (same as --max-passes 1)
@@ -724,21 +729,374 @@ function writeReport(pass: number, allPasses: PassResult[]): void {
   }
 }
 
+// ─── AUDIT CATEGORY 11: Environment variable validation ───────────────────────
+
+async function auditEnvVars(): Promise<AuditIssue[]> {
+  section('Category 11: Environment variable validation');
+  const issues: AuditIssue[] = [];
+
+  // Patterns that indicate unsafe env var access:
+  // 1. process.env.FOO!  — non-null assertion (crashes if undefined at runtime)
+  // 2. process.env.FOO used directly in new Client(process.env.FOO) without guard
+  const UNSAFE_PATTERNS = [
+    { pattern: /process\.env\.\w+!/,                     label: 'Non-null assertion on env var (crashes if undefined)' },
+    { pattern: /new\s+\w+\([^)]*process\.env\.\w+[^)!]*\)/,  label: 'Env var passed directly to constructor without null check' },
+  ];
+
+  // Critical env vars that MUST be validated before use
+  const CRITICAL_VARS = [
+    'ANTHROPIC_API_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'OPENAI_API_KEY',
+  ];
+
+  // Files that legitimately use non-null assertions on env vars at module init
+  // (Supabase client helpers use ! because the app literally cannot boot without them)
+  const KNOWN_INIT_FILES = [
+    path.join('lib', 'supabase', 'client.ts'),
+    path.join('lib', 'supabase', 'server.ts'),
+    path.join('lib', 'supabase', 'middleware.ts'),
+    path.join('lib', 'audit.ts'),
+  ];
+
+  const searchDirs = [
+    path.join(PLATFORM, 'app/api'),
+    path.join(PLATFORM, 'lib'),
+  ];
+
+  let found = 0;
+
+  for (const dir of searchDirs) {
+    const files = globFiles(dir, '.ts');
+    for (const file of files) {
+      // Skip known init files where non-null assertions on env vars are intentional
+      if (KNOWN_INIT_FILES.some(known => file.endsWith(known))) {
+        verbose(`  ${rel(file)}: skipped (supabase init file — ! assertions expected)`);
+        continue;
+      }
+      const content = readFile(file);
+      const lines = content.split('\n');
+
+      lines.forEach((line, idx) => {
+        // Check for non-null assertion on env vars
+        for (const { pattern, label } of UNSAFE_PATTERNS) {
+          if (pattern.test(line) && !line.trim().startsWith('//')) {
+            issues.push({
+              id: `ENVVAR-${issues.length + 1}`,
+              category: 'envvars',
+              severity: 'high',
+              file: rel(file),
+              line: idx + 1,
+              message: `${label}: ${line.trim().slice(0, 100)}`,
+              autoFixable: false,
+            });
+            warn(`  ${rel(file)}:${idx + 1} — ${label}`);
+            found++;
+            break;
+          }
+        }
+
+        // Check for critical vars used without early return guard in same file
+        for (const varName of CRITICAL_VARS) {
+          if (line.includes(`process.env.${varName}`) && !line.trim().startsWith('//')) {
+            // Check if the file has a null-check guard anywhere for this var
+            const hasGuard = content.includes(`!process.env.${varName}`) ||
+                             content.includes(`process.env.${varName} ===`) ||
+                             content.includes(`process.env.${varName} ==`) ||
+                             content.includes(`!${varName}`) ||
+                             content.includes(`${varName} ===`) ||
+                             content.includes(`${varName} ?`);
+            if (!hasGuard && !content.includes(`process.env.${varName}!`)) {
+              // Only flag if var is assigned to a local and then used — avoid flagging double
+              const assignMatch = new RegExp(`const\\s+(\\w+)\\s*=\\s*process\\.env\\.${varName}\\b`).exec(content);
+              if (assignMatch) {
+                const localVarName = assignMatch[1]; // e.g., 'serviceRoleKey', 'supabaseKey'
+                // Check if there's a null-guard within 15 lines after assignment
+                const assignIdx = lines.findIndex(l => new RegExp(`const\\s+\\w+\\s*=\\s*process\\.env\\.${varName}\\b`).test(l));
+                const guardWindow = lines.slice(assignIdx, assignIdx + 15).join('\n');
+                // Guard patterns: if (!localVar), if (x && localVar), if (localVar &&), localVar &&
+                const guardPatterns = [
+                  `if (!${localVarName})`,
+                  `!${localVarName}`,
+                  `${localVarName} &&`,
+                  `&& ${localVarName}`,
+                  `(${localVarName}`,
+                  `return NextResponse`,
+                  `throw new`,
+                ];
+                const isGuarded = guardPatterns.some(p => guardWindow.includes(p));
+                if (!isGuarded) {
+                  issues.push({
+                    id: `ENVVAR-${issues.length + 1}`,
+                    category: 'envvars',
+                    severity: 'medium',
+                    file: rel(file),
+                    line: assignIdx + 1,
+                    message: `${varName} assigned but no null-guard before use`,
+                    autoFixable: false,
+                  });
+                  warn(`  ${rel(file)}:${assignIdx + 1} — ${varName} used without null check`);
+                  found++;
+                }
+              }
+              break; // only report once per file per var
+            }
+          }
+        }
+      });
+    }
+  }
+
+  if (found === 0) ok('All env var accesses: properly guarded');
+  return issues;
+}
+
+// ─── AUDIT CATEGORY 12: Math.random() for IDs (non-deterministic) ─────────────
+
+async function auditRandomIds(): Promise<AuditIssue[]> {
+  section('Category 12: Math.random() used for IDs (non-deterministic)');
+  const issues: AuditIssue[] = [];
+
+  // Math.random() used specifically for ID generation (not jitter, not shuffling)
+  // Only match patterns where the result is used as an identifier/key/id value
+  const RANDOM_ID_PATTERNS = [
+    // Explicit toString(36) pattern — always used for ID generation
+    /Math\.random\(\)\.(toString|slice|substr)\(36/,
+    // Template literal ID patterns: `prefix_${Math.random...`
+    /`\w+_\$\{Math\.random\(\)/,
+    // Direct assignment: id: `..._${Math.random...`
+    /id:\s*`[^`]*\$\{Math\.random/,
+  ];
+
+  // Files where Math.random for IDs is acceptable (test scripts, stress tests, synthetic data)
+  const KNOWN_TEST_PATTERNS = [
+    'stress-test',
+    'e2e-rl',
+    'demo-',
+    'simulate-',
+    'setup-demo',
+    '__tests__',
+    'synthetic-',
+  ];
+
+  const searchDirs = [
+    path.join(PLATFORM, 'app/api'),
+    path.join(PLATFORM, 'lib'),
+    path.join(PACKAGES, 'memory-stack/src'),
+  ];
+
+  let found = 0;
+
+  for (const dir of searchDirs) {
+    const files = globFiles(dir, '.ts');
+    for (const file of files) {
+      // Skip test/demo/synthetic files — Math.random for IDs is fine there
+      if (KNOWN_TEST_PATTERNS.some(p => file.includes(p))) {
+        verbose(`  ${rel(file)}: skipped (test/synthetic file)`);
+        continue;
+      }
+      const content = readFile(file);
+      const lines = content.split('\n');
+
+      lines.forEach((line, idx) => {
+        if (line.trim().startsWith('//')) return;
+        for (const pat of RANDOM_ID_PATTERNS) {
+          if (pat.test(line)) {
+            issues.push({
+              id: `RANDID-${issues.length + 1}`,
+              category: 'randomids',
+              severity: 'medium',
+              file: rel(file),
+              line: idx + 1,
+              message: `Math.random() used for ID generation — not collision-safe: ${line.trim().slice(0, 80)}`,
+              autoFixable: true,
+              fix: () => {
+                // Replace `sig_${Math.random().toString(36).substr(2, 9)}` style with crypto.randomUUID()
+                const updated = content
+                  .replace(/`sig_\$\{Math\.random\(\)\.toString\(36\)\.substr\(2, 9\)\}`/g, '`sig_${crypto.randomUUID().replace(/-/g, \'\').slice(0, 9)}`')
+                  .replace(/`\w+_\$\{Math\.random\(\)\.toString\(36\)\.substr\(2, \d+\)\}`/g, (m) => {
+                    const prefix = m.match(/`(\w+)_/)?.[1] ?? 'id';
+                    return `\`${prefix}_\${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}\``;
+                  });
+                if (updated !== content) {
+                  fs.writeFileSync(file, updated, 'utf-8');
+                }
+              },
+            });
+            warn(`  ${rel(file)}:${idx + 1} — Math.random() ID`);
+            found++;
+            break;
+          }
+        }
+      });
+    }
+  }
+
+  if (found === 0) ok('No Math.random() ID generation found');
+  return issues;
+}
+
+// ─── AUDIT CATEGORY 13: Webhook routes that just return {ok: true} ────────────
+
+async function auditWebhookStubs(): Promise<AuditIssue[]> {
+  section('Category 13: Webhook routes with stub-only responses');
+  const issues: AuditIssue[] = [];
+
+  const webhookDir = path.join(PLATFORM, 'app/api/connectors');
+  if (!fs.existsSync(webhookDir)) {
+    ok('No connectors API dir found — skipping');
+    return issues;
+  }
+
+  // Find all webhook route files
+  const allRouteFiles = globFiles(webhookDir, 'route.ts');
+  const webhookFiles = allRouteFiles.filter(f => f.includes('/webhook/'));
+
+  let stubCount = 0;
+
+  for (const file of webhookFiles) {
+    const content = readFile(file);
+
+    // A webhook is a stub if:
+    // 1. It returns { ok: true } or { received: true } without touching any DB
+    // 2. Has no supabase insert/update/upsert call
+    const hasDbWrite = /\.(insert|update|upsert|delete)\s*\(/.test(content);
+    const hasStubReturn = /return NextResponse\.json\(\s*\{\s*(ok|received|success)\s*:\s*true\s*\}/.test(content);
+    const hasRealProcessing = /await\s+supabase|createClient|createServiceClient/.test(content);
+
+    if (hasStubReturn && !hasDbWrite && !hasRealProcessing) {
+      issues.push({
+        id: `WEBHOOK-${issues.length + 1}`,
+        category: 'webhooks',
+        severity: 'high',
+        file: rel(file),
+        message: `Webhook route returns stub {ok: true} without any DB writes — events are silently dropped`,
+        autoFixable: false,
+      });
+      err(`  ${rel(file)}: webhook stub — events not persisted`);
+      stubCount++;
+    } else {
+      verbose(`  ${rel(file)}: ✓ has real processing`);
+    }
+  }
+
+  if (stubCount === 0) ok('All webhook routes: have real event processing');
+  return issues;
+}
+
+// ─── AUDIT CATEGORY 14: Anthropic API key early-exit guard ───────────────────
+
+async function auditAnthropicGuard(): Promise<AuditIssue[]> {
+  section('Category 14: ANTHROPIC_API_KEY guard in LLM routes');
+  const issues: AuditIssue[] = [];
+
+  const searchDirs = [
+    path.join(PLATFORM, 'app/api'),
+  ];
+
+  let missing = 0;
+
+  for (const dir of searchDirs) {
+    const files = globFiles(dir, 'route.ts');
+    for (const file of files) {
+      const content = readFile(file);
+
+      // Only check files that USE the Anthropic key
+      if (!content.includes('ANTHROPIC_API_KEY') && !content.includes('Anthropic(') && !content.includes('anthropic')) continue;
+      if (!content.includes('process.env.ANTHROPIC_API_KEY')) continue;
+
+      // Check if there's an early-exit guard
+      const hasGuard =
+        content.includes('!process.env.ANTHROPIC_API_KEY') ||
+        content.includes('!apiKey') ||
+        content.includes('!anthropicApiKey') ||
+        content.includes('!ANTHROPIC_API_KEY') ||
+        /if\s*\(\s*!.*API_KEY/.test(content);
+
+      if (!hasGuard) {
+        issues.push({
+          id: `ANTHRO-${issues.length + 1}`,
+          category: 'anthropic',
+          severity: 'high',
+          file: rel(file),
+          message: `Uses ANTHROPIC_API_KEY but has no early-exit guard — will crash with cryptic error if key is missing`,
+          autoFixable: false,
+        });
+        err(`  ${rel(file)}: ANTHROPIC_API_KEY used without null guard`);
+        missing++;
+      } else {
+        verbose(`  ${rel(file)}: ✓ ANTHROPIC_API_KEY guarded`);
+      }
+    }
+  }
+
+  if (missing === 0) ok('All LLM routes: ANTHROPIC_API_KEY properly guarded');
+  return issues;
+}
+
+// ─── AUDIT CATEGORY 15: console.log left in production API routes ─────────────
+
+async function auditConsoleLogs(): Promise<AuditIssue[]> {
+  section('Category 15: console.log (debug noise) in API routes');
+  const issues: AuditIssue[] = [];
+
+  // console.log (not console.error/warn) in API routes is debug noise in production
+  const LOG_PATTERN = /console\.log\s*\(/;
+  // Allow: lines with console.error, console.warn, console.info (those are intentional)
+  // Allow: lines that are comments
+
+  const apiDir = path.join(PLATFORM, 'app/api');
+  const files = globFiles(apiDir, 'route.ts');
+
+  let found = 0;
+
+  for (const file of files) {
+    const content = readFile(file);
+    const lines = content.split('\n');
+
+    lines.forEach((line, idx) => {
+      if (line.trim().startsWith('//')) return;
+      if (LOG_PATTERN.test(line)) {
+        issues.push({
+          id: `CLOG-${issues.length + 1}`,
+          category: 'consolelogs',
+          severity: 'low',
+          file: rel(file),
+          line: idx + 1,
+          message: `console.log in production API route — use console.error/warn instead: ${line.trim().slice(0, 80)}`,
+          autoFixable: false,
+        });
+        warn(`  ${rel(file)}:${idx + 1} — console.log`);
+        found++;
+      }
+    });
+  }
+
+  if (found === 0) ok('No console.log found in API routes');
+  return issues;
+}
+
 // ─── CATEGORY DISPATCHER ──────────────────────────────────────────────────────
 
 type CategoryFn = () => Promise<AuditIssue[]>;
 
 const CATEGORIES: Record<string, CategoryFn> = {
-  tsc:        auditTypeScript,
-  lint:       auditLint,
-  federation: auditFederation,
-  bus:        auditFeedbackBus,
-  orgscope:   auditOrgScoping,
-  mocks:      auditMockData,
-  promises:   auditPromises,
-  trycatch:   auditTryCatch,
-  stubs:      auditStubs,
-  tracker:    auditTracker,
+  tsc:         auditTypeScript,
+  lint:        auditLint,
+  federation:  auditFederation,
+  bus:         auditFeedbackBus,
+  orgscope:    auditOrgScoping,
+  mocks:       auditMockData,
+  promises:    auditPromises,
+  trycatch:    auditTryCatch,
+  stubs:       auditStubs,
+  tracker:     auditTracker,
+  envvars:     auditEnvVars,
+  randomids:   auditRandomIds,
+  webhooks:    auditWebhookStubs,
+  anthropic:   auditAnthropicGuard,
+  consolelogs: auditConsoleLogs,
 };
 
 // ─── MAIN AUDIT LOOP ──────────────────────────────────────────────────────────

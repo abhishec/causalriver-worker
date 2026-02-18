@@ -1278,7 +1278,7 @@ export function CopilotChat({
   }, [trackedBranchesProp]);
 
   // Stable conversation ID for feedback tracking (one per chat session)
-  const [conversationId] = useState(() => `conv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  const [conversationId] = useState(() => `conv_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`);
 
   // Bug fix #2: Use refs for values that sendMessage closes over to avoid stale closures
   const messagesRef = useRef(messages);

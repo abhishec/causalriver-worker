@@ -516,7 +516,7 @@ export function createBrainAgentRuntime(config: BrainAgentRuntimeConfig): BrainA
   return {
     async execute(request: BrainAgentRequest): Promise<BrainAgentResult> {
       const totalStart = Date.now();
-      const executionId = `bae_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const executionId = `bae_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
 
       // ── Validate ──
       const agent = _agents.get(request.agentId);

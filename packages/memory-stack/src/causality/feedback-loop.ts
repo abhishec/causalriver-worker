@@ -806,7 +806,7 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
  * Generate unique prediction ID
  */
 function generatePredictionId(): string {
-  return `pred-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  return `pred-${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`;
 }
 
 /**

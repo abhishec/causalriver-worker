@@ -258,7 +258,7 @@ export async function POST(request: Request) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.log(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+        console.info(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
       }
     } catch (oracleErr: any) {
       console.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
@@ -461,5 +461,5 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
     }
   }
 
-  console.log(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
+  console.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
 }

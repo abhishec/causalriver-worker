@@ -79,8 +79,12 @@ export async function POST(req: NextRequest) {
     const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
 
     // 4. Initialize Supabase
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Linear Webhook] Missing SUPABASE env vars — cannot persist signal');
+      return NextResponse.json({ ok: true }); // ack webhook, don't retry
+    }
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // 5. Convert event to signal

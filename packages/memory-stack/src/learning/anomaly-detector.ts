@@ -474,7 +474,7 @@ export function detectEntityAnomalies(
   for (const historical of historicalData) {
     for (const [metricName, value] of Object.entries(historical)) {
       observations.push({
-        entityId: `historical_${Math.random()}`,
+        entityId: `historical_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
         entityType,
         metricName,
         value,

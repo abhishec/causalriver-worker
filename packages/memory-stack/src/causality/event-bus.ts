@@ -477,7 +477,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
       filter: EventFilter;
       handler: EventHandler;
     }): string {
-      const id = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const id = `sub_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
       subscriptions.set(id, {
         id,
         filter: options.filter,
@@ -585,7 +585,7 @@ export function createEventBus(config: Partial<EventBusConfig> = {}) {
  * Generate a unique event ID
  */
 export function generateEventId(prefix: string = 'evt'): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `${prefix}_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 7)}`;
 }
 
 /**

@@ -542,7 +542,7 @@ export class LogConnector extends ConnectorBase {
       const msg = item.message || item.msg || item.text || JSON.stringify(item);
       entries.push(
         this.normalise({
-          id: item.id || `generic_${ts}_${Math.random().toString(36).slice(2)}`,
+          id: item.id || `generic_${ts}_${crypto.randomUUID().replace(/-/g, '').slice(0, 32)}`,
           timestamp: ts,
           message: msg,
           service: item.service || item.app || 'unknown',

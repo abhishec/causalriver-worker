@@ -317,7 +317,7 @@ export function createEntityResolver(config: EntityResolverConfig) {
       confidence: 1.0,
     }).select('id').single();
 
-    const canonicalId = inserted?.id ?? `ent_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const canonicalId = inserted?.id ?? `ent_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`;
 
     const resolved: ResolvedEntity = {
       canonicalId,

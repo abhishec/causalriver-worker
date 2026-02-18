@@ -222,7 +222,7 @@ export async function POST(request: Request) {
             mode: "full",
             durationMs: brainData.duration_ms,
           };
-          console.log(`[sync-all] Auto-triggered full brain cycle (${brainData.duration_ms}ms)`);
+          console.info(`[sync-all] Auto-triggered full brain cycle (${brainData.duration_ms}ms)`);
         } else {
           brainCycleResult = {
             triggered: false,
