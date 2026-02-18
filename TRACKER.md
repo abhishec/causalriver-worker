@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (sprint 2 close) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (sprint 2 close — all commit SHAs filled in) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -29,14 +29,14 @@
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
 | Data Pipeline / Brain | 8 | 6 | 2 | 0 |
-| SE-aaS / Connectors | 9 | 5 | 4 | 0 |
+| SE-aaS / Connectors | 9 | 7 | 2 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 2 | 1 | 0 |
 | Training / RL | 5 | 5 | 0 | 0 |
 | Missing Features | 4 | 3 | 1 | 0 |
 | Dependabot / CVEs | 5 | 3 | 2 | 0 |
-| **TOTAL** | **49** | **39** | **10** | **0** |
+| **TOTAL** | **49** | **41** | **8** | **0** |
 
 ---
 
@@ -208,26 +208,23 @@
 
 ## ✨ FEATURES / MISSING IMPLEMENTATIONS
 
-### NB-017 🟠 ❌
+### NB-017 🟠 ✅
 **Real AST dependency graph — currently regex/text only**
 - Area: SE-aaS / Code Intelligence
 - Priority: High
-- Status: ❌ Not Started
-- Detail: All 17 SE-aaS domains use Claude reading code as text. No proper TypeScript/Python/Go AST parsing.
-- Impact: Impact Analysis, Dead Code Detector, Dependency Upgrade answers are heuristic only
-- Effort: 2–3 sprints
-- Honest framing to partners: "Claude-powered code intelligence — AST parsing on roadmap"
+- Status: ✅ Fixed
+- Detail: `createCodeParser().parseSource()` now called for every file in `ingestFileTree()`. Symbols (functions, classes, methods, interfaces, types) extracted across TS/JS/Python/Go/Java/Rust/Ruby/Kotlin/Swift/C#/PHP. Import graph emitted as `code_dependency` signals (intra-repo relative imports only) carrying `branch_name`, `release_version`, `team_label` for full team isolation. Parser is instantiated once per connector as a singleton.
+- Files: `packages/memory-stack/src/connectors/github/github-connector.ts` — `parseAndEmbedFile()`, `ingestFileTree()` batch loop
 
 ---
 
-### NB-018 🟠 ❌
+### NB-018 🟠 ✅
 **Code embeddings pipeline not populated — semantic code search unavailable**
 - Area: SE-aaS / Code Intelligence
 - Priority: High
-- Status: ❌ Not Started
-- Detail: `code-embedder.ts` infrastructure exists but not wired/populated
-- Impact: "Semantic code search" is currently keyword-based only
-- Effort: 1 sprint to wire + populate for one org
+- Status: ✅ Fixed
+- Detail: `createCodeEmbedder()` now wired into `parseAndEmbedFile()` in GitHub connector. Every parsed symbol is upserted into `entity_embeddings` with `entity_type='code_symbol'`, branch-scoped `entity_id` (`repo:path::Symbol@branch`), n-gram embedding vector, and full branch/release/team metadata. `generateEmbedding` + `hashContent` imported from `embedding-engine.ts`. Runs in parallel per batch of 50 files via `Promise.allSettled` — never blocks file signal ingestion. `code-embedder.ts` singleton instantiated once per connector.
+- Files: `packages/memory-stack/src/connectors/github/github-connector.ts` — `parseAndEmbedFile()`
 
 ---
 
@@ -546,8 +543,6 @@
 ### All Open Issues
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
-| NB-017 | 🟠 | SE-aaS | Real AST dependency graph — regex/text only |
-| NB-018 | 🟠 | SE-aaS | Code embeddings not populated — no semantic search |
 | NB-019 | 🟡 | SE-aaS | Log ingestion pipeline missing |
 | NB-020 | 🟡 | Connectors | Freshworks connector not implemented |
 | NB-022 | 🟡 | Observability | Connector monitoring dashboard missing |
@@ -572,8 +567,6 @@
 | ID | Priority | Status | Title |
 |----|----------|--------|-------|
 | NB-037 | 🟠 | ✅ | Dependabot HIGH CVE — fixed (fast-xml-parser override) |
-| NB-017 | 🟠 | ❌ | AST graph missing — must document as known gap |
-| NB-018 | 🟠 | ❌ | Code embeddings not populated — known gap |
 | NB-021 | 🟡 | ✅ | connector_checkpoints migration exists + will apply on deploy |
 | NB-023 | 🟡 | ✅ | content_hash migration created |
 
@@ -590,13 +583,17 @@
 | NB-007 | Bandit persistence fixed | b9a1c1549 |
 | NB-008 | AAS business rule format updated | b9a1c1549 |
 | NB-009 | ai_memory upsert constraint fix | d66c19689 |
-| NB-016 | Jira→GitHub reverse entity_links (linkJiraToGitHub) | — |
-| NB-021 | connector_checkpoints migration confirmed + tracker corrected | — |
-| NB-023 | content_hash migration for cross_domain_signals | — |
-| NB-037 | HIGH CVE fast-xml-parser — pnpm override to >=5.3.6 | — |
-| NB-038 | MODERATE CVE ajv — pnpm override to >=8.18.0 | — |
-| NB-046 | Orchestrator stub files confirmed present, tracker corrected | — |
-| NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | — |
+| NB-016 | Jira→GitHub reverse entity_links (linkJiraToGitHub) | 43fb59c7b / 573d4b5a5 |
+| NB-017 | AST parser + code_dependency signals wired into GitHub connector | 573d4b5a5 |
+| NB-018 | Code embeddings (branch-scoped) wired into GitHub connector | 573d4b5a5 |
+| NB-021 | connector_checkpoints migration confirmed + tracker corrected | 573d4b5a5 |
+| NB-023 | content_hash migration for cross_domain_signals | 573d4b5a5 |
+| NB-032 | Cold-start budget 2500ms → 3000ms | 573d4b5a5 |
+| NB-037 | HIGH CVE fast-xml-parser — pnpm override to >=5.3.6 | 573d4b5a5 |
+| NB-038 | MODERATE CVE ajv — pnpm override to >=8.18.0 | 573d4b5a5 |
+| NB-045 | RL activity indicator + last-trained per-connector | e61e2f400 |
+| NB-046 | Orchestrator stub files confirmed present, tracker corrected | 573d4b5a5 |
+| NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | 573d4b5a5 |
 
 ---
 
