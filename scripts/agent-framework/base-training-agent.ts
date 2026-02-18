@@ -122,7 +122,12 @@ export abstract class BaseTrainingAgent {
     if (!config.organizationId) {
       console.warn(`[BaseTrainingAgent] No organizationId provided for "${(this as any).name || 'unknown'}", falling back to CORE_ORG_ID`);
     }
-    this.supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    // Disable realtime to prevent WebSocket from keeping the Node.js event loop
+    // alive after the agent completes (causes ECS tasks to hang indefinitely).
+    this.supabase = createClient(config.supabaseUrl, config.supabaseKey, {
+      realtime: { params: { eventsPerSecond: -1 } },
+      global: { headers: { 'X-Client-Info': 'nexusbrain-trainer' } },
+    });
   }
 
   // ============================================================================
@@ -274,9 +279,12 @@ export abstract class BaseTrainingAgent {
 
     // Performance fix: Enforce timeout to prevent runaway tasks (23h+ runs)
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
+      const t = setTimeout(() => {
         reject(new Error(`Agent "${this.name}" timed out after ${(timeoutMs / 60000).toFixed(0)} minutes. Forcing graceful shutdown to prevent memory leaks and runaway AWS costs.`));
       }, timeoutMs);
+      // unref() so this timer doesn't keep the Node.js event loop alive after
+      // the agent finishes — preventing ECS tasks from hanging post-completion.
+      t.unref();
     });
 
     // Wrap the entire execution in a race against the timeout

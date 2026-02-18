@@ -80,7 +80,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new FederationAgent(supabase, CORE_ORG_ID, {
     minEffectSize: MIN_EFFECT_SIZE,
     minConfidence: MIN_CONFIDENCE,

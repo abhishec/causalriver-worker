@@ -85,7 +85,7 @@ async function runOnce(): Promise<void> {
   console.log(`Accuracy Threshold: ${ACCURACY_THRESHOLD}%`);
   console.log('');
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new BenchmarkAgent(supabase, ORGANIZATION_ID, {
     benchmarkType: BENCHMARK_TYPE,
     maxQuestions: BENCHMARK_MAX_QUESTIONS,
@@ -149,7 +149,7 @@ async function main(): Promise<void> {
   }
 
   // Test connection
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   try {
     const { error } = await supabase.from('cross_domain_signals').select('id', { count: 'exact', head: true });
     if (error) {

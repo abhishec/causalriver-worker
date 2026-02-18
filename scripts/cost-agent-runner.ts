@@ -573,7 +573,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
 
   // Test connection
   const { error: pingError } = await supabase.from('cost_budget_config').select('id').limit(1);

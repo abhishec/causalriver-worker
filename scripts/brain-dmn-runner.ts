@@ -761,7 +761,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   costTracker = createCostTracker(supabase, true);
 
   // Verify connection

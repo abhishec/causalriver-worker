@@ -69,7 +69,7 @@ async function runOnce(): Promise<void> {
   console.log(`Mode: ${TRAINER_MODE}`);
   console.log('');
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new AutonomousTrainerAgent(supabase, ORGANIZATION_ID, { verbose: true });
 
   // Auto-register to Agent Registry
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
   }
 
   // Test connection
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   try {
     const { error } = await supabase.from('cross_domain_signals').select('id', { count: 'exact', head: true });
     if (error) {

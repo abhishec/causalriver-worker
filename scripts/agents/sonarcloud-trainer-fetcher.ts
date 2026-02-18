@@ -63,19 +63,14 @@ export interface SonarFetchOptions {
  * Well-known open-source organizations on SonarCloud.
  * These have public quality analysis enabled.
  */
+// Verified 2026-02: these org slugs are confirmed active on SonarCloud public API.
+// Others (spring-projects, jetbrains, elastic) return 0 results — incorrect slugs.
 export const TARGET_ORGS: string[] = [
-  // Apache projects (many have SonarCloud)
-  'apache',
-  // Spring ecosystem
-  'spring-projects',
-  // JetBrains
-  'jetbrains',
-  // Eclipse Foundation
-  'eclipse',
-  // Elastic
-  'elastic',
-  // SonarSource (dog-fooding!)
-  'sonarsource',
+  'apache',          // 431 projects
+  'sonarsource',     // 65 projects
+  'eclipse',         // 30 projects
+  'microsoft',       // 23 projects
+  'redhat-developer', // 17 projects
 ];
 
 /**
@@ -221,6 +216,36 @@ function parseMeasures(measures: SonarMeasure[]): ProjectQuality['measures'] {
 // MAIN EXPORT
 // ============================================================================
 
+async function fetchProjectsByOrg(
+  org: string,
+  options: SonarFetchOptions,
+): Promise<SonarProject[]> {
+  const maxProjects = options.maxProjectsPerOrg || 20;
+  const data = await fetchSonarAPI<{
+    components: Array<{
+      key: string;
+      name: string;
+      organization: string;
+      visibility: string;
+    }>;
+    paging: { total: number };
+  }>('/components/search_projects', {
+    organization: org,
+    ps: String(Math.min(maxProjects, 100)),
+  });
+
+  if (!data || !data.components) return [];
+
+  return data.components
+    .filter(c => c.visibility === 'public')
+    .map(c => ({
+      key: c.key,
+      name: c.name,
+      organization: c.organization || org,
+      qualifier: 'TRK',
+    }));
+}
+
 export async function fetchAllSonarCloudData(
   options: SonarFetchOptions = {},
 ): Promise<OrgQualityData[]> {
@@ -230,13 +255,13 @@ export async function fetchAllSonarCloudData(
 
   console.log(`[SonarFetcher] Searching SonarCloud for public projects...`);
 
-  // Phase 1: Search by direct project name queries
+  // Phase 1: Fetch projects by known organization (reliable — org projects always have valid keys)
   const allProjects: SonarProject[] = [];
-  for (let i = 0; i < DIRECT_PROJECT_SEARCHES.length; i++) {
-    const query = DIRECT_PROJECT_SEARCHES[i];
-    console.log(`[${i + 1}/${DIRECT_PROJECT_SEARCHES.length}] Searching: "${query}"`);
+  for (let i = 0; i < TARGET_ORGS.length; i++) {
+    const org = TARGET_ORGS[i];
+    console.log(`[${i + 1}/${TARGET_ORGS.length}] Fetching org: "${org}"`);
 
-    const projects = await searchProjects(query, options);
+    const projects = await fetchProjectsByOrg(org, options);
     for (const p of projects) {
       if (!seenKeys.has(p.key)) {
         seenKeys.add(p.key);
@@ -246,7 +271,7 @@ export async function fetchAllSonarCloudData(
     await sleep(delay);
   }
 
-  console.log(`[SonarFetcher] Found ${allProjects.length} unique projects`);
+  console.log(`[SonarFetcher] Found ${allProjects.length} unique projects from ${TARGET_ORGS.length} orgs`);
 
   // Phase 2: Fetch measures for each project
   const projectsByOrg = new Map<string, ProjectQuality[]>();

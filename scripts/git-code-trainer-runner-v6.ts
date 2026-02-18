@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new GitCodeTrainerAgent(supabase, ORGANIZATION_ID, {
     maxPRs: MAX_PRS,
     maxIssues: MAX_ISSUES,

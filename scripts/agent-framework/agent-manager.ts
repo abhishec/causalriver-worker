@@ -27,7 +27,12 @@ export class AgentManager {
     config: { supabaseUrl: string; supabaseKey: string; organizationId?: string },
   ) {
     this.registry = registry;
-    this.supabase = createClient(config.supabaseUrl, config.supabaseKey);
+    // Disable realtime to prevent WebSocket from keeping the Node.js event loop
+    // alive after the agent completes (causes ECS tasks to hang indefinitely).
+    this.supabase = createClient(config.supabaseUrl, config.supabaseKey, {
+      realtime: { params: { eventsPerSecond: -1 } },
+      global: { headers: { 'X-Client-Info': 'nexusbrain-trainer' } },
+    });
     this.defaultConfig = {
       supabaseUrl: config.supabaseUrl,
       supabaseKey: config.supabaseKey,

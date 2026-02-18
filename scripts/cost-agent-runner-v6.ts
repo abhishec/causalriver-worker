@@ -80,7 +80,7 @@ async function runOnce(): Promise<void> {
   console.log(`Anomaly multiplier: ${ANOMALY_SPIKE_MULTIPLIER}x`);
   console.log('');
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new CostAgent(supabase, ORGANIZATION_ID, {
     lookbackDays: COST_LOOKBACK_DAYS,
     budgetAlertThreshold: BUDGET_ALERT_THRESHOLD,
@@ -137,7 +137,7 @@ async function main(): Promise<void> {
   }
 
   // Test connection
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   try {
     const { error } = await supabase.from('cost_tracker').select('id', { count: 'exact', head: true });
     if (error) {

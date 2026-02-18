@@ -77,7 +77,7 @@ async function runOnce(): Promise<void> {
   console.log(`Scan all orgs: ${SCAN_ALL_ORGS}`);
   console.log('');
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   const agent = new DMNAgent(supabase, ORGANIZATION_ID, {
     minSurpriseScore: MIN_SURPRISE_SCORE,
     maxInsightsPerScan: MAX_INSIGHTS_PER_SCAN,
@@ -134,7 +134,7 @@ async function main(): Promise<void> {
   }
 
   // Test connection
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   try {
     const { error } = await supabase.from('cross_domain_signals').select('id', { count: 'exact', head: true });
     if (error) {
