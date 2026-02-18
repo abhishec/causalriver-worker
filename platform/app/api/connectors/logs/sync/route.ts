@@ -70,20 +70,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Import connector class
-    const { LogConnector } = await import(
-      "@nexus-ai/memory-stack/connectors/logs/log-connector"
-    ).catch(() => ({ LogConnector: null as any }));
+    // 4. Import connector class from main memory-stack entry point
+    const { LogConnector } = await import("@nexus-ai/memory-stack").catch(() => ({ LogConnector: null as any }));
 
     if (!LogConnector) {
-      // Fallback: try direct package import
-      const pkg = await import("@nexus-ai/memory-stack").catch(() => ({})) as any;
-      if (!pkg.LogConnector) {
-        return NextResponse.json(
-          { error: "LogConnector not available — ensure @nexus-ai/memory-stack is built" },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { error: "LogConnector not available — ensure @nexus-ai/memory-stack is built" },
+        { status: 500 }
+      );
     }
 
     const results: Record<string, any> = {};
