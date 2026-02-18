@@ -147,7 +147,7 @@ export async function POST(request: Request) {
             `project = "${project.key}"${fixVersionClause} AND updated >= ${jqlLookback} ORDER BY updated DESC`
           );
           const issuesRes = await jiraFetch(
-            credentials.access_token, siteUrl,
+            credentials, siteUrl,
             `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints`
           );
 
@@ -303,18 +303,34 @@ export async function POST(request: Request) {
 }
 
 /**
- * Jira API fetch helper
+ * Jira API fetch helper — supports both OAuth (Bearer) and Basic Auth (email:apiToken).
+ * Basic Auth is used for design-partner connections made via the admin /connect route.
  */
-async function jiraFetch(accessToken: string, siteUrl: string, endpoint: string): Promise<any> {
-  // Support both cloud ID format and direct URL
-  const baseUrl = siteUrl.startsWith('http')
+async function jiraFetch(
+  credentials: {
+    access_token?: string;
+    auth_type?: string;
+    email?: string;
+    api_token?: string;
+    site_url?: string;
+  },
+  siteUrl: string,
+  endpoint: string
+): Promise<any> {
+  // Support cloud ID format, direct URL, or credentials.site_url fallback
+  const baseUrl = siteUrl.startsWith("http")
     ? siteUrl
     : `https://api.atlassian.com/ex/jira/${siteUrl}`;
 
+  const authHeader =
+    credentials.auth_type === "basic"
+      ? `Basic ${Buffer.from(`${credentials.email}:${credentials.api_token}`).toString("base64")}`
+      : `Bearer ${credentials.access_token}`;
+
   const response = await fetch(`${baseUrl}${endpoint}`, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
+      Authorization: authHeader,
+      Accept: "application/json",
     },
   });
 
