@@ -27,18 +27,12 @@ import {
   semanticDedupAsync,
   type SemanticFederationConfig,
 } from './semantic-federation';
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-/**
- * The CORE Brain organization ID — a well-known UUID for shared baseline knowledge.
- * MUST match the canonical CORE_BRAIN_ORG_ID used by upstream-promoter, consolidation-engine,
- * and all other federation writers. Previously this was '..0000' which caused a silent
- * data black hole — promoted knowledge was never read back.
- */
-export const CORE_ORGANIZATION_ID = '00000000-0000-4000-a000-000000000001';
+import {
+  CORE_BRAIN_ORG_ID,
+  CORE_ORGANIZATION_ID,
+  CORE_PUSH_MIN_EVIDENCE_WEIGHT,
+  CORE_PUSH_MIN_EFFECT_SIZE,
+} from './constants';
 
 // ============================================================================
 // TYPES
@@ -838,6 +832,210 @@ export async function percolateToCore(
   }
 
   return { percolated: toPercolate.length, skippedDuplicates };
+}
+
+// ============================================================================
+// CORE PUSH — Distribute high-confidence CORE priors down to individual orgs
+// ============================================================================
+
+/**
+ * Result of a CORE-to-org push operation.
+ */
+export interface CorePushResult {
+  /** Total CORE edges that were strong enough to push */
+  coreEdgesEvaluated: number;
+  /** Edges successfully written to org's causal graph as priors */
+  edgesPushedDown: number;
+  /** Edges skipped because org already has own contradicting data */
+  edgesSkippedOrgOverride: number;
+  /** Edges already present as CORE priors (no update needed) */
+  edgesAlreadyPresent: number;
+  /** Duration in ms */
+  durationMs: number;
+}
+
+/**
+ * Push high-confidence CORE causal priors down to an individual org.
+ *
+ * DIRECTION: CORE → ORG (the OPPOSITE of percolateToCore)
+ *
+ * This is the "downward broadcast" path of the federation cycle:
+ *   1. CORE accumulates evidence from many orgs via FedAvg (upward)
+ *   2. When CORE reaches high confidence on an edge, it pushes it
+ *      back down to all subscribing orgs as a prior (downward)
+ *
+ * The org can then:
+ *   - ADOPT: Use the CORE prior if it has no conflicting data
+ *   - DOWNGRADE: If its own data weakly contradicts, keep prior but lower confidence
+ *   - OVERRIDE: If its own data strongly contradicts, mark as org-specific (no adoption)
+ *
+ * Pushed edges are marked `discovery_method = 'core_prior'` so the copilot
+ * can distinguish them from locally-discovered edges in explanations.
+ *
+ * Criteria for push:
+ *   - evidence_weight >= CORE_PUSH_MIN_EVIDENCE_WEIGHT (10+ orgs confirmed it)
+ *   - effect_size >= CORE_PUSH_MIN_EFFECT_SIZE (>= 0.7, strong effect)
+ *   - is_significant = true
+ *
+ * Safety: never overwrites org edges with higher evidence_weight (org data wins).
+ *
+ * @param organizationId - Target org to push priors into
+ * @param supabase - Supabase client with service role
+ * @returns Push result with counts for observability
+ */
+export async function pushCoreInsightsToOrg(
+  organizationId: string,
+  supabase: ReturnType<typeof getClientForTableInEdge>,
+): Promise<CorePushResult> {
+  const startMs = Date.now();
+
+  // Guard: never push CORE to itself
+  if (isCoreOrganization(organizationId)) {
+    return { coreEdgesEvaluated: 0, edgesPushedDown: 0, edgesSkippedOrgOverride: 0, edgesAlreadyPresent: 0, durationMs: 0 };
+  }
+
+  // 1. Fetch strong CORE edges that are ready to broadcast
+  const { data: coreEdges, error: coreError } = await supabase
+    .from('causal_relationships_statistical')
+    .select('source_domain, target_domain, effect_size, evidence_weight, natural_language, discovery_method')
+    .eq('organization_id', CORE_ORGANIZATION_ID)
+    .eq('is_significant', true)
+    .gte('evidence_weight', CORE_PUSH_MIN_EVIDENCE_WEIGHT)
+    .gte('effect_size', CORE_PUSH_MIN_EFFECT_SIZE)
+    .order('evidence_weight', { ascending: false })
+    .limit(50); // Max 50 pushes per cycle — prevents overwhelming new orgs
+
+  if (coreError || !coreEdges?.length) {
+    return { coreEdgesEvaluated: 0, edgesPushedDown: 0, edgesSkippedOrgOverride: 0, edgesAlreadyPresent: 0, durationMs: Date.now() - startMs };
+  }
+
+  // 2. Fetch org's existing edges for the same domain pairs (for conflict detection)
+  const pairFilters = coreEdges.map(e => `${e.source_domain}::${e.target_domain}`);
+
+  const { data: orgEdges } = await supabase
+    .from('causal_relationships_statistical')
+    .select('source_domain, target_domain, effect_size, evidence_weight, discovery_method')
+    .eq('organization_id', organizationId)
+    .in('source_domain', coreEdges.map(e => e.source_domain));
+
+  // Build a lookup map: pairKey → org edge
+  const orgEdgeMap = new Map<string, { effectSize: number; evidenceWeight: number; discoveryMethod: string }>();
+  for (const edge of (orgEdges ?? [])) {
+    const key = `${edge.source_domain}::${edge.target_domain}`;
+    orgEdgeMap.set(key, {
+      effectSize: edge.effect_size ?? 0,
+      evidenceWeight: edge.evidence_weight ?? 0,
+      discoveryMethod: edge.discovery_method ?? 'unknown',
+    });
+  }
+
+  // 3. Decide which edges to push, skip, or update
+  const now = new Date().toISOString();
+  const toPush: Array<Record<string, unknown>> = [];
+  let edgesSkippedOrgOverride = 0;
+  let edgesAlreadyPresent = 0;
+
+  for (const coreEdge of coreEdges) {
+    const key = `${coreEdge.source_domain}::${coreEdge.target_domain}`;
+    const orgEdge = orgEdgeMap.get(key);
+
+    if (orgEdge) {
+      // Org already has data for this pair — apply conflict resolution
+      const isOrgPrior = orgEdge.discoveryMethod === 'core_prior';
+      const orgHasOwnData = !isOrgPrior;
+
+      if (orgHasOwnData) {
+        if (orgEdge.evidenceWeight >= CORE_PUSH_MIN_EVIDENCE_WEIGHT) {
+          // Org has strong own data that takes precedence — never overwrite
+          edgesSkippedOrgOverride++;
+          continue;
+        }
+
+        // Org has weak own data — DOWNGRADE: push as prior with reduced confidence
+        // Blend: 70% CORE + 30% org (CORE has much more evidence overall)
+        const blendedEffectSize = 0.7 * coreEdge.effect_size + 0.3 * orgEdge.effectSize;
+        toPush.push({
+          organization_id: organizationId,
+          source_domain: coreEdge.source_domain,
+          target_domain: coreEdge.target_domain,
+          effect_size: Math.round(blendedEffectSize * 10000) / 10000,
+          evidence_weight: Math.min(orgEdge.evidenceWeight, CORE_PUSH_MIN_EVIDENCE_WEIGHT - 1), // Stay below CORE threshold
+          is_significant: true,
+          discovery_method: 'core_prior_blended',
+          natural_language: coreEdge.natural_language
+            ? `[CORE baseline, blended with org data] ${coreEdge.natural_language}`
+            : undefined,
+          last_computed_at: now,
+        });
+        continue;
+      }
+
+      if (isOrgPrior) {
+        // Already a CORE prior — update if CORE has grown stronger
+        const existingEffectSize = orgEdge.effectSize;
+        if (Math.abs(coreEdge.effect_size - existingEffectSize) < 0.02) {
+          edgesAlreadyPresent++;
+          continue; // No meaningful change — skip
+        }
+        // Update the prior with refreshed CORE estimate
+        toPush.push({
+          organization_id: organizationId,
+          source_domain: coreEdge.source_domain,
+          target_domain: coreEdge.target_domain,
+          effect_size: Math.round(coreEdge.effect_size * 10000) / 10000,
+          evidence_weight: CORE_PUSH_MIN_EVIDENCE_WEIGHT, // Mark as CORE-strength evidence
+          is_significant: true,
+          discovery_method: 'core_prior',
+          natural_language: coreEdge.natural_language
+            ? `[CORE baseline] ${coreEdge.natural_language}`
+            : undefined,
+          last_computed_at: now,
+        });
+        continue;
+      }
+    } else {
+      // Org has NO data for this pair — ADOPT: write as CORE prior
+      toPush.push({
+        organization_id: organizationId,
+        source_domain: coreEdge.source_domain,
+        target_domain: coreEdge.target_domain,
+        effect_size: Math.round(coreEdge.effect_size * 10000) / 10000,
+        evidence_weight: CORE_PUSH_MIN_EVIDENCE_WEIGHT, // Mark as CORE-strength evidence
+        is_significant: true,
+        discovery_method: 'core_prior',
+        natural_language: coreEdge.natural_language
+          ? `[CORE baseline] ${coreEdge.natural_language}`
+          : undefined,
+        last_computed_at: now,
+      });
+    }
+  }
+
+  // 4. Batch upsert the priors to the org
+  let edgesPushedDown = 0;
+  if (toPush.length > 0) {
+    const { error: upsertError } = await supabase
+      .from('causal_relationships_statistical')
+      .upsert(toPush, {
+        onConflict: 'organization_id,source_domain,target_domain',
+        ignoreDuplicates: false,
+      });
+
+    if (upsertError) {
+      console.error('[FederatedBrain] CORE push upsert error:', upsertError.message);
+    } else {
+      edgesPushedDown = toPush.length;
+      console.log(`[FederatedBrain] Pushed ${edgesPushedDown} CORE priors to org ${organizationId.substring(0, 8)}...`);
+    }
+  }
+
+  return {
+    coreEdgesEvaluated: coreEdges.length,
+    edgesPushedDown,
+    edgesSkippedOrgOverride,
+    edgesAlreadyPresent,
+    durationMs: Date.now() - startMs,
+  };
 }
 
 /**

@@ -58,8 +58,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { checkSemanticNovelty } from './semantic-federation';
-
-const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+import { CORE_BRAIN_ORG_ID, FED_AVG_LEARNING_RATE, FED_AVG_MAX_DELTA } from './constants';
 
 // ============================================================================
 // TYPES
@@ -377,6 +376,52 @@ export async function applyFedAvgToCore(
     }
   }
 
+  // ── Pull recent pending deltas from other orgs (FedAvg cross-org aggregation) ──
+  //
+  // TRUE FedAvg (McMahan et al. 2017):
+  //   CORE_new = (1 - lr) × CORE_old + lr × weighted_mean(Δ_i)
+  //   weighted_mean = Σ(sampleSize_i × Δ_i) / Σ(sampleSize_i)
+  //
+  // We collect ALL recent deltas for each pair (from all orgs, last 24h)
+  // from causal_federated_delta_log, add THIS org's current deltas, then
+  // compute the weighted mean before applying the lr-scaled update.
+  // This means CORE is updated once per aggregation window, not once per org.
+  //
+  // Why this matters: if 5 orgs each send Δ=+0.05 with sampleSize=100,
+  //   Single-org update (old):  CORE += 0.3 × 0.05 = +0.015 (per org, 5 updates = +0.075)
+  //   True FedAvg (new):       CORE += 0.3 × mean(0.05 × 5) = +0.015 (one update, stable)
+  // The old approach over-weighted high-frequency orgs. FedAvg is sample-size neutral.
+
+  const FEDAVG_AGGREGATION_WINDOW_HOURS = 24;
+  const aggregationCutoff = new Date(
+    Date.now() - FEDAVG_AGGREGATION_WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
+
+  // Fetch recent deltas from ALL orgs for the same pair keys (anonymized hash — safe)
+  const pairKeysForAgg = finalDeltas.map(d => d.pairKey);
+  const { data: recentLogRows } = await supabase
+    .from('causal_federated_delta_log')
+    .select('pair_key, delta_effect_size, sample_size')
+    .in('pair_key', pairKeysForAgg)
+    .gte('created_at', aggregationCutoff);
+
+  // Build per-pair aggregation buckets: include existing log rows + current org's deltas
+  const pairDeltaBuckets = new Map<string, Array<{ deltaEffectSize: number; sampleSize: number }>>();
+
+  // Seed buckets with recent log rows from other orgs
+  for (const row of (recentLogRows ?? [])) {
+    const bucket = pairDeltaBuckets.get(row.pair_key) ?? [];
+    bucket.push({ deltaEffectSize: row.delta_effect_size, sampleSize: row.sample_size });
+    pairDeltaBuckets.set(row.pair_key, bucket);
+  }
+
+  // Add current org's deltas to their respective buckets
+  for (const delta of finalDeltas) {
+    const bucket = pairDeltaBuckets.get(delta.pairKey) ?? [];
+    bucket.push({ deltaEffectSize: delta.deltaEffectSize, sampleSize: delta.sampleSize });
+    pairDeltaBuckets.set(delta.pairKey, bucket);
+  }
+
   // ── Apply FedAvg updates ─────────────────────────────────────────────────
   let deltasApplied = 0;
   let newPairsAdded = 0;
@@ -387,32 +432,41 @@ export async function applyFedAvgToCore(
   for (const delta of finalDeltas) {
     const existing = existingCoreWeights.get(delta.pairKey);
 
+    // ── Compute weighted mean Δ across all contributing orgs ─────────────
+    // weighted_mean = Σ(sampleSize_i × Δ_i) / Σ(sampleSize_i)
+    const bucket = pairDeltaBuckets.get(delta.pairKey) ?? [{ deltaEffectSize: delta.deltaEffectSize, sampleSize: delta.sampleSize }];
+    const totalWeight = bucket.reduce((sum, b) => sum + b.sampleSize, 0);
+    const weightedMeanDelta = totalWeight > 0
+      ? bucket.reduce((sum, b) => sum + b.sampleSize * b.deltaEffectSize, 0) / totalWeight
+      : delta.deltaEffectSize;
+
+    // Clip the aggregated delta (post-aggregation clipping prevents outlier org coalitions)
+    const aggregatedDelta = Math.max(-cfg.maxDelta, Math.min(cfg.maxDelta, weightedMeanDelta));
+
     let newEffectSize: number;
     let isNewPair: boolean;
 
     if (existing) {
-      // FedAvg update for existing CORE relationship:
-      //   new_weight = (1 - lr) × old_weight + lr × (old_weight + delta)
-      //             = old_weight + lr × delta
-      //
-      // This is equivalent to: apply delta with learning rate dampening.
-      // The damping prevents a single org from drastically changing CORE.
+      // True FedAvg update for existing CORE relationship:
+      //   CORE_new = (1 - lr) × CORE_old + lr × weighted_mean(Δ_i)
+      // This is mathematically equivalent to CORE_old + lr × weighted_mean(Δ_i)
+      // but the (1-lr) form makes the learning rate semantics explicit.
       newEffectSize = Math.max(0.05, Math.min(0.95,
-        existing.effectSize + cfg.fedAvgLearningRate * delta.deltaEffectSize,
+        (1 - cfg.fedAvgLearningRate) * existing.effectSize +
+        cfg.fedAvgLearningRate * (existing.effectSize + aggregatedDelta),
       ));
       isNewPair = false;
       existingPairsUpdated++;
     } else {
       // New pair not in CORE: initialize with a conservative prior.
-      // We don't know the absolute effect size, only the delta.
-      // Use delta as initial evidence from below the neutral prior (0.5).
-      // A positive delta means the relationship was confirmed → start above 0.5.
-      // A negative delta means it was disconfirmed → skip (don't add weak edges).
-      if (delta.deltaEffectSize <= 0) continue; // Don't add newly-disconfirmed pairs
+      // We don't know the absolute effect size, only the aggregated delta.
+      // A positive aggregated delta means relationship confirmed → start above 0.5.
+      // A negative aggregated delta means disconfirmed → skip (don't add weak edges).
+      if (aggregatedDelta <= 0) continue; // Don't add newly-disconfirmed pairs
 
-      // Initial estimate: neutral prior + dampened delta
+      // Initial estimate: neutral prior + dampened aggregated delta
       newEffectSize = Math.max(0.05, Math.min(0.95,
-        0.4 + cfg.fedAvgLearningRate * delta.deltaEffectSize,
+        0.4 + cfg.fedAvgLearningRate * aggregatedDelta,
       ));
       isNewPair = true;
       newPairsAdded++;
@@ -453,6 +507,8 @@ export async function applyFedAvgToCore(
     // Log delta for audit trail (includes org hash but NOT org ID)
     // This is the privacy-preserving audit: we know THAT an org contributed,
     // but the actual org ID is hashed to a non-reversible token.
+    // We record both the raw per-org delta AND the aggregated FedAvg delta
+    // so the audit trail shows both individual contribution and collective update.
     deltaLog.push({
       organization_hash: _hashOrgId(organizationId), // Non-reversible hash
       pair_key: delta.pairKey,
@@ -460,6 +516,9 @@ export async function applyFedAvgToCore(
       target_domain: delta.targetDomain,
       delta_effect_size: Math.round(delta.deltaEffectSize * 10000) / 10000,
       sample_size: delta.sampleSize,
+      // FedAvg observability: record the aggregated update that was actually applied
+      aggregated_delta: Math.round(aggregatedDelta * 10000) / 10000,
+      contributing_orgs_count: bucket.length,
       is_new_pair: isNewPair,
       cycle_id: cycleId,
       created_at: now,

@@ -27,6 +27,8 @@ const corsHeaders = {
  * The core brain — trained on Wikipedia, FRED, IMF, GitHub, World Bank, etc.
  * All organizations inherit this knowledge as a baseline.
  */
+// Canonical source: packages/memory-stack/src/federation/constants.ts
+// Deno edge functions cannot import from npm packages directly — keep in sync manually.
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
 /**

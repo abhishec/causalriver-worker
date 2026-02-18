@@ -26,8 +26,10 @@
 /**
  * The core brain — trained on Wikipedia, FRED, IMF, GitHub, World Bank, etc.
  * All organizations inherit this knowledge as a baseline via query-time federation.
+ *
+ * Canonical source: packages/memory-stack/src/federation/constants.ts
  */
-export const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+export { CORE_BRAIN_ORG_ID, CORE_ORGANIZATION_ID, isCoreOrg, CORE_PUSH_MIN_EVIDENCE_WEIGHT, CORE_PUSH_MIN_EFFECT_SIZE, FED_AVG_LEARNING_RATE, FED_AVG_MAX_DELTA } from './federation/constants';
 
 // ============================================================================
 // CORE NLP - Sentiment & Topic Analysis
@@ -257,6 +259,18 @@ export {
   type FederatedCausalLearningConfig,
   type FederatedLearningResult,
 } from './federation/federated-causal-learning';
+
+// ── Federation Brain — Dual-Query + Percolation + CORE Push ────────────────
+// Fix 3: CORE actively pushes high-confidence priors down to org causal graphs.
+// This is the DOWNWARD path of federation (CORE → ORG), complementing the
+// UPWARD path (ORG → CORE via FedAvg) already implemented in federated-causal-learning.
+export {
+  pushCoreInsightsToOrg,
+  percolateToCore,
+  isCoreOrganization,
+  type CorePushResult,
+  type SourceLabel,
+} from './federation/federated-brain';
 
 // ── GAP 3: Neural Semantic Embeddings ──────────────────────────────────────
 // OpenAI text-embedding-3-small (1536→384 dims) replacing n-gram hashing.
@@ -1333,6 +1347,7 @@ export {
   linkPRToJira,
   linkSlackMessageToCrossRefs,
   linkCommitToJira,
+  linkJiraToGitHub,
   getLinkedEntitiesForTicket,
   getLinkedEntitiesForPR,
   getSprintDeliveryReport,
@@ -1603,6 +1618,7 @@ export { createDocumentConnector, type DocumentConnectorConfig } from './connect
 export { createJiraConnector, type JiraConnectorConfig } from './connectors/jira';
 export { createPagerDutyConnector, type PagerDutyConnectorConfig } from './connectors/pagerduty';
 export { createCICDIngestor, type CICDEvent, type CICDIngestor, type CICDProvider } from './connectors/cicd-ingestor';
+export { ReleaseTracker, createReleaseTracker, listActiveReleases, type ReleaseConfig } from './connectors/release-tracker';
 
 // Template Connectors (bidirectional: pull + push)
 /** @deprecated Use `createNexusSlackConnector` from `@nexus-ai/slack-connector` instead */

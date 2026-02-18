@@ -10,8 +10,12 @@
  * Seed scripts and API routes should import from here.
  */
 
-/** Core Brain organization — the platform's own brain */
-export const CORE_ORG_ID = "00000000-0000-4000-a000-000000000001";
+/**
+ * Core Brain organization — the platform's own brain.
+ * Canonical source: packages/memory-stack/src/federation/constants.ts
+ * Re-exported here as CORE_ORG_ID for backwards-compatibility with platform code.
+ */
+export { CORE_BRAIN_ORG_ID as CORE_ORG_ID } from '@nexus-ai/memory-stack';
 
 /** Company Jarvis — AML compliance SaaS (synthetic data) */
 export const COMPANY_JARVIS_ORG_ID = "22222222-2222-4000-a000-222222222222";

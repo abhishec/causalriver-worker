@@ -49,6 +49,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Canonical source: packages/memory-stack/src/federation/constants.ts
+// Deno edge functions cannot import from npm packages directly — keep in sync manually.
 const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
 /** Maximum agentic loop iterations to prevent runaway (reduced from 8 → 5 for cost control) */

@@ -58,6 +58,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AdvancedDiscoveryMethod } from './advanced-discovery';
+import { CORE_BRAIN_ORG_ID } from '../federation/constants';
 
 // ============================================================================
 // TYPES
@@ -639,7 +640,7 @@ export function createCausalMethodBandit(config: CausalMethodBanditConfig = {}):
         .sort((a, b) => b.pairsWon - a.pairsWon || b.avgReward - a.avgReward);
     },
 
-    async loadState(): Promise<{ loaded: number; pairs: string[] }> {
+    async loadState(): Promise<{ loaded: number; pairs: string[]; seededFromCore?: number }> {
       if (!_supabase || !_orgId) return { loaded: 0, pairs: [] };
 
       const { data, error } = await _supabase
@@ -654,41 +655,149 @@ export function createCausalMethodBandit(config: CausalMethodBanditConfig = {}):
         return { loaded: 0, pairs: [] };
       }
 
-      if (!data || data.length === 0) return { loaded: 0, pairs: [] };
-
       const loadedPairs = new Set<string>();
 
-      for (const row of data) {
-        const state = _getOrCreateState(row.source_domain, row.target_domain);
-        const method = row.method as BanditArm;
+      if (data && data.length > 0) {
+        for (const row of data) {
+          const state = _getOrCreateState(row.source_domain, row.target_domain);
+          const method = row.method as BanditArm;
 
-        if (!BANDIT_ARMS.includes(method)) continue;
+          if (!BANDIT_ARMS.includes(method)) continue;
 
-        const arm = state.arms.get(method);
-        if (!arm) continue;
+          const arm = state.arms.get(method);
+          if (!arm) continue;
 
-        arm.pulls = row.pulls ?? 0;
-        arm.totalReward = row.total_reward ?? 0;
-        arm.empiricalMean = row.empirical_mean ?? 0;
-        arm.lastPulledAt = row.last_pulled_at ? new Date(row.last_pulled_at) : undefined;
-        arm.lastReward = row.last_reward ?? undefined;
+          arm.pulls = row.pulls ?? 0;
+          arm.totalReward = row.total_reward ?? 0;
+          arm.empiricalMean = row.empirical_mean ?? 0;
+          arm.lastPulledAt = row.last_pulled_at ? new Date(row.last_pulled_at) : undefined;
+          arm.lastReward = row.last_reward ?? undefined;
 
-        // Restore total pair pulls from whichever row has it
-        if (row.total_pair_pulls > state.totalPulls) {
-          state.totalPulls = row.total_pair_pulls;
+          // Restore total pair pulls from whichever row has it
+          if (row.total_pair_pulls > state.totalPulls) {
+            state.totalPulls = row.total_pair_pulls;
+          }
+
+          loadedPairs.add(_pairKey(row.source_domain, row.target_domain));
         }
-
-        loadedPairs.add(_pairKey(row.source_domain, row.target_domain));
       }
 
       // Recompute UCB scores for all loaded pairs
       for (const key of loadedPairs) {
-        const [src, tgt] = key.split('::');
         const state = _pairStates.get(key);
         if (state) _updateUCBScores(state);
       }
 
-      return { loaded: data.length, pairs: Array.from(loadedPairs) };
+      // ── CROSS-ORG BANDIT SEEDING FROM CORE ────────────────────────────────
+      //
+      // Cold-start problem: a new org (or a pair with 0 pulls) starts with
+      // uniform arm exploration. UCB1 requires ~5 pulls × 9 arms = 45 cycles
+      // before meaningful differentiation. That's 45 learning cycles of
+      // sub-optimal method selection before the bandit starts to learn.
+      //
+      // Fix: when an org has NO data for a domain pair, query CORE's bandit
+      // state for that pair and seed this org's arm stats with a scaled-down
+      // version of CORE's aggregate win rates.
+      //
+      // Seeding weight: SEED_WEIGHT_FRACTION = 0.1 (10% of CORE's pull counts)
+      // This means seeded arm stats look like "we already ran 10% of what CORE
+      // has seen" — enough to break uniform exploration without drowning out
+      // the org's own future observations.
+      //
+      // Only seeds if:
+      //   a) This org is NOT the CORE brain itself
+      //   b) The pair has 0 total pulls for this org
+      //   c) CORE has at least 5 pulls for the pair (i.e., CORE itself has data)
+      //
+      // Privacy: CORE stores aggregate win rates, not individual org data.
+      // Seeding reads CORE's public aggregate — same as query-time federation.
+
+      if (_orgId === CORE_BRAIN_ORG_ID) {
+        // CORE brain never seeds from itself
+        return { loaded: data?.length ?? 0, pairs: Array.from(loadedPairs) };
+      }
+
+      const SEED_WEIGHT_FRACTION = 0.1; // 10% of CORE's pull counts
+      const CORE_MIN_PULLS_TO_SEED = 5; // Only seed if CORE has enough data
+
+      // Find pairs that have 0 pulls for this org (unseen pairs)
+      const unseededPairKeys: string[] = [];
+      for (const [key, state] of _pairStates) {
+        if (state.totalPulls === 0) {
+          unseededPairKeys.push(key);
+        }
+      }
+
+      // Also check if there are CORE pairs we haven't seen at all yet
+      // (we can proactively seed the most-pulled CORE pairs)
+      let seededFromCore = 0;
+
+      if (_supabase) {
+        try {
+          // Fetch CORE's top domain pairs by total pulls
+          const { data: coreData } = await _supabase
+            .from('causal_method_bandit_state')
+            .select('source_domain, target_domain, method, pulls, total_reward, empirical_mean, total_pair_pulls')
+            .eq('organization_id', CORE_BRAIN_ORG_ID)
+            .gte('total_pair_pulls', CORE_MIN_PULLS_TO_SEED)
+            .order('total_pair_pulls', { ascending: false })
+            .limit(maxPairs * BANDIT_ARMS.length);
+
+          if (coreData && coreData.length > 0) {
+            for (const coreRow of coreData) {
+              const key = _pairKey(coreRow.source_domain, coreRow.target_domain);
+
+              // Only seed pairs this org hasn't seen yet
+              const orgState = _pairStates.get(key);
+              if (orgState && orgState.totalPulls > 0) continue; // Org has own data — skip
+
+              const state = _getOrCreateState(coreRow.source_domain, coreRow.target_domain);
+              const method = coreRow.method as BanditArm;
+
+              if (!BANDIT_ARMS.includes(method)) continue;
+
+              const arm = state.arms.get(method);
+              if (!arm) continue;
+
+              // Seed with a fraction of CORE's pull counts
+              // This gives "ghost pulls" — prior knowledge from collective experience
+              const seededPulls = Math.max(1, Math.floor((coreRow.pulls ?? 0) * SEED_WEIGHT_FRACTION));
+              const seededTotalReward = (coreRow.total_reward ?? 0) * SEED_WEIGHT_FRACTION;
+
+              // Only update if seeded stats are better than current (don't regress real data)
+              if (arm.pulls === 0) {
+                arm.pulls = seededPulls;
+                arm.totalReward = seededTotalReward;
+                arm.empiricalMean = coreRow.empirical_mean ?? (seededPulls > 0 ? seededTotalReward / seededPulls : 0);
+              }
+
+              // Seed total pair pulls
+              const seededPairPulls = Math.max(1, Math.floor((coreRow.total_pair_pulls ?? 0) * SEED_WEIGHT_FRACTION));
+              if (state.totalPulls < seededPairPulls) {
+                state.totalPulls = seededPairPulls;
+              }
+
+              loadedPairs.add(key);
+              seededFromCore++;
+            }
+
+            // Recompute UCB scores for newly seeded pairs
+            for (const key of loadedPairs) {
+              const state = _pairStates.get(key);
+              if (state) _updateUCBScores(state);
+            }
+
+            if (seededFromCore > 0) {
+              console.log(`[CausalMethodBandit] Seeded ${seededFromCore} arm entries from CORE bandit state (cold-start elimination)`);
+            }
+          }
+        } catch (seedErr: any) {
+          // Non-critical: seeding failures don't affect normal bandit operation
+          console.warn('[CausalMethodBandit] CORE seeding failed (non-fatal):', seedErr.message);
+        }
+      }
+
+      return { loaded: data?.length ?? 0, pairs: Array.from(loadedPairs), seededFromCore };
     },
 
     async persistState(): Promise<{ persisted: number }> {

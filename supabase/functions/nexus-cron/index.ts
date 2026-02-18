@@ -449,7 +449,7 @@ serve(async (req: Request) => {
 
     // Log cron execution
     await supabase.from('ai_agent_activity').insert({
-      organization_id: specificOrgId || '00000000-0000-4000-a000-000000000001',
+      organization_id: specificOrgId || '00000000-0000-4000-a000-000000000001', // CORE_BRAIN_ORG_ID — canonical source: packages/memory-stack/src/federation/constants.ts
       agent_type: 'cron',
       action_type: 'scheduled_run',
       input_summary: `Tasks: ${requestedTasks.join(', ')} | Orgs: ${orgIds.length}`,

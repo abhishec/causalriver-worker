@@ -31,6 +31,8 @@ export interface CliConfig {
   maxTokens: number;
 }
 
+// Canonical source: packages/memory-stack/src/federation/constants.ts
+// TODO: import { CORE_BRAIN_ORG_ID } from '@nexus-ai/memory-stack' once this package resolves in CLI context
 const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
 export function loadConfig(): CliConfig {

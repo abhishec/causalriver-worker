@@ -541,6 +541,8 @@ async function runRetentionJob(supabase: any, orgId: string) {
  * Full federation runs in consolidation-engine.ts via Node.js.
  */
 async function runFederationJob(supabase: any, orgId: string) {
+  // Canonical source: packages/memory-stack/src/federation/constants.ts
+  // Deno edge functions cannot import from npm packages directly — keep in sync manually.
   const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
   if (orgId === CORE_BRAIN_ORG_ID) {
     return { status: 'skipped', reason: 'Core brain does not federate upstream' };

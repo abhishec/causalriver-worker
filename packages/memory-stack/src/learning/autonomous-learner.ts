@@ -55,6 +55,8 @@ import {
   computeAndPromoteCausalDeltas,
   type FederatedCausalLearningConfig,
 } from '../federation/federated-causal-learning';
+// ── Fix 3: CORE Push — receive high-confidence priors from CORE ─────────────
+import { pushCoreInsightsToOrg, isCoreOrganization } from '../federation/federated-brain';
 // ── GAP 1: UCB1 Bandit ─────────────────────────────────────────────────────
 import {
   createCausalMethodBandit,
@@ -175,6 +177,26 @@ export interface LearningCycleResult {
    * These will be autonomously verified at the next connector sync.
    */
   oraclePredictionsRegistered?: number;
+  /**
+   * Fix 3 — CORE push: priors received from CORE brain this cycle.
+   * Shows how many high-confidence CORE causal edges were written to this
+   * org's graph as priors (discovery_method = 'core_prior').
+   * Undefined if federated learning is disabled or org is the CORE brain.
+   */
+  corePush?: {
+    edgesPushedDown: number;
+    coreEdgesEvaluated: number;
+    edgesSkippedOrgOverride: number;
+  };
+  /**
+   * If the learning cycle was skipped due to the signal quality gate,
+   * this field contains the reason. Undefined means the cycle ran normally.
+   *
+   * Possible values:
+   *   - 'no_signals'            — No signals at all in the lookback window
+   *   - 'quality_gate_failed: ...' — One or more quality criteria not met
+   */
+  skipReason?: string;
 }
 
 // ============================================================================
@@ -555,7 +577,29 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
       const signals = await fetchRecentSignals();
       log(`Fetched ${signals.length} signals (all stored data, ordered by signal_timestamp)`);
 
+      // ── SIGNAL QUALITY GATE ────────────────────────────────────────────────
+      // The causal discovery algorithms (Granger, PC/LiNGAM, KSG) require a
+      // minimum signal corpus to produce statistically credible results.
+      // Running below these thresholds produces noise, not signal — spurious
+      // causal edges that pollute the knowledge graph and mislead the copilot.
+      //
+      // Gate criteria (all must pass):
+      //   1. MIN_SIGNALS: At least 500 signals total (enough for time-series analysis)
+      //   2. MIN_DOMAINS: At least 3 distinct source domains (cross-domain learning
+      //      requires multiple domains — single-domain data can't discover cross-domain causal edges)
+      //   3. MIN_RECENT: At least 10 signals in the last 7 days (data freshness gate —
+      //      stale connectors with no recent activity shouldn't trigger learning cycles)
+      //
+      // If the gate fails: return early with skip_reason so callers can log/alert.
+      const QUALITY_GATE = {
+        MIN_SIGNALS: 500,
+        MIN_DOMAINS: 3,
+        MIN_RECENT_SIGNALS: 10,
+        RECENT_WINDOW_DAYS: 7,
+      };
+
       if (signals.length === 0) {
+        log(`Quality gate FAILED: no signals at all (need ${QUALITY_GATE.MIN_SIGNALS})`);
         return {
           packsGenerated: 0,
           rulesPromoted: 0,
@@ -567,8 +611,49 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           temporalRulesFound: 0,
           trainingStats: trainer.getTrainingStats(),
           duration: Date.now() - startTime,
+          skipReason: 'no_signals',
         };
       }
+
+      // Count distinct domains
+      const distinctDomains = new Set(signals.map((s: any) => s.source_domain).filter(Boolean));
+
+      // Count signals in last 7 days
+      const recentCutoff = Date.now() - QUALITY_GATE.RECENT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+      const recentSignalCount = signals.filter((s: any) => {
+        const ts = s.signal_timestamp ? new Date(s.signal_timestamp).getTime() : 0;
+        return ts >= recentCutoff;
+      }).length;
+
+      const qualityFailures: string[] = [];
+      if (signals.length < QUALITY_GATE.MIN_SIGNALS) {
+        qualityFailures.push(`insufficient_signals: ${signals.length} < ${QUALITY_GATE.MIN_SIGNALS}`);
+      }
+      if (distinctDomains.size < QUALITY_GATE.MIN_DOMAINS) {
+        qualityFailures.push(`insufficient_domains: ${distinctDomains.size} < ${QUALITY_GATE.MIN_DOMAINS} (found: ${[...distinctDomains].join(', ')})`);
+      }
+      if (recentSignalCount < QUALITY_GATE.MIN_RECENT_SIGNALS) {
+        qualityFailures.push(`stale_data: only ${recentSignalCount} signals in last ${QUALITY_GATE.RECENT_WINDOW_DAYS} days (need ${QUALITY_GATE.MIN_RECENT_SIGNALS})`);
+      }
+
+      if (qualityFailures.length > 0) {
+        log(`Quality gate FAILED: ${qualityFailures.join('; ')} — skipping learning cycle to avoid spurious causal discovery`);
+        return {
+          packsGenerated: 0,
+          rulesPromoted: 0,
+          memoriesCreated: 0,
+          causalEdgesUpdated: 0,
+          anomaliesDetected: 0,
+          patternsRegistered: 0,
+          sequentialPatternsFound: 0,
+          temporalRulesFound: 0,
+          trainingStats: trainer.getTrainingStats(),
+          duration: Date.now() - startTime,
+          skipReason: `quality_gate_failed: ${qualityFailures.join('; ')}`,
+        };
+      }
+
+      log(`Quality gate PASSED: ${signals.length} signals, ${distinctDomains.size} domains, ${recentSignalCount} recent`);
 
       // 2. READ existing causal relationships from DB (discovery is delegated to consolidation engine)
       // The autonomous learner focuses on pattern mining, anomaly detection, and promotion
@@ -949,6 +1034,33 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         }
       }
 
+      // FEDERATED LEARNING — Step 3: Receive CORE priors (CORE → ORG push)
+      // After this org pushes its deltas UP to CORE (Step 2), CORE may have
+      // strong priors to push back DOWN. This closes the federation loop:
+      //   ORG → CORE (FedAvg, upward)
+      //   CORE → ORG (push, downward)
+      //
+      // Only runs if:
+      //   a) Federated learning is enabled
+      //   b) This org is not the CORE brain itself
+      //   c) Step 2 ran successfully (we just contributed, so CORE may have updated)
+      let corePushResult: LearningCycleResult['corePush'];
+      if (isFederatedEnabled && !isCoreOrganization(organizationId)) {
+        try {
+          const pushResult = await pushCoreInsightsToOrg(organizationId, supabase as any);
+          if (pushResult.edgesPushedDown > 0 || pushResult.coreEdgesEvaluated > 0) {
+            corePushResult = {
+              edgesPushedDown: pushResult.edgesPushedDown,
+              coreEdgesEvaluated: pushResult.coreEdgesEvaluated,
+              edgesSkippedOrgOverride: pushResult.edgesSkippedOrgOverride,
+            };
+            log(`CORE push: received ${pushResult.edgesPushedDown} priors from CORE (${pushResult.edgesSkippedOrgOverride} skipped — org data takes precedence)`);
+          }
+        } catch (err) {
+          log(`CORE push: failed (non-fatal): ${(err as Error).message}`);
+        }
+      }
+
       const result: LearningCycleResult = {
         packsGenerated,
         rulesPromoted,
@@ -962,6 +1074,8 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
         trainingStats: trainer.getTrainingStats(),
         duration: Date.now() - startTime,
         federatedLearning: federatedResult,
+        // Fix 3: CORE push result
+        corePush: corePushResult,
         // Gap 1: Bandit arm selections this cycle
         banditSelections: banditSelections.length > 0 ? banditSelections : undefined,
         // Gap 4: Oracle predictions queued for autonomous verification
