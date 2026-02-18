@@ -7,7 +7,8 @@ import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { StatValue } from "@/components/ui/StatValue";
-import { GitHubSetupModal } from "@/components/connectors/GitHubSetupModal";
+import { GitHubSetupModal, type GitHubReleaseConfig } from "@/components/connectors/GitHubSetupModal";
+import { JiraSetupModal, type JiraConfig } from "@/components/connectors/JiraSetupModal";
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
 import { S3UploadModal } from "@/components/connectors/S3UploadModal";
 
@@ -90,6 +91,7 @@ export function ConnectorsClient({
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showJiraModal, setShowJiraModal] = useState(false);
   const [showS3Upload, setShowS3Upload] = useState(false);
   const [showIngestion, setShowIngestion] = useState(false);
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
@@ -168,10 +170,49 @@ export function ConnectorsClient({
   }, []);
 
   /* ── GitHub setup ────────────────────────────────────────────── */
-  const handleGitHubConnected = useCallback(() => {
-    setShowIngestion(true);
-    router.refresh();
-  }, [router]);
+  const handleGitHubConnected = useCallback(
+    (_repo: any, releaseConfig: GitHubReleaseConfig) => {
+      setMessage({
+        type: "info",
+        text: `Starting ingestion for ${releaseConfig.trackedBranches.length} branch(es), ${releaseConfig.dataLookback} lookback...`,
+      });
+      setShowIngestion(true);
+      router.refresh();
+    },
+    [router]
+  );
+
+  /* ── Jira setup ──────────────────────────────────────────────── */
+  const handleJiraConnected = useCallback(
+    (config: JiraConfig) => {
+      setMessage({
+        type: "info",
+        text: `Starting Jira ingestion for ${config.trackedProjects.join(", ")}, ${config.dataLookback} lookback...`,
+      });
+      // Kick off the Jira sync with the config
+      fetch("/api/connectors/jira/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteUrl: config.siteUrl,
+          email: config.email,
+          apiToken: config.apiToken,
+          projects: config.trackedProjects,
+          lookback: config.dataLookback,
+          fixVersionFilter: config.fixVersionFilter,
+        }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setMessage({ type: "success", text: "Jira sync started — tickets will appear shortly." });
+          setTimeout(() => router.refresh(), 2000);
+        })
+        .catch(() => {
+          setMessage({ type: "error", text: "Jira sync failed to start. Check credentials." });
+        });
+    },
+    [router]
+  );
 
   /* ── Separate connectors into connected vs available ─────────── */
   const connectedConnectors = connectors.filter(
@@ -473,10 +514,31 @@ export function ConnectorsClient({
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                             </svg>
-                            Token Setup
+                            Token + Branches
                           </button>
                           <button
                             onClick={() => handleOAuthConnect("github")}
+                            className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            OAuth
+                          </button>
+                        </>
+                      ) : connector.type === "jira" ? (
+                        <>
+                          <button
+                            onClick={() => setShowJiraModal(true)}
+                            className="flex-1 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                            Token + Projects
+                          </button>
+                          <button
+                            onClick={() => handleOAuthConnect("jira")}
                             className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -551,11 +613,18 @@ export function ConnectorsClient({
         </Card>
       </div>
 
-      {/* GitHub Setup Modal */}
+      {/* GitHub Setup Modal — token + branch selection + data lookback */}
       <GitHubSetupModal
         isOpen={showSetupModal}
         onClose={() => setShowSetupModal(false)}
         onConnected={handleGitHubConnected}
+      />
+
+      {/* Jira Setup Modal — API token + project selection + data lookback */}
+      <JiraSetupModal
+        isOpen={showJiraModal}
+        onClose={() => setShowJiraModal(false)}
+        onConnected={handleJiraConnected}
       />
 
       {/* S3 Upload Modal */}

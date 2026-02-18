@@ -15,15 +15,35 @@ interface RepoInfo {
   isPrivate: boolean;
   openIssues: number;
   updatedAt: string;
+  branches?: string[]; // available branches fetched from API
+}
+
+export interface GitHubReleaseConfig {
+  /** Which branches to track — e.g. ["release/6.3.4", "release/5.11.5-enterprise"] */
+  trackedBranches: string[];
+  /**
+   * How far back to ingest commits / PRs on first load.
+   * "3m" | "6m" | "1y" | "2y" | "all"
+   */
+  dataLookback: string;
 }
 
 interface GitHubSetupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnected: (repo: RepoInfo) => void;
+  /** Called with repo info + release config once user confirms */
+  onConnected: (repo: RepoInfo, releaseConfig: GitHubReleaseConfig) => void;
 }
 
-type Step = "token" | "validating" | "confirmed" | "error";
+type Step = "token" | "validating" | "branches" | "confirmed" | "error";
+
+const LOOKBACK_OPTIONS = [
+  { value: "3m",  label: "Last 3 months",  hint: "Fastest — recent work only" },
+  { value: "6m",  label: "Last 6 months",  hint: "Recommended for active releases" },
+  { value: "1y",  label: "Last 1 year",    hint: "Good for long-lived branches" },
+  { value: "2y",  label: "Last 2 years",   hint: "Deep history — slower first sync" },
+  { value: "all", label: "All history",    hint: "Full repo — can be very slow on large repos" },
+];
 
 export function GitHubSetupModal({
   isOpen,
@@ -37,47 +57,26 @@ export function GitHubSetupModal({
   const [error, setError] = useState("");
   const [repoInfo, setRepoInfo] = useState<RepoInfo | null>(null);
 
+  // Branch + lookback config (step 2)
+  const [availableBranches, setAvailableBranches] = useState<string[]>([]);
+  const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+  const [lookback, setLookback] = useState("6m");
+  const [branchSearch, setBranchSearch] = useState("");
+
   const parseRepoUrl = useCallback((input: string): { owner: string; repo: string } | null => {
-    // Support formats:
-    // https://github.com/calcom/cal.com
-    // github.com/calcom/cal.com
-    // calcom/cal.com
     const cleaned = input.trim().replace(/\/$/, "");
-
-    // Full URL
-    const urlMatch = cleaned.match(
-      /(?:https?:\/\/)?github\.com\/([^/]+)\/([^/]+)/
-    );
-    if (urlMatch) {
-      return { owner: urlMatch[1], repo: urlMatch[2].replace(/\.git$/, "") };
-    }
-
-    // owner/repo format
+    const urlMatch = cleaned.match(/(?:https?:\/\/)?github\.com\/([^/]+)\/([^/]+)/);
+    if (urlMatch) return { owner: urlMatch[1], repo: urlMatch[2].replace(/\.git$/, "") };
     const slashMatch = cleaned.match(/^([^/\s]+)\/([^/\s]+)$/);
-    if (slashMatch) {
-      return { owner: slashMatch[1], repo: slashMatch[2] };
-    }
-
+    if (slashMatch) return { owner: slashMatch[1], repo: slashMatch[2] };
     return null;
   }, []);
 
   const handleConnect = async () => {
-    if (!token.trim()) {
-      setError("Please enter your GitHub Personal Access Token");
-      return;
-    }
-    if (!repoUrl.trim()) {
-      setError("Please enter a repository URL or owner/repo");
-      return;
-    }
-
+    if (!token.trim()) { setError("Please enter your GitHub Personal Access Token"); return; }
+    if (!repoUrl.trim()) { setError("Please enter a repository URL or owner/repo"); return; }
     const parsed = parseRepoUrl(repoUrl);
-    if (!parsed) {
-      setError(
-        "Invalid repository format. Use: owner/repo or https://github.com/owner/repo"
-      );
-      return;
-    }
+    if (!parsed) { setError("Invalid format. Use: owner/repo or https://github.com/owner/repo"); return; }
 
     setError("");
     setStep("validating");
@@ -86,33 +85,51 @@ export function GitHubSetupModal({
       const response = await fetch("/api/connectors/github/setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: token.trim(),
-          owner: parsed.owner,
-          repo: parsed.repo,
-        }),
+        body: JSON.stringify({ token: token.trim(), owner: parsed.owner, repo: parsed.repo }),
       });
 
       const data = await response.json();
+      if (!response.ok) { setError(data.error || "Failed to connect to GitHub"); setStep("error"); return; }
 
-      if (!response.ok) {
-        setError(data.error || "Failed to connect to GitHub");
-        setStep("error");
-        return;
+      // Fetch branches list from GitHub API directly using the token
+      let branches: string[] = [data.repo.defaultBranch];
+      try {
+        const branchRes = await fetch(
+          `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/branches?per_page=100`,
+          { headers: { Authorization: `Bearer ${token.trim()}`, Accept: "application/vnd.github.v3+json" } }
+        );
+        if (branchRes.ok) {
+          const branchData = await branchRes.json();
+          branches = branchData.map((b: any) => b.name as string);
+        }
+      } catch {
+        // fallback: just default branch
       }
 
-      setRepoInfo(data.repo);
-      setStep("confirmed");
+      // Pre-select release/* branches if any exist
+      const releaseBranches = branches.filter((b) => b.startsWith("release/"));
+      setAvailableBranches(branches);
+      setSelectedBranches(
+        releaseBranches.length > 0 ? releaseBranches : [data.repo.defaultBranch]
+      );
+      setRepoInfo({ ...data.repo, branches });
+      setStep("branches");
     } catch (err: any) {
       setError(err.message || "Network error");
       setStep("error");
     }
   };
 
-  const handleStartIngestion = async () => {
-    if (repoInfo) {
-      onConnected(repoInfo);
-    }
+  const toggleBranch = (branch: string) => {
+    setSelectedBranches((prev) =>
+      prev.includes(branch) ? prev.filter((b) => b !== branch) : [...prev, branch]
+    );
+  };
+
+  const handleStartIngestion = () => {
+    if (!repoInfo) return;
+    if (selectedBranches.length === 0) { setError("Please select at least one branch to track"); return; }
+    onConnected(repoInfo, { trackedBranches: selectedBranches, dataLookback: lookback });
     handleClose();
   };
 
@@ -122,22 +139,37 @@ export function GitHubSetupModal({
     setRepoUrl("");
     setError("");
     setRepoInfo(null);
+    setAvailableBranches([]);
+    setSelectedBranches([]);
+    setLookback("6m");
+    setBranchSearch("");
     onClose();
   };
+
+  const filteredBranches = availableBranches.filter((b) =>
+    b.toLowerCase().includes(branchSearch.toLowerCase())
+  );
+
+  // Group branches: release/* first, then rest
+  const releaseBranches = filteredBranches.filter((b) => b.startsWith("release/"));
+  const otherBranches = filteredBranches.filter((b) => !b.startsWith("release/"));
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg mx-4 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden">
+      <div className="w-full max-w-lg mx-4 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🐙</span>
             <div>
               <h2 className="text-base font-semibold">Connect GitHub</h2>
               <p className="text-xs text-muted">
-                Link a repository to build code intelligence
+                {step === "branches" || step === "confirmed"
+                  ? `${repoInfo?.fullName} — configure tracking`
+                  : "Link a repository to build code intelligence"}
               </p>
             </div>
           </div>
@@ -151,72 +183,26 @@ export function GitHubSetupModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4">
-          {step === "confirmed" && repoInfo ? (
-            /* Success state */
-            <div className="space-y-4">
-              <div className="rounded-xl bg-success/5 border border-success/20 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm font-medium text-success">
-                    Repository Connected
-                  </span>
-                </div>
-                <h3 className="text-lg font-semibold mb-1">{repoInfo.fullName}</h3>
-                {repoInfo.description && (
-                  <p className="text-xs text-muted mb-3">{repoInfo.description}</p>
-                )}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <div className="text-xs text-muted">Language</div>
-                    <div className="text-sm font-medium">{repoInfo.language || "—"}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted">Stars</div>
-                    <div className="text-sm font-medium">
-                      {repoInfo.stars.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted">Size</div>
-                    <div className="text-sm font-medium">
-                      {(repoInfo.size / 1024).toFixed(0)} MB
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted">Branch</div>
-                    <div className="text-sm font-medium">{repoInfo.defaultBranch}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted">Open Issues</div>
-                    <div className="text-sm font-medium">
-                      {repoInfo.openIssues.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted">Visibility</div>
-                    <div className="text-sm font-medium">
-                      {repoInfo.isPrivate ? "Private" : "Public"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleStartIngestion}
-                className="w-full py-3 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Start Brain Ingestion
-              </button>
+        {/* Step indicator */}
+        {(step === "branches" || step === "confirmed") && (
+          <div className="flex items-center gap-2 px-6 py-2.5 bg-surface/50 border-b border-border-subtle shrink-0">
+            <div className="flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-success text-white text-[10px] font-bold flex items-center justify-center">✓</span>
+              <span className="text-xs text-muted">Repository</span>
             </div>
-          ) : (
-            /* Input state */
+            <div className="flex-1 h-px bg-border-subtle mx-1" />
+            <div className="flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">2</span>
+              <span className="text-xs font-medium">Branches & Data Scope</span>
+            </div>
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+
+          {/* ── Step 1: Token + Repo ── */}
+          {(step === "token" || step === "validating" || step === "error") && (
             <>
               {/* Token input */}
               <div>
@@ -253,23 +239,19 @@ export function GitHubSetupModal({
                   type="text"
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
-                  placeholder="calcom/cal.com or https://github.com/calcom/cal.com"
+                  placeholder="owner/repo or https://github.com/owner/repo"
                   className="w-full px-3 py-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
                   disabled={step === "validating"}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleConnect();
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleConnect(); }}
                 />
               </div>
 
-              {/* Error message */}
               {error && (
                 <div className="rounded-lg bg-danger/5 border border-danger/20 p-3 text-xs text-danger">
                   {error}
                 </div>
               )}
 
-              {/* Connect button */}
               <button
                 onClick={handleConnect}
                 disabled={step === "validating"}
@@ -281,11 +263,9 @@ export function GitHubSetupModal({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Validating...
+                    Validating & fetching branches...
                   </>
-                ) : step === "error" ? (
-                  "Try Again"
-                ) : (
+                ) : step === "error" ? "Try Again" : (
                   <>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -296,15 +276,246 @@ export function GitHubSetupModal({
               </button>
             </>
           )}
+
+          {/* ── Step 2: Branch selection + lookback ── */}
+          {step === "branches" && repoInfo && (
+            <>
+              {/* Repo summary pill */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-success/5 border border-success/20">
+                <svg className="w-4 h-4 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-sm font-medium text-success">{repoInfo.fullName}</span>
+                <span className="text-xs text-muted ml-auto">{repoInfo.language || "—"} · {(repoInfo.size / 1024).toFixed(0)} MB</span>
+              </div>
+
+              {/* Branch selection */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Branches to track
+                    <span className="ml-1 text-[10px] text-muted font-normal">
+                      ({selectedBranches.length} selected)
+                    </span>
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSelectedBranches(availableBranches.filter(b => b.startsWith("release/")))}
+                      className="text-[10px] text-accent hover:underline"
+                    >
+                      Select release/*
+                    </button>
+                    <span className="text-[10px] text-muted">·</span>
+                    <button
+                      onClick={() => setSelectedBranches([])}
+                      className="text-[10px] text-muted hover:text-foreground"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                {/* Branch search */}
+                <div className="relative mb-2">
+                  <svg className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={branchSearch}
+                    onChange={(e) => setBranchSearch(e.target.value)}
+                    placeholder="Filter branches..."
+                    className="w-full pl-8 pr-3 py-2 rounded-lg bg-surface border border-border text-xs placeholder:text-muted/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                  />
+                </div>
+
+                {/* Branch list */}
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-surface divide-y divide-border-subtle">
+                  {releaseBranches.length > 0 && (
+                    <>
+                      <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted bg-surface/80 sticky top-0">
+                        Release branches
+                      </div>
+                      {releaseBranches.map((branch) => (
+                        <BranchRow
+                          key={branch}
+                          branch={branch}
+                          isDefault={branch === repoInfo.defaultBranch}
+                          isSelected={selectedBranches.includes(branch)}
+                          onToggle={() => toggleBranch(branch)}
+                          isRelease
+                        />
+                      ))}
+                    </>
+                  )}
+                  {otherBranches.length > 0 && (
+                    <>
+                      {releaseBranches.length > 0 && (
+                        <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted bg-surface/80 sticky top-0">
+                          Other branches
+                        </div>
+                      )}
+                      {otherBranches.map((branch) => (
+                        <BranchRow
+                          key={branch}
+                          branch={branch}
+                          isDefault={branch === repoInfo.defaultBranch}
+                          isSelected={selectedBranches.includes(branch)}
+                          onToggle={() => toggleBranch(branch)}
+                        />
+                      ))}
+                    </>
+                  )}
+                  {filteredBranches.length === 0 && (
+                    <div className="px-3 py-4 text-xs text-muted text-center">No branches match</div>
+                  )}
+                </div>
+
+                {selectedBranches.length === 0 && (
+                  <p className="text-[10px] text-danger mt-1">Select at least one branch</p>
+                )}
+                <p className="text-[10px] text-muted mt-1">
+                  Only selected branches are ingested. <strong>release/*</strong> branches are auto-detected for release tracking.
+                </p>
+              </div>
+
+              {/* Data lookback */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                  Data lookback — how far back to pull on first sync
+                </label>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {LOOKBACK_OPTIONS.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
+                        lookback === opt.value
+                          ? "border-accent/50 bg-accent/5"
+                          : "border-border-subtle bg-surface hover:bg-surface-hover"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="lookback"
+                        value={opt.value}
+                        checked={lookback === opt.value}
+                        onChange={() => setLookback(opt.value)}
+                        className="accent-accent"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium">{opt.label}</span>
+                        <span className="text-[10px] text-muted ml-2">{opt.hint}</span>
+                      </div>
+                      {opt.value === "6m" && (
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+                          Recommended
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selected summary */}
+              {selectedBranches.length > 0 && (
+                <div className="rounded-lg bg-surface border border-border-subtle p-3 text-xs space-y-1">
+                  <div className="font-medium text-foreground mb-1">Ingestion summary</div>
+                  <div className="flex justify-between text-muted">
+                    <span>Branches</span>
+                    <span className="font-mono text-foreground">{selectedBranches.length}</span>
+                  </div>
+                  <div className="flex justify-between text-muted">
+                    <span>Data window</span>
+                    <span className="font-mono text-foreground">
+                      {LOOKBACK_OPTIONS.find(o => o.value === lookback)?.label}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-muted">
+                    <span>Release tracking</span>
+                    <span className="font-mono text-foreground">
+                      {selectedBranches.filter(b => b.startsWith("release/")).length > 0 ? "✓ Enabled" : "—"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-lg bg-danger/5 border border-danger/20 p-3 text-xs text-danger">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => { setStep("token"); setError(""); }}
+                  className="flex-1 py-2.5 rounded-xl border border-border text-xs font-medium hover:bg-surface-hover transition-colors"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={handleStartIngestion}
+                  disabled={selectedBranches.length === 0}
+                  className="flex-1 py-2.5 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Start Brain Ingestion
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Footer hint */}
-        <div className="px-6 py-3 bg-surface/50 border-t border-border-subtle">
+        {/* Footer */}
+        <div className="px-6 py-3 bg-surface/50 border-t border-border-subtle shrink-0">
           <p className="text-[10px] text-muted text-center">
-            Your token is validated but not stored in the database. It will be needed again for sync operations.
+            {step === "branches"
+              ? "Initial sync runs in the background. Incremental syncs are fast and run hourly after that."
+              : "Your token is encrypted in transit. Only repo metadata and commit/PR activity is read — no source code content."}
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Branch Row sub-component ─────────────────────────────────────────── */
+
+function BranchRow({
+  branch,
+  isDefault,
+  isSelected,
+  onToggle,
+  isRelease = false,
+}: {
+  branch: string;
+  isDefault: boolean;
+  isSelected: boolean;
+  onToggle: () => void;
+  isRelease?: boolean;
+}) {
+  return (
+    <label className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-surface-hover transition-colors">
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={onToggle}
+        className="accent-accent rounded"
+      />
+      <span className="flex-1 text-xs font-mono truncate">{branch}</span>
+      <div className="flex items-center gap-1 shrink-0">
+        {isRelease && (
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-brain-training bg-brain-training/10 px-1.5 py-0.5 rounded">
+            Release
+          </span>
+        )}
+        {isDefault && (
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted bg-surface px-1.5 py-0.5 rounded border border-border-subtle">
+            Default
+          </span>
+        )}
+      </div>
+    </label>
   );
 }
