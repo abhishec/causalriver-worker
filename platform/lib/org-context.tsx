@@ -18,6 +18,12 @@ export interface Organization {
   slug: string;
   plan: string;
   is_core_brain: boolean;
+  // Workspace / customer grouping (from customers table via customer_id FK).
+  // null for internal orgs (CORE brain, test orgs).
+  // Never used in brain/signal/learning paths — display + billing only.
+  customer_id:   string | null;
+  customer_name: string | null;  // e.g. "Tookitaki" — for grouping in switcher UI
+  customer_slug: string | null;  // e.g. "tookitaki"
 }
 
 export interface OrgMembership {
@@ -67,7 +73,11 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       const { data: rows } = await supabase
         .from("org_members")
         .select(
-          "organization_id, role, is_platform_admin, organizations:organization_id(id, name, slug, plan, is_core_brain)"
+          `organization_id, role, is_platform_admin,
+           organizations:organization_id(
+             id, name, slug, plan, is_core_brain, customer_id,
+             customer:customer_id(id, name, slug)
+           )`
         )
         .eq("user_id", user.id)
         .order("joined_at", { ascending: true });
@@ -77,12 +87,25 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const mapped: OrgMembership[] = (rows as any[]).map((r) => ({
-        organization_id: r.organization_id,
-        role: r.role,
-        is_platform_admin: r.is_platform_admin,
-        organization: r.organizations,
-      }));
+      const mapped: OrgMembership[] = (rows as any[]).map((r) => {
+        const org   = r.organizations;
+        const cust  = org?.customer ?? null;
+        return {
+          organization_id: r.organization_id,
+          role: r.role,
+          is_platform_admin: r.is_platform_admin,
+          organization: {
+            id:            org.id,
+            name:          org.name,
+            slug:          org.slug,
+            plan:          org.plan,
+            is_core_brain: org.is_core_brain,
+            customer_id:   org.customer_id   ?? null,
+            customer_name: cust?.name        ?? null,
+            customer_slug: cust?.slug        ?? null,
+          },
+        };
+      });
 
       const isAdmin = mapped.some((m) => m.is_platform_admin);
       setMemberships(mapped);

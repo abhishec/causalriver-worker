@@ -117,14 +117,24 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
 
     const githubToken = await getInstallationToken(installationId);
 
-    // 2. Fetch organization mapping
-    const { data: connectorConfig } = await supabase
-      .from('connector_configurations')
+    // 2. Fetch organization mapping from org_connectors.
+    // org_connectors is the canonical connector table (used by provisioning + sync).
+    // Config stores githubRepo as "owner/repo" (e.g. "tookitaki/aml-engine").
+    // NOTE: a repo can belong to multiple orgs (e.g. two Tookitaki workspace-orgs
+    // each with different branch scopes). We pick the one whose primaryBranch
+    // matches the PR's target branch, falling back to the first match.
+    const { data: allConnectorConfigs } = await supabase
+      .from('org_connectors')
       .select('organization_id, config')
       .eq('connector_type', 'github')
-      .eq('config->>owner', repository.owner.login)
-      .eq('config->>repo', repository.name)
-      .single();
+      .eq('config->>githubRepo', repository.full_name);
+
+    // Pick the workspace-org whose primaryBranch matches the PR base branch,
+    // or fall back to the first match if no branch-specific config found.
+    const prBaseBranch = pull_request?.base?.ref;
+    const connectorConfig = allConnectorConfigs?.find(
+      (c: any) => c.config?.primaryBranch === prBaseBranch
+    ) ?? allConnectorConfigs?.[0] ?? null;
 
     if (!connectorConfig) {
       console.error('[PR Review] No organization mapping found for repo');
@@ -293,14 +303,18 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
     `[PR Review Outcome] Recording review outcome for PR #${pull_request.number}`
   );
 
-  // Fetch organization mapping
-  const { data: connectorConfig } = await supabase
-    .from('connector_configurations')
+  // Fetch organization mapping from org_connectors (canonical table).
+  // Match by full repo name; pick workspace-org whose primaryBranch matches PR target branch.
+  const { data: allReviewConfigs } = await supabase
+    .from('org_connectors')
     .select('organization_id')
     .eq('connector_type', 'github')
-    .eq('config->>owner', repository.owner.login)
-    .eq('config->>repo', repository.name)
-    .single();
+    .eq('config->>githubRepo', repository.full_name);
+
+  const reviewBaseBranch = pull_request?.base?.ref;
+  const connectorConfig = (allReviewConfigs as any[])?.find(
+    (c: any) => c.config?.primaryBranch === reviewBaseBranch
+  ) ?? allReviewConfigs?.[0] ?? null;
 
   if (!connectorConfig) {
     return NextResponse.json({ message: 'No organization mapping' });
@@ -330,14 +344,14 @@ async function handleIssuesEvent(payload: any, supabase: any) {
 
   console.log(`[Issue Outcome] Issue #${issue.number} closed`);
 
-  // Record for metrics
-  const { data: connectorConfig } = await supabase
-    .from('connector_configurations')
+  // Record for metrics — look up from org_connectors (canonical table).
+  const { data: issueConnectors } = await supabase
+    .from('org_connectors')
     .select('organization_id')
     .eq('connector_type', 'github')
-    .eq('config->>owner', repository.owner.login)
-    .eq('config->>repo', repository.name)
-    .single();
+    .eq('config->>githubRepo', repository.full_name);
+  // Issues are not branch-specific — use first matched org (or all, if multi-org).
+  const connectorConfig = issueConnectors?.[0] ?? null;
 
   if (connectorConfig) {
     await supabase.from('agent_activity_log').insert({

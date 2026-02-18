@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { DomainTag } from "@/components/ui/Badge";
 import { ConfidenceMeter } from "@/components/ui/ConfidenceMeter";
 import { StatusDot } from "@/components/ui/StatusDot";
+import { BrainLearningFeed } from "@/components/intelligence/BrainLearningFeed";
 
 interface BrainMeta {
   intent: string;
@@ -18,9 +19,13 @@ interface BrainContextPanelProps {
   brainMeta: BrainMeta | null;
   isLoading: boolean;
   className?: string;
+  /** Org ID for Supabase Realtime push in BrainLearningFeed */
+  orgId?: string;
+  /** Service context — filters learning feed to relevant domain */
+  service?: "aas" | "seaas";
 }
 
-export function BrainContextPanel({ brainMeta, isLoading, className }: BrainContextPanelProps) {
+export function BrainContextPanel({ brainMeta, isLoading, className, orgId, service }: BrainContextPanelProps) {
   return (
     <div className={cn("space-y-4", className)}>
       {/* Brain Status */}
@@ -128,6 +133,22 @@ export function BrainContextPanel({ brainMeta, isLoading, className }: BrainCont
           </p>
         </div>
       )}
+
+      {/* Brain Learning Feed — what the brain is actively learning */}
+      <div className="rounded-xl bg-card border border-border-subtle p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-brain-training brain-pulse" />
+          <h3 className="text-xs font-medium text-muted uppercase tracking-wider">
+            Brain Learning
+          </h3>
+        </div>
+        <BrainLearningFeed
+          orgId={orgId}
+          service={service}
+          limit={5}
+          compact
+        />
+      </div>
 
       {/* Quick Navigation to related pages */}
       <div className="rounded-xl bg-card border border-border-subtle p-4">

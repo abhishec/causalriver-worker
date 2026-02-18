@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     const orgId = await getCurrentOrgId();
     const domain = request.nextUrl.searchParams.get("domain") || "finance";
 
-    // Run in parallel: upstream causes, downstream effects, recent anomaly history
-    const [upstreamResult, downstreamResult, recentAnomalyResult] = await Promise.all([
+    // Run in parallel: upstream causes, downstream effects, recent anomaly history, data age
+    const [upstreamResult, downstreamResult, recentAnomalyResult, oldestEventResult] = await Promise.all([
       // What causes this domain? (source_domain → target_domain = this domain)
       supabase
         .from("causal_relationships_statistical")
@@ -55,18 +55,53 @@ export async function GET(request: NextRequest) {
         .ilike("event_data->>domain", `%${domain}%`)
         .order("created_at", { ascending: false })
         .limit(2),
+
+      // Oldest causal edge or platform_event — tells us how much history Brain has
+      supabase
+        .from("causal_relationships_statistical")
+        .select("created_at")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: true })
+        .limit(1),
     ]);
 
     const upstreamEdges = upstreamResult.data || [];
     const downstreamEdges = downstreamResult.data || [];
     const recentAnomalies = recentAnomalyResult.data || [];
 
+    // Compute real data age in months (rounded to nearest whole month)
+    const oldestEdge = oldestEventResult.data?.[0];
+    let dataAgeMonths: number | null = null;
+    let dataAgeLabel: string = "your financial data";
+    if (oldestEdge?.created_at) {
+      const ageMs = Date.now() - new Date(oldestEdge.created_at).getTime();
+      const ageDays = Math.round(ageMs / 86400000);
+      dataAgeMonths = Math.max(1, Math.round(ageDays / 30));
+      if (dataAgeMonths < 2) {
+        dataAgeLabel = `${ageDays} days of your data`;
+      } else if (dataAgeMonths < 12) {
+        dataAgeLabel = `${dataAgeMonths} months of your data`;
+      } else {
+        const years = (dataAgeMonths / 12).toFixed(1).replace(/\.0$/, "");
+        dataAgeLabel = `${years} years of your data`;
+      }
+    }
+
     // Top incoming edge: what most strongly causes this domain
     const topEdge = upstreamEdges[0] || null;
 
-    // Downstream domains affected
+    // Downstream domains affected — humanise the snake_case domain names
+    function humaniseDomain(raw: string | null | undefined): string {
+      if (!raw) return "";
+      return raw
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+        .replace(/\bAnd\b/g, "and")
+        .replace(/\bOf\b/g, "of");
+    }
+
     const affectedDomains = downstreamEdges
-      .map((e) => e.target_domain?.replace(/_/g, " "))
+      .map((e) => humaniseDomain(e.target_domain))
       .filter(Boolean)
       .slice(0, 3);
 
@@ -103,7 +138,9 @@ export async function GET(request: NextRequest) {
       topEdge: topEdge
         ? {
             source_domain: topEdge.source_domain,
+            source_domain_label: humaniseDomain(topEdge.source_domain),
             target_domain: topEdge.target_domain,
+            target_domain_label: humaniseDomain(topEdge.target_domain),
             lag_days: topEdge.lag_days,
             effect_size: topEdge.effect_size,
             natural_language: topEdge.natural_language,
@@ -113,6 +150,8 @@ export async function GET(request: NextRequest) {
       affectedDomains,
       lastOccurrence,
       lastOutcome,
+      dataAgeMonths,
+      dataAgeLabel,
       upstreamEdgesCount: upstreamEdges.length,
       downstreamEdgesCount: downstreamEdges.length,
     });

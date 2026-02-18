@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { OverviewClient } from "./overview-client";
+import type { LearningEvent } from "@/app/api/brain/emergence/route";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,7 @@ export default async function OverviewPage() {
     earlyWarningResult,
     connectorsResult,
     artifactsResult,
+    emergenceResult,
   ] = await Promise.all([
     // Latest brain snapshots (30 days)
     safe(supabase
@@ -122,6 +124,14 @@ export default async function OverviewPage() {
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
       .limit(5)),
+
+    // Brain learning feed — brain_emergence_log
+    safe(supabase
+      .from("brain_emergence_log")
+      .select("id, event_type, summary, metrics, intelligence_score, duration_ms, created_at")
+      .eq("organization_id", CORE_ORG_ID)
+      .order("created_at", { ascending: false })
+      .limit(10)),
   ]);
 
   const snapshots = snapshotsResult.data || [];
@@ -133,6 +143,97 @@ export default async function OverviewPage() {
   const recentEdges = recentEdgesResult.data || [];
   const platformEvents = eventsResult.data || [];
   const signalRecords = signalsByDomainResult.data || [];
+
+  // Brain learning feed — format emergence log rows into LearningEvent shape
+  // (mirrors the /api/brain/emergence formatter so SSR data is identical to client fetches)
+  const emergenceRows = emergenceResult.data || [];
+  const TYPE_MAP: Record<string, LearningEvent["type"]> = {
+    autonomous_learning: "training",
+    dream_insight: "discovery",
+    evolution_milestone: "discovery",
+    pattern_promoted: "training",
+    self_modification: "training",
+    calibration_shift: "training",
+    reactive_trigger: "training",
+  };
+  function makeLearningEventSummary(row: any): string {
+    const metrics = (row.metrics as Record<string, any>) || {};
+    switch (row.event_type) {
+      case "autonomous_learning": {
+        const packs = metrics.packsGenerated ?? metrics.packs_generated ?? 0;
+        const rules = metrics.rulesPromoted ?? metrics.rules_promoted ?? 0;
+        const edges = metrics.edgesDiscovered ?? metrics.causal_edges_discovered ?? 0;
+        const accuracy = metrics.predictionAccuracy ?? metrics.prediction_accuracy;
+        return [
+          "Brain ran an autonomous learning cycle.",
+          packs > 0 ? `Generated ${packs} training pack${packs !== 1 ? "s" : ""}.` : null,
+          rules > 0 ? `Promoted ${rules} rule${rules !== 1 ? "s" : ""} to long-term memory.` : null,
+          edges > 0 ? `Discovered ${edges} new causal edge${edges !== 1 ? "s" : ""}.` : null,
+          accuracy != null ? `Prediction accuracy now at ${Number(accuracy).toFixed(1)}%.` : null,
+        ].filter(Boolean).join(" ");
+      }
+      case "dream_insight": {
+        const insight = metrics.insight || metrics.hypothesis || row.summary;
+        return insight ? `💡 Dream insight: "${insight}"` : "Brain surfaced a new hypothesis during its deep reasoning cycle.";
+      }
+      case "evolution_milestone": {
+        const milestone = metrics.milestone || metrics.threshold;
+        const accuracy = metrics.accuracy ?? metrics.predictionAccuracy;
+        return [
+          milestone ? `Brain crossed evolution milestone ${milestone}.` : "Brain reached a new evolution milestone.",
+          accuracy != null ? `Prediction accuracy: ${Number(accuracy).toFixed(1)}%.` : null,
+        ].filter(Boolean).join(" ");
+      }
+      case "pattern_promoted": {
+        const pattern = metrics.pattern_name || metrics.patternName || "a new pattern";
+        const confidence = metrics.confidence;
+        return [
+          `Promoted pattern "${pattern}" to long-term memory.`,
+          confidence != null ? `Confidence: ${(Number(confidence) * 100).toFixed(0)}%.` : null,
+        ].filter(Boolean).join(" ");
+      }
+      case "calibration_shift": {
+        const domain = metrics.domain || "a domain";
+        const delta = metrics.delta ?? metrics.shift;
+        return [
+          `Calibration updated for ${domain}.`,
+          delta != null ? `Confidence threshold shifted by ${Number(delta).toFixed(3)}.` : null,
+        ].filter(Boolean).join(" ");
+      }
+      default:
+        return row.summary || row.event_type.replace(/_/g, " ");
+    }
+  }
+  const brainLearningEvents: LearningEvent[] = emergenceRows.map((row: any) => ({
+    id: `emergence-${row.id}`,
+    type: TYPE_MAP[row.event_type] ?? "training",
+    event_type: row.event_type,
+    title: (() => {
+      switch (row.event_type) {
+        case "autonomous_learning": return "Autonomous Learning Cycle";
+        case "dream_insight": return "Dream Insight";
+        case "evolution_milestone": return `Evolution Milestone ${(row.metrics as any)?.milestone ?? ""}`.trim();
+        case "pattern_promoted": return "Pattern Promoted";
+        case "self_modification": return "Self-Modification";
+        case "calibration_shift": return "Calibration Shift";
+        case "reactive_trigger": return "Reactive Learning";
+        default: return row.event_type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+      }
+    })(),
+    summary: makeLearningEventSummary(row),
+    intelligence_score: row.intelligence_score != null ? Number(row.intelligence_score) : null,
+    duration_ms: row.duration_ms ?? null,
+    metrics: (row.metrics as Record<string, any>) || {},
+    created_at: row.created_at,
+  }));
+
+  // Brain learning feed meta (from latest snapshot)
+  const brainLearningMeta = {
+    latest_score: latest?.intelligence_score ?? null,
+    prediction_accuracy: latest?.prediction_accuracy ?? null,
+    autonomous_cycles_run: latest?.autonomous_cycles_run ?? null,
+    dream_insights_surfaced: latest?.dream_insights_surfaced ?? null,
+  };
 
   // Calculate cost metrics
   const costToday = costRows.reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
@@ -292,6 +393,8 @@ export default async function OverviewPage() {
       connectors={connectors}
       recentArtifacts={recentArtifacts}
       brainHealthScore={latest?.brain_health_score ?? 0}
+      brainLearningEvents={brainLearningEvents}
+      brainLearningMeta={brainLearningMeta}
     />
   );
 }

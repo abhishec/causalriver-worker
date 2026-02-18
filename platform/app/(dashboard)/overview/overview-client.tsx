@@ -1,6 +1,7 @@
 "use client";
 
 import { IntelligenceStream } from "@/components/intelligence/IntelligenceStream";
+import { BrainLearningFeed } from "@/components/intelligence/BrainLearningFeed";
 import { KnowledgeGrowthChart } from "@/components/intelligence/KnowledgeGrowthChart";
 import { SignalRatePanel } from "@/components/intelligence/SignalRatePanel";
 import { StatValue } from "@/components/ui/StatValue";
@@ -12,6 +13,7 @@ import { LiveIndicator } from "@/components/ui/LiveIndicator";
 import { Badge } from "@/components/ui/Badge";
 import { formatNumber, formatUSD, timeAgo } from "@/lib/utils";
 import type { IntelligenceEvent } from "@/components/intelligence/StreamEvent";
+import type { BrainLearningFeedProps } from "@/components/intelligence/BrainLearningFeed";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -56,6 +58,81 @@ interface OverviewClientProps {
   brainAnomaliesThisWeek?: number;
   /** Count of causal discoveries Brain made this week */
   brainDiscoveriesThisWeek?: number;
+  /** SSR-prefetched brain learning events (from brain_emergence_log) */
+  brainLearningEvents?: NonNullable<BrainLearningFeedProps["initialEvents"]>;
+  /** SSR-prefetched brain learning meta (score, accuracy, cycles) */
+  brainLearningMeta?: {
+    latest_score: number | null;
+    prediction_accuracy: number | null;
+    autonomous_cycles_run: number | null;
+    dream_insights_surfaced: number | null;
+  };
+}
+
+/* ── Intelligence Stream + Brain Learning Feed tab switcher ──────────────── */
+
+function IntelligenceStreamWithLearning({
+  intelligenceEvents,
+  brainLearningEvents,
+  brainLearningMeta,
+  orgId,
+}: {
+  intelligenceEvents: IntelligenceEvent[];
+  brainLearningEvents: NonNullable<BrainLearningFeedProps["initialEvents"]>;
+  brainLearningMeta?: {
+    latest_score: number | null;
+    prediction_accuracy: number | null;
+    autonomous_cycles_run: number | null;
+    dream_insights_surfaced: number | null;
+  };
+  orgId?: string;
+}) {
+  const [tab, setTab] = useState<"stream" | "learning">("stream");
+
+  return (
+    <div>
+      {/* Tab switcher */}
+      <div className="flex items-center gap-1 mb-4 bg-card/50 rounded-xl border border-border-subtle p-1 w-fit">
+        <button
+          onClick={() => setTab("stream")}
+          className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-150 ${
+            tab === "stream"
+              ? "bg-accent/10 text-accent border border-accent/30 shadow-sm"
+              : "text-muted hover:text-foreground hover:bg-surface border border-transparent"
+          }`}
+        >
+          Intelligence Stream
+        </button>
+        <button
+          onClick={() => setTab("learning")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-150 ${
+            tab === "learning"
+              ? "bg-brain-training/10 text-brain-training border border-brain-training/30 shadow-sm"
+              : "text-muted hover:text-foreground hover:bg-surface border border-transparent"
+          }`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-brain-training brain-pulse" />
+          Brain Learning
+          {brainLearningEvents.length > 0 && (
+            <span className="ml-0.5 px-1 py-0.5 rounded-full bg-brain-training/20 text-[9px] font-semibold tabular-nums">
+              {brainLearningEvents.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {tab === "stream" ? (
+        <IntelligenceStream events={intelligenceEvents} orgId={orgId} />
+      ) : (
+        <BrainLearningFeed
+          initialEvents={brainLearningEvents}
+          initialMeta={brainLearningMeta}
+          orgId={orgId}
+          limit={10}
+        />
+      )}
+    </div>
+  );
 }
 
 /* ── Component ────────────────────────────────────────────────────────────── */
@@ -80,6 +157,8 @@ export function OverviewClient({
   orgId,
   brainAnomaliesThisWeek = 0,
   brainDiscoveriesThisWeek = 0,
+  brainLearningEvents = [],
+  brainLearningMeta,
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
@@ -275,10 +354,12 @@ export function OverviewClient({
 
       {/* ── Zone 3: Intelligence Stream + Brain Vitals ───────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Intelligence Stream (60%) */}
+        {/* Intelligence Stream + Brain Learning Feed (60%) */}
         <div className="lg:col-span-3">
-          <IntelligenceStream
-            events={intelligenceEvents}
+          <IntelligenceStreamWithLearning
+            intelligenceEvents={intelligenceEvents}
+            brainLearningEvents={brainLearningEvents}
+            brainLearningMeta={brainLearningMeta}
             orgId={orgId}
           />
         </div>

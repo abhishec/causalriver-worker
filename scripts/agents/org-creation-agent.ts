@@ -96,6 +96,14 @@ export interface OrgCreationRequest {
   slug: string;
   /** Organization ID (auto-generated if not provided) */
   id?: string;
+  /**
+   * Customer ID — the parent customer that owns this workspace-org.
+   * One customer can have multiple orgs (workspaces), each with a fully
+   * isolated causal graph. customer_id is for billing/reporting only;
+   * it does NOT affect brain state or signal isolation.
+   * Leave undefined for internal/test orgs.
+   */
+  customerId?: string;
   /** Plan tier (free, pro, enterprise) */
   plan?: 'free' | 'pro' | 'enterprise';
   /** Industry/vertical (e.g., "SaaS", "E-commerce", "Finance") */
@@ -228,6 +236,10 @@ export class OrgCreationAgent extends BrainNativeAgent {
           slug: request.slug,
           plan: request.plan || 'pro',
           is_core_brain: false,
+          // customer_id links this workspace-org to its parent customer.
+          // Two orgs with the same customer_id still have fully isolated
+          // causal graphs — customer_id is billing/reporting only.
+          ...(request.customerId ? { customer_id: request.customerId } : {}),
           settings: {
             industry: request.industry,
             purpose: request.purpose,

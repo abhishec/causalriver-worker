@@ -433,6 +433,8 @@ export default function CopilotPage() {
                   <BrainContextPanel
                     brainMeta={brainMeta}
                     isLoading={brainLoading}
+                    orgId={currentOrg?.id}
+                    service={activeService !== "general" ? activeService : undefined}
                   />
                 </div>
               </>

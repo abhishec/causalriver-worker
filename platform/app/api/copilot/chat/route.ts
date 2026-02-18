@@ -224,6 +224,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Org resolution ──────────────────────────────────────────────────
+    // organizationId comes from the frontend (OrgProvider cookie / context).
+    // It is ALWAYS the workspace-org the user is currently viewing.
+    //
+    // Workspace isolation guarantee:
+    //   - Each org has its own causal graph, signals, memory, predictions.
+    //   - customer_id (billing parent) is NEVER used here — org_id is the
+    //     sole isolation boundary for all brain/SE-AAS/copilot paths.
+    //
+    // CORE_ORG_ID fallback:
+    //   - Only hit when organizationId is not provided (e.g. unauthenticated
+    //     embed, API callers without org context).
+    //   - The membership check below enforces access — a regular user who is
+    //     not a member of CORE will receive a 403. This is correct behaviour.
     const orgId = organizationId || CORE_ORG_ID;
 
     // Authenticate via Supabase
@@ -236,7 +250,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ── Validate user is a member of the requested org ─────────────────
+    // ── Validate user is a member of the requested org ──────────────────
+    // This runs for EVERY request including CORE_ORG_ID — no exemptions.
+    // A user must be an org_member of the target org OR a platform admin.
+    // This prevents any user from querying a different workspace's brain,
+    // regardless of what organizationId they pass in the request body.
     const { data: membership } = await supabase
       .from("org_members")
       .select("organization_id, is_platform_admin")
@@ -244,7 +262,7 @@ export async function POST(request: NextRequest) {
       .eq("organization_id", orgId)
       .single();
 
-    // Platform admins can access any org
+    // Platform admins can access any org (for support/debugging)
     const { data: adminCheck } = !membership
       ? await supabase
           .from("org_members")
