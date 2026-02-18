@@ -460,40 +460,108 @@ async function diagnoseWithHeuristics(
 // ============================================================================
 
 /**
- * Find similar past incidents
+ * Find similar past incidents from real artifact history.
+ *
+ * Queries the `artifacts` table for past incident-diagnosis executions,
+ * scores each by keyword overlap with the current incident description,
+ * and returns the top matches ranked by similarity.
+ *
+ * Falls back to empty array (not mock data) if supabase is unavailable.
  */
 async function findSimilarIncidents(
   request: IncidentDiagnosisRequest,
   ctx: ActionDomainContext
 ): Promise<SimilarIncident[]> {
-  // In production, this would query incident database
-  // For now, return mock data
-  const similarIncidents: SimilarIncident[] = [];
+  const supabase = (ctx as any).supabase;
+  const organizationId = (ctx as any).organizationId;
 
-  // Check for keyword matches
-  const keywords = request.description.toLowerCase().split(' ');
+  if (!supabase || !organizationId) return [];
 
-  if (keywords.includes('timeout') || keywords.includes('slow')) {
-    similarIncidents.push({
-      id: 'INC-2024-001',
-      description: 'API timeout issues',
-      similarity: 0.75,
-      resolution: 'Increased timeout configuration and optimized query',
-      timeToResolve: '2 hours',
-    });
+  try {
+    // Query last 90 days of resolved incident-diagnosis artifacts for this org
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: rows, error } = await supabase
+      .from('artifacts')
+      .select('id, artifact_data, created_at')
+      .eq('organization_id', organizationId)
+      .eq('domain_type', 'incident-diagnosis')
+      .gte('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error || !rows?.length) return [];
+
+    // Tokenize the current description for overlap scoring
+    const queryTokens = new Set(
+      request.description
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter((t) => t.length > 3)
+    );
+
+    const scored: Array<SimilarIncident & { _score: number }> = [];
+
+    for (const row of rows) {
+      const artifact = row.artifact_data as Record<string, any> | null;
+      if (!artifact) continue;
+
+      // Extract the description from the past incident's input
+      const pastDescription: string =
+        artifact.input?.description ||
+        artifact.summary ||
+        artifact.rootCauses?.[0]?.description ||
+        '';
+
+      if (!pastDescription) continue;
+
+      const pastTokens = new Set(
+        pastDescription
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, ' ')
+          .split(/\s+/)
+          .filter((t) => t.length > 3)
+      );
+
+      // Jaccard similarity
+      const intersection = [...queryTokens].filter((t) => pastTokens.has(t)).length;
+      const union = new Set([...queryTokens, ...pastTokens]).size;
+      const similarity = union > 0 ? intersection / union : 0;
+
+      if (similarity < 0.1) continue; // skip unrelated incidents
+
+      // Extract resolution from remediationSteps
+      const remediationSteps: string[] = artifact.remediationSteps?.map(
+        (s: any) => (typeof s === 'string' ? s : s.description || s.action || '')
+      ) ?? [];
+      const resolution = remediationSteps.slice(0, 2).join('; ') || 'See artifact for details';
+
+      // Time to resolve: use artifact metadata if available
+      const durationMs = artifact.metadata?.durationMs as number | null;
+      const timeToResolve = durationMs
+        ? `${Math.round(durationMs / 60000)} min (automated analysis)`
+        : artifact.timeToResolve || 'Unknown';
+
+      scored.push({
+        id: row.id as string,
+        description: pastDescription.slice(0, 200),
+        similarity: Math.round(similarity * 100) / 100,
+        resolution,
+        timeToResolve,
+        _score: similarity,
+      });
+    }
+
+    // Return top 5 by similarity, strip internal score
+    return scored
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 5)
+      .map(({ _score: _s, ...rest }) => rest);
+  } catch (err) {
+    // Non-fatal: similar incident lookup should never break diagnosis
+    console.warn('[incident-diagnosis] findSimilarIncidents failed:', (err as Error).message);
+    return [];
   }
-
-  if (keywords.includes('memory') || keywords.includes('oom')) {
-    similarIncidents.push({
-      id: 'INC-2024-002',
-      description: 'Out of memory errors',
-      similarity: 0.8,
-      resolution: 'Increased heap size and fixed memory leak',
-      timeToResolve: '4 hours',
-    });
-  }
-
-  return similarIncidents;
 }
 
 // ============================================================================
