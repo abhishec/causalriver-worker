@@ -542,19 +542,25 @@ export function createBrainTrainer(config: BrainTrainerConfig = {}) {
         reasoning: `Derived from "${pack.title}" (${pack.source})`,
       };
 
-      const { error } = await supabase.from('ai_memory').insert({
-        organization_id: organizationId,
-        memory_type: 'rule' as MemoryType,
-        content: JSON.stringify(ruleContent),
-        importance: pack.confidence,
-        domain: pack.domains[0] || 'general',
-        metadata: {
-          entity_type: rule.entityType,
-          title: rule.title,
-          source_pack: pack.id,
-          is_active: autoActivateRules,
+      // Use pack-scoped domain to satisfy (org, memory_type, domain) unique constraint
+      // Pattern: "<base_domain>.<pack_id>.<rule_index>" e.g. "finance.aas-trial-balance-computation.0"
+      const ruleDomain = `${pack.domains[0] || 'general'}.${pack.id}.${i}`;
+      const { error } = await supabase.from('ai_memory').upsert(
+        {
+          organization_id: organizationId,
+          memory_type: 'rule' as MemoryType,
+          content: JSON.stringify(ruleContent),
+          importance: pack.confidence,
+          domain: ruleDomain,
+          metadata: {
+            entity_type: rule.entityType,
+            title: rule.title,
+            source_pack: pack.id,
+            is_active: autoActivateRules,
+          },
         },
-      });
+        { onConflict: 'organization_id,memory_type,domain', ignoreDuplicates: false },
+      );
       if (!error) loaded++;
     }
     return loaded;
