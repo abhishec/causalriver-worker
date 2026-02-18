@@ -13,7 +13,7 @@
  *   Brain knows YOUR business. Claude is guessing.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -34,8 +34,8 @@ interface CausalContext {
   lastOutcome?: string;
 }
 
-// Claude's generic response — what you get with zero context
-function getClaudeBaseline(event: IntelligenceEvent): string[] {
+// Static fallback — shown while the live Claude call is loading or if it fails
+function getClaudeBaselineFallback(event: IntelligenceEvent): string[] {
   const domain = event.domain || "this area";
   return [
     `This metric appears to be higher than usual in ${domain}.`,
@@ -123,11 +123,17 @@ function WhatToDoNext({ event }: { event: IntelligenceEvent }) {
 export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) {
   const [causal, setCausal] = useState<CausalContext | null>(null);
   const [loading, setLoading] = useState(false);
+  const [claudeBullets, setClaudeBullets] = useState<string[] | null>(null);
+  const [claudeLoading, setClaudeLoading] = useState(false);
+  // Track which event ID we last fetched Claude baseline for to avoid duplicate calls
+  const lastClaudeFetchId = useRef<string | null>(null);
 
   // When an anomaly event is selected, fetch its causal context from the brain
   useEffect(() => {
     if (!event || event.type !== "anomaly") {
       setCausal(null);
+      setClaudeBullets(null);
+      lastClaudeFetchId.current = null;
       return;
     }
 
@@ -154,11 +160,44 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
       .finally(() => setLoading(false));
   }, [event?.id, event?.domain]);
 
+  // Fetch the real Claude baseline — what Claude says with ZERO business context
+  useEffect(() => {
+    if (!event || event.type !== "anomaly") return;
+    // Avoid re-fetching for the same event
+    if (lastClaudeFetchId.current === event.id) return;
+
+    lastClaudeFetchId.current = event.id;
+    setClaudeBullets(null);
+    setClaudeLoading(true);
+
+    fetch("/api/brain/claude-baseline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: event.title,
+        description: event.description,
+        domain: event.domain,
+        eventType: event.type,
+      }),
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.bullets?.length) {
+          setClaudeBullets(data.bullets);
+        }
+      })
+      .catch(() => {
+        // Silently fail — fallback shown
+      })
+      .finally(() => setClaudeLoading(false));
+  }, [event?.id]);
+
   if (!event) return null;
 
   const isAnomaly = event.type === "anomaly";
   const brainInsights = getBrainInsights(event, causal);
-  const claudeBaseline = getClaudeBaseline(event);
+  // Real Claude response if available, else static fallback
+  const claudeBaseline = claudeBullets ?? getClaudeBaselineFallback(event);
 
   return (
     <Drawer
@@ -234,33 +273,54 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
                 )}
               </div>
 
-              {/* Claude baseline column */}
+              {/* Claude baseline column — live response with zero org context */}
               <div className="space-y-2 border-l border-border-subtle pl-3">
                 <div className="flex items-center gap-1.5 mb-2">
                   <div className="w-5 h-5 rounded-md bg-surface-hover flex items-center justify-center">
                     <span className="text-[10px] font-bold text-muted-foreground">C</span>
                   </div>
                   <span className="text-[11px] font-semibold text-muted-foreground">Claude alone</span>
-                  <Badge variant="outline" size="xs">
-                    no context
-                  </Badge>
+                  {claudeLoading ? (
+                    <span className="text-[9px] text-muted italic">asking Claude…</span>
+                  ) : claudeBullets ? (
+                    <Badge variant="outline" size="xs">
+                      live · no context
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" size="xs">
+                      no context
+                    </Badge>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  {claudeBaseline.map((line, i) => (
-                    <div
-                      key={i}
-                      className="flex gap-2 text-[11px] leading-relaxed text-muted-foreground"
-                    >
-                      <span className="text-border mt-0.5 shrink-0">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15m-3 0l-3-3m0 0l3-3m-3 3H15" />
-                        </svg>
-                      </span>
-                      <span>{line}</span>
-                    </div>
-                  ))}
-                </div>
+                {claudeLoading ? (
+                  // Loading skeleton while waiting for real Claude response
+                  <div className="space-y-2">
+                    {[65, 85, 72, 78].map((w, i) => (
+                      <div
+                        key={i}
+                        className="h-2.5 bg-surface-hover rounded animate-pulse"
+                        style={{ width: `${w}%`, animationDelay: `${i * 120}ms` }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {claudeBaseline.map((line, i) => (
+                      <div
+                        key={i}
+                        className="flex gap-2 text-[11px] leading-relaxed text-muted-foreground"
+                      >
+                        <span className="text-border mt-0.5 shrink-0">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15m-3 0l-3-3m0 0l3-3m-3 3H15" />
+                          </svg>
+                        </span>
+                        <span>{line}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -268,7 +328,10 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
             <div className="mt-3 rounded-lg bg-accent/5 border border-accent/10 px-3 py-2.5 text-[11px] text-muted leading-relaxed">
               <span className="font-medium text-accent">Why Brain wins: </span>
               Brain loaded {causal ? "your causal graph, 8 months of history, and your typical spend patterns" : "your financial data and transaction history"} before answering.
-              Claude has none of that — it's answering from general knowledge.
+              {claudeBullets
+                ? " The right column is Claude's real live response — given only the alert text, no business context."
+                : " Claude has none of that — it's answering from general knowledge only."
+              }
             </div>
           </div>
         )}
