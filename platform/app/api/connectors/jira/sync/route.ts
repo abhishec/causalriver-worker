@@ -309,6 +309,7 @@ export async function POST(request: Request) {
 async function jiraFetch(
   credentials: {
     access_token?: string;
+    refresh_token?: string;
     auth_type?: string;
     email?: string;
     api_token?: string;
