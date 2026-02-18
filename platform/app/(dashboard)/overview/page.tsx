@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function OverviewPage() {
   const supabase = await createClient();
-  const CORE_ORG_ID = await getCurrentOrgId();
+  const currentOrgId = await getCurrentOrgId();
 
   const today = new Date().toISOString().split("T")[0];
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -42,7 +42,7 @@ export default async function OverviewPage() {
     safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("snapshot_date", { ascending: false })
       .limit(30)),
 
@@ -50,20 +50,20 @@ export default async function OverviewPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .gte("created_at", today)),
 
     // Total causal edges
     safe(supabase
       .from("causal_relationships_statistical")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", CORE_ORG_ID)),
+      .eq("organization_id", currentOrgId)),
 
     // Today's LLM cost (scoped to org)
     safe(supabase
       .from("llm_cost_log")
       .select("estimated_cost_usd, component, function_name, model, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .gte("created_at", today)
       .order("created_at", { ascending: false })
       .limit(50)),
@@ -72,14 +72,14 @@ export default async function OverviewPage() {
     safe(supabase
       .from("cost_budget_config")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .single()),
 
     // Recent causal discoveries for intelligence stream
     safe(supabase
       .from("causal_relationships_statistical")
       .select("id, source_entity, target_entity, statistical_method, p_value, confidence_score, lag_days, source_domain, target_domain, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false })
       .limit(10)),
 
@@ -87,7 +87,7 @@ export default async function OverviewPage() {
     safe(supabase
       .from("platform_events")
       .select("id, event_type, source, title, event_data, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false })
       .limit(30)),
 
@@ -95,7 +95,7 @@ export default async function OverviewPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .gte("created_at", thirtyDaysAgo)
       .order("created_at", { ascending: false })
       .limit(500)),
@@ -104,7 +104,7 @@ export default async function OverviewPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("id, signal_type, signal_value, signal_metadata, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .like("source_domain", "engineering%")
       .in("signal_type", ["velocity_collapsed", "bottleneck_detected"])
       .order("created_at", { ascending: false })
@@ -114,14 +114,14 @@ export default async function OverviewPage() {
     safe(supabase
       .from("org_connectors")
       .select("id, connector_type, display_name, status, last_sync_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("last_sync_at", { ascending: false })),
 
     // Recent SE-aaS artifacts
     safe(supabase
       .from("se_aas_artifacts")
       .select("id, domain_type, title, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false })
       .limit(5)),
 
@@ -129,7 +129,7 @@ export default async function OverviewPage() {
     safe(supabase
       .from("brain_emergence_log")
       .select("id, event_type, summary, metrics, intelligence_score, duration_ms, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false })
       .limit(10)),
   ]);
@@ -409,7 +409,7 @@ export default async function OverviewPage() {
       knowledgeGrowth={knowledgeGrowth}
       signalRates={signalRates}
       totalSignalRate={Math.round(totalSignalRate * 100) / 100}
-      orgId={CORE_ORG_ID}
+      orgId={currentOrgId}
       brainAnomaliesThisWeek={brainAnomaliesThisWeek}
       brainDiscoveriesThisWeek={brainDiscoveriesThisWeek}
       topDiscoveries={latest?.top_discoveries || []}
