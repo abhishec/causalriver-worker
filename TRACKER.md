@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (NB-060/061/032 FIXED — website lint 0 errors, NB-032 CI cold-start guard added, NB-061 already done. NB-062 ajv CVE: dev-only, pnpm override + .pnpmfile.cjs added, nested eslint bundle resists patching — accepted as dev-only risk) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (NB-064 FIXED — SE-AAS Gap 3 pushInsight, Gap 4 leapContext/entityLinks ctx surfacing, Gap 5 AAS Promise.all. Full SE-AAS ↔ AAS parity now achieved. NB-062 ajv CVE: dev-only, accepted risk) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -29,7 +29,7 @@
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
 | Data Pipeline / Brain | 9 | 8 | 1 | 0 |
-| SE-aaS / Connectors | 13 | 13 | 0 | 0 |
+| SE-aaS / Connectors | 14 | 14 | 0 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 3 | 0 | 0 |
@@ -40,7 +40,7 @@
 | Website / Lint | 1 | 1 | 0 | 0 |
 | Platform / TypeScript | 1 | 1 | 0 | 0 |
 | Security / CVE | 1 | 0 | 1 | 0 |
-| **TOTAL** | **63** | **62** | **1** | **0** |
+| **TOTAL** | **64** | **63** | **1** | **0** |
 
 ---
 
@@ -694,6 +694,25 @@
 
 ---
 
+### NB-064 🟠 ✅
+**SE-AAS & AAS executor parity gaps — 3 remaining after NB-063 (pushInsight, ctx surfacing, parallel feedback)**
+- Area: SE-aaS / AAS / Brain / Federated Learning
+- Priority: High (Gap 3 🟠), Medium (Gap 4 🟡), Low (Gap 5 🟢)
+- Status: ✅ Fixed (2026-02-18)
+- Root cause: Deep-dive parity audit after NB-063 revealed 3 remaining divergences between `se-aas/domain-executor.ts` and `aas/domain-executor.ts`:
+  1. **Gap 3 🟠** — SE-AAS missing Channel 5 `pushInsight` from the Brain Feedback Bus. AAS had it since NB-059; SE-AAS feedback was broadcasting Channels 1–4 but never pushing intervention insights cross-service. Copilot and AAS Mesh `recentSignals` queries would never see SE-AAS intervention signals.
+  2. **Gap 4 🟡** — SE-AAS `ctx` object (Step 2) did not explicitly surface `leapContext` or `entityLinks`. Both ARE loaded by the mesh (`getSeaasDomainContext` loads entity links in Layer 2; LEAP is loaded in Layer 1 universal), but domain `execute()` functions had to dig into `ctx.brain` internals to access them — violating the AAS contract where both are top-level on `ctx.brainContext`.
+  3. **Gap 5 🟢** — AAS Step 5 ran Feedback Bus Channels 1–4 sequentially (each individually awaited) instead of `Promise.all`. SE-AAS was already correct (parallel). Sequential adds ~3-4 redundant await ticks before the federation fire-and-forget.
+- Fixes:
+  1. **Gap 3**: Added `bus.pushInsight()` call after the `Promise.all` block in SE-AAS Step 5. Conditional on `interventions.length > 0`. Fire-and-forget with `.catch(() => {})` — never blocks domain response.
+  2. **Gap 4**: Added explicit `leapContext: brainContext.leapContext ?? null` and `entityLinks: (brainContext.entityLinks ?? []).slice(0, 20).map(...)` to SE-AAS `ctx` in Step 2. Mirrors the AAS `ctx.brainContext.leapContext` / `ctx.brainContext.entityLinks` pattern exactly.
+  3. **Gap 5**: Rewrote AAS Step 5 from 4 sequential `await bus.*` calls + conditional `await bus.pushInsight` to a single `Promise.all([ch1, ch2, ch3, ch4]).catch(() => {})` + fire-and-forget `bus.pushInsight(...).catch(() => {})`. Extracted `agentConfidence` and `anomalies` as local consts for clarity.
+- Files:
+  - `platform/lib/se-aas/domain-executor.ts` (Gap 3 + Gap 4)
+  - `platform/lib/aas/domain-executor.ts` (Gap 5)
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -703,7 +722,7 @@
 |----|----------|------|-------|
 | NB-062 | 🟡 | Security | ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) — dev-only, nested eslint bundle resists pnpm override. Accepted risk. |
 
-> **62/63 issues resolved.** 1 remaining: NB-062 ajv CVE is dev-only (not in production bundle) — accepted risk pending eslint upgrade.
+> **63/64 issues resolved.** 1 remaining: NB-062 ajv CVE is dev-only (not in production bundle) — accepted risk pending eslint upgrade.
 
 ---
 
@@ -810,6 +829,7 @@
 | NB-058 | S3 → Supabase Storage fallback for GL uploads | d695a4eaeb |
 | NB-059 | Federated Causal Learning (FedAvg delta promotion to CORE brain) | db43aada6a |
 | NB-063 | SE-AAS federated learning loop fixed — ORG → CORE now works for both SE-AAS and AAS | 2026-02-18 |
+| NB-064 | SE-AAS/AAS parity gaps fixed — pushInsight (Ch5), leapContext/entityLinks ctx surfacing, AAS Promise.all | 2026-02-18 |
 
 ---
 

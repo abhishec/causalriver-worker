@@ -157,6 +157,10 @@ export async function executeDomain(
   );
 
   // ── Step 2: Build ActionDomainContext ────────────────────────────────────
+  // Gap 4 (NB-064): Explicitly surface leapContext and entityLinks so SE-AAS
+  // domain execute() functions can access deep brain reasoning without having
+  // to dig into ctx.brain internals. Mirrors the AAS executor pattern where
+  // both are unpacked directly into the ctx for easy agent consumption.
   const ctx = {
     organizationId: params.organizationId,
     userId: params.userId,
@@ -165,6 +169,17 @@ export async function executeDomain(
       anthropicApiKey: params.anthropicApiKey,
     },
     brain: brainContext,
+    // LEAP context: deep brain reasoning from cognitive sleep cycles
+    // (curiosity hypotheses, self-model, imagination scenarios)
+    leapContext: brainContext.leapContext ?? null,
+    // Entity links: cross-system connections (PR→Jira→Slack→Deploy)
+    // loaded by the mesh's Layer 2 SE-AAS domain context (getSeaasDomainContext)
+    entityLinks: (brainContext.entityLinks ?? []).slice(0, 20).map((l: Record<string, unknown>) => ({
+      source: `${l['source_domain'] ?? ''}:${l['source_entity_id']}`,
+      target: `${l['target_domain'] ?? ''}:${l['target_entity_id']}`,
+      type: l['link_type'],
+      confidence: l['confidence'],
+    })),
     supabase,
   };
 
@@ -240,6 +255,21 @@ export async function executeDomain(
   ]).catch(() => {
     // Non-blocking: feedback failure should NEVER break domain execution
   });
+
+  // Channel 5: Push insight for cross-service propagation (Gap 3 — NB-064)
+  // If SE-AAS found actionable interventions, broadcast them as a structured
+  // insight signal so Copilot and AAS pick it up via their next Mesh
+  // recentSignals query. Mirrors the AAS executor's pushInsight pattern.
+  if (interventions.length > 0) {
+    bus.pushInsight({
+      type: 'anomaly',
+      domains: ['engineering', 'se-aas', params.domainType],
+      content: `SE-AAS domain "${params.domainType}" flagged ${interventions.length} intervention(s): ${interventions[0]?.description ?? 'See artifact for details'}`,
+      importance: confidence,
+    }).catch(() => {
+      // Non-blocking: insight push failure should NEVER break domain execution
+    });
+  }
 
   // ── Step 6: Domain-Specific Side Effects (DB-direct, non-blocking) ───────
   // Previously in event-bus-wiring.ts (initializeSeAaSEventBusWiring) which was

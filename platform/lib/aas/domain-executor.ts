@@ -254,59 +254,71 @@ export async function executeAccountingAgent(
   const durationMs = Date.now() - startMs;
 
   // ── Step 5: Feedback Loop — Teach the Brain ─────────────────────────────
+  // Gap 5 (NB-064): Converted from sequential awaits to Promise.all to match
+  // SE-AAS executor pattern. Channels 1-4 now run in parallel (non-blocking),
+  // shaving ~3-4 awaits off the hot path before the federation fire-and-forget.
   const bus = createBrainFeedbackBus({ supabase, organizationId });
+  const anomalies = (result.anomalies as Array<{ reason: string }>) || [];
+  const agentConfidence = typeof result.confidence === 'number' ? result.confidence : 0.5;
 
-  // Channel 1: Signal
-  await bus.emitSignal({
-    sourceDomain: `aas.${info.name}`,
-    signalType: 'agent_completion',
-    signalValue: typeof result.confidence === 'number' ? result.confidence : 0.5,
-    entityType: 'aas_agent',
-    entityId: `${info.name}_${Date.now()}`,
-    metadata: {
-      action,
-      agentName: info.name,
+  await Promise.all([
+    // Channel 1: Signal — Brain observes this agent completion
+    bus.emitSignal({
+      sourceDomain: `aas.${info.name}`,
+      signalType: 'agent_completion',
+      signalValue: agentConfidence,
+      entityType: 'aas_agent',
+      entityId: `${info.name}_${Date.now()}`,
+      metadata: {
+        action,
+        agentName: info.name,
+        brainAugmented: brainContext.cognitiveStackAvailable,
+        causalEdgesUsed: brainContext.causalEdges.length,
+        patternsUsed: brainContext.patterns.length,
+        durationMs,
+        userId,
+        jurisdiction,
+        transactionCount: transactions.length,
+      },
+    }),
+
+    // Channel 2: Predictions — record anomalies for later verification
+    anomalies.length > 0
+      ? bus.recordInterventionPredictions(
+          anomalies.slice(0, 5).map(a => ({ description: a.reason, type: 'accounting_anomaly' })),
+          `aas.${action}`,
+          agentConfidence,
+        )
+      : Promise.resolve(),
+
+    // Channel 3: Evolution — trigger Bayesian weight updates
+    bus.triggerEvolution(),
+
+    // Channel 4: Observability — audit trail
+    bus.recordExecution({
+      service: 'aas',
+      domainType: info.name,
+      durationMs,
+      claudePowered: false,
       brainAugmented: brainContext.cognitiveStackAvailable,
       causalEdgesUsed: brainContext.causalEdges.length,
       patternsUsed: brainContext.patterns.length,
-      durationMs,
-      userId,
-      jurisdiction,
-      transactionCount: transactions.length,
-    },
+    }),
+  ]).catch(() => {
+    // Non-blocking: feedback failure should NEVER break agent execution
   });
 
-  // Channel 2: Predictions (if result contains findings/anomalies)
-  const anomalies = (result.anomalies as Array<{ reason: string }>) || [];
+  // Channel 5: Push insight for cross-service propagation (fire-and-forget)
+  // Kept outside Promise.all because it is conditional — and its own .catch()
+  // ensures it can never surface as an unhandled rejection.
   if (anomalies.length > 0) {
-    await bus.recordInterventionPredictions(
-      anomalies.slice(0, 5).map(a => ({ description: a.reason, type: 'accounting_anomaly' })),
-      `aas.${action}`,
-      typeof result.confidence === 'number' ? result.confidence : 0.5,
-    );
-  }
-
-  // Channel 3: Evolution
-  await bus.triggerEvolution();
-
-  // Channel 4: Observability
-  await bus.recordExecution({
-    service: 'aas',
-    domainType: info.name,
-    durationMs,
-    claudePowered: false,
-    brainAugmented: brainContext.cognitiveStackAvailable,
-    causalEdgesUsed: brainContext.causalEdges.length,
-    patternsUsed: brainContext.patterns.length,
-  });
-
-  // Channel 5: Push insight if anomalies found (cross-service propagation)
-  if (anomalies.length > 0) {
-    await bus.pushInsight({
+    bus.pushInsight({
       type: 'anomaly',
       domains: ['finance', 'accounting', 'revenue'],
-      content: `Accounting agent "${info.name}" found ${anomalies.length} anomaly(ies) in ${jurisdiction} GL data: ${anomalies[0]?.reason || 'See details'}`,
+      content: `Accounting agent "${info.name}" found ${anomalies.length} anomaly(ies) in ${jurisdiction} GL data: ${anomalies[0]?.reason ?? 'See details'}`,
       importance: 0.8,
+    }).catch(() => {
+      // Non-blocking: insight push failure should NEVER break agent execution
     });
   }
 
