@@ -11,8 +11,10 @@ export const dynamic = 'force-dynamic';
  * Runs the brain's GitHub connector fullSync — pulls PRs, reviews, issues,
  * CI/CD runs, commits, and file changes into cross_domain_signals.
  *
- * Body: { token?: string, organizationId?: string }
+ * Body: { token?: string, organizationId?: string, trackedBranches?: string[], dataLookback?: string }
  * Token resolved: body.token > stored OAuth access_token > stored PAT
+ * trackedBranches: overrides stored config when provided (e.g. on first-connect from UI)
+ * dataLookback:   overrides stored config when provided ("30d"|"90d"|"6m"|"1y"|"all")
  */
 export async function POST(request: Request) {
   try {
@@ -54,28 +56,64 @@ export async function POST(request: Request) {
       );
     }
 
-    const { owner, repo } = connector.config as { owner: string; repo: string };
+    const storedConfig = connector.config as {
+      owner: string;
+      repo: string;
+      repoFullName?: string;
+      trackedBranches?: string[];
+      dataLookback?: string;
+    };
+    const { owner, repo } = storedConfig;
+
+    // Branch config: body overrides stored config (body is set on first-connect from UI)
+    const trackedBranches: string[] | undefined =
+      (body.trackedBranches && Array.isArray(body.trackedBranches) && body.trackedBranches.length > 0)
+        ? body.trackedBranches
+        : storedConfig.trackedBranches;
+    const dataLookback: string | undefined = body.dataLookback || storedConfig.dataLookback;
+
+    // If body provided branch config that differs from stored, persist it
+    if (body.trackedBranches || body.dataLookback) {
+      const service2 = await createServiceClient();
+      await service2
+        .from("org_connectors")
+        .update({
+          config: {
+            ...storedConfig,
+            ...(body.trackedBranches ? { trackedBranches: body.trackedBranches } : {}),
+            ...(body.dataLookback ? { dataLookback: body.dataLookback } : {}),
+          },
+        })
+        .eq("id", connector.id);
+    }
 
     // 4. Update status to syncing
     await service
       .from("org_connectors")
       .update({
         config: {
-          ...connector.config,
+          ...storedConfig,
           ingestion_progress: {
             step: "syncing_signals",
-            message: "Syncing PRs, issues, CI/CD, and reviews from GitHub...",
+            message: trackedBranches && trackedBranches.length > 0
+              ? `Syncing PRs, issues, CI/CD from ${trackedBranches.length} branch(es): ${trackedBranches.slice(0, 3).join(", ")}${trackedBranches.length > 3 ? "…" : ""}...`
+              : "Syncing PRs, issues, CI/CD, and reviews from GitHub...",
             startedAt: new Date().toISOString(),
+            trackedBranches: trackedBranches || null,
           },
         },
       })
       .eq("id", connector.id);
 
-    // 5. Run fullSync
+    // 5. Run fullSync — pass branch tracking config for SE-aaS release analysis
     const github = createGitHubConnector({
       token,
       owner,
       repo,
+      // trackedBranches: ["release/*", "main"] → only sync PRs/commits/workflows on these branches
+      // dataLookback: "90d" / "6m" / "1y" / "all" → controls how far back to pull data
+      trackedBranches,
+      dataLookback,
       syncScope: {
         pulls: true,
         reviews: true,
@@ -135,14 +173,19 @@ export async function POST(request: Request) {
           ? syncResult.errors.join("; ")
           : null,
         config: {
-          ...connector.config,
+          ...storedConfig,
+          // Persist resolved branch config so future syncs use the same settings
+          ...(trackedBranches ? { trackedBranches } : {}),
+          ...(dataLookback ? { dataLookback } : {}),
           ingestion_progress: {
             step: "signals_complete",
-            message: `Synced ${syncResult.signalsGenerated} signals from ${syncResult.recordsProcessed} records`,
+            message: `Synced ${syncResult.signalsGenerated} signals from ${syncResult.recordsProcessed} records${trackedBranches ? ` (branches: ${trackedBranches.slice(0, 3).join(", ")}${trackedBranches.length > 3 ? "…" : ""})` : ""}`,
             completedAt: new Date().toISOString(),
             signalsGenerated: syncResult.signalsGenerated,
             recordsProcessed: syncResult.recordsProcessed,
             duration_ms: syncResult.duration_ms,
+            trackedBranches: trackedBranches || null,
+            dataLookback: dataLookback || "90d",
           },
         },
       })

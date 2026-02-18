@@ -49,6 +49,19 @@ export interface GitHubConnectorConfig {
   repo: string;
   /** GitHub API base URL (default: https://api.github.com) */
   baseUrl?: string;
+  /**
+   * Branch names to track for SE-aaS release analysis.
+   * Supports glob-style patterns: ["release/*", "main", "develop"].
+   * When specified, PRs/commits/workflows are filtered to these branches only.
+   * Signals get branch_name + release_version metadata for release tracking.
+   * When absent (undefined/empty), ALL branches are synced (default behaviour).
+   */
+  trackedBranches?: string[];
+  /**
+   * How far back to pull data on the first full sync.
+   * Format: "30d", "90d", "6m", "1y", "all" (default: "90d")
+   */
+  dataLookback?: string;
   /** Which data to sync (default: all true) */
   syncScope?: {
     pulls?: boolean;
@@ -78,6 +91,10 @@ interface GitHubPR {
   user?: { login: string };
   labels?: Array<{ name: string }>;
   requested_reviewers?: Array<{ login: string }>;
+  /** Source branch (feature → this branch) */
+  head?: { ref: string; sha: string };
+  /** Target/base branch (PR merges INTO this branch) */
+  base?: { ref: string; sha: string };
 }
 
 interface GitHubIssue {
@@ -141,6 +158,48 @@ interface GitHubWorkflowJob {
 // HELPERS
 // ============================================================================
 
+/**
+ * Convert a dataLookback string ("30d", "90d", "6m", "1y", "all") to a Date cutoff.
+ * Returns undefined when lookback is "all" (no time filter).
+ */
+function lookbackToDate(lookback?: string): Date | undefined {
+  if (!lookback || lookback === "all") return undefined;
+  const now = Date.now();
+  const match = lookback.match(/^(\d+)(d|m|y)$/);
+  if (!match) return new Date(now - 90 * 24 * 60 * 60 * 1000); // default 90d
+  const n = parseInt(match[1], 10);
+  const unit = match[2];
+  const ms =
+    unit === "d" ? n * 24 * 60 * 60 * 1000 :
+    unit === "m" ? n * 30 * 24 * 60 * 60 * 1000 :
+    /* y */        n * 365 * 24 * 60 * 60 * 1000;
+  return new Date(now - ms);
+}
+
+/**
+ * Test whether a branch name matches a pattern list.
+ * Supports glob wildcards: "release/*" matches "release/1.2.3".
+ * An empty/undefined pattern list means "match everything".
+ */
+function branchMatchesPatterns(branch: string, patterns?: string[]): boolean {
+  if (!patterns || patterns.length === 0) return true; // no filter → all branches
+  return patterns.some((pattern) => {
+    if (pattern === branch) return true;
+    // Glob-style: "release/*" → regex /^release\/.+$/
+    const regexSrc = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".+");
+    return new RegExp(`^${regexSrc}$`).test(branch);
+  });
+}
+
+/**
+ * Extract a release version string from a branch name.
+ * "release/1.2.3" → "1.2.3", "v1.2.3" → "1.2.3", "main" → null
+ */
+function extractReleaseVersion(branch: string): string | null {
+  const m = branch.match(/(?:release\/|v)([\d]+\.[\d]+(?:\.[\d]+)?(?:[-\w.]+)?)/i);
+  return m ? m[1] : null;
+}
+
 /** Extract unique parent directories from file paths */
 function extractDirectories(files: GitHubPRFile[]): string[] {
   const dirs = new Set<string>();
@@ -169,11 +228,16 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
     owner,
     repo,
     baseUrl = 'https://api.github.com',
+    trackedBranches,   // undefined → all branches; ["release/*","main"] → filter
+    dataLookback,      // "30d" / "90d" / "6m" / "1y" / "all"
     syncScope = {
       pulls: true, issues: true, commits: true, workflows: true,
       reviews: true, fileChanges: true, jobDetails: true,
     },
   } = config;
+
+  // Convert dataLookback string to a cutoff Date (undefined = fetch all history)
+  const sinceCutoff: Date | undefined = lookbackToDate(dataLookback);
 
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -216,6 +280,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   }
 
   async function fetchPullRequests(since?: Date): Promise<GitHubPR[]> {
+    // Use sinceCutoff from dataLookback if no explicit since date provided
+    const effectiveSince = since ?? sinceCutoff;
     const allPRs: GitHubPR[] = [];
     let page = 1;
 
@@ -227,22 +293,35 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         per_page: '100',
         page: String(page),
       };
-      if (since) {
-        params.since = since.toISOString();
-      }
+      // Note: GitHub pulls API does not support `since` param directly;
+      // we filter by updated_at after fetch. The `base` param filters by target branch.
+      // When tracking specific branches, we fetch per-branch to maximise accuracy.
 
       const prs = await fetchJSON<GitHubPR[]>(`/repos/${owner}/${repo}/pulls`, params);
       if (!prs || prs.length === 0) break;
 
-      // Fetch detailed stats for each PR (additions/deletions)
+      // Fetch detailed stats for each PR (additions/deletions + head/base branch)
       for (const pr of prs) {
         if (allPRs.length >= MAX_PRS) break;
-        if (since && new Date(pr.updated_at) < since) continue;
+        if (effectiveSince && new Date(pr.updated_at) < effectiveSince) {
+          // PRs are sorted by updated desc — once we hit one older than cutoff, stop
+          return allPRs;
+        }
         try {
           const detail = await fetchJSON<GitHubPR>(`/repos/${owner}/${repo}/pulls/${pr.number}`);
-          allPRs.push(detail);
+          // Branch filter: keep PR if its BASE (target) branch matches trackedBranches
+          // OR if its HEAD (source) branch matches (captures PRs going INTO tracked branches)
+          const baseBranch = detail.base?.ref || '';
+          const headBranch = detail.head?.ref || '';
+          const tracked =
+            branchMatchesPatterns(baseBranch, trackedBranches) ||
+            branchMatchesPatterns(headBranch, trackedBranches);
+          if (tracked) allPRs.push(detail);
         } catch {
-          allPRs.push(pr); // Use basic data if detail fetch fails
+          // Use basic data if detail fetch fails (no branch info available for filtering)
+          if (!trackedBranches || trackedBranches.length === 0) {
+            allPRs.push(pr); // Only include if no branch filter active
+          }
         }
       }
 
@@ -288,38 +367,119 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   }
 
   async function fetchWorkflowRuns(since?: Date): Promise<GitHubWorkflowRun[]> {
+    const effectiveSince = since ?? sinceCutoff;
     const allRuns: GitHubWorkflowRun[] = [];
-    let page = 1;
 
-    while (allRuns.length < MAX_WORKFLOW_RUNS) {
-      const params: Record<string, string> = {
-        per_page: '100',
-        page: String(page),
-      };
-      if (since) {
-        params.created = `>=${since.toISOString().split('T')[0]}`;
+    // If trackedBranches with literal names specified, fetch per-branch for accuracy
+    const literalBranches =
+      trackedBranches && trackedBranches.length > 0
+        ? trackedBranches.filter((b) => !b.includes('*'))
+        : [];
+
+    const branchesToFetch = literalBranches.length > 0 ? literalBranches : [undefined];
+
+    for (const branch of branchesToFetch) {
+      let page = 1;
+      while (allRuns.length < MAX_WORKFLOW_RUNS) {
+        const params: Record<string, string> = {
+          per_page: '100',
+          page: String(page),
+        };
+        if (effectiveSince) {
+          params.created = `>=${effectiveSince.toISOString().split('T')[0]}`;
+        }
+        if (branch) {
+          params.branch = branch; // GitHub API: filter runs by branch name
+        }
+
+        const data = await fetchJSON<{ workflow_runs: GitHubWorkflowRun[] }>(
+          `/repos/${owner}/${repo}/actions/runs`,
+          params
+        );
+        const runs = data.workflow_runs || [];
+        if (runs.length === 0) break;
+
+        for (const run of runs) {
+          if (allRuns.length >= MAX_WORKFLOW_RUNS) break;
+          // For glob patterns (no literal branch filter), apply post-fetch filter
+          if (trackedBranches && trackedBranches.length > 0 && literalBranches.length === 0) {
+            if (!branchMatchesPatterns(run.head_branch, trackedBranches)) continue;
+          }
+          allRuns.push(run);
+        }
+
+        if (runs.length < 100) break; // Last page
+        page++;
+        await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
       }
-
-      const data = await fetchJSON<{ workflow_runs: GitHubWorkflowRun[] }>(
-        `/repos/${owner}/${repo}/actions/runs`,
-        params
-      );
-      const runs = data.workflow_runs || [];
-      if (runs.length === 0) break;
-
-      for (const run of runs) {
-        if (allRuns.length >= MAX_WORKFLOW_RUNS) break;
-        allRuns.push(run);
-      }
-
-      if (runs.length < 100) break; // Last page
-      page++;
-      await new Promise(r => setTimeout(r, 50)); // Rate limit courtesy
     }
+
     return allRuns;
   }
 
+  async function fetchCommitsForBranch(branch: string, since?: Date): Promise<GitHubCommit[]> {
+    const effectiveSince = since ?? sinceCutoff;
+    const branchCommits: GitHubCommit[] = [];
+    let page = 1;
+
+    while (branchCommits.length < MAX_COMMITS) {
+      const params: Record<string, string> = {
+        sha: branch,         // GitHub commits API: sha = branch name
+        per_page: '100',
+        page: String(page),
+      };
+      if (effectiveSince) {
+        params.since = effectiveSince.toISOString();
+      }
+
+      const commits = await fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
+      if (!commits || commits.length === 0) break;
+
+      for (const commit of commits) {
+        if (branchCommits.length >= MAX_COMMITS) break;
+        // Annotate with branch name for downstream signal enrichment
+        (commit as any)._branch = branch;
+        branchCommits.push(commit);
+      }
+
+      if (commits.length < 100) break;
+      page++;
+      await new Promise(r => setTimeout(r, 50));
+    }
+    return branchCommits;
+  }
+
   async function fetchCommits(since?: Date): Promise<GitHubCommit[]> {
+    const effectiveSince = since ?? sinceCutoff;
+
+    // If trackedBranches specified, fetch per branch (accurate branch attribution)
+    if (trackedBranches && trackedBranches.length > 0) {
+      // Expand glob patterns: "release/*" needs the actual branch list from API
+      // For simplicity, fetch commits per literal branch name (non-glob patterns)
+      // and fall back to default fetch for glob patterns.
+      const literalBranches = trackedBranches.filter((b) => !b.includes('*'));
+      if (literalBranches.length > 0) {
+        const perBranchCommits = await Promise.all(
+          literalBranches.map((b) => fetchCommitsForBranch(b, effectiveSince))
+        );
+        // Deduplicate by SHA (a commit can appear on multiple branches)
+        const seen = new Set<string>();
+        const allCommits: GitHubCommit[] = [];
+        for (const branchCommits of perBranchCommits) {
+          for (const c of branchCommits) {
+            if (!seen.has(c.sha)) {
+              seen.add(c.sha);
+              allCommits.push(c);
+              if (allCommits.length >= MAX_COMMITS) return allCommits;
+            }
+          }
+        }
+        return allCommits;
+      }
+      // Glob-only patterns: fall through to default (all-branch) fetch
+    }
+
+    // Default: fetch from default branch (all commits)
     const allCommits: GitHubCommit[] = [];
     let page = 1;
 
@@ -328,8 +488,8 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         per_page: '100',
         page: String(page),
       };
-      if (since) {
-        params.since = since.toISOString();
+      if (effectiveSince) {
+        params.since = effectiveSince.toISOString();
       }
 
       const commits = await fetchJSON<GitHubCommit[]>(`/repos/${owner}/${repo}/commits`, params);
@@ -397,6 +557,18 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
       const linesChanged = (pr.additions || 0) + (pr.deletions || 0);
       const isBug = pr.labels?.some((l) => l.name.toLowerCase().includes('bug'));
 
+      // ── Branch + release metadata for SE-aaS release tracking ──────────
+      const headBranch = pr.head?.ref || '';
+      const baseBranch = pr.base?.ref || '';
+      // Use base branch (target) as the "release branch" for tracking purposes
+      const releaseBranch = baseBranch || headBranch;
+      const releaseVersion = extractReleaseVersion(releaseBranch) || extractReleaseVersion(headBranch);
+      const branchMeta = {
+        branch_name: releaseBranch || undefined,
+        head_branch: headBranch || undefined,
+        release_version: releaseVersion || undefined,
+      };
+
       // Fetch file changes for this PR
       let filePaths: string[] = [];
       let directoriesChanged: string[] = [];
@@ -405,7 +577,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
         filePaths = files.map((f) => f.filename);
         directoriesChanged = extractDirectories(files);
 
-        // Emit pr_files_changed signal
+        // Emit pr_files_changed signal (with branch context)
         if (files.length > 0) {
           signals.push({
             organization_id: orgId,
@@ -423,6 +595,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
               directories_changed: directoriesChanged,
               additions: files.reduce((sum, f) => sum + f.additions, 0),
               deletions: files.reduce((sum, f) => sum + f.deletions, 0),
+              ...branchMeta,
             },
           });
         }
@@ -448,6 +621,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           created_at: pr.created_at,
           directory_count: directoriesChanged.length,
           reviewers_requested: pr.requested_reviewers?.map((r) => r.login) || [],
+          ...branchMeta,
         },
       });
 
@@ -486,6 +660,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
               sentiment_score: sentiment?.score ?? 0,
               sentiment_label: sentiment?.label ?? 'neutral',
               topics: topics?.keywords.map((k) => k.word) || [],
+              ...branchMeta, // branch_name + release_version for SE-aaS
             },
           });
         }
@@ -515,6 +690,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
             directory_count: directoriesChanged.length,
             reviewers_who_approved: reviewersWhoApproved,
             review_rounds: reviewersWhoApproved.length,
+            ...branchMeta, // branch_name + release_version for SE-aaS release tracker
           },
         });
       }
@@ -531,6 +707,7 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
           metadata: {
             title: pr.title,
             author: pr.user?.login,
+            ...branchMeta,
           },
         });
       }
@@ -727,24 +904,37 @@ export function createGitHubConnector(config: GitHubConnectorConfig): NexusConne
   function commitsToSignals(commits: GitHubCommit[], orgId: string): ConnectorSignal[] {
     const signals: ConnectorSignal[] = [];
 
-    // Aggregate commits by day for volume signal
-    const commitsByDay = new Map<string, number>();
+    // Aggregate commits by day (and branch when available) for volume signals
+    // Commits annotated with _branch by fetchCommitsForBranch get per-branch breakdown
+    const commitsByDayBranch = new Map<string, { count: number; branch?: string }>();
     for (const commit of commits) {
       const day = commit.commit.author.date.split('T')[0];
-      commitsByDay.set(day, (commitsByDay.get(day) || 0) + 1);
+      const branch = (commit as any)._branch as string | undefined;
+      const key = branch ? `${day}::${branch}` : day;
+      const existing = commitsByDayBranch.get(key);
+      if (existing) {
+        existing.count++;
+      } else {
+        commitsByDayBranch.set(key, { count: 1, branch });
+      }
     }
 
-    for (const [day, count] of commitsByDay) {
+    for (const [key, { count, branch }] of commitsByDayBranch) {
+      const day = key.split('::')[0];
+      const releaseVersion = branch ? extractReleaseVersion(branch) : null;
       signals.push({
         organization_id: orgId,
         source_domain: 'engineering.github',
         signal_type: 'commit_volume',
         signal_value: Math.min(count / 20, 1), // Normalized by 20 commits/day
         entity_type: 'metric',
-        entity_id: `commits_${day}`,
+        entity_id: branch ? `commits_${day}_${branch.replace(/[^a-zA-Z0-9]/g, '_')}` : `commits_${day}`,
         metadata: {
           date: day,
           commit_count: count,
+          // Branch metadata for SE-aaS release tracking
+          ...(branch ? { branch_name: branch } : {}),
+          ...(releaseVersion ? { release_version: releaseVersion } : {}),
         },
       });
     }

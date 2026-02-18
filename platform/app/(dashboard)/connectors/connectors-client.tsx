@@ -172,11 +172,46 @@ export function ConnectorsClient({
   /* ── GitHub setup ────────────────────────────────────────────── */
   const handleGitHubConnected = useCallback(
     (_repo: any, releaseConfig: GitHubReleaseConfig) => {
+      const branchLabel =
+        releaseConfig.trackedBranches.length > 0
+          ? `${releaseConfig.trackedBranches.length} branch(es)`
+          : "all branches";
+
       setMessage({
         type: "info",
-        text: `Starting ingestion for ${releaseConfig.trackedBranches.length} branch(es), ${releaseConfig.dataLookback} lookback...`,
+        text: `Starting GitHub ingestion for ${branchLabel}, ${releaseConfig.dataLookback} lookback...`,
       });
       setShowIngestion(true);
+
+      // ── CRITICAL FIX: pass trackedBranches + dataLookback to sync route ──
+      // Previously this was just router.refresh() — branch config was captured
+      // in the UI but never actually sent to the backend, so ALL branches were
+      // synced and no release_version metadata was stamped on signals.
+      fetch("/api/connectors/github/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trackedBranches: releaseConfig.trackedBranches,
+          dataLookback: releaseConfig.dataLookback,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            setMessage({ type: "error", text: `GitHub sync failed: ${data.error}` });
+          } else {
+            setMessage({
+              type: "success",
+              text: `GitHub sync complete — ${data.signalsGenerated ?? 0} signals ingested from ${branchLabel}`,
+            });
+          }
+          setTimeout(() => router.refresh(), 1500);
+        })
+        .catch(() => {
+          setMessage({ type: "error", text: "GitHub sync failed — check your connection and try again." });
+          setTimeout(() => router.refresh(), 1500);
+        });
+
       router.refresh();
     },
     [router]
@@ -343,6 +378,20 @@ export function ConnectorsClient({
                         {status.config?.repoFullName && (
                           <span className="text-muted">
                             Repo: <span className="text-foreground font-mono">{status.config.repoFullName}</span>
+                          </span>
+                        )}
+                        {connector.type === "github" && status.config?.trackedBranches && status.config.trackedBranches.length > 0 && (
+                          <span className="text-muted">
+                            Branches:{" "}
+                            <span className="text-foreground font-mono text-[11px]">
+                              {(status.config.trackedBranches as string[]).slice(0, 3).join(", ")}
+                              {status.config.trackedBranches.length > 3 && ` +${status.config.trackedBranches.length - 3} more`}
+                            </span>
+                          </span>
+                        )}
+                        {connector.type === "github" && status.config?.dataLookback && (
+                          <span className="text-muted">
+                            Lookback: <span className="text-foreground">{status.config.dataLookback}</span>
                           </span>
                         )}
                       </div>
