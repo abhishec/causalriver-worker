@@ -23,6 +23,7 @@
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+import { callDomainLLM } from './domain-llm-client';
 
 // ============================================================================
 // TYPES
@@ -748,23 +749,8 @@ Return ONLY valid JSON:
   ]
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicApiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) throw new Error(`Claude API error: ${response.status}`);
-  const data = await response.json();
-  const text = data.content[0].text;
+  // Route through smart model router — generation task uses Sonnet
+  const text = await callDomainLLM({ apiKey: anthropicApiKey, taskType: 'generation', prompt, maxTokens: 8192 });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in Claude response');
   return JSON.parse(jsonMatch[0]) as TestDataResult;

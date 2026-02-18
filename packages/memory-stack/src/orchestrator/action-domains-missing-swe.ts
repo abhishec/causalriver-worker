@@ -14,6 +14,7 @@
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+import { callDomainLLM } from './domain-llm-client';
 
 // ============================================================================
 // DOMAIN 1: PR REVIEW ASSISTANT
@@ -160,23 +161,8 @@ Provide a comprehensive code review. Return ONLY valid JSON:
   "recommendations": ["Add token validation on line 42", "Consider rate limiting auth endpoints"]
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicApiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) throw new Error(`Claude API error: ${response.status}`);
-  const data = await response.json();
-  const text = data.content[0].text;
+  // Route through smart model router — analysis task uses Sonnet
+  const text = await callDomainLLM({ apiKey: anthropicApiKey, taskType: 'analysis', prompt });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in Claude response');
   return JSON.parse(jsonMatch[0]) as PRReviewResult;
@@ -341,23 +327,8 @@ Return ONLY valid JSON:
   "nextSteps": ["Run tests: npm test", "Add authentication middleware", "Deploy to staging"]
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicApiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) throw new Error(`Claude API error: ${response.status}`);
-  const data = await response.json();
-  const text = data.content[0].text;
+  // Route through smart model router — generation task uses Sonnet (8192 tokens for code)
+  const text = await callDomainLLM({ apiKey: anthropicApiKey, taskType: 'generation', prompt, maxTokens: 8192 });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in Claude response');
   return JSON.parse(jsonMatch[0]) as BoilerplateResult;
@@ -545,23 +516,8 @@ Provide a thorough, accurate answer. Return ONLY valid JSON:
   "brainInsights": "Brain pattern: JWT expiry mismatches caused 3 incidents in last 90 days"
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': anthropicApiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) throw new Error(`Claude API error: ${response.status}`);
-  const data = await response.json();
-  const text = data.content[0].text;
+  // Route through smart model router — reasoning task uses Sonnet
+  const text = await callDomainLLM({ apiKey: anthropicApiKey, taskType: 'reasoning', prompt });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in Claude response');
   return JSON.parse(jsonMatch[0]) as CodebaseQAResult;

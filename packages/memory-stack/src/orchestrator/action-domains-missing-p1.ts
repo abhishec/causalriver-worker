@@ -18,6 +18,7 @@
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
 import type { ActionDomainDefinition } from './action-domain-registry';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+import { callDomainLLM } from './domain-llm-client';
 
 /**
  * Adapter: converts registry-format execution context
@@ -188,22 +189,8 @@ Return JSON:
   "upgradeRiskScore": 45
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '{}';
+  // Route through smart model router — analysis task uses Sonnet
+  const text = await callDomainLLM({ apiKey, taskType: 'analysis', prompt });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch?.[0] || '{}');
 
@@ -365,22 +352,8 @@ Return JSON:
   "qualityScore": 85
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '{}';
+  // Route through smart model router — generation task uses Sonnet (8192 tokens for docs)
+  const text = await callDomainLLM({ apiKey, taskType: 'generation', prompt, maxTokens: 8192 });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch?.[0] || '{}');
 
@@ -541,22 +514,8 @@ Return JSON:
   "slaRisk": "at_risk"
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '{}';
+  // Route through smart model router — analysis task uses Sonnet
+  const text = await callDomainLLM({ apiKey, taskType: 'analysis', prompt });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch?.[0] || '{}');
 
@@ -725,22 +684,8 @@ Return JSON:
   "safeRemovalConfidence": 0.85
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '{}';
+  // Route through smart model router — analysis task uses Sonnet
+  const text = await callDomainLLM({ apiKey, taskType: 'analysis', prompt });
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch?.[0] || '{}');
 

@@ -21,6 +21,7 @@
  */
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
+import { callDomainLLM } from './domain-llm-client';
 
 // ============================================================================
 // TYPES
@@ -265,29 +266,11 @@ ${request.diff ? `## Diff:\n${request.diff.slice(0, 3000)}\n` : ''}
 }
 
 /**
- * Call Claude API
+ * Call Claude API — routed through smart model router
+ * @see domain-llm-client for model selection logic
  */
 async function callClaudeAPI(apiKey: string, prompt: string): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Claude API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.content[0].text;
+  return callDomainLLM({ apiKey, taskType: 'analysis', prompt });
 }
 
 // ============================================================================

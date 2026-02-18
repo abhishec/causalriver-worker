@@ -1505,6 +1505,20 @@ export {
   type CopilotLogger,
 } from './orchestrator/copilot-framework';
 
+// Domain LLM Client — Shared smart-routed Claude API client for all action domains
+// Eliminates 12+ duplicate callClaudeAPI() implementations across action-domain files
+export {
+  callDomainLLM,
+  callDomainLLMWithMeta,
+  extractWithLLM,
+  analyzeWithLLM,
+  generateWithLLM,
+  reasonWithLLM,
+  type DomainTaskType,
+  type DomainLLMOptions,
+  type DomainLLMResult,
+} from './orchestrator/domain-llm-client';
+
 // Natural Language Query Router (Phase 3) — THE BRAIN'S MOUTH (unified NL entry point)
 // Integrates: Brain Context Builder + Action Domains + Copilot Framework + Conversation Memory
 // Routes natural language queries through the unified brain architecture (no redundant systems)

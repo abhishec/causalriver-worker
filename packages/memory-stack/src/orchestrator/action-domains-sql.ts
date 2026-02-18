@@ -23,6 +23,7 @@
 
 import type { ActionDomainContext, ActionDomainResult } from './domain-action-engine';
 import { formatBrainContextForDomain, buildBrainAttribution } from './brain-context-for-domains';
+import { routeActionDomainModel } from '../infra/smart-model-router';
 
 // ============================================================================
 // TYPES
@@ -299,7 +300,7 @@ Return this exact JSON structure:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: routeActionDomainModel('analysis'),
       max_tokens: 4096,
       system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [

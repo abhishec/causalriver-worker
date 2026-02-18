@@ -24,7 +24,6 @@ import {
   createSeAaSResponse,
   createSeAaSError,
 } from "@/lib/se-aas/middleware";
-
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {

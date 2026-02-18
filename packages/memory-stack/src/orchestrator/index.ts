@@ -170,3 +170,16 @@ export {
   type MeshPersistenceSyncInstance,
   type MeshLoadResult,
 } from './mesh-persistence-sync';
+
+// Domain LLM Client — Smart model router for all action domains
+export {
+  callDomainLLM,
+  callDomainLLMWithMeta,
+  extractWithLLM,
+  analyzeWithLLM,
+  generateWithLLM,
+  reasonWithLLM,
+  type DomainTaskType,
+  type DomainLLMOptions,
+  type DomainLLMResult,
+} from './domain-llm-client';
