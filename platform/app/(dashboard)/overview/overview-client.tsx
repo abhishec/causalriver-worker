@@ -50,6 +50,12 @@ interface OverviewClientProps {
   connectors?: ConnectorSummary[];
   recentArtifacts?: ArtifactSummary[];
   brainHealthScore?: number;
+  /** Org ID — passed to IntelligenceStream for real-time subscription */
+  orgId?: string;
+  /** Count of anomalies Brain detected with causal grounding this week */
+  brainAnomaliesThisWeek?: number;
+  /** Count of causal discoveries Brain made this week */
+  brainDiscoveriesThisWeek?: number;
 }
 
 /* ── Component ────────────────────────────────────────────────────────────── */
@@ -71,6 +77,9 @@ export function OverviewClient({
   connectors = [],
   recentArtifacts = [],
   brainHealthScore = 0,
+  orgId,
+  brainAnomaliesThisWeek = 0,
+  brainDiscoveriesThisWeek = 0,
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
@@ -194,11 +203,84 @@ export function OverviewClient({
         </Card>
       )}
 
+      {/* ── Brain vs Claude Proof Banner ─────────────────────────────── */}
+      {(brainAnomaliesThisWeek > 0 || brainDiscoveriesThisWeek > 0 || totalEdges > 0) && (
+        <div className="rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 to-transparent px-5 py-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-accent">N</span>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground mb-0.5">
+                  Why NexusBrain, not just Claude?
+                </p>
+                <p className="text-[11px] text-muted leading-relaxed">
+                  Brain knows your business. Claude is guessing from general knowledge.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6 flex-wrap">
+              {/* Metric 1: Anomalies with causal context */}
+              <div className="text-center">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold tabular-nums text-foreground">
+                    {brainAnomaliesThisWeek || (intelligenceEvents.filter(e => e.type === "anomaly").length)}
+                  </span>
+                  <span className="text-[10px] text-muted">anomalies</span>
+                </div>
+                <div className="text-[10px] text-muted mt-0.5">Brain flagged + explained</div>
+                <div className="text-[10px] text-muted/60">Claude: "looks high, review it"</div>
+              </div>
+
+              <div className="w-px h-8 bg-border-subtle" />
+
+              {/* Metric 2: Causal discoveries */}
+              <div className="text-center">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold tabular-nums text-foreground">
+                    {totalEdges}
+                  </span>
+                  <span className="text-[10px] text-muted">relationships</span>
+                </div>
+                <div className="text-[10px] text-muted mt-0.5">Brain mapped in your data</div>
+                <div className="text-[10px] text-muted/60">Claude: knows none of these</div>
+              </div>
+
+              <div className="w-px h-8 bg-border-subtle" />
+
+              {/* Metric 3: Causal context advantage */}
+              <div className="text-center">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold tabular-nums text-accent">
+                    {brainDiscoveriesThisWeek || (intelligenceEvents.filter(e => e.type === "discovery").length)}
+                  </span>
+                  <span className="text-[10px] text-muted">discoveries</span>
+                </div>
+                <div className="text-[10px] text-muted mt-0.5">Brain found proactively</div>
+                <div className="text-[10px] text-muted/60">Claude: you had to ask</div>
+              </div>
+            </div>
+
+            <a
+              href="/early-warning"
+              className="text-[11px] text-accent hover:text-accent/80 font-medium transition-colors shrink-0 self-center"
+            >
+              See early warning →
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* ── Zone 3: Intelligence Stream + Brain Vitals ───────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Intelligence Stream (60%) */}
         <div className="lg:col-span-3">
-          <IntelligenceStream events={intelligenceEvents} />
+          <IntelligenceStream
+            events={intelligenceEvents}
+            orgId={orgId}
+          />
         </div>
 
         {/* Brain Vitals (40%) */}

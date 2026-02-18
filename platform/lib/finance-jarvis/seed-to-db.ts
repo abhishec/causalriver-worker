@@ -117,7 +117,55 @@ export async function seedFinanceDataToDb(
         .from("causal_relationships_statistical")
         .insert(causalRows);
       if (causalErr) console.warn("[FinanceSeeder] causal insert error:", causalErr.message);
-      else counts.causalEdges = causalRows.length;
+      else {
+        counts.causalEdges = causalRows.length;
+
+        // Surface the most important discovery in plain English for the activity feed.
+        // Find the highest-confidence, longest-lag edge — that's the one that tells the
+        // accountant something they couldn't see from a spreadsheet.
+        const topEdge = analysis.causalRelationships
+          .filter((r) => r.confidence >= 0.7 && r.lagDays > 0)
+          .sort((a, b) => b.lagDays - a.lagDays)[0];
+
+        let discoveryTitle: string;
+        let discoveryDescription: string;
+
+        if (topEdge) {
+          const srcLabel = topEdge.source.replace(/-/g, " ");
+          const tgtLabel = topEdge.target.replace(/-/g, " ");
+          discoveryTitle = `When your ${srcLabel} moves, your ${tgtLabel} follows ${topEdge.lagDays} days later — every time`;
+          discoveryDescription = `${topEdge.description} I'll now watch for breaks in this pattern, which would be an early warning sign.`;
+        } else {
+          const edgeSummary = analysis.causalRelationships
+            .slice(0, 2)
+            .map((r) => `${r.source} → ${r.target}`)
+            .join(", ");
+          discoveryTitle = `I've mapped ${causalRows.length} financial relationships in your data`;
+          discoveryDescription = `Key patterns: ${edgeSummary}. I'm now monitoring for anything that breaks these patterns.`;
+        }
+
+        Promise.resolve(
+          supabase.from("platform_events").insert({
+            organization_id: organizationId,
+            event_type: "causal.discovered",
+            source: "finance_seeder",
+            title: discoveryTitle,
+            event_data: {
+              title: discoveryTitle,
+              description: discoveryDescription,
+              domain: "finance",
+              edgesDiscovered: causalRows.length,
+              topEdge: topEdge
+                ? { source: topEdge.source, target: topEdge.target, lagDays: topEdge.lagDays, confidence: topEdge.confidence }
+                : null,
+            },
+          })
+        ).then(({ error }: any) => {
+          if (error) console.warn("[FinanceSeeder] Failed to write discovery event:", error.message);
+        }).catch((err: any) => {
+          console.warn("[FinanceSeeder] Failed to write discovery event:", err.message);
+        });
+      }
     }
 
     // ── 3. Seed finance rules from department risk data ──────────────────

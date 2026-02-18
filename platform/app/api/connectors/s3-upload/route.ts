@@ -233,6 +233,49 @@ export async function POST(request: NextRequest) {
           causalBootstrap: causalSeedResult,
         };
 
+        // ── Surface bootstrap discovery to the intelligence feed ───────────────
+        // Write a plain-English discovery event so the accountant sees what Brain
+        // learned on day one — not raw stats, just what it means for their business.
+        if (causalSeedResult.seeded > 0) {
+          const lagEdge = causalSeedResult.edges.find((e: string) => e.includes("revenue") && e.includes("cash"));
+          const lagDays = lagEdge ? 45 : null; // revenue→cash prior is always 45 days
+
+          const discoveryTitle = lagDays
+            ? `I've mapped how your business works: revenue takes ${lagDays} days to reach your bank. Payroll goes out before that — you have a ${lagDays}-day cash gap to manage.`
+            : `I've mapped ${causalSeedResult.seeded} financial relationships in your data. I'm now watching for anything that breaks these patterns.`;
+
+          const discoveryDescription = `Based on your ${transactions.length} transactions I've identified: ${
+            causalSeedResult.edges.slice(0, 3).map((e: string) => {
+              const [src, tgt] = e.split(" → ");
+              const srcLabel = src?.replace("finance.", "").replace(/_/g, " ") || src;
+              const tgtLabel = tgt?.replace("finance.", "").replace(/_/g, " ") || tgt;
+              return `${srcLabel} → ${tgtLabel}`;
+            }).join(", ")
+          }${causalSeedResult.edges.length > 3 ? `, and ${causalSeedResult.edges.length - 3} more` : ""}.`;
+
+          Promise.resolve(
+            service.from("platform_events").insert({
+              organization_id: orgId,
+              event_type: "brain.discovery",
+              source: "gl_bootstrap",
+              title: discoveryTitle,
+              event_data: {
+                title: discoveryTitle,
+                description: discoveryDescription,
+                domain: "finance",
+                edgesSeeded: causalSeedResult.seeded,
+                transactionCount: transactions.length,
+                signalsIngested: signals.length,
+                bootstrapStatus: causalSeedResult.status,
+              },
+            })
+          ).then(({ error }: any) => {
+            if (error) console.warn("[S3Upload] Failed to write discovery event:", error.message);
+          }).catch((err: any) => {
+            console.warn("[S3Upload] Failed to write discovery event:", err.message);
+          });
+        }
+
         console.log(`[S3Upload] GL brain ingestion: ${signals.length} signals from ${transactions.length} txns`);
       } catch (parseErr: any) {
         console.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);

@@ -505,6 +505,33 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
   const eventBus = createEventBus();
   const anomalyMonitor = createAnomalyMonitor(eventBus, {
     ...config.anomalyMonitor,
+    // Wire anomaly detections to platform_events so the accountant sees them in the feed.
+    // Language is business-first: "your X is 4× usual" not "3σ deviation detected".
+    onAnomaly: async (anomaly) => {
+      try {
+        await supabase.from('platform_events').insert({
+          organization_id: organizationId,
+          event_type: 'anomaly.detected',
+          source: 'anomaly_monitor',
+          title: anomaly.feedTitle,
+          event_data: {
+            title: anomaly.feedTitle,
+            description: anomaly.feedDescription,
+            domain: anomaly.domain,
+            signalType: anomaly.signalType,
+            signalValue: anomaly.signalValue,
+            deviationSigma: anomaly.deviationSigma,
+            historicalMean: anomaly.historicalMean,
+            historicalStd: anomaly.historicalStd,
+            method: anomaly.method,
+            priority: anomaly.priority,
+          },
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn('[BrainPipeline] Failed to write anomaly to platform_events:', msg);
+      }
+    },
   });
 
   // Working Memory (dlPFC): contextual state that shapes interpretation

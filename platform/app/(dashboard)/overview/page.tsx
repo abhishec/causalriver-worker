@@ -81,13 +81,13 @@ export default async function OverviewPage() {
       .order("created_at", { ascending: false })
       .limit(10)),
 
-    // Platform events for intelligence stream
+    // Platform events for intelligence stream (anomalies, discoveries, alerts)
     safe(supabase
       .from("platform_events")
-      .select("id, event_type, event_data, created_at")
+      .select("id, event_type, source, title, event_data, created_at")
       .eq("organization_id", CORE_ORG_ID)
       .order("created_at", { ascending: false })
-      .limit(15)),
+      .limit(30)),
 
     // Signals grouped by domain (for signal rate panel)
     safe(supabase
@@ -167,23 +167,32 @@ export default async function OverviewPage() {
   // Build intelligence stream events from platform events
   const activityEvents = platformEvents.map((evt) => {
     const data = evt.event_data || {};
-    const typeMap: Record<string, "training" | "anomaly" | "alert" | "agent"> = {
+    const typeMap: Record<string, "training" | "anomaly" | "alert" | "agent" | "discovery"> = {
       "consolidation.complete": "training",
       "consolidation.started": "training",
       "alert.triggered": "alert",
       "anomaly.detected": "anomaly",
       "agent.completed": "agent",
       "agent.started": "agent",
+      "brain.discovery": "discovery",
+      "causal.discovered": "discovery",
+      "gl.bootstrap": "discovery",
     };
     const eventType = typeMap[evt.event_type] || "training";
+
+    // Use the row-level title field first (business-language sentence we write),
+    // then fall back to event_data.title, then format the event_type as a label.
+    const title = (evt as any).title
+      || data.title
+      || evt.event_type.replace(/\./g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
 
     return {
       id: `event-${evt.id}`,
       type: eventType,
-      title: data.title || evt.event_type.replace(/\./g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+      title,
       description: data.description || data.summary,
       timestamp: evt.created_at,
-      domain: data.domain,
+      domain: data.domain || (evt as any).source || undefined,
       confidence: data.confidence,
       details: data.details,
     };
@@ -254,6 +263,14 @@ export default async function OverviewPage() {
     createdAt: a.created_at,
   }));
 
+  // Brain vs Claude metrics: count anomalies and discoveries from this week's platform_events
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const weekEvents = platformEvents.filter((e: any) => e.created_at >= sevenDaysAgo);
+  const brainAnomaliesThisWeek = weekEvents.filter((e: any) => e.event_type === "anomaly.detected").length;
+  const brainDiscoveriesThisWeek = weekEvents.filter(
+    (e: any) => e.event_type === "brain.discovery" || e.event_type === "causal.discovered"
+  ).length;
+
   return (
     <OverviewClient
       totalEdges={totalEdges}
@@ -268,6 +285,9 @@ export default async function OverviewPage() {
       knowledgeGrowth={knowledgeGrowth}
       signalRates={signalRates}
       totalSignalRate={Math.round(totalSignalRate * 100) / 100}
+      orgId={CORE_ORG_ID}
+      brainAnomaliesThisWeek={brainAnomaliesThisWeek}
+      brainDiscoveriesThisWeek={brainDiscoveriesThisWeek}
       topDiscoveries={latest?.top_discoveries || []}
       connectors={connectors}
       recentArtifacts={recentArtifacts}

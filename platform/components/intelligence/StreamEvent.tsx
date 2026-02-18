@@ -61,8 +61,15 @@ const TYPE_CONFIG = {
   },
 };
 
-export function StreamEvent({ event }: { event: IntelligenceEvent }) {
+export function StreamEvent({
+  event,
+  onSelect,
+}: {
+  event: IntelligenceEvent;
+  onSelect?: (event: IntelligenceEvent) => void;
+}) {
   const config = TYPE_CONFIG[event.type];
+  const isClickable = event.type === "anomaly" || event.type === "alert" || event.type === "discovery";
 
   return (
     <div className="group relative pl-8 pb-6 last:pb-0">
@@ -87,8 +94,23 @@ export function StreamEvent({ event }: { event: IntelligenceEvent }) {
         </svg>
       </div>
 
-      {/* Content */}
-      <div className="rounded-xl bg-card border border-border-subtle p-4 hover:bg-card-hover transition-colors">
+      {/* Content — clickable for anomaly/alert/discovery */}
+      <div
+        className={cn(
+          "rounded-xl bg-card border border-border-subtle p-4 transition-colors",
+          isClickable && onSelect
+            ? "hover:bg-card-hover hover:border-border cursor-pointer"
+            : "hover:bg-card-hover"
+        )}
+        onClick={isClickable && onSelect ? () => onSelect(event) : undefined}
+        role={isClickable && onSelect ? "button" : undefined}
+        tabIndex={isClickable && onSelect ? 0 : undefined}
+        onKeyDown={
+          isClickable && onSelect
+            ? (e) => { if (e.key === "Enter" || e.key === " ") onSelect(event); }
+            : undefined
+        }
+      >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
@@ -100,9 +122,17 @@ export function StreamEvent({ event }: { event: IntelligenceEvent }) {
               <DomainTag key={d} domain={d} />
             ))}
           </div>
-          <span className="text-[10px] text-muted whitespace-nowrap tabular-nums">
-            {timeAgo(event.timestamp)}
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] text-muted whitespace-nowrap tabular-nums">
+              {timeAgo(event.timestamp)}
+            </span>
+            {/* Chevron hint for clickable events */}
+            {isClickable && onSelect && (
+              <svg className="w-3.5 h-3.5 text-muted opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            )}
+          </div>
         </div>
 
         {/* Title */}
@@ -132,8 +162,8 @@ export function StreamEvent({ event }: { event: IntelligenceEvent }) {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 mt-3">
+        {/* Actions — only shown on non-clickable events or as supplementary */}
+        <div className="flex items-center gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
           {event.actionHref && (
             <a
               href={event.actionHref}
@@ -145,12 +175,24 @@ export function StreamEvent({ event }: { event: IntelligenceEvent }) {
               </svg>
             </a>
           )}
-          <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>
-            Ask Copilot
-          </button>
+          {isClickable && onSelect ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(event); }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] text-accent hover:bg-accent/10 transition-colors font-medium"
+            >
+              Brain vs Claude
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          ) : (
+            <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+              </svg>
+              Ask Copilot
+            </button>
+          )}
         </div>
       </div>
     </div>

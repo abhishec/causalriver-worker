@@ -25,6 +25,22 @@ type EventBusInstance = {
   }) => string;
 };
 
+export interface DetectedAnomaly {
+  organizationId: string;
+  domain: string;
+  signalType: string;
+  signalValue: number;
+  deviationSigma: number;
+  historicalMean: number;
+  historicalStd: number;
+  method: DetectionMethod;
+  priority: 1 | 2 | 3;
+  /** Plain-English title for the activity feed */
+  feedTitle: string;
+  /** Plain-English description for the activity feed */
+  feedDescription: string;
+}
+
 export interface AnomalyMonitorConfig {
   /** Rolling window size in data points (default: 90) */
   windowSize: number;
@@ -34,6 +50,12 @@ export interface AnomalyMonitorConfig {
   method: DetectionMethod;
   /** Detection threshold (default: 2.5 for zscore) */
   threshold: number;
+  /**
+   * Called whenever an anomaly is detected. Use this to persist to
+   * platform_events or any other notification system.
+   * Fire-and-forget — errors are caught and logged.
+   */
+  onAnomaly?: (anomaly: DetectedAnomaly) => Promise<void>;
 }
 
 const DEFAULT_CONFIG: AnomalyMonitorConfig = {
@@ -50,7 +72,7 @@ export function createAnomalyMonitor(
   eventBus: EventBusInstance,
   config: Partial<AnomalyMonitorConfig> = {}
 ) {
-  const { windowSize, minWindowSize, method, threshold } = {
+  const { windowSize, minWindowSize, method, threshold, onAnomaly } = {
     ...DEFAULT_CONFIG,
     ...config,
   };
@@ -94,6 +116,8 @@ export function createAnomalyMonitor(
             totalAnomaliesDetected++;
 
             const deviation = Math.abs(detection.zScore);
+            const priority: 1 | 2 | 3 = deviation > 3 ? 1 : deviation > 2.5 ? 2 : 3;
+            const signalType = (event.payload.signal_type as string) || event.domain;
 
             // Emit cascade trigger
             eventBus.emit({
@@ -113,11 +137,46 @@ export function createAnomalyMonitor(
                 historical_std: stats.std,
                 window_size: window.length,
                 trigger_event_id: event.eventId,
-                signal_type: event.payload.signal_type,
+                signal_type: signalType,
               },
               timestamp: new Date(),
-              priority: deviation > 3 ? 1 : deviation > 2.5 ? 2 : 3,
+              priority,
             });
+
+            // Build plain-English feed message (what an accountant actually cares about)
+            const sigLabel = signalType.replace(/_/g, ' ');
+            const domainLabel = event.domain.replace(/_/g, ' ');
+            const multiplier = stats.mean > 0
+              ? (signalValue / stats.mean).toFixed(1)
+              : null;
+            const direction = signalValue > stats.mean ? 'higher' : 'lower';
+            const severityWord = priority === 1 ? 'significantly' : priority === 2 ? 'notably' : 'slightly';
+
+            const feedTitle = multiplier
+              ? `Your ${sigLabel} is ${multiplier}× your usual — ${severityWord} ${direction} than normal`
+              : `Unusual ${sigLabel} detected in ${domainLabel} — ${deviation.toFixed(1)}σ from baseline`;
+
+            const feedDescription = `Current value: ${signalValue.toLocaleString()}. Your usual range: around ${stats.mean.toLocaleString()} (±${stats.std.toFixed(0)}). Last time this happened, check your cash position within the next few weeks.`;
+
+            // Notify via callback (platform layer wires this to platform_events)
+            if (onAnomaly) {
+              onAnomaly({
+                organizationId: event.organizationId,
+                domain: event.domain,
+                signalType,
+                signalValue,
+                deviationSigma: deviation,
+                historicalMean: stats.mean,
+                historicalStd: stats.std,
+                method,
+                priority,
+                feedTitle,
+                feedDescription,
+              }).catch((err: unknown) => {
+                const msg = err instanceof Error ? err.message : String(err);
+                console.warn('[AnomalyMonitor] onAnomaly callback failed:', msg);
+              });
+            }
           }
         }
       }
