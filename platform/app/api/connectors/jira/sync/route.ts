@@ -11,7 +11,15 @@ export const dynamic = 'force-dynamic';
  * Syncs Jira projects, issues, and sprints into cross_domain_signals.
  * Uses the production Jira connector with rate limiting and circuit breaker.
  *
- * Body: { siteUrl?: string, projectKeys?: string[] }
+ * Body: {
+ *   siteUrl?: string,
+ *   projectKeys?: string[],
+ *   fixVersionFilter?: string,   -- e.g. "6.3.4" or "5.11.5-enterprise"
+ *                                   When set, scopes JQL to fixVersion="X" only.
+ *                                   Critical for Tookitaki 2-team setup: without this
+ *                                   the sync would pull all 5000+ TM tickets.
+ *   dataLookback?: string,       -- "30d"|"90d"|"6m"|"1y"|"all"
+ * }
  */
 export async function POST(request: Request) {
   try {
@@ -51,7 +59,38 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { projectKeys } = body as { projectKeys?: string[] };
+    const { projectKeys, fixVersionFilter, dataLookback } = body as {
+      projectKeys?: string[];
+      fixVersionFilter?: string;   // e.g. "6.3.4" or "5.11.5-enterprise"
+      dataLookback?: string;       // "30d"|"90d"|"6m"|"1y"|"all"
+    };
+
+    // Persist fixVersionFilter + dataLookback to connector config if provided
+    if (fixVersionFilter !== undefined || dataLookback !== undefined) {
+      const service2 = await createServiceClient();
+      await service2
+        .from("org_connectors")
+        .update({
+          config: {
+            ...connector.config,
+            ...(fixVersionFilter !== undefined ? { fixVersionFilter } : {}),
+            ...(dataLookback !== undefined ? { dataLookback } : {}),
+          },
+        })
+        .eq("id", connector.id);
+    }
+
+    // Resolve fixVersionFilter: body > stored config
+    const effectiveFixVersion: string | undefined =
+      fixVersionFilter ?? (connector.config as Record<string, any>)?.fixVersionFilter;
+
+    // Resolve lookback window: body > stored config > default 90d
+    const effectiveLookback: string =
+      dataLookback ?? (connector.config as Record<string, any>)?.dataLookback ?? "90d";
+    const lookbackMap: Record<string, string> = {
+      "30d": "-30d", "90d": "-90d", "6m": "-180d", "1y": "-365d", all: "-3650d",
+    };
+    const jqlLookback = lookbackMap[effectiveLookback] ?? "-90d";
 
     // 3. Update status to syncing
     await service
@@ -88,10 +127,13 @@ export async function POST(request: Request) {
           continue;
         }
 
-        // Fetch issues (last 90 days)
+        // Fetch issues — scope by fixVersion when provided (critical for multi-release orgs)
         try {
+          const fixVersionClause = effectiveFixVersion
+            ? ` AND fixVersion = "${effectiveFixVersion}"`
+            : "";
           const jql = encodeURIComponent(
-            `project = "${project.key}" AND updated >= -90d ORDER BY updated DESC`
+            `project = "${project.key}"${fixVersionClause} AND updated >= ${jqlLookback} ORDER BY updated DESC`
           );
           const issuesRes = await jiraFetch(
             credentials.access_token, siteUrl,
