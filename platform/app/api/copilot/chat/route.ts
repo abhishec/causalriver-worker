@@ -205,6 +205,8 @@ export async function POST(request: NextRequest) {
       useFramework,
       // V4: Optional persona override from frontend
       persona,
+      // Phase 4: branch for SE-aaS code intelligence (from GitHub connector)
+      branch,
     } = body as {
       message: string;
       organizationId?: string;
@@ -212,6 +214,7 @@ export async function POST(request: NextRequest) {
       conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
       useFramework?: boolean;
       persona?: { name: string; description: string };
+      branch?: string;
     };
 
     if (!message || typeof message !== "string") {
@@ -597,7 +600,9 @@ export async function POST(request: NextRequest) {
 
         const domainResult = await executeDomain(service, {
           domainType: seaasRoute.domainType,
-          request: seaasRoute.extractedInput,
+          // Phase 4: merge branch into domain request so domain-executor's
+          // createBrainContextMesh({ branch }) picks it up for code intelligence.
+          request: { ...seaasRoute.extractedInput, ...(branch ? { branch } : {}) },
           organizationId: orgId,
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,

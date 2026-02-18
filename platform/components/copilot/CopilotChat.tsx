@@ -115,6 +115,8 @@ export interface CopilotChatProps {
   onDomainResult?: (result: DomainResult) => void;
   /** Active service mode — changes context sent to backend */
   activeService?: "general" | "aas" | "seaas";
+  /** Pre-configured branches from the GitHub connector (overrides internal fetch) */
+  trackedBranches?: string[];
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -1232,6 +1234,7 @@ export function CopilotChat({
   onBrainMeta,
   onDomainResult,
   activeService = "general",
+  trackedBranches: trackedBranchesProp,
 }: CopilotChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1241,6 +1244,28 @@ export function CopilotChat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // ── Branch selector state ─────────────────────────────────────────────
+  // Branches come from: prop override → fetched from GitHub status API → empty
+  const [trackedBranches, setTrackedBranches] = useState<string[]>(trackedBranchesProp ?? []);
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+
+  // Fetch trackedBranches from GitHub connector status on mount (when not pre-supplied via prop)
+  useEffect(() => {
+    if (trackedBranchesProp !== undefined) return; // Prop takes precedence
+    let cancelled = false;
+    fetch("/api/connectors/github/status")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (cancelled) return;
+        const branches: string[] = Array.isArray(data?.trackedBranches) ? data.trackedBranches : [];
+        setTrackedBranches(branches);
+        // Auto-select the first branch so code intelligence is always on by default
+        if (branches.length > 0) setSelectedBranch(branches[0]);
+      })
+      .catch(() => { /* GitHub not connected — no branch selector */ });
+    return () => { cancelled = true; };
+  }, [trackedBranchesProp]);
 
   // Stable conversation ID for feedback tracking (one per chat session)
   const [conversationId] = useState(() => `conv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
@@ -1254,6 +1279,8 @@ export function CopilotChat({
   onBrainMetaRef.current = onBrainMeta;
   const onDomainResultRef = useRef(onDomainResult);
   onDomainResultRef.current = onDomainResult;
+  const selectedBranchRef = useRef(selectedBranch);
+  selectedBranchRef.current = selectedBranch;
 
   const color = persona.color || "accent";
 
@@ -1314,6 +1341,9 @@ export function CopilotChat({
     let finalAssistantContent = "";
 
     try {
+      // Read branch from ref so the closure always sees the latest value
+      const branch = selectedBranchRef.current || undefined;
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1321,6 +1351,8 @@ export function CopilotChat({
           message: trimmed,
           conversationHistory: history.length > 0 ? history : undefined,
           serviceMode: activeService !== "general" ? activeService : undefined,
+          // Phase 4: include selected branch so SE-aaS domains get code intelligence
+          ...(branch ? { branch } : {}),
           ...extraParams,
         }),
         signal: controller.signal,
@@ -1633,6 +1665,39 @@ export function CopilotChat({
 
       {/* Input bar — fixed to bottom */}
       <div className="border-t border-border-subtle pt-4 pb-2">
+        {/* Branch selector — shown only when GitHub connector has tracked branches */}
+        {trackedBranches.length > 0 && (
+          <div className="max-w-4xl mx-auto mb-2 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 3v12m0 0a3 3 0 106 0m-6 0a3 3 0 006 0m0 0v-5.25m0 0a3 3 0 106 0m-6 0a3 3 0 006 0" />
+            </svg>
+            <span className="text-[10px] text-muted">Branch:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {trackedBranches.map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setSelectedBranch(b === selectedBranch ? "" : b)}
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-colors border",
+                    b === selectedBranch
+                      ? "bg-accent/15 text-accent border-accent/30"
+                      : "bg-surface text-muted border-border-subtle hover:border-accent/20 hover:text-foreground"
+                  )}
+                  title={b === selectedBranch ? "Click to deselect branch" : `Use code intelligence from ${b}`}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+            {selectedBranch && (
+              <span className="text-[10px] text-accent/70 ml-auto">
+                Code intelligence active
+              </span>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
           <textarea
             ref={inputRef}

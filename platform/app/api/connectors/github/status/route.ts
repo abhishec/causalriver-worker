@@ -62,6 +62,7 @@ export async function GET() {
         owner: config?.owner,
         repo: config?.repo,
       },
+      trackedBranches: Array.isArray(config?.trackedBranches) ? config.trackedBranches : [],
       lastSyncAt: connector.last_sync_at,
       signalsCount: signalCountResult.count || 0,
       codeFilesIndexed: codeFileCountResult.count || 0,
