@@ -2650,9 +2650,11 @@ export {
   computeVelocityIndex,
   computeTicketResponseLag,
   computeEngagementScopeVelocity,
+  computeThroughputForecast,
   type DeliveryHealthConfig,
   type EngagementRef,
   type AggregationResult,
+  type ThroughputForecastResult,
 } from './se-aas/delivery-health-signals';
 
 export {

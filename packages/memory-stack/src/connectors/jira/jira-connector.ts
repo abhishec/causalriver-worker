@@ -40,6 +40,15 @@ interface JiraIssue {
     };
     labels: string[];
     project: { key: string; name: string };
+    /** Target completion date — used for throughput delivery forecast */
+    duedate: string | null;
+    /** Fix versions (planned releases) — used for delivery forecasting */
+    fixVersions: Array<{
+      id: string;
+      name: string;
+      releaseDate?: string;
+      released: boolean;
+    }>;
   };
 }
 
@@ -92,6 +101,8 @@ export class JiraConnector extends ConnectorBase {
               'created',
               'updated',
               'resolutiondate',
+              'duedate',        // Target completion date — throughput forecast
+              'fixVersions',    // Planned release versions — delivery forecasting
               'comment',
               'labels',
               'project',
@@ -281,6 +292,14 @@ export class JiraConnector extends ConnectorBase {
     const description = this.extractText(issue.fields.description);
     const fields = issue.fields as any; // Cast for optional fields like resolutiondate, sprint
 
+    // Extract fixVersions: earliest unreleased version's releaseDate is the hard deadline
+    const fixVersions: JiraIssue['fields']['fixVersions'] = issue.fields.fixVersions || [];
+    const earliestFixVersionDate =
+      fixVersions
+        .filter((v) => v.releaseDate && !v.released)
+        .map((v) => v.releaseDate as string)
+        .sort()[0] ?? null;
+
     const baseMetadata = {
       source: 'jira',
       content: `${issue.fields.summary}\n\n${description}`,
@@ -296,6 +315,12 @@ export class JiraConnector extends ConnectorBase {
       sprint_name: fields.sprint?.name || null,
       sprint_id: fields.sprint?.id || null,
       story_points: fields.story_points || fields.customfield_10028 || null,
+      // Delivery forecast fields
+      due_date: issue.fields.duedate || null,
+      fix_versions: fixVersions.map((v) => ({ id: v.id, name: v.name, releaseDate: v.releaseDate, released: v.released })),
+      earliest_fix_version_date: earliestFixVersionDate,
+      // Effective deadline: prefer explicit duedate, fall back to earliest fix version
+      effective_deadline: issue.fields.duedate || earliestFixVersionDate || null,
     };
 
     // 1. Issue creation signal (always emit — with created_at timestamp for accurate time series)
@@ -365,6 +390,30 @@ export class JiraConnector extends ConnectorBase {
         signal_timestamp: issue.fields.created,
       };
       await this.streamProcessor.addSignal(storyPointSignal);
+    }
+
+    // 2c. Due date signal — delivery forecast tracking
+    //     Emitted for any open issue that carries an effective deadline.
+    //     computeThroughputForecast() reads these to project team completion dates.
+    const effectiveDeadline = baseMetadata.effective_deadline;
+    const isOpen = !isDone;
+    if (isOpen && effectiveDeadline) {
+      const deadlineSignal: Signal = {
+        source_domain: 'engineering.jira',
+        signal_type: 'jira_issue_due_date',
+        signal_value: new Date(effectiveDeadline).getTime(), // epoch ms for range queries
+        entity_type: 'issue',
+        entity_id: `jira#${issue.key}`,
+        signal_metadata: {
+          ...baseMetadata,
+          effective_deadline: effectiveDeadline,
+          deadline_source: issue.fields.duedate ? 'duedate' : 'fix_version',
+        },
+        organization_id: this.organizationId,
+        created_at: issue.fields.updated,
+        signal_timestamp: issue.fields.updated,
+      };
+      await this.streamProcessor.addSignal(deadlineSignal);
     }
 
     // 3. Current state snapshot (for brain context — the original jira_issue signal)

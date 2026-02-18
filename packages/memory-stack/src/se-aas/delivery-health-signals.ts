@@ -412,6 +412,272 @@ export async function computeEngagementScopeVelocity(
 }
 
 // ============================================================================
+// GAP 1E: THROUGHPUT FORECAST — estimated completion based on open ticket count
+//          and actual weekly resolution rate
+// ============================================================================
+
+export interface ThroughputForecastResult {
+  /** Open ticket count at time of forecast */
+  openTickets: number;
+  /** Resolved tickets in lookback window */
+  resolvedTickets: number;
+  /** Average weekly resolution rate (tickets/week) */
+  avgWeeklyThroughput: number;
+  /** Estimated weeks to clear the backlog */
+  estimatedWeeksRemaining: number | null;
+  /** ISO date of estimated completion (null if throughput is zero) */
+  estimatedCompletionDate: string | null;
+  /** Per-project breakdown */
+  byProject: Array<{
+    project: string;
+    openTickets: number;
+    resolvedTickets: number;
+    avgWeeklyThroughput: number;
+    estimatedCompletionDate: string | null;
+    /** Earliest effective deadline across open issues in this project */
+    earliestDeadline: string | null;
+    /** Whether estimated completion is past the earliest deadline */
+    atRisk: boolean;
+  }>;
+  /** Deadline-bearing open issues that are at risk */
+  atRiskIssues: Array<{
+    issueKey: string;
+    effectiveDeadline: string;
+    project: string;
+    estimatedCompletionDate: string | null;
+    daysAtRisk: number | null;
+  }>;
+  computedAt: string;
+}
+
+/**
+ * Throughput-based delivery forecast.
+ *
+ * Formula: estimated_completion = today + (open_tickets / avg_weekly_throughput) weeks
+ *
+ * Sources:
+ *   - open_tickets:          jira_issue_created signals without a matching jira_issue_resolved
+ *   - resolved_tickets:      jira_issue_resolved signals in the lookback window
+ *   - avg_weekly_throughput: resolved / (lookback_days / 7)
+ *   - deadline tracking:     jira_issue_due_date signals on open issues
+ *
+ * Emits:
+ *   - throughput_forecast     — overall org forecast signal (outcome)
+ *   - throughput_at_risk      — per-issue at-risk signal when estimated > deadline
+ */
+export async function computeThroughputForecast(
+  config: DeliveryHealthConfig,
+  opts: {
+    /** JQL-style Jira project filter (e.g. ['NEXUS', 'BRAIN']). Empty = all projects. */
+    jiraProjects?: string[];
+    /** Lookback window for computing throughput. Defaults to config.lookbackDays or 28 days. */
+    lookbackDays?: number;
+  } = {}
+): Promise<ThroughputForecastResult> {
+  const { supabase, organizationId } = config;
+  const lookbackDays = opts.lookbackDays ?? config.lookbackDays ?? 28;
+  const cutoff = lookbackCutoff(lookbackDays);
+  const now = new Date();
+
+  // ── 1. Fetch created + resolved + due-date signals ────────────────────────
+  const [createdRes, resolvedRes, dueDateRes] = await Promise.all([
+    supabase
+      .from('connector_signals')
+      .select('metadata')
+      .eq('organization_id', organizationId)
+      .eq('signal_type', 'jira_issue_created'),
+    supabase
+      .from('connector_signals')
+      .select('metadata, signal_value, created_at')
+      .eq('organization_id', organizationId)
+      .eq('signal_type', 'jira_issue_resolved')
+      .gte('created_at', cutoff),
+    supabase
+      .from('connector_signals')
+      .select('metadata')
+      .eq('organization_id', organizationId)
+      .eq('signal_type', 'jira_issue_due_date'),
+  ]);
+
+  const createdRows: any[] = createdRes.data || [];
+  const resolvedRows: any[] = resolvedRes.data || [];
+  const dueDateRows: any[] = dueDateRes.data || [];
+
+  // ── 2. Build resolved-issue lookup (key → true) ───────────────────────────
+  const resolvedKeys = new Set<string>();
+  for (const row of resolvedRows) {
+    const meta = row.metadata as Record<string, unknown> | null;
+    const key = meta?.issue_key as string | null;
+    if (key) resolvedKeys.add(key);
+  }
+
+  // ── 3. Identify open tickets (created but NOT resolved) ───────────────────
+  const projectFilter = (opts.jiraProjects?.length ?? 0) > 0
+    ? (p: string) => opts.jiraProjects!.some(f => p.toUpperCase().startsWith(f.toUpperCase()))
+    : () => true;
+
+  const openByProject: Record<string, number> = {};
+  for (const row of createdRows) {
+    const meta = row.metadata as Record<string, unknown> | null;
+    const key = meta?.issue_key as string | null;
+    const project = meta?.project as string | null;
+    if (!key || resolvedKeys.has(key)) continue;
+    if (!project || !projectFilter(project)) continue;
+    openByProject[project] = (openByProject[project] || 0) + 1;
+  }
+
+  // ── 4. Count resolved by project in the lookback window ──────────────────
+  const resolvedByProject: Record<string, number> = {};
+  for (const row of resolvedRows) {
+    const meta = row.metadata as Record<string, unknown> | null;
+    const project = meta?.project as string | null;
+    if (!project || !projectFilter(project)) continue;
+    resolvedByProject[project] = (resolvedByProject[project] || 0) + 1;
+  }
+
+  // ── 5. Build deadline lookup per project ─────────────────────────────────
+  interface DueDateEntry {
+    issueKey: string;
+    effectiveDeadline: string;
+    project: string;
+  }
+  const dueDateEntries: DueDateEntry[] = [];
+  for (const row of dueDateRows) {
+    const meta = row.metadata as Record<string, unknown> | null;
+    const key = meta?.issue_key as string | null;
+    const deadline = meta?.effective_deadline as string | null;
+    const project = meta?.project as string | null;
+    if (!key || !deadline || !project) continue;
+    if (resolvedKeys.has(key)) continue; // already resolved — skip
+    if (!projectFilter(project)) continue;
+    dueDateEntries.push({ issueKey: key, effectiveDeadline: deadline, project });
+  }
+
+  const earliestDeadlineByProject: Record<string, string> = {};
+  for (const entry of dueDateEntries) {
+    const prev = earliestDeadlineByProject[entry.project];
+    if (!prev || entry.effectiveDeadline < prev) {
+      earliestDeadlineByProject[entry.project] = entry.effectiveDeadline;
+    }
+  }
+
+  // ── 6. Compute per-project forecast ──────────────────────────────────────
+  const weeksInWindow = lookbackDays / 7;
+  const allProjects = new Set([
+    ...Object.keys(openByProject),
+    ...Object.keys(resolvedByProject),
+  ]);
+
+  const byProject: ThroughputForecastResult['byProject'] = [];
+
+  for (const project of allProjects) {
+    const open = openByProject[project] || 0;
+    const resolved = resolvedByProject[project] || 0;
+    const weeklyRate = resolved / weeksInWindow;
+    const weeksToComplete = weeklyRate > 0 ? open / weeklyRate : null;
+    const completionDate = weeksToComplete != null
+      ? new Date(now.getTime() + weeksToComplete * 7 * 86_400_000).toISOString().split('T')[0]
+      : null;
+    const earliestDeadline = earliestDeadlineByProject[project] ?? null;
+    const atRisk = !!(completionDate && earliestDeadline && completionDate > earliestDeadline);
+
+    byProject.push({
+      project,
+      openTickets: open,
+      resolvedTickets: resolved,
+      avgWeeklyThroughput: Math.round(weeklyRate * 10) / 10,
+      estimatedCompletionDate: completionDate,
+      earliestDeadline,
+      atRisk,
+    });
+  }
+
+  // ── 7. Overall org-level forecast ─────────────────────────────────────────
+  const totalOpen = Object.values(openByProject).reduce((a, b) => a + b, 0);
+  const totalResolved = Object.values(resolvedByProject).reduce((a, b) => a + b, 0);
+  const orgWeeklyRate = totalResolved / weeksInWindow;
+  const orgWeeksToComplete = orgWeeklyRate > 0 ? totalOpen / orgWeeklyRate : null;
+  const orgCompletionDate = orgWeeksToComplete != null
+    ? new Date(now.getTime() + orgWeeksToComplete * 7 * 86_400_000).toISOString().split('T')[0]
+    : null;
+
+  // ── 8. Identify at-risk issues (deadline < estimated completion) ───────────
+  const atRiskIssues: ThroughputForecastResult['atRiskIssues'] = [];
+  for (const entry of dueDateEntries) {
+    const projectForecast = byProject.find(p => p.project === entry.project);
+    const estimatedCompletion = projectForecast?.estimatedCompletionDate ?? orgCompletionDate;
+    if (estimatedCompletion && estimatedCompletion > entry.effectiveDeadline) {
+      const daysAtRisk = Math.round(
+        (new Date(estimatedCompletion).getTime() - new Date(entry.effectiveDeadline).getTime()) / 86_400_000
+      );
+      atRiskIssues.push({
+        issueKey: entry.issueKey,
+        effectiveDeadline: entry.effectiveDeadline,
+        project: entry.project,
+        estimatedCompletionDate: estimatedCompletion,
+        daysAtRisk,
+      });
+    }
+  }
+
+  const result: ThroughputForecastResult = {
+    openTickets: totalOpen,
+    resolvedTickets: totalResolved,
+    avgWeeklyThroughput: Math.round(orgWeeklyRate * 10) / 10,
+    estimatedWeeksRemaining: orgWeeksToComplete != null ? Math.round(orgWeeksToComplete * 10) / 10 : null,
+    estimatedCompletionDate: orgCompletionDate,
+    byProject,
+    atRiskIssues,
+    computedAt: now.toISOString(),
+  };
+
+  // ── 9. Emit signals into the brain dual-write pipeline ────────────────────
+  const forecastSignals: Parameters<typeof storeDualWriteConnectorSignals>[1] = [];
+
+  // Overall throughput forecast signal
+  forecastSignals.push({
+    source: 'engineering.jira',
+    signal_type: 'throughput_forecast',
+    signal_value: orgWeeklyRate,
+    signal_timestamp: now.toISOString(),
+    metadata: {
+      open_tickets: totalOpen,
+      resolved_tickets: totalResolved,
+      avg_weekly_throughput: result.avgWeeklyThroughput,
+      estimated_weeks_remaining: result.estimatedWeeksRemaining,
+      estimated_completion_date: orgCompletionDate,
+      lookback_days: lookbackDays,
+      at_risk_count: atRiskIssues.length,
+      cognitive_module: 'L10', // Temporal Consciousness
+    },
+  });
+
+  // Per at-risk issue signals (Brain can discover causal patterns)
+  for (const risk of atRiskIssues.slice(0, 50)) { // cap at 50 to avoid signal flood
+    forecastSignals.push({
+      source: 'engineering.jira',
+      signal_type: 'throughput_at_risk',
+      signal_value: risk.daysAtRisk ?? 0,
+      signal_timestamp: now.toISOString(),
+      metadata: {
+        issue_key: risk.issueKey,
+        project: risk.project,
+        effective_deadline: risk.effectiveDeadline,
+        estimated_completion_date: risk.estimatedCompletionDate,
+        days_at_risk: risk.daysAtRisk,
+        cognitive_module: 'L14', // Goal-Backward Planning
+      },
+    });
+  }
+
+  if (forecastSignals.length > 0) {
+    await storeDualWriteConnectorSignals(supabase, forecastSignals, organizationId);
+  }
+
+  return result;
+}
+
+// ============================================================================
 // MASTER ORCHESTRATOR
 // ============================================================================
 
@@ -443,7 +709,25 @@ export async function runDeliveryHealthAggregation(
     console.warn('[delivery-health] Engineer aggregation error:', err);
   }
 
-  // 2. Engagement-level scope velocity (per engagement)
+  // 2. Org-level throughput delivery forecast (always run — core SE-aaS capability)
+  try {
+    const forecast = await computeThroughputForecast(config, {
+      lookbackDays: config.lookbackDays ?? 28,
+    });
+    // Count emitted signals: 1 forecast + N at-risk signals
+    result.signalsEmitted += 1 + Math.min(forecast.atRiskIssues.length, 50);
+    console.log(
+      `[delivery-health] Throughput forecast: ${forecast.openTickets} open tickets, ` +
+      `${forecast.avgWeeklyThroughput} tickets/week, ETA: ${forecast.estimatedCompletionDate ?? 'unknown'}, ` +
+      `${forecast.atRiskIssues.length} at-risk issues`
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    result.errors.push(`Throughput forecast failed: ${msg}`);
+    console.warn('[delivery-health] Throughput forecast error:', err);
+  }
+
+  // 3. Engagement-level scope velocity (per engagement)
   try {
     const { data: engagements } = await config.supabase
       .from('engagements')
