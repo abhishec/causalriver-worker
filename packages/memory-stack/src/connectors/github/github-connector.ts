@@ -199,7 +199,7 @@ export class GitHubConnector extends ConnectorBase {
                 await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
                   sha: commit.sha,
                   message: commitMsg,
-                });
+                }, { branch_name: branch, release_version: releaseVersion });
               } catch { /* non-critical */ }
             }
           }
@@ -217,7 +217,7 @@ export class GitHubConnector extends ConnectorBase {
                 title: pr.title,
                 body: pr.body,
                 head: { ref: pr.head?.ref },
-              });
+              }, { branch_name: branch, release_version: releaseVersion });
             } catch { /* non-critical */ }
 
             // Reviews for each PR
@@ -459,7 +459,7 @@ export class GitHubConnector extends ConnectorBase {
           await linkCommitToJira(this.supabase, this.organizationId, repo.name, {
             sha: commit.sha,
             message,
-          });
+          }, { branch_name: targetBranch, release_version: releaseVersion });
         } catch {
           // Non-critical: continue even if linking fails
         }
@@ -502,7 +502,7 @@ export class GitHubConnector extends ConnectorBase {
           title: pr.title,
           body: pr.body,
           head: { ref: pr.head?.ref },
-        });
+        }, { branch_name: targetBranch, release_version: releaseVersion });
       } catch (linkErr) {
         console.warn(`[GitHub] Cross-domain link failed for PR #${pr.number}:`, linkErr);
       }

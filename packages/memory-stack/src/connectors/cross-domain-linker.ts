@@ -235,6 +235,8 @@ export async function linkSlackMessageToCrossRefs(
 
 /**
  * When a commit is ingested, parse its message for Jira references.
+ * Pass branchContext to tag each link with the originating branch/release —
+ * required to isolate Team A commits from Team B commits in cross-domain queries.
  */
 export async function linkCommitToJira(
   supabase: SupabaseClient,
@@ -243,7 +245,8 @@ export async function linkCommitToJira(
   commit: {
     sha: string;
     message: string;
-  }
+  },
+  branchContext?: { branch_name?: string; release_version?: string }
 ): Promise<EntityLink[]> {
   const links: EntityLink[] = [];
   const refs = parseReferences(commit.message);
@@ -261,6 +264,8 @@ export async function linkCommitToJira(
       confidence: 0.90,
       evidence: `Commit message contains ticket "${ticket}"`,
       created_at: new Date().toISOString(),
+      branch_name: branchContext?.branch_name,
+      release_version: branchContext?.release_version,
     });
   }
 
@@ -457,11 +462,14 @@ export async function getLinkedEntitiesForBranch(
   let jiraTickets: string[] = [];
 
   if (allSourceIds.length > 0) {
-    // Try entity_links table first
+    // Try entity_links table first — filter by branch_name to isolate Team A from Team B.
+    // Without this filter, a PR/commit entity_id that appears on both branches would
+    // return Jira tickets that belong to the other team's release.
     const { data: links } = await supabase
       .from('entity_links')
       .select('target_entity_id')
       .eq('organization_id', organizationId)
+      .eq('branch_name', branchName)
       .in('source_entity_id', allSourceIds)
       .eq('target_type', 'jira_issue');
 
@@ -501,19 +509,24 @@ export async function getLinkedEntitiesForBranch(
 /**
  * For a sprint or time window, find all PRs and their linked Jira tickets.
  * Enables: "What did we ship in the last sprint? Show PRs and tickets."
+ *
+ * Pass branchName to scope results to a specific release branch —
+ * required when two teams (e.g. Team A on release/6.3.4, Team B on release/5.11.5-enterprise)
+ * are shipping in overlapping date windows.
  */
 export async function getSprintDeliveryReport(
   supabase: SupabaseClient,
   organizationId: string,
   fromDate: Date,
-  toDate: Date
+  toDate: Date,
+  branchName?: string
 ): Promise<Array<{
   pr: { number: number; repo: string; title: string; cycleTimeHours: number; author: string };
   linkedTickets: string[];
   slackDiscussions: number;
 }>> {
-  // Get all merged PRs in window
-  const { data: mergedPRs } = await supabase
+  // Get all merged PRs in window, optionally scoped to a specific release branch
+  let prQuery = supabase
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
@@ -523,6 +536,12 @@ export async function getSprintDeliveryReport(
     .lte('created_at', toDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(200);
+
+  if (branchName) {
+    prQuery = prQuery.eq('branch_name', branchName);
+  }
+
+  const { data: mergedPRs } = await prQuery;
 
   // Get all cross-domain links for the period
   const { data: links } = await supabase
