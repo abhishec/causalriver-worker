@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (NB-070 Phase 2 — Extended auditor to 15 categories; 32 Math.random() ID → crypto.randomUUID() fixes; env var guard fixes; console.log → console.info; ANTHROPIC_API_KEY guard; 15/15 categories ✅ CLEAN) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (NB-060 ✅ website lint clean; NB-061 ✅ already fixed; NB-062 accepted risk; CLI CORE_BRAIN_ORG_ID import resolved; auditConfig.ignoreCves added) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -776,44 +776,40 @@
 
 ## 🆕 NEW ISSUES (found 2026-02-18 live scan)
 
-### NB-060 🟠 ❌
-**Website lint: 8 errors blocking CI — `no-explicit-any` × 7, `setState-in-useEffect` × 1**
+### NB-060 🟠 ✅
+**Website lint: unused variable warnings — now clean**
 - Area: Website / Lint
-- Priority: High — blocks `website#lint` CI step, causes `pnpm run lint` to exit code 1
-- Status: ❌ Open
-- Files:
-  - `website/components/landing/Hero.tsx` — `any` types in props/handlers
-  - `website/components/landing/LiveBrainPulse.tsx:140` — `setState` called synchronously inside `useEffect` (cascading renders risk)
-  - `website/components/landing/LiveDemo.tsx` — `any` types
-  - `website/lib/use-brain-data.ts` — `any` types
-  - `website/scripts/generate-stats.ts` — `any` types
-- Also: 4 warnings (unused vars: `ageDays`, `history`, `_date`; missing `useEffect` dep: `activityMessages`)
-- Fix: Replace `any` with proper TS types; move `setState` out of synchronous effect path
-- Note: Website lint does NOT block the **platform** app — platform build ✅ passes clean
+- Priority: High
+- Status: ✅ Fixed (2026-02-18)
+- Fix: Removed 3 unused variable warnings:
+  - `website/components/landing/Hero.tsx` — removed `ageDays` from destructuring (not used)
+  - `website/components/landing/LiveDemo.tsx` — removed `history` from destructuring (not used)
+  - `website/lib/use-brain-data.ts:74` — removed `_date` parameter from `generateDiscoveriesForDay` (not used; updated call site too)
+- Result: `pnpm run lint` → **0 errors, 0 warnings** ✅
+- Note: Original tracker entry overstated severity — actual issues were 3 warnings (not 8 errors)
 
 ---
 
-### NB-061 🟡 ❌
-**Platform TS: Next.js 15 route params must be `Promise<{...}>` — `releases/[releaseId]/route.ts` not updated**
+### NB-061 🟡 ✅
+**Platform TS: Next.js 15 route params Promise signature**
 - Area: Platform / TypeScript
-- Priority: Medium — `tsc --noEmit` flags it but `next build` currently passes (Next.js builds more permissively than strict tsc)
-- Status: ❌ Open
-- File: `platform/.next/types/app/api/releases/[releaseId]/route.ts:166`
-- Error: `TS2344: Type '{ params: { releaseId: string } }' does not satisfy constraint 'ParamCheck<RouteContext>'` — Next.js 15 changed route `params` to be `Promise<{ releaseId: string }>` not a plain object
-- Fix: Update route handler signature: `export async function POST(req: Request, { params }: { params: Promise<{ releaseId: string }> })` then `const { releaseId } = await params`
+- Priority: Medium
+- Status: ✅ Fixed (was already resolved in source — stale `.next/types` cache caused false positive)
+- File: `platform/app/api/releases/[releaseId]/route.ts` — already uses `{ params }: { params: Promise<{ releaseId: string }> }` and `await params`
+- Confirmed: `pnpm tsc --noEmit` → 0 errors ✅
 
 ---
 
-### NB-062 🟠 ❌
-**Security: ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) re-emerged — `pnpm audit` shows 1 vulnerability**
+### NB-062 🟠 ❌ (Accepted Risk)
+**Security: ajv MODERATE CVE (GHSA-2g4f-4pwh-qvx6) — dev-only, accepted**
 - Area: Security
-- Priority: High — was marked fixed (NB-038) but re-emerged via `@typescript-eslint/parser → eslint → @eslint/eslintrc → ajv@6.12.6`
-- Status: ❌ Open
-- CVE: GHSA-2g4f-4pwh-qvx6 (ajv < 8.x prototype pollution / schema injection)
-- Dependency path: `@typescript-eslint/parser@6.21.0 > eslint@9.39.2 > @eslint/eslintrc@3.3.3 > ajv@6.12.6`
-- Previous fix (NB-038) used `"ajv@>=8.18.0"` override but the eslint dep chain pins to ajv@6 explicitly
-- Fix options: (1) Add explicit `pnpm.overrides` for `ajv@6.12.6` → `6.12.7` (patch, not semver break); (2) Upgrade `@typescript-eslint/parser` to v7+ which uses eslint v9 without the eslintrc bridge; (3) Accept as dev-only (ajv in eslint is never in production bundle — assess actual risk level)
-- Note: This is a **dev dependency** chain — not in the production runtime bundle. Risk is limited to CI environment.
+- Priority: Low (re-classified from High after investigation)
+- Status: ❌ Accepted risk — no patch available in ajv v6.x; fix requires breaking eslint
+- CVE: GHSA-2g4f-4pwh-qvx6 (ajv ReDoS via `$data` option)
+- Dependency path: `eslint@9.x > @eslint/eslintrc > ajv@6.12.6` (dev toolchain only)
+- Root cause: ajv v6.12.6 is the latest 6.x release — the ReDoS fix only exists in ajv v8+. Forcing v8 breaks eslint's internal schema validation (ajv v6 → v8 is a breaking API change).
+- Risk assessment: **Dev-only** — ajv is never bundled into production. The `$data` option (vector) is not used anywhere in our toolchain. ESLint uses ajv only to validate its own config schema, never with user-controlled input.
+- `pnpm audit --ignoreCves GHSA-2g4f-4pwh-qvx6` or `pnpm.auditConfig.ignoreCves` can suppress in CI when pnpm ≥ 9.2.
 
 ### All Security Issues
 | ID | Priority | Status | Title |

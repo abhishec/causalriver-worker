@@ -28,7 +28,7 @@ function generateSimulatedSnapshots(): BrainDailySnapshot[] {
       baseAccuracy + dayNum * 0.18 + (Math.random() - 0.3) * 1.2
     );
 
-    const discoveries = generateDiscoveriesForDay(dayNum, date);
+    const discoveries = generateDiscoveriesForDay(dayNum);
     const regions = generateActiveRegions(dayNum);
 
     days.push({
@@ -71,7 +71,7 @@ function generateSimulatedSnapshots(): BrainDailySnapshot[] {
   return days;
 }
 
-function generateDiscoveriesForDay(dayNum: number, _date: Date): string[] {
+function generateDiscoveriesForDay(dayNum: number): string[] {
   const allDiscoveries = [
     "Discovered new causal edge: deploy frequency \u2192 satisfaction (14d lag, p<0.01)",
     "Anomaly detected: signal volume spike +340% \u2014 tracing root cause across domains",

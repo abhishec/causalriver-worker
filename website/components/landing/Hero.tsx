@@ -21,7 +21,7 @@ function formatNumber(n: number): string {
 }
 
 export function Hero() {
-  const { latest, history, isLive, ageDays } = useBrainHealth();
+  const { latest, history, isLive } = useBrainHealth();
   const [thoughtIndex, setThoughtIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);

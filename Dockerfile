@@ -28,8 +28,10 @@ FROM node:20-alpine AS builder
 RUN apk add --no-cache python3 py3-pip make g++ curl github-cli && \
     pip3 install --break-system-packages openai tqdm requests
 
-# Install pnpm — use npm (corepack can be flaky in CI)
-RUN npm install -g pnpm@9
+# Install pnpm — pin exact version to match packageManager field in package.json
+# pnpm@9 (latest 9.x) has a different pnpmfileChecksum algorithm than 9.0.0
+# and will reject the lockfile with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
+RUN npm install -g pnpm@9.0.0
 
 WORKDIR /app
 
@@ -89,7 +91,7 @@ RUN apk add --no-cache curl python3 py3-pip github-cli && \
     pip3 install --break-system-packages openai tqdm requests
 
 # Install pnpm + tsx globally (pnpm needed for `pnpm exec tsx` in docker-entrypoint.sh)
-RUN npm install -g pnpm@9 tsx
+RUN npm install -g pnpm@9.0.0 tsx
 
 # Security: non-root user
 RUN addgroup -g 1001 -S nodejs && \

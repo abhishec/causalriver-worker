@@ -25,7 +25,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 };
 
 export function LiveDemo() {
-  const { latest, history, isLive } = useBrainHealth();
+  const { latest, isLive } = useBrainHealth();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);

@@ -7,6 +7,7 @@
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
+import { CORE_BRAIN_ORG_ID } from '@nexus-ai/memory-stack';
 
 // Load .env — try CWD first, then walk up to find apps/cli-copilot/.env
 const candidates = [
@@ -32,8 +33,7 @@ export interface CliConfig {
 }
 
 // Canonical source: packages/memory-stack/src/federation/constants.ts
-// TODO: import { CORE_BRAIN_ORG_ID } from '@nexus-ai/memory-stack' once this package resolves in CLI context
-const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
+const CORE_ORG_ID = CORE_BRAIN_ORG_ID;
 
 export function loadConfig(): CliConfig {
   const required: Record<string, string | undefined> = {

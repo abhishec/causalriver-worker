@@ -27,8 +27,10 @@ FROM node:20-alpine AS deps
 # Native module build tools (tree-sitter needs python3, make, g++)
 RUN apk add --no-cache python3 make g++
 
-# Install pnpm
-RUN npm install -g pnpm@9
+# Install pnpm — pin exact version to match packageManager field in package.json
+# pnpm@9 (latest 9.x) has a different pnpmfileChecksum algorithm than 9.0.0
+# and will reject the lockfile with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
+RUN npm install -g pnpm@9.0.0
 
 WORKDIR /app
 
@@ -55,7 +57,7 @@ RUN pnpm install --frozen-lockfile
 # ─────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-RUN npm install -g pnpm@9
+RUN npm install -g pnpm@9.0.0
 
 WORKDIR /app
 
