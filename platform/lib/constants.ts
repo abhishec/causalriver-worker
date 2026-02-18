@@ -13,9 +13,10 @@
 /**
  * Core Brain organization — the platform's own brain.
  * Canonical source: packages/memory-stack/src/federation/constants.ts
- * Re-exported here as CORE_ORG_ID for backwards-compatibility with platform code.
+ * Inlined here (not re-exported from @nexus-ai/memory-stack) to avoid pulling
+ * memory-stack (which contains tree-sitter native modules) into client bundles.
  */
-export { CORE_BRAIN_ORG_ID as CORE_ORG_ID } from '@nexus-ai/memory-stack';
+export const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 
 /** Company Jarvis — AML compliance SaaS (synthetic data) */
 export const COMPANY_JARVIS_ORG_ID = "22222222-2222-4000-a000-222222222222";

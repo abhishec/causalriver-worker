@@ -61,18 +61,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Dynamically import connectors (avoids bundling all at edge init)
-    const { FreshdeskConnector } = await import(
-      "@nexus-ai/memory-stack/connectors/freshworks/freshdesk-connector"
-    ).catch(() => ({ FreshdeskConnector: null }));
-
-    const { FreshsalesConnector } = await import(
-      "@nexus-ai/memory-stack/connectors/freshworks/freshsales-connector"
-    ).catch(() => ({ FreshsalesConnector: null }));
-
-    const { FreshchatConnector } = await import(
-      "@nexus-ai/memory-stack/connectors/freshworks/freshchat-connector"
-    ).catch(() => ({ FreshchatConnector: null }));
+    // 4. Import connectors from main memory-stack entry point
+    const { FreshdeskConnector, FreshsalesConnector, FreshchatConnector } = await import(
+      "@nexus-ai/memory-stack"
+    ).catch(() => ({ FreshdeskConnector: null, FreshsalesConnector: null, FreshchatConnector: null }));
 
     const results: Record<string, any> = {};
 
