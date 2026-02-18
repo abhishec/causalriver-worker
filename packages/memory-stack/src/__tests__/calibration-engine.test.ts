@@ -36,17 +36,17 @@ function createMatchedPrediction(
   const actualValue = actualOccurred ? 1 : 0;
   return {
     prediction: {
-      id: `pred_${Math.random().toString(36).substr(2, 9)}`,
+      id: `pred_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
       organizationId: 'org-test',
       predictionType: 'churn',
       entityType: 'client',
-      entityId: `client_${Math.random().toString(36).substr(2, 9)}`,
+      entityId: `client_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
       predictedProbability: predictedProb,
       predictedAt: new Date(),
       predictionWindowDays: 30,
     },
     outcome: {
-      predictionId: `pred_${Math.random().toString(36).substr(2, 9)}`,
+      predictionId: `pred_${crypto.randomUUID().replace(/-/g, '').slice(0, 9)}`,
       outcomeOccurred: actualOccurred,
       outcomeDate: new Date(),
       recordedAt: new Date(),
