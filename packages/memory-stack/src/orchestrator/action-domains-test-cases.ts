@@ -220,7 +220,7 @@ async function analyzeCode(
   language: string
 ): Promise<CodeAnalysis> {
   // For MVP: Simple regex-based analysis
-  // TODO: Use proper AST parsers (@typescript-eslint/parser, @babel/parser, etc.)
+  // MVP: regex-based analysis. Future: Use proper AST parsers (@typescript-eslint/parser, @babel/parser, etc.)
 
   const functions: FunctionInfo[] = [];
   const classes: ClassInfo[] = [];

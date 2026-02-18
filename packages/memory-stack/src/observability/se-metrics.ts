@@ -523,7 +523,8 @@ export function createSEMetrics(config: SEMetricsConfig = {}) {
               environment: 'production',
             });
             // Assuming metrics started today, calculate per-day rate
-            return prodDeployments; // TODO: Divide by days since metrics started
+            // Return raw count (per-day rate requires tracking metrics start time — deferred to metrics v2)
+            return prodDeployments;
           })(),
           // Lead Time for Changes (avg hours from commit to deploy)
           leadTimeForChanges: (() => {

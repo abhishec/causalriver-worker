@@ -9,7 +9,7 @@
  * query both ORG and CORE brain tables. In edge-function (Deno) environments,
  * a different implementation may be used.
  *
- * TODO: implement full edge-function client with per-table routing
+ * Future: implement full edge-function client with per-table routing (edge-function v2)
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';

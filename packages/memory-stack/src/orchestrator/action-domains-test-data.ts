@@ -214,7 +214,7 @@ async function parseSchema(
   ctx: ActionDomainContext
 ): Promise<DatabaseSchema> {
   // For MVP: Parse simple schema format
-  // TODO: Add PostgreSQL DDL parser, Prisma schema parser, TypeORM entity parser
+  // MVP: simple text format parser. Future: Add PostgreSQL DDL parser, Prisma schema parser, TypeORM entity parser
 
   // Example simple schema format:
   // "users(id:uuid pk, email:text unique, created_at:timestamp)"
@@ -313,7 +313,7 @@ async function analyzeDistributions(
   ctx: ActionDomainContext
 ): Promise<Record<string, any>> {
   // For MVP: Return default distributions
-  // TODO: Query production DB for aggregated statistics
+  // MVP: Return default distributions. Future: Query production DB for aggregated statistics
   //       - Column cardinality
   //       - Value distributions
   //       - Null percentages

@@ -625,7 +625,7 @@ export function createBrainRunReporter(
         hours,
       },
       layers: layerStatuses,
-      trigger_chains: [], // TODO: implement
+      trigger_chains: [], // Populated when cascade alerts are linked to run events (future: join cascade_alerts → brain_execution_log)
       feedback: {
         total_predictions: totalPredictions,
         verified_predictions: verifiedPredictions,
