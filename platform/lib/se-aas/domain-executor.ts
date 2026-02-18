@@ -159,13 +159,14 @@ export async function executeDomain(
   // All 5 channels in one shot — signal, prediction, evolution, observability
   const bus = createBrainFeedbackBus({ supabase, organizationId: params.organizationId });
   const interventions = (result as any).interventions ?? [];
+  const confidence = (result as any).confidence ?? 0.5;
 
   await Promise.all([
     // Channel 1: Signal — Brain observes this domain execution
     bus.emitSignal({
       sourceDomain: `se-aas.${params.domainType}`,
       signalType: 'domain_execution',
-      signalValue: (result as any).confidence ?? 0.5,
+      signalValue: confidence,
       entityType: 'se_aas_artifact',
       entityId: `${params.domainType}_${Date.now()}`,
       metadata: {
@@ -185,7 +186,7 @@ export async function executeDomain(
       ? bus.recordInterventionPredictions(
           interventions,
           params.domainType,
-          (result as any).confidence ?? 0.5,
+          confidence,
         )
       : Promise.resolve(),
 
@@ -206,10 +207,120 @@ export async function executeDomain(
     // Non-blocking: feedback failure should NEVER break domain execution
   });
 
+  // ── Step 6: Domain-Specific Side Effects (DB-direct, non-blocking) ───────
+  // Previously in event-bus-wiring.ts (initializeSeAaSEventBusWiring) which was
+  // never called in production. Migrated here to run on every domain execution.
+  _runDomainSideEffects(supabase, params.organizationId, params.domainType, result, confidence, durationMs).catch(() => {
+    // Non-blocking: side-effect failure should NEVER break domain execution
+  });
+
   return {
     result: { ...result, timing: { totalMs: durationMs } },
     artifactId,
   };
+}
+
+// ============================================================================
+// DOMAIN SIDE EFFECTS — DB-direct, non-blocking
+// Previously wired via initializeSeAaSEventBusWiring() (event-bus-wiring.ts)
+// which was never called in the production API path. Migrated here so these
+// writes happen on every domain execution without needing an in-process event bus.
+// ============================================================================
+
+async function _runDomainSideEffects(
+  supabase: SupabaseClient,
+  organizationId: string,
+  domainType: string,
+  result: Record<string, unknown>,
+  confidence: number,
+  durationMs: number,
+): Promise<void> {
+  const claudePowered = (result as any).data?.claudePowered ?? false;
+  const now = new Date().toISOString();
+
+  // 1. Execution metrics row (se_aas_metrics)
+  await supabase.from('se_aas_metrics').insert({
+    organization_id: organizationId,
+    domain_type: domainType,
+    confidence,
+    execution_time_ms: durationMs,
+    claude_powered: claudePowered,
+    created_at: now,
+  });
+
+  // 2. Domain-specific auto-actions
+  switch (domainType) {
+    case 'incident-diagnosis': {
+      // High-confidence incident → create alert
+      if (confidence > 0.85) {
+        await supabase.from('alerts').insert({
+          organization_id: organizationId,
+          alert_type: 'incident',
+          severity: 'high',
+          title: `Incident detected: ${(result as any).rootCause || 'Unknown'}`,
+          description: (result as any).narrative as string | undefined,
+          metadata: result,
+          status: 'open',
+        });
+      }
+      break;
+    }
+
+    case 'impact-analysis': {
+      // High-risk change → notify org admins
+      const riskScore = (result as any).riskScore as number | undefined;
+      if (riskScore && riskScore > 0.7) {
+        const { data: members } = await supabase
+          .from('org_members')
+          .select('user_id')
+          .eq('organization_id', organizationId)
+          .in('role', ['admin', 'owner']);
+
+        if (members && members.length > 0) {
+          await supabase.from('notifications').insert(
+            members.map((m: { user_id: string }) => ({
+              user_id: m.user_id,
+              organization_id: organizationId,
+              notification_type: 'high_risk_change',
+              title: 'High-risk code change detected',
+              message: `Risk score: ${riskScore}. ${(result as any).summary || 'Review required.'}`,
+              metadata: result,
+              read: false,
+            }))
+          );
+        }
+      }
+      break;
+    }
+
+    case 'log-query': {
+      // Error clusters detected → auto-create monitoring rules
+      const errorClusters = (result as any).errorClusters as Array<{
+        pattern: string;
+        count: number;
+        severity: string;
+      }> | undefined;
+
+      if (errorClusters && errorClusters.length > 0) {
+        const rulesToInsert = errorClusters
+          .filter((c) => c.severity === 'high' || c.count > 10)
+          .map((c) => ({
+            organization_id: organizationId,
+            rule_type: 'log_pattern',
+            pattern: c.pattern,
+            threshold: c.count,
+            severity: c.severity,
+            auto_created: true,
+            created_from: 'log-query-domain',
+          }));
+
+        if (rulesToInsert.length > 0) {
+          await supabase.from('monitoring_rules').insert(rulesToInsert);
+        }
+      }
+      break;
+    }
+  }
 }
 
 // ============================================================================

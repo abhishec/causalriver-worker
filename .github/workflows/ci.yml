@@ -135,7 +135,10 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - name: Apply pending migrations
-        run: supabase db push --linked
+        # --include-all: apply migrations even if their timestamp is before the
+        # latest already-applied migration. This is needed because new migrations
+        # are sometimes created with earlier timestamps (backfill/hotfix pattern).
+        run: supabase db push --linked --include-all
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -156,7 +159,40 @@ jobs:
             echo "New/modified migrations detected:"
             echo "$CHANGED_MIGRATIONS"
             echo ""
-            echo "Checking for dangerous patterns..."
+
+            # ── Duplicate timestamp check ─────────────────────────────────
+            echo "Checking for duplicate migration timestamps..."
+            ALL_TIMESTAMPS=$(ls supabase/migrations/*.sql | xargs -I{} basename {} | cut -d'_' -f1 | sort)
+            DUPES=$(echo "$ALL_TIMESTAMPS" | uniq -d)
+            if [ -n "$DUPES" ]; then
+              echo "::error::DUPLICATE MIGRATION TIMESTAMPS DETECTED: $DUPES"
+              echo "Two migration files share the same timestamp — this will cause a primary key violation."
+              echo "Rename one of the conflicting files with a later timestamp."
+              exit 1
+            fi
+            echo "✅ No duplicate timestamps"
+
+            # ── Out-of-order warning ──────────────────────────────────────
+            echo ""
+            echo "Checking for out-of-order migrations..."
+            LATEST_MAIN=$(git show origin/main:supabase/migrations/ 2>/dev/null | grep '.sql' | sort | tail -1 | sed 's/.*\///' | cut -d'_' -f1 || echo "0")
+            NEW_MIGRATIONS=$(echo "$CHANGED_MIGRATIONS" | xargs -I{} basename {} | cut -d'_' -f1 | sort)
+            OUT_OF_ORDER=""
+            for TS in $NEW_MIGRATIONS; do
+              if [ "$TS" \< "$LATEST_MAIN" ]; then
+                OUT_OF_ORDER="$OUT_OF_ORDER $TS"
+              fi
+            done
+            if [ -n "$OUT_OF_ORDER" ]; then
+              echo "::warning::OUT-OF-ORDER MIGRATIONS:$OUT_OF_ORDER"
+              echo "These migrations have timestamps before the current latest on main ($LATEST_MAIN)."
+              echo "The deploy uses --include-all to handle this, but consider using the current date prefix."
+            else
+              echo "✅ All new migrations are in order"
+            fi
+
+            echo ""
+            echo "Checking for dangerous SQL patterns..."
 
             # Check for DROP TABLE without IF EXISTS
             if grep -rn "DROP TABLE " $CHANGED_MIGRATIONS | grep -v "IF EXISTS"; then
@@ -171,6 +207,11 @@ jobs:
             # Check for ALTER TABLE DROP COLUMN
             if grep -rn "DROP COLUMN" $CHANGED_MIGRATIONS; then
               echo "WARNING: Column drop detected — ensure backward compatibility"
+            fi
+
+            # Check for missing IF NOT EXISTS on CREATE TABLE
+            if grep -rn "CREATE TABLE " $CHANGED_MIGRATIONS | grep -v "IF NOT EXISTS"; then
+              echo "WARNING: CREATE TABLE without IF NOT EXISTS — migration not idempotent"
             fi
 
             echo "Migration check complete"
