@@ -29,7 +29,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/inbox": "Inbox",
   "/integrate": "Integrate",
   "/finance-jarvis": "Finance Jarvis",
-  "/accounting-jarvis": "Accounting Jarvis",
+  "/accounting-jarvis": "AAS — Accounting as a Service",
 };
 
 export function TopBar() {

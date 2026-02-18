@@ -600,7 +600,7 @@ export function CapabilitiesClient({
                         <div>
                           <div className="text-[10px] font-medium text-muted uppercase tracking-wider mb-1">API Endpoint</div>
                           <code className="text-[10px] font-mono text-accent bg-surface px-2 py-1 rounded block">
-                            POST /api/{cap.servicePack === "accounting-aas" ? "accounting-jarvis" : "se-aas"}/{cap.domainType}
+                            POST /api/{cap.servicePack === "accounting-aas" ? "aas" : "se-aas"}/{cap.domainType}
                           </code>
                         </div>
                       )}

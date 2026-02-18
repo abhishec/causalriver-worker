@@ -18,6 +18,8 @@ This document contains every use case NexusBrain supports, with real examples of
 8. [Code Review Assistance](#use-case-8-code-review-assistance) - "Review this PR"
 9. [Knowledge Transfer](#use-case-9-knowledge-transfer) - "Plan handoff"
 10. [Predictive Analysis](#use-case-10-predictive-analysis) - "What if we refactor?"
+11. [Branch-Scoped Code Intelligence](#use-case-11-branch-scoped-code-intelligence) - "What's the state of the 6.3.4 release?" ⭐ NEW
+12. [Cross-Branch Impact Analysis](#use-case-12-cross-branch-impact-analysis) - "Do our two releases conflict?" ⭐ NEW
 
 ---
 
@@ -436,6 +438,129 @@ Query time: 6 seconds
 
 ---
 
+---
+
+## Use Case 11: Branch-Scoped Code Intelligence
+
+**Question**: "Analyse the 6.3.4 branch — what's changed, what's at risk, who owns what?"
+
+**When to Use**:
+- Before a release cut-off
+- Sprint review gates
+- Cross-branch risk assessment
+- When two parallel release trains are running
+
+**What Makes This Different**:
+NexusBrain indexes every file on every tracked branch separately. When you select `6.3.4` in the branch selector, every answer — code review, impact analysis, expert finding — is scoped to the exact symbol versions on that branch. It is not a generic "your codebase" answer; it is branch-aware, commit-aware intelligence.
+
+**Example**:
+```
+Branch selected: 6.3.4
+Question: "What has changed on 6.3.4 since branching from 6.3.3,
+           and what is the blast radius before the Apr 7 release?"
+
+AI Response:
+BRANCH INTELLIGENCE — 6.3.4 vs 6.3.3
+
+DELTA SUMMARY
+├─ Commits since branch point: 147
+├─ Files changed: 89 files across 12 modules
+├─ Authors: Bao (38%), Ravi (27%), Mayank (19%), Nitish (11%), Ganesh (5%)
+└─ Net change: +4,201 lines / -1,847 lines
+
+HIGH-RISK MODULES (brain causal scoring):
+1. auth/SessionManager.scala — Risk: CRITICAL
+   - Changed by: Bao (PR #312), Ravi (PR #318)
+   - Downstream dependents: 31 files
+   - Test coverage: 61% (was 78% on 6.3.3) — REGRESSION
+   - Linked Jira tickets: PROJ-1204 (open blocker), PROJ-1198
+
+2. PaymentOrchestrator.scala — Risk: HIGH
+   - Changed by: Mayank (PR #321)
+   - Blast radius: 14 files
+   - Breaking API change detected (method signature changed)
+   - Recommended reviewer: Ganesh (12 historical commits, highest expertise)
+
+3. EventBus.scala — Risk: MEDIUM
+   - Changed by: Nitish (PR #309)
+   - No breaking changes, but 3 circular imports introduced
+
+JIRA CORRELATION:
+- 23 Jira tickets linked to PRs on this branch
+- 4 tickets marked "Done" but linked PR has unresolved review comments
+- 2 critical path tickets (PROJ-1204, PROJ-1211) have no linked PR yet
+
+RELEASE READINESS: 67% — not ready for Apr 7 without:
+1. Auth test coverage restored to ≥75%
+2. PaymentOrchestrator API change verified by downstream teams
+3. PROJ-1204 resolved or deferred
+
+Query time: 4 seconds
+```
+
+---
+
+## Use Case 12: Cross-Branch Impact Analysis
+
+**Question**: "Does what we're building in 6.3.4 conflict with the 5.11.5 enterprise release?"
+
+**When to Use**:
+- Two parallel release trains running simultaneously
+- Enterprise fork and main branch diverging
+- Merge planning between streams
+- Understanding cumulative risk across all active releases
+
+**What Makes This Different**:
+Most tools show you one branch at a time. NexusBrain tracks all active branches simultaneously and understands the causal relationships between them — not just file-level diffs, but semantic changes (function renames, API signature changes, shared schema evolution).
+
+**Example**:
+```
+Question: "We have two parallel releases — 6.3.4 (Apr 7) and 5.11.5 enterprise
+           (Drop 1: Feb 26, Drop 2: Mar 15). What conflicts or shared risks exist
+           between these two release trains?"
+
+AI Response:
+CROSS-BRANCH INTELLIGENCE — 6.3.4 ∩ 5.11.5
+
+SHARED COMPONENT CONFLICTS (6 detected):
+
+1. AuthService.authenticate() — CRITICAL CONFLICT
+   - 6.3.4 (Bao, PR #312): Changed token expiry from 24h → 8h
+   - 5.11.5 (Sandeep, PR #089): Added OAuth2 refresh token path
+   - PROBLEM: If 5.11.5-Drop1 ships Feb 26, enterprise clients will have
+     OAuth2 refresh on 8h tokens — untested combination
+   - RECOMMENDATION: Cross-team sync required before Feb 26
+
+2. database/migrations/v47_schema.sql — HIGH CONFLICT
+   - 6.3.4: Adds nullable column `user.last_mfa_at`
+   - 5.11.5: Adds non-null column `user.last_mfa_at` with default
+   - PROBLEM: Forward-incompatible schema — 5.11.5 clients cannot be
+     upgraded to 6.3.4 without a data migration
+   - RECOMMENDATION: Align migration in a pre-release coordination sprint
+
+3. EventBus message format — MEDIUM
+   - 6.3.4 adds new event type `session.mfa_bypass`
+   - 5.11.5 does not consume it — safe for now but monitor
+
+TEAM COORDINATION GAPS:
+- No Jira link exists between 6.3.4 team (Bao et al) and 5.11.5 team (Sandeep et al)
+  for the 6 shared conflicts above
+- Suggested: Create coordination tickets before 5.11.5 Drop 1 (Feb 26)
+
+RELEASE TIMELINE RISK:
+5.11.5 Drop 1 (Feb 26) → at risk if AuthService conflict not resolved
+5.11.5 Drop 2 (Mar 15) → schema migration conflict could push to Apr
+6.3.4 (Apr 7)          → timeline safe if schema aligned by mid-March
+
+RECOMMENDED OWNERS FOR SYNC:
+- Bao (6.3.4 auth lead) ↔ Sandeep (5.11.5 auth lead)
+- Mayank (6.3.4 schema) ↔ Doan (5.11.5 migrations)
+
+Query time: 6 seconds
+```
+
+---
+
 ## Quick Reference
 
 **Most Common Questions**:
@@ -464,6 +589,14 @@ Query time: 6 seconds
 
 # Onboarding
 "I'm new to [component]. Where do I start?"
+
+# Branch intelligence (NEW — select branch in Copilot first)
+"What has changed on [branch] and what's the release risk?"
+"Analyse all PRs on the 6.3.4 branch before the Apr 7 cut-off"
+
+# Cross-branch analysis (NEW — two parallel release trains)
+"Do our 6.3.4 and 5.11.5 releases have any conflicts?"
+"What shared components are touched by both teams?"
 ```
 
 **Query Tips**:
