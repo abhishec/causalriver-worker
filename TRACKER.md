@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (Sprint 4 in progress — Accounting Jarvis overhaul: transaction interpretations engine, GL causal bootstrap, S3→Supabase fallback, balance sheet fix; 7 files uncommitted) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (Sprint 4 COMPLETE — AAS full build shipped: NB-054–059 committed + pushed. Transaction interpretations, causal bootstrap, S3→Supabase fallback, balance sheet fix, FedAvg federation, 5 structured result renderers, artifact framework.) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -36,8 +36,8 @@
 | Training / RL | 5 | 5 | 0 | 0 |
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
-| Accounting Jarvis | 5 | 0 | 0 | 5 |
-| **TOTAL** | **58** | **52** | **1** | **5** |
+| Accounting / AAS | 6 | 6 | 0 | 0 |
+| **TOTAL** | **59** | **58** | **1** | **0** |
 
 ---
 
@@ -610,6 +610,72 @@
 
 ---
 
+### NB-054 🟠 ✅
+**AAS full build — 5 structured result renderers, transaction interpretations, artifact framework, balance sheet fix**
+- Area: Accounting / AAS
+- Priority: High
+- Status: ✅ Done (commits `d695a4eaeb`, `db43aada6a`)
+- Detail: Sprint 4 AAS overhaul across 12 files:
+  - **Transaction Interpretations Engine** (GET + POST paths): top-30 txns by value, SFRS(I)/IRAS-aware plain-English narratives covering 15+ account types (ARR revenue, payroll, CPF, GST, ROU assets, FX, related-party, deferred revenue). `businessImpact` signal per transaction.
+  - **5 structured result renderers** (no more raw JSON fallback): TaxResultView (IRAS GST F5 8-box table), AuditResultView (readiness score + risk bars), StatementsResultView (P&L waterfall + Balance Sheet 3-col + Trial Balance), ReconcilerResultView (month-end banner + TB rows), GenericResultView (triage + Benford's Law + interpretations + causal anomalies).
+  - **Artifact framework**: `saveArtifact()` after each SSE event → `se_aas_artifacts` with `domain_type: aas-{action}`. New `GET /api/accounting-jarvis/artifacts` route. `RecentAASArtifactsPanel` auto-refreshes after agent run.
+  - **Balance Sheet equation fix**: was `totalAssets = totalLiabilities + totalEquity + netProfit` (double-counting); fixed to `totalAssets = totalLiabilities + totalEquity`.
+  - **Gross margin fix**: replaces hardcoded 15%-of-expenses heuristic with real COGS detection (`/hosting|infrastructure|aws|gcp|cost.of.sale/i`).
+  - **AAS rename**: TopBar label updated to "AAS — Accounting as a Service". Sidebar already "Accounting (AAS)". Page headings updated.
+- Files: `agents-accounting.ts`, `accounting-jarvis/page.tsx`, `accounting-jarvis/route.ts`, `accounting-jarvis/artifacts/route.ts`, `s3-upload/route.ts`, `domain-executor.ts`, `TopBar.tsx`, `capabilities-client.tsx`, `copilot/page.tsx`, `SEaaSResultPanel.tsx`, `TRACKER.md`, `design-partner-onboarding/03-ALL-USE-CASES.md`
+
+---
+
+### NB-055 🟠 ✅
+**GL Causal Bootstrap — day-1 accounting intelligence seeded on first GL upload**
+- Area: Accounting / AAS
+- Priority: High
+- Status: ✅ Done (commit `d695a4eaeb`)
+- Detail: `bootstrapAccountingCausalGraph()` seeds 9 fundamental accounting causal edges into `causal_relationships_statistical` on first GL upload. Edges: Revenue→Cash (lag 45d), Revenue→TradeDebtors, Payroll→Cash, Payroll→CPF (17%), Revenue→GSTPayable (9%), Cash→DeferredRevenue, Expenses→NetIncome, Revenue→NetIncome, CashOutflow→RunwayMonths. Uses `domain_prior` method (distinguished from statistically learned). UPSERT idempotent — re-uploads refresh confidence. Calibrated from actual transaction presence (payroll, GST, receivables detected before seeding).
+- File: `platform/app/api/connectors/s3-upload/route.ts`
+
+---
+
+### NB-056 🟡 ✅
+**Balance Sheet equation fix — assets ≠ liabilities + equity + netProfit**
+- Area: Accounting / AAS
+- Priority: Medium (correctness bug visible to design partner)
+- Status: ✅ Done (commit `d695a4eaeb`)
+- Detail: Balance sheet `balanced` flag was `Math.abs(totalAssets - (totalLiabilities + totalEquity + netProfit)) < 1` — double-counting net profit because P&L feeds into retained earnings (equity), not added separately. Fixed to `Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 1` in both `route.ts` (GET path) and `agents-accounting.ts` (POST/brain path).
+- Files: `platform/app/api/accounting-jarvis/route.ts`, `packages/memory-stack/src/orchestrator/agents-accounting.ts`
+
+---
+
+### NB-057 🟡 ✅
+**Gross margin calculation fix — replaces hardcoded 15% heuristic with real COGS**
+- Area: Accounting / AAS
+- Priority: Medium
+- Status: ✅ Done (commit `d695a4eaeb`)
+- Detail: Was computing gross margin as `(Revenue - Expenses × 0.15) / Revenue` — a made-up 15% heuristic. Now detects real COGS accounts matching `/hosting|infrastructure|server|cloud|cogs|cost.of.sale|third.party|aws|gcp|azure/i` and uses their actual sum. Falls back to 0% COGS if no direct cost accounts found (accurate for pure service companies).
+- File: `platform/app/api/accounting-jarvis/route.ts`
+
+---
+
+### NB-058 🟡 ✅
+**S3 → Supabase Storage fallback — GL uploads unblocked in dev/staging**
+- Area: Infrastructure / AAS
+- Priority: Medium
+- Status: ✅ Done (commit `d695a4eaeb`)
+- Detail: Previously the upload route returned HTTP 503 if S3 was not configured (`isS3Configured() === false`). Now: detects S3 availability, falls back to Supabase Storage (`org-data` bucket) when S3 credentials are absent. Supabase path: `{orgId}/{s3Key}` with `upsert: true`. `service` client created once and reused for both storage fallback and DB writes. Unblocks dev/staging environments that don't have S3 configured.
+- File: `platform/app/api/connectors/s3-upload/route.ts`
+
+---
+
+### NB-059 🟠 ✅
+**Federated Causal Learning (FedAvg) — per-org deltas promoted to CORE brain**
+- Area: Accounting / AAS / Brain
+- Priority: High
+- Status: ✅ Done (commit `db43aada6a`)
+- Detail: After each AAS agent run, `snapshotCausalWeights()` captures the org's causal graph before execution, then `computeAndPromoteCausalDeltas()` promotes only what changed (delta) to the CORE brain using FedAvg. Privacy-preserving: only deltas (not raw data) leave the org boundary. Fire-and-forget — never blocks the SSE stream. Config: `fedAvgLearningRate: 0.3`, `maxDelta: 0.15`, `minDelta: 0.01`, `minSampleSize: 10`, `maxPairsPerRun: 20`. `federationEnabled` flag returned in metadata for observability. `FederationCycleId` pattern: `aas_{action}_{orgId8}_{timestamp}`.
+- File: `platform/lib/aas/domain-executor.ts`
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -618,13 +684,8 @@
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
 | NB-032 | 🟡 | Performance | Brain cold-start monitoring — ongoing (currently at 3000ms budget) |
-| NB-054 | 🟠 | Accounting | Transaction Interpretations Engine — 🚧 in progress (uncommitted) |
-| NB-055 | 🟠 | Accounting | GL Causal Bootstrap (day-1 accounting intelligence) — 🚧 in progress (uncommitted) |
-| NB-056 | 🟡 | Accounting | Balance Sheet equation fix (assets = liabilities + equity, not + netProfit) — 🚧 in progress (uncommitted) |
-| NB-057 | 🟡 | Accounting | Gross margin calculation fix (COGS-based, not 15% heuristic) — 🚧 in progress (uncommitted) |
-| NB-058 | 🟡 | Infrastructure | S3 → Supabase Storage fallback (non-blocking when S3 not configured) — 🚧 in progress (uncommitted) |
 
-> **52/58 issues resolved.** 1 ongoing monitoring concern (NB-032). 5 in active development — uncommitted, Sprint 4.
+> **58/59 issues resolved.** 1 ongoing monitoring concern (NB-032). Sprint 4 AAS build fully shipped.
 
 ### All Security Issues
 | ID | Priority | Status | Title |
@@ -681,6 +742,12 @@
 | NB-038 | All CVEs resolved — pnpm audit returns "No known vulnerabilities found" | 36d162865 |
 | NB-047 | Stale tracker emoji fixed (📦 ❌ → 📦 ✅) | tracker-fix |
 | NB-048 | Stale tracker emoji fixed (📦 ❌ → 📦 ✅) | tracker-fix |
+| NB-054 | AAS full build — 5 structured renderers, interpretations, artifact framework, AAS rename | d695a4eaeb + db43aada6a |
+| NB-055 | GL Causal Bootstrap — 9 domain-expert priors seeded on first GL upload | d695a4eaeb |
+| NB-056 | Balance Sheet equation fix (assets = liabilities + equity) | d695a4eaeb |
+| NB-057 | Gross margin COGS-based calculation (replaces 15% heuristic) | d695a4eaeb |
+| NB-058 | S3 → Supabase Storage fallback for GL uploads | d695a4eaeb |
+| NB-059 | Federated Causal Learning (FedAvg delta promotion to CORE brain) | db43aada6a |
 
 ---
 
