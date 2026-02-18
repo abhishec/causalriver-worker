@@ -29,6 +29,8 @@ import {
   brainCausalAccountantAgent,
   createBrainContextMesh,
   createBrainFeedbackBus,
+  snapshotCausalWeights,
+  computeAndPromoteCausalDeltas,
   type AgentDefinition,
   type AssembledBrainContext,
 } from '@nexus-ai/memory-stack';
@@ -74,6 +76,7 @@ export interface ExecuteAccountingResult {
     patternsUsed: number;
     intelligenceScore: number;
     brainAccuracy: number;
+    federationEnabled?: boolean;
   };
 }
 
@@ -117,6 +120,18 @@ export async function executeAccountingAgent(
   const info = getAccountingAgentInfo(action);
   if (!info) {
     throw new Error(`Unknown accounting action: ${action}`);
+  }
+
+  // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
+  // Federation: we capture the org's causal graph state before the agent runs,
+  // then compute deltas afterward so we can promote only what CHANGED to CORE.
+  // This is fire-and-forget; if it fails we still proceed with agent execution.
+  let causalWeightsBefore: Map<string, number> = new Map();
+  const federationCycleId = `aas_${action}_${organizationId.slice(0, 8)}_${Date.now()}`;
+  try {
+    causalWeightsBefore = await snapshotCausalWeights(supabase, organizationId);
+  } catch {
+    // Non-fatal — federation is best-effort
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
@@ -295,6 +310,44 @@ export async function executeAccountingAgent(
     });
   }
 
+  // ── Step 6: Federated Causal Learning — promote deltas to CORE brain ────
+  // After the agent has run (and the feedback bus has potentially updated
+  // causal weights via bus.triggerEvolution()), we compute what CHANGED and
+  // promote only the deltas to the CORE brain using FedAvg. This implements
+  // privacy-preserving federated learning: only the CHANGE (delta), not the
+  // raw data, leaves the org boundary.
+  //
+  // We run this fire-and-forget so it never blocks the agent response.
+  // When it succeeds, Tookitaki's accounting intelligence contributes to
+  // improving AAS for every other org on the platform.
+  (async () => {
+    try {
+      if (causalWeightsBefore.size === 0) return; // No baseline to compare against
+      const federationResult = await computeAndPromoteCausalDeltas(
+        supabase,
+        organizationId,
+        causalWeightsBefore,
+        federationCycleId,
+        {
+          fedAvgLearningRate: 0.3,
+          maxDelta: 0.15,          // max effect size change per cycle
+          minDelta: 0.01,          // ignore trivial changes
+          minSampleSize: 10,       // only promote if we have enough observations
+          maxPairsPerRun: 20,      // limit CORE updates per agent run
+        },
+      );
+      console.log(
+        `[AAS federation] org=${organizationId.slice(0, 8)} action=${action} ` +
+        `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
+        `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
+        `took=${federationResult.durationMs}ms`
+      );
+    } catch (err: any) {
+      // Federation is best-effort — never block agent response
+      console.warn('[AAS federation] Delta promotion failed (non-fatal):', err?.message);
+    }
+  })();
+
   return {
     result: { ...result, timing: { totalMs: durationMs } },
     action,
@@ -306,6 +359,7 @@ export async function executeAccountingAgent(
       patternsUsed: brainContext.patterns.length,
       intelligenceScore: brainContext.brainEvolution.intelligenceScore,
       brainAccuracy: brainContext.brainAccuracy.accuracy,
+      federationEnabled: causalWeightsBefore.size > 0,
     },
   };
 }

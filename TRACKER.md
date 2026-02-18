@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (Phase 4 complete — branch selector UI + backend fully connected; trackedBranches exposed in GitHub status API) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (Sprint 4 in progress — Accounting Jarvis overhaul: transaction interpretations engine, GL causal bootstrap, S3→Supabase fallback, balance sheet fix; 7 files uncommitted) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -36,7 +36,8 @@
 | Training / RL | 5 | 5 | 0 | 0 |
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
-| **TOTAL** | **53** | **52** | **1** | **0** |
+| Accounting Jarvis | 5 | 0 | 0 | 5 |
+| **TOTAL** | **58** | **52** | **1** | **5** |
 
 ---
 
@@ -617,8 +618,13 @@
 | ID | Priority | Area | Title |
 |----|----------|------|-------|
 | NB-032 | 🟡 | Performance | Brain cold-start monitoring — ongoing (currently at 3000ms budget) |
+| NB-054 | 🟠 | Accounting | Transaction Interpretations Engine — 🚧 in progress (uncommitted) |
+| NB-055 | 🟠 | Accounting | GL Causal Bootstrap (day-1 accounting intelligence) — 🚧 in progress (uncommitted) |
+| NB-056 | 🟡 | Accounting | Balance Sheet equation fix (assets = liabilities + equity, not + netProfit) — 🚧 in progress (uncommitted) |
+| NB-057 | 🟡 | Accounting | Gross margin calculation fix (COGS-based, not 15% heuristic) — 🚧 in progress (uncommitted) |
+| NB-058 | 🟡 | Infrastructure | S3 → Supabase Storage fallback (non-blocking when S3 not configured) — 🚧 in progress (uncommitted) |
 
-> 🎉 **52/53 issues resolved.** Only NB-032 (monitoring alert for cold-start creep) remains as an ongoing operational concern.
+> **52/58 issues resolved.** 1 ongoing monitoring concern (NB-032). 5 in active development — uncommitted, Sprint 4.
 
 ### All Security Issues
 | ID | Priority | Status | Title |
@@ -693,4 +699,63 @@ When a new issue is found:
 
 ---
 
-*Source: git log, CRITICAL-BRAIN-INTEGRATION-GAPS.md, NEXUSBRAIN-HONEST-STATUS-FOR-TOKTAKI.md, CONNECTOR_STATUS_AND_PLAN.md, session memory audit*
+---
+
+## 🧾 ACCOUNTING JARVIS — Sprint 4 (In Progress)
+
+### NB-054 🟠 🚧
+**Transaction Interpretations Engine — plain-English narratives per GL transaction**
+- Area: Accounting Jarvis
+- Priority: High
+- Status: 🚧 In Progress — code written, **uncommitted** (7 files modified)
+- Detail: New `generateBookkeeperInterpretations()` function in `agents-accounting.ts`. Top 30 transactions by value, each gets a plain-English business narrative — not just what the GL says but what it *means*. Categories: ARR Revenue, Services Revenue, Grant Income, Payroll, CPF, GST, SFRS(I) 16 Lease, Depreciation, FX, Related Party, Deferred Revenue, Cash Movement. Each has `businessImpact: positive | neutral | watch`. Also wired into `route.ts` via parallel `generateTransactionInterpretations()`. Design partner deliverable Req 1.
+- Files: `packages/memory-stack/src/orchestrator/agents-accounting.ts`, `platform/app/api/accounting-jarvis/route.ts`, `platform/app/(dashboard)/accounting-jarvis/page.tsx`
+- Action: ⚠️ Needs commit + deploy
+
+---
+
+### NB-055 🟠 🚧
+**GL Causal Bootstrap — day-1 accounting intelligence on first upload**
+- Area: Accounting Jarvis / Brain
+- Priority: High
+- Status: 🚧 In Progress — code written, **uncommitted**
+- Detail: `bootstrapAccountingCausalGraph()` in `s3-upload/route.ts`. On first GL upload, seeds fundamental accounting causal relationships into `causal_relationships_statistical` as domain-expert priors (e.g. Revenue → Cash with 45-day lag, Payroll → Cash, GST Output → Tax Liability). Calibrated from actual transactions present (checks for revenue, payroll, receivables, GST, deferred revenue). UPSERT so subsequent uploads refresh confidence rather than duplicate. Returns `{ seeded, status: 'new'|'refreshed', edges[] }`.
+- Files: `platform/app/api/connectors/s3-upload/route.ts`
+- Action: ⚠️ Needs commit + deploy
+
+---
+
+### NB-056 🔴 🚧
+**Balance Sheet equation bug — `totalAssets = totalLiabilities + totalEquity + netProfit` was wrong**
+- Area: Accounting Jarvis
+- Priority: Critical (accounting correctness)
+- Status: 🚧 In Progress — fix written, **uncommitted**
+- Detail: Balance sheet `balanced` check incorrectly added `netProfit` to RHS: `Math.abs(totalAssets - (totalLiabilities + totalEquity + netProfit)) < 1`. The accounting equation is `Assets = Liabilities + Equity` — net profit flows into retained earnings (which is already in equity). Adding it separately double-counts. Fixed in both `agents-accounting.ts` and `route.ts`.
+- Files: `packages/memory-stack/src/orchestrator/agents-accounting.ts:1206`, `platform/app/api/accounting-jarvis/route.ts:296`
+- Action: ⚠️ Needs commit — this is a correctness bug affecting every balance sheet render
+
+---
+
+### NB-057 🟠 🚧
+**Gross margin calculation was wrong — hardcoded 15% of expenses as COGS**
+- Area: Accounting Jarvis
+- Priority: High (financial accuracy)
+- Status: 🚧 In Progress — fix written, **uncommitted**
+- Detail: Old: `grossMargin = (revenue - expenses * 0.15) / revenue * 100` — completely made up. New: filters expense accounts for real COGS signals (`/hosting|infrastructure|server|cloud|cogs|cost.of.sale|third.party|aws|gcp|azure/i`) and computes actual `totalCOGS`. Falls back to 0% if no COGS found (honest).
+- Files: `platform/app/api/accounting-jarvis/route.ts:149`
+- Action: ⚠️ Needs commit
+
+---
+
+### NB-058 🟡 🚧
+**S3 upload hard-blocked when S3 not configured — now falls back to Supabase Storage**
+- Area: Infrastructure / Connectors
+- Priority: Medium
+- Status: 🚧 In Progress — fix written, **uncommitted**
+- Detail: Old: returned HTTP 503 if S3 not configured — blocked all GL uploads in dev/staging environments without S3. New: checks `isS3Configured()`, falls back to Supabase Storage bucket `org-data` if false. Both paths produce `{ key, bucket }` upload result. Upload log updated to show which path was used.
+- Files: `platform/app/api/connectors/s3-upload/route.ts`
+- Action: ⚠️ Needs commit — this is blocking GL uploads in any env without S3 configured
+
+---
+
+*Source: git log, CRITICAL-BRAIN-INTEGRATION-GAPS.md, NEXUSBRAIN-HONEST-STATUS-FOR-TOKTAKI.md, CONNECTOR_STATUS_AND_PLAN.md, session memory audit, git diff HEAD (2026-02-18)*

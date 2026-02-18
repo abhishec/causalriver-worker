@@ -349,6 +349,16 @@ export const brainBookkeeperAgent: AgentDefinition<
       reason: string;
       severity: 'info' | 'warning' | 'critical';
     }>;
+    transactionInterpretations: Array<{
+      date: string;
+      account: string;
+      amount: number;
+      direction: 'debit' | 'credit';
+      accountType: string;
+      narrative: string;
+      businessImpact: 'positive' | 'neutral' | 'watch';
+      category: string;
+    }>;
   }
 > = defineAgent({
   name: 'brain-bookkeeper',
@@ -513,8 +523,12 @@ export const brainBookkeeperAgent: AgentDefinition<
       }
     }
 
+    // Step 8: Generate transaction interpretations — NL narratives per transaction
+    ctx.reportProgress(0.95, 'Generating transaction interpretations...');
+    const transactionInterpretations = generateBookkeeperInterpretations(transactions, accountMap, jurisdiction);
+
     ctx.reportProgress(1.0, 'Bookkeeping complete');
-    ctx.log(`[brain-bookkeeper] Created ${journalEntries.length} journal entries, ${anomalies.length} anomalies, ${autoPosted} auto-posted`);
+    ctx.log(`[brain-bookkeeper] Created ${journalEntries.length} journal entries, ${anomalies.length} anomalies, ${autoPosted} auto-posted, ${transactionInterpretations.length} interpretations`);
 
     return {
       journalEntries,
@@ -527,9 +541,105 @@ export const brainBookkeeperAgent: AgentDefinition<
         variance,
       },
       anomalies,
+      transactionInterpretations,
     };
   },
 });
+
+// ── Transaction Interpretation Engine (shared between bookkeeper + route.ts) ─
+// Generates plain-English narratives per transaction — what it means in
+// business terms, not just what the GL says. Top 30 by value are returned.
+function generateBookkeeperInterpretations(
+  transactions: GLTransaction[],
+  accountMap: Map<string, AccountClassification>,
+  jurisdiction: string,
+): Array<{
+  date: string;
+  account: string;
+  amount: number;
+  direction: 'debit' | 'credit';
+  accountType: string;
+  narrative: string;
+  businessImpact: 'positive' | 'neutral' | 'watch';
+  category: string;
+}> {
+  const top30 = [...transactions]
+    .sort((a, b) => Math.max(b.debit, b.credit) - Math.max(a.debit, a.credit))
+    .slice(0, 30);
+
+  const currency = jurisdiction === 'SG' ? 'SGD' : jurisdiction === 'US' ? 'USD' : jurisdiction === 'MY' ? 'MYR' : 'SGD';
+
+  return top30.map(txn => {
+    const amount = Math.max(txn.debit, txn.credit);
+    const direction: 'debit' | 'credit' = txn.debit >= txn.credit ? 'debit' : 'credit';
+    const accountType = classifyAccount(txn.account);
+    const acctLower = txn.account.toLowerCase();
+    const amtFmt = `${currency} ${amount.toLocaleString('en-SG', { minimumFractionDigits: 2 })}`;
+
+    let narrative = '';
+    let businessImpact: 'positive' | 'neutral' | 'watch' = 'neutral';
+    let category: string = accountType;
+
+    if (accountType === 'revenue') {
+      businessImpact = 'positive';
+      if (acctLower.includes('license') || acctLower.includes('subscription')) {
+        narrative = `Recurring software license/subscription revenue of ${amtFmt} — core ARR contribution. ${txn.reference ? `Ref: ${txn.reference}. ` : ''}Check deferred revenue schedule if multi-period billing.`;
+        category = 'ARR Revenue';
+      } else if (acctLower.includes('implementation') || acctLower.includes('professional')) {
+        narrative = `Professional services revenue of ${amtFmt}. One-time in nature — exclude from ARR. Verify delivery confirmation in supporting documents.`;
+        category = 'Services Revenue';
+      } else if (acctLower.includes('grant')) {
+        narrative = `Grant income of ${amtFmt} recognised. Not reflective of commercial revenue — exclude from ARR metrics. Verify grant conditions met and no clawback risk.`;
+        category = 'Grant Income'; businessImpact = 'neutral';
+      } else if (acctLower.includes('interest')) {
+        narrative = `Interest income of ${amtFmt} — non-operating, positive but not a revenue quality indicator.`;
+        category = 'Interest Income';
+      } else {
+        narrative = `Revenue of ${amtFmt} from "${txn.account}". ${txn.description ? `Note: ${txn.description}.` : ''} Classify by revenue stream for ARR tracking.`;
+        category = 'Other Revenue';
+      }
+    } else if (acctLower.includes('salary') || acctLower.includes('salaries') || acctLower.includes('bonus')) {
+      businessImpact = 'watch';
+      category = acctLower.includes('bonus') ? 'Variable Compensation' : 'Payroll';
+      narrative = acctLower.includes('bonus')
+        ? `Bonus / variable compensation of ${amtFmt}. One-time outflow — verify performance basis documented. Confirm CPF on bonus is computed and filed.`
+        : `Payroll disbursement of ${amtFmt}. ${txn.reference ? `Ref: ${txn.reference}. ` : ''}Largest recurring opex. Verify headcount matches HR records and CPF submitted by 14th.`;
+    } else if (acctLower.includes('cpf')) {
+      category = 'Statutory'; narrative = `CPF contribution of ${amtFmt}. Must be paid by 14th of following month. Verify OA/SA/MA rate bands correct for each employee age group.`;
+    } else if (acctLower.includes('gst') || txn.taxRateName?.includes('GST')) {
+      category = 'GST/Tax'; narrative = direction === 'debit'
+        ? `GST input tax of ${amtFmt} (claimable). Will net against output tax in F5 return. Ensure tax invoice from GST-registered supplier on file.`
+        : `GST output tax of ${amtFmt} collected. Payable to IRAS in next filing. Ensure tax invoice issued to customer.`;
+    } else if (acctLower.includes('rental') || acctLower.includes('rou asset') || acctLower.includes('lease liability')) {
+      category = acctLower.includes('rou') ? 'SFRS(I) 16 Lease' : 'Occupancy';
+      narrative = acctLower.includes('rou')
+        ? `Right-of-Use asset movement of ${amtFmt} under SFRS(I) 16. Ensure lease liability amortisation schedule updated.`
+        : `Office rental of ${amtFmt}. Fixed recurring overhead — verify lease agreement is current.`;
+    } else if (acctLower.includes('depreciation') || acctLower.includes('amortis')) {
+      category = 'Non-Cash'; narrative = `Depreciation / amortisation charge of ${amtFmt}. Non-cash; adds back in operating cash flow. Verify fixed asset register and method consistently applied.`;
+    } else if (accountType === 'bank') {
+      category = 'Cash Movement'; businessImpact = direction === 'credit' ? 'positive' : 'neutral';
+      narrative = direction === 'credit'
+        ? `Cash inflow of ${amtFmt} to ${txn.account}. ${txn.description ? `Source: ${txn.description}.` : ''} Trace to source document.`
+        : `Cash outflow of ${amtFmt} from ${txn.account}. ${txn.description ? `Purpose: ${txn.description}.` : ''} Verify approved payment mandate.`;
+    } else if (acctLower.includes('advance to') || acctLower.includes('due to') || acctLower.includes('intercompany')) {
+      category = 'Related Party'; businessImpact = 'watch';
+      narrative = `Related-party / intercompany transaction of ${amtFmt}. Auditors will scrutinise: confirm arm's-length basis, transfer pricing docs prepared, and IRAS Form C disclosure complete.`;
+    } else if (acctLower.includes('deferred revenue')) {
+      category = 'Deferred Revenue'; narrative = direction === 'credit'
+        ? `Deferred revenue increasing by ${amtFmt}. Cash received ahead of revenue recognition — update revenue recognition schedule per SFRS(I) 15.`
+        : `Deferred revenue being recognised: ${amtFmt}. Verify delivery milestone met per contract.`;
+    } else if (acctLower.includes('foreign exchange') || acctLower.includes('forex')) {
+      category = 'FX'; businessImpact = amount > 10000 ? 'watch' : 'neutral';
+      narrative = `Foreign exchange ${direction === 'debit' ? 'loss' : 'gain'} of ${amtFmt}. ${direction === 'debit' ? 'Review hedging policy.' : 'FX gain recorded.'} Mark-to-market all foreign-currency balances at period end.`;
+    } else {
+      const typeLabel = accountType === 'expense' ? 'operating expense' : accountType === 'asset' ? 'asset movement' : accountType === 'liability' ? 'liability movement' : 'transaction';
+      narrative = `${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} of ${amtFmt} in "${txn.account}". ${txn.description ? `Note: ${txn.description}.` : ''} Review classification and period allocation.`;
+    }
+
+    return { date: txn.date.slice(0, 10), account: txn.account, amount, direction, accountType, narrative, businessImpact, category };
+  });
+}
 
 // ============================================================================
 // AGENT 2: BRAIN-RECONCILER — Autonomous Account Reconciliation
@@ -1096,7 +1206,7 @@ export const brainStatementGeneratorAgent: AgentDefinition<
         totalLiabilities,
         equity: equityEntries,
         totalEquity,
-        balanced: Math.abs(totalAssets - (totalLiabilities + totalEquity + netProfit)) < 1,
+        balanced: Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 1,
       },
       cashFlowSummary: {
         operatingCashFlow,
