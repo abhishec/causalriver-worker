@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(
   request: Request,
-  { params }: { params: { releaseId: string } }
+  { params }: { params: Promise<{ releaseId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -30,7 +30,7 @@ export async function POST(
 
     const orgId = await getCurrentOrgId();
     const service = await createServiceClient();
-    const { releaseId } = params;
+    const { releaseId } = await params;
 
     const url = new URL(request.url);
     const query = url.searchParams.get("query") ?? "readiness";
