@@ -104,16 +104,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Triggers for auto-updating updated_at
+DROP TRIGGER IF EXISTS update_federation_config_modtime ON federation_config;
 CREATE TRIGGER update_federation_config_modtime
   BEFORE UPDATE ON federation_config
   FOR EACH ROW
   EXECUTE FUNCTION update_modified_column();
 
+DROP TRIGGER IF EXISTS update_scheduled_jobs_modtime ON scheduled_jobs;
 CREATE TRIGGER update_scheduled_jobs_modtime
   BEFORE UPDATE ON scheduled_jobs
   FOR EACH ROW
   EXECUTE FUNCTION update_modified_column();
 
+DROP TRIGGER IF EXISTS update_org_settings_modtime ON org_settings;
 CREATE TRIGGER update_org_settings_modtime
   BEFORE UPDATE ON org_settings
   FOR EACH ROW

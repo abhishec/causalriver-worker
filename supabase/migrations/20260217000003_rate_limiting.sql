@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS se_aas_rate_limit_tracking (
 );
 
 -- Indexes for fast queries
-CREATE INDEX idx_rate_limit_org_type_time
+CREATE INDEX IF NOT EXISTS idx_rate_limit_org_type_time
   ON se_aas_rate_limit_tracking(organization_id, limit_type, created_at DESC);
 
-CREATE INDEX idx_rate_limit_cleanup
+CREATE INDEX IF NOT EXISTS idx_rate_limit_cleanup
   ON se_aas_rate_limit_tracking(created_at);
 
 -- Add rate_limits column to organization_settings if not exists
@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS se_aas_metrics (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_se_aas_metrics_org_time
+CREATE INDEX IF NOT EXISTS idx_se_aas_metrics_org_time
   ON se_aas_metrics(organization_id, created_at DESC);
 
-CREATE INDEX idx_se_aas_metrics_domain
+CREATE INDEX IF NOT EXISTS idx_se_aas_metrics_domain
   ON se_aas_metrics(domain_type, created_at DESC);
 
 -- Brain query logs table (for orchestrator)
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS brain_query_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_brain_query_logs_org_time
+CREATE INDEX IF NOT EXISTS idx_brain_query_logs_org_time
   ON brain_query_logs(organization_id, created_at DESC);
 
 -- Notifications table (for inbox)
@@ -94,10 +94,10 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_notifications_user_unread
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
   ON notifications(user_id, read, created_at DESC);
 
-CREATE INDEX idx_notifications_org
+CREATE INDEX IF NOT EXISTS idx_notifications_org
   ON notifications(organization_id, created_at DESC);
 
 -- Alerts table (for incident alerts)
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS alerts (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_alerts_org_status
+CREATE INDEX IF NOT EXISTS idx_alerts_org_status
   ON alerts(organization_id, status, created_at DESC);
 
 -- Monitoring rules table
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS monitoring_rules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_monitoring_rules_org_enabled
+CREATE INDEX IF NOT EXISTS idx_monitoring_rules_org_enabled
   ON monitoring_rules(organization_id, enabled);
 
 -- Discovered patterns table (continuous learner)
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS pattern_evaluation_queue (
   processed_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_pattern_eval_queue_status
+CREATE INDEX IF NOT EXISTS idx_pattern_eval_queue_status
   ON pattern_evaluation_queue(status, created_at);
 
 -- Anomaly thresholds table (threshold optimizer)

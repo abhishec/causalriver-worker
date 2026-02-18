@@ -89,7 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_rules_org_active_confidence
 
 DROP INDEX IF EXISTS idx_embeddings_vector;
 
-CREATE INDEX idx_embeddings_vector
+CREATE INDEX IF NOT EXISTS idx_embeddings_vector
   ON entity_embeddings USING ivfflat (embedding extensions.vector_cosine_ops)
   WITH (lists = 500);
 

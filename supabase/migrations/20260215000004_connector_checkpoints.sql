@@ -40,6 +40,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS connector_checkpoints_updated_at ON connector_checkpoints;
 CREATE TRIGGER connector_checkpoints_updated_at
   BEFORE UPDATE ON connector_checkpoints
   FOR EACH ROW

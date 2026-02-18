@@ -90,9 +90,9 @@ CREATE TABLE IF NOT EXISTS public.engagements (
   UNIQUE(organization_id, engagement_name)
 );
 
-CREATE INDEX idx_engagements_org_id   ON public.engagements(organization_id);
-CREATE INDEX idx_engagements_pod_id   ON public.engagements(pod_id);
-CREATE INDEX idx_engagements_status   ON public.engagements(organization_id, status);
+CREATE INDEX IF NOT EXISTS idx_engagements_org_id   ON public.engagements(organization_id);
+CREATE INDEX IF NOT EXISTS idx_engagements_pod_id   ON public.engagements(pod_id);
+CREATE INDEX IF NOT EXISTS idx_engagements_status   ON public.engagements(organization_id, status);
 
 -- ============================================================================
 -- 2. ENGINEER HEALTH SNAPSHOTS — Per engineer per week
@@ -122,9 +122,9 @@ CREATE TABLE IF NOT EXISTS public.engineer_health_snapshots (
   UNIQUE(organization_id, github_login, week_start)
 );
 
-CREATE INDEX idx_eng_health_org_week  ON public.engineer_health_snapshots(organization_id, week_start DESC);
-CREATE INDEX idx_eng_health_login     ON public.engineer_health_snapshots(github_login, week_start DESC);
-CREATE INDEX idx_eng_health_risk      ON public.engineer_health_snapshots(organization_id, flight_risk_score DESC) WHERE flight_risk_score > 50;
+CREATE INDEX IF NOT EXISTS idx_eng_health_org_week  ON public.engineer_health_snapshots(organization_id, week_start DESC);
+CREATE INDEX IF NOT EXISTS idx_eng_health_login     ON public.engineer_health_snapshots(github_login, week_start DESC);
+CREATE INDEX IF NOT EXISTS idx_eng_health_risk      ON public.engineer_health_snapshots(organization_id, flight_risk_score DESC) WHERE flight_risk_score > 50;
 
 -- ============================================================================
 -- 3. ENGAGEMENT HEALTH SCORES — Per engagement per day
@@ -175,9 +175,9 @@ CREATE TABLE IF NOT EXISTS public.engagement_health_scores (
 CREATE INDEX IF NOT EXISTS idx_eng_scores_daily
   ON public.engagement_health_scores(organization_id, engagement_id, computed_at DESC);
 
-CREATE INDEX idx_eng_scores_engagement  ON public.engagement_health_scores(engagement_id, computed_at DESC);
-CREATE INDEX idx_eng_scores_org         ON public.engagement_health_scores(organization_id, computed_at DESC);
-CREATE INDEX idx_eng_scores_low_health  ON public.engagement_health_scores(organization_id, health_score ASC) WHERE health_score < 60;
+CREATE INDEX IF NOT EXISTS idx_eng_scores_engagement  ON public.engagement_health_scores(engagement_id, computed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_eng_scores_org         ON public.engagement_health_scores(organization_id, computed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_eng_scores_low_health  ON public.engagement_health_scores(organization_id, health_score ASC) WHERE health_score < 60;
 
 -- ============================================================================
 -- 4. SCOPE CREEP ALERTS — Unacknowledged scope drift alerts
@@ -201,8 +201,8 @@ CREATE TABLE IF NOT EXISTS public.scope_creep_alerts (
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_scope_alerts_org    ON public.scope_creep_alerts(organization_id, created_at DESC);
-CREATE INDEX idx_scope_alerts_active ON public.scope_creep_alerts(organization_id, engagement_id)
+CREATE INDEX IF NOT EXISTS idx_scope_alerts_org    ON public.scope_creep_alerts(organization_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scope_alerts_active ON public.scope_creep_alerts(organization_id, engagement_id)
   WHERE acknowledged = FALSE;
 
 -- ============================================================================
@@ -237,8 +237,8 @@ CREATE TABLE IF NOT EXISTS public.pod_match_history (
   created_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_pod_match_org ON public.pod_match_history(organization_id, created_at DESC);
-CREATE INDEX idx_pod_match_eng ON public.pod_match_history(engagement_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pod_match_org ON public.pod_match_history(organization_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pod_match_eng ON public.pod_match_history(engagement_id, created_at DESC);
 
 -- ============================================================================
 -- 6. VIEW: engagement_health_latest — Latest score per engagement

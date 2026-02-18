@@ -55,6 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_prediction_tracker_resolved
   WHERE resolved = TRUE;
 
 -- Auto-update timestamp trigger
+DROP TRIGGER IF EXISTS set_prediction_tracker_updated_at ON prediction_tracker;
 CREATE TRIGGER set_prediction_tracker_updated_at
   BEFORE UPDATE ON prediction_tracker
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

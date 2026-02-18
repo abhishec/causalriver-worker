@@ -53,17 +53,17 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- ───────────────────────────────────────────────────────────────────────────
 
 -- Primary access patterns
-CREATE INDEX idx_audit_org_time ON audit_log(organization_id, "timestamp" DESC);
-CREATE INDEX idx_audit_user_time ON audit_log(user_id, "timestamp" DESC);
-CREATE INDEX idx_audit_resource ON audit_log(resource_type, resource_id);
-CREATE INDEX idx_audit_action ON audit_log(action, "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_org_time ON audit_log(organization_id, "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_user_time ON audit_log(user_id, "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_resource ON audit_log(resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, "timestamp" DESC);
 
 -- For security investigations
-CREATE INDEX idx_audit_ip ON audit_log(ip_address, "timestamp" DESC);
-CREATE INDEX idx_audit_status_time ON audit_log(status, "timestamp" DESC) WHERE status = 'failure';
+CREATE INDEX IF NOT EXISTS idx_audit_ip ON audit_log(ip_address, "timestamp" DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_status_time ON audit_log(status, "timestamp" DESC) WHERE status = 'failure';
 
 -- For compliance reporting
-CREATE INDEX idx_audit_timestamp ON audit_log("timestamp" DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log("timestamp" DESC);
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- ROW LEVEL SECURITY

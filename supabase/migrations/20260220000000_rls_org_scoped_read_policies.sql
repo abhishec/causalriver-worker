@@ -205,7 +205,7 @@ END $$;
 -- ============================================================================
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_org_members_user_org_admin') THEN
-    CREATE INDEX idx_org_members_user_org_admin
+    CREATE INDEX IF NOT EXISTS idx_org_members_user_org_admin
       ON org_members (user_id, organization_id, is_platform_admin);
   END IF;
 END $$;

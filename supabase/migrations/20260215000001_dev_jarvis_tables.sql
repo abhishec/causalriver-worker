@@ -93,6 +93,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_dev_jarvis_runs_updated_at ON dev_jarvis_runs;
 CREATE TRIGGER trg_dev_jarvis_runs_updated_at
   BEFORE UPDATE ON dev_jarvis_runs
   FOR EACH ROW

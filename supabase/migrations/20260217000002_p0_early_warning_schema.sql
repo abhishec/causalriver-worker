@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS public.engineers (
   UNIQUE(organization_id, jira_user_id)
 );
 
-CREATE INDEX idx_engineers_org_id ON public.engineers(organization_id);
-CREATE INDEX idx_engineers_team_id ON public.engineers(team_id);
-CREATE INDEX idx_engineers_github_user ON public.engineers(github_user_id) WHERE github_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_engineers_org_id ON public.engineers(organization_id);
+CREATE INDEX IF NOT EXISTS idx_engineers_team_id ON public.engineers(team_id);
+CREATE INDEX IF NOT EXISTS idx_engineers_github_user ON public.engineers(github_user_id) WHERE github_user_id IS NOT NULL;
 
 -- ============================================================================
 -- 2. TEAMS TABLE
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS public.teams (
   UNIQUE(organization_id, team_name)
 );
 
-CREATE INDEX idx_teams_org_id ON public.teams(organization_id);
+CREATE INDEX IF NOT EXISTS idx_teams_org_id ON public.teams(organization_id);
 
 -- ============================================================================
 -- 3. REPOSITORIES TABLE
@@ -78,8 +78,8 @@ CREATE TABLE IF NOT EXISTS public.repositories (
   UNIQUE(organization_id, github_repo_id)
 );
 
-CREATE INDEX idx_repositories_org_id ON public.repositories(organization_id);
-CREATE INDEX idx_repositories_team_id ON public.repositories(team_id);
+CREATE INDEX IF NOT EXISTS idx_repositories_org_id ON public.repositories(organization_id);
+CREATE INDEX IF NOT EXISTS idx_repositories_team_id ON public.repositories(team_id);
 
 -- ============================================================================
 -- 4. PULL REQUESTS TABLE (Core P0 data)
@@ -123,11 +123,11 @@ CREATE TABLE IF NOT EXISTS public.pull_requests (
 );
 
 -- Critical indexes for velocity queries
-CREATE INDEX idx_prs_org_repo_merged ON public.pull_requests(organization_id, repo_id, merged_at)
+CREATE INDEX IF NOT EXISTS idx_prs_org_repo_merged ON public.pull_requests(organization_id, repo_id, merged_at)
   WHERE is_merged = TRUE;
-CREATE INDEX idx_prs_author_merged ON public.pull_requests(author_id, merged_at)
+CREATE INDEX IF NOT EXISTS idx_prs_author_merged ON public.pull_requests(author_id, merged_at)
   WHERE is_merged = TRUE;
-CREATE INDEX idx_prs_merged_timestamp ON public.pull_requests(merged_at)
+CREATE INDEX IF NOT EXISTS idx_prs_merged_timestamp ON public.pull_requests(merged_at)
   WHERE is_merged = TRUE;
 
 -- Function to compute derived metrics
@@ -148,6 +148,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_compute_pr_metrics ON public.pull_requests;
 CREATE TRIGGER trigger_compute_pr_metrics
   BEFORE INSERT OR UPDATE ON public.pull_requests
   FOR EACH ROW
@@ -176,8 +177,8 @@ CREATE TABLE IF NOT EXISTS public.pr_reviews (
 );
 
 -- Critical indexes for bottleneck queries
-CREATE INDEX idx_pr_reviews_org_pr ON public.pr_reviews(organization_id, pr_id);
-CREATE INDEX idx_pr_reviews_reviewer ON public.pr_reviews(reviewer_id, review_submitted_at);
+CREATE INDEX IF NOT EXISTS idx_pr_reviews_org_pr ON public.pr_reviews(organization_id, pr_id);
+CREATE INDEX IF NOT EXISTS idx_pr_reviews_reviewer ON public.pr_reviews(reviewer_id, review_submitted_at);
 
 -- ============================================================================
 -- 6. TICKETS TABLE (Jira/Linear)
@@ -215,8 +216,8 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   UNIQUE(organization_id, external_ticket_id)
 );
 
-CREATE INDEX idx_tickets_org_team ON public.tickets(organization_id, team_id);
-CREATE INDEX idx_tickets_completed ON public.tickets(completed_at) WHERE completed_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_tickets_org_team ON public.tickets(organization_id, team_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_completed ON public.tickets(completed_at) WHERE completed_at IS NOT NULL;
 
 -- Function to compute ticket metrics
 CREATE OR REPLACE FUNCTION compute_ticket_metrics()
@@ -229,6 +230,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_compute_ticket_metrics ON public.tickets;
 CREATE TRIGGER trigger_compute_ticket_metrics
   BEFORE INSERT OR UPDATE ON public.tickets
   FOR EACH ROW
@@ -272,8 +274,8 @@ CREATE TABLE IF NOT EXISTS public.velocity_snapshots (
   UNIQUE(organization_id, snapshot_date, window_type, team_id, repo_id)
 );
 
-CREATE INDEX idx_velocity_snapshots_org_date ON public.velocity_snapshots(organization_id, snapshot_date);
-CREATE INDEX idx_velocity_snapshots_team ON public.velocity_snapshots(team_id, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_velocity_snapshots_org_date ON public.velocity_snapshots(organization_id, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_velocity_snapshots_team ON public.velocity_snapshots(team_id, snapshot_date);
 
 -- ============================================================================
 -- 8. BOTTLENECK RISK SNAPSHOTS
@@ -308,8 +310,8 @@ CREATE TABLE IF NOT EXISTS public.bottleneck_snapshots (
   UNIQUE(organization_id, snapshot_date, team_id)
 );
 
-CREATE INDEX idx_bottleneck_snapshots_org_date ON public.bottleneck_snapshots(organization_id, snapshot_date);
-CREATE INDEX idx_bottleneck_snapshots_risk ON public.bottleneck_snapshots(organization_id, risk_level, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_bottleneck_snapshots_org_date ON public.bottleneck_snapshots(organization_id, snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_bottleneck_snapshots_risk ON public.bottleneck_snapshots(organization_id, risk_level, snapshot_date);
 
 -- ============================================================================
 -- RLS POLICIES

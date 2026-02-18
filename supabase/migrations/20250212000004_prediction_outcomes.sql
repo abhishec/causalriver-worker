@@ -65,6 +65,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS set_prediction_outcomes_updated_at ON prediction_outcomes;
 CREATE TRIGGER set_prediction_outcomes_updated_at
   BEFORE UPDATE ON prediction_outcomes
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

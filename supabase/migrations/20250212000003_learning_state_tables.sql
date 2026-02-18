@@ -156,18 +156,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_bayesian_posteriors_updated ON bayesian_posteriors;
 CREATE TRIGGER trg_bayesian_posteriors_updated
   BEFORE UPDATE ON bayesian_posteriors
   FOR EACH ROW EXECUTE FUNCTION update_learning_updated_at();
 
+DROP TRIGGER IF EXISTS trg_embedding_transforms_updated ON embedding_transforms;
 CREATE TRIGGER trg_embedding_transforms_updated
   BEFORE UPDATE ON embedding_transforms
   FOR EACH ROW EXECUTE FUNCTION update_learning_updated_at();
 
+DROP TRIGGER IF EXISTS trg_causal_model_state_updated ON causal_model_state;
 CREATE TRIGGER trg_causal_model_state_updated
   BEFORE UPDATE ON causal_model_state
   FOR EACH ROW EXECUTE FUNCTION update_learning_updated_at();
 
+DROP TRIGGER IF EXISTS trg_attention_policy_state_updated ON attention_policy_state;
 CREATE TRIGGER trg_attention_policy_state_updated
   BEFORE UPDATE ON attention_policy_state
   FOR EACH ROW EXECUTE FUNCTION update_learning_updated_at();

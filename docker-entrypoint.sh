@@ -4,6 +4,23 @@ set -e
 # Default to orchestrator if no BRAIN_PROCESS specified
 BRAIN_PROCESS="${BRAIN_PROCESS:-orchestrator}"
 
+# ── Required environment variable fast-fail ──────────────────────────────────
+# Fail immediately with a clear message if critical vars are missing,
+# rather than crashing deep inside TypeScript with a cryptic DB connection error.
+_missing_vars=""
+for _var in SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+  eval "_val=\${$_var:-}"
+  if [ -z "$_val" ]; then
+    _missing_vars="$_missing_vars $_var"
+  fi
+done
+if [ -n "$_missing_vars" ]; then
+  echo "ERROR: Missing required environment variables:$_missing_vars"
+  echo "Set these in the ECS task definition / docker run command."
+  exit 1
+fi
+unset _missing_vars _var _val
+
 echo "========================================"
 echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] NexusBrain Brain Training"
 echo "Process: ${BRAIN_PROCESS}"
@@ -170,7 +187,7 @@ case "${BRAIN_PROCESS}" in
     echo "  cost-agent            Cost monitoring & anomaly detection (one-shot)"
     echo "  weekly                11-region brain scan + pruning (one-shot)"
     echo "  monthly               Full historical causal discovery (one-shot)"
-  echo "  historical-deep-train Full signal history → brain training in rolling batches (one-shot)"
+    echo "  historical-deep-train Full signal history → brain training in rolling batches (one-shot)"
     echo "  federation            Core <> Org knowledge federation (one-shot)"
     echo "  security              Security vulnerability scanning (one-shot)"
     echo "  proactive-intelligence  Proactive alerting & threat detection (one-shot)"

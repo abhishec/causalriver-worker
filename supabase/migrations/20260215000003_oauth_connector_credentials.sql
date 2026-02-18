@@ -29,6 +29,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS org_connectors_updated_at ON org_connectors;
 CREATE TRIGGER org_connectors_updated_at
   BEFORE UPDATE ON org_connectors
   FOR EACH ROW

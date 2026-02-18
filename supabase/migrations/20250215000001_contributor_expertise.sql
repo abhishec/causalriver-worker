@@ -36,13 +36,13 @@ CREATE TABLE IF NOT EXISTS contributor_expertise (
 );
 
 -- Find experts for a topic within an org
-CREATE INDEX idx_expertise_org_topic ON contributor_expertise (organization_id, topic);
+CREATE INDEX IF NOT EXISTS idx_expertise_org_topic ON contributor_expertise (organization_id, topic);
 -- Find all expertise for a contributor
-CREATE INDEX idx_expertise_org_contributor ON contributor_expertise (organization_id, contributor_id);
+CREATE INDEX IF NOT EXISTS idx_expertise_org_contributor ON contributor_expertise (organization_id, contributor_id);
 -- Find top experts (sorted by strength)
-CREATE INDEX idx_expertise_org_strength ON contributor_expertise (organization_id, strength DESC);
+CREATE INDEX IF NOT EXISTS idx_expertise_org_strength ON contributor_expertise (organization_id, strength DESC);
 -- Find stale expertise for decay
-CREATE INDEX idx_expertise_last_activity ON contributor_expertise (last_activity_at);
+CREATE INDEX IF NOT EXISTS idx_expertise_last_activity ON contributor_expertise (last_activity_at);
 
 -- RLS: service role has full access
 ALTER TABLE contributor_expertise ENABLE ROW LEVEL SECURITY;
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS alert_routing_rules (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_alert_routing_org ON alert_routing_rules (organization_id);
+CREATE INDEX IF NOT EXISTS idx_alert_routing_org ON alert_routing_rules (organization_id);
 
 ALTER TABLE alert_routing_rules ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access on alert_routing_rules"
