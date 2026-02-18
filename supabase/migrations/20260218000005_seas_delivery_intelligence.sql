@@ -16,6 +16,22 @@
 -- ============================================================================
 
 -- ============================================================================
+-- GUARD: Ensure `teams` table exists before referencing it.
+-- Created by 20260217000002_p0_early_warning_schema.sql, but that migration
+-- may not have been applied to all environments. This guard is idempotent.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.teams (
+  id               UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  organization_id  UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  team_name        TEXT NOT NULL,
+  metadata         JSONB DEFAULT '{}',
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(organization_id, team_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_teams_org_id ON public.teams(organization_id);
+
+-- ============================================================================
 -- 1. ENGAGEMENTS — Registry of client engagements
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.engagements (

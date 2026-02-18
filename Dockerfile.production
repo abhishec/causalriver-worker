@@ -24,7 +24,9 @@ RUN npm install -g pnpm@9
 WORKDIR /app
 
 # ── Layer 1: Workspace config (cached aggressively) ──
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json turbo.json ./
+# .pnpmfile.cjs must accompany pnpm-lock.yaml — lockfile embeds pnpmfileChecksum
+# and pnpm --frozen-lockfile fails if the file is absent from build context.
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json turbo.json .pnpmfile.cjs ./
 
 # ── Layer 2: All package.json files for workspace resolution ──
 COPY packages/memory-stack/package.json ./packages/memory-stack/
