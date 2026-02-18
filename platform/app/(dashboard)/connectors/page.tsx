@@ -13,6 +13,10 @@ const CONNECTORS = [
   { name: "Jira", type: "jira", domain: "engineering", icon: "📋", description: "Issues, comments, and project workflows", oauth: true },
   { name: "Stripe", type: "stripe", domain: "finance", icon: "💳", description: "Payment events, subscription changes, invoices, disputes", oauth: false },
   { name: "HubSpot", type: "hubspot", domain: "sales", icon: "🎯", description: "Deal stage changes, contact activity, pipeline metrics", oauth: false },
+  // Freshworks suite (NB-020)
+  { name: "Freshdesk", type: "freshdesk", domain: "support", icon: "🎧", description: "Support tickets, conversations, SLA tracking, agent performance", oauth: false },
+  { name: "Freshsales", type: "freshsales", domain: "sales", icon: "💼", description: "CRM contacts, deals, activities, pipeline and revenue metrics", oauth: false },
+  { name: "Freshchat", type: "freshchat", domain: "support", icon: "💬", description: "Live-chat conversations, message threads, agent response times", oauth: false },
   { name: "Intercom", type: "intercom", domain: "support", icon: "💬", description: "Conversations, resolution times, customer satisfaction", oauth: false },
   { name: "Zendesk", type: "zendesk", domain: "support", icon: "🎫", description: "Tickets, escalations, SLA compliance, agent performance", oauth: false },
   { name: "Notion", type: "notion", domain: "knowledge", icon: "📝", description: "Page updates, database changes, workspace activity", oauth: false },
@@ -20,6 +24,11 @@ const CONNECTORS = [
   { name: "Google Calendar", type: "google_calendar", domain: "operations", icon: "📅", description: "Meeting patterns, scheduling conflicts, time allocation", oauth: false },
   { name: "Voice", type: "voice", domain: "cs", icon: "🎙️", description: "Call transcripts, sentiment analysis, topic extraction", oauth: false },
   { name: "Mailchimp", type: "mailchimp", domain: "marketing", icon: "📧", description: "Campaign performance, open rates, click patterns", oauth: false },
+  // Log ingestion (NB-019)
+  { name: "CloudWatch Logs", type: "cloudwatch", domain: "engineering", icon: "☁️", description: "AWS CloudWatch log groups — errors, latency, Lambda/ECS traces", oauth: false },
+  { name: "Datadog Logs", type: "datadog", domain: "engineering", icon: "🐶", description: "Datadog log indexes — service logs, APM traces, error clusters", oauth: false },
+  { name: "ELK / OpenSearch", type: "elk", domain: "engineering", icon: "🔍", description: "Elasticsearch or OpenSearch log indexes — any structured log data", oauth: false },
+  { name: "Generic Log Endpoint", type: "logs", domain: "engineering", icon: "📄", description: "Any HTTP endpoint returning JSON-lines or JSON array of log events", oauth: false },
   { name: "Generic API", type: "generic_api", domain: "any", icon: "🔌", description: "Custom webhook endpoints for any data source", oauth: false },
 ] as const;
 

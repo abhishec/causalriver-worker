@@ -1,6 +1,6 @@
 # NexusBrain Issue Tracker
 > Auto-generated from code audit, git history, session memory, and status docs.
-> Last updated: 2026-02-18 (Sprint 3 close — 48/50 issues resolved; NB-019 log connector, NB-020 Freshworks suite, NB-022 monitoring dashboard, NB-034 load test confirmed, NB-038 all CVEs clean) | Queryable: search by ID, area, status, priority, label
+> Last updated: 2026-02-18 (Phase 3 complete — branch wired end-to-end; CTO audit: 6 bugs fixed across P1/P2) | Queryable: search by ID, area, status, priority, label
 
 ---
 
@@ -29,14 +29,14 @@
 | Area | Total | Done | Open | In Progress |
 |------|-------|------|------|-------------|
 | Data Pipeline / Brain | 8 | 6 | 2 | 0 |
-| SE-aaS / Connectors | 10 | 10 | 0 | 0 |
+| SE-aaS / Connectors | 11 | 11 | 0 | 0 |
 | Security | 7 | 7 | 0 | 0 |
 | Infrastructure / CI/CD | 8 | 8 | 0 | 0 |
 | Performance | 3 | 3 | 0 | 0 |
 | Training / RL | 5 | 5 | 0 | 0 |
 | Missing Features | 4 | 4 | 0 | 0 |
 | Dependabot / CVEs | 5 | 5 | 0 | 0 |
-| **TOTAL** | **50** | **48** | **2** | **0** |
+| **TOTAL** | **51** | **49** | **2** | **0** |
 
 ---
 
@@ -232,9 +232,9 @@
 **Log ingestion pipeline missing — Log Query SE-aaS domain is a stub**
 - Area: SE-aaS / Connectors
 - Priority: Medium
-- Status: ✅ Fixed
-- Detail: Built `LogConnector` in `packages/memory-stack/src/connectors/logs/log-connector.ts` with full provider adapters for CloudWatch (Logs Insights API), Datadog (Logs API v2 with cursor pagination), ELK/OpenSearch (search_after pagination), and a Generic HTTP/JSON-lines adapter. Emits `log_entry` signals (severity-weighted signal_value) and auto-detects `log_error_spike` signals when error rate exceeds 15%. All 4 providers normalise to a common `NormalisedLogEntry` format. Exported from `@nexus-ai/memory-stack`. The `/api/se-aas/log-query` domain now has real ingested log data to query.
-- Files: `packages/memory-stack/src/connectors/logs/log-connector.ts`, `packages/memory-stack/src/index.ts`
+- Status: ✅ Fixed (fully wired — backend + API + UI + sync-all)
+- Detail: Built `LogConnector` with full provider adapters (CloudWatch/Datadog/ELK/Generic). Now fully wired end-to-end: (1) `platform/app/api/connectors/logs/sync/route.ts` — POST endpoint loads log connector config from `org_connectors`, instantiates `LogConnector` with provider-specific credentials, runs incremental or initial sync with configurable lookback. (2) `sync-all/route.ts` — now routes `cloudwatch`, `datadog`, `elk`, `logs` connector types to the logs sync endpoint so log connectors participate in "Sync & Train". (3) `connectors/page.tsx` — CloudWatch Logs, Datadog Logs, ELK/OpenSearch, Generic Log Endpoint added to connector catalog UI (4 new entries).
+- Files: `packages/memory-stack/src/connectors/logs/log-connector.ts`, `platform/app/api/connectors/logs/sync/route.ts`, `platform/app/api/connectors/sync-all/route.ts`, `platform/app/(dashboard)/connectors/page.tsx`
 
 ---
 
@@ -242,13 +242,15 @@
 **Freshworks connector not implemented (Freshdesk, Freshsales, Freshchat)**
 - Area: Connectors
 - Priority: Medium
-- Status: ✅ Fixed
-- Detail: All 3 Freshworks connectors built + API route wired:
-  - **Freshdesk** (`freshdesk-connector.ts`): Already existed — support tickets + conversations. Status/priority code mapping.
-  - **Freshsales** (`freshsales-connector.ts`): NEW — CRM contacts, deals (signal_value=amount for revenue trending), and activities. Lifecycle stage mapping (Lead→Customer). Checkpoint every 1000 contacts.
-  - **Freshchat** (`freshchat-connector.ts`): NEW — live-chat conversations + per-conversation messages. Text extraction from Freshchat `message_parts` array. Non-fatal per-conversation fallback.
-  - **API Route** (`platform/app/api/connectors/freshworks/sync/route.ts`): NEW — POST endpoint supports `product` (freshdesk|freshsales|freshchat|all) and `mode` (initial|incremental). Dynamically imports connector classes. Updates `last_synced_at` after each sync.
-- Files: `packages/memory-stack/src/connectors/freshworks/freshsales-connector.ts`, `packages/memory-stack/src/connectors/freshworks/freshchat-connector.ts`, `platform/app/api/connectors/freshworks/sync/route.ts`, `packages/memory-stack/src/index.ts`
+- Status: ✅ Fixed (fully wired — backend + API + sync-all + UI catalog)
+- Detail: All 3 Freshworks connectors built + fully wired end-to-end:
+  - **Freshdesk** (`freshdesk-connector.ts`): support tickets + conversations.
+  - **Freshsales** (`freshsales-connector.ts`): CRM contacts, deals (signal_value=amount), activities. Lifecycle stage mapping.
+  - **Freshchat** (`freshchat-connector.ts`): live-chat conversations + messages (text from message_parts array).
+  - **API Route** (`platform/app/api/connectors/freshworks/sync/route.ts`): POST — product=freshdesk|freshsales|freshchat|all, mode=initial|incremental.
+  - **sync-all** (`platform/app/api/connectors/sync-all/route.ts`): freshdesk, freshsales, freshchat, freshworks cases added — Freshworks now participates in "Sync & Train".
+  - **Connector catalog UI** (`platform/app/(dashboard)/connectors/page.tsx`): Freshdesk, Freshsales, Freshchat added to CONNECTORS array with correct domains (support/sales), icons, and descriptions.
+- Files: `freshsales-connector.ts`, `freshchat-connector.ts`, `platform/app/api/connectors/freshworks/sync/route.ts`, `platform/app/api/connectors/sync-all/route.ts`, `platform/app/(dashboard)/connectors/page.tsx`
 
 ---
 
@@ -552,6 +554,25 @@
 
 ---
 
+### NB-051 🟠 ✅
+**Phase 3: Branch wired into domain-executor + CTO audit — 6 correctness bugs fixed**
+- Area: SE-aaS / Code Intelligence
+- Priority: High
+- Status: ✅ Done (Phase 3 complete + post-audit hardening)
+- Detail: Two parts:
+  **Phase 3 wiring** (1 file):
+  - **`platform/lib/se-aas/domain-executor.ts`** — Extracts `branch` from `params.request.branch` and passes it into `createBrainContextMesh({ branch })`. This is the single missing link that activates code intelligence for all 17 SE-aaS domains. Any SE-aaS API call that includes `branch` in the request body now gets the full code dependency graph + symbol index injected into Claude's system prompt.
+  **CTO audit fixes** (5 bugs across 4 files):
+  1. **P1 — Signature stored in metadata** (`github-connector.ts`): `symbol.signature` now stored directly in `metadata.signature`. Removed fragile line-index parsing (`content.split('\n')[3]`) in brain-context-mesh.
+  2. **P1 — Real total symbol count** (`brain-context-mesh.ts`): Added parallel `SELECT *, count: exact, head: true` query to get actual total symbols for the branch (was capped at the 50-row fetch limit). Falls back to batch size if count query fails.
+  3. **P1 — Direct method call** (`github-connector.ts`): Changed `const { formatSymbolForEmbedding } = this.codeEmbedder` destructure to `this.codeEmbedder.formatSymbolForEmbedding(symbol)` to avoid fragile `this`-context loss.
+  4. **P2 — Error-first in dependency graph** (`cross-domain-linker.ts`): Moved Supabase error check BEFORE data processing loop. On error: log + return empty graph immediately (was: log AFTER processing potentially corrupt/empty data).
+  5. **P2 — Symbol embed warning** (`github-connector.ts`): Added `console.warn` to silent catch so DB/embed failures are visible in logs without blocking file ingestion.
+  6. **P2 — Null guards** (`brain-context-for-domains.ts`): Changed `codeIntel.topSymbols.filter(...)` to `(codeIntel.topSymbols ?? []).filter(...)` for both exported and internal symbol loops.
+- Files: `platform/lib/se-aas/domain-executor.ts`, `packages/memory-stack/src/connectors/github/github-connector.ts`, `packages/memory-stack/src/orchestrator/brain-context-mesh.ts`, `packages/memory-stack/src/connectors/cross-domain-linker.ts`, `packages/memory-stack/src/orchestrator/brain-context-for-domains.ts`
+
+---
+
 ---
 
 ## Filtered Views (Quick Reference)
@@ -609,6 +630,7 @@
 | NB-046 | Orchestrator stub files confirmed present, tracker corrected | 573d4b5a5 |
 | NB-049 | Node 18 EOL — confirmed enforced in CI, tracker corrected | 573d4b5a5 |
 | NB-050 | Phase 2: Code dep graph + symbol index injected into Brain context (all 17 SE-aaS domains) | phase-2 |
+| NB-051 | Phase 3: branch wired into domain-executor + 6 audit bugs fixed (P1: sig, count, method; P2: errors, log, null) | phase-3 |
 | NB-019 | Log ingestion connector (CloudWatch/Datadog/ELK/Generic) — Log Query domain now has real data | 36d162865 |
 | NB-020 | Freshworks suite — Freshsales + Freshchat connectors + /api/connectors/freshworks/sync route | 36d162865 |
 | NB-022 | Connector monitoring dashboard — GET /api/connectors/monitoring with ETA, throughput, health | 36d162865 |

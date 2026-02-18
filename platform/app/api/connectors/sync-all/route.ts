@@ -92,6 +92,32 @@ export async function POST(request: Request) {
             syncUrl = `${baseUrl}/api/connectors/xero/sync`;
             syncBody = { organizationId: orgId };
             break;
+          // NB-020: Freshworks suite (Freshdesk, Freshsales, Freshchat)
+          case "freshdesk":
+            syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
+            syncBody = { organizationId: orgId, product: "freshdesk", mode: "incremental" };
+            break;
+          case "freshsales":
+            syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
+            syncBody = { organizationId: orgId, product: "freshsales", mode: "incremental" };
+            break;
+          case "freshchat":
+            syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
+            syncBody = { organizationId: orgId, product: "freshchat", mode: "incremental" };
+            break;
+          case "freshworks":
+            // Umbrella case: syncs all 3 Freshworks products at once
+            syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
+            syncBody = { organizationId: orgId, product: "all", mode: "incremental" };
+            break;
+          // NB-019: Log ingestion (CloudWatch, Datadog, ELK, Generic)
+          case "logs":
+          case "cloudwatch":
+          case "datadog":
+          case "elk":
+            syncUrl = `${baseUrl}/api/connectors/logs/sync`;
+            syncBody = { organizationId: orgId, mode: "incremental" };
+            break;
           default:
             // Skip connector types without a sync route (e.g. hubspot, asana)
             return {
