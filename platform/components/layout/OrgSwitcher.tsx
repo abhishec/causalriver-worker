@@ -112,14 +112,14 @@ export function OrgSwitcher() {
   const { currentOrg, organizations, switchOrg, isPlatformAdmin, isLoading } = useOrg();
   const [open, setOpen] = useState(false);
 
-  if (isLoading || !currentOrg) return null;
-
   // ── Group memberships by customer ─────────────────────────────────────────
   //
   // customerGroups: Map<customerLabel, OrgMembership[]>
   //   - keyed by customer_name (e.g. "Tookitaki") or "__none__" for unclaimed
   // coreOrgs: memberships for CORE brain (admin only)
   //
+  // Must be declared BEFORE the early return so hooks are always called in
+  // the same order (React rules-of-hooks).
   const { customerGroups, coreOrgs } = useMemo(() => {
     const groups = new Map<string, OrgMembership[]>();
     const core: OrgMembership[] = [];
@@ -137,6 +137,8 @@ export function OrgSwitcher() {
 
     return { customerGroups: groups, coreOrgs: core };
   }, [organizations]);
+
+  if (isLoading || !currentOrg) return null;
 
   const totalUserOrgs = organizations.filter(m => !m.organization.is_core_brain).length;
 
