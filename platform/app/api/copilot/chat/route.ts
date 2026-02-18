@@ -964,18 +964,20 @@ When asked WHY something happened, cite the relevant pair's accuracy. E.g.: "The
         if (affectedDomain) {
           const reasoner = brainRegions.multiHopReasoner as any;
           const diagnosis = reasoner.diagnose(brainRegions.causalDAG, affectedDomain);
-          if (diagnosis && diagnosis.rootCauses && diagnosis.rootCauses.length > 0) {
-            const causeLines = diagnosis.rootCauses.slice(0, 5).map((rc: any) =>
-              `- ${rc.domain} → ${affectedDomain} | path confidence: ${rc.pathConfidence != null ? (rc.pathConfidence * 100).toFixed(0) + '%' : 'N/A'} | via: ${rc.pathSummary || 'direct'}`
+          // diagnose() returns { topCauses, isExplainable, narrative }
+          // topCauses shape: { cause, likelihood, lagDays, path, explanation }
+          if (diagnosis && diagnosis.topCauses && diagnosis.topCauses.length > 0) {
+            const causeLines = diagnosis.topCauses.slice(0, 5).map((rc: any) =>
+              `- ${rc.cause} → ${affectedDomain} | likelihood: ${rc.likelihood != null ? (rc.likelihood * 100).toFixed(0) + '%' : 'N/A'} | lag: ${rc.lagDays ?? '?'}d | ${rc.explanation || 'direct link'}`
             );
             effectiveSystemPrompt += `\n\n## CAUSAL CHAIN DIAGNOSIS for "${affectedDomain}" (multi-hop reasoning)
 The Brain traced upstream causes for the domain you're asking about:
 
 ${causeLines.join('\n')}
 
-${diagnosis.explanation || ''}
+${diagnosis.narrative || ''}
 
-Use this causal chain in your answer. Don't just say "X affects Y" — explain the path and cite the confidence.`;
+Use this causal chain in your answer. Don't just say "X affects Y" — explain the path, likelihood, and lag.`;
           }
         }
       } catch (diagErr) {
@@ -993,8 +995,9 @@ Use this causal chain in your answer. Don't just say "X affects Y" — explain t
         const simulator = brainRegions.counterfactualSimulator as any;
         const leveragePoints = simulator.findLeveragePoints(brainRegions.causalDAG);
         if (leveragePoints && leveragePoints.length > 0) {
+          // LeveragePoint shape: { source, target, currentWeight, leverageScore, downstreamCount, mostAffected, explanation }
           const topLevers = leveragePoints.slice(0, 5).map((lp: any) =>
-            `- ${lp.domain}: ${lp.description || 'leverage point'} | impact score: ${lp.impactScore != null ? (lp.impactScore * 100).toFixed(0) + '%' : 'N/A'} | affects: ${(lp.affectedDomains || []).join(', ')}`
+            `- ${lp.source} → ${lp.target} | leverage score: ${lp.leverageScore != null ? lp.leverageScore.toFixed(3) : 'N/A'} | affects ${lp.downstreamCount ?? '?'} downstream domain(s) | ${lp.explanation || ''}`
           );
           effectiveSystemPrompt += `\n\n## COUNTERFACTUAL LEVERAGE POINTS (causal DAG simulation)
 These are the highest-impact intervention points in the causal graph — where changes propagate furthest.
@@ -1021,7 +1024,7 @@ When answering what-if questions, base your answer on these leverage points and 
           const reachable = reasoner.findReachableDomains(brainRegions.causalDAG, sourceDomain);
           if (reachable && reachable.length > 0) {
             const cascadeLines = reachable.slice(0, 8).map((r: any) =>
-              `- ${sourceDomain} → ${r.domain} (${r.hops} hop${r.hops !== 1 ? 's' : ''}, confidence: ${r.confidence != null ? (r.confidence * 100).toFixed(0) + '%' : 'N/A'})`
+              `- ${sourceDomain} → ${r.domain} (${r.hops} hop${r.hops !== 1 ? 's' : ''}, confidence: ${r.confidence != null ? (r.confidence * 100).toFixed(0) + '%' : 'N/A'}, cumulative lag: ${r.lagDays ?? '?'}d)`
             );
             effectiveSystemPrompt += `\n\n## CASCADE CHAIN from "${sourceDomain}" (ripple effect analysis)
 A change in ${sourceDomain} propagates through the causal graph to these downstream domains:
