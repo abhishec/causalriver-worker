@@ -634,11 +634,8 @@ export class GitHubConnector extends ConnectorBase {
       // Embed symbols — override entity_id to be branch-scoped
       for (const symbol of fileIndex.symbols) {
         try {
-          const { formatSymbolForEmbedding } = this.codeEmbedder;
-          const contentText = formatSymbolForEmbedding(symbol);
+          const contentText = this.codeEmbedder.formatSymbolForEmbedding(symbol);
 
-          // Import hashContent from embedding-engine via embedder internals is not
-          // exposed, so compute a simple hash inline for branch-scoped entity_id.
           const branchSuffix = branchName ? `@${branchName}` : '';
           const entityId = symbol.parentSymbol
             ? `${repoFullName}:${filePath}::${symbol.parentSymbol}.${symbol.name}${branchSuffix}`
@@ -668,14 +665,18 @@ export class GitHubConnector extends ConnectorBase {
                 branch: branchName,
                 release_version: releaseVersion,
                 team_label: teamLabel,
+                // Store signature directly so brain-context-mesh can read it
+                // without fragile line-index parsing of the content string.
+                signature: symbol.signature ?? null,
               },
               importance_score: symbol.isExported ? 0.8 : 0.5,
               updated_at: new Date().toISOString(),
             },
             { onConflict: 'organization_id,entity_type,entity_id' }
           );
-        } catch {
-          // Non-critical: skip failed symbols, continue with rest
+        } catch (err: any) {
+          // Non-critical: skip failed symbol, continue with rest of file
+          console.warn(`[GitHub] Symbol embed failed (${filePath}::${symbol.name}):`, err?.message ?? err);
         }
       }
 

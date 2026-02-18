@@ -113,9 +113,19 @@ export async function executeDomain(
   }
 
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
-  // Phase 3: When interpretation is provided, mesh.assemble() uses requiredData
-  // signals to skip unneeded DB queries (e.g., skip causal edges for simple lookups).
-  const mesh = createBrainContextMesh({ supabase, organizationId: params.organizationId });
+  // Branch scoping: the request payload may include a `branch` field (e.g. 'release/6.3.4').
+  // When present, the mesh loads the code dependency graph + symbol index for that branch
+  // and injects them into every SE-aaS Claude prompt (NB-017/NB-018 Phase 2).
+  // When absent (cold-start or org has no GitHub connector), code intelligence is skipped.
+  const branch = typeof params.request.branch === 'string' && params.request.branch
+    ? params.request.branch
+    : undefined;
+
+  const mesh = createBrainContextMesh({
+    supabase,
+    organizationId: params.organizationId,
+    branch,
+  });
   const brainContext = await mesh.assemble(
     `se-aas ${params.domainType} execution`,
     'se-aas',

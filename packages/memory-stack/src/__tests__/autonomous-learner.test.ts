@@ -2,35 +2,55 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createAutonomousLearner } from '../learning/autonomous-learner';
 
 // Mock Supabase client
+// Uses per-table routing so cross_domain_signals always returns the test data
+// regardless of how many other .from() calls (bandit state, org settings, etc.)
+// happen before signals are fetched inside runLearningCycle().
 function createMockSupabase(signals: any[] = []) {
-  // Source code chains: .from().select().eq().order().range() with pagination
-  let callCount = 0;
-  const rangeFn = vi.fn().mockImplementation(() => {
-    callCount++;
-    if (callCount === 1) {
-      return Promise.resolve({ data: signals, error: null });
-    }
-    return Promise.resolve({ data: [], error: null });
-  });
+  // Track how many times a terminal fetch (range/limit) has been called for
+  // cross_domain_signals so pagination works: first call returns signals, rest return [].
+  let signalFetchCount = 0;
 
-  const orderFn = vi.fn().mockReturnValue({
-    range: rangeFn,
-  });
+  const makeChain = (table: string): any => {
+    // Terminal resolvers — only these actually "consume" a page of data
+    const resolveData = () => {
+      if (table === 'cross_domain_signals') {
+        signalFetchCount++;
+        return Promise.resolve({ data: signalFetchCount === 1 ? signals : [], error: null });
+      }
+      return Promise.resolve({ data: [], error: null });
+    };
+    const resolveSingle = () => Promise.resolve({ data: null, error: null });
+
+    const chain: any = {
+      data: [],
+      error: null,
+      eq:   vi.fn().mockImplementation(() => makeChain(table)),
+      gte:  vi.fn().mockImplementation(() => makeChain(table)),
+      lte:  vi.fn().mockImplementation(() => makeChain(table)),
+      lt:   vi.fn().mockImplementation(() => makeChain(table)),
+      in:   vi.fn().mockImplementation(() => makeChain(table)),
+      order: vi.fn().mockImplementation(() => makeChain(table)),
+      limit: vi.fn().mockImplementation(resolveData),
+      range: vi.fn().mockImplementation(resolveData),
+      maybeSingle: vi.fn().mockImplementation(resolveSingle),
+      single:      vi.fn().mockImplementation(resolveSingle),
+    };
+    return chain;
+  };
 
   return {
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          order: orderFn,
-          gte: vi.fn().mockReturnValue({
-            order: orderFn,
-          }),
-          single: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
+    from: vi.fn().mockImplementation((table: string) => ({
+      select: vi.fn().mockImplementation(() => makeChain(table)),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
       }),
-      insert: vi.fn().mockReturnValue({ error: null }),
-      upsert: vi.fn().mockReturnValue({ error: null }),
-    }),
+      delete: vi.fn().mockReturnValue({
+        eq:  vi.fn().mockResolvedValue({ error: null }),
+        lt:  vi.fn().mockResolvedValue({ error: null }),
+      }),
+    })),
   } as any;
 }
 
@@ -94,14 +114,17 @@ describe('Autonomous Learner', () => {
     });
 
     it('should process signals and run discovery', async () => {
-      // Generate enough signals for causal discovery to attempt
+      // Generate enough signals to pass MIN_SIGNALS quality gate (500) and
+      // cover at least 3 distinct source domains (MIN_DOMAINS=3).
+      const domains = ['engineering', 'support', 'product', 'finance'];
       const signals = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 600; i++) {
         signals.push({
-          source_domain: i % 2 === 0 ? 'engineering' : 'support',
-          signal_type: i % 2 === 0 ? 'ci_passed' : 'ticket_opened',
+          source_domain: domains[i % domains.length],
+          signal_type: `signal_type_${i % 10}`,
           signal_value: Math.random(),
-          created_at: new Date(Date.now() - i * 86400000).toISOString(),
+          signal_timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+          created_at: new Date(Date.now() - i * 3600000).toISOString(),
           entity_type: 'metric',
           entity_id: `sig_${i}`,
         });
@@ -119,22 +142,25 @@ describe('Autonomous Learner', () => {
 
       const result = await learner.runLearningCycle();
 
-      expect(result.duration).toBeGreaterThan(0);
+      // Duration is measured with Date.now() — may be 0ms on fast machines so use >= 0
+      expect(result.duration).toBeGreaterThanOrEqual(0);
       // Even if no causal edges found (depends on data), the cycle should complete
       expect(result.trainingStats).toBeDefined();
     });
 
     it('should log activity to repository when provided', async () => {
-      const supabase = createMockSupabase([
-        {
-          source_domain: 'finance',
-          signal_type: 'mrr_change',
-          signal_value: 0.5,
-          created_at: new Date().toISOString(),
-          entity_type: 'metric',
-          entity_id: 'mrr_1',
-        },
-      ]);
+      // Need 500+ signals across 3+ domains to pass quality gate and reach logActivity call
+      const domains = ['engineering', 'support', 'product', 'finance'];
+      const manySignals = Array.from({ length: 600 }, (_, i) => ({
+        source_domain: domains[i % domains.length],
+        signal_type: `sig_type_${i % 8}`,
+        signal_value: Math.random(),
+        signal_timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+        created_at: new Date(Date.now() - i * 3600000).toISOString(),
+        entity_type: 'metric',
+        entity_id: `sig_${i}`,
+      }));
+      const supabase = createMockSupabase(manySignals);
 
       const repository = createMockRepository();
       const learner = createAutonomousLearner({

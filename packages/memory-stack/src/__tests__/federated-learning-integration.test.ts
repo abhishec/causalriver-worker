@@ -182,6 +182,8 @@ function createChainMock(
       }),
       lte: vi.fn().mockImplementation(() => makeChain(table, filters)),
       lt: vi.fn().mockImplementation(() => makeChain(table, filters)),
+      // .in(col, values) — used by applyFedAvgToCore for multi-org delta aggregation
+      in: vi.fn().mockImplementation((_col: string, _vals: any[]) => makeChain(table, filters)),
       order: vi.fn().mockImplementation(() => makeChain(table, filters)),
       limit: vi.fn().mockImplementation(() => Promise.resolve({ data: rows, error: null })),
 
@@ -807,8 +809,15 @@ describe('🌐 Federated Learning — applyFedAvgToCore', () => {
             }),
           };
         }
-        // causal_federated_delta_log
+        // causal_federated_delta_log — supports SELECT (multi-org aggregation window)
+        // and INSERT (logging this org's deltas after apply).
+        // Chain needed: .select().in(pairKeys).gte(cutoff) → { data: [], error: null }
         return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
           insert: vi.fn().mockResolvedValue({ error: null }),
           upsert: vi.fn().mockResolvedValue({ error: null }),
         };
@@ -1008,7 +1017,14 @@ describe('🌐 snapshotCausalWeights & computeAndPromoteCausalDeltas', () => {
             upsert: vi.fn().mockResolvedValue({ error: null }),
           };
         }
+        // causal_federated_delta_log + any other table:
+        // needs .select().in().gte() for multi-org aggregation, plus insert/upsert
         return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn().mockReturnValue({
+              gte: vi.fn().mockResolvedValue({ data: [], error: null }),
+            }),
+          }),
           insert: vi.fn().mockResolvedValue({ error: null }),
           upsert: vi.fn().mockResolvedValue({ error: null }),
         };
@@ -1247,34 +1263,48 @@ describe('📈 Brain Gets Smarter — Multi-Cycle Convergence Proofs', () => {
     const trajectory: number[] = [coreEffectSize];
 
     const makeCore = () => ({
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            // .limit(500) for semantic check
-            limit: vi.fn().mockResolvedValue({ data: [], error: null }),
-            // .eq(src).eq(tgt).maybeSingle()
+      from: vi.fn().mockImplementation((table: string) => {
+        // causal_federated_delta_log: needs .select().in().gte() for multi-org aggregation
+        if (table === 'causal_federated_delta_log') {
+          return {
+            select: vi.fn().mockReturnValue({
+              in: vi.fn().mockReturnValue({
+                gte: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+            insert: vi.fn().mockResolvedValue({ error: null }),
+          };
+        }
+        // causal_relationships_statistical
+        return {
+          select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
+              // .limit(500) for semantic check
+              limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+              // .eq(src).eq(tgt).maybeSingle()
               eq: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  maybeSingle: vi.fn().mockResolvedValue({
+                    data: { effect_size: coreEffectSize, evidence_weight: 5 },
+                    error: null,
+                  }),
+                }),
                 maybeSingle: vi.fn().mockResolvedValue({
                   data: { effect_size: coreEffectSize, evidence_weight: 5 },
                   error: null,
                 }),
               }),
-              maybeSingle: vi.fn().mockResolvedValue({
-                data: { effect_size: coreEffectSize, evidence_weight: 5 },
-                error: null,
-              }),
             }),
           }),
-        }),
-        upsert: vi.fn().mockImplementation((data: any) => {
-          if (data?.effect_size !== undefined) {
-            coreEffectSize = data.effect_size;
-            trajectory.push(Number(coreEffectSize.toFixed(5)));
-          }
-          return Promise.resolve({ error: null });
-        }),
-        insert: vi.fn().mockResolvedValue({ error: null }),
+          upsert: vi.fn().mockImplementation((data: any) => {
+            if (data?.effect_size !== undefined) {
+              coreEffectSize = data.effect_size;
+              trajectory.push(Number(coreEffectSize.toFixed(5)));
+            }
+            return Promise.resolve({ error: null });
+          }),
+          insert: vi.fn().mockResolvedValue({ error: null }),
+        };
       }),
     } as any);
 

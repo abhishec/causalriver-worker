@@ -15,14 +15,15 @@ const nextConfig: NextConfig = {
     // Skip ESLint during CI builds — run separately via `pnpm lint`.
     ignoreDuringBuilds: true,
   },
-  // Transpile workspace packages so Next.js resolves them correctly.
-  // Required for Vercel monorepo deployments where pnpm workspace: links
-  // must be resolved at build time.
-  transpilePackages: ['@nexus-ai/memory-stack'],
   // Native Node.js modules — resolved at runtime, not bundled by webpack.
+  // @nexus-ai/memory-stack is pre-built via tsup (dist/index.js) with tree-sitter
+  // externalized; do NOT add it to transpilePackages or webpack will re-process
+  // the source and try to bundle tree-sitter .node binaries for the browser.
   serverExternalPackages: [
+    '@nexus-ai/memory-stack',
     'tree-sitter',
     'tree-sitter-go',
+    'tree-sitter-java',
     'tree-sitter-python',
     'tree-sitter-scala',
   ],

@@ -55,6 +55,27 @@ export interface BrainContextForDomain {
     target_entity_id: string; target_type: string; target_domain: string;
     link_type: string; confidence: number; evidence?: string;
   }>;
+  /** Code intelligence: symbol index + dependency graph from GitHub connector */
+  codeIntelligence?: {
+    branch: string;
+    symbolCount: number;
+    topSymbols: Array<{
+      name: string;
+      kind: string;
+      filePath: string;
+      signature?: string;
+      isExported: boolean;
+      language: string;
+    }>;
+    dependencyGraphSummary: string;
+    dependencyGraph: {
+      branch: string;
+      dependencies: Record<string, string[]>;
+      dependents: Record<string, string[]>;
+      edgeCount: number;
+      fileCount: number;
+    };
+  } | null;
   /** LEAP context from cognitive sleep cycles (deep brain reasoning) */
   leapContext?: Record<string, { content: string; metadata?: Record<string, unknown> }>;
   /** Brain evolution state (intelligence score, accuracy) */
@@ -264,6 +285,39 @@ export function formatBrainContextForDomain(
     sections.push('');
   }
 
+  // ── CODE INTELLIGENCE: Symbol Index + Dependency Graph ──────────────
+  const codeIntel = (brain as Record<string, any>).codeIntelligence as BrainContextForDomain['codeIntelligence'] | undefined;
+  if (codeIntel && codeIntel.symbolCount > 0) {
+    sections.push(`### Codebase Intelligence (Branch: ${codeIntel.branch})`);
+    sections.push(`The Brain has indexed **${codeIntel.symbolCount.toLocaleString()} code symbols** from this branch.`);
+
+    // Dependency graph summary (hotspots, leaf files)
+    if (codeIntel.dependencyGraphSummary) {
+      sections.push(codeIntel.dependencyGraphSummary);
+    }
+
+    // Top exported symbols — give Claude awareness of the public API surface
+    const exportedSymbols = (codeIntel.topSymbols ?? []).filter((s) => s.isExported).slice(0, 10);
+    if (exportedSymbols.length > 0) {
+      sections.push(`\nTop exported symbols:`);
+      for (const sym of exportedSymbols) {
+        const sig = sym.signature ? ` — \`${sym.signature.substring(0, 80)}\`` : '';
+        sections.push(`- \`${sym.kind} ${sym.name}\` in \`${sym.filePath}\`${sig}`);
+      }
+    }
+
+    // Internal-only symbols (unexported but top-ranked) — useful for dead-code, impact
+    const internalSymbols = (codeIntel.topSymbols ?? []).filter((s) => !s.isExported).slice(0, 5);
+    if (internalSymbols.length > 0) {
+      sections.push(`\nTop internal symbols:`);
+      for (const sym of internalSymbols) {
+        sections.push(`- \`${sym.kind} ${sym.name}\` in \`${sym.filePath}\``);
+      }
+    }
+
+    sections.push('');
+  }
+
   // ── BRAIN NUTRITION: LEAP Context (Deep Brain Reasoning) ──────────
   if (brain.leapContext && typeof brain.leapContext === 'object' && Object.keys(brain.leapContext).length > 0) {
     sections.push(`### Brain Deep Reasoning (from cognitive sleep cycles)`);
@@ -339,10 +393,11 @@ function getDomainSpecificHint(domainName: string): string {
     case 'impact-analyze':
       return (
         `\n### Domain Hint: Impact Analysis\n` +
-        `Use the Brain's causal graph to predict cascade effects. ` +
-        `If the Brain has learned causal chains, trace how a change might cascade through ` +
-        `the dependency chain. Reference bottleneck risk to assess if the change affects ` +
-        `a critical reviewer or high-centrality contributor.`
+        `Use the Brain's causal graph AND the Codebase Intelligence section above to predict cascade effects. ` +
+        `The dependency graph (dependents map) shows exactly which files transitively import the changed file — ` +
+        `enumerate these as blast-radius candidates. Reference bottleneck risk to assess if the change affects ` +
+        `a critical reviewer or high-centrality contributor. If the changed symbol appears in the hotspot list, ` +
+        `flag it as high-risk — it is imported by many downstream files.`
       );
 
     case 'sql-analyzer':
@@ -374,7 +429,9 @@ function getDomainSpecificHint(domainName: string): string {
         `Use the Brain's causal graph to understand how dependency changes cascade through ` +
         `the system. If the Brain has learned that certain dependency updates correlate with ` +
         `incident spikes, flag those as higher-risk upgrades. Reference bottleneck data to ` +
-        `identify if the upgrade will affect a critical reviewer's area of expertise.`
+        `identify if the upgrade will affect a critical reviewer's area of expertise. ` +
+        `Use the Codebase Intelligence dependency graph to identify which internal files ` +
+        `directly import the package being upgraded — those are the primary blast-radius files.`
       );
 
     case 'design-doc-generator':
@@ -398,10 +455,31 @@ function getDomainSpecificHint(domainName: string): string {
     case 'dead-code-detector':
       return (
         `\n### Domain Hint: Dead Code Detection\n` +
-        `Use the Brain's engineering context to assess risk of dead code removal. ` +
+        `Use the Codebase Intelligence section above to cross-reference suspected dead code against ` +
+        `the dependency graph. A symbol is truly dead only if it appears in NO other file's import list ` +
+        `(i.e., zero dependents in the dependents map). Leaf files with zero dependents are safe removal candidates. ` +
         `If the Brain knows which code areas have high bottleneck risk (few reviewers), ` +
         `flag dead code in those areas as higher-risk to modify. Reference the Brain's ` +
         `causal graph to understand if unused code is part of a dormant cascade chain.`
+      );
+
+    case 'codebase-qa':
+      return (
+        `\n### Domain Hint: Codebase Q&A\n` +
+        `The Codebase Intelligence section above lists the top indexed symbols for this branch. ` +
+        `When answering questions about where functionality lives, cross-reference symbol names, ` +
+        `file paths, and signatures. If the question references a function or class, locate it ` +
+        `in the symbol list and reason from its signature and file path. ` +
+        `Use the dependency graph to explain how modules connect.`
+      );
+
+    case 'pr-review':
+      return (
+        `\n### Domain Hint: PR Review\n` +
+        `Use the Codebase Intelligence section to understand what the changed files export and ` +
+        `how many downstream files depend on them (dependents map). High-dependent files deserve ` +
+        `extra scrutiny — a bug there has a large blast radius. Cross-check changed symbol ` +
+        `signatures against the indexed top symbols to detect unintended API surface changes.`
       );
 
     default:

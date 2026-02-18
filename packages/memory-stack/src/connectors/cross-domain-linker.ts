@@ -350,6 +350,178 @@ export async function linkJiraToGitHub(
 }
 
 // ============================================================================
+// CODE DEPENDENCY GRAPH  (NB-017 Phase 2)
+// ============================================================================
+
+/**
+ * Lightweight code dependency graph built from `code_dependency` signals
+ * emitted by the GitHub connector's parseAndEmbedFile() (Phase 1).
+ *
+ * Contains both directions so SE-aaS domains can answer:
+ *   - Impact analysis: "if I change file X, which files break?" → `dependents`
+ *   - Lineage:         "what does file X depend on?"             → `dependencies`
+ */
+export interface CodeDependencyGraph {
+  /** branch this graph is scoped to */
+  branch: string;
+  /** file → list of files it imports (outgoing edges) */
+  dependencies: Record<string, string[]>;
+  /** file → list of files that import it (incoming edges, for impact analysis) */
+  dependents: Record<string, string[]>;
+  /** total number of dependency edges in the graph */
+  edgeCount: number;
+  /** total unique files in the graph */
+  fileCount: number;
+}
+
+/**
+ * Build a code dependency graph from `code_dependency` signals for a given
+ * branch, scoped to a single organisation.
+ *
+ * Used by:
+ *   - impact SE-aaS domain   — find transitive dependents of a changed file
+ *   - dead-code SE-aaS domain — find files/symbols with zero inbound edges
+ *   - dependency-upgrade domain — find all files importing a given package path
+ *   - Brain context mesh     — inject graph summary into every SE-aaS prompt
+ *
+ * @param supabase      Supabase client (org-scoped via RLS)
+ * @param organizationId  Org to query
+ * @param branch        Branch name to scope the graph (e.g. 'release/6.3.4')
+ * @param maxEdges      Safety limit on signals fetched (default 5000)
+ */
+export async function buildCodeDependencyGraph(
+  supabase: SupabaseClient,
+  organizationId: string,
+  branch: string,
+  maxEdges = 5000,
+): Promise<CodeDependencyGraph> {
+  // Fetch all code_dependency signals for this branch
+  const { data, error } = await supabase
+    .from('cross_domain_signals')
+    .select('signal_metadata')
+    .eq('organization_id', organizationId)
+    .eq('signal_type', 'code_dependency')
+    .eq('branch_name', branch)
+    .limit(maxEdges);
+
+  if (error) {
+    console.warn('[CrossDomainLinker] buildCodeDependencyGraph query failed:', error.message);
+    // Return empty graph — caller gets graceful degradation, not a crash
+    return { branch, dependencies: {}, dependents: {}, edgeCount: 0, fileCount: 0 };
+  }
+
+  const dependencies: Record<string, string[]> = {};
+  const dependents: Record<string, string[]> = {};
+  let edgeCount = 0;
+
+  for (const row of (data || [])) {
+    const meta = row.signal_metadata as Record<string, string> | null;
+    if (!meta?.importer || !meta?.importee) continue;
+
+    const importer = meta.importer;
+    const importee = meta.importee;
+
+    // Forward edge: importer → importee
+    if (!dependencies[importer]) dependencies[importer] = [];
+    if (!dependencies[importer].includes(importee)) {
+      dependencies[importer].push(importee);
+    }
+
+    // Reverse edge: importee → importer (what depends on importee)
+    if (!dependents[importee]) dependents[importee] = [];
+    if (!dependents[importee].includes(importer)) {
+      dependents[importee].push(importer);
+    }
+
+    edgeCount++;
+  }
+
+  const allFiles = new Set([...Object.keys(dependencies), ...Object.keys(dependents)]);
+
+  return {
+    branch,
+    dependencies,
+    dependents,
+    edgeCount,
+    fileCount: allFiles.size,
+  };
+}
+
+/**
+ * Given a file path and a pre-built dependency graph, return all files that
+ * transitively depend on it (up to maxDepth hops).
+ *
+ * This is the core of impact analysis:
+ *   "I'm changing src/auth/token.ts — which files could break?"
+ *
+ * @param graph     Output of buildCodeDependencyGraph()
+ * @param filePath  The file being changed
+ * @param maxDepth  Maximum transitive hops (default 5 — avoids full-graph traversal)
+ * @returns         Ordered list of dependent files, closest first
+ */
+export function getTransitiveDependents(
+  graph: CodeDependencyGraph,
+  filePath: string,
+  maxDepth = 5,
+): Array<{ file: string; depth: number }> {
+  const visited = new Set<string>();
+  const result: Array<{ file: string; depth: number }> = [];
+
+  function walk(current: string, depth: number): void {
+    if (depth > maxDepth) return;
+    const directDependents = graph.dependents[current] || [];
+    for (const dep of directDependents) {
+      if (visited.has(dep)) continue;
+      visited.add(dep);
+      result.push({ file: dep, depth });
+      walk(dep, depth + 1);
+    }
+  }
+
+  walk(filePath, 1);
+  // Sort by depth (closest dependents first)
+  return result.sort((a, b) => a.depth - b.depth);
+}
+
+/**
+ * Summarise the dependency graph for injection into Brain context.
+ * Returns a compact, human-readable snapshot — not the full adjacency map.
+ */
+export function summariseCodeDependencyGraph(graph: CodeDependencyGraph): string {
+  if (graph.edgeCount === 0) {
+    return `No code dependency graph available for branch ${graph.branch} yet (sync in progress or no relative imports found).`;
+  }
+
+  // Most-depended-on files (highest inbound edge count = highest-risk to change)
+  const hotspots = Object.entries(graph.dependents)
+    .map(([file, deps]) => ({ file, inboundCount: deps.length }))
+    .sort((a, b) => b.inboundCount - a.inboundCount)
+    .slice(0, 10);
+
+  // Files with no dependents (candidates for dead code / safe to change)
+  const leafCount = Object.keys(graph.dependencies).filter(
+    f => !graph.dependents[f] || graph.dependents[f].length === 0
+  ).length;
+
+  const lines: string[] = [
+    `Code dependency graph (branch: ${graph.branch}): ${graph.fileCount} files, ${graph.edgeCount} import edges.`,
+  ];
+
+  if (hotspots.length > 0) {
+    lines.push(`Most-imported files (highest change-risk):`);
+    for (const h of hotspots) {
+      lines.push(`  - ${h.file} (imported by ${h.inboundCount} file${h.inboundCount !== 1 ? 's' : ''})`);
+    }
+  }
+
+  if (leafCount > 0) {
+    lines.push(`${leafCount} file${leafCount !== 1 ? 's' : ''} have no dependents (safe to modify or candidates for dead code review).`);
+  }
+
+  return lines.join('\n');
+}
+
+// ============================================================================
 // SAVE ENTITY LINKS TO DATABASE
 // ============================================================================
 

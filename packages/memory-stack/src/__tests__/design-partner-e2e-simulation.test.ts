@@ -285,7 +285,10 @@ function createDesignPartnerMock(orgId: string) {
         makeChain(tableName, { ...filters, [col]: val })
       ),
       gte: vi.fn().mockImplementation(() => makeChain(tableName, filters)),
+      lte: vi.fn().mockImplementation(() => makeChain(tableName, filters)),
       lt: vi.fn().mockImplementation(() => makeChain(tableName, filters)),
+      // .in(col, values) — needed for applyFedAvgToCore multi-org aggregation query
+      in: vi.fn().mockImplementation((_col: string, _vals: any[]) => makeChain(tableName, filters)),
       order: vi.fn().mockImplementation(() => makeChain(tableName, filters)),
       limit: vi.fn().mockImplementation(() => Promise.resolve({ data: filtered, error: null })),
       maybeSingle: vi.fn().mockResolvedValue({ data: filtered[0] ?? null, error: null }),

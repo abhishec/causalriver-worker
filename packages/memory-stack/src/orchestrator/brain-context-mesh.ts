@@ -25,6 +25,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createDispatchAssessor, type DispatchAssessment, type UserIntent, type BusinessDomain } from './dispatch-assessor';
 import type { RequiredDataSignals, QueryInterpretation } from './llm-query-interpreter';
+import { buildCodeDependencyGraph, summariseCodeDependencyGraph, type CodeDependencyGraph } from '../connectors/cross-domain-linker.js';
 
 // ============================================================================
 // TYPES — Service Types
@@ -83,6 +84,35 @@ export interface SeaasDomainContext {
   signalCount: number;
   /** BRAIN NUTRITION: Entity links for SE-aaS (cross-system PR→Jira→Slack→Deploy) */
   entityLinks: EntityLinkRow[];
+  /**
+   * Code intelligence layer (NB-017/NB-018 Phase 2).
+   * Populated when a branch is active; null during cold-start or before first sync.
+   */
+  codeIntelligence: CodeIntelligenceContext | null;
+}
+
+/**
+ * Code intelligence context injected into every SE-aaS prompt.
+ * Derived from entity_embeddings (symbols) + cross_domain_signals (code_dependency).
+ */
+export interface CodeIntelligenceContext {
+  /** Branch this context is scoped to */
+  branch: string;
+  /** Total symbols indexed for this branch (from entity_embeddings) */
+  symbolCount: number;
+  /** Top exported symbols by importance score — most critical API surface */
+  topSymbols: Array<{
+    name: string;
+    kind: string;
+    filePath: string;
+    signature?: string;
+    isExported: boolean;
+    language: string;
+  }>;
+  /** Compact human-readable summary of the dependency graph */
+  dependencyGraphSummary: string;
+  /** Full graph object for domains that need it (impact, dead-code, dependency-upgrade) */
+  dependencyGraph: CodeDependencyGraph;
 }
 
 export interface AasDomainContext {
@@ -150,6 +180,9 @@ export interface AssembledBrainContext {
 
   // BRAIN NUTRITION: Entity links (populated for copilot + se-aas — cross-system connections)
   entityLinks?: EntityLinkRow[];
+
+  // CODE INTELLIGENCE: symbol index + dependency graph (populated for se-aas — NB-017/NB-018)
+  codeIntelligence?: CodeIntelligenceContext | null;
 
   // BRAIN NUTRITION: LEAP context (deep brain reasoning from cognitive sleep cycles)
   leapContext: LeapContext;
@@ -384,6 +417,13 @@ export interface BrainContextMeshConfig {
   maxMemoryItems?: number;
   /** Total token budget for assembled context (default: 12000) */
   totalTokenBudget?: number;
+  /**
+   * Active release branch to scope code intelligence context.
+   * When set, the mesh loads the code dependency graph + symbol index
+   * for this branch and injects them into SE-aaS prompts.
+   * Example: 'release/6.3.4' or 'release/5.11.5-enterprise'
+   */
+  branch?: string;
 }
 
 // ============================================================================
@@ -414,6 +454,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     maxCausalEdges = 50,
     maxMemoryItems = 15,
     totalTokenBudget = DEFAULT_TOTAL_TOKEN_BUDGET,
+    branch,
   } = config;
 
   const dispatchAssessor = createDispatchAssessor();
@@ -689,7 +730,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     //   - incident-diagnosis: "which PR caused this Jira spike?"
     //   - impact-analysis: "what does this code change affect across systems?"
     //   - pr-review: "related Jira context for this PR"
-    const [velocityRes, bottleneckRes, signalsRes, entityLinksRes] = await Promise.all([
+    const [velocityRes, bottleneckRes, signalsRes, entityLinksRes, symbolsRes] = await Promise.all([
       skipVelocity ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('velocity_snapshots')
@@ -728,9 +769,75 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .order('created_at', { ascending: false })
         .limit(50)
       ).catch(() => ({ data: [] as any[] })),
+
+      // CODE INTELLIGENCE: top exported symbols for this branch (NB-017/NB-018)
+      // Scoped by branch via metadata->>'branch' filter.
+      // Only runs when a branch is configured — skipped for cold-start.
+      branch
+        ? Promise.resolve(supabase
+            .from('entity_embeddings')
+            .select('entity_id, content, metadata, importance_score')
+            .eq('organization_id', organizationId)
+            .eq('entity_type', 'code_symbol')
+            .eq('metadata->>branch', branch)
+            .eq('metadata->>isExported', 'true')
+            .order('importance_score', { ascending: false })
+            .limit(50)
+          ).catch(() => ({ data: [] as any[] }))
+        : Promise.resolve(emptyRes),
     ]);
 
     const signals = (signalsRes.data || []) as SignalRow[];
+
+    // Build code intelligence context when branch is configured
+    let codeIntelligence: CodeIntelligenceContext | null = null;
+    if (branch) {
+      // Build dependency graph + get real total symbol count in parallel
+      const [depGraph, totalCountRes] = await Promise.all([
+        buildCodeDependencyGraph(supabase, organizationId, branch).catch(
+          () => ({ branch, dependencies: {}, dependents: {}, edgeCount: 0, fileCount: 0 }) as CodeDependencyGraph
+        ),
+        // COUNT query — no rows returned, just the total (head:true)
+        Promise.resolve(
+          supabase
+            .from('entity_embeddings')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', organizationId)
+            .eq('entity_type', 'code_symbol')
+            .eq('metadata->>branch', branch)
+        ).catch(() => ({ count: null })),
+      ]);
+
+      // Shape top symbols for injection into prompts
+      const rawSymbols = (symbolsRes.data || []) as Array<{
+        entity_id: string;
+        content: string;
+        metadata: Record<string, any>;
+        importance_score: number;
+      }>;
+
+      const topSymbols = rawSymbols.slice(0, 20).map(row => ({
+        name: row.metadata?.name ?? row.entity_id,
+        kind: row.metadata?.kind ?? 'unknown',
+        filePath: row.metadata?.filePath ?? '',
+        // Read signature directly from metadata (stored by github-connector).
+        // Avoids fragile line-index parsing of the content string.
+        signature: (row.metadata?.signature as string | null) ?? undefined,
+        isExported: row.metadata?.isExported === true,
+        language: row.metadata?.language ?? 'unknown',
+      }));
+
+      // Use real total count; fall back to batch size if count query fails
+      const symbolCount = (totalCountRes as any)?.count ?? rawSymbols.length;
+
+      codeIntelligence = {
+        branch,
+        symbolCount,
+        topSymbols,
+        dependencyGraphSummary: summariseCodeDependencyGraph(depGraph),
+        dependencyGraph: depGraph,
+      };
+    }
 
     return {
       velocity: (velocityRes.data?.[0] as VelocityRow) || null,
@@ -738,6 +845,7 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       recentSignals: signals.slice(0, 20),
       signalCount: signals.length,
       entityLinks: (entityLinksRes.data || []) as EntityLinkRow[],
+      codeIntelligence,
     };
   }
 
@@ -856,6 +964,8 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     let signalCount = 0;
     let entityLinks: EntityLinkRow[] | undefined;
 
+    let codeIntelligence: CodeIntelligenceContext | null | undefined;
+
     if (isCopilot) {
       const ctx = domain as CopilotDomainContext;
       velocity = ctx.velocity;
@@ -871,6 +981,8 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       signalCount = ctx.signalCount;
       // BRAIN NUTRITION: SE-aaS now gets entity links (was: only Copilot had them)
       entityLinks = ctx.entityLinks;
+      // CODE INTELLIGENCE: code dependency graph + symbol index (NB-017/NB-018)
+      codeIntelligence = ctx.codeIntelligence;
     }
 
     // AAS-specific context
@@ -987,6 +1099,11 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       accountingPatterns: prunedAccountingPatterns,
       financialCausalEdges: prunedFinancialEdges,
       entityLinks: prunedEntityLinks,
+
+      // CODE INTELLIGENCE: code dependency graph + top symbols (NB-017/NB-018)
+      // Not token-pruned — the graph is already compact (adjacency map not serialised into prompt).
+      // formatBrainContextForDomain() injects only the summary string + top symbol list.
+      codeIntelligence,
 
       // BRAIN NUTRITION: LEAP context (deep brain reasoning from sleep cycles)
       // Shared across ALL services — curiosity, imagination, self-model, experiments, etc.
