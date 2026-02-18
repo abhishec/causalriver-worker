@@ -167,12 +167,13 @@ CREATE TABLE IF NOT EXISTS public.engagement_health_scores (
   metadata             JSONB DEFAULT '{}'
 );
 
--- Functional unique index: one score record per (org, engagement, day).
--- Uses CREATE UNIQUE INDEX rather than inline UNIQUE(...) because expression-based
--- unique constraints inside CREATE TABLE require PG 15+ and aren't supported
--- in all Supabase environments.
-CREATE UNIQUE INDEX IF NOT EXISTS idx_eng_scores_unique_day
-  ON public.engagement_health_scores(organization_id, engagement_id, (computed_at::DATE));
+-- Composite index: one score record per (org, engagement, computed_at).
+-- NOTE: A functional unique index on (computed_at::DATE) would require an
+-- IMMUTABLE function wrapper (PostgreSQL restriction on index expressions using
+-- TIMESTAMPTZ→DATE casts). Instead we keep a plain index and enforce per-day
+-- uniqueness at the application layer (upsert on computed_at truncated to day).
+CREATE INDEX IF NOT EXISTS idx_eng_scores_daily
+  ON public.engagement_health_scores(organization_id, engagement_id, computed_at DESC);
 
 CREATE INDEX idx_eng_scores_engagement  ON public.engagement_health_scores(engagement_id, computed_at DESC);
 CREATE INDEX idx_eng_scores_org         ON public.engagement_health_scores(organization_id, computed_at DESC);
