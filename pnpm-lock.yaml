@@ -12,7 +12,7 @@ overrides:
   '@anthropic-ai/sdk': ^0.74.0
   fast-xml-parser@>=4.1.3 <5.3.6: '>=5.3.6'
   ajv@<6.12.3: ^6.12.3
-  minimatch@<10.2.1: '>=10.2.1'
+  minimatch: ^9.0.5
 
 pnpmfileChecksum: wgxqsz4hgmeoga7uqbi4sbhsbi
 
@@ -2294,9 +2294,8 @@ packages:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
 
-  balanced-match@4.0.3:
-    resolution: {integrity: sha512-1pHv8LX9CpKut1Zp4EXey7Z8OfH11ONNH6Dhi2WDUt31VVZFXZzKwXcysBgqSumFCmR+0dqjMK5v5JiFHzi0+g==}
-    engines: {node: 20 || >=22}
+  balanced-match@1.0.2:
+    resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
   baseline-browser-mapping@2.9.19:
     resolution: {integrity: sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==}
@@ -2312,9 +2311,8 @@ packages:
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
-  brace-expansion@5.0.2:
-    resolution: {integrity: sha512-Pdk8c9poy+YhOgVWw1JNN22/HcivgKWwpxKq04M/jTmHyCZn12WPJebZxdjSa5TmBqISrUSgNYU3eRORljfCCw==}
-    engines: {node: 20 || >=22}
+  brace-expansion@2.0.2:
+    resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -3767,9 +3765,9 @@ packages:
     resolution: {integrity: sha512-vqiC06CuhBTUdZH+RYl8sFrL096vA45Ok5ISO6sE/Mr1jRbGH4Csnhi8f3wKVl7x8mO4Au7Ir9D3Oyv1VYMFJw==}
     engines: {node: '>=12'}
 
-  minimatch@10.2.1:
-    resolution: {integrity: sha512-MClCe8IL5nRRmawL6ib/eT4oLyeKMGCghibcDWK+J0hh0Q8kqSdia6BvbRMVk6mPa6WqUa5uR2oxt6C5jd533A==}
-    engines: {node: 20 || >=22}
+  minimatch@9.0.5:
+    resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
+    engines: {node: '>=16 || 14 >=14.17'}
 
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
@@ -5637,7 +5635,7 @@ snapshots:
     dependencies:
       '@eslint/object-schema': 2.1.7
       debug: 4.4.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
     transitivePeerDependencies:
       - supports-color
 
@@ -5658,7 +5656,7 @@ snapshots:
       ignore: 5.3.2
       import-fresh: 3.3.1
       js-yaml: 4.1.1
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -6881,7 +6879,7 @@ snapshots:
       debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       semver: 7.7.4
       ts-api-utils: 1.4.3(typescript@5.9.3)
     optionalDependencies:
@@ -6896,7 +6894,7 @@ snapshots:
       '@typescript-eslint/types': 8.55.0
       '@typescript-eslint/visitor-keys': 8.55.0
       debug: 4.4.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       semver: 7.7.4
       tinyglobby: 0.2.15
       ts-api-utils: 2.4.0(typescript@5.9.3)
@@ -7172,7 +7170,7 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  balanced-match@4.0.3: {}
+  balanced-match@1.0.2: {}
 
   baseline-browser-mapping@2.9.19: {}
 
@@ -7194,9 +7192,9 @@ snapshots:
 
   bowser@2.14.1: {}
 
-  brace-expansion@5.0.2:
+  brace-expansion@2.0.2:
     dependencies:
-      balanced-match: 4.0.3
+      balanced-match: 1.0.2
 
   braces@3.0.3:
     dependencies:
@@ -7900,7 +7898,7 @@ snapshots:
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       object.fromentries: 2.0.8
       object.groupby: 1.0.3
       object.values: 1.2.1
@@ -7929,7 +7927,7 @@ snapshots:
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       object.fromentries: 2.0.8
       object.groupby: 1.0.3
       object.values: 1.2.1
@@ -7957,7 +7955,7 @@ snapshots:
       hasown: 2.0.2
       jsx-ast-utils: 3.3.5
       language-tags: 1.0.9
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       object.fromentries: 2.0.8
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
@@ -7989,7 +7987,7 @@ snapshots:
       estraverse: 5.3.0
       hasown: 2.0.2
       jsx-ast-utils: 3.3.5
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       object.entries: 1.1.9
       object.fromentries: 2.0.8
       object.values: 1.2.1
@@ -8041,7 +8039,7 @@ snapshots:
       is-glob: 4.0.3
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       natural-compare: 1.4.0
       optionator: 0.9.4
     optionalDependencies:
@@ -8296,7 +8294,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 10.2.1
+      minimatch: 9.0.5
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -8908,9 +8906,9 @@ snapshots:
 
   mimic-fn@4.0.0: {}
 
-  minimatch@10.2.1:
+  minimatch@9.0.5:
     dependencies:
-      brace-expansion: 5.0.2
+      brace-expansion: 2.0.2
 
   minimist@1.2.8: {}
 
@@ -9690,7 +9688,7 @@ snapshots:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
-      minimatch: 10.2.1
+      minimatch: 9.0.5
 
   thenify-all@1.6.0:
     dependencies:
