@@ -97,6 +97,8 @@ import { createContextManager } from '../packages/memory-stack/src/orchestrator/
 import { createBrainAmplifier } from '../packages/memory-stack/src/orchestrator/llm-brain-amplifier';
 // Cost Tracker — centralized LLM cost logging
 import { createCostTracker } from '../packages/memory-stack/src/persistence/cost-tracker';
+// Memory Pressure Monitor — dynamic OOM prevention
+import { createMemoryPressureMonitor, type MemoryPressureMonitor } from '../packages/memory-stack/src/infra/memory-pressure-monitor';
 
 // ============================================================================
 // CONFIGURATION
@@ -123,6 +125,10 @@ const VERBOSE = process.env.VERBOSE === 'true';
 
 // Module-level cost tracker — initialized in main(), used by consolidateOrg()
 let costTracker: ReturnType<typeof createCostTracker> | undefined;
+
+// Module-level memory monitor — initialized in main(), used across consolidation
+let memoryMonitor: MemoryPressureMonitor | undefined;
+let emergencyMode = false;
 
 // LLM Brain Amplifier config (optional — graceful degradation if no key)
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
@@ -756,7 +762,11 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     // Pre-warm common business query shapes so first queries after
     // consolidation hit compiled paths instead of cold misses.
     // These cover the top query fingerprints across business domains.
-    const warmupQueries = [
+    // SKIP in emergency mode — pre-warming is non-essential
+    if (emergencyMode) {
+      log('CEREBELLUM', 'Skipping pre-warming (emergency memory mode)');
+    }
+    const warmupQueries = !emergencyMode ? [
       'Why did revenue change this quarter?',
       'What caused churn to increase?',
       'How is customer acquisition trending?',
@@ -767,7 +777,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       'What risks should we watch for?',
       'Show me cross-domain correlations',
       'What changed since last consolidation?',
-    ];
+    ] : [];
 
     let warmed = 0;
     for (const query of warmupQueries) {
@@ -979,6 +989,15 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     logError('FEDERATION', 'Upstream promotion failed', err);
   }
 
+  // Stop memory monitor and log stats
+  if (memoryMonitor) {
+    const memStats = memoryMonitor.stop();
+    divider('MEMORY REPORT');
+    log('MEMORY', `Peak heap: ${memStats.peakHeapUsedMB.toFixed(0)}MB | Avg heap: ${memStats.avgHeapUsedMB.toFixed(0)}MB | Peak RSS: ${memStats.peakRssMB.toFixed(0)}MB`);
+    log('MEMORY', `Time in normal: ${(memStats.timeInNormalMs / 1000).toFixed(1)}s | elevated: ${(memStats.timeInElevatedMs / 1000).toFixed(1)}s | high: ${(memStats.timeInHighMs / 1000).toFixed(1)}s | critical: ${(memStats.timeInCriticalMs / 1000).toFixed(1)}s`);
+    log('MEMORY', `GC triggered: ${memStats.gcTriggered} | Batch reductions: ${memStats.batchReductions} | Emergency mode: ${emergencyMode ? 'YES' : 'no'}`);
+  }
+
   divider('CONSOLIDATION COMPLETE');
   log('DONE', `Total time: ${totalDuration}s`);
   log('DONE', `Organizations consolidated: ${results.length}`);
@@ -1186,7 +1205,11 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
 
     // ── GAP 5: LLM Consolidation Briefing ─────────────────────────────
     // Generate a CTO-grade executive briefing from tonight's consolidation
-    if (LLM_API_KEY) {
+    // SKIP in emergency mode — LLM calls are expensive and non-essential
+    if (emergencyMode) {
+      log('LLM', 'Skipping executive briefing (emergency memory mode)');
+    }
+    if (LLM_API_KEY && !emergencyMode) {
       try {
         const amplifier = createBrainAmplifier({
           provider: LLM_PROVIDER,
@@ -1273,6 +1296,22 @@ async function main(): Promise<void> {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: -1 } } });
   costTracker = createCostTracker(supabase, true);
+
+  // Start memory pressure monitor — adapts behavior to prevent OOM
+  memoryMonitor = createMemoryPressureMonitor({ verbose: VERBOSE });
+  memoryMonitor.onPressure('elevated', (snap) => {
+    log('MEMORY', `Elevated pressure — ${snap.heapUsedMB.toFixed(0)}MB / ${snap.heapTotalMB.toFixed(0)}MB (${(snap.usageRatio * 100).toFixed(1)}%)`);
+  });
+  memoryMonitor.onPressure('high', (snap) => {
+    log('MEMORY', `High pressure — triggering GC (${snap.heapUsedMB.toFixed(0)}MB / ${snap.heapTotalMB.toFixed(0)}MB)`);
+    memoryMonitor!.tryGC();
+  });
+  memoryMonitor.onPressure('critical', (snap) => {
+    logError('MEMORY', `CRITICAL pressure — entering emergency mode (${snap.heapUsedMB.toFixed(0)}MB / ${snap.heapTotalMB.toFixed(0)}MB)`);
+    emergencyMode = true;
+    memoryMonitor!.tryGC();
+  });
+  memoryMonitor.start();
 
   // Verify connection
   try {

@@ -32,6 +32,15 @@ export interface StreamingBatcherConfig {
   batchTimeoutMs?: number;
   /** Logger */
   logger?: NexusLogger;
+  /**
+   * Enable adaptive batch sizing based on memory pressure.
+   * When enabled, batch size and delay auto-scale based on heap usage:
+   *   >70% heap: halve batch size (min: 100)
+   *   <40% heap: double batch size (up to original)
+   *   >75% heap: add 500ms delay between batches
+   * (default: false)
+   */
+  adaptiveBatchSize?: boolean;
 }
 
 export interface BatchResult<T> {
@@ -102,6 +111,7 @@ export async function streamInBatches<T, R = void>(
     maxItems = Infinity,
     batchDelayMs = 0,
     batchTimeoutMs = 30_000,
+    adaptiveBatchSize = false,
   } = config;
 
   const logger = config.logger ?? getDefaultLogger().child({ module: 'streaming-batcher' });
@@ -112,12 +122,27 @@ export async function streamInBatches<T, R = void>(
   let totalBatchTimeMs = 0;
   const startTime = Date.now();
   let peakMemory = 0;
+  let currentBatchSize = batchSize;
 
   while (totalProcessed < maxItems) {
     const batchStart = Date.now();
 
+    // Adaptive batch sizing: adjust based on current heap pressure
+    if (adaptiveBatchSize) {
+      const mem = process.memoryUsage();
+      const heapRatio = mem.heapTotal > 0 ? mem.heapUsed / mem.heapTotal : 0;
+
+      if (heapRatio > 0.70) {
+        // Under pressure — halve batch size (floor: 100)
+        currentBatchSize = Math.max(100, Math.floor(currentBatchSize / 2));
+      } else if (heapRatio < 0.40 && currentBatchSize < batchSize) {
+        // Plenty of room — grow back toward original
+        currentBatchSize = Math.min(batchSize, currentBatchSize * 2);
+      }
+    }
+
     // Fetch batch
-    const effectiveBatchSize = Math.min(batchSize, maxItems - totalProcessed);
+    const effectiveBatchSize = Math.min(currentBatchSize, maxItems - totalProcessed);
     const { items, nextCursor, hasMore } = await fetcher(cursor, effectiveBatchSize);
 
     if (items.length === 0) break;
@@ -156,13 +181,21 @@ export async function streamInBatches<T, R = void>(
       batchSize: items.length,
       totalProcessed,
       hasMore,
+      ...(adaptiveBatchSize ? { adaptedBatchSize: currentBatchSize } : {}),
     });
 
     if (!hasMore) break;
 
-    // Backpressure delay
-    if (batchDelayMs > 0) {
-      await new Promise(resolve => setTimeout(resolve, batchDelayMs));
+    // Backpressure delay (adaptive: increase under memory pressure)
+    let effectiveDelay = batchDelayMs;
+    if (adaptiveBatchSize) {
+      const mem = process.memoryUsage();
+      const heapRatio = mem.heapTotal > 0 ? mem.heapUsed / mem.heapTotal : 0;
+      if (heapRatio > 0.75) effectiveDelay = Math.max(effectiveDelay, 500);
+      else if (heapRatio > 0.60) effectiveDelay = Math.max(effectiveDelay, 100);
+    }
+    if (effectiveDelay > 0) {
+      await new Promise(resolve => setTimeout(resolve, effectiveDelay));
     }
   }
 

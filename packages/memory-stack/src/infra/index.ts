@@ -121,6 +121,16 @@ export {
   type BatchProcessor,
 } from './streaming-batcher';
 
+// Memory Pressure Monitor (Dynamic OOM Prevention)
+export {
+  createMemoryPressureMonitor,
+  type MemoryPressureMonitor,
+  type MemoryPressureMonitorConfig,
+  type MemorySnapshot,
+  type MemoryStats,
+  type PressureLevel,
+} from './memory-pressure-monitor';
+
 // Hardened Security
 export {
   createHardenedSecurity,
