@@ -22,6 +22,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
 import { maybeTriggerBrainCycle } from "@/lib/brain-trigger";
+import { parseGLFile } from "@/lib/parsers/gl-file-parser";
 
 export const dynamic = "force-dynamic";
 
@@ -182,17 +183,36 @@ export async function POST(request: NextRequest) {
 
     if (fileType === "gl-data") {
       try {
-        // Parse and validate the GL data
-        const text = buffer.toString("utf-8");
-        const transactions = JSON.parse(text);
+        // Dynamic file parsing — supports Excel (.xlsx), CSV, and JSON
+        const { transactions, metadata: parseMeta } = parseGLFile(buffer, file.name);
+        console.info(`[S3Upload] Parsed ${file.name}: format=${parseMeta.format}, ${transactions.length} transactions, ${parseMeta.accountCount} accounts, balanced=${parseMeta.balanced}`);
 
-        if (!Array.isArray(transactions) || transactions.length === 0) {
+        if (transactions.length === 0) {
           return NextResponse.json({
             success: true,
             upload: uploadResult,
             warning: "File uploaded but contains no transactions. Brain ingestion skipped.",
+            parseMetadata: parseMeta,
           });
         }
+
+        // Store the parsed JSON version to S3 (so AAAS agents can read it)
+        const parsedJsonBuffer = Buffer.from(JSON.stringify(transactions), "utf-8");
+        if (useS3) {
+          const storage = getOrgStorage();
+          await storage.upload(orgId, "gl-data.json", parsedJsonBuffer, {
+            contentType: "application/json",
+            metadata: { parsedFrom: file.name, format: parseMeta.format, parsedAt: new Date().toISOString() },
+          });
+        } else {
+          await service.storage
+            .from("org-data")
+            .upload(`${orgId}/gl-data.json`, parsedJsonBuffer, {
+              contentType: "application/json",
+              upsert: true,
+            });
+        }
+        console.info(`[S3Upload] Stored parsed gl-data.json (${parsedJsonBuffer.length} bytes) for org ${orgId}`);
 
         // Ingest GL signals into cross_domain_signals
         const signals = generateGLSignals(transactions, orgId);
@@ -231,6 +251,9 @@ export async function POST(request: NextRequest) {
           signalsIngested: signals.length,
           transactionCount: transactions.length,
           causalBootstrap: causalSeedResult,
+          sourceFormat: parseMeta.format,
+          accountCount: parseMeta.accountCount,
+          balanced: parseMeta.balanced,
         };
 
         // ── Surface bootstrap discovery to the intelligence feed ───────────────

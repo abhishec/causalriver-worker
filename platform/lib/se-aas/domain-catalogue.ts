@@ -130,6 +130,7 @@ export const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Test Intelligence",
     description:
       "Generate comprehensive test suites from code analysis — edge cases, boundary conditions, happy paths, integration paths, and negative test scenarios.",
+    href: "/se-aas/test-cases",
     copilotPrompt: "Generate a comprehensive test suite for my codebase covering all edge cases",
     colorClass: "text-emerald-400",
     ringClass: "border-emerald-500/25",
@@ -142,6 +143,7 @@ export const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Test Intelligence",
     description:
       "Synthetic test data generation with referential integrity, PII-safe anonymisation, and scenario-based dataset creation for realistic load testing.",
+    href: "/se-aas/test-data",
     copilotPrompt: "Generate realistic synthetic test data for my database schema",
     colorClass: "text-teal-400",
     ringClass: "border-teal-500/25",
@@ -273,6 +275,7 @@ export const DOMAIN_CATALOGUE: DomainEntry[] = [
     description:
       "Extract your full system architecture: service graph, data flows, module ownership, Mermaid diagrams, and architecture risks — auto-updated as code changes.",
     href: "/se-aas/architecture",
+    copilotPrompt: "Extract the full architecture of my system with service graphs and Mermaid diagrams",
     badge: "New",
     badgeVariant: "accent",
     colorClass: "text-sky-400",

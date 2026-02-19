@@ -15,10 +15,10 @@ describe("Domain commands completeness", () => {
     }
   });
 
-  it("should have all 6 AAS commands", () => {
+  it("should have all 7 AAS commands", () => {
     const aasCommands = ALL_SLASH_COMMANDS.filter((c) => c.service === "aas");
     expect(aasCommands.length).toBe(AAS_COMMANDS.length);
-    expect(aasCommands.length).toBe(6);
+    expect(aasCommands.length).toBe(7);
   });
 
   it("should have no duplicate IDs", () => {
