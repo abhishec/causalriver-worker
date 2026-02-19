@@ -26,6 +26,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execSync, execFileSync } from 'node:child_process';
 import { freemem } from 'node:os';
+import { pushCoreInsightsToOrg } from '../packages/memory-stack/src/federation/federated-brain';
 
 // ── Load .env ──
 function loadEnv(): void {
@@ -100,6 +101,11 @@ interface OrgInfo {
   customer_name?: string;
 }
 
+interface CustomerInfo {
+  name: string;
+  orgs: OrgInfo[];
+}
+
 interface PhaseResult {
   phase: string;
   success: boolean;
@@ -166,76 +172,80 @@ async function getOrgHeapSize(
 }
 
 // ============================================================================
-// PHASE 1: Edge Function Daily Jobs (per-org)
+// PHASE 1: Edge Function Daily Jobs (per customer → per org)
 // ============================================================================
 
-async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>, orgs: OrgInfo[]): Promise<PhaseResult> {
+async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>, customers: CustomerInfo[]): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
   let processed = 0;
+  const allOrgs = customers.flatMap(c => c.orgs);
+  let orgIndex = 0;
 
-  for (let i = 0; i < orgs.length; i++) {
-    const org = orgs[i];
-    log('PHASE-1', progress(i + 1, orgs.length, `Edge jobs for ${org.name}`));
+  for (const customer of customers) {
+    log('PHASE-1', `── Customer: ${customer.name} (${customer.orgs.length} org${customer.orgs.length !== 1 ? 's' : ''}) ──`);
 
-    if (DRY_RUN) {
-      log('PHASE-1', `  [DRY RUN] Would run: verification, weights, decay, threshold, retention, federation`);
-      processed++;
-      continue;
-    }
+    for (const org of customer.orgs) {
+      orgIndex++;
+      log('PHASE-1', progress(orgIndex, allOrgs.length, `Edge jobs for ${org.name}`));
 
-    // Retry edge function calls up to 2 times with exponential backoff
-    const MAX_EDGE_RETRIES = 2;
-    let edgeSuccess = false;
-    for (let attempt = 0; attempt <= MAX_EDGE_RETRIES; attempt++) {
-      try {
-        const url = `${SUPABASE_URL}/functions/v1/scheduled-jobs`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-          },
-          body: JSON.stringify({
-            job_type: 'all_daily',
-            organization_id: org.id,
-          }),
-        });
+      if (DRY_RUN) {
+        log('PHASE-1', `  [DRY RUN] Would run: verification, weights, decay, threshold, retention, federation`);
+        processed++;
+        continue;
+      }
 
-        const result = await response.json();
+      // Retry edge function calls up to 2 times with exponential backoff
+      const MAX_EDGE_RETRIES = 2;
+      for (let attempt = 0; attempt <= MAX_EDGE_RETRIES; attempt++) {
+        try {
+          const url = `${SUPABASE_URL}/functions/v1/scheduled-jobs`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+            },
+            body: JSON.stringify({
+              job_type: 'all_daily',
+              organization_id: org.id,
+            }),
+          });
 
-        if (!response.ok) {
-          // Retryable server errors (5xx)
-          if (response.status >= 500 && attempt < MAX_EDGE_RETRIES) {
-            const delay = 1000 * Math.pow(2, attempt); // 1s, 2s
-            logError('PHASE-1', `Edge jobs 5xx for ${org.name} (attempt ${attempt + 1}) — retrying in ${delay}ms`);
+          const result = await response.json();
+
+          if (!response.ok) {
+            // Retryable server errors (5xx)
+            if (response.status >= 500 && attempt < MAX_EDGE_RETRIES) {
+              const delay = 1000 * Math.pow(2, attempt); // 1s, 2s
+              logError('PHASE-1', `Edge jobs 5xx for ${org.name} (attempt ${attempt + 1}) — retrying in ${delay}ms`);
+              await new Promise(r => setTimeout(r, delay));
+              continue;
+            }
+            const errMsg = `Edge jobs failed for ${org.name}: ${JSON.stringify(result).substring(0, 200)}`;
+            errors.push(errMsg);
+            logError('PHASE-1', errMsg);
+          } else {
+            log('PHASE-1', `  ✓ Edge jobs complete for ${org.name}${attempt > 0 ? ` (retry #${attempt})` : ''}`);
+            if (VERBOSE && result.results) {
+              for (const r of result.results) {
+                log('PHASE-1', `    ${r.job_type}: ${r.success ? '✓' : '✗'} (${r.duration_ms}ms)`);
+              }
+            }
+            processed++;
+          }
+          break; // Success or non-retryable error — stop retrying
+        } catch (err: any) {
+          if (attempt < MAX_EDGE_RETRIES) {
+            const delay = 1000 * Math.pow(2, attempt);
+            logError('PHASE-1', `Edge jobs network error for ${org.name} (attempt ${attempt + 1}): ${err.message} — retrying in ${delay}ms`);
             await new Promise(r => setTimeout(r, delay));
             continue;
           }
-          const errMsg = `Edge jobs failed for ${org.name}: ${JSON.stringify(result).substring(0, 200)}`;
+          const errMsg = `Edge jobs error for ${org.name} (after ${MAX_EDGE_RETRIES + 1} attempts): ${err.message}`;
           errors.push(errMsg);
           logError('PHASE-1', errMsg);
-        } else {
-          log('PHASE-1', `  ✓ Edge jobs complete for ${org.name}${attempt > 0 ? ` (retry #${attempt})` : ''}`);
-          if (VERBOSE && result.results) {
-            for (const r of result.results) {
-              log('PHASE-1', `    ${r.job_type}: ${r.success ? '✓' : '✗'} (${r.duration_ms}ms)`);
-            }
-          }
-          processed++;
-          edgeSuccess = true;
         }
-        break; // Success or non-retryable error — stop retrying
-      } catch (err: any) {
-        if (attempt < MAX_EDGE_RETRIES) {
-          const delay = 1000 * Math.pow(2, attempt);
-          logError('PHASE-1', `Edge jobs network error for ${org.name} (attempt ${attempt + 1}): ${err.message} — retrying in ${delay}ms`);
-          await new Promise(r => setTimeout(r, delay));
-          continue;
-        }
-        const errMsg = `Edge jobs error for ${org.name} (after ${MAX_EDGE_RETRIES + 1} attempts): ${err.message}`;
-        errors.push(errMsg);
-        logError('PHASE-1', errMsg);
       }
     }
   }
@@ -250,92 +260,102 @@ async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>,
 }
 
 // ============================================================================
-// PHASE 2: Brain Consolidation (10-step sleep + cognitive stack L3-L15)
+// PHASE 2: Brain Consolidation (per customer → per org → core brain)
 //
-// Architecture: Runs each org in its OWN subprocess so each gets a fresh 4GB
-// heap. Previously used CONSOLIDATE_ALL_ORGS=true which crammed all 11 orgs
-// into one process and OOM'd on GitHub Actions' 7GB runner.
+// Architecture: Runs each org in its OWN subprocess so each gets a fresh heap.
 //
-// Each org is consolidated individually via ORGANIZATION_ID=<org-id>.
-// The consolidation runner automatically also consolidates core brain after
-// each org, so we skip the explicit core brain pass at the end.
+//   Phase 2A: Consolidate each org brain (promotes knowledge UP to core)
+//   Phase 2B: Consolidate core brain (aggregates all federated knowledge)
+//   Phase 2C: Push CORE priors DOWN to each org brain (completes bidirectional loop)
+//   Phase 2D: Core brain edge decay (deferred from Phase 1)
 // ============================================================================
 
-async function phase2Consolidation(supabase: ReturnType<typeof createClient>, orgs: OrgInfo[]): Promise<PhaseResult> {
+async function phase2Consolidation(supabase: ReturnType<typeof createClient>, customers: CustomerInfo[]): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
   let processed = 0;
+  const allOrgs = customers.flatMap(c => c.orgs);
 
-  log('PHASE-2', `Running brain consolidation for ${orgs.length} orgs (each in isolated process with dynamic heap)...`);
+  log('PHASE-2', `Running brain consolidation for ${allOrgs.length} orgs across ${customers.length} customer(s) (each in isolated process with dynamic heap)...`);
 
   if (DRY_RUN) {
-    for (const org of orgs) {
-      const { heapMB, signalCount, edgeCount } = await getOrgHeapSize(supabase, org.id);
-      log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for ${org.name} (${heapMB}MB heap — ${signalCount} signals, ${edgeCount} edges)`);
+    for (const customer of customers) {
+      log('PHASE-2', `── Customer: ${customer.name} ──`);
+      for (const org of customer.orgs) {
+        const { heapMB, signalCount, edgeCount } = await getOrgHeapSize(supabase, org.id);
+        log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for ${org.name} (${heapMB}MB heap — ${signalCount} signals, ${edgeCount} edges)`);
+      }
     }
     log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for Core Brain (final pass)`);
+    log('PHASE-2', `  [DRY RUN] Would push CORE priors DOWN to ${allOrgs.length} org brain(s)`);
+    log('PHASE-2', `  [DRY RUN] Would run: deferred edge decay for Core Brain`);
     return { phase: 'Brain Consolidation', success: true, orgsProcessed: 0, durationMs: 0, errors };
   }
 
-  // Process each org brain in its own subprocess with dynamically-sized heap
-  const totalConsolidation = orgs.length + 1; // +1 for core brain
-  for (let i = 0; i < orgs.length; i++) {
-    const org = orgs[i];
-    const orgStart = Date.now();
+  // ── Phase 2A: Consolidate each org brain (per customer → per org) ──
+  const totalConsolidation = allOrgs.length + 1; // +1 for core brain
+  let orgIndex = 0;
 
-    // Dynamic heap: measure org data volume, compute optimal heap size
-    let heapMB = 4096; // fallback
-    try {
-      const sizing = await getOrgHeapSize(supabase, org.id);
-      heapMB = sizing.heapMB;
-      log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — ${sizing.signalCount} signals, ${sizing.edgeCount} edges)`));
-    } catch {
-      log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — sizing fallback)`));
-    }
+  for (const customer of customers) {
+    log('PHASE-2', `── Customer: ${customer.name} (${customer.orgs.length} org${customer.orgs.length !== 1 ? 's' : ''}) ──`);
 
-    // Run with retry-on-OOM: if the process crashes with heap out of memory,
-    // retry once with a bigger heap (HEAP_RETRY_MULTIPLIER × original)
-    let currentHeap = heapMB;
-    let succeeded = false;
-    for (let attempt = 0; attempt <= MAX_OOM_RETRIES; attempt++) {
+    for (const org of customer.orgs) {
+      orgIndex++;
+      const orgStart = Date.now();
+
+      // Dynamic heap: measure org data volume, compute optimal heap size
+      let heapMB = 4096; // fallback
       try {
-        const projectRoot = resolve(import.meta.dirname || __dirname, '..');
-        const tsxBin = resolve(projectRoot, 'node_modules', '.bin', 'tsx');
-        execFileSync(tsxBin, ['scripts/brain-consolidation-runner.ts'], {
-          stdio: 'inherit',
-          cwd: projectRoot,
-          timeout: 1200000, // 20 min per org
-          env: {
-            ...process.env,
-            NODE_OPTIONS: `--max-old-space-size=${currentHeap}`,
-            ORGANIZATION_ID: org.id,
-            CONSOLIDATION_MODE: 'once',
-            VERBOSE: VERBOSE ? 'true' : 'false',
-          },
-        });
+        const sizing = await getOrgHeapSize(supabase, org.id);
+        heapMB = sizing.heapMB;
+        log('PHASE-2', progress(orgIndex, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — ${sizing.signalCount} signals, ${sizing.edgeCount} edges)`));
+      } catch {
+        log('PHASE-2', progress(orgIndex, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — sizing fallback)`));
+      }
 
-        const elapsed = ((Date.now() - orgStart) / 1000).toFixed(1);
-        log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s, ${currentHeap}MB heap${attempt > 0 ? `, retry #${attempt}` : ''})`);
-        processed++;
-        succeeded = true;
-        break;
-      } catch (err: any) {
-        const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
-        if (isOOM && attempt < MAX_OOM_RETRIES) {
-          const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
-          logError('PHASE-2', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
-          currentHeap = nextHeap;
-          continue;
+      // Run with retry-on-OOM: if the process crashes with heap out of memory,
+      // retry once with a bigger heap (HEAP_RETRY_MULTIPLIER × original)
+      let currentHeap = heapMB;
+      for (let attempt = 0; attempt <= MAX_OOM_RETRIES; attempt++) {
+        try {
+          const projectRoot = resolve(import.meta.dirname || __dirname, '..');
+          const tsxBin = resolve(projectRoot, 'node_modules', '.bin', 'tsx');
+          execFileSync(tsxBin, ['scripts/brain-consolidation-runner.ts'], {
+            stdio: 'inherit',
+            cwd: projectRoot,
+            timeout: 1200000, // 20 min per org
+            env: {
+              ...process.env,
+              NODE_OPTIONS: `--max-old-space-size=${currentHeap}`,
+              ORGANIZATION_ID: org.id,
+              CONSOLIDATION_MODE: 'once',
+              VERBOSE: VERBOSE ? 'true' : 'false',
+            },
+          });
+
+          const elapsed = ((Date.now() - orgStart) / 1000).toFixed(1);
+          log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s, ${currentHeap}MB heap${attempt > 0 ? `, retry #${attempt}` : ''})`);
+          processed++;
+          break;
+        } catch (err: any) {
+          const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+          if (isOOM && attempt < MAX_OOM_RETRIES) {
+            const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
+            logError('PHASE-2', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
+            currentHeap = nextHeap;
+            continue;
+          }
+          const errMsg = `Brain consolidation failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+          errors.push(errMsg);
+          logError('PHASE-2', errMsg);
+          // Continue with next org — don't let one failure stop everything
         }
-        const errMsg = `Brain consolidation failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
-        errors.push(errMsg);
-        logError('PHASE-2', errMsg);
-        // Continue with next org — don't let one failure stop everything
       }
     }
   }
 
-  // Final pass: consolidate core brain (receives all federated knowledge)
+  // ── Phase 2B: Consolidate core brain (receives all federated knowledge) ──
+  log('PHASE-2', '── Core Brain Consolidation (aggregates all federated knowledge) ──');
   let coreHeapMB = 4096;
   try {
     const coreSizing = await getOrgHeapSize(supabase, CORE_BRAIN_ORG_ID);
@@ -381,12 +401,71 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, or
     }
   }
 
+  // ── Phase 2C: Push CORE priors DOWN to all org brains ──
+  // Now that core brain has aggregated all federated knowledge from org promotions,
+  // push strong CORE priors back down to each org brain. This completes the
+  // bidirectional federation loop: ORG→CORE (Phase 2A promotions) + CORE→ORG (here).
+  log('PHASE-2', '── CORE → ORG: Pushing industry priors down to org brains ──');
+  let totalPushed = 0;
+  let totalOrgWins = 0;
+
+  for (const customer of customers) {
+    log('PHASE-2', `  Customer: ${customer.name}`);
+    for (const org of customer.orgs) {
+      try {
+        const pushResult = await pushCoreInsightsToOrg(org.id, supabase as any);
+        totalPushed += pushResult.edgesPushedDown;
+        totalOrgWins += pushResult.edgesSkippedOrgOverride;
+        log('PHASE-2', `    ✓ ${org.name}: ${pushResult.edgesPushedDown} priors pushed, ${pushResult.edgesSkippedOrgOverride} org-wins, ${pushResult.edgesAlreadyPresent} unchanged (${pushResult.durationMs}ms)`);
+      } catch (err: any) {
+        logError('PHASE-2', `    CORE→ORG push failed for ${org.name}: ${err.message}`);
+        // Non-fatal — continue with next org
+      }
+    }
+  }
+  log('PHASE-2', `  CORE→ORG complete: ${totalPushed} priors pushed, ${totalOrgWins} org-overrides across ${allOrgs.length} org(s)`);
+
+  // ── Phase 2D: Core brain edge decay (deferred from Phase 1) ──
+  // Core brain was excluded from Phase 1 because its edges must not decay
+  // before org brains federate knowledge UP. Now that federation is complete
+  // in both directions, apply standard daily jobs to core brain edges.
+  log('PHASE-2', '── Core Brain deferred edge maintenance (decay, weights, verification) ──');
+  try {
+    const url = `${SUPABASE_URL}/functions/v1/scheduled-jobs`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({
+        job_type: 'all_daily',
+        organization_id: CORE_BRAIN_ORG_ID,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      logError('PHASE-2', `Core brain edge jobs failed: ${JSON.stringify(result).substring(0, 200)}`);
+    } else {
+      log('PHASE-2', '  ✓ Core brain edge decay + maintenance complete');
+      if (VERBOSE && result.results) {
+        for (const r of result.results) {
+          log('PHASE-2', `    ${r.job_type}: ${r.success ? '✓' : '✗'} (${r.duration_ms}ms)`);
+        }
+      }
+    }
+  } catch (err: any) {
+    logError('PHASE-2', `Core brain edge jobs failed: ${err.message}`);
+    // Non-fatal — edge decay is maintenance, not critical
+  }
+
   return {
     phase: 'Brain Consolidation',
     success: errors.length === 0,
     orgsProcessed: processed,
     durationMs: Date.now() - start,
-    details: `Per-org isolation — ${processed}/${orgs.length + 1} orgs consolidated (dynamic heap)`,
+    details: `${customers.length} customers, ${processed}/${allOrgs.length + 1} orgs consolidated, ${totalPushed} CORE priors pushed down`,
     errors,
   };
 }
@@ -435,63 +514,117 @@ async function phase3Oracle(): Promise<PhaseResult> {
 }
 
 // ============================================================================
-// PHASE 4: Full Consolidation Pipeline (brain-pipeline.runFullCycle per org)
+// PHASE 4: Full Consolidation Pipeline (per customer → per org → core brain)
 // ============================================================================
 
-async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, orgs: OrgInfo[]): Promise<PhaseResult> {
+async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, customers: CustomerInfo[], coreBrain: OrgInfo | undefined): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
   let processed = 0;
+  const allOrgs = [
+    ...customers.flatMap(c => c.orgs),
+    ...(coreBrain ? [coreBrain] : []),
+  ];
+  let orgIndex = 0;
 
-  for (let i = 0; i < orgs.length; i++) {
-    const org = orgs[i];
+  for (const customer of customers) {
+    log('PHASE-4', `── Customer: ${customer.name} (${customer.orgs.length} org${customer.orgs.length !== 1 ? 's' : ''}) ──`);
 
-    // Dynamic heap sizing for full pipeline too
+    for (const org of customer.orgs) {
+      orgIndex++;
+
+      // Dynamic heap sizing for full pipeline too
+      let heapMB = 4096;
+      try {
+        const sizing = await getOrgHeapSize(supabase, org.id);
+        heapMB = sizing.heapMB;
+        log('PHASE-4', progress(orgIndex, allOrgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap)`));
+      } catch {
+        log('PHASE-4', progress(orgIndex, allOrgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap — sizing fallback)`));
+      }
+
+      if (DRY_RUN) {
+        log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for ${org.name} (${heapMB}MB heap)`);
+        processed++;
+        continue;
+      }
+
+      // Run with retry-on-OOM (same pattern as Phase 2)
+      let currentHeap = heapMB;
+      for (let attempt = 0; attempt <= MAX_OOM_RETRIES; attempt++) {
+        try {
+          execSync(
+            `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${currentHeap} --expose-gc" pnpm exec tsx scripts/run-full-consolidation.ts`,
+            {
+              stdio: 'inherit',
+              cwd: resolve(import.meta.dirname || __dirname, '..'),
+              timeout: 3600000, // 1 hour per org
+            }
+          );
+
+          log('PHASE-4', `  ✓ Full pipeline complete for ${org.name} (${currentHeap}MB heap${attempt > 0 ? `, retry #${attempt}` : ''})`);
+          processed++;
+          break;
+        } catch (err: any) {
+          const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+          if (isOOM && attempt < MAX_OOM_RETRIES) {
+            const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
+            logError('PHASE-4', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
+            currentHeap = nextHeap;
+            continue;
+          }
+          const errMsg = `Full pipeline failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+          errors.push(errMsg);
+          logError('PHASE-4', errMsg);
+          // Continue with next org — don't let one failure stop everything
+        }
+      }
+    }
+  }
+
+  // Core brain last
+  if (coreBrain && !DRY_RUN) {
+    orgIndex++;
+    log('PHASE-4', `── Core Brain ──`);
     let heapMB = 4096;
     try {
-      const sizing = await getOrgHeapSize(supabase, org.id);
+      const sizing = await getOrgHeapSize(supabase, coreBrain.id);
       heapMB = sizing.heapMB;
-      log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap)`));
+      log('PHASE-4', progress(orgIndex, allOrgs.length, `Full pipeline for Core Brain (${heapMB}MB heap)`));
     } catch {
-      log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap — sizing fallback)`));
+      log('PHASE-4', progress(orgIndex, allOrgs.length, `Full pipeline for Core Brain (${heapMB}MB heap — sizing fallback)`));
     }
 
-    if (DRY_RUN) {
-      log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for ${org.name} (${heapMB}MB heap)`);
-      processed++;
-      continue;
-    }
-
-    // Run with retry-on-OOM (same pattern as Phase 2)
     let currentHeap = heapMB;
     for (let attempt = 0; attempt <= MAX_OOM_RETRIES; attempt++) {
       try {
         execSync(
-          `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${currentHeap} --expose-gc" pnpm exec tsx scripts/run-full-consolidation.ts`,
+          `ORGANIZATION_ID=${coreBrain.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${currentHeap} --expose-gc" pnpm exec tsx scripts/run-full-consolidation.ts`,
           {
             stdio: 'inherit',
             cwd: resolve(import.meta.dirname || __dirname, '..'),
-            timeout: 3600000, // 1 hour per org
+            timeout: 3600000,
           }
         );
-
-        log('PHASE-4', `  ✓ Full pipeline complete for ${org.name} (${currentHeap}MB heap${attempt > 0 ? `, retry #${attempt}` : ''})`);
+        log('PHASE-4', `  ✓ Full pipeline complete for Core Brain (${currentHeap}MB heap${attempt > 0 ? `, retry #${attempt}` : ''})`);
         processed++;
         break;
       } catch (err: any) {
         const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
         if (isOOM && attempt < MAX_OOM_RETRIES) {
           const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
-          logError('PHASE-4', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
+          logError('PHASE-4', `OOM for Core Brain at ${currentHeap}MB — retrying with ${nextHeap}MB`);
           currentHeap = nextHeap;
           continue;
         }
-        const errMsg = `Full pipeline failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+        const errMsg = `Full pipeline failed for Core Brain${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
         errors.push(errMsg);
         logError('PHASE-4', errMsg);
-        // Continue with next org — don't let one failure stop everything
       }
     }
+  } else if (coreBrain && DRY_RUN) {
+    log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for Core Brain`);
+    processed++;
   }
 
   return {
@@ -499,7 +632,7 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, org
     success: errors.length === 0,
     orgsProcessed: processed,
     durationMs: Date.now() - start,
-    details: 'Cognitive stack L3-L15 per org',
+    details: `${customers.length} customers — cognitive stack L3-L15 per org`,
     errors,
   };
 }
@@ -550,8 +683,13 @@ async function main(): Promise<void> {
     if (!customerMap.has(key)) customerMap.set(key, []);
     customerMap.get(key)!.push(org);
   }
-  for (const [customer, customerOrgs] of customerMap) {
-    log('INIT', `  Customer: ${customer} — ${customerOrgs.length} org(s): ${customerOrgs.map(o => o.name).join(', ')}`);
+  // Build structured customer → org hierarchy for pipeline iteration
+  const customers: CustomerInfo[] = [...customerMap.entries()].map(
+    ([name, customerOrgs]) => ({ name, orgs: customerOrgs })
+  );
+
+  for (const customer of customers) {
+    log('INIT', `  Customer: ${customer.name} — ${customer.orgs.length} org(s): ${customer.orgs.map(o => o.name).join(', ')}`);
   }
   if (coreBrain) {
     log('INIT', `  Core Brain: ${coreBrain.name}`);
@@ -562,16 +700,18 @@ async function main(): Promise<void> {
   const results: PhaseResult[] = [];
 
   // Phase 1: Edge Function daily maintenance (verification, weights, decay, etc.)
-  // Bug #11 fix: exclude core brain from Phase 1 — its edges should not be decayed
-  // before org brains federate knowledge to it during Phase 2.
-  divider('PHASE 1: EDGE FUNCTION DAILY JOBS (ORG BRAINS ONLY)');
-  results.push(await phase1EdgeFunctionJobs(supabase, orgBrains));
+  // Iterates Customer → Org. Core brain excluded (decayed later in Phase 2D).
+  divider('PHASE 1: EDGE FUNCTION DAILY JOBS (PER CUSTOMER → PER ORG)');
+  results.push(await phase1EdgeFunctionJobs(supabase, customers));
   endGroup();
 
-  // Phase 2: Brain Consolidation (10-step sleep + cognitive stack)
-  // Each org gets its own subprocess with a dynamically-sized heap (no more OOM)
-  divider('PHASE 2: BRAIN CONSOLIDATION (ALL ORGS + CORE BRAIN)');
-  results.push(await phase2Consolidation(supabase, orgBrains));
+  // Phase 2: Brain Consolidation + Bidirectional Federation
+  // 2A: Consolidate each org (per customer → per org, each promotes UP to core)
+  // 2B: Consolidate core brain (aggregates all federated knowledge)
+  // 2C: Push CORE priors DOWN to each org brain (closes the loop)
+  // 2D: Core brain edge decay (deferred from Phase 1)
+  divider('PHASE 2: BRAIN CONSOLIDATION + FEDERATION (PER CUSTOMER → PER ORG ↔ CORE BRAIN)');
+  results.push(await phase2Consolidation(supabase, customers));
   endGroup();
 
   // Phase 3: Oracle RL (prediction verification + bandit updates)
@@ -580,12 +720,10 @@ async function main(): Promise<void> {
   results.push(await phase3Oracle());
   endGroup();
 
-  // Phase 4: Full brain pipeline per org (cognitive stack L3-L15)
+  // Phase 4: Full brain pipeline (per customer → per org → core brain last)
   // Run for each org individually so each gets its own LEAP states
-  divider('PHASE 4: FULL BRAIN PIPELINE PER ORG (L3-L15)');
-  const allOrgsForPipeline = [...orgBrains];
-  if (coreBrain) allOrgsForPipeline.push(coreBrain); // Core brain last
-  results.push(await phase4FullPipeline(supabase, allOrgsForPipeline));
+  divider('PHASE 4: FULL BRAIN PIPELINE (PER CUSTOMER → PER ORG → CORE BRAIN)');
+  results.push(await phase4FullPipeline(supabase, customers, coreBrain));
   endGroup();
 
   // ── Phase 5: Weekly Accounting Anomaly Report (Monday only) ──
@@ -708,7 +846,10 @@ async function main(): Promise<void> {
   log('SUMMARY', '');
   log('SUMMARY', `Total duration: ${(totalDuration / 1000 / 60).toFixed(1)} minutes`);
   log('SUMMARY', `Organizations: ${orgs.length}`);
-  log('SUMMARY', `Customers: ${customerMap.size}`);
+  log('SUMMARY', `Customers: ${customers.length}`);
+  for (const customer of customers) {
+    log('SUMMARY', `  ${customer.name}: ${customer.orgs.length} org(s) — ${customer.orgs.map(o => o.name).join(', ')}`);
+  }
   log('SUMMARY', `Status: ${allSuccess ? 'ALL PASSED' : `${allErrors.length} ERROR(S)`}`);
 
   if (allErrors.length > 0) {
@@ -736,7 +877,7 @@ async function main(): Promise<void> {
           errorCount: r.errors.length,
         })),
         totalOrgs: orgs.length,
-        totalCustomers: customerMap.size,
+        totalCustomers: customers.length,
       }),
       error_message: allErrors.length > 0 ? allErrors.join('; ').substring(0, 1000) : null,
       duration_ms: totalDuration,
