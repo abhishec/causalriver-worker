@@ -49,14 +49,17 @@ on:
         type: string
         default: '48'
 
+# Workflow-level permissions — required for scheduled events where
+# job-level permissions alone don't elevate the GITHUB_TOKEN.
+permissions:
+  contents: read
+  issues: write  # Required for failure notification (actions/github-script)
+
 jobs:
   consolidation:
     name: Brain Sleep Cycle
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2-hour max (large orgs with 10M signals)
-    permissions:
-      contents: read
-      issues: write  # Required for failure notification (actions/github-script)
 
     steps:
       - name: Checkout code

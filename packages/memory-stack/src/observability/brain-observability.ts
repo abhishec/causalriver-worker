@@ -581,7 +581,7 @@ export function createBrainObservability(
   let flushTimer: NodeJS.Timeout | null = null;
   if (batchMode) {
     flushTimer = setInterval(() => {
-      void flush();
+      void flush().catch(() => { /* swallow — errors already logged inside flush */ });
     }, batchIntervalMs);
   }
 
@@ -590,6 +590,11 @@ export function createBrainObservability(
   // ──────────────────────────────────────────────────────────
 
   async function flush(): Promise<void> {
+    // Guard: skip flush when supabase client is missing or invalid.
+    // This prevents crashes during test teardown when mocked clients
+    // are already disposed, and during process exit cleanup.
+    if (!supabase || typeof supabase.from !== 'function') return;
+
     const start = Date.now();
     let writeCount = 0;
 
@@ -1170,7 +1175,7 @@ export function createBrainObservability(
   if (typeof process !== 'undefined') {
     const cleanup = () => {
       if (flushTimer) clearInterval(flushTimer);
-      void flush();
+      void flush().catch(() => { /* swallow — process is exiting */ });
     };
     process.on('beforeExit', cleanup);
     process.on('SIGINT', cleanup);
