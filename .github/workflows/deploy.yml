@@ -175,7 +175,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: detect
     if: |
-      inputs.skip_preflight != true &&
+      inputs.skip_preflight != 'true' &&
       (needs.detect.outputs.deploy_platform == 'true' || needs.detect.outputs.deploy_orchestrator == 'true')
     steps:
       - name: Checkout
@@ -215,7 +215,7 @@ jobs:
     needs: [detect, preflight]
     if: |
       always() &&
-      inputs.skip_migrations != true &&
+      inputs.skip_migrations != 'true' &&
       (needs.detect.outputs.deploy_platform == 'true' || needs.detect.outputs.deploy_orchestrator == 'true') &&
       (needs.preflight.result == 'success' || needs.preflight.result == 'skipped') &&
       vars.SUPABASE_PROJECT_REF != ''
@@ -629,7 +629,7 @@ jobs:
     if: always() && (needs.detect.outputs.deploy_platform == 'true' || needs.detect.outputs.deploy_orchestrator == 'true')
     steps:
       - name: Slack notification
-        if: secrets.SLACK_WEBHOOK_URL != ''
+        if: vars.SLACK_ENABLED == 'true'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
