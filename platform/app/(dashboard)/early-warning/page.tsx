@@ -483,17 +483,97 @@ export default async function EarlyWarningPage() {
                   </div>
                   <div className="text-xs text-muted">HHI index</div>
                   {latestBottleneck.reviewer_hhi > 0.25 && (
-                    <div className="text-[10px] text-danger mt-0.5">⚠️ Concentrated (&gt;0.25)</div>
+                    <div className="text-[10px] text-danger mt-0.5">⚠️ Condition A: Concentrated (&gt;0.25)</div>
                   )}
                 </div>
                 <div>
-                  <div className="text-sm font-medium">
+                  <div className={`text-sm font-medium ${latestBottleneck.max_betweenness_centrality > 0.35 ? 'text-danger' : ''}`}>
                     {latestBottleneck.max_betweenness_centrality
-                      ? (latestBottleneck.max_betweenness_centrality * 100).toFixed(1)
+                      ? (latestBottleneck.max_betweenness_centrality * 100).toFixed(1) + '%'
                       : '-'}
                   </div>
                   <div className="text-xs text-muted">Betweenness centrality</div>
+                  {latestBottleneck.max_betweenness_centrality > 0.35 && (
+                    <div className="text-[10px] text-danger mt-0.5">⚠️ Condition C: &gt;2σ above team mean</div>
+                  )}
                 </div>
+              </div>
+
+              {/* ── P0-02 Bottleneck Trigger Conditions ─────────────────── */}
+              <div className="pt-3 border-t border-border-subtle">
+                <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">
+                  Bottleneck Trigger Conditions
+                </div>
+                <div className="space-y-1.5">
+                  {/* Condition A: Top reviewer share */}
+                  <div className="flex items-center gap-2">
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                      latestBottleneck.top_reviewer_share > 0.4 ? 'bg-danger/20 text-danger' : 'bg-success/20 text-success'
+                    }`}>
+                      {latestBottleneck.top_reviewer_share > 0.4 ? '✕' : '✓'}
+                    </span>
+                    <span className="text-[10px] text-muted flex-1">
+                      <span className="font-semibold text-foreground">Condition A</span>{' '}
+                      Top reviewer handles &gt;40% of merges
+                      {latestBottleneck.top_reviewer_share
+                        ? ` (currently ${(latestBottleneck.top_reviewer_share * 100).toFixed(0)}%)`
+                        : ''}
+                    </span>
+                    <Badge
+                      variant={latestBottleneck.top_reviewer_share > 0.4 ? 'danger' : 'success'}
+                      size="xs"
+                    >
+                      {latestBottleneck.top_reviewer_share > 0.4 ? 'Triggered' : 'Clear'}
+                    </Badge>
+                  </div>
+
+                  {/* Condition B: HHI > 0.25 */}
+                  <div className="flex items-center gap-2">
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                      latestBottleneck.reviewer_hhi > 0.25 ? 'bg-danger/20 text-danger' : 'bg-success/20 text-success'
+                    }`}>
+                      {latestBottleneck.reviewer_hhi > 0.25 ? '✕' : '✓'}
+                    </span>
+                    <span className="text-[10px] text-muted flex-1">
+                      <span className="font-semibold text-foreground">Condition B</span>{' '}
+                      Review concentration (HHI) &gt; 0.25
+                      {latestBottleneck.reviewer_hhi
+                        ? ` (currently ${latestBottleneck.reviewer_hhi.toFixed(3)})`
+                        : ''}
+                    </span>
+                    <Badge
+                      variant={latestBottleneck.reviewer_hhi > 0.25 ? 'danger' : 'success'}
+                      size="xs"
+                    >
+                      {latestBottleneck.reviewer_hhi > 0.25 ? 'Triggered' : 'Clear'}
+                    </Badge>
+                  </div>
+
+                  {/* Condition C: Betweenness centrality z-score > 2 std dev */}
+                  <div className="flex items-center gap-2">
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                      latestBottleneck.max_betweenness_centrality > 0.35 ? 'bg-danger/20 text-danger' : 'bg-success/20 text-success'
+                    }`}>
+                      {latestBottleneck.max_betweenness_centrality > 0.35 ? '✕' : '✓'}
+                    </span>
+                    <span className="text-[10px] text-muted flex-1">
+                      <span className="font-semibold text-foreground">Condition C</span>{' '}
+                      Betweenness centrality &gt;2σ above team mean
+                      {latestBottleneck.max_betweenness_centrality
+                        ? ` (currently ${(latestBottleneck.max_betweenness_centrality * 100).toFixed(1)}%)`
+                        : ' (no data)'}
+                    </span>
+                    <Badge
+                      variant={latestBottleneck.max_betweenness_centrality > 0.35 ? 'danger' : 'success'}
+                      size="xs"
+                    >
+                      {latestBottleneck.max_betweenness_centrality > 0.35 ? 'Triggered' : 'Clear'}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-[9px] text-muted mt-2">
+                  SPOF alert fires when ≥1 condition is triggered. All 3 conditions active = critical risk.
+                </p>
               </div>
             </div>
           ) : (

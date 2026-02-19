@@ -78,6 +78,16 @@ export async function POST(req: NextRequest) {
       return handleIssuesEvent(payload, supabase);
     }
 
+    // 6. Handle push events — auto-trigger Architecture Extractor (P1-15 spec)
+    // "Diagrams auto-update when code changes are merged"
+    if (event === 'push') {
+      // Fire-and-forget — architecture sync is non-blocking best effort
+      handlePushEvent(payload, supabase).catch((err) => {
+        console.warn('[GitHub Webhook] push/architecture-sync failed (non-fatal):', err?.message);
+      });
+      return NextResponse.json({ message: 'push event received — architecture sync queued' });
+    }
+
     // Unsupported event
     return NextResponse.json({
       message: `Event ${event} received but not processed`,
@@ -395,6 +405,106 @@ async function handleIssuesEvent(payload: any, supabase: any) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+// ============================================================================
+// PUSH EVENT — Architecture Extractor Auto-Sync (P1-15 spec)
+// "Diagrams auto-update when code changes are merged. A weekly diff report
+//  shows what changed in the architecture since last week."
+// ============================================================================
+
+async function handlePushEvent(payload: any, supabase: any): Promise<void> {
+  const { ref, repository, commits, installation } = payload;
+
+  // Only trigger on pushes to the default/primary branch (not feature branches)
+  const pushedBranch = typeof ref === 'string' ? ref.replace('refs/heads/', '') : '';
+  if (!pushedBranch) return;
+
+  const repoFullName = repository?.full_name;
+  if (!repoFullName) return;
+
+  // Look up org connector — only auto-sync if this is the org's primaryBranch
+  const { data: connectorConfigs } = await supabase
+    .from('org_connectors')
+    .select('organization_id, config')
+    .eq('connector_type', 'github')
+    .eq('config->>githubRepo', repoFullName);
+
+  const matchingConnector = (connectorConfigs ?? []).find(
+    (c: any) => c.config?.primaryBranch === pushedBranch
+  ) ?? (connectorConfigs ?? [])[0] ?? null;
+
+  if (!matchingConnector) {
+    console.info(`[Architecture Sync] No org connector found for ${repoFullName}@${pushedBranch}`);
+    return;
+  }
+
+  const organizationId = matchingConnector.organization_id;
+  const primaryBranch = matchingConnector.config?.primaryBranch ?? pushedBranch;
+
+  // Only auto-trigger if the push is to the primary/configured branch
+  if (pushedBranch !== primaryBranch) {
+    console.info(`[Architecture Sync] Push to ${pushedBranch} is not primaryBranch (${primaryBranch}), skipping`);
+    return;
+  }
+
+  // Check if we ran an architecture extract in the last 24h to avoid hammering
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data: recentJob } = await supabase
+    .from('agent_queue')
+    .select('id, created_at')
+    .eq('organization_id', organizationId)
+    .eq('domain_type', 'architecture-extractor')
+    .gte('created_at', oneDayAgo)
+    .limit(1)
+    .maybeSingle();
+
+  if (recentJob) {
+    console.info(`[Architecture Sync] Already ran architecture extract in last 24h (jobId=${recentJob.id}), skipping`);
+    return;
+  }
+
+  // Build commit summary for context
+  const commitMessages = (commits ?? [])
+    .slice(0, 5)
+    .map((c: any) => c.message?.split('\n')[0])
+    .filter(Boolean)
+    .join('; ');
+
+  // Queue the architecture-extractor job
+  const { data: job, error } = await supabase
+    .from('agent_queue')
+    .insert({
+      organization_id: organizationId,
+      domain_type: 'architecture-extractor',
+      request_data: {
+        repositoryUrl: `https://github.com/${repoFullName}`,
+        branch: primaryBranch,
+        triggerReason: 'github_push_auto_sync',
+        commitContext: commitMessages || `Push to ${primaryBranch}`,
+        weeklyDiffMode: true, // Signal to domain to compute diff from last extraction
+      },
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('[Architecture Sync] Failed to queue job:', error.message);
+    return;
+  }
+
+  console.info(`[Architecture Sync] Queued architecture-extractor job ${job?.id} for org ${organizationId} (push to ${primaryBranch})`);
+
+  // Log activity
+  await supabase.from('agent_activity_log').insert({
+    organization_id: organizationId,
+    agent_type: 'architecture-extractor',
+    action_type: 'auto_sync_queued',
+    input_summary: `Push to ${primaryBranch}: ${commitMessages || 'code changes'}`,
+    output_summary: `Architecture re-extraction queued (job ${job?.id})`,
+  });
 }
 
 // ============================================================================

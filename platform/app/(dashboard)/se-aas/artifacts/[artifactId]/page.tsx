@@ -18,6 +18,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { CopyButton } from "./copy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -323,6 +324,18 @@ function TDDRenderer({ data }: { data: Record<string, any> }) {
 function DesignDocRenderer({ data }: { data: Record<string, any> }) {
   const openDecisions = (data.openDecisions as Array<Record<string, any>> | undefined) ?? [];
   const patterns = (data.patterns as string[] | undefined) ?? [];
+
+  // Build full Confluence-ready markdown for copy action
+  const confluenceContent = [
+    data.hld?.fullMarkdown ? `## High-Level Design\n\n${data.hld.fullMarkdown}` : null,
+    data.lld?.fullMarkdown ? `## Low-Level Design\n\n${data.lld.fullMarkdown}` : null,
+    openDecisions.length > 0
+      ? `## Open Decisions\n\n${openDecisions.map((d: any) => `- **${d.question}**${d.recommendation ? `\n  Recommendation: ${d.recommendation}` : ""}`).join("\n")}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join("\n\n---\n\n");
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -330,15 +343,60 @@ function DesignDocRenderer({ data }: { data: Record<string, any> }) {
         <StatTile value={openDecisions.length} label="Open Decisions" danger={openDecisions.length > 3} />
         <StatTile value={patterns.length} label="Patterns Detected" />
       </div>
+
+      {/* ── Confluence Export Action (P1-07 spec) ──────────────────────── */}
+      <div className="rounded-xl border border-cyan-500/25 bg-cyan-500/5 p-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base">📝</span>
+            <div>
+              <div className="text-sm font-semibold">Confluence-Ready Export</div>
+              <div className="text-xs text-muted">
+                Copy this design doc as Markdown and paste into a Confluence page.
+                Maintenance mode: when code changes are merged, Brain will flag deviations from this approved design.
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {data.jiraTicketUrl && (
+              <a
+                href={data.jiraTicketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle bg-surface text-xs font-medium hover:bg-surface-hover transition-colors"
+              >
+                <span>🔗</span>
+                Linked Jira Ticket
+              </a>
+            )}
+            {confluenceContent && (
+              <CopyButton text={confluenceContent} label="Copy Markdown" />
+            )}
+          </div>
+        </div>
+        {data.confluenceAutoSaved && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-success">
+            <span>✓</span>
+            <span>Auto-saved to Confluence page: <span className="font-mono">{data.confluencePageTitle ?? "Design Document"}</span></span>
+          </div>
+        )}
+        {data.deviationsDetected && (
+          <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning">
+            <span className="shrink-0">⚠️</span>
+            <span>Implementation deviates from approved design in {data.deviationsDetected} area(s). Review required before next merge.</span>
+          </div>
+        )}
+      </div>
+
       {data.hld?.fullMarkdown && (
-        <SectionCard title="High-Level Design">
+        <SectionCard title="High-Level Design (HLD)">
           <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed overflow-auto max-h-80">
             {data.hld.fullMarkdown}
           </pre>
         </SectionCard>
       )}
       {data.lld?.fullMarkdown && (
-        <SectionCard title="Low-Level Design">
+        <SectionCard title="Low-Level Design (LLD)">
           <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed overflow-auto max-h-80">
             {data.lld.fullMarkdown}
           </pre>
@@ -808,6 +866,8 @@ function ArchitectureRenderer({ data }: { data: Record<string, any> }) {
   const techStack = (data.techStack as Array<Record<string, any>> | undefined) ?? [];
   const externalIntegrations = (data.externalIntegrations as Array<Record<string, any>> | undefined) ?? [];
   const insights = (data.architectureInsights as string[] | undefined) ?? [];
+  const weeklyDiff = (data.weeklyDiff as Record<string, any> | undefined) ?? null;
+  const lastExtractedAt = data.extractedAt ?? data.generatedAt ?? null;
 
   return (
     <div className="space-y-5">
@@ -817,6 +877,68 @@ function ArchitectureRenderer({ data }: { data: Record<string, any> }) {
         <StatTile value={dataFlows.length} label="Data Flows" />
         <StatTile value={riskAreas.filter((r: any) => r.severity === "high").length} label="High Risks" danger={riskAreas.filter((r: any) => r.severity === "high").length > 0} />
         <StatTile value={techStack.length} label="Tech Stack" />
+      </div>
+
+      {/* ── Architecture Auto-Sync Status (P1-15 spec) ──────────────────── */}
+      <div className="rounded-xl border border-sky-500/25 bg-sky-500/5 p-4">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🔄</span>
+            <div>
+              <div className="text-sm font-semibold">Architecture Auto-Sync</div>
+              <div className="text-xs text-muted">
+                Diagrams auto-update when code changes are merged to your primary branch.
+                A weekly diff report shows what changed in the architecture since last extraction.
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {lastExtractedAt && (
+              <span className="text-[10px] text-muted bg-surface border border-border-subtle rounded px-2 py-1">
+                Last extracted {new Date(lastExtractedAt).toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+                })}
+              </span>
+            )}
+            <Badge variant="accent" size="xs" pulse>Auto-sync On</Badge>
+          </div>
+        </div>
+
+        {/* Weekly Architecture Diff */}
+        {weeklyDiff ? (
+          <div className="mt-3 space-y-2">
+            <div className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+              Weekly Architecture Changes
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {weeklyDiff.newServices?.length > 0 && (
+                <div className="p-2 rounded-lg bg-success/10 border border-success/20">
+                  <div className="text-xs font-semibold text-success">+{weeklyDiff.newServices.length} New</div>
+                  <div className="text-[10px] text-muted">{(weeklyDiff.newServices as string[]).slice(0, 2).join(", ")}</div>
+                </div>
+              )}
+              {weeklyDiff.removedServices?.length > 0 && (
+                <div className="p-2 rounded-lg bg-danger/10 border border-danger/20">
+                  <div className="text-xs font-semibold text-danger">−{weeklyDiff.removedServices.length} Removed</div>
+                  <div className="text-[10px] text-muted">{(weeklyDiff.removedServices as string[]).slice(0, 2).join(", ")}</div>
+                </div>
+              )}
+              {weeklyDiff.changedConnections?.length > 0 && (
+                <div className="p-2 rounded-lg bg-warning/10 border border-warning/20">
+                  <div className="text-xs font-semibold text-warning">~{weeklyDiff.changedConnections.length} Changed</div>
+                  <div className="text-[10px] text-muted">data flow connections</div>
+                </div>
+              )}
+            </div>
+            {weeklyDiff.summary && (
+              <p className="text-xs text-muted mt-1">{weeklyDiff.summary}</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-[10px] text-muted mt-2">
+            Weekly diff will appear here after the second extraction. GitHub webhook push events trigger automatic re-extraction.
+          </p>
+        )}
       </div>
 
       {/* Summary */}
