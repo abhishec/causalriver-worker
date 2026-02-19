@@ -760,22 +760,45 @@ async function runAllDailyJobs(supabase: any, orgId: string) {
 // ============================================================================
 
 /**
- * Get all active organization IDs
+ * Get all active organization IDs.
+ *
+ * Uses the same activity-based strategy as brain-consolidation-runner.ts:
+ * an org is "active" if it has signals in the last 30 days.
+ * Falls back to querying all orgs if no recent signals exist.
+ *
+ * NOTE: The organizations table does NOT have a `status` column.
+ * Previous code queried `.eq('status', 'active')` which always errored
+ * and fell back to core brain only — silently skipping all customer orgs.
  */
 async function getActiveOrganizations(supabase: any): Promise<string[]> {
-  const { data, error } = await supabase
+  // Strategy 1: Find orgs with recent signal activity (last 30 days)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: activeSignals, error: signalError } = await supabase
+    .from('cross_domain_signals')
+    .select('organization_id')
+    .gte('signal_timestamp', thirtyDaysAgo)
+    .limit(500);
+
+  if (!signalError && activeSignals && activeSignals.length > 0) {
+    const uniqueOrgs = [...new Set(activeSignals.map((s: any) => s.organization_id))] as string[];
+    console.log(`[scheduled-jobs] Found ${uniqueOrgs.length} orgs with recent signals`);
+    return uniqueOrgs;
+  }
+
+  // Strategy 2: Fall back to all orgs in the organizations table
+  const { data: allOrgs, error: orgError } = await supabase
     .from('organizations')
     .select('id')
-    .eq('status', 'active')
     .order('created_at', { ascending: true });
 
-  if (error) {
-    console.error('[scheduled-jobs] Error fetching organizations:', error);
-    // If organizations table doesn't exist or query fails, use default org
+  if (orgError) {
+    console.error('[scheduled-jobs] Error fetching organizations:', orgError);
     return ['00000000-0000-4000-a000-000000000001'];
   }
 
-  return data?.map((org: any) => org.id) || ['00000000-0000-4000-a000-000000000001'];
+  const orgIds = allOrgs?.map((org: any) => org.id) || [];
+  console.log(`[scheduled-jobs] No recent signals — using all ${orgIds.length} orgs`);
+  return orgIds.length > 0 ? orgIds : ['00000000-0000-4000-a000-000000000001'];
 }
 
 /**

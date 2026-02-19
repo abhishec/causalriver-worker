@@ -54,6 +54,9 @@ jobs:
     name: Brain Sleep Cycle
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2-hour max (large orgs with 10M signals)
+    permissions:
+      contents: read
+      issues: write  # Required for failure notification (actions/github-script)
 
     steps:
       - name: Checkout code
@@ -74,9 +77,10 @@ jobs:
       - name: Build memory-stack
         run: pnpm --filter @nexus-ai/memory-stack run build
 
-      - name: Run Brain Consolidation
+      - name: Run All Nightly Agents
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -87,28 +91,31 @@ jobs:
           CONSOLIDATION_MODE: 'once'
           PRUNE_AFTER_DAYS: '30'
         run: |
+          # Fall back to NEXT_PUBLIC_SUPABASE_URL if SUPABASE_URL is not set
+          if [ -z "$SUPABASE_URL" ] && [ -n "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+          fi
+
           # Validate required secrets
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::error::SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured in repository secrets."
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) must be configured in repository secrets."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY must be configured in repository secrets."
             echo ""
             echo "To configure:"
             echo "  1. Go to Settings > Secrets and variables > Actions"
-            echo "  2. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY"
-            echo ""
-            echo "Optional secrets for enhanced consolidation:"
-            echo "  - ANTHROPIC_API_KEY (executive briefing generation)"
-            echo "  - FRED_API_KEY (public economic data ingestion)"
+            echo "  2. Add SUPABASE_SERVICE_ROLE_KEY"
             exit 1
           fi
 
-          echo "=== Brain Consolidation Starting ==="
+          echo "=== NexusBrain Nightly — All Agents, All Customers, All Orgs ==="
           echo "Time: $(date -u)"
-          echo "Consolidate All Orgs: $CONSOLIDATE_ALL_ORGS"
-          echo "Lookback: ${LOOKBACK_HOURS}h"
-          echo "Prune Threshold: ${PRUNE_AFTER_DAYS} days"
+          echo "Phases: Edge Jobs → Consolidation → Oracle RL → Full Pipeline"
           echo ""
 
-          pnpm exec tsx scripts/brain-consolidation-runner.ts
+          pnpm exec tsx scripts/run-all-nightly.ts
 
       - name: Upload Consolidation Report
         if: always()
@@ -126,26 +133,25 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const title = 'Brain Consolidation Failed (Nightly Sleep)';
+            const title = 'Nightly Brain Agents Failed';
             const body = `
-            ## Brain Sleep Cycle Failed
+            ## Nightly Brain Agents Failed
 
-            The nightly brain consolidation (sleep cycle) failed.
-            This means knowledge is not being pruned, strengthened, or federated.
+            The nightly all-agents run failed. One or more phases did not complete.
 
             **Run:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             **Time:** ${new Date().toISOString()}
 
-            ### Impact
-            - Weak causal edges are not being pruned
-            - Validated predictions are not strengthening edges
-            - Cognitive stack layers 3-15 did not fire
-            - Daily brain snapshot was not generated
+            ### Phases
+            1. Edge Function daily jobs (verification, weights, decay, thresholds, retention)
+            2. Brain Consolidation (10-step sleep + cognitive stack L3-L15)
+            3. Oracle RL (prediction verification + UCB1 bandit updates)
+            4. Full Brain Pipeline per org (cognitive stack L3-L15 per org)
 
             ### Next Steps
             1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             2. Verify Supabase connectivity
-            3. Run manually: \`pnpm exec tsx scripts/brain-consolidation-runner.ts\`
+            3. Run manually: \`pnpm run nightly\`
 
             _Automated alert from Brain Orchestrator._
             `;

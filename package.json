@@ -88,7 +88,10 @@
     "ci:heal": "tsx scripts/run-ci-healer.ts",
     "ci:heal:diagnose": "tsx scripts/run-ci-healer.ts --mode diagnose",
     "ci:heal:retry": "tsx scripts/run-ci-healer.ts --mode retry",
-    "ci:heal:dry": "tsx scripts/run-ci-healer.ts --dry-run"
+    "ci:heal:dry": "tsx scripts/run-ci-healer.ts --dry-run",
+    "nightly": "tsx scripts/run-all-nightly.ts",
+    "nightly:dry": "DRY_RUN=true tsx scripts/run-all-nightly.ts",
+    "nightly:verbose": "VERBOSE=true tsx scripts/run-all-nightly.ts"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",
