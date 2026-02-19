@@ -208,18 +208,11 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
 
     try {
       execSync(
-        `pnpm exec tsx scripts/brain-consolidation-runner.ts`,
+        `ORGANIZATION_ID=${org.id} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
           timeout: 1200000, // 20 min per org
-          env: {
-            ...process.env,
-            NODE_OPTIONS: '--max-old-space-size=4096',
-            ORGANIZATION_ID: org.id,
-            CONSOLIDATION_MODE: 'once',
-            VERBOSE: VERBOSE ? 'true' : 'false',
-          },
         }
       );
 
@@ -239,18 +232,11 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
   const coreStart = Date.now();
   try {
     execSync(
-      `pnpm exec tsx scripts/brain-consolidation-runner.ts`,
+      `ORGANIZATION_ID=${CORE_BRAIN_ORG_ID} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 1200000, // 20 min
-        env: {
-          ...process.env,
-          NODE_OPTIONS: '--max-old-space-size=4096',
-          ORGANIZATION_ID: CORE_BRAIN_ORG_ID,
-          CONSOLIDATION_MODE: 'once',
-          VERBOSE: VERBOSE ? 'true' : 'false',
-        },
       }
     );
     const elapsed = ((Date.now() - coreStart) / 1000).toFixed(1);
@@ -290,16 +276,11 @@ async function phase3Oracle(): Promise<PhaseResult> {
   try {
     // Oracle already iterates all orgs when ORGANIZATION_ID is unset
     execSync(
-      `pnpm exec tsx scripts/run-oracle-job.ts`,
+      `VERBOSE=true NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/run-oracle-job.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 600000, // 10 min timeout
-        env: {
-          ...process.env,
-          NODE_OPTIONS: '--max-old-space-size=4096',
-          VERBOSE: 'true',
-        },
       }
     );
 
@@ -341,17 +322,11 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
 
     try {
       execSync(
-        `pnpm exec tsx scripts/run-full-consolidation.ts`,
+        `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/run-full-consolidation.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
           timeout: 3600000, // 1 hour per org
-          env: {
-            ...process.env,
-            NODE_OPTIONS: '--max-old-space-size=4096',
-            ORGANIZATION_ID: org.id,
-            VERBOSE: VERBOSE ? 'true' : 'false',
-          },
         }
       );
 
