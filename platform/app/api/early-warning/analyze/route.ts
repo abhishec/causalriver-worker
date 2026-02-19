@@ -35,6 +35,10 @@ interface AnalyzeRequest {
   lookbackDays?: number;
   forecastDays?: number;
   mode?: 'standard' | 'brain';
+  /** Optional: scope analysis to a specific branch (e.g. 'release/6.3.4').
+   *  Each workspace-org normally maps to one primaryBranch, so this is
+   *  auto-resolved from org_connectors when not provided. */
+  branchName?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -53,6 +57,7 @@ export async function POST(req: NextRequest) {
       lookbackDays = 90,
       forecastDays = 7,
       mode = 'standard',
+      branchName: bodyBranchName,
     } = body;
 
     // Also check query param ?mode=brain
@@ -94,11 +99,39 @@ export async function POST(req: NextRequest) {
     const supabase = await createServiceClient();
 
     // ========================================================================
+    // Resolve branch context from org_connectors (workspace-level scoping)
+    // Each workspace-org has a primaryBranch stored in the github connector config.
+    // We use this to scope velocity + bottleneck queries to the right branch,
+    // providing an additional guard on top of organization_id isolation.
+    // ========================================================================
+    let resolvedBranchName: string | undefined = bodyBranchName;
+    let resolvedPrimaryBranch: string | undefined;
+    let resolvedReleaseVersion: string | undefined;
+
+    if (!resolvedBranchName) {
+      const { data: githubConnector } = await supabase
+        .from('org_connectors')
+        .select('config')
+        .eq('organization_id', organizationId)
+        .eq('connector_type', 'github')
+        .limit(1)
+        .single();
+
+      if (githubConnector?.config) {
+        resolvedBranchName = githubConnector.config.primaryBranch ?? undefined;
+        resolvedPrimaryBranch = githubConnector.config.primaryBranch ?? undefined;
+        resolvedReleaseVersion = resolvedPrimaryBranch
+          ? (githubConnector.config.releaseVersionMap?.[resolvedPrimaryBranch] ?? undefined)
+          : undefined;
+      }
+    }
+
+    // ========================================================================
     // Run Brain-aligned P0 analysis + velocity prediction
     // ========================================================================
     const [velocityAnalysis, bottleneckAnalysis] = await Promise.all([
-      analyzeVelocityCollapse(supabase, organizationId, lookbackDays),
-      analyzeBottleneckRisk(supabase, organizationId, lookbackDays),
+      analyzeVelocityCollapse(supabase, organizationId, lookbackDays, resolvedBranchName),
+      analyzeBottleneckRisk(supabase, organizationId, lookbackDays, resolvedBranchName),
     ]);
 
     // Cross-populate feature vector with bottleneck metrics
@@ -136,6 +169,9 @@ export async function POST(req: NextRequest) {
         mean_review_latency_hours: bottleneckAnalysis.avgReviewLatencyHours,
         open_pr_count: latest.openPrCount,
         prs_per_engineer: latest.prsPerEngineer,
+        // Workspace/branch context — allows UI to show which branch this snapshot belongs to
+        branch_name: resolvedBranchName ?? null,
+        release_version: resolvedReleaseVersion ?? null,
       });
     }
 
@@ -310,6 +346,12 @@ export async function POST(req: NextRequest) {
             interventions,
           },
           dataSource: 'cross_domain_signals (Brain L1) + 15-layer cognitive stack',
+          workspaceContext: {
+            organizationId,
+            branchName: resolvedBranchName ?? null,
+            primaryBranch: resolvedPrimaryBranch ?? null,
+            releaseVersion: resolvedReleaseVersion ?? null,
+          },
           signalsEmitted: [
             velocityAnalysis.collapseDetected && 'velocity_collapsed',
             bottleneckAnalysis.riskLevel === 'high' && 'bottleneck_detected',
@@ -381,6 +423,12 @@ export async function POST(req: NextRequest) {
           avgReviewLatencyHours: bottleneckAnalysis.avgReviewLatencyHours,
         },
         dataSource: 'cross_domain_signals (Brain L1)',
+        workspaceContext: {
+          organizationId,
+          branchName: resolvedBranchName ?? null,
+          primaryBranch: resolvedPrimaryBranch ?? null,
+          releaseVersion: resolvedReleaseVersion ?? null,
+        },
         signalsEmitted: [
           velocityAnalysis.collapseDetected && 'velocity_collapsed',
           bottleneckAnalysis.riskLevel === 'high' && 'bottleneck_detected',

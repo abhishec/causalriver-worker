@@ -24,9 +24,9 @@ const PRIMARY_SECTIONS = [
     id: "services",
     label: "AI Services",
     items: [
-      // AAS and SE-aaS are accessed via Copilot service mode — not separate pages
+      // AAS: Copilot service mode. SE-aaS: dedicated dashboard with 17 domains + artifacts.
       { label: "Accounting (AAS)", href: "/copilot?service=aas", icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" },
-      { label: "Engineering (SE-aaS)", href: "/copilot?service=seaas", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
+      { label: "Engineering (SE-aaS)", href: "/se-aas", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
       { label: "Releases", href: "/releases", icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
       { label: "Code Intel", href: "/code-intelligence", icon: "M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" },
     ],
@@ -88,7 +88,11 @@ function NavSection({
       )}
       <div className="space-y-0.5">
         {section.items.map((item) => {
-          const isActive = pathname === item.href;
+          // Prefix-match for dashboard sections (/se-aas, /early-warning, etc.)
+          // Exact-match for query-param routes (/copilot?service=aas)
+          const isActive = item.href.includes("?")
+            ? pathname === item.href.split("?")[0]
+            : pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
           return (
             <Link
               key={item.href}

@@ -268,7 +268,9 @@ export async function emitBottleneckSignal(
 export async function getMergedPRSignals(
   supabase: SupabaseClient,
   organizationId: string,
-  lookbackDays: number
+  lookbackDays: number,
+  /** Optional branch filter — safety guard for orgs with multiple branches in one connector */
+  branchName?: string
 ): Promise<Array<{
   prNumber: number;
   repo: string;
@@ -276,11 +278,12 @@ export async function getMergedPRSignals(
   mergedAt: string;
   cycleTimeHours: number;
   prSize: number;
+  branchName?: string;
 }>> {
   const since = new Date();
   since.setDate(since.getDate() - lookbackDays);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
@@ -289,6 +292,12 @@ export async function getMergedPRSignals(
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
 
+  // Branch-level isolation: filter by branch_name in metadata when provided
+  if (branchName) {
+    query = query.eq('signal_metadata->>branch_name', branchName);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
 
   return (data || []).map((signal) => ({
@@ -298,6 +307,7 @@ export async function getMergedPRSignals(
     mergedAt: signal.created_at,
     cycleTimeHours: signal.signal_value || signal.signal_metadata.cycle_time_hours || 0,
     prSize: signal.signal_metadata.pr_size || (signal.signal_metadata.additions || 0) + (signal.signal_metadata.deletions || 0) || 0,
+    branchName: signal.signal_metadata.branch_name,
   }));
 }
 
@@ -308,7 +318,9 @@ export async function getMergedPRSignals(
 export async function getReviewSignals(
   supabase: SupabaseClient,
   organizationId: string,
-  lookbackDays: number
+  lookbackDays: number,
+  /** Optional branch filter */
+  branchName?: string
 ): Promise<Array<{
   prNumber: number;
   repo: string;
@@ -316,11 +328,12 @@ export async function getReviewSignals(
   prAuthor: string;
   reviewedAt: string;
   reviewLatencyHours: number;
+  branchName?: string;
 }>> {
   const since = new Date();
   since.setDate(since.getDate() - lookbackDays);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('cross_domain_signals')
     .select('*')
     .eq('organization_id', organizationId)
@@ -329,6 +342,11 @@ export async function getReviewSignals(
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
 
+  if (branchName) {
+    query = query.eq('signal_metadata->>branch_name', branchName);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
 
   return (data || []).map((signal) => ({
@@ -338,5 +356,6 @@ export async function getReviewSignals(
     prAuthor: signal.signal_metadata.pr_author || signal.signal_metadata.author || '',
     reviewedAt: signal.created_at,
     reviewLatencyHours: signal.signal_value || signal.signal_metadata.review_latency_hours || 0,
+    branchName: signal.signal_metadata.branch_name,
   }));
 }

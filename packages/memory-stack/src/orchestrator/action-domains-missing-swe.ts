@@ -35,6 +35,8 @@ export interface PRReviewRequest {
   focus?: ('security' | 'performance' | 'correctness' | 'style' | 'tests' | 'all')[];
   /** Repository context */
   repositoryContext?: string;
+  /** Files changed in this PR — used to match against causal graph bottleneck domains */
+  changedFiles?: string[];
 }
 
 export interface PRReviewComment {
@@ -45,6 +47,22 @@ export interface PRReviewComment {
   message: string;
   suggestion?: string;
   confidence: number;
+}
+
+/** Causal cascade impact — added when Brain graph is available */
+export interface CausalCascadeImpact {
+  /** Domain affected (e.g. 'customer_success', 'revenue') */
+  domain: string;
+  /** The causal relationship in plain English */
+  relationship: string;
+  /** Effect size from Granger causal graph */
+  effectSize: number;
+  /** Confidence of the causal edge */
+  confidence: number;
+  /** Lag in days before downstream impact appears */
+  lagDays: number;
+  /** Severity label based on effectSize */
+  severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export interface PRReviewResult {
@@ -65,6 +83,11 @@ export interface PRReviewResult {
     historicalRiskPatterns: string[];
     similarIncidents: string[];
   };
+  /** Causal cascade: how changes in this PR ripple through the business.
+   *  Populated when org has causal graph data in Brain L4. */
+  causalCascade?: CausalCascadeImpact[];
+  /** True when causal cascade was enriched from the Brain graph */
+  brainCausalEnriched?: boolean;
 }
 
 export const prReviewDomain = {
@@ -86,23 +109,57 @@ export const prReviewDomain = {
 
     try {
       const result = await reviewWithClaude(request, anthropicApiKey, brainContext);
+
+      // ── CAUSAL CASCADE ENRICHMENT ─────────────────────────────────────────
+      // Pull engineering causal edges from Brain L4 (causal_relationships_statistical).
+      // These tell us how changes in the engineering domain ripple downstream:
+      //   e.g. engineering → customer_success (NPS, effect_size 0.55, lag 45d)
+      //        engineering → revenue (churn, effect_size -0.65, lag 75d)
+      // We surface these in the PR review so devs understand business impact
+      // of what they're merging — not just code quality.
+      const causalCascade = buildCausalCascadeFromBrain(ctx);
+
       return {
         type: 'pr-review',
-        data: { ...result, claudePowered: true, ...brainAttribution },
+        data: {
+          ...result,
+          causalCascade,
+          brainCausalEnriched: causalCascade.length > 0,
+          claudePowered: true,
+          ...brainAttribution,
+        },
         confidence: result.overallScore / 100,
-        narrative: result.summary,
-        interventions: result.recommendations.map((r, i) => ({
-          id: `rec-${i}`,
-          type: 'recommendation',
-          description: r,
-          priority: i < 3 ? 'high' : 'medium',
-        })),
+        narrative: causalCascade.length > 0
+          ? `${result.summary}\n\n🧠 Brain causal cascade: This change to the engineering domain has ${causalCascade.length} downstream causal impact(s) — ${causalCascade.map(c => `${c.domain} (effect: ${c.effectSize.toFixed(2)}, lag: ${c.lagDays}d)`).join(', ')}.`
+          : result.summary,
+        interventions: [
+          ...result.recommendations.map((r, i) => ({
+            id: `rec-${i}`,
+            type: 'recommendation',
+            description: r,
+            priority: i < 3 ? 'high' : 'medium',
+          })),
+          // Surface high-severity causal cascade items as interventions
+          ...causalCascade
+            .filter(c => c.severity === 'high' || c.severity === 'critical')
+            .map((c, i) => ({
+              id: `cascade-${i}`,
+              type: 'causal_risk',
+              description: `⚡ Causal risk: ${c.relationship} (${c.domain}, effect_size ${c.effectSize.toFixed(2)}, manifests in ~${c.lagDays} days)`,
+              priority: c.severity === 'critical' ? 'critical' : 'high',
+            })),
+        ],
         evidence: [
           {
             type: 'claude_review',
             description: `Claude analyzed ${request.diff.split('\n').length} diff lines across ${result.comments.length} comments`,
             weight: 0.9,
           },
+          ...(causalCascade.length > 0 ? [{
+            type: 'brain_causal_graph',
+            description: `Brain L4 causal graph: ${causalCascade.length} downstream causal edges from engineering domain`,
+            weight: 0.85,
+          }] : []),
         ],
       };
     } catch (err: any) {
@@ -111,6 +168,56 @@ export const prReviewDomain = {
     }
   },
 };
+
+/**
+ * Extract causal cascade impacts from the Brain context (L4 causal graph).
+ *
+ * The Brain's causal_relationships_statistical table holds edges like:
+ *   engineering → customer_success (effect_size 0.55, lag 45d, confidence 0.84)
+ *   engineering → revenue (effect_size -0.65, lag 75d, confidence 0.91)
+ *
+ * We surface these in PR reviews so developers see business-level ripple effects.
+ * This is the "wow" insight: "This PR touches engineering which causally affects
+ * NPS (effect 0.55) in ~45 days — make sure we have test coverage."
+ */
+function buildCausalCascadeFromBrain(ctx: ActionDomainContext): CausalCascadeImpact[] {
+  // Brain context carries causal edges via ctx.brain.dag or ctx.brain.causalEdges
+  const brain = ctx.brain as Record<string, any>;
+  const edges: any[] = brain?.causalEdges ?? brain?.dag?.edges ?? [];
+
+  // Filter to edges where source domain is engineering (this PR's domain)
+  const engineeringEdges = edges.filter((e: any) =>
+    (e.source_domain ?? e.sourceDomain ?? e.source ?? '').toLowerCase().includes('engineering')
+  );
+
+  return engineeringEdges
+    .filter((e: any) => (e.effect_size ?? e.effectSize ?? 0) !== 0)
+    .map((e: any): CausalCascadeImpact => {
+      const effectSize = Math.abs(e.effect_size ?? e.effectSize ?? 0);
+      const lagDays = e.lag ?? e.lag_days ?? e.lagDays ?? 0;
+      const confidence = e.confidence ?? e.p_value ?? 0.5;
+      const targetDomain = e.target_domain ?? e.targetDomain ?? e.target ?? 'unknown';
+      const targetMetric = e.target_metric ?? e.targetMetric ?? '';
+      const naturalLanguage = e.natural_language ?? e.naturalLanguage ?? `Engineering changes affect ${targetDomain}${targetMetric ? ` (${targetMetric})` : ''}`;
+
+      const severity: CausalCascadeImpact['severity'] =
+        effectSize >= 0.7 ? 'critical' :
+        effectSize >= 0.5 ? 'high' :
+        effectSize >= 0.3 ? 'medium' : 'low';
+
+      return {
+        domain: targetDomain,
+        relationship: naturalLanguage,
+        effectSize,
+        confidence,
+        lagDays,
+        severity,
+      };
+    })
+    // Sort by effect size descending — most impactful cascades first
+    .sort((a, b) => b.effectSize - a.effectSize)
+    .slice(0, 5); // Cap at 5 cascades to keep review focused
+}
 
 async function reviewWithClaude(
   request: PRReviewRequest,
@@ -122,12 +229,21 @@ async function reviewWithClaude(
 
 ${brainContext}
 
+⚡ IMPORTANT CONTEXT — BUSINESS CAUSAL IMPACT:
+The Brain's causal graph (built from ${new Date().getFullYear()} of historical data) shows that
+engineering changes causally affect downstream business metrics. As you review this PR,
+consider that code quality issues, missing tests, or risky refactors in the engineering
+domain have measurable causal effects on customer satisfaction, revenue, and operational
+stability (captured in the Brain Context above). Flag issues that could cause cascading
+downstream harm — not just technical debt.
+
 Review the following code diff with focus on: ${focusAreas}
 
 PR Title: ${request.title || 'Untitled PR'}
 Description: ${request.description || 'No description'}
 Target Branch: ${request.targetBranch || 'main'}
 Languages: ${request.languages?.join(', ') || 'auto-detect'}
+${request.changedFiles?.length ? `\nFiles changed: ${request.changedFiles.slice(0, 20).join(', ')}` : ''}
 
 DIFF:
 \`\`\`diff

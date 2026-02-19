@@ -13,6 +13,24 @@ export default async function EarlyWarningPage() {
   const supabase = await createClient();
   const orgId = await getCurrentOrgId();
 
+  // ── Workspace / Branch context ──────────────────────────────────────────
+  // Each workspace-org has a primaryBranch stored in org_connectors.
+  // We surface this as a badge so the user knows this velocity/bottleneck
+  // data is scoped to their specific branch (e.g. release/6.3.4).
+  const { data: githubConnector } = await supabase
+    .from("org_connectors")
+    .select("config")
+    .eq("organization_id", orgId)
+    .eq("connector_type", "github")
+    .limit(1)
+    .maybeSingle();
+
+  const primaryBranch: string | null = githubConnector?.config?.primaryBranch ?? null;
+  const releaseVersion: string | null = primaryBranch
+    ? (githubConnector?.config?.releaseVersionMap?.[primaryBranch] ?? null)
+    : null;
+  const githubRepo: string | null = githubConnector?.config?.githubRepo ?? null;
+
   // Fetch latest 30 days of velocity snapshots
   const { data: velocitySnapshots } = await supabase
     .from("velocity_snapshots")
@@ -90,6 +108,37 @@ export default async function EarlyWarningPage() {
           Ask Brain
         </Link>
       </div>
+
+      {/* Workspace / Branch Context Badge */}
+      {(primaryBranch || githubRepo) && (
+        <div className="flex items-center gap-2 flex-wrap text-xs">
+          <span className="text-muted">Workspace scope:</span>
+          {githubRepo && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono bg-surface border border-border-subtle text-muted">
+              {githubRepo}
+            </span>
+          )}
+          {primaryBranch && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              🌿 {primaryBranch}
+            </span>
+          )}
+          {releaseVersion && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              v{releaseVersion}
+            </span>
+          )}
+          <span className="text-muted">
+            · All metrics isolated to this workspace
+          </span>
+          <Link
+            href="/se-aas"
+            className="ml-auto text-accent hover:text-accent/80 transition-colors"
+          >
+            View SE-AAS Dashboard →
+          </Link>
+        </div>
+      )}
 
       {/* Brain Intelligence Summary */}
       {(engineeringCauses.length > 0 || (brainAlerts && brainAlerts.length > 0)) && (

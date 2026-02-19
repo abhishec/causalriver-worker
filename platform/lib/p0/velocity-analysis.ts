@@ -83,23 +83,35 @@ export interface VelocityFeatureVector {
 export async function analyzeVelocityCollapse(
   supabase: SupabaseClient,
   organizationId: string,
-  lookbackDays: number = 90
+  lookbackDays: number = 90,
+  /** Optional: scope to a specific branch (e.g. 'release/6.3.4').
+   *  When omitted, all branches for this workspace-org are included.
+   *  NOTE: Because each workspace-org maps to exactly ONE primaryBranch
+   *  (enforced at connector registration time), omitting branchName is
+   *  equivalent to branch-scoped analysis in normal usage. The explicit
+   *  branchName guard exists as an additional safety layer for orgs that
+   *  track multiple branches in a single connector config. */
+  branchName?: string
 ): Promise<VelocityCollapseResult> {
   // Get PR merge signals from cross_domain_signals
-  const mergedPRs = await getMergedPRSignals(supabase, organizationId, lookbackDays);
+  const mergedPRs = await getMergedPRSignals(supabase, organizationId, lookbackDays, branchName);
 
   // Get review signals for reviewer-per-PR and concentration metrics
-  const reviewSignals = await getReviewSignals(supabase, organizationId, lookbackDays);
+  const reviewSignals = await getReviewSignals(supabase, organizationId, lookbackDays, branchName);
+
+  const cutoffIso = new Date(Date.now() - lookbackDays * 86400000).toISOString();
 
   // Get open PR signals for WIP tracking (GitHub PRs)
-  const { data: openPrSignals } = await supabase
+  let openPrQuery = supabase
     .from('cross_domain_signals')
     .select('created_at, signal_metadata')
     .eq('organization_id', organizationId)
     .eq('source_domain', 'engineering.github')
     .eq('signal_type', 'pr_opened')
-    .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
+    .gte('created_at', cutoffIso)
     .order('created_at', { ascending: true });
+  if (branchName) openPrQuery = openPrQuery.eq('signal_metadata->>branch_name', branchName);
+  const { data: openPrSignals } = await openPrQuery;
 
   // Get Jira ticket signals for cross-domain velocity features
   // Queries engineering.jira (from ConnectorBase path) + product (from Linear/webhook path)
@@ -108,7 +120,7 @@ export async function analyzeVelocityCollapse(
     .select('created_at, signal_value, signal_metadata')
     .eq('organization_id', organizationId)
     .in('signal_type', ['ticket_resolved', 'jira_issue_resolved', 'jira_issue'])
-    .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
+    .gte('created_at', cutoffIso)
     .order('created_at', { ascending: true });
 
   // Get Slack signals for cross-domain early warning features
@@ -118,7 +130,7 @@ export async function analyzeVelocityCollapse(
     .eq('organization_id', organizationId)
     .eq('source_domain', 'communication.slack')
     .in('signal_type', ['after_hours_activity', 'channel_message_volume', 'slack_message'])
-    .gte('created_at', new Date(Date.now() - lookbackDays * 86400000).toISOString())
+    .gte('created_at', cutoffIso)
     .order('created_at', { ascending: true });
 
   // Get unique engineers (PR authors) for prs_per_engineer
@@ -398,10 +410,12 @@ export interface BottleneckResult {
 export async function analyzeBottleneckRisk(
   supabase: SupabaseClient,
   organizationId: string,
-  lookbackDays: number = 90
+  lookbackDays: number = 90,
+  /** Optional branch filter — mirrors analyzeVelocityCollapse scoping */
+  branchName?: string
 ): Promise<BottleneckResult> {
   // Get review signals from cross_domain_signals (GitHub PR reviews)
-  const reviews = await getReviewSignals(supabase, organizationId, lookbackDays);
+  const reviews = await getReviewSignals(supabase, organizationId, lookbackDays, branchName);
 
   // ── JIRA ASSIGNEE CONCENTRATION (Cross-domain bottleneck) ───────────────
   // If one person is assigned most Jira tickets AND most PR reviews,
