@@ -1655,10 +1655,19 @@ export function CopilotChat({
                   )}
 
                   {msg.role === "user" ? (
-                    /* ── User bubble — right-aligned within centered container ── */
-                    <div className="flex justify-end">
-                      <div className="bg-accent/8 border border-accent/15 rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed text-foreground max-w-md shadow-[var(--shadow-sm)]">
-                        {msg.content}
+                    /* ── User message — left-aligned, no bubble (Claude pattern) ── */
+                    <div className="group">
+                      <div className="flex gap-3">
+                        {/* User avatar */}
+                        <div className="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center shrink-0 mt-0.5">
+                          <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                          </svg>
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 pt-1">
+                          <p className="text-sm leading-relaxed text-foreground font-medium">{msg.content}</p>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -1795,16 +1804,17 @@ export function CopilotChat({
           </div>
         )}
 
+        {/* Active service badge — shown above input when a slash command set the service mode */}
+        {activeService !== "general" && onServiceChange && (
+          <div className="max-w-4xl mx-auto mb-1.5 flex items-center gap-2">
+            <ServiceBadge
+              service={activeService}
+              onClear={() => onServiceChange("general")}
+            />
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
-          {/* Active service badge — shown when a slash command set the service mode */}
-          {activeService !== "general" && onServiceChange && (
-            <div className="absolute left-3 top-2.5 z-10">
-              <ServiceBadge
-                service={activeService}
-                onClear={() => onServiceChange("general")}
-              />
-            </div>
-          )}
 
           {/* Slash command picker — floating above the input */}
           {showSlashPicker && (
@@ -1865,13 +1875,12 @@ export function CopilotChat({
               }
               handleKeyDown(e);
             }}
-            placeholder="Ask NexusBrain anything..."
+            placeholder="Message..."
             rows={1}
             disabled={isLoading}
             className={cn(
               "w-full resize-none rounded-xl bg-input border border-input-border",
               "px-4 py-3 pr-24 text-sm text-foreground placeholder:text-muted",
-              activeService !== "general" && onServiceChange ? "pl-24" : "",
               "shadow-[var(--shadow-input)]",
               "focus:outline-none focus:shadow-[var(--shadow-input-focus)] focus:border-input-focus",
               "disabled:opacity-50 disabled:cursor-not-allowed",
@@ -1905,8 +1914,8 @@ export function CopilotChat({
               disabled={!input.trim() || isLoading}
               className={cn(
                 "w-8 h-8 rounded-lg flex items-center justify-center",
-                "bg-accent text-white",
-                "hover:bg-accent-dark transition-colors",
+                "text-muted-foreground hover:text-foreground",
+                "hover:bg-surface-hover transition-colors",
                 "disabled:opacity-30 disabled:cursor-not-allowed"
               )}
             >
@@ -1920,14 +1929,14 @@ export function CopilotChat({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                  d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
                 />
               </svg>
             </button>
           </div>
         </form>
         <p className="text-center text-[10px] text-muted/50 mt-2">
-          Type <span className="font-mono text-muted/70">/</span> for commands &middot; Powered by NexusBrain
+          Type <span className="font-mono text-muted/70">/</span> for services
         </p>
       </div>
     </div>

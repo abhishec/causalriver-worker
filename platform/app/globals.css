@@ -9,32 +9,32 @@
  */
 
 @theme {
-  /* ── Backgrounds ──────────────────────────────────────────────────────────── */
-  --color-background: #ffffff;
-  --color-foreground: #09090b;
-  --color-muted: #71717a;
-  --color-muted-foreground: #52525b;
+  /* ── Backgrounds (warm stone palette — Claude-inspired) ────────────────── */
+  --color-background: #FFFFFF;
+  --color-foreground: #1A1915;
+  --color-muted: #6B6760;
+  --color-muted-foreground: #8C877D;
 
-  /* ── Surfaces (layered depth) ─────────────────────────────────────────────── */
-  --color-surface: #fafafa;
-  --color-surface-hover: #f4f4f5;
-  --color-card: #ffffff;
-  --color-card-hover: #f9f9fb;
-  --color-card-foreground: #09090b;
-  --color-surface-elevated: #f9f9fb;
-  --color-surface-active: #f4f4f5;
+  /* ── Surfaces (layered depth — warm cream/sand tones) ─────────────────── */
+  --color-surface: #F5F4EF;
+  --color-surface-hover: #EEECE5;
+  --color-card: #FFFFFF;
+  --color-card-hover: #FAF9F6;
+  --color-card-foreground: #1A1915;
+  --color-surface-elevated: #FAF9F6;
+  --color-surface-active: #EEECE5;
 
-  /* ── Borders ──────────────────────────────────────────────────────────────── */
-  --color-border: #e4e4e7;
-  --color-border-subtle: #f0f0f2;
+  /* ── Borders (warm tan) ────────────────────────────────────────────────── */
+  --color-border: #E8E5DE;
+  --color-border-subtle: #F0EDE6;
 
-  /* ── Accent (blue-violet, distinctive — same in both themes) ─────────────── */
-  --color-accent: #7c6cf0;
-  --color-accent-dark: #6558d4;
-  --color-accent-light: #9b8ff8;
+  /* ── Accent (warm amber-orange — Claude-inspired) ──────────────────────── */
+  --color-accent: #C2410C;
+  --color-accent-dark: #9A3412;
+  --color-accent-light: #EA580C;
   --color-accent-foreground: #ffffff;
-  --color-accent-subtle: rgba(124, 108, 240, 0.06);
-  --color-accent-muted: rgba(124, 108, 240, 0.12);
+  --color-accent-subtle: rgba(194, 65, 12, 0.05);
+  --color-accent-muted: rgba(194, 65, 12, 0.10);
 
   /* ── Semantic Colors ──────────────────────────────────────────────────────── */
   --color-success: #16a34a;
@@ -59,14 +59,14 @@
   --color-domain-knowledge: #8b5cf6;
   --color-domain-communication: #14b8a6;
 
-  /* ── Sidebar ──────────────────────────────────────────────────────────────── */
-  --color-sidebar: #f8f8fa;
-  --color-sidebar-hover: #f0f0f4;
+  /* ── Sidebar (warm cream) ──────────────────────────────────────────────── */
+  --color-sidebar: #F5F4EF;
+  --color-sidebar-hover: #EEECE5;
 
   /* ── Inputs ─────────────────────────────────────────────────────────────── */
-  --color-input: #ffffff;
-  --color-input-border: #e4e4e7;
-  --color-input-focus: #7c6cf0;
+  --color-input: #FFFFFF;
+  --color-input-border: #E8E5DE;
+  --color-input-focus: #C2410C;
 
   /* ── Fonts ──────────────────────────────────────────────────────────────── */
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
@@ -79,10 +79,10 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.03);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(124, 108, 240, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(194, 65, 12, 0.08);
   --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(124, 108, 240, 0.3), 0 0 0 3px rgba(124, 108, 240, 0.1);
+  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(194, 65, 12, 0.3), 0 0 0 3px rgba(194, 65, 12, 0.1);
 }
 
 /* ── Light theme (default) ────────────────────────────────────────────────── */
@@ -90,28 +90,28 @@ html {
   color-scheme: light;
 }
 
-/* ── Dark theme overrides ─────────────────────────────────────────────────── */
+/* ── Dark theme overrides (warm dark browns — Claude-inspired) ────────────── */
 html.dark {
   color-scheme: dark;
 
-  --color-background: #09090b;
-  --color-foreground: #e4e4e7;
-  --color-muted: #71717a;
-  --color-muted-foreground: #a1a1aa;
+  --color-background: #2D2B26;
+  --color-foreground: #E8E5DE;
+  --color-muted: #8C877D;
+  --color-muted-foreground: #A8A39A;
 
-  --color-surface: #0c0c10;
-  --color-surface-hover: #14141f;
-  --color-card: #0f1019;
-  --color-card-hover: #141520;
-  --color-card-foreground: #e4e4e7;
-  --color-surface-elevated: #12121a;
-  --color-surface-active: #18182a;
+  --color-surface: #353330;
+  --color-surface-hover: #3D3A36;
+  --color-card: #2D2B26;
+  --color-card-hover: #353330;
+  --color-card-foreground: #E8E5DE;
+  --color-surface-elevated: #3D3A36;
+  --color-surface-active: #45423D;
 
-  --color-border: #1e1e2e;
-  --color-border-subtle: #141420;
+  --color-border: #4A4640;
+  --color-border-subtle: #3D3A36;
 
-  --color-accent-subtle: rgba(124, 108, 240, 0.08);
-  --color-accent-muted: rgba(124, 108, 240, 0.15);
+  --color-accent-subtle: rgba(234, 88, 12, 0.08);
+  --color-accent-muted: rgba(234, 88, 12, 0.15);
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
@@ -123,11 +123,11 @@ html.dark {
   --color-brain-discovery: #38bdf8;
   --color-brain-alert: #fbbf24;
 
-  --color-sidebar: #08080d;
-  --color-sidebar-hover: #0f0f17;
+  --color-sidebar: #242220;
+  --color-sidebar-hover: #2D2B26;
 
-  --color-input: #12121a;
-  --color-input-border: #1e1e2e;
+  --color-input: #353330;
+  --color-input-border: #4A4640;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
@@ -135,10 +135,10 @@ html.dark {
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.03);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 108, 240, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(194, 65, 12, 0.08);
   --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.04);
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.03);
-  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 108, 240, 0.3), 0 0 0 3px rgba(124, 108, 240, 0.1);
+  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(194, 65, 12, 0.3), 0 0 0 3px rgba(194, 65, 12, 0.1);
 }
 
 body {
@@ -178,8 +178,8 @@ body {
 
 /* Accent glow */
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(124, 108, 240, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(124, 108, 240, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(194, 65, 12, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(194, 65, 12, 0.6); }
 }
 .glow-accent {
   animation: glow 2s ease-in-out infinite;
@@ -241,7 +241,7 @@ body {
 
 /* ── Gradient backgrounds ─────────────────────────────────────────────────── */
 .bg-gradient-brain {
-  background: radial-gradient(ellipse at 50% 0%, rgba(124, 108, 240, 0.06) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(194, 65, 12, 0.06) 0%, transparent 60%);
 }
 
 .bg-gradient-sidebar {
@@ -250,7 +250,7 @@ body {
 
 .bg-gradient-intelligence {
   background: radial-gradient(ellipse at 80% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 50%),
-              radial-gradient(ellipse at 20% 80%, rgba(124, 108, 240, 0.04) 0%, transparent 50%);
+              radial-gradient(ellipse at 20% 80%, rgba(194, 65, 12, 0.04) 0%, transparent 50%);
 }
 
 /* ── Slide-in from left (sidebar panels) ─────────────────────────────────── */
@@ -377,12 +377,12 @@ body {
 
 /* ── Global focus ring ────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid rgba(124, 108, 240, 0.5);
+  outline: 2px solid rgba(194, 65, 12, 0.5);
   outline-offset: 2px;
   border-radius: 6px;
 }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-  outline: 2px solid rgba(124, 108, 240, 0.5);
+  outline: 2px solid rgba(194, 65, 12, 0.5);
   outline-offset: 2px;
 }
 

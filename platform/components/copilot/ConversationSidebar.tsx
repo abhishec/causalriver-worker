@@ -177,16 +177,15 @@ export function ConversationSidebar({
   return (
     <div className="w-60 shrink-0 h-full flex flex-col border-r border-border-subtle bg-sidebar overflow-hidden">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="p-3 border-b border-border-subtle flex items-center gap-2">
+      <div className="p-2 border-b border-border-subtle flex items-center gap-2">
         <button
           onClick={onNew}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-            "border border-border-subtle hover:border-accent/30",
-            "bg-background hover:bg-surface text-foreground"
+            "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors",
+            "hover:bg-surface-hover text-muted-foreground hover:text-foreground"
           )}
         >
-          <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           New chat
@@ -220,7 +219,7 @@ export function ConversationSidebar({
         ) : (
           Object.entries(grouped).map(([group, items]) => (
             <div key={group}>
-              <div className="px-3 py-1.5 text-[10px] font-semibold text-muted uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] text-muted/70 mt-2 first:mt-0">
                 {group}
               </div>
               {items.map((conv) => (

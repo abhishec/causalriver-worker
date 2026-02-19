@@ -341,9 +341,9 @@ export default function OnboardingPage() {
       await supabase.auth.updateUser({
         data: { onboarding_complete: true, org_name: orgName.trim() },
       });
-      router.push("/overview");
+      router.push("/copilot");
     } catch {
-      router.push("/overview");
+      router.push("/copilot");
     }
   }
 

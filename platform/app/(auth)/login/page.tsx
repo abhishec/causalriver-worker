@@ -21,7 +21,7 @@ function LoginForm() {
   const supabase = createClient();
 
   // Where to redirect after login
-  const redirectTo = nextUrl || "/overview";
+  const redirectTo = nextUrl || "/copilot";
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();

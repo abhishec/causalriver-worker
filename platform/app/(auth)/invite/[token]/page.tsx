@@ -88,7 +88,7 @@ export default function InvitePage() {
       }
 
       setTimeout(() => {
-        router.push("/overview");
+        router.push("/copilot");
       }, 1500);
     } catch {
       setError("Something went wrong");
@@ -157,10 +157,10 @@ export default function InvitePage() {
           This invitation has already been accepted.
         </p>
         <Link
-          href="/overview"
+          href="/copilot"
           className="text-accent hover:text-accent-light text-sm"
         >
-          Go to dashboard
+          Go to copilot
         </Link>
       </div>
     );

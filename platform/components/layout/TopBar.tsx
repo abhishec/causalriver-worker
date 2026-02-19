@@ -83,42 +83,10 @@ export function TopBar() {
   const pageLabel = ROUTE_LABELS[pathname] || pathname.split("/").pop() || "";
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-subtle bg-background/80 backdrop-blur-xl px-6">
-      {/* ── Left: Breadcrumb + Brain Status ─────────────────────────── */}
-      <div className="flex items-center gap-4">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-sm">
-          <span className="text-muted">
-            {currentOrg?.name ?? "Brain"}
-          </span>
-          <svg className="w-3 h-3 text-muted/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-          <span className="font-medium">{pageLabel}</span>
-        </div>
-
-        {/* Brain Status Strip */}
-        {brainStats && (
-          <div className="hidden md:flex items-center gap-3 px-3 py-1 rounded-full bg-surface border border-border-subtle text-[11px] text-muted">
-            <span className="flex items-center gap-1.5">
-              {brainStats.edges > 0 || brainStats.signalsHr > 0 ? (
-                <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-brain-active brain-pulse" />
-                  Active
-                </>
-              ) : (
-                <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
-                  Awaiting data
-                </>
-              )}
-            </span>
-            <span className="text-border-subtle">|</span>
-            <span className="tabular-nums">{brainStats.edges.toLocaleString()} edges</span>
-            <span className="text-border-subtle">|</span>
-            <span className="tabular-nums">{brainStats.signalsHr} signals/hr</span>
-          </div>
-        )}
+    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border-subtle bg-background px-6">
+      {/* ── Left: Org name only ─────────────────────────────────────── */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium">{currentOrg?.name ?? "NexusBrain"}</span>
 
         {/* Admin Badge */}
         {isPlatformAdmin && (
@@ -131,26 +99,10 @@ export function TopBar() {
         )}
       </div>
 
-      {/* ── Right: Theme + Search + User ───────────────────────────────── */}
+      {/* ── Right: Theme + User ────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         {/* Theme toggle */}
         <ThemeToggle />
-
-        {/* Quick search trigger */}
-        <button
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-border-subtle text-xs text-muted transition-colors"
-          onClick={() => {
-            document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-          }}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Search
-          <kbd className="px-1 py-0.5 rounded bg-background text-[10px] font-mono border border-border-subtle">
-            {"\u2318"}K
-          </kbd>
-        </button>
 
         {/* User avatar & dropdown */}
         <div className="relative">
