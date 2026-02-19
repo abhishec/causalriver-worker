@@ -393,13 +393,14 @@ jobs:
         if: needs.gate.outputs.deploy_platform == 'true'
         run: |
           echo "🚀 Deploying Platform..."
-          # minimumHealthyPercent=0: stop old task first, then start new one.
-          # Required because Fargate vCPU quota prevents two tasks running simultaneously.
+          # minimumHealthyPercent=0: allow ECS to stop old task before starting new one.
+          # maximumPercent=200: required when AZ Rebalancing is enabled (cannot use ≤100).
+          # This handles Fargate vCPU quota constraints — brief ~30s downtime during deploy.
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.PLATFORM_SERVICE }} \
             --force-new-deployment \
-            --deployment-configuration minimumHealthyPercent=0,maximumPercent=100 \
+            --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
             --region ${{ env.AWS_REGION }}
 
       - name: Wait for Platform stability
