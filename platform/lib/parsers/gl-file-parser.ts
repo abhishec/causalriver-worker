@@ -89,13 +89,38 @@ function parseDate(raw: unknown): string | null {
     if (mon) return `${yr}-${mon}-${day}`;
   }
 
-  // DD/MM/YYYY or D/M/YYYY
+  // DD/MM/YYYY or D/M/YYYY (4-digit year)
   const slashMatch = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
   if (slashMatch) {
     const day = slashMatch[1].padStart(2, "0");
     const month = slashMatch[2].padStart(2, "0");
     const year = slashMatch[3];
     return `${year}-${month}-${day}`;
+  }
+
+  // M/D/YY or MM/DD/YY (2-digit year — XLSX CSV date output format)
+  const shortYearMatch = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2})$/);
+  if (shortYearMatch) {
+    const part1 = parseInt(shortYearMatch[1]);
+    const part2 = parseInt(shortYearMatch[2]);
+    const shortYear = parseInt(shortYearMatch[3]);
+    // 2-digit year: 00-49 → 2000s, 50-99 → 1900s
+    const year = shortYear < 50 ? 2000 + shortYear : 1900 + shortYear;
+    // XLSX outputs US format M/D/YY, so part1=month, part2=day
+    // But if part1 > 12, it must be D/M/YY
+    let month: number, day: number;
+    if (part1 > 12) {
+      day = part1;
+      month = part2;
+    } else if (part2 > 12) {
+      month = part1;
+      day = part2;
+    } else {
+      // Ambiguous — default to M/D/YY (US format, what XLSX produces)
+      month = part1;
+      day = part2;
+    }
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
 
   // MM/DD/YYYY (US format — only if month <= 12 and day > 12)
