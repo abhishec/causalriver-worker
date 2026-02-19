@@ -1,15 +1,20 @@
 /**
- * Seed Script: Create "PH Accounting" Design Partner Organization
+ * Seed Script: Create "PH Accounting" Design Partner (Customer + Workspace)
  *
  * Usage: npx tsx scripts/seed-accounting-partner.ts
  *
- * Creates:
- * 1. "PH Accounting" organization (enterprise plan)
- * 2. Links abhishek@tookitaki.com as owner
- * 3. Links platform admin (abhishek@monetiz3.com) as admin
- * 4. Seeds org_connectors entry for Xero GL data
+ * Architecture:
+ *   Customer: PH Accounting  ← users are members of THIS
+ *     └── Workspace: PH Accounting (org)  ← brain scoping only
  *
- * This org is the design partner for Accounting-as-a-Service (AaaS).
+ * Creates:
+ * 1. "PH Accounting" customer (enterprise, design partner)
+ * 2. "PH Accounting" workspace (org) linked to customer
+ * 3. abhishek@tookitaki.com — customer_member (owner) + org_member (owner)
+ * 4. abhishek@monetiz3.com  — customer_member (admin) + org_member (admin)
+ * 5. Seeds org_connectors entry for Xero GL data
+ *
+ * This customer is the design partner for Accounting-as-a-Service (AaaS).
  * The GL data was parsed from a real Xero General Ledger Detail export:
  *   - 49,684 transactions, 187 accounts, SGD
  *   - Date range: 2020-01-01 to 2026-02-12
@@ -38,27 +43,85 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 
 // ─── Design Partner Config ────────────────────────────────────
 
-const PH_ACCOUNTING_ORG = {
+const PH_ACCOUNTING_CUSTOMER_ID = "00000000-0000-4000-c000-000000000003";
+
+const PH_ACCOUNTING_CUSTOMER = {
+  id:               PH_ACCOUNTING_CUSTOMER_ID,
+  name:             "PH Accounting",
+  slug:             "ph-accounting",
+  plan:             "enterprise",
+  industry:         "Accounting & Advisory",
+  is_design_partner: true,
+  settings: {
+    description:     "Singapore accounting firm — design partner for Accounting-as-a-Service (AaaS)",
+    jurisdiction:    "SFRS/IRAS",
+    currency:        "SGD",
+    primary_contact: "abhishek@tookitaki.com",
+    slack_channel:   "#nexusbrain-ph-accounting",
+  },
+};
+
+const PH_ACCOUNTING_WORKSPACE = {
   name: "PH Accounting",
   slug: "ph-accounting",
   plan: "enterprise",
   settings: {
-    industry: "Accounting & Advisory Services",
-    countries: ["SG"],
-    currency: "SGD",
-    jurisdiction: "SFRS/IRAS",
-    headcount: 15,
-    description: "Singapore accounting firm — design partner for Accounting-as-a-Service (AaaS)",
+    industry:      "Accounting & Advisory Services",
+    countries:     ["SG"],
+    currency:      "SGD",
+    jurisdiction:  "SFRS/IRAS",
+    headcount:     15,
+    description:   "Singapore accounting firm — design partner for Accounting-as-a-Service (AaaS)",
     designPartner: true,
   },
 };
 
-const OWNER_EMAIL = "abhishek@tookitaki.com";
-const OWNER_PASSWORD = "Tookitaki@2025!";
-
+const OWNER_EMAIL          = "abhishek@tookitaki.com";
+const OWNER_PASSWORD       = "Tookitaki@2025!";
 const PLATFORM_ADMIN_EMAIL = "abhishek@monetiz3.com";
 
-// ─── Helpers (same pattern as seed-users.ts) ──────────────────
+// ─── Helpers ──────────────────────────────────────────────────
+
+async function findOrCreateCustomer(opts: {
+  id: string; name: string; slug: string; plan: string;
+  industry?: string; is_design_partner?: boolean; settings?: Record<string, unknown>;
+}) {
+  const { data: existing } = await supabase
+    .from("customers").select("id, name, slug").eq("id", opts.id).single();
+
+  if (existing) {
+    await supabase.from("customers")
+      .update({ settings: opts.settings, industry: opts.industry, is_design_partner: opts.is_design_partner })
+      .eq("id", opts.id);
+    console.log(`  [exists] Customer "${opts.name}" (${existing.id}) — settings updated`);
+    return existing;
+  }
+
+  const { data, error } = await supabase.from("customers")
+    .insert({
+      id: opts.id, name: opts.name, slug: opts.slug, plan: opts.plan,
+      industry: opts.industry, is_design_partner: opts.is_design_partner ?? false,
+      settings: opts.settings ?? {},
+    }).select().single();
+
+  if (error) { console.error(`  [error] Failed to create customer "${opts.name}":`, error.message); return null; }
+  console.log(`  [created] Customer "${opts.name}" (${data.id})`);
+  return data;
+}
+
+async function addCustomerMember(customerId: string, userId: string, role: string, isPlatformAdmin = false) {
+  const { data: existing } = await supabase
+    .from("customer_members").select("id")
+    .eq("customer_id", customerId).eq("user_id", userId).single();
+
+  if (existing) { console.log(`    [exists] customer_member user=${userId}`); return; }
+
+  const { error } = await supabase.from("customer_members")
+    .insert({ customer_id: customerId, user_id: userId, role, is_platform_admin: isPlatformAdmin });
+
+  if (error) { console.error(`    [error] Failed to add customer_member:`, error.message); }
+  else { console.log(`    [added] customer_member ${role}${isPlatformAdmin ? " (platform admin)" : ""}`); }
+}
 
 async function findOrCreateUser(email: string, password: string) {
   const { data: existingUsers } = await supabase.auth.admin.listUsers();
@@ -85,40 +148,26 @@ async function findOrCreateUser(email: string, password: string) {
   return data.user;
 }
 
-async function findOrCreateOrg(name: string, slug: string, plan: string, settings?: Record<string, unknown>) {
+async function findOrCreateOrg(opts: {
+  name: string; slug: string; plan: string; customer_id: string; settings?: Record<string, unknown>;
+}) {
   const { data: existing } = await supabase
-    .from("organizations")
-    .select("id, name, slug")
-    .eq("slug", slug)
-    .single();
+    .from("organizations").select("id, name, slug, customer_id").eq("slug", opts.slug).single();
 
   if (existing) {
-    // Update settings if provided (ensures consistency on re-runs)
-    if (settings) {
-      await supabase
-        .from("organizations")
-        .update({ settings })
-        .eq("id", existing.id);
-      console.log(`  [exists] Org "${name}" (${existing.id}) — settings updated`);
-    } else {
-      console.log(`  [exists] Org "${name}" (${existing.id})`);
-    }
+    await supabase.from("organizations")
+      .update({ customer_id: opts.customer_id, settings: opts.settings })
+      .eq("id", existing.id);
+    console.log(`  [exists] Workspace "${opts.name}" (${existing.id}) — customer_id + settings updated`);
     return existing;
   }
 
-  const orgId = randomUUID();
-  const { data, error } = await supabase
-    .from("organizations")
-    .insert({ id: orgId, name, slug, plan, ...(settings ? { settings } : {}) })
-    .select()
-    .single();
+  const { data, error } = await supabase.from("organizations")
+    .insert({ id: randomUUID(), name: opts.name, slug: opts.slug, plan: opts.plan, customer_id: opts.customer_id, settings: opts.settings ?? {} })
+    .select().single();
 
-  if (error) {
-    console.error(`  [error] Failed to create org "${name}":`, error.message);
-    return null;
-  }
-
-  console.log(`  [created] Org "${name}" (${data.id})`);
+  if (error) { console.error(`  [error] Failed to create workspace "${opts.name}":`, error.message); return null; }
+  console.log(`  [created] Workspace "${opts.name}" (${data.id})`);
   return data;
 }
 
@@ -194,68 +243,68 @@ async function addXeroConnector(orgId: string) {
 // ─── Main ──────────────────────────────────────────────────────
 
 async function main() {
-  console.log("\n=== Seed: PH Accounting Design Partner ===\n");
+  console.log("\n=== Seed: PH Accounting Design Partner (Customer + Workspace) ===\n");
 
-  // 1. Create the org
-  console.log("1. Organization:");
-  const org = await findOrCreateOrg(PH_ACCOUNTING_ORG.name, PH_ACCOUNTING_ORG.slug, PH_ACCOUNTING_ORG.plan, PH_ACCOUNTING_ORG.settings);
-  if (!org) {
-    console.error("Failed to create PH Accounting org. Aborting.");
-    process.exit(1);
-  }
+  // 1. Create the customer
+  console.log("1. Customer:");
+  const customer = await findOrCreateCustomer(PH_ACCOUNTING_CUSTOMER);
+  if (!customer) { console.error("Failed to create PH Accounting customer. Aborting."); process.exit(1); }
 
-  // 2. Create/find the owner user
-  console.log("\n2. Owner User:");
+  // 2. Create the workspace (org) linked to customer
+  console.log("\n2. Workspace (org):");
+  const org = await findOrCreateOrg({ ...PH_ACCOUNTING_WORKSPACE, customer_id: customer.id });
+  if (!org) { console.error("Failed to create PH Accounting workspace. Aborting."); process.exit(1); }
+
+  // 3. Create/find the owner user → customer_member + org_member
+  console.log("\n3. Owner User:");
   const ownerUser = await findOrCreateUser(OWNER_EMAIL, OWNER_PASSWORD);
   if (ownerUser) {
-    console.log("  Adding as owner of PH Accounting:");
+    console.log("  Adding as owner of PH Accounting customer:");
+    await addCustomerMember(customer.id, ownerUser.id, "owner");
+    console.log("  Adding as owner of PH Accounting workspace:");
     await addOrgMember(org.id, ownerUser.id, "owner");
   }
 
-  // 3. Link platform admin to org
-  console.log("\n3. Platform Admin:");
+  // 4. Link platform admin → customer_member + org_member
+  console.log("\n4. Platform Admin:");
   const { data: existingUsers } = await supabase.auth.admin.listUsers();
   const adminUser = existingUsers?.users?.find((u) => u.email === PLATFORM_ADMIN_EMAIL);
 
   if (adminUser) {
     console.log(`  [found] ${PLATFORM_ADMIN_EMAIL} (${adminUser.id})`);
-    console.log("  Adding as admin of PH Accounting:");
+    console.log("  Adding as admin of PH Accounting customer:");
+    await addCustomerMember(customer.id, adminUser.id, "admin", true);
+    console.log("  Adding as admin of PH Accounting workspace:");
     await addOrgMember(org.id, adminUser.id, "admin", true);
   } else {
     console.log(`  [skip] ${PLATFORM_ADMIN_EMAIL} not found — run seed-users.ts first`);
   }
 
-  // 3b. S3 storage (auto-provisioned by DB trigger, ensure connector exists)
-  console.log("\n   Verifying S3 storage provisioning...");
-  const { data: existingS3 } = await supabase
-    .from("org_connectors")
-    .select("id")
-    .eq("organization_id", org.id)
-    .eq("connector_type", "s3-storage")
-    .single();
-  if (!existingS3) {
+  // 5a. Seed Xero connector
+  console.log("\n5a. Xero Connector:");
+  await addXeroConnector(org.id);
+
+  // 5b. S3 storage connector
+  console.log("\n   Verifying S3 storage connector...");
+  const { data: existingS3Pre } = await supabase
+    .from("org_connectors").select("id")
+    .eq("organization_id", org.id).eq("connector_type", "s3-storage").single();
+  if (!existingS3Pre) {
     await supabase.from("org_connectors").insert({
-      organization_id: org.id,
-      connector_type: "s3-storage",
-      status: "active",
+      organization_id: org.id, connector_type: "s3-storage", status: "active",
       config: {
         bucket: process.env.AWS_S3_BUCKET_NAME || "nexusbrain-org-data",
         region: process.env.AWS_REGION || "ap-southeast-1",
-        prefix: org.id,
-        purpose: "Org-level file storage (GL data, CSV, reports)",
+        prefix: org.id, purpose: "Org-level file storage (GL data, CSV, reports)",
       },
     });
     console.log("   [created] S3 storage connector");
   } else {
-    console.log("   [exists] S3 storage connector (auto-provisioned)");
+    console.log("   [exists] S3 storage connector");
   }
 
-  // 4. Seed Xero connector
-  console.log("\n4. Xero Connector:");
-  await addXeroConnector(org.id);
-
-  // 5. Convert GL data to cross_domain_signals (so brain can reason about this org)
-  console.log("\n5. GL → Signal Conversion:");
+  // 6. Convert GL data to cross_domain_signals (so brain can reason about this workspace)
+  console.log("\n6. GL → Signal Conversion:");
   try {
     // Load GL data from storage (uploaded by migrate-gl-data-to-storage.ts)
     const storagePath = `${org.id}/gl-data.json`;
@@ -382,18 +431,14 @@ async function main() {
     console.log(`  [skip] Signal conversion failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // 6. Summary
+  // 7. Summary
   console.log("\n=== Summary ===\n");
-  console.log(`Organization: ${PH_ACCOUNTING_ORG.name}`);
-  console.log(`  ID:    ${org.id}`);
-  console.log(`  Slug:  ${PH_ACCOUNTING_ORG.slug}`);
-  console.log(`  Plan:  ${PH_ACCOUNTING_ORG.plan}`);
+  console.log(`Customer: ${PH_ACCOUNTING_CUSTOMER.name} (${customer.id})`);
+  console.log(`  └── Workspace: ${PH_ACCOUNTING_WORKSPACE.name} (${org.id})`);
   console.log("");
-  console.log("Members:");
+  console.log("Customer Members (customer_members + org_members):");
   console.log(`  ${OWNER_EMAIL} — owner`);
-  if (adminUser) {
-    console.log(`  ${PLATFORM_ADMIN_EMAIL} — admin (platform admin)`);
-  }
+  if (adminUser) { console.log(`  ${PLATFORM_ADMIN_EMAIL} — admin (platform admin)`); }
   console.log("");
   console.log("Connectors:");
   console.log("  Xero GL — 49,684 transactions, 187 accounts, SGD");
@@ -404,7 +449,7 @@ async function main() {
   console.log("");
   console.log("Next steps:");
   console.log("  1. Login at your platform URL with the credentials above");
-  console.log('  2. Switch to "PH Accounting" org from the sidebar');
+  console.log('  2. Switch to "PH Accounting" workspace from the sidebar');
   console.log("  3. Navigate to Accounting Jarvis dashboard");
   console.log("\nDone!\n");
 }
