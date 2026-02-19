@@ -1,7 +1,7 @@
 {
   "name": "@nexus-ai/client",
   "version": "0.1.0",
-  "description": "Lightweight HTTP client for NexusBrain — query, ingest signals, and receive causal intelligence from any app or agent.",
+  "description": "Lightweight HTTP client for NexusBrain \u2014 query, ingest signals, and receive causal intelligence from any app or agent.",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.cjs",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "nexusbrain",
