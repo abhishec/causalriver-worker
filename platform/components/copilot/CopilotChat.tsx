@@ -1334,6 +1334,10 @@ export function CopilotChat({
   onSaveRef.current = onSave;
   const selectedBranchRef = useRef(selectedBranch);
   selectedBranchRef.current = selectedBranch;
+  const activeServiceRef = useRef(activeService);
+  activeServiceRef.current = activeService;
+  // Ref for sendMessage so event handlers can call it without stale closures
+  const sendMessageRef = useRef<((msg: string) => void) | null>(null);
 
   const color = persona.color || "accent";
 
@@ -1353,7 +1357,9 @@ export function CopilotChat({
     };
   }, []);
 
-  // ── Listen for external prompt injection (from capability pills) ──────
+  // ── Listen for external prompt injection (from capability pills / context pane) ──
+  // "copilot-inject-prompt" just fills the input (e.g. slash commands where user may want to edit)
+  // "copilot-inject-and-submit" fills AND auto-submits (e.g. clicking a service card in the right pane)
   useEffect(() => {
     const handleInjectPrompt = (event: Event) => {
       const prompt = (event as CustomEvent).detail;
@@ -1362,8 +1368,69 @@ export function CopilotChat({
         inputRef.current?.focus();
       }
     };
+    const handleInjectAndSubmit = (event: Event) => {
+      const prompt = (event as CustomEvent).detail;
+      if (typeof prompt === "string" && prompt.trim()) {
+        setInput(prompt);
+        // Use sendMessageRef to auto-submit after a brief render tick
+        setTimeout(() => {
+          sendMessageRef.current?.(prompt);
+        }, 50);
+      }
+    };
     window.addEventListener("copilot-inject-prompt", handleInjectPrompt);
-    return () => window.removeEventListener("copilot-inject-prompt", handleInjectPrompt);
+    window.addEventListener("copilot-inject-and-submit", handleInjectAndSubmit);
+    return () => {
+      window.removeEventListener("copilot-inject-prompt", handleInjectPrompt);
+      window.removeEventListener("copilot-inject-and-submit", handleInjectAndSubmit);
+    };
+  }, []);
+
+  // ── Listen for new-conversation event (reset chat state) ────────────
+  useEffect(() => {
+    const handleNewConversation = () => {
+      // Abort any in-flight stream
+      abortRef.current?.abort();
+      abortRef.current = null;
+      // Clear all chat state
+      setMessages([]);
+      setInput("");
+      setIsLoading(false);
+      setBrainMeta(null);
+      setFollowUps([]);
+      setBrainMetaPerMessage(new Map());
+      setShowSlashPicker(false);
+      setSlashQuery("");
+      inputRef.current?.focus();
+    };
+    window.addEventListener("copilot-new-conversation", handleNewConversation);
+    return () => window.removeEventListener("copilot-new-conversation", handleNewConversation);
+  }, []);
+
+  // ── Listen for load-conversation event (restore saved messages) ─────
+  useEffect(() => {
+    const handleLoadConversation = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      if (!detail?.messages) return;
+      // Abort any in-flight stream
+      abortRef.current?.abort();
+      abortRef.current = null;
+      // Restore saved messages
+      setMessages(detail.messages);
+      setInput("");
+      setIsLoading(false);
+      setBrainMeta(null);
+      setFollowUps([]);
+      setBrainMetaPerMessage(new Map());
+      setShowSlashPicker(false);
+      setSlashQuery("");
+      // Scroll to bottom after render
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    };
+    window.addEventListener("copilot-load-conversation", handleLoadConversation);
+    return () => window.removeEventListener("copilot-load-conversation", handleLoadConversation);
   }, []);
 
   // ── SSE stream consumer ─────────────────────────────────────────────────
@@ -1403,7 +1470,7 @@ export function CopilotChat({
         body: JSON.stringify({
           message: trimmed,
           conversationHistory: history.length > 0 ? history : undefined,
-          serviceMode: activeService !== "general" ? activeService : undefined,
+          serviceMode: activeServiceRef.current !== "general" ? activeServiceRef.current : undefined,
           // Phase 4: include selected branch so SE-aaS domains get code intelligence
           ...(branch ? { branch } : {}),
           ...extraParams,
@@ -1483,7 +1550,7 @@ export function CopilotChat({
                     ? firstUser.content.slice(0, 57) + "..."
                     : firstUser.content
                   : "Untitled conversation";
-                saveCb({ messages: allMsgs, title, serviceMode: activeService });
+                saveCb({ messages: allMsgs, title, serviceMode: activeServiceRef.current });
               }
             }
           },

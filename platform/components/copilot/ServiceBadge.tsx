@@ -3,8 +3,8 @@
 import { cn } from "@/lib/utils";
 
 const SERVICE_CONFIG = {
-  aas: { label: "Accounting", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25" },
-  seaas: { label: "Engineering", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25" },
+  aas: { label: "AAAS", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25" },
+  seaas: { label: "SE-aaS", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25" },
 } as const;
 
 interface ServiceBadgeProps {

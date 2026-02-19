@@ -111,7 +111,7 @@ export function ServiceContextPane({ activeService, onOpenArtifact }: ServiceCon
   }, [artifactCards]);
 
   const connectors = SERVICE_CONNECTORS[activeService] || [];
-  const serviceLabel = activeService === "aas" ? "Accounting" : activeService === "seaas" ? "Engineering" : "Copilot";
+  const serviceLabel = activeService === "aas" ? "AAAS" : activeService === "seaas" ? "SE-aaS" : "Copilot";
   const commandCount = artifactCards.length;
 
   return (

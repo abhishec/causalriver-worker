@@ -30,14 +30,14 @@ const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color
   },
   {
     id: "aas",
-    label: "Accounting",
+    label: "AAAS",
     description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
     color: "emerald",
     alwaysVisible: false, // Only if enabled for this org
   },
   {
     id: "seaas",
-    label: "Engineering",
+    label: "SE-aaS",
     description: "Your AI software engineer — branch-scoped code intelligence, PR review, impact analysis, and cross-release risk assessment",
     color: "blue",
     alwaysVisible: false, // Only if enabled for this org
@@ -51,12 +51,12 @@ const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string;
     color: "accent",
   },
   aas: {
-    name: "Accounting Intelligence",
+    name: "AAAS — Accounting Intelligence",
     description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
     color: "emerald",
   },
   seaas: {
-    name: "Engineering Intelligence",
+    name: "SE-aaS — Engineering Intelligence",
     description: "Your AI software engineer — branch-scoped code intelligence, PR review, impact analysis, and cross-release risk assessment",
     color: "blue",
   },

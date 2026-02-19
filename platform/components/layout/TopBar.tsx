@@ -23,7 +23,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/costs": "Costs",
   "/training": "Training",
   "/simulator": "Simulator",
-  "/aaas": "Accounting",
+  "/aaas": "AAAS",
 };
 
 export function TopBar() {

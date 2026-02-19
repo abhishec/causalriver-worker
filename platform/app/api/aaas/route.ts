@@ -972,7 +972,7 @@ export async function POST(request: Request) {
               action === 'anomaly' ? 'Risk Factor Detection' :
               action.charAt(0).toUpperCase() + action.slice(1);
 
-            await serviceSupabase.from('cascade_alerts').insert({
+            const { error: notifErr } = await serviceSupabase.from('cascade_alerts').insert({
               organization_id: orgId!,
               alert_type: 'accounting_report',
               severity: anomalyCount > 3 ? 'high' : anomalyCount > 0 ? 'medium' : 'low',
@@ -989,11 +989,10 @@ export async function POST(request: Request) {
                 anomalyCount,
                 jurisdiction,
               },
-            }).then(() => {
-              // Notification inserted successfully
-            }).catch((notifErr: any) => {
-              console.warn("[AAS] Notification insert failed (non-fatal):", notifErr?.message);
             });
+            if (notifErr) {
+              console.warn("[AAS] Notification insert failed (non-fatal):", notifErr?.message);
+            }
           } catch (artifactErr: any) {
             // Non-fatal — artifact persistence failure should never break the stream
             console.warn("[AAS] Artifact persistence failed (non-fatal):", artifactErr?.message);
