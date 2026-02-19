@@ -44,6 +44,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { getHeapStatistics } from 'node:v8';
+
+// Log heap limit immediately so we can diagnose OOM issues
+const _heapLimitMB = Math.round(getHeapStatistics().heap_size_limit / 1024 / 1024);
+console.log(`[HEAP] V8 heap limit: ${_heapLimitMB}MB (NODE_OPTIONS=${process.env.NODE_OPTIONS || 'unset'})`);
 
 // Load .env from project root
 function loadEnv(): void {

@@ -24,7 +24,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import { freemem } from 'node:os';
 
 // ── Load .env ──
@@ -269,14 +269,21 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, or
     }
 
     try {
-      execSync(
-        `ORGANIZATION_ID=${org.id} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${heapMB} --expose-gc" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
-        {
-          stdio: 'inherit',
-          cwd: resolve(import.meta.dirname || __dirname, '..'),
-          timeout: 1200000, // 20 min per org
-        }
-      );
+      // Call tsx binary directly (not via pnpm exec) so NODE_OPTIONS reliably propagates
+      const projectRoot = resolve(import.meta.dirname || __dirname, '..');
+      const tsxBin = resolve(projectRoot, 'node_modules', '.bin', 'tsx');
+      execFileSync(tsxBin, ['scripts/brain-consolidation-runner.ts'], {
+        stdio: 'inherit',
+        cwd: projectRoot,
+        timeout: 1200000, // 20 min per org
+        env: {
+          ...process.env,
+          NODE_OPTIONS: `--max-old-space-size=${heapMB}`,
+          ORGANIZATION_ID: org.id,
+          CONSOLIDATION_MODE: 'once',
+          VERBOSE: VERBOSE ? 'true' : 'false',
+        },
+      });
 
       const elapsed = ((Date.now() - orgStart) / 1000).toFixed(1);
       log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s, ${heapMB}MB heap)`);
@@ -301,14 +308,20 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, or
 
   const coreStart = Date.now();
   try {
-    execSync(
-      `ORGANIZATION_ID=${CORE_BRAIN_ORG_ID} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${coreHeapMB} --expose-gc" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
-      {
-        stdio: 'inherit',
-        cwd: resolve(import.meta.dirname || __dirname, '..'),
-        timeout: 1200000, // 20 min
-      }
-    );
+    const projectRoot = resolve(import.meta.dirname || __dirname, '..');
+    const tsxBin = resolve(projectRoot, 'node_modules', '.bin', 'tsx');
+    execFileSync(tsxBin, ['scripts/brain-consolidation-runner.ts'], {
+      stdio: 'inherit',
+      cwd: projectRoot,
+      timeout: 1200000, // 20 min
+      env: {
+        ...process.env,
+        NODE_OPTIONS: `--max-old-space-size=${coreHeapMB}`,
+        ORGANIZATION_ID: CORE_BRAIN_ORG_ID,
+        CONSOLIDATION_MODE: 'once',
+        VERBOSE: VERBOSE ? 'true' : 'false',
+      },
+    });
     const elapsed = ((Date.now() - coreStart) / 1000).toFixed(1);
     log('PHASE-2', `  ✓ Core Brain consolidated (${elapsed}s, ${coreHeapMB}MB heap)`);
     processed++;
