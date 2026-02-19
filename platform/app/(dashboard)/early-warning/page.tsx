@@ -3,6 +3,7 @@ import { getCurrentOrgId } from "@/lib/org-helpers";
 import Link from "next/link";
 import { EarlyWarningActions } from "./actions";
 import { ReviewerDistributionChart, BRSBreakdown } from "./bottleneck-charts";
+import { VelocityTrendChart } from "./velocity-chart";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -575,6 +576,41 @@ export default async function EarlyWarningPage() {
                   SPOF alert fires when ≥1 condition is triggered. All 3 conditions active = critical risk.
                 </p>
               </div>
+
+              {/* ── Repository Breakdown — P0-02 spec: "which repos" ──── */}
+              {latestBottleneck.repo_breakdown && Array.isArray(latestBottleneck.repo_breakdown) && latestBottleneck.repo_breakdown.length > 0 && (
+                <div className="pt-3 border-t border-border-subtle">
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">
+                    Repository Concentration
+                  </div>
+                  <div className="space-y-1.5">
+                    {(latestBottleneck.repo_breakdown as Array<{ repo: string; reviewCount: number; share: number }>).map((r: { repo: string; reviewCount: number; share: number }, i: number) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted truncate w-32 shrink-0">{r.repo}</span>
+                        <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${r.share > 0.5 ? 'bg-danger' : r.share > 0.3 ? 'bg-warning' : 'bg-accent'}`}
+                            style={{ width: `${Math.round(r.share * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted tabular-nums shrink-0">
+                          {Math.round(r.share * 100)}% ({r.reviewCount})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(!latestBottleneck.repo_breakdown || !Array.isArray(latestBottleneck.repo_breakdown) || latestBottleneck.repo_breakdown.length === 0) && githubRepo && (
+                <div className="pt-3 border-t border-border-subtle">
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">
+                    Repository
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-surface border border-border-subtle text-muted">
+                    {githubRepo}
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
             <EmptyState
@@ -755,35 +791,9 @@ export default async function EarlyWarningPage() {
 
       {/* ── Velocity Trend Chart (last 30 days) ────────────────────────────── */}
       <div className="rounded-xl bg-card border border-border-subtle p-5">
-        <h3 className="text-sm font-medium mb-4">Deploy Velocity Trend (Last 30 Days)</h3>
+        <h3 className="text-sm font-medium mb-4">Deploy Velocity Trend (Last 14 Days)</h3>
         {velocitySnapshots && velocitySnapshots.length > 0 ? (
-          <div className="space-y-2">
-            {velocitySnapshots.slice(0, 14).reverse().map((snapshot: any) => {
-              const date = new Date(snapshot.snapshot_date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              });
-              const prs = snapshot.prs_merged || 0;
-              const maxPRs = Math.max(...(velocitySnapshots || []).map((s: any) => s.prs_merged || 0));
-              const width = maxPRs > 0 ? (prs / maxPRs) * 100 : 0;
-
-              return (
-                <div key={snapshot.id} className="flex items-center gap-3">
-                  <div className="w-16 text-xs text-muted font-mono">{date}</div>
-                  <div className="flex-1 h-6 rounded bg-surface overflow-hidden">
-                    <div
-                      className="h-full bg-accent transition-all flex items-center justify-end pr-2"
-                      style={{ width: `${width}%` }}
-                    >
-                      {prs > 0 && (
-                        <span className="text-xs font-medium text-accent-foreground">{prs}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <VelocityTrendChart snapshots={velocitySnapshots as any} />
         ) : (
           <EmptyState
             icon={

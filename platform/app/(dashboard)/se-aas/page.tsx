@@ -200,6 +200,8 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Observability",
     description:
       "Root cause analysis with Brain causal intelligence — trace production incidents upstream through signal history to the engineering or config change that triggered them.",
+    badge: "High Priority Gap",
+    badgeVariant: "warning",
     href: "/se-aas/incident",
     copilotPrompt: "Diagnose our production incident and trace the root cause using Brain causal intelligence",
     colorClass: "text-pink-400",
@@ -213,6 +215,8 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Observability",
     description:
       "Query logs with natural language — pattern detection, error clustering, anomaly timeline construction, and structured export for post-mortems.",
+    badge: "High Priority Gap",
+    badgeVariant: "warning",
     href: "/se-aas/log-query",
     copilotPrompt: "Find all ERROR patterns in the last 24h logs and cluster them by root cause",
     colorClass: "text-yellow-400",
@@ -254,6 +258,8 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Data",
     description:
       "Map data flow through your system — FK relationships, transformation chains, circular dependency detection, and compliance-ready lineage reports.",
+    badge: "High Priority Gap",
+    badgeVariant: "warning",
     href: "/se-aas/lineage",
     copilotPrompt: "Map the data lineage for our user transaction table",
     colorClass: "text-indigo-400",
@@ -634,7 +640,7 @@ export default async function SeAaSDashboardPage() {
                   {/* CTA footer */}
                   <div className="mt-auto pt-2.5 border-t border-border-subtle/50 flex items-center justify-between">
                     <span className={`text-[10px] font-semibold uppercase tracking-wider ${domain.colorClass}`}>
-                      {domain.href ? "View Dashboard" : "Ask in Copilot"}
+                      {domain.href ? "Open Tool" : "Ask in Copilot"}
                     </span>
                     <svg
                       className={`w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 ${domain.colorClass}`}

@@ -11,6 +11,8 @@ interface NotificationPrefs {
   anomaly_detections: boolean;
   min_severity: string;
   email_digest: boolean;
+  digest_email_recipients: string;
+  digest_slack_channel: string;
 }
 
 interface NotificationSettingsProps {
@@ -68,6 +70,8 @@ export function NotificationSettings({ initialPrefs, orgId }: NotificationSettin
       anomaly_detections: true,
       min_severity: "medium",
       email_digest: false,
+      digest_email_recipients: "",
+      digest_slack_channel: "",
     }
   );
   const [saving, setSaving] = useState(false);
@@ -177,6 +181,39 @@ export function NotificationSettings({ initialPrefs, orgId }: NotificationSettin
             )}
           />
         </button>
+      </div>
+
+      {/* Digest Delivery Channels */}
+      <div className="space-y-3 px-4 py-3 rounded-lg bg-surface/50 border border-border-subtle">
+        <div>
+          <span className="text-sm font-medium">Digest Delivery Channels</span>
+          <p className="text-[10px] text-muted">Configure where Monday sprint digests and early warning alerts are delivered</p>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-medium text-muted uppercase tracking-wider">
+            Slack Channel
+          </label>
+          <input
+            type="text"
+            value={prefs.digest_slack_channel}
+            onChange={(e) => setPrefs((prev) => ({ ...prev, digest_slack_channel: e.target.value }))}
+            placeholder="#engineering-alerts"
+            className="w-full text-xs bg-input border border-input-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-medium text-muted uppercase tracking-wider">
+            Email Recipients
+          </label>
+          <input
+            type="text"
+            value={prefs.digest_email_recipients}
+            onChange={(e) => setPrefs((prev) => ({ ...prev, digest_email_recipients: e.target.value }))}
+            placeholder="eng-lead@company.com, cto@company.com"
+            className="w-full text-xs bg-input border border-input-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40"
+          />
+          <p className="text-[9px] text-muted">Comma-separated email addresses</p>
+        </div>
       </div>
 
       {/* Save Button */}

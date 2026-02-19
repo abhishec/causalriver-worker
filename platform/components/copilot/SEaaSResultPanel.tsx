@@ -1,8 +1,85 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
 import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
+
+// ─── Mermaid diagram renderer ─────────────────────────────────────────────────
+
+function MermaidDiagram({ code, title }: { code: string; title?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [svg, setSvg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const uniqueId = useId();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "dark",
+          themeVariables: {
+            primaryColor: "#7c6cf0",
+            primaryTextColor: "#e4e4e7",
+            primaryBorderColor: "#3f3f46",
+            lineColor: "#52525b",
+            secondaryColor: "#1e1b4b",
+            tertiaryColor: "#172554",
+            background: "#0d1117",
+            mainBkg: "#161b22",
+            nodeBorder: "#3f3f46",
+            clusterBkg: "#1a1a2e",
+            titleColor: "#a1a1aa",
+          },
+          flowchart: { htmlLabels: true, curve: "basis" },
+          securityLevel: "strict",
+        });
+        const safeId = `mermaid-result-${uniqueId.replace(/:/g, "-")}`;
+        const { svg: rendered } = await mermaid.render(safeId, code);
+        if (!cancelled) setSvg(rendered);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [code, uniqueId]);
+
+  if (error) {
+    return (
+      <div className="my-3 rounded-xl overflow-hidden border border-warning/20 bg-warning/5 px-4 py-3">
+        <div className="flex items-center gap-2 text-xs text-warning mb-2">
+          <span className="font-medium">Diagram render error</span>
+        </div>
+        <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap">{code}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <div className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-[#0d1117]">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d]">
+        <span className="text-[10px] font-medium text-muted uppercase tracking-wider">
+          {title ?? "Diagram"}
+        </span>
+      </div>
+      <div ref={containerRef} className="p-4 flex items-center justify-center overflow-x-auto">
+        {svg ? (
+          <div
+            className="[&_svg]:max-w-full [&_svg]:h-auto"
+            dangerouslySetInnerHTML={{ __html: svg }}
+          />
+        ) : (
+          <div className="flex items-center gap-2 py-8 text-xs text-muted">
+            <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            Rendering diagram...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ─── Severity / Priority badges ────────────────────────────────────────────────
 
@@ -384,6 +461,35 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
               <div>
                 <SectionLabel>Analysis</SectionLabel>
                 <p className="text-[13px] text-muted-foreground leading-relaxed">{data.summary}</p>
+              </div>
+            )}
+
+            {/* Mermaid diagrams from codeSnippets */}
+            {data.codeSnippets && data.codeSnippets.filter(s => s.language?.toLowerCase() === "mermaid").length > 0 && (
+              <div>
+                <SectionLabel>Architecture Diagrams</SectionLabel>
+                {data.codeSnippets
+                  .filter(s => s.language?.toLowerCase() === "mermaid")
+                  .map((snippet, i) => (
+                    <MermaidDiagram key={i} code={snippet.code} title={snippet.title} />
+                  ))}
+              </div>
+            )}
+
+            {/* Code snippets (non-mermaid) */}
+            {data.codeSnippets && data.codeSnippets.filter(s => s.language?.toLowerCase() !== "mermaid").length > 0 && (
+              <div>
+                <SectionLabel>Code</SectionLabel>
+                {data.codeSnippets
+                  .filter(s => s.language?.toLowerCase() !== "mermaid")
+                  .map((snippet, i) => (
+                    <div key={i} className="my-2 rounded-xl overflow-hidden border border-border-subtle">
+                      <div className="px-4 py-2 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between">
+                        <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{snippet.title ?? snippet.language}</span>
+                      </div>
+                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code}</code></pre>
+                    </div>
+                  ))}
               </div>
             )}
 

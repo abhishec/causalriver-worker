@@ -3,19 +3,16 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-
-// ── Types ────────────────────────────────────────────────────────────────────
+import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
+import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
 
 interface JobResult {
   jobId: string;
   status: "success" | "error";
-  result?: unknown;
+  result?: SEaaSDomainData;
   error?: string;
   artifactId?: string;
 }
-
-// ── Polling helper ───────────────────────────────────────────────────────────
 
 async function pollJob(jobId: string): Promise<JobResult> {
   const MAX_ATTEMPTS = 90;
@@ -30,8 +27,6 @@ async function pollJob(jobId: string): Promise<JobResult> {
   }
   throw new Error("Job timed out after 3 minutes");
 }
-
-// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PerfProfilerPage() {
   const [apmData, setApmData] = useState("");
@@ -77,14 +72,12 @@ export default function PerfProfilerPage() {
   const submitClass = "px-6 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-50";
 
   return (
-    <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">
-      {/* Back link */}
-      <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <Link href="/se-aas" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors">
         ← SE-AAS Dashboard
       </Link>
 
-      {/* Header */}
-      <div className="mt-4 mb-6 flex items-start gap-3">
+      <div className="flex items-start gap-3">
         <span className="text-3xl">⚡</span>
         <div>
           <h1 className="text-lg font-semibold">Performance Profiler</h1>
@@ -94,103 +87,57 @@ export default function PerfProfilerPage() {
         </div>
       </div>
 
-      {/* Form */}
       <Card variant="default" padding="md">
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* apmData */}
           <div className="space-y-1.5">
             <label className={labelClass}>APM Data <span className="text-danger">*</span></label>
-            <textarea
-              className={`${textareaClass} font-mono`}
-              rows={10}
-              required
+            <textarea className={`${textareaClass} font-mono`} rows={10} required
               placeholder="Paste APM traces, slow query logs, or profiler output..."
-              value={apmData}
-              onChange={(e) => setApmData(e.target.value)}
-            />
+              value={apmData} onChange={(e) => setApmData(e.target.value)} />
           </div>
-
-          {/* serviceName */}
           <div className="space-y-1.5">
             <label className={labelClass}>Service Name <span className="text-muted normal-case tracking-normal">(optional)</span></label>
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="e.g. framl-scoring-service"
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
-            />
+            <input type="text" className={inputClass} placeholder="e.g. framl-scoring-service"
+              value={serviceName} onChange={(e) => setServiceName(e.target.value)} />
           </div>
-
-          {/* slaTarget */}
           <div className="space-y-1.5">
             <label className={labelClass}>SLA Target <span className="text-muted normal-case tracking-normal">(optional)</span></label>
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="e.g. p99 < 500ms"
-              value={slaTarget}
-              onChange={(e) => setSlaTarget(e.target.value)}
-            />
+            <input type="text" className={inputClass} placeholder="e.g. p99 < 500ms"
+              value={slaTarget} onChange={(e) => setSlaTarget(e.target.value)} />
           </div>
-
-          {/* environment */}
           <div className="space-y-1.5">
             <label className={labelClass}>Environment</label>
             <select className={selectClass} value={environment} onChange={(e) => setEnvironment(e.target.value)}>
-              {["production", "staging", "development"].map((env) => (
-                <option key={env}>{env}</option>
-              ))}
+              {["production", "staging", "development"].map((env) => <option key={env}>{env}</option>)}
             </select>
           </div>
-
           <div className="flex items-center gap-4 pt-1">
             <button type="submit" disabled={loading || !apmData.trim()} className={submitClass}>
               {loading ? "Profiling…" : "Profile Performance"}
             </button>
-            <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">
-              Cancel
-            </Link>
+            <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">Cancel</Link>
           </div>
         </form>
       </Card>
 
-      {/* Loading */}
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted mt-4">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          Analysing…
+          Analysing performance…
         </div>
       )}
-
-      {/* Error */}
-      {error && (
-        <div className="mt-4 rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="rounded-xl bg-surface border border-border-subtle p-5 mt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-medium">Result</span>
-            {result.status === "success" ? (
-              <Badge variant="success" size="xs">Complete</Badge>
-            ) : (
-              <Badge variant="danger" size="xs">Error</Badge>
-            )}
-          </div>
-          <pre className="text-xs font-mono text-muted leading-relaxed overflow-x-auto whitespace-pre-wrap">
-            {JSON.stringify(result.status === "success" ? result.result : result.error, null, 2)}
-          </pre>
+      {error && <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>}
+      {result && result.status === "success" && result.result && (
+        <div className="h-[600px]">
+          <SEaaSResultPanel data={result.result} />
           {result.artifactId && (
-            <Link
-              href={`/se-aas/artifacts/${result.artifactId}`}
-              className="inline-block mt-4 text-xs text-accent hover:text-accent/80 transition-colors"
-            >
-              View full artifact →
-            </Link>
+            <Link href={`/se-aas/artifacts/${result.artifactId}`}
+              className="inline-block mt-3 text-xs text-accent hover:text-accent/80 transition-colors">View full artifact →</Link>
           )}
         </div>
+      )}
+      {result && result.status === "error" && (
+        <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{String(result.error)}</div>
       )}
     </div>
   );

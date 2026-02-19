@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
+import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,7 +14,7 @@ type FocusKey = "security" | "performance" | "correctness" | "style" | "tests";
 interface JobResult {
   jobId: string;
   status: "success" | "error";
-  result?: unknown;
+  result?: SEaaSDomainData;
   error?: string;
   artifactId?: string;
 }
@@ -87,14 +89,12 @@ export default function PRReviewPage() {
   const submitClass = "px-6 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-50";
 
   return (
-    <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">
-      {/* Back link */}
-      <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <Link href="/se-aas" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors">
         ← SE-AAS Dashboard
       </Link>
 
-      {/* Header */}
-      <div className="mt-4 mb-6 flex items-start gap-3">
+      <div className="flex items-start gap-3">
         <span className="text-3xl">🔍</span>
         <div>
           <h1 className="text-lg font-semibold">PR Review</h1>
@@ -104,10 +104,8 @@ export default function PRReviewPage() {
         </div>
       </div>
 
-      {/* Form */}
       <Card variant="default" padding="md">
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* diff */}
           <div className="space-y-1.5">
             <label className={labelClass}>Diff <span className="text-danger">*</span></label>
             <textarea
@@ -120,7 +118,6 @@ export default function PRReviewPage() {
             />
           </div>
 
-          {/* title */}
           <div className="space-y-1.5">
             <label className={labelClass}>PR Title</label>
             <input
@@ -132,7 +129,6 @@ export default function PRReviewPage() {
             />
           </div>
 
-          {/* language */}
           <div className="space-y-1.5">
             <label className={labelClass}>Language</label>
             <select className={selectClass} value={language} onChange={(e) => setLanguage(e.target.value)}>
@@ -142,7 +138,6 @@ export default function PRReviewPage() {
             </select>
           </div>
 
-          {/* focus */}
           <div className="space-y-2">
             <label className={labelClass}>Focus Areas</label>
             <div className="flex flex-wrap gap-3">
@@ -171,41 +166,33 @@ export default function PRReviewPage() {
         </form>
       </Card>
 
-      {/* Loading */}
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted mt-4">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          Analysing…
+          Analysing PR…
         </div>
       )}
 
-      {/* Error */}
       {error && (
-        <div className="mt-4 rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>
+        <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>
       )}
 
-      {/* Result */}
-      {result && (
-        <div className="rounded-xl bg-surface border border-border-subtle p-5 mt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-medium">Result</span>
-            {result.status === "success" ? (
-              <Badge variant="success" size="xs">Complete</Badge>
-            ) : (
-              <Badge variant="danger" size="xs">Error</Badge>
-            )}
-          </div>
-          <pre className="text-xs font-mono text-muted leading-relaxed overflow-x-auto whitespace-pre-wrap">
-            {JSON.stringify(result.status === "success" ? result.result : result.error, null, 2)}
-          </pre>
+      {result && result.status === "success" && result.result && (
+        <div className="h-[600px]">
+          <SEaaSResultPanel data={result.result} />
           {result.artifactId && (
             <Link
               href={`/se-aas/artifacts/${result.artifactId}`}
-              className="inline-block mt-4 text-xs text-accent hover:text-accent/80 transition-colors"
+              className="inline-block mt-3 text-xs text-accent hover:text-accent/80 transition-colors"
             >
               View full artifact →
             </Link>
           )}
+        </div>
+      )}
+      {result && result.status === "error" && (
+        <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">
+          {String(result.error)}
         </div>
       )}
     </div>

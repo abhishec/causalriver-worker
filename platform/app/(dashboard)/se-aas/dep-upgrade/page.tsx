@@ -3,19 +3,16 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-
-// ── Types ────────────────────────────────────────────────────────────────────
+import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
+import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
 
 interface JobResult {
   jobId: string;
   status: "success" | "error";
-  result?: unknown;
+  result?: SEaaSDomainData;
   error?: string;
   artifactId?: string;
 }
-
-// ── Polling helper ───────────────────────────────────────────────────────────
 
 async function pollJob(jobId: string): Promise<JobResult> {
   const MAX_ATTEMPTS = 90;
@@ -30,8 +27,6 @@ async function pollJob(jobId: string): Promise<JobResult> {
   }
   throw new Error("Job timed out after 3 minutes");
 }
-
-// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DepUpgradePage() {
   const [manifest, setManifest] = useState("");
@@ -75,14 +70,12 @@ export default function DepUpgradePage() {
   const submitClass = "px-6 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-50";
 
   return (
-    <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">
-      {/* Back link */}
-      <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <Link href="/se-aas" className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground transition-colors">
         ← SE-AAS Dashboard
       </Link>
 
-      {/* Header */}
-      <div className="mt-4 mb-6 flex items-start gap-3">
+      <div className="flex items-start gap-3">
         <span className="text-3xl">📦</span>
         <div>
           <h1 className="text-lg font-semibold">Dependency Upgrade</h1>
@@ -92,91 +85,53 @@ export default function DepUpgradePage() {
         </div>
       </div>
 
-      {/* Form */}
       <Card variant="default" padding="md">
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* manifest */}
           <div className="space-y-1.5">
             <label className={labelClass}>Manifest <span className="text-danger">*</span></label>
-            <textarea
-              className={textareaClass}
-              rows={10}
-              required
+            <textarea className={textareaClass} rows={10} required
               placeholder="Paste your package.json, requirements.txt, pom.xml, etc."
-              value={manifest}
-              onChange={(e) => setManifest(e.target.value)}
-            />
+              value={manifest} onChange={(e) => setManifest(e.target.value)} />
           </div>
-
-          {/* ecosystem */}
           <div className="space-y-1.5">
             <label className={labelClass}>Ecosystem</label>
             <select className={selectClass} value={ecosystem} onChange={(e) => setEcosystem(e.target.value)}>
-              {["npm", "pip", "maven", "go", "cargo"].map((ec) => (
-                <option key={ec}>{ec}</option>
-              ))}
+              {["npm", "pip", "maven", "go", "cargo"].map((ec) => <option key={ec}>{ec}</option>)}
             </select>
           </div>
-
-          {/* sourceCode */}
           <div className="space-y-1.5">
             <label className={labelClass}>Source Code <span className="text-muted normal-case tracking-normal">(optional)</span></label>
-            <textarea
-              className={textareaClass}
-              rows={6}
+            <textarea className={textareaClass} rows={6}
               placeholder="Paste relevant source code for breaking change analysis (optional)"
-              value={sourceCode}
-              onChange={(e) => setSourceCode(e.target.value)}
-            />
+              value={sourceCode} onChange={(e) => setSourceCode(e.target.value)} />
           </div>
-
           <div className="flex items-center gap-4 pt-1">
             <button type="submit" disabled={loading || !manifest.trim()} className={submitClass}>
               {loading ? "Analysing…" : "Analyse Dependencies"}
             </button>
-            <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">
-              Cancel
-            </Link>
+            <Link href="/se-aas" className="text-xs text-muted hover:text-foreground transition-colors">Cancel</Link>
           </div>
         </form>
       </Card>
 
-      {/* Loading */}
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-muted mt-4">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          Analysing…
+          Analysing dependencies…
         </div>
       )}
-
-      {/* Error */}
-      {error && (
-        <div className="mt-4 rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="rounded-xl bg-surface border border-border-subtle p-5 mt-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-medium">Result</span>
-            {result.status === "success" ? (
-              <Badge variant="success" size="xs">Complete</Badge>
-            ) : (
-              <Badge variant="danger" size="xs">Error</Badge>
-            )}
-          </div>
-          <pre className="text-xs font-mono text-muted leading-relaxed overflow-x-auto whitespace-pre-wrap">
-            {JSON.stringify(result.status === "success" ? result.result : result.error, null, 2)}
-          </pre>
+      {error && <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{error}</div>}
+      {result && result.status === "success" && result.result && (
+        <div className="h-[600px]">
+          <SEaaSResultPanel data={result.result} />
           {result.artifactId && (
-            <Link
-              href={`/se-aas/artifacts/${result.artifactId}`}
-              className="inline-block mt-4 text-xs text-accent hover:text-accent/80 transition-colors"
-            >
-              View full artifact →
-            </Link>
+            <Link href={`/se-aas/artifacts/${result.artifactId}`}
+              className="inline-block mt-3 text-xs text-accent hover:text-accent/80 transition-colors">View full artifact →</Link>
           )}
         </div>
+      )}
+      {result && result.status === "error" && (
+        <div className="rounded-lg bg-danger/10 border border-danger/20 p-4 text-sm text-danger">{String(result.error)}</div>
       )}
     </div>
   );
