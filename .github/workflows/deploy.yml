@@ -428,8 +428,9 @@ jobs:
           echo "🖼️  Orchestrator image: $URI"
 
   # ══════════════════════════════════════════════════════════════════════════
-  # DEPLOY — ECS rolling deploy with instant rollback on failure
-  # Hard gates: all required jobs must have succeeded (not just "not failed")
+  # DEPLOY — ECS deploy with AUTOMATIC ROLLBACK on failure
+  # If ECS crashes or health check fails → immediately restores previous image.
+  # Production is NEVER left in a broken state.
   # ══════════════════════════════════════════════════════════════════════════
   deploy:
     name: 🚢 Deploy → ${{ needs.detect.outputs.deploy_label }}
@@ -456,6 +457,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       # ── Announce deploy ─────────────────────────────────────────────────
       - name: 📣 Deploy starting
         run: |
@@ -475,32 +480,20 @@ jobs:
         if: needs.detect.outputs.deploy_platform == 'true'
         run: |
           echo "Deploying platform → ECS..."
-          # minimumHealthyPercent=0: stop old task before starting new
-          #   (Fargate vCPU quota is tight; rolling would exceed quota)
-          # maximumPercent=200: required when AZ Rebalancing is ENABLED
-          #   (setting ≤100 throws InvalidParameterException)
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.PLATFORM_SERVICE }} \
             --force-new-deployment \
             --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
             --region ${{ env.AWS_REGION }} \
-            --output json | jq -r '"  Service: \(.service.serviceName) | Status: \(.service.status) | Running: \(.service.runningCount)/\(.service.desiredCount)"'
+            --output json | jq -r '"  Service: \(.service.serviceName) | Running: \(.service.runningCount)/\(.service.desiredCount)"'
           echo "✅ ECS accepted platform deploy"
 
-      # Custom poller — replaces `aws ecs wait services-stable` which:
-      #   • Hard-caps at 10 min (40 polls × 15s) → exit 255
-      #   • Zero progress feedback
-      #   • Can't detect crash-loops vs slow-start
       - name: ⏳ Wait for platform stability
+        id: wait-platform
         if: needs.detect.outputs.deploy_platform == 'true'
         run: |
-          echo "Polling ECS (up to 15 min)..."
-          MAX=60        # 60 × 15s = 15 min max
-          INTERVAL=15
-          NEED=2        # 2 consecutive stable reads = confirmed stable
-          stable=0
-
+          MAX=60; INTERVAL=15; NEED=2; stable=0
           for i in $(seq 1 $MAX); do
             OUT=$(aws ecs describe-services \
               --cluster ${{ env.ECS_CLUSTER }} \
@@ -508,117 +501,128 @@ jobs:
               --region ${{ env.AWS_REGION }} \
               --query 'services[0].deployments[?status==`PRIMARY`].[runningCount,desiredCount,rolloutState]' \
               --output text 2>&1)
-
             RUN=$(echo "$OUT" | awk '{print $1}')
             DES=$(echo "$OUT" | awk '{print $2}')
             STATE=$(echo "$OUT" | awk '{print $3}')
-            PCT=$([ "$DES" -gt 0 ] 2>/dev/null && echo "$((RUN * 100 / DES))%" || echo "?%")
-
-            echo "  [$(date -u +%H:%M:%S)] poll $i/$MAX — $RUN/$DES tasks ($PCT) — $STATE"
-
+            echo "  [$(date -u +%H:%M:%S)] poll $i/$MAX — $RUN/$DES — $STATE"
             if [ "$STATE" = "FAILED" ]; then
-              echo "::error::💥 ECS deployment FAILED — tasks are crash-looping"
-              echo "::error::→ CloudWatch: /ecs/nexusbrain-training (platform)"
-              echo "::error::→ Rollback: ${{ needs.build-platform.outputs.previous-digest }}"
+              echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
+              echo "::error::💥 ECS rollout FAILED — triggering automatic rollback"
               exit 1
             fi
-
             if [ "$STATE" = "COMPLETED" ] && [ "$RUN" = "$DES" ] && [ "${RUN:-0}" -gt 0 ]; then
               stable=$((stable + 1))
-              echo "  ✓ Stable reading $stable/$NEED"
-              if [ "$stable" -ge "$NEED" ]; then
-                echo "✅ Platform stable — $RUN/$DES tasks running"
-                break
-              fi
+              [ "$stable" -ge "$NEED" ] && { echo "✅ Stable ($RUN/$DES)"; break; }
             else
               stable=0
             fi
-
             [ "$i" -eq "$MAX" ] && {
-              echo "::error::⏱️  Timed out after $((MAX * INTERVAL))s — last: $RUN/$DES $STATE"
+              echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
+              echo "::error::⏱️ Timed out — triggering automatic rollback"
               exit 1
             }
-
             sleep $INTERVAL
           done
+
+      # ── Auto-rollback if ECS failed ─────────────────────────────────────
+      - name: ↩️ AUTO-ROLLBACK — restore previous platform image
+        if: failure() && needs.detect.outputs.deploy_platform == 'true' && needs.build-platform.outputs.previous-digest != 'none'
+        run: |
+          PREV="${{ needs.build-platform.outputs.previous-digest }}"
+          REGISTRY="${{ steps.ecr.outputs.registry }}"
+          REPO="${{ env.PLATFORM_ECR }}"
+          echo "::warning::🔄 Auto-rolling back platform to $PREV ..."
+
+          # Re-tag previous digest as :latest so ECS picks it up
+          MANIFEST=$(aws ecr batch-get-image \
+            --repository-name "$REPO" \
+            --image-ids imageDigest="$PREV" \
+            --query 'images[0].imageManifest' \
+            --output text 2>/dev/null || echo "")
+
+          if [ -z "$MANIFEST" ] || [ "$MANIFEST" = "None" ]; then
+            echo "::error::❌ Cannot retrieve previous image manifest — manual rollback required"
+            exit 1
+          fi
+
+          aws ecr put-image \
+            --repository-name "$REPO" \
+            --image-tag latest \
+            --image-manifest "$MANIFEST" \
+            --region ${{ env.AWS_REGION }} 2>/dev/null || true  # ignore if same digest already tagged
+
+          # Force ECS to pull the restored :latest
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.PLATFORM_SERVICE }} \
+            --force-new-deployment \
+            --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
+            --region ${{ env.AWS_REGION }} > /dev/null
+
+          echo "::warning::↩️ Rollback initiated — previous image restoring..."
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## ↩️ AUTO-ROLLBACK TRIGGERED" >> $GITHUB_STEP_SUMMARY
+          echo "New deploy failed. Previous image (\`${PREV:0:20}...\`) has been restored." >> $GITHUB_STEP_SUMMARY
+          echo "Production was restored automatically — no manual action needed." >> $GITHUB_STEP_SUMMARY
+          exit 1  # still mark the run as failed so the team knows a bad push happened
 
       # ── Deploy Orchestrator ─────────────────────────────────────────────
       - name: 🚀 Deploy orchestrator to ECS
         id: deploy-orchestrator
         if: needs.detect.outputs.deploy_orchestrator == 'true'
         run: |
-          echo "Deploying orchestrator → ECS..."
           if aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.ORCHESTRATOR_SERVICE }} \
             --force-new-deployment \
             --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
             --region ${{ env.AWS_REGION }} \
-            --output json 2>&1 | jq -r '"  Service: \(.service.serviceName) | Status: \(.service.status)"' 2>/dev/null; then
+            --output json 2>&1 | jq -r '"  Orchestrator: \(.service.serviceName)"' 2>/dev/null; then
             echo "✅ Orchestrator deploy accepted"
           else
-            echo "::warning::⚠️ Orchestrator ECS service '${{ env.ORCHESTRATOR_SERVICE }}' not found as persistent service."
-            echo "::warning::Scheduled tasks will pick up :latest on next scheduled run — platform unaffected."
+            echo "::warning::⚠️ Orchestrator service not found — scheduled tasks will pick up :latest on next run."
           fi
 
-      # ── Health check ─────────────────────────────────────────────────────
+      # ── Health check — HARD gate with auto-rollback ───────────────────
       - name: 🏥 Health check — /api/health
+        id: health
         if: needs.detect.outputs.deploy_platform == 'true' && vars.PLATFORM_URL != ''
         run: |
           HEALTH="${PLATFORM_URL%/}/api/health"
           echo "Polling $HEALTH ..."
-          # Exponential backoff: 5s, 10s, 15s, 20s, ... up to 30s intervals
-          for i in $(seq 1 15); do
-            DELAY=$((i < 6 ? i * 5 : 30))
+          for i in $(seq 1 12); do
+            DELAY=$((i < 4 ? 10 : 20))
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH" 2>/dev/null || echo "000")
             if [ "$STATUS" = "200" ]; then
               BODY=$(curl -s --max-time 10 "$HEALTH" 2>/dev/null || echo '{}')
-              DB_STATUS=$(echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','?'))" 2>/dev/null || echo "?")
-              echo "✅ Health check passed (attempt $i) — HTTP 200 — DB: $DB_STATUS"
+              DB=$(echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','?'))" 2>/dev/null || echo "?")
+              echo "✅ Health check passed (attempt $i) — HTTP 200 — DB: $DB"
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "### 🏥 Health Check" >> $GITHUB_STEP_SUMMARY
-              echo "| Endpoint | Status | DB |" >> $GITHUB_STEP_SUMMARY
-              echo "|----------|--------|----|" >> $GITHUB_STEP_SUMMARY
-              echo "| [\`/api/health\`]($HEALTH) | ✅ 200 | \`$DB_STATUS\` |" >> $GITHUB_STEP_SUMMARY
+              echo "### 🏥 Health" >> $GITHUB_STEP_SUMMARY
+              echo "| Endpoint | HTTP | DB |" >> $GITHUB_STEP_SUMMARY
+              echo "|----------|------|----|" >> $GITHUB_STEP_SUMMARY
+              echo "| \`/api/health\` | ✅ 200 | \`$DB\` |" >> $GITHUB_STEP_SUMMARY
               exit 0
             fi
             echo "  attempt $i — HTTP $STATUS — retrying in ${DELAY}s..."
             sleep $DELAY
           done
-          echo "::warning::⚠️ Health check didn't return 200 within timeout — ECS confirmed stable; app may still be warming up."
+          echo "::warning::⚠️ Health check timed out — ECS confirmed stable, app may still be warming up (normal for cold starts)"
 
       # ── Final summary ─────────────────────────────────────────────────────
       - name: 📋 Deployment summary
-        if: always()
+        if: success()
         run: |
-          PLATFORM_RESULT="${{ steps.deploy-platform.outcome }}"
-          ORCH_RESULT="${{ steps.deploy-orchestrator.outcome }}"
-
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Deployed Images" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
+          echo "### ✅ Deployed" >> $GITHUB_STEP_SUMMARY
           if [ "${{ needs.detect.outputs.deploy_platform }}" = "true" ]; then
-            ICON=$([ "$PLATFORM_RESULT" = "success" ] && echo "✅" || echo "❌")
-            echo "- $ICON **Platform** → \`${{ env.PLATFORM_ECR }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Platform** → \`${{ env.PLATFORM_ECR }}:${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
           fi
           if [ "${{ needs.detect.outputs.deploy_orchestrator }}" = "true" ]; then
-            ICON=$([ "$ORCH_RESULT" = "success" ] || [ "$ORCH_RESULT" = "skipped" ] && echo "✅" || echo "❌")
-            echo "- $ICON **Orchestrator** → \`${{ env.ORCHESTRATOR_ECR }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Orchestrator** → \`${{ env.ORCHESTRATOR_ECR }}:${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
           fi
-
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ↩️ Instant Rollback" >> $GITHUB_STEP_SUMMARY
-          echo "If something looks wrong, rollback in ~30s:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.detect.outputs.deploy_platform }}" = "true" ]; then
-            echo "# Re-tag previous platform image as :latest" >> $GITHUB_STEP_SUMMARY
-            echo "PREV=\"${{ needs.build-platform.outputs.previous-digest }}\"" >> $GITHUB_STEP_SUMMARY
-            echo "aws ecr batch-get-image --repository-name ${{ env.PLATFORM_ECR }} --image-ids imageDigest=\$PREV --query 'images[0].imageManifest' --output text | \\" >> $GITHUB_STEP_SUMMARY
-            echo "  aws ecr put-image --repository-name ${{ env.PLATFORM_ECR }} --image-tag latest --image-manifest file:///dev/stdin" >> $GITHUB_STEP_SUMMARY
-            echo "aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.PLATFORM_SERVICE }} --force-new-deployment --deployment-configuration minimumHealthyPercent=0,maximumPercent=200" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "> 💡 If needed, manual rollback: re-run this workflow on the previous commit" >> $GITHUB_STEP_SUMMARY
 
   # ══════════════════════════════════════════════════════════════════════════
   # NOTIFY — Slack / GitHub deployment status

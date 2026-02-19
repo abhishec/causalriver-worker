@@ -1,0 +1,90 @@
+name: 🛡️ Auto-Rollback on CI Failure
+
+# ============================================================================
+# AUTO-ROLLBACK GUARDIAN
+# ============================================================================
+# Watches for failed deploys on main. If a deploy fails, immediately
+# re-deploys the last known GOOD commit — production stays live.
+#
+# Logic:
+#   1. Deploy fails on main
+#   2. This workflow triggers
+#   3. Finds the last commit on main where CI passed
+#   4. Triggers a deploy of that commit
+#   5. Annotates the failed commit so the team knows what happened
+# ============================================================================
+
+on:
+  workflow_run:
+    workflows: ["🚀 Deploy to Production"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  guard:
+    name: 🛡️ Rollback Guard
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Find last good commit
+        id: good
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FAILED_SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "❌ Deploy failed on: $FAILED_SHA"
+
+          # Walk back through recent commits to find last one with passing CI
+          for SHA in $(git log --format="%H" -20); do
+            if [ "$SHA" = "$FAILED_SHA" ]; then
+              continue  # skip the bad commit itself
+            fi
+
+            # Check if this commit had a passing deploy
+            RESULT=$(gh api \
+              "repos/${{ github.repository }}/commits/$SHA/check-runs" \
+              --jq '[.check_runs[] | select(.name | contains("Deploy")) | .conclusion] | first' \
+              2>/dev/null || echo "unknown")
+
+            if [ "$RESULT" = "success" ]; then
+              echo "✅ Last good commit: $SHA"
+              echo "sha=$SHA" >> $GITHUB_OUTPUT
+              break
+            fi
+            echo "  $SHA — $RESULT (skipping)"
+          done
+
+      - name: 🔄 Trigger rollback deploy
+        if: steps.good.outputs.sha != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          GOOD_SHA="${{ steps.good.outputs.sha }}"
+          FAILED_SHA="${{ github.event.workflow_run.head_sha }}"
+
+          echo "🔄 Rolling back to $GOOD_SHA (failed: $FAILED_SHA)"
+
+          # Trigger deploy workflow on the last good SHA
+          gh workflow run deploy.yml \
+            --ref "$GOOD_SHA" \
+            --field target=both \
+            --field skip_preflight=true \
+            --field skip_migrations=true \
+            2>/dev/null || \
+          gh workflow run deploy.yml \
+            --field target=both \
+            --field skip_preflight=true \
+            --field skip_migrations=true
+
+          echo "::warning::🛡️ Auto-rollback triggered → deploying $GOOD_SHA"
+
+      - name: ⚠️ Cannot find good commit
+        if: steps.good.outputs.sha == ''
+        run: |
+          echo "::error::🛡️ Auto-rollback: could not find a previously-passing commit in the last 20."
+          echo "::error::Manual intervention required — check ECS and ECR for the last stable image."
