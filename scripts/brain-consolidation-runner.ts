@@ -443,102 +443,111 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     log('COGNITIVE', `Input: ${cogSignals.length} signals, ${cogEdges.length} edges, ${cogPatterns.length} patterns, ${cogPredictions.length} predictions`);
 
     // Step 3: Run cognitive stack with real data
-    const cogResult = cognitiveStack.runCycle({
-      signals: cogSignals,
-      causalEdges: cogEdges,
-      patterns: cogPatterns,
-      predictions: cogPredictions,
-      metrics: cogMetrics,
-    });
-
-    const pipelineDuration = ((Date.now() - pipelineStartTime) / 1000).toFixed(1);
-    log('COGNITIVE', `Cognitive Stack complete in ${pipelineDuration}s`);
-    log('COGNITIVE', `  L3  Deep Dreaming:       ${cogResult.dreaming?.associationsFound ?? 0} associations, ${cogResult.dreaming?.crossDomainConnections ?? 0} cross-domain`);
-    log('COGNITIVE', `  L4  Hierarchical Memory: ${cogResult.memory?.itemsEncoded ?? 0} items encoded, ${cogResult.memory?.episodesRecorded ?? 0} episodes`);
-    log('COGNITIVE', `  L5  Curiosity:           ${cogResult.curiosity?.hypothesesGenerated ?? 0} hypotheses, ${cogResult.curiosity?.knowledgeGaps ?? 0} gaps`);
-    log('COGNITIVE', `  L6  Self-Modifying:      ${cogResult.selfModel?.suggestedModifications ?? 0} modifications, calibration=${(cogResult.selfModel?.calibrationScore ?? 0).toFixed(2)}`);
-    log('COGNITIVE', `  L7  Intelligence Mesh:   ${cogResult.mesh?.patternsContributed ?? 0} patterns, ${cogResult.mesh?.collectivePatterns ?? 0} collective`);
-    log('COGNITIVE', `  L8  Causal Imagination:  ${cogResult.imagination?.scenariosPlanned ?? 0} scenarios, ${cogResult.imagination?.analogiesFound ?? 0} analogies`);
-    log('COGNITIVE', `  L9  Theory of Mind:      updated=${cogResult.theoryOfMind?.userModelUpdated ?? false}, intent="${cogResult.theoryOfMind?.predictedIntent ?? 'unknown'}"`);
-    log('COGNITIVE', `  L10 Temporal:            ${cogResult.temporal?.rhythmsDetected ?? 0} rhythms, ${cogResult.temporal?.goalsTracked ?? 0} goals tracked`);
-    log('COGNITIVE', `  L11 Red Team:            ${cogResult.redTeam?.predictionsTested ?? 0} tests, robustness=${(cogResult.redTeam?.robustnessAvg ?? 0).toFixed(2)}`);
-    log('COGNITIVE', `  L12 Experimentation:     ${cogResult.experimentation?.experimentsSuggested ?? 0} experiments suggested`);
-    log('COGNITIVE', `  L13 Immune System:       ${cogResult.immune?.signalsChecked ?? 0} checked, ${cogResult.immune?.signalsQuarantined ?? 0} quarantined`);
-    log('COGNITIVE', `  L14 Goal Planning:       ${cogResult.planning?.goalsPlanned ?? 0} goals, ${cogResult.planning?.feasiblePaths ?? 0} feasible paths`);
-    log('COGNITIVE', `  L15 Narrative:           ${cogResult.narrative ? `"${cogResult.narrative.title}" (${cogResult.narrative.keyInsights?.length ?? 0} insights)` : 'none generated'}`);
-
-    // Step 4: Persist LEAP states to Supabase
+    // Bug #5 fix: use try/finally so LEAP states are persisted even on partial failure.
+    // If runCycle() crashes mid-way, layers may still have accumulated state worth saving.
+    let cogResult: any = null;
     try {
-      const layers = cognitiveStack.layers;
-      for (const [leapType, layer] of Object.entries({
-        deep_dreaming: layers.dreaming,
-        hierarchical_memory: layers.memory,
-        theory_of_mind: layers.theoryOfMind,
-        temporal_consciousness: layers.temporal,
-      })) {
-        if ((layer as any).getState) {
-          await supabase.from('cognitive_leap_state').upsert({
-            organization_id: ORGANIZATION_ID,
-            leap_type: leapType,
-            state_data: (layer as any).getState(),
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'organization_id,leap_type' });
+      cogResult = cognitiveStack.runCycle({
+        signals: cogSignals,
+        causalEdges: cogEdges,
+        patterns: cogPatterns,
+        predictions: cogPredictions,
+        metrics: cogMetrics,
+      });
+
+      const pipelineDuration = ((Date.now() - pipelineStartTime) / 1000).toFixed(1);
+      log('COGNITIVE', `Cognitive Stack complete in ${pipelineDuration}s`);
+      log('COGNITIVE', `  L3  Deep Dreaming:       ${cogResult.dreaming?.associationsFound ?? 0} associations, ${cogResult.dreaming?.crossDomainConnections ?? 0} cross-domain`);
+      log('COGNITIVE', `  L4  Hierarchical Memory: ${cogResult.memory?.itemsEncoded ?? 0} items encoded, ${cogResult.memory?.episodesRecorded ?? 0} episodes`);
+      log('COGNITIVE', `  L5  Curiosity:           ${cogResult.curiosity?.hypothesesGenerated ?? 0} hypotheses, ${cogResult.curiosity?.knowledgeGaps ?? 0} gaps`);
+      log('COGNITIVE', `  L6  Self-Modifying:      ${cogResult.selfModel?.suggestedModifications ?? 0} modifications, calibration=${(cogResult.selfModel?.calibrationScore ?? 0).toFixed(2)}`);
+      log('COGNITIVE', `  L7  Intelligence Mesh:   ${cogResult.mesh?.patternsContributed ?? 0} patterns, ${cogResult.mesh?.collectivePatterns ?? 0} collective`);
+      log('COGNITIVE', `  L8  Causal Imagination:  ${cogResult.imagination?.scenariosPlanned ?? 0} scenarios, ${cogResult.imagination?.analogiesFound ?? 0} analogies`);
+      log('COGNITIVE', `  L9  Theory of Mind:      updated=${cogResult.theoryOfMind?.userModelUpdated ?? false}, intent="${cogResult.theoryOfMind?.predictedIntent ?? 'unknown'}"`);
+      log('COGNITIVE', `  L10 Temporal:            ${cogResult.temporal?.rhythmsDetected ?? 0} rhythms, ${cogResult.temporal?.goalsTracked ?? 0} goals tracked`);
+      log('COGNITIVE', `  L11 Red Team:            ${cogResult.redTeam?.predictionsTested ?? 0} tests, robustness=${(cogResult.redTeam?.robustnessAvg ?? 0).toFixed(2)}`);
+      log('COGNITIVE', `  L12 Experimentation:     ${cogResult.experimentation?.experimentsSuggested ?? 0} experiments suggested`);
+      log('COGNITIVE', `  L13 Immune System:       ${cogResult.immune?.signalsChecked ?? 0} checked, ${cogResult.immune?.signalsQuarantined ?? 0} quarantined`);
+      log('COGNITIVE', `  L14 Goal Planning:       ${cogResult.planning?.goalsPlanned ?? 0} goals, ${cogResult.planning?.feasiblePaths ?? 0} feasible paths`);
+      log('COGNITIVE', `  L15 Narrative:           ${cogResult.narrative ? `"${cogResult.narrative.title}" (${cogResult.narrative.keyInsights?.length ?? 0} insights)` : 'none generated'}`);
+    } catch (err) {
+      logError('COGNITIVE', 'Cognitive stack runCycle() failed mid-way — will still persist partial LEAP state', err);
+    } finally {
+      // Step 4: Persist LEAP states to Supabase (ALWAYS runs, even on partial failure)
+      try {
+        const layers = cognitiveStack.layers;
+        for (const [leapType, layer] of Object.entries({
+          deep_dreaming: layers.dreaming,
+          hierarchical_memory: layers.memory,
+          theory_of_mind: layers.theoryOfMind,
+          temporal_consciousness: layers.temporal,
+        })) {
+          if ((layer as any).getState) {
+            await supabase.from('cognitive_leap_state').upsert({
+              organization_id: ORGANIZATION_ID,
+              leap_type: leapType,
+              state_data: (layer as any).getState(),
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,leap_type' });
+          }
+        }
+        log('COGNITIVE', `LEAP states persisted to Supabase${cogResult ? '' : ' (partial — runCycle failed)'}`);
+      } catch (err) {
+        logError('COGNITIVE', 'LEAP state persistence failed (non-critical)', err);
+      }
+
+      // Step 5: Persist layer outputs to ai_memory (only if runCycle succeeded)
+      if (cogResult) {
+        try {
+          if (cogResult.narrative) {
+            await supabase.from('ai_memory').upsert({
+              organization_id: ORGANIZATION_ID,
+              memory_type: 'narrative',
+              domain: 'brain',
+              content: cogResult.narrative.summary || cogResult.narrative.title,
+              importance: cogResult.narrative.confidence || 0.5,
+              confidence: cogResult.narrative.confidence || 0.5,
+              metadata: {
+                source: 'L15_narrative',
+                title: cogResult.narrative.title,
+                keyInsights: cogResult.narrative.keyInsights?.length ?? 0,
+                generatedAt: new Date().toISOString(),
+              },
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,memory_type,domain' });
+          }
+          if (cogResult.experimentation?.topExperiment) {
+            await supabase.from('ai_memory').upsert({
+              organization_id: ORGANIZATION_ID,
+              memory_type: 'experiment',
+              domain: 'brain',
+              content: cogResult.experimentation.topExperiment,
+              importance: 0.6,
+              confidence: 0.5,
+              metadata: { source: 'L12_experimentation', suggested: cogResult.experimentation.experimentsSuggested },
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,memory_type,domain' });
+          }
+          if (cogResult.planning?.topRecommendation) {
+            await supabase.from('ai_memory').upsert({
+              organization_id: ORGANIZATION_ID,
+              memory_type: 'goal_plan',
+              domain: 'brain',
+              content: cogResult.planning.topRecommendation,
+              importance: 0.7,
+              confidence: 0.5,
+              metadata: { source: 'L14_goal_planning', goalsPlanned: cogResult.planning.goalsPlanned },
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,memory_type,domain' });
+          }
+          log('COGNITIVE', 'Layer outputs persisted to ai_memory');
+        } catch (err) {
+          logError('COGNITIVE', 'Layer output persistence failed (non-critical)', err);
         }
       }
-      log('COGNITIVE', 'LEAP states persisted to Supabase');
-    } catch (err) {
-      logError('COGNITIVE', 'LEAP state persistence failed (non-critical)', err);
-    }
-
-    // Step 5: Persist layer outputs to ai_memory
-    try {
-      if (cogResult.narrative) {
-        await supabase.from('ai_memory').upsert({
-          organization_id: ORGANIZATION_ID,
-          memory_type: 'narrative',
-          domain: 'brain',
-          content: cogResult.narrative.summary || cogResult.narrative.title,
-          importance: cogResult.narrative.confidence || 0.5,
-          confidence: cogResult.narrative.confidence || 0.5,
-          metadata: {
-            source: 'L15_narrative',
-            title: cogResult.narrative.title,
-            keyInsights: cogResult.narrative.keyInsights?.length ?? 0,
-            generatedAt: new Date().toISOString(),
-          },
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'organization_id,memory_type,domain' });
-      }
-      if (cogResult.experimentation?.topExperiment) {
-        await supabase.from('ai_memory').upsert({
-          organization_id: ORGANIZATION_ID,
-          memory_type: 'experiment',
-          domain: 'brain',
-          content: cogResult.experimentation.topExperiment,
-          importance: 0.6,
-          confidence: 0.5,
-          metadata: { source: 'L12_experimentation', suggested: cogResult.experimentation.experimentsSuggested },
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'organization_id,memory_type,domain' });
-      }
-      if (cogResult.planning?.topRecommendation) {
-        await supabase.from('ai_memory').upsert({
-          organization_id: ORGANIZATION_ID,
-          memory_type: 'goal_plan',
-          domain: 'brain',
-          content: cogResult.planning.topRecommendation,
-          importance: 0.7,
-          confidence: 0.5,
-          metadata: { source: 'L14_goal_planning', goalsPlanned: cogResult.planning.goalsPlanned },
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'organization_id,memory_type,domain' });
-      }
-      log('COGNITIVE', 'Layer outputs persisted to ai_memory');
-    } catch (err) {
-      logError('COGNITIVE', 'Layer output persistence failed (non-critical)', err);
     }
   } catch (err) {
-    logError('COGNITIVE', 'Cognitive stack L3-L15 failed', err);
+    logError('COGNITIVE', 'Cognitive stack L3-L15 failed (pre-runCycle setup error)', err);
     logError('COGNITIVE', 'Continuing with learning steps — consolidation data is still valid', undefined);
   }
 
@@ -842,13 +851,14 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
         cascadeAlerts.push(alert);
         postConsolidationCascadeAlerts++;
         try {
-          await supabase.from('cascade_alerts').insert({
+          // Bug #8 fix: upsert with onConflict to prevent duplicate alerts on re-run
+          await supabase.from('cascade_alerts').upsert({
             organization_id: alert.organizationId, alert_id: alert.alertId,
             severity: alert.severity, trigger_domain: alert.triggerDomain,
             trigger_signal_type: alert.triggerSignalType, anomaly_score: alert.anomalyScore,
             predicted_path: alert.predictedPath, expected_impacts: alert.expectedImpacts,
             recommended_interventions: alert.recommendedInterventions,
-          });
+          }, { onConflict: 'alert_id' });
         } catch { /* non-critical */ }
       },
     });
@@ -1059,9 +1069,12 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // Powers the live brain dashboard at usebrainos.com
   // One row per org per day — upserts so re-runs overwrite gracefully
   // IMPORTANT: Skip writing if consolidation produced zero data (e.g. lock failures)
-  // to avoid overwriting a good earlier snapshot with zeros
+  // or if any domains failed — partial data would overwrite a good earlier snapshot.
+  // Bug #6 fix: also check `failed > 0` to prevent partial-run overwrites.
   if (totalSignals === 0 && totalNew === 0 && totalEdges === 0) {
     log('SNAPSHOT', 'Skipping snapshot write — consolidation produced zero data (would overwrite good data)');
+  } else if (failed > 0) {
+    log('SNAPSHOT', `Skipping snapshot write — ${failed} domain(s) failed (partial data would overwrite good snapshot)`);
   } else
   try {
     const totalPatterns = results.reduce((sum, r) => sum + r.report.stats.patternsFound, 0);
@@ -1080,14 +1093,17 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
     regionsActive.push('simulation');                          // PFC — always active during consolidation
 
     // Get total brain knowledge connections (edges + memories) for cumulative tracking
+    // Bug #13 fix: scope total_connections to current org (was globally counting all orgs)
     let totalConnectionsInDB = totalEdges;
     try {
       const { count: edgeCount } = await supabase
         .from('causal_relationships_statistical')
-        .select('id', { count: 'exact', head: true });
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', ORGANIZATION_ID);
       const { count: memoryCount } = await supabase
         .from('ai_memory')
-        .select('id', { count: 'exact', head: true });
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', ORGANIZATION_ID);
       totalConnectionsInDB = (edgeCount || 0) + (memoryCount || 0);
     } catch {
       // Fall back to session count
@@ -1199,7 +1215,8 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
         memoriesCreated: totalMemories,
         orgsConsolidated: results.length,
       },
-      narrative: results[0]?.report?.narrative || null,
+      // Bug #14 fix: pick the narrative from the current org's result (not always results[0])
+      narrative: (results.find(r => r.organizationId === ORGANIZATION_ID) ?? results[0])?.report?.narrative || null,
       run_duration_ms: Date.now() - overallStart,
       run_status: failed === 0 ? 'completed' : 'partial',
     }, {
@@ -1224,12 +1241,15 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
         });
 
         log('LLM', 'Generating executive consolidation briefing...');
+        // Bug #14 fix: use current org's result, aggregate warnings from all domains
+        const orgResult = results.find(r => r.organizationId === ORGANIZATION_ID) ?? results[0];
+        const allWarnings = results.flatMap(r => r.report?.warnings || []);
         const briefing = await amplifier.generateConsolidationBriefing(
           {
-            narrative: results[0]?.report?.narrative || undefined,
+            narrative: orgResult?.report?.narrative || undefined,
             discoveries: allDiscoveries.slice(0, 10),
-            warnings: results[0]?.report?.warnings || [],
-            stats: results[0]?.report?.stats || {},
+            warnings: allWarnings,
+            stats: orgResult?.report?.stats || {},
           },
           {
             signalsProcessed: totalSignals,
