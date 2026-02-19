@@ -665,3 +665,26 @@ jobs:
                 ]
               }]
             }"
+
+      - name: Email on deploy failure
+        # Only fires when deploy actually fails — CI failures do NOT trigger this.
+        # Requires secrets: MAIL_USERNAME, MAIL_PASSWORD (app password), NOTIFY_EMAIL
+        if: needs.deploy.result == 'failure' && vars.MAIL_ENABLED == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "❌ NexusBrain deploy FAILED — ${{ github.sha && github.sha || '' }}"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: NexusBrain CI <${{ secrets.MAIL_USERNAME }}>
+          body: |
+            Deploy to production FAILED.
+
+            Commit: ${{ github.sha }}
+            Actor:  ${{ github.actor }}
+            Run:    ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Check the Actions log for details.
