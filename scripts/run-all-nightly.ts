@@ -174,18 +174,19 @@ async function phase2Consolidation(): Promise<PhaseResult> {
   }
 
   try {
-    const envVars = [
-      'CONSOLIDATE_ALL_ORGS=true',
-      'CONSOLIDATION_MODE=once',
-      VERBOSE ? 'VERBOSE=true' : '',
-    ].filter(Boolean).join(' ');
-
     execSync(
-      `${envVars} tsx scripts/brain-consolidation-runner.ts`,
+      `tsx scripts/brain-consolidation-runner.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 7200000, // 2 hour timeout
+        env: {
+          ...process.env,
+          NODE_OPTIONS: '--max-old-space-size=4096',
+          CONSOLIDATE_ALL_ORGS: 'true',
+          CONSOLIDATION_MODE: 'once',
+          VERBOSE: VERBOSE ? 'true' : 'false',
+        },
       }
     );
 
@@ -224,11 +225,16 @@ async function phase3Oracle(): Promise<PhaseResult> {
   try {
     // Oracle already iterates all orgs when ORGANIZATION_ID is unset
     execSync(
-      `VERBOSE=true tsx scripts/run-oracle-job.ts`,
+      `tsx scripts/run-oracle-job.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 600000, // 10 min timeout
+        env: {
+          ...process.env,
+          NODE_OPTIONS: '--max-old-space-size=4096',
+          VERBOSE: 'true',
+        },
       }
     );
 
@@ -269,11 +275,17 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
 
     try {
       execSync(
-        `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} tsx scripts/run-full-consolidation.ts`,
+        `tsx scripts/run-full-consolidation.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
           timeout: 3600000, // 1 hour per org
+          env: {
+            ...process.env,
+            NODE_OPTIONS: '--max-old-space-size=4096',
+            ORGANIZATION_ID: org.id,
+            VERBOSE: VERBOSE ? 'true' : 'false',
+          },
         }
       );
 
