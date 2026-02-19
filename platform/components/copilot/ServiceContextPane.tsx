@@ -15,10 +15,11 @@
  * available via slash commands in the chat input.
  */
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { DOMAIN_CATALOGUE, type DomainEntry } from "@/lib/se-aas/domain-catalogue";
 import { AAS_COMMANDS } from "./aas-commands";
+import { S3UploadModal } from "@/components/connectors/S3UploadModal";
 
 // ─── General copilot artifact cards ──────────────────────────────────────────
 
@@ -85,6 +86,8 @@ interface ServiceContextPaneProps {
 }
 
 export function ServiceContextPane({ activeService, onOpenArtifact }: ServiceContextPaneProps) {
+  const [uploadOpen, setUploadOpen] = useState(false);
+
   // Build cards from the real catalogues
   const artifactCards = useMemo(() => {
     if (activeService === "seaas") {
@@ -120,6 +123,24 @@ export function ServiceContextPane({ activeService, onOpenArtifact }: ServiceCon
           {commandCount} {activeService === "general" ? "capabilities" : "commands"} available · Type / to use
         </p>
       </div>
+
+      {/* ── Upload Xero GL (AAS only) ────────────────────────────────────── */}
+      {activeService === "aas" && (
+        <div className="px-4 py-3 border-b border-border-subtle">
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 hover:border-emerald-500/30 text-emerald-400 text-[12px] font-medium transition-all group"
+          >
+            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            Upload Xero GL
+          </button>
+          <p className="text-[10px] text-muted mt-1.5 text-center leading-relaxed">
+            Drop your Xero General Ledger export to generate financial statements automatically
+          </p>
+        </div>
+      )}
 
       {/* ── Artifact Cards grouped by category ────────────────────────────── */}
       <div className="px-4 py-3">
@@ -205,6 +226,23 @@ export function ServiceContextPane({ activeService, onOpenArtifact }: ServiceCon
           </div>
         </div>
       </div>
+
+      {/* ── S3 Upload Modal (AAS Xero GL) ──────────────────────────────────── */}
+      <S3UploadModal
+        isOpen={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onUploaded={(result) => {
+          setUploadOpen(false);
+          if (result.success && result.fileType === "gl-data") {
+            // Auto-trigger full financial analysis via copilot prompt injection
+            window.dispatchEvent(
+              new CustomEvent("copilot-inject-prompt", {
+                detail: "Run a full financial analysis on the uploaded GL data — generate P&L, Balance Sheet, Trial Balance, GST F5, and Transaction Interpretations",
+              })
+            );
+          }
+        }}
+      />
     </div>
   );
 }

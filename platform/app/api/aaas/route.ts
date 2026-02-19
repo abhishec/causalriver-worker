@@ -10,7 +10,7 @@
  *   3. brain-statement-gen    → P&L, Balance Sheet, Cash Flow
  *   4. brain-tax-compliance   → GST/tax computation
  *   5. brain-audit-preparer   → Audit readiness & workpapers
- *   6. brain-anomaly-detect   → Benford's Law, duplicates, vendor concentration
+ *   6. brain-anomaly-detect   → Transaction pattern analysis, duplicates, vendor concentration
  *   7. brain-causal-accountant → V9: Standard accounting + NexusBrain causal overlay
  *
  * Every execution feeds back into the Brain (signal + prediction + evolution).
@@ -23,6 +23,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { executeAccountingAgent, type AccountingAction } from "@/lib/aas/domain-executor";
 import { saveArtifact } from "@/lib/se-aas/job-queue";
+import { generateTransactionInterpretations as generateInterpretations } from "@/lib/aas/transaction-interpretations";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 120s for agent execution
@@ -242,6 +243,18 @@ function processGLData(transactions: GLTransaction[]) {
   const totalCOGS = cogsAccounts.reduce((s, a) => s + a.amount, 0);
   const grossMargin = totalRevenue > 0 ? ((totalRevenue - totalCOGS) / totalRevenue) * 100 : 0;
 
+  // ── EBITDA: Net Profit + Depreciation + Amortisation + Interest/Finance Costs ──
+  const depreciationAmount = expenseAccounts
+    .filter(a => /depreciation/i.test(a.account))
+    .reduce((s, a) => s + a.amount, 0);
+  const amortisationAmount = expenseAccounts
+    .filter(a => /amortis/i.test(a.account))
+    .reduce((s, a) => s + a.amount, 0);
+  const interestExpense = expenseAccounts
+    .filter(a => /interest expense|bank charge|finance cost/i.test(a.account))
+    .reduce((s, a) => s + a.amount, 0);
+  const ebitda = netProfit + depreciationAmount + amortisationAmount + interestExpense;
+
   // Balance Sheet
   const assetEntries = Array.from(accountBalances.entries())
     .filter(([_, b]) => b.type === 'asset' || b.type === 'bank')
@@ -299,7 +312,7 @@ function processGLData(transactions: GLTransaction[]) {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 10);
 
-  // Anomaly detection — Benford's Law
+  // Anomaly detection — Transaction Pattern Analysis
   const amounts = transactions
     .map(t => Math.max(t.debit, t.credit))
     .filter(a => a >= 10);
@@ -432,7 +445,7 @@ function processGLData(transactions: GLTransaction[]) {
   // Top 30 transactions by value, each with a plain-English explanation of what
   // the transaction means in business terms. This is the key Req 1 deliverable
   // that the design partner will specifically look for.
-  const transactionInterpretations = generateTransactionInterpretations(transactions, accountBalances);
+  const transactionInterpretations = generateInterpretations(transactions as any, accountBalances);
 
   return {
     summary: {
@@ -455,6 +468,10 @@ function processGLData(transactions: GLTransaction[]) {
       expenseAccounts: expenseAccounts.slice(0, 25),
       totalExpenses,
       netProfit,
+      ebitda,
+      depreciationAmount,
+      amortisationAmount,
+      interestExpense,
       grossMargin,
       topExpenseCategories,
     },
@@ -477,7 +494,7 @@ function processGLData(transactions: GLTransaction[]) {
     },
     monthlyTrends: monthlyTrends.slice(-24), // Last 24 months
     anomalyDetection: {
-      benfordsLaw: { expected, observed, chiSquare, conforming: benfordsConforming },
+      transactionPatternAnalysis: { expected, observed, patternConformityScore: chiSquare, conforming: benfordsConforming },
     },
     accountTypeSummary: Array.from(accountTypeSummary.entries()).map(([type, data]) => ({
       type,
@@ -942,6 +959,40 @@ export async function POST(request: Request) {
                 service: "AAS",
               },
               createdBy: user.id,
+            });
+            // ── Notify: AAS analysis complete ──────────────────────────────
+            // Insert notification so CFO / stakeholders see it in NotificationBell.
+            // The notification API reads cascade_alerts → auto-surfaces within 60s.
+            const anomalyCount = ((result.result as any)?.anomalies?.length ??
+              (result.result as any)?.causalAnomalies?.length ?? 0);
+            const actionLabel = action === 'full' ? 'Full Financial Analysis' :
+              action === 'tax' ? 'GST Compliance Review' :
+              action === 'audit' ? 'Audit Preparation' :
+              action === 'statements' ? 'Financial Statements' :
+              action === 'anomaly' ? 'Risk Factor Detection' :
+              action.charAt(0).toUpperCase() + action.slice(1);
+
+            await serviceSupabase.from('cascade_alerts').insert({
+              organization_id: orgId!,
+              alert_type: 'accounting_report',
+              severity: anomalyCount > 3 ? 'high' : anomalyCount > 0 ? 'medium' : 'low',
+              message: `${actionLabel} complete. ${
+                anomalyCount > 0
+                  ? `${anomalyCount} risk factor${anomalyCount > 1 ? 's' : ''} detected — review recommended.`
+                  : 'No risk factors detected.'
+              } Completed in ${((result.timing?.totalMs ?? 0) / 1000).toFixed(1)}s.`,
+              is_read: false,
+              metadata: {
+                action: result.action,
+                agentName: result.agentName,
+                durationMs: result.timing?.totalMs ?? 0,
+                anomalyCount,
+                jurisdiction,
+              },
+            }).then(() => {
+              // Notification inserted successfully
+            }).catch((notifErr: any) => {
+              console.warn("[AAS] Notification insert failed (non-fatal):", notifErr?.message);
             });
           } catch (artifactErr: any) {
             // Non-fatal — artifact persistence failure should never break the stream

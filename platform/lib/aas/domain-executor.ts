@@ -470,7 +470,7 @@ function createBrainExecutionInterface(
 
         case 'causal-anomaly-detect': {
           // THIS IS THE DIFFERENTIATOR — use Brain's causal edges
-          // CAS (Causal Anomaly Score) 0–100 per Function 02 spec
+          // Financial Risk Score (CAS) 0–100 per Function 02 spec
           const financialEdges = brainContext.financialCausalEdges || [];
           const allEdges = brainContext.causalEdges || [];
           const causalAnomalies: Array<{
@@ -480,13 +480,89 @@ function createBrainExecutionInterface(
             condition?: string;
           }> = [];
 
-          // ── Check the 4 High-Risk Conditions from spec (A/B/C/D) ────────────
-          // Condition A: Revenue spike without corresponding deferred revenue growth
-          //   → signals of revenue recognition gaming
-          const hasRevenueEdge = allEdges.some(e =>
+          // ── Spec-Exact High-Risk Conditions A–D ───────────────────────────
+          // These are the 4 conditions from the P1 Function 02 specification.
+
+          // Condition A: Vendor payment without purchase order (PO)
+          //   → Signals of unauthorised expenditure or fraudulent disbursement
+          const expenseVendorEdges = allEdges.filter(e =>
+            (e.source_signal || '').toLowerCase().match(/expense|vendor|creditor|payment/) ||
+            (e.target_signal || '').toLowerCase().match(/expense|vendor|creditor|payment/)
+          );
+          const hasPOSignal = allEdges.some(e =>
+            (e.source_signal || '').toLowerCase().match(/purchase.?order|po|approval/) ||
+            (e.target_signal || '').toLowerCase().match(/purchase.?order|po|approval/)
+          );
+          if (expenseVendorEdges.length > 0 && !hasPOSignal) {
+            causalAnomalies.push({
+              type: 'condition_a_vendor_payment_no_po',
+              condition: 'A',
+              description: `Vendor payment activity detected without corresponding purchase order or approval signal. ${expenseVendorEdges.length} expense/vendor pattern(s) found with no PO trail — investigate for unauthorised expenditure.`,
+              severity: 'high',
+            });
+          }
+
+          // Condition B: Revenue recognised without delivery confirmation
+          //   → Signals of premature or fictitious revenue recognition
+          const revenueEdges = allEdges.filter(e =>
             (e.source_signal || '').toLowerCase().includes('revenue') ||
             (e.target_signal || '').toLowerCase().includes('revenue')
           );
+          const hasDeliverySignal = allEdges.some(e =>
+            (e.source_signal || '').toLowerCase().match(/deliver|fulfil|ship|complet/) ||
+            (e.target_signal || '').toLowerCase().match(/deliver|fulfil|ship|complet/)
+          );
+          if (revenueEdges.length > 0 && !hasDeliverySignal) {
+            causalAnomalies.push({
+              type: 'condition_b_revenue_no_delivery',
+              condition: 'B',
+              description: `Revenue recognised without delivery or fulfilment confirmation in financial relationships. Check SFRS(I) 15 performance obligation criteria — may indicate premature recognition.`,
+              severity: 'high',
+            });
+          }
+
+          // Condition C: Intercompany transaction deviation
+          //   → Signals of irregular transfer pricing or related-party manipulation
+          const intercompanyEdges = allEdges.filter(e =>
+            (e.source_signal || '').toLowerCase().match(/intercompany|related.?party|advance.?to|due.?to/) ||
+            (e.target_signal || '').toLowerCase().match(/intercompany|related.?party|advance.?to|due.?to/)
+          );
+          for (const icEdge of intercompanyEdges.slice(0, 5)) {
+            if (icEdge.confidence < 0.6) {
+              causalAnomalies.push({
+                type: 'condition_c_intercompany_deviation',
+                condition: 'C',
+                description: `Intercompany relationship ${icEdge.source_signal} → ${icEdge.target_signal} shows irregular pattern (confidence: ${icEdge.confidence.toFixed(2)}). Verify transfer pricing documentation and arm's-length basis per IRAS guidelines.`,
+                severity: 'high',
+              });
+            }
+          }
+
+          // Condition D: GST input tax claimed without established supplier history
+          //   → Signals of fictitious input tax claims
+          const gstInputEdges = allEdges.filter(e =>
+            (e.source_signal || '').toLowerCase().match(/gst.*input|input.*tax/) ||
+            (e.target_signal || '').toLowerCase().match(/gst.*input|input.*tax/)
+          );
+          const hasSupplierHistory = allEdges.some(e =>
+            (e.source_signal || '').toLowerCase().match(/supplier|vendor.*hist|trade.?creditor/) ||
+            (e.target_signal || '').toLowerCase().match(/supplier|vendor.*hist|trade.?creditor/)
+          );
+          if (gstInputEdges.length > 0 && !hasSupplierHistory) {
+            causalAnomalies.push({
+              type: 'condition_d_gst_no_supplier_history',
+              condition: 'D',
+              description: `GST input tax claims detected without established supplier history in financial relationships. Verify tax invoices from GST-registered suppliers are on file — possible fictitious claim risk.`,
+              severity: 'high',
+            });
+          }
+
+          // ── Extended Conditions A2–D2 (additional risk checks) ──────────────
+          // These extend the core A-D with supplementary pattern-based detections.
+
+          // Condition A2: Revenue spike without corresponding deferred revenue growth
+          //   → signals of revenue recognition gaming
+          const hasRevenueEdge = revenueEdges.length > 0;
           if (hasRevenueEdge) {
             const revenueEdge = allEdges.find(e =>
               (e.source_signal || '').toLowerCase().includes('revenue') &&
@@ -494,15 +570,15 @@ function createBrainExecutionInterface(
             );
             if (revenueEdge && (revenueEdge.effect_size || revenueEdge.strength || 0) > 1.0) {
               causalAnomalies.push({
-                type: 'condition_a_revenue_recognition',
-                condition: 'A',
+                type: 'condition_a2_revenue_recognition',
+                condition: 'A2',
                 description: `Revenue signal spike detected without corresponding deferred revenue movement (effect size: ${((revenueEdge.effect_size || revenueEdge.strength || 0) as number).toFixed(2)}). Check SFRS(I) 15 recognition criteria — may indicate accelerated booking.`,
                 severity: 'high',
               });
             }
           }
 
-          // Condition B: Expense spike in month preceding audit period
+          // Condition B2: Expense spike in month preceding audit period
           //   → signals of expense dumping / window dressing
           const patterns = brainContext.patterns || [];
           const hasAuditPattern = patterns.some(p =>
@@ -511,48 +587,47 @@ function createBrainExecutionInterface(
           );
           if (hasAuditPattern) {
             causalAnomalies.push({
-              type: 'condition_b_audit_period_expense_spike',
-              condition: 'B',
-              description: 'Expense pattern anomaly detected near audit window. Brain identified expense concentration inconsistent with monthly run-rate — investigate for window dressing or accelerated accruals.',
+              type: 'condition_b2_audit_period_expense_spike',
+              condition: 'B2',
+              description: 'Expense pattern anomaly detected near audit window. Identified expense concentration inconsistent with monthly run-rate — investigate for window dressing or accelerated accruals.',
               severity: 'high',
             });
           }
 
-          // Condition C: Causal link between payroll and CPF broken
+          // Condition C2: Payroll → CPF link broken
           //   → signals of CPF under-filing or phantom employees
           const payrollCpfEdge = allEdges.find(e =>
             ((e.source_signal || '').toLowerCase().includes('payroll') || (e.source_signal || '').toLowerCase().includes('salary')) &&
             (e.target_signal || '').toLowerCase().includes('cpf')
           );
           if (!payrollCpfEdge && allEdges.length > 5) {
-            // Only flag if we have enough edges to be confident the link is genuinely missing
             causalAnomalies.push({
-              type: 'condition_c_cpf_payroll_link_absent',
-              condition: 'C',
-              description: 'Expected Payroll → CPF causal link not established. Brain has not confirmed CPF contributions are tracking payroll. Verify CPF filings with IRAS — possible under-contribution or phantom payroll.',
+              type: 'condition_c2_cpf_payroll_link_absent',
+              condition: 'C2',
+              description: 'Expected Payroll → CPF financial link not established. CPF contributions are not tracking payroll. Verify CPF filings with IRAS — possible under-contribution or phantom payroll.',
               severity: 'high',
             });
           }
 
-          // Condition D: Broken causal relationships from Brain edges
+          // Condition D2: Broken financial relationships from Brain edges
           for (const edge of financialEdges.slice(0, 10)) {
             if (edge.confidence < 0.5 || (edge.p_value && edge.p_value > 0.1)) {
               causalAnomalies.push({
-                type: 'condition_d_weak_causal_relationship',
-                condition: 'D',
-                description: `Causal link ${edge.source_signal} → ${edge.target_signal} is statistically weak (confidence: ${edge.confidence.toFixed(2)}). Expected relationship is not holding — investigate root cause.`,
+                type: 'condition_d2_weak_financial_relationship',
+                condition: 'D2',
+                description: `Financial relationship ${edge.source_signal} → ${edge.target_signal} has low confidence (${edge.confidence.toFixed(2)}). Expected business pattern is not holding — investigate root cause.`,
                 severity: edge.confidence < 0.3 ? 'high' : 'medium',
               });
             }
           }
 
-          // ── Compute CAS (Causal Anomaly Score) 0–100 ────────────────────────
+          // ── Compute Financial Risk Score 0–100 ──────────────────────────────
           // 5 structured dimensions per spec, each 0–20:
-          //   1. Completeness: Are all expected causal edges present?
-          //   2. Consistency: Do causal relationships hold statistically?
-          //   3. Conformity: Benford's Law / distribution checks
+          //   1. Completeness: Are all expected financial relationships present?
+          //   2. Consistency: Do business patterns hold?
+          //   3. Conformity: Transaction pattern checks
           //   4. Condition A-D High-Risk triggers
-          //   5. Brain Intelligence Level (edges + patterns available)
+          //   5. Brain Intelligence Level (relationships + patterns available)
           const expectedEdges = 9; // Domain-expert accounting priors seeded on GL upload
           const actualEdges = allEdges.length;
           const completenessScore = Math.min(20, Math.round((actualEdges / expectedEdges) * 20));
@@ -560,14 +635,15 @@ function createBrainExecutionInterface(
           const weakEdges = allEdges.filter(e => e.confidence < 0.6).length;
           const consistencyScore = Math.max(0, 20 - Math.round(weakEdges * 4));
 
-          // Conformity: use ratio of edges with p_value < 0.05 (statistically confirmed)
+          // Conformity: use ratio of edges with high confidence (p_value < 0.05)
           const confirmedEdges = allEdges.filter(e => !e.p_value || e.p_value < 0.05).length;
           const conformityScore = allEdges.length > 0 ? Math.round((confirmedEdges / allEdges.length) * 20) : 10;
 
-          // High-risk conditions (A-D): deduct 5 per condition A/B/C triggered, 2 per D
-          const abcConditions = causalAnomalies.filter(a => ['A', 'B', 'C'].includes(a.condition || '')).length;
-          const dConditions = causalAnomalies.filter(a => a.condition === 'D').length;
-          const conditionScore = Math.max(0, 20 - (abcConditions * 5) - (dConditions * 2));
+          // High-risk conditions: deduct 5 per primary condition (A/B/C/D), 3 per extended (A2/B2/C2), 2 per D2
+          const primaryConditions = causalAnomalies.filter(a => ['A', 'B', 'C', 'D'].includes(a.condition || '')).length;
+          const extendedAbcConditions = causalAnomalies.filter(a => ['A2', 'B2', 'C2'].includes(a.condition || '')).length;
+          const d2Conditions = causalAnomalies.filter(a => a.condition === 'D2').length;
+          const conditionScore = Math.max(0, 20 - (primaryConditions * 5) - (extendedAbcConditions * 3) - (d2Conditions * 2));
 
           // Intelligence: brain quality
           const intelligenceRaw = brainContext.brainEvolution?.intelligenceScore ?? 0;
@@ -588,11 +664,11 @@ function createBrainExecutionInterface(
               conditionAlerts: conditionScore,
               brainIntelligence: intelligenceScore,
             },
-            highRiskConditions: causalAnomalies.filter(a => ['A', 'B', 'C'].includes(a.condition || '')),
+            highRiskConditions: causalAnomalies.filter(a => ['A', 'B', 'C', 'D', 'A2', 'B2', 'C2'].includes(a.condition || '')),
             riskScore: causalAnomalies.length > 0 ? 0.6 + (causalAnomalies.length * 0.05) : 0.1,
             brainValueAdd: causalAnomalies.length > 0
-              ? `CAS ${casScore}/100 (${casRating.replace(/_/g, ' ')}) — ${causalAnomalies.length} causal anomalies detected, invisible to any pure LLM without a causal graph`
-              : `CAS ${casScore}/100 — All causal relationships holding. Data consistency confirmed by Brain's ${actualEdges} causal edges.`,
+              ? `Financial Risk Score ${casScore}/100 (${casRating.replace(/_/g, ' ')}) — ${causalAnomalies.length} risk factors detected that standard AI would miss`
+              : `Financial Risk Score ${casScore}/100 — All financial relationships holding. Data consistency confirmed across ${actualEdges} monitored business patterns.`,
             edgesAnalyzed: actualEdges,
           };
         }

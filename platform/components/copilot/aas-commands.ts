@@ -2,7 +2,7 @@ import type { SlashCommand } from "./SlashCommandPicker";
 
 /**
  * AAS (Accounting-as-a-Service) slash commands.
- * These are the 6 accounting capabilities accessible via `/` in the chat input.
+ * These are the 7 accounting capabilities accessible via `/` in the chat input.
  * Built from the AAAS_AGENT_CATALOGUE in domain-catalogue.ts.
  */
 export const AAS_COMMANDS: SlashCommand[] = [
@@ -45,9 +45,9 @@ export const AAS_COMMANDS: SlashCommand[] = [
   {
     id: "aas-anomaly",
     label: "anomaly-check",
-    description: "Run Benford's Law anomaly detection on transactions",
+    description: "Detect unusual transaction patterns",
     icon: "🔮",
-    prompt: "Run Benford's Law analysis on transaction amounts to detect anomalies",
+    prompt: "Analyse transaction patterns to detect unusual activity and risk factors",
     service: "aas",
     category: "Compliance",
   },
@@ -59,5 +59,14 @@ export const AAS_COMMANDS: SlashCommand[] = [
     prompt: "Show me the top transactions and transaction summary for 2025",
     service: "aas",
     category: "Financial Statements",
+  },
+  {
+    id: "aas-benchmark",
+    label: "benchmark",
+    description: "Generate benchmark comparison report for manual validation",
+    icon: "📐",
+    prompt: "Generate a benchmark comparison report — show each line item with AI-computed value, status, and validation notes for manual review",
+    service: "aas",
+    category: "Quality Assurance",
   },
 ];

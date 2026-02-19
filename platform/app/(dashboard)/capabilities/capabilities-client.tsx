@@ -301,9 +301,9 @@ const CAPABILITIES: Capability[] = [
   {
     id: "acct-phase1", name: "Core Bookkeeping", servicePack: "accounting-aas",
     category: "accounting-core", categoryLabel: "Phase 1 — Core Bookkeeping",
-    description: "Pure GL processing pipeline for PH Accounting: account classification, journal entries, trial balance, P&L, Balance Sheet, and anomaly detection (Benford's Law). 6 AI agents processing 49,684 real Xero GL transactions from the PH Accounting org.",
+    description: "Pure GL processing pipeline for PH Accounting: account classification, journal entries, trial balance, P&L, Balance Sheet, and transaction pattern analysis. 6 AI agents processing 49,684 real Xero GL transactions from the PH Accounting org.",
     status: "live", domainType: "acct-phase1",
-    examplePrompts: ["Show me the profit and loss breakdown", "Classify all accounts in the general ledger", "Run Benford's Law analysis on transaction amounts"],
+    examplePrompts: ["Show me the profit and loss breakdown", "Classify all accounts in the general ledger", "Analyse transaction patterns to detect unusual activity"],
     dataRequired: ["Xero GL export (xlsx) — PH Accounting org", "Chart of accounts"],
     brainIntegration: "Phase 1 operates as a standalone GL intelligence engine for PH Accounting — no Brain dependency. Validates pure accounting accuracy before layering causal intelligence.",
     icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z",

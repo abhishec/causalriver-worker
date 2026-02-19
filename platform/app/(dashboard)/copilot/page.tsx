@@ -24,14 +24,14 @@ const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color
   {
     id: "general",
     label: "Copilot",
-    description: "Your causal intelligence co-pilot — every answer grounded in statistical evidence",
+    description: "Your intelligence co-pilot — every answer grounded in evidence-based analysis",
     color: "accent",
     alwaysVisible: true,
   },
   {
     id: "aas",
     label: "Accounting",
-    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by causal AI",
+    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
     color: "emerald",
     alwaysVisible: false, // Only if enabled for this org
   },
@@ -47,12 +47,12 @@ const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
     name: "Intelligence Copilot",
-    description: "Your causal intelligence co-pilot — every answer grounded in statistical evidence",
+    description: "Your intelligence co-pilot — every answer grounded in evidence-based analysis",
     color: "accent",
   },
   aas: {
     name: "Accounting Intelligence",
-    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by causal AI",
+    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
     color: "emerald",
   },
   seaas: {
@@ -65,7 +65,7 @@ const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string;
 const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
   general: [
     "Why is churn increasing?",
-    "Show me the strongest causal relationships",
+    "Show me the strongest financial relationships",
     "What anomalies were detected today?",
     "Give me the full intelligence report",
   ],

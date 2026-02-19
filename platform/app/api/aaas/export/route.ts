@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
+import { generateTransactionInterpretations, type GLTransaction as SharedGLTransaction } from "@/lib/aas/transaction-interpretations";
 
 export const dynamic = "force-dynamic";
 
@@ -245,6 +246,25 @@ function buildCSVExport(transactions: GLTransaction[], company: string): string 
   const netVarPct = netPrior !== 0 ? ((netCurrent - netPrior) / Math.abs(netPrior) * 100) : 0;
   plRows.push(['NET PROFIT / (LOSS)', netCurrent.toFixed(2), netPrior.toFixed(2), `${netVarPct >= 0 ? '+' : ''}${netVarPct.toFixed(1)}%`]);
 
+  // ── EBITDA ──
+  const depAmt = Array.from(accountBalances.entries())
+    .filter(([acct, b]) => b.type === 'expense' && /depreciation/i.test(acct))
+    .reduce((s, [_, b]) => s + (b.debit - b.credit), 0);
+  const amortAmt = Array.from(accountBalances.entries())
+    .filter(([acct, b]) => b.type === 'expense' && /amortis/i.test(acct))
+    .reduce((s, [_, b]) => s + (b.debit - b.credit), 0);
+  const intExp = Array.from(accountBalances.entries())
+    .filter(([acct, b]) => b.type === 'expense' && /interest expense|bank charge|finance cost/i.test(acct))
+    .reduce((s, [_, b]) => s + (b.debit - b.credit), 0);
+  const ebitdaVal = netCurrent + depAmt + amortAmt + intExp;
+
+  plRows.push(['', '', '', '']);
+  plRows.push(['--- EBITDA ---', '', '', '']);
+  plRows.push(['Add back: Depreciation', depAmt.toFixed(2), '', '']);
+  plRows.push(['Add back: Amortisation', amortAmt.toFixed(2), '', '']);
+  plRows.push(['Add back: Interest / Finance Costs', intExp.toFixed(2), '', '']);
+  plRows.push(['EBITDA', ebitdaVal.toFixed(2), '', '']);
+
   sections.push(csvSection(
     `PROFIT & LOSS STATEMENT — Prior-Period Comparison`,
     ['Account', `Current Period (${currentLabel}) SGD`, `Prior Period (${priorLabel}) SGD`, 'Variance %'],
@@ -329,26 +349,30 @@ function buildCSVExport(transactions: GLTransaction[], company: string): string 
   ];
   sections.push(csvSection('IRAS GST F5 RETURN SCHEDULE (SG 9%)', ['Box', 'Amount (SGD)'], gstRows));
 
-  // ── SECTION 5: Transaction Interpretations (top 30) ──────────────────────
-  const topTxns = [...sorted]
-    .sort((a, b) => Math.max(b.debit, b.credit) - Math.max(a.debit, a.credit))
-    .slice(0, 30);
+  // ── SECTION 5: Transaction Interpretations (top 30) with Narrative ────────
+  // Uses the shared interpretation engine to generate plain-English narratives
+  // for each of the top 30 transactions by value.
+  const interpretations = generateTransactionInterpretations(
+    sorted as SharedGLTransaction[],
+    accountBalances as Map<string, { type: string; debit: number; credit: number; count: number }>,
+  );
 
-  const txnRows: (string | number)[][] = topTxns.map(t => [
-    t.date.slice(0, 10),
+  const txnRows: (string | number)[][] = interpretations.map(t => [
+    t.date,
     t.account,
-    classifyAccount(t.account),
+    t.accountType,
     t.description || '',
     t.reference || '',
-    t.debit > 0 ? 'Debit' : 'Credit',
-    Math.max(t.debit, t.credit).toFixed(2),
-    t.taxRateName || '',
-    t.tax.toFixed(2),
+    t.direction === 'debit' ? 'Debit' : 'Credit',
+    t.amount.toFixed(2),
+    t.category,
+    t.businessImpact,
+    t.narrative,
   ]);
 
   sections.push(csvSection(
     'TRANSACTION INTERPRETATIONS — Top 30 by Value',
-    ['Date', 'Account', 'Type', 'Description', 'Reference', 'Direction', 'Amount (SGD)', 'Tax Rate', 'Tax Amount (SGD)'],
+    ['Date', 'Account', 'Type', 'Description', 'Reference', 'Direction', 'Amount (SGD)', 'Category', 'Business Impact', 'Narrative'],
     txnRows,
   ));
 

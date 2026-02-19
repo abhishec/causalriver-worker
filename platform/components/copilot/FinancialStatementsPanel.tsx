@@ -78,7 +78,7 @@ function PLTab({ pl, period }: { pl: AccountingDomainData["profitAndLoss"]; peri
       <Row label="Total Expenses" value={pl.expenses} bold />
 
       <div className="mx-3 my-2 h-px bg-border-subtle" />
-      <div className="flex items-center justify-between px-3 py-2 bg-surface/30 rounded-lg mx-2 mb-2">
+      <div className="flex items-center justify-between px-3 py-2 bg-surface/30 rounded-lg mx-2 mb-1">
         <span className="text-[13px] font-semibold text-foreground">Net Income / (Loss)</span>
         <span className={cn(
           "text-[14px] font-bold tabular-nums font-mono",
@@ -87,6 +87,21 @@ function PLTab({ pl, period }: { pl: AccountingDomainData["profitAndLoss"]; peri
           SGD {formatSGD(pl.netIncome)}
         </span>
       </div>
+
+      {/* EBITDA */}
+      {pl.ebitda !== undefined && (
+        <div className="mx-2 mb-2">
+          <div className="flex items-center justify-between px-3 py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+            <span className="text-[12px] font-semibold text-foreground">EBITDA</span>
+            <span className={cn(
+              "text-[13px] font-bold tabular-nums font-mono",
+              pl.ebitda < 0 ? "text-danger" : "text-emerald-400"
+            )}>
+              SGD {formatSGD(pl.ebitda)}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

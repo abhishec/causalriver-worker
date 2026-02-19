@@ -257,6 +257,88 @@ async function main() {
   }
 
   // ═══════════════════════════════════════════════════════
+  // STAGE 4: MONTHLY FINANCE INTELLIGENCE SUMMARY
+  // ═══════════════════════════════════════════════════════
+  divider('STAGE 4: MONTHLY FINANCE INTELLIGENCE SUMMARY');
+
+  try {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    // Query past month's AAS artifacts for this org
+    const { data: aasArtifacts, error: aasError } = await supabase
+      .from('se_aas_artifacts')
+      .select('artifact_data, created_at')
+      .eq('organization_id', ORGANIZATION_ID)
+      .gte('created_at', oneMonthAgo.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (aasError) throw new Error(aasError.message);
+
+    const artifacts = aasArtifacts ?? [];
+    log('FINANCE', `Found ${artifacts.length} AAS artifact(s) in the past month`);
+
+    if (artifacts.length > 0) {
+      // Aggregate anomaly counts and financial relationship stats
+      let totalAnomalies = 0;
+      let highSeverity = 0;
+      let totalRelationships = 0;
+      let avgCasScore = 0;
+      let casCount = 0;
+
+      for (const art of artifacts) {
+        const data = art.artifact_data as Record<string, any> | null;
+        if (!data) continue;
+
+        const anomalies = (data.causalAnomalies ?? data.anomalies ?? []) as Array<any>;
+        totalAnomalies += anomalies.length;
+        highSeverity += anomalies.filter((a: any) => a.severity === 'high').length;
+
+        if (typeof data.edgesAnalyzed === 'number') {
+          totalRelationships += data.edgesAnalyzed;
+        }
+
+        if (typeof data.casScore === 'number') {
+          avgCasScore += data.casScore;
+          casCount++;
+        }
+      }
+
+      const avgScore = casCount > 0 ? Math.round(avgCasScore / casCount) : 0;
+      const riskRating = avgScore >= 80 ? 'Low Risk' : avgScore >= 60 ? 'Elevated Risk' : avgScore >= 40 ? 'High Risk' : 'Critical Risk';
+
+      // Insert monthly finance summary alert for Abhi's NotificationBell
+      await supabase.from('cascade_alerts').insert({
+        organization_id: ORGANIZATION_ID,
+        alert_type: 'accounting_monthly_summary',
+        severity: highSeverity > 5 ? 'high' : totalAnomalies > 0 ? 'medium' : 'low',
+        message: `Monthly Finance Intelligence: ${artifacts.length} analysis run(s) completed. ` +
+          `${totalAnomalies} risk factor${totalAnomalies !== 1 ? 's' : ''} detected ` +
+          `(${highSeverity} high-severity). ` +
+          `Average Financial Risk Score: ${avgScore}/100 (${riskRating}). ` +
+          `${totalRelationships} financial relationships monitored.`,
+        is_read: false,
+        metadata: {
+          report_type: 'monthly_finance_summary',
+          month: new Date().toISOString().substring(0, 7),
+          analysis_runs: artifacts.length,
+          total_anomalies: totalAnomalies,
+          high_severity: highSeverity,
+          avg_cas_score: avgScore,
+          risk_rating: riskRating,
+          total_relationships: totalRelationships,
+        },
+      });
+
+      log('FINANCE', `Monthly finance alert created: ${totalAnomalies} anomalies, avg score ${avgScore}/100 (${riskRating})`);
+    } else {
+      log('FINANCE', 'No AAS artifacts found for this month — skipping finance summary');
+    }
+  } catch (err) {
+    log('FINANCE', `Failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // ═══════════════════════════════════════════════════════
   // PERSIST
   // ═══════════════════════════════════════════════════════
   const duration = Date.now() - startTime;

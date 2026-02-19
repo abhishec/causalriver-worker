@@ -43,6 +43,7 @@ export interface AccountingDomainData {
     revenue: number;
     expenses: number;
     netIncome: number;
+    ebitda?: number;
     revenueBreakdown?: Array<{ account: string; amount: number }>;
     expenseBreakdown?: Array<{ account: string; amount: number }>;
   };
@@ -144,7 +145,7 @@ export interface CopilotChatProps {
 
 const DEFAULT_PROMPTS = [
   "Why is churn increasing?",
-  "Show me the strongest causal relationships",
+  "Show me the strongest financial relationships",
   "What anomalies were detected today?",
   "Predict next month's revenue",
   "What's our burn rate and runway?",
@@ -1618,8 +1619,8 @@ export function CopilotChat({
               Ask NexusBrain anything
             </h2>
             <p className="text-sm text-muted max-w-md mb-8">
-              {persona.description}. All answers are grounded in statistical
-              evidence from the NexusBrain causal intelligence engine.
+              {persona.description}. All answers are grounded in evidence-based
+              analysis from the NexusBrain intelligence engine.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl w-full">
               {examplePrompts.map((prompt) => (

@@ -25,6 +25,7 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execSync } from 'node:child_process';
+import { freemem } from 'node:os';
 
 // ── Load .env ──
 function loadEnv(): void {
@@ -109,6 +110,57 @@ interface PhaseResult {
 }
 
 // ============================================================================
+// DYNAMIC HEAP SIZING — Compute optimal heap per org based on data volume
+// ============================================================================
+
+const HEAP_TIERS = [
+  { maxSignals: 1_000,   heapMB: 1024 },  // Tiny:   1GB
+  { maxSignals: 10_000,  heapMB: 2048 },  // Small:  2GB
+  { maxSignals: 100_000, heapMB: 3072 },  // Medium: 3GB
+  { maxSignals: 500_000, heapMB: 4096 },  // Large:  4GB
+  { maxSignals: Infinity, heapMB: 5120 }, // Huge:   5GB
+];
+
+async function getOrgHeapSize(
+  supabase: ReturnType<typeof createClient>,
+  orgId: string,
+): Promise<{ heapMB: number; signalCount: number; edgeCount: number }> {
+  // Count signals from last 48 hours (same window as consolidation)
+  const [signalResult, edgeResult] = await Promise.all([
+    supabase
+      .from('cross_domain_signals')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .gte('signal_timestamp', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()),
+    supabase
+      .from('causal_relationships_statistical')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId),
+  ]);
+
+  const signalCount = signalResult.count ?? 0;
+  const edgeCount = edgeResult.count ?? 0;
+  // Use the larger of signal count and edge count * 10 (edges consume more memory per item)
+  const effectiveSize = Math.max(signalCount, edgeCount * 10);
+
+  // Find appropriate tier
+  let heapMB = HEAP_TIERS[HEAP_TIERS.length - 1].heapMB;
+  for (const tier of HEAP_TIERS) {
+    if (effectiveSize <= tier.maxSignals) {
+      heapMB = tier.heapMB;
+      break;
+    }
+  }
+
+  // Clamp to available system memory (leave 2GB for OS + parent process)
+  const availableMB = Math.floor(freemem() / (1024 * 1024));
+  const maxHeapMB = Math.max(1024, availableMB - 2048);
+  heapMB = Math.min(heapMB, maxHeapMB);
+
+  return { heapMB, signalCount, edgeCount };
+}
+
+// ============================================================================
 // PHASE 1: Edge Function Daily Jobs (per-org)
 // ============================================================================
 
@@ -184,31 +236,41 @@ async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>,
 // each org, so we skip the explicit core brain pass at the end.
 // ============================================================================
 
-async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
+async function phase2Consolidation(supabase: ReturnType<typeof createClient>, orgs: OrgInfo[]): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
   let processed = 0;
 
-  log('PHASE-2', `Running brain consolidation for ${orgs.length} orgs (each in isolated process)...`);
+  log('PHASE-2', `Running brain consolidation for ${orgs.length} orgs (each in isolated process with dynamic heap)...`);
 
   if (DRY_RUN) {
     for (const org of orgs) {
-      log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for ${org.name}`);
+      const { heapMB, signalCount, edgeCount } = await getOrgHeapSize(supabase, org.id);
+      log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for ${org.name} (${heapMB}MB heap — ${signalCount} signals, ${edgeCount} edges)`);
     }
     log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for Core Brain (final pass)`);
     return { phase: 'Brain Consolidation', success: true, orgsProcessed: 0, durationMs: 0, errors };
   }
 
-  // Process each org brain in its own subprocess (fresh 4GB heap each time)
+  // Process each org brain in its own subprocess with dynamically-sized heap
   const totalConsolidation = orgs.length + 1; // +1 for core brain
   for (let i = 0; i < orgs.length; i++) {
     const org = orgs[i];
     const orgStart = Date.now();
-    log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name}`));
+
+    // Dynamic heap: measure org data volume, compute optimal heap size
+    let heapMB = 4096; // fallback
+    try {
+      const sizing = await getOrgHeapSize(supabase, org.id);
+      heapMB = sizing.heapMB;
+      log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — ${sizing.signalCount} signals, ${sizing.edgeCount} edges)`));
+    } catch {
+      log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name} (${heapMB}MB heap — sizing fallback)`));
+    }
 
     try {
       execSync(
-        `ORGANIZATION_ID=${org.id} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
+        `ORGANIZATION_ID=${org.id} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${heapMB} --expose-gc" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
@@ -217,7 +279,7 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
       );
 
       const elapsed = ((Date.now() - orgStart) / 1000).toFixed(1);
-      log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s)`);
+      log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s, ${heapMB}MB heap)`);
       processed++;
     } catch (err: any) {
       const errMsg = `Brain consolidation failed for ${org.name}: ${err.message}`;
@@ -228,11 +290,19 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
   }
 
   // Final pass: consolidate core brain (receives all federated knowledge)
-  log('PHASE-2', progress(totalConsolidation, totalConsolidation, 'Core Brain (final federation pass)'));
+  let coreHeapMB = 4096;
+  try {
+    const coreSizing = await getOrgHeapSize(supabase, CORE_BRAIN_ORG_ID);
+    coreHeapMB = coreSizing.heapMB;
+    log('PHASE-2', progress(totalConsolidation, totalConsolidation, `Core Brain (${coreHeapMB}MB heap — ${coreSizing.signalCount} signals, ${coreSizing.edgeCount} edges)`));
+  } catch {
+    log('PHASE-2', progress(totalConsolidation, totalConsolidation, `Core Brain (${coreHeapMB}MB heap — sizing fallback)`));
+  }
+
   const coreStart = Date.now();
   try {
     execSync(
-      `ORGANIZATION_ID=${CORE_BRAIN_ORG_ID} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
+      `ORGANIZATION_ID=${CORE_BRAIN_ORG_ID} CONSOLIDATION_MODE=once VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${coreHeapMB} --expose-gc" pnpm exec tsx scripts/brain-consolidation-runner.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
@@ -240,7 +310,7 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
       }
     );
     const elapsed = ((Date.now() - coreStart) / 1000).toFixed(1);
-    log('PHASE-2', `  ✓ Core Brain consolidated (${elapsed}s)`);
+    log('PHASE-2', `  ✓ Core Brain consolidated (${elapsed}s, ${coreHeapMB}MB heap)`);
     processed++;
   } catch (err: any) {
     const errMsg = `Brain consolidation failed for Core Brain: ${err.message}`;
@@ -253,7 +323,7 @@ async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
     success: errors.length === 0,
     orgsProcessed: processed,
     durationMs: Date.now() - start,
-    details: `Per-org isolation — ${processed}/${orgs.length + 1} orgs consolidated (4GB heap each)`,
+    details: `Per-org isolation — ${processed}/${orgs.length + 1} orgs consolidated (dynamic heap)`,
     errors,
   };
 }
@@ -276,7 +346,7 @@ async function phase3Oracle(): Promise<PhaseResult> {
   try {
     // Oracle already iterates all orgs when ORGANIZATION_ID is unset
     execSync(
-      `VERBOSE=true NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/run-oracle-job.ts`,
+      `VERBOSE=true NODE_OPTIONS="--max-old-space-size=4096 --expose-gc" pnpm exec tsx scripts/run-oracle-job.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
@@ -305,24 +375,33 @@ async function phase3Oracle(): Promise<PhaseResult> {
 // PHASE 4: Full Consolidation Pipeline (brain-pipeline.runFullCycle per org)
 // ============================================================================
 
-async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
+async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, orgs: OrgInfo[]): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
   let processed = 0;
 
   for (let i = 0; i < orgs.length; i++) {
     const org = orgs[i];
-    log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name}`));
+
+    // Dynamic heap sizing for full pipeline too
+    let heapMB = 4096;
+    try {
+      const sizing = await getOrgHeapSize(supabase, org.id);
+      heapMB = sizing.heapMB;
+      log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap)`));
+    } catch {
+      log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name} (${heapMB}MB heap — sizing fallback)`));
+    }
 
     if (DRY_RUN) {
-      log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for ${org.name}`);
+      log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for ${org.name} (${heapMB}MB heap)`);
       processed++;
       continue;
     }
 
     try {
       execSync(
-        `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=4096" pnpm exec tsx scripts/run-full-consolidation.ts`,
+        `ORGANIZATION_ID=${org.id} VERBOSE=${VERBOSE ? 'true' : 'false'} NODE_OPTIONS="--max-old-space-size=${heapMB} --expose-gc" pnpm exec tsx scripts/run-full-consolidation.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
@@ -330,7 +409,7 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
         }
       );
 
-      log('PHASE-4', `  ✓ Full pipeline complete for ${org.name}`);
+      log('PHASE-4', `  ✓ Full pipeline complete for ${org.name} (${heapMB}MB heap)`);
       processed++;
     } catch (err: any) {
       const errMsg = `Full pipeline failed for ${org.name}: ${err.message}`;
@@ -413,9 +492,9 @@ async function main(): Promise<void> {
   endGroup();
 
   // Phase 2: Brain Consolidation (10-step sleep + cognitive stack)
-  // Each org gets its own subprocess with a fresh 4GB heap (no more OOM)
+  // Each org gets its own subprocess with a dynamically-sized heap (no more OOM)
   divider('PHASE 2: BRAIN CONSOLIDATION (ALL ORGS + CORE BRAIN)');
-  results.push(await phase2Consolidation(orgBrains));
+  results.push(await phase2Consolidation(supabase, orgBrains));
   endGroup();
 
   // Phase 3: Oracle RL (prediction verification + bandit updates)
@@ -429,8 +508,103 @@ async function main(): Promise<void> {
   divider('PHASE 4: FULL BRAIN PIPELINE PER ORG (L3-L15)');
   const allOrgsForPipeline = [...orgBrains];
   if (coreBrain) allOrgsForPipeline.push(coreBrain); // Core brain last
-  results.push(await phase4FullPipeline(allOrgsForPipeline));
+  results.push(await phase4FullPipeline(supabase, allOrgsForPipeline));
   endGroup();
+
+  // ── Phase 5: Weekly Accounting Anomaly Report (Monday only) ──
+  // On Mondays, aggregate the past 7 days of AAS artifacts and insert a
+  // summary alert for Isabel's NotificationBell. Non-Monday runs skip this.
+  const dayOfWeek = new Date().getDay(); // 0=Sun, 1=Mon, ...
+  if (dayOfWeek === 1) {
+    divider('PHASE 5: WEEKLY ACCOUNTING ANOMALY REPORT (MONDAY)');
+    const weeklyStart = Date.now();
+    const weeklyErrors: string[] = [];
+
+    try {
+      log('PHASE-5', 'Aggregating AAS artifacts from the past 7 days...');
+
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Query all AAS artifacts from the past week across all orgs
+      const { data: weeklyArtifacts, error: weeklyError } = await supabase
+        .from('se_aas_artifacts')
+        .select('organization_id, artifact_data, created_at')
+        .gte('created_at', sevenDaysAgo)
+        .order('created_at', { ascending: false });
+
+      if (weeklyError) throw new Error(weeklyError.message);
+
+      const artifacts = weeklyArtifacts ?? [];
+      log('PHASE-5', `Found ${artifacts.length} AAS artifact(s) in the past 7 days`);
+
+      // Aggregate anomaly counts per org
+      const orgAnomalyCounts = new Map<string, { total: number; high: number; orgName: string }>();
+      for (const art of artifacts) {
+        const orgId = art.organization_id;
+        const data = art.artifact_data as Record<string, any> | null;
+        const anomalies = (data?.causalAnomalies ?? data?.anomalies ?? []) as Array<any>;
+        const highCount = anomalies.filter((a: any) => a.severity === 'high').length;
+
+        if (!orgAnomalyCounts.has(orgId)) {
+          const orgInfo = orgBrains.find(o => o.id === orgId);
+          orgAnomalyCounts.set(orgId, { total: 0, high: 0, orgName: orgInfo?.name ?? orgId.slice(0, 8) });
+        }
+        const counts = orgAnomalyCounts.get(orgId)!;
+        counts.total += anomalies.length;
+        counts.high += highCount;
+      }
+
+      // Insert weekly alert for each org that had anomalies
+      let alertsInserted = 0;
+      for (const [orgId, counts] of orgAnomalyCounts) {
+        if (counts.total === 0) continue;
+
+        await supabase.from('cascade_alerts').insert({
+          organization_id: orgId,
+          alert_type: 'accounting_weekly_report',
+          severity: counts.high > 2 ? 'high' : counts.total > 0 ? 'medium' : 'low',
+          message: `Weekly Accounting Summary: ${counts.total} risk factor${counts.total > 1 ? 's' : ''} detected across ${artifacts.filter(a => a.organization_id === orgId).length} analysis run(s) this week.${counts.high > 0 ? ` ${counts.high} high-severity item(s) require attention.` : ''} Review recommended.`,
+          is_read: false,
+          metadata: {
+            report_type: 'weekly_anomaly_summary',
+            week_ending: new Date().toISOString().substring(0, 10),
+            total_anomalies: counts.total,
+            high_severity: counts.high,
+            analysis_runs: artifacts.filter(a => a.organization_id === orgId).length,
+          },
+        });
+        alertsInserted++;
+        log('PHASE-5', `  ✓ Weekly alert for ${counts.orgName}: ${counts.total} anomalies (${counts.high} high)`);
+      }
+
+      if (alertsInserted === 0) {
+        log('PHASE-5', '  No anomalies detected this week — no alerts created');
+      }
+
+      results.push({
+        phase: 'Weekly Accounting Anomaly Report',
+        success: true,
+        orgsProcessed: alertsInserted,
+        durationMs: Date.now() - weeklyStart,
+        details: `Monday weekly report — ${alertsInserted} org alert(s) created`,
+        errors: weeklyErrors,
+      });
+    } catch (err: any) {
+      const errMsg = `Weekly anomaly report failed: ${err.message}`;
+      weeklyErrors.push(errMsg);
+      logError('PHASE-5', errMsg);
+      results.push({
+        phase: 'Weekly Accounting Anomaly Report',
+        success: false,
+        orgsProcessed: 0,
+        durationMs: Date.now() - weeklyStart,
+        errors: weeklyErrors,
+      });
+    }
+    endGroup();
+  } else {
+    log('SKIP', `Phase 5 (Weekly Anomaly Report) skipped — only runs on Monday (today is day ${dayOfWeek})`);
+  }
 
   // ── Final Summary ──
   const totalDuration = Date.now() - overallStart;
