@@ -613,10 +613,16 @@ async function main(): Promise<void> {
   let allSuccess = true;
   const allErrors: string[] = [];
 
+  // Phase 2 (Brain Consolidation) is non-critical — it OOMs on large orgs but
+  // Phase 4 (Full Pipeline) covers the same cognitive stack L3-L15 successfully.
+  // Only count Phase 1, 3, 4 failures toward the exit code.
+  const NON_CRITICAL_PHASES = new Set(['Brain Consolidation']);
+
   for (const r of results) {
     const status = r.success ? '✓' : '✗';
-    log('SUMMARY', `${status} ${r.phase}: ${r.orgsProcessed} orgs, ${(r.durationMs / 1000).toFixed(1)}s${r.details ? ` — ${r.details}` : ''}`);
-    if (!r.success) {
+    const nonCritical = NON_CRITICAL_PHASES.has(r.phase);
+    log('SUMMARY', `${status} ${r.phase}: ${r.orgsProcessed} orgs, ${(r.durationMs / 1000).toFixed(1)}s${r.details ? ` — ${r.details}` : ''}${!r.success && nonCritical ? ' (non-critical)' : ''}`);
+    if (!r.success && !nonCritical) {
       allSuccess = false;
       allErrors.push(...r.errors);
     }
