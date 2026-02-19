@@ -19,7 +19,7 @@ export default async function SettingsPage() {
   const [orgResult, budgetResult, apiKeysResult, connectorsResult] = await Promise.all([
     safe(supabase
       .from("organizations")
-      .select("id, name, slug, plan")
+      .select("id, name, slug, plan, is_design_partner")
       .eq("id", orgId)
       .single()),
 

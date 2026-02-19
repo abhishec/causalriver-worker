@@ -9,7 +9,7 @@ const STEPS = [
   { id: 1, label: "Organization" },
   { id: 2, label: "Connect Data" },
   { id: 3, label: "Initializing" },
-  { id: 4, label: "First Question" },
+  { id: 4, label: "First Results" },
 ];
 
 const CONNECTORS = [
@@ -49,6 +49,19 @@ function getProvisionLabel(progress: number): string {
   return label;
 }
 
+// ── GitHub repo type ────────────────────────────────────────────────────────
+interface GitHubRepo {
+  full_name: string;
+  name: string;
+  description: string | null;
+  language: string | null;
+  default_branch: string;
+  private: boolean;
+  stars: number;
+  updated_at: string;
+  owner: string;
+}
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [orgName, setOrgName] = useState("");
@@ -63,6 +76,24 @@ export default function OnboardingPage() {
   const [provisionDone, setProvisionDone] = useState(false);
   const [provisionError, setProvisionError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [isDesignPartner, setIsDesignPartner] = useState(false);
+
+  // GitHub inline OAuth states
+  const [githubConnected, setGithubConnected] = useState(false);
+  const [githubUser, setGithubUser] = useState<{ login: string; name?: string; avatar?: string } | null>(null);
+  const [githubRepos, setGithubRepos] = useState<GitHubRepo[]>([]);
+  const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
+  const [repoSearch, setRepoSearch] = useState("");
+  const [loadingRepos, setLoadingRepos] = useState(false);
+
+  // Step 4 real results
+  const [firstResults, setFirstResults] = useState<{
+    prCount?: number;
+    signalCount?: number;
+    findingCount?: number;
+    topFindings?: Array<{ type: string; summary: string }>;
+  } | null>(null);
+  const [loadingResults, setLoadingResults] = useState(false);
 
   const provisionStarted = useRef(false);
   const supabase = createClient();
@@ -79,6 +110,57 @@ export default function OnboardingPage() {
     }
     getUser();
   }, [supabase, router]);
+
+  // ── Listen for GitHub popup OAuth callback ──────────────────────────
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === "github-connected") {
+        setGithubConnected(true);
+        setGithubUser({
+          login: event.data.login,
+          name: event.data.name,
+          avatar: event.data.avatar,
+        });
+        // Auto-fetch repos after connection
+        fetchRepos();
+      }
+      if (event.data?.type === "github-error") {
+        setError(`GitHub connection failed: ${event.data.error || "Unknown error"}`);
+      }
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── GitHub OAuth popup launcher ─────────────────────────────────────
+  function openGitHubOAuth() {
+    const popup = window.open(
+      "/api/connectors/github/auth?returnMode=popup",
+      "github-oauth",
+      "width=600,height=700,scrollbars=yes"
+    );
+    if (!popup) {
+      setError("Popup blocked — please allow popups for this site and try again.");
+    }
+  }
+
+  // ── Fetch repos from GitHub ─────────────────────────────────────────
+  async function fetchRepos() {
+    setLoadingRepos(true);
+    try {
+      const res = await fetch("/api/connectors/github/repos");
+      if (res.ok) {
+        const data = await res.json();
+        setGithubRepos(data.repos || []);
+      }
+    } catch {
+      console.warn("[Onboarding] Failed to fetch repos");
+    } finally {
+      setLoadingRepos(false);
+    }
+  }
 
   // ── Real provisioning call (Step 3) ─────────────────────────────
   const runProvisioning = useCallback(async () => {
@@ -100,6 +182,7 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           orgId,
           selectedConnectors,
+          isDesignPartner,
         }),
       });
 
@@ -108,13 +191,11 @@ export default function OnboardingPage() {
       clearInterval(progressInterval);
 
       if (!response.ok || !result.success) {
-        // Partial success — show what was provisioned but flag the error
         const errorMsg = result.errors?.length > 0
           ? result.errors.join("; ")
           : result.error || "Provisioning failed";
         console.warn("[Onboarding] Provision partial/failed:", errorMsg);
 
-        // Still allow continuing if at least some things provisioned
         if (result.provisioned?.brain_cortex_state || result.provisioned?.s3_connector) {
           setBrainProgress(100);
           setProvisionDone(true);
@@ -126,7 +207,6 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Full success — animate to 100%
       setBrainProgress(100);
       setProvisionDone(true);
 
@@ -139,7 +219,7 @@ export default function OnboardingPage() {
       provisionStarted.current = false;
       console.error("[Onboarding] Provision error:", err);
     }
-  }, [orgId, selectedConnectors]);
+  }, [orgId, selectedConnectors, isDesignPartner]);
 
   // Trigger provisioning when entering Step 3
   useEffect(() => {
@@ -155,6 +235,57 @@ export default function OnboardingPage() {
       return () => clearTimeout(timer);
     }
   }, [step, provisionDone, brainProgress]);
+
+  // ── Fetch first results for Step 4 ──────────────────────────────────
+  useEffect(() => {
+    if (step !== 4 || !githubConnected || loadingResults) return;
+
+    async function loadFirstResults() {
+      setLoadingResults(true);
+      try {
+        // Fetch initial data from velocity & bottleneck snapshots
+        const [velRes, artRes] = await Promise.all([
+          supabase
+            .from("velocity_snapshots")
+            .select("prs_merged", { count: "exact", head: false })
+            .eq("organization_id", orgId!)
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("se_aas_artifacts")
+            .select("id, domain_type, artifact_data", { count: "exact", head: false })
+            .eq("organization_id", orgId!)
+            .order("created_at", { ascending: false })
+            .limit(3),
+        ]);
+
+        const prCount = velRes.data?.prs_merged ?? 0;
+        const artCount = artRes.count ?? 0;
+        const topFindings = (artRes.data ?? []).map((a: any) => ({
+          type: a.domain_type,
+          summary:
+            a.artifact_data?.narrative ??
+            a.artifact_data?.summary ??
+            a.artifact_data?.answer ??
+            "Artifact generated",
+        }));
+
+        setFirstResults({
+          prCount,
+          signalCount: artCount,
+          findingCount: topFindings.length,
+          topFindings,
+        });
+      } catch {
+        // Silently fail — Step 4 shows fallback UI
+      } finally {
+        setLoadingResults(false);
+      }
+    }
+
+    loadFirstResults();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, githubConnected]);
 
   async function handleOrgSubmit() {
     if (!orgName.trim()) {
@@ -221,6 +352,17 @@ export default function OnboardingPage() {
     );
   }
 
+  function toggleRepo(fullName: string) {
+    setSelectedRepos((prev) =>
+      prev.includes(fullName) ? prev.filter((r) => r !== fullName) : [...prev, fullName]
+    );
+  }
+
+  const filteredRepos = githubRepos.filter((r) =>
+    r.full_name.toLowerCase().includes(repoSearch.toLowerCase()) ||
+    (r.description ?? "").toLowerCase().includes(repoSearch.toLowerCase())
+  );
+
   return (
     <div className="w-full">
       {/* Mobile logo */}
@@ -257,7 +399,7 @@ export default function OnboardingPage() {
         <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">{error}</div>
       )}
 
-      {/* Step 1: Organization Setup */}
+      {/* ── Step 1: Organization Setup ─────────────────────────────────── */}
       {step === 1 && (
         <div className="space-y-6">
           <div>
@@ -288,12 +430,42 @@ export default function OnboardingPage() {
                 <option value="200+">200+</option>
               </select>
             </div>
+
+            {/* Design Partner toggle */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-surface border border-border-subtle">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-sm font-medium">Design Partner</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent border border-accent/20">Beta</span>
+                </div>
+                <p className="text-xs text-muted leading-relaxed">
+                  Get early access to all features, activation tracking, and direct product feedback channels.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDesignPartner(!isDesignPartner)}
+                className={cn(
+                  "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background ml-4",
+                  isDesignPartner ? "bg-accent" : "bg-surface-raised"
+                )}
+                role="switch"
+                aria-checked={isDesignPartner}
+              >
+                <span
+                  className={cn(
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    isDesignPartner ? "translate-x-5" : "translate-x-0"
+                  )}
+                />
+              </button>
+            </div>
           </div>
           <button onClick={handleOrgSubmit} disabled={loading || !orgName.trim()} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Setting up..." : "Continue"}</button>
         </div>
       )}
 
-      {/* Step 2: Connect Data Sources */}
+      {/* ── Step 2: Connect Data Sources + GitHub Inline OAuth ──────────── */}
       {step === 2 && (
         <div className="space-y-6">
           <div>
@@ -301,14 +473,123 @@ export default function OnboardingPage() {
             <p className="text-muted">Choose data sources to feed the causal memory. You can add more later.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {CONNECTORS.map((conn) => (
-              <button key={conn.id} onClick={() => toggleConnector(conn.id)} className={cn("p-4 rounded-xl border text-left transition-all", selectedConnectors.includes(conn.id) ? "border-accent bg-accent/5" : "border-border-subtle hover:border-border")}>
-                <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold mb-3", conn.color)}>{conn.icon}</div>
-                <span className="text-sm font-medium">{conn.name}</span>
-                {selectedConnectors.includes(conn.id) && <div className="mt-1 text-[10px] text-accent">Selected</div>}
-              </button>
-            ))}
+            {CONNECTORS.map((conn) => {
+              const isGH = conn.id === "github";
+              const isSelected = selectedConnectors.includes(conn.id);
+
+              return (
+                <button
+                  key={conn.id}
+                  onClick={() => {
+                    toggleConnector(conn.id);
+                    // If selecting GitHub and not yet connected, trigger OAuth
+                    if (isGH && !isSelected && !githubConnected) {
+                      openGitHubOAuth();
+                    }
+                  }}
+                  className={cn(
+                    "p-4 rounded-xl border text-left transition-all relative",
+                    isSelected ? "border-accent bg-accent/5" : "border-border-subtle hover:border-border",
+                    isGH && githubConnected ? "border-success/40 bg-success/5" : ""
+                  )}
+                >
+                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold mb-3", conn.color)}>{conn.icon}</div>
+                  <span className="text-sm font-medium">{conn.name}</span>
+                  {isGH && githubConnected ? (
+                    <div className="mt-1 flex items-center gap-1.5">
+                      <svg className="w-3 h-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-[10px] text-success font-medium">
+                        Connected as {githubUser?.login}
+                      </span>
+                    </div>
+                  ) : isSelected ? (
+                    <div className="mt-1 text-[10px] text-accent">Selected</div>
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
+
+          {/* ── GitHub Repo Picker (inline when connected) ──────────── */}
+          {githubConnected && selectedConnectors.includes("github") && (
+            <div className="rounded-xl bg-surface border border-border-subtle p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Select Repositories</span>
+                  <span className="text-[10px] text-muted">{githubRepos.length} available</span>
+                </div>
+                {selectedRepos.length > 0 && (
+                  <span className="text-[10px] text-accent font-medium">{selectedRepos.length} selected</span>
+                )}
+              </div>
+
+              {/* Search */}
+              <input
+                type="text"
+                value={repoSearch}
+                onChange={(e) => setRepoSearch(e.target.value)}
+                placeholder="Search repositories..."
+                className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-input-focus transition-colors"
+              />
+
+              {/* Repo list */}
+              <div className="max-h-48 overflow-y-auto space-y-1.5">
+                {loadingRepos ? (
+                  <div className="flex items-center justify-center py-6">
+                    <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                    <span className="ml-2 text-xs text-muted">Loading repositories...</span>
+                  </div>
+                ) : filteredRepos.length === 0 ? (
+                  <p className="text-xs text-muted text-center py-4">No repositories found</p>
+                ) : (
+                  filteredRepos.map((repo) => (
+                    <button
+                      key={repo.full_name}
+                      onClick={() => toggleRepo(repo.full_name)}
+                      className={cn(
+                        "w-full flex items-start gap-3 p-2.5 rounded-lg border text-left transition-all",
+                        selectedRepos.includes(repo.full_name)
+                          ? "border-accent/40 bg-accent/5"
+                          : "border-transparent hover:bg-surface-hover"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 mt-0.5 rounded border flex items-center justify-center shrink-0 transition-colors",
+                        selectedRepos.includes(repo.full_name) ? "bg-accent border-accent" : "border-border"
+                      )}>
+                        {selectedRepos.includes(repo.full_name) && (
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium truncate">{repo.name}</span>
+                          {repo.private && (
+                            <span className="text-[9px] px-1 py-0.5 rounded bg-surface-raised border border-border-subtle text-muted">Private</span>
+                          )}
+                          {repo.language && (
+                            <span className="text-[10px] text-muted">{repo.language}</span>
+                          )}
+                        </div>
+                        {repo.description && (
+                          <p className="text-xs text-muted truncate mt-0.5">{repo.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] text-muted font-mono">{repo.default_branch}</span>
+                          <span className="text-[10px] text-muted">{repo.owner}</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <button onClick={() => setStep(3)} className="flex-1 py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors">
               {selectedConnectors.length > 0 ? `Connect ${selectedConnectors.length} Source${selectedConnectors.length > 1 ? "s" : ""}` : "Continue"}
@@ -318,7 +599,7 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Step 3: Brain Provisioning (REAL — calls /api/org/provision) */}
+      {/* ── Step 3: Brain Provisioning (REAL — calls /api/org/provision) ── */}
       {step === 3 && (
         <div className="space-y-6 text-center">
           <div className="relative mx-auto w-32 h-32">
@@ -376,6 +657,7 @@ export default function OnboardingPage() {
                 { label: "Brain cortex state", done: brainProgress > 30 },
                 { label: "S3 storage prefix", done: brainProgress > 45 },
                 { label: "Connector registry", done: brainProgress > 60 },
+                ...(githubConnected ? [{ label: "GitHub connected", done: true }] : []),
                 { label: "Federation to Core Brain", done: brainProgress > 75 },
                 { label: "Learning schedules", done: brainProgress > 88 },
               ].map((item) => (
@@ -424,30 +706,93 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Step 4: First Question */}
+      {/* ── Step 4: First Results / First Question ─────────────────────── */}
       {step === 4 && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold mb-1">Ask Your First Question</h2>
-            <p className="text-muted">Try asking NexusBrain something. You can always explore more later.</p>
+            <h2 className="text-2xl font-bold mb-1">
+              {githubConnected && firstResults ? "Your First Insights" : "Ask Your First Question"}
+            </h2>
+            <p className="text-muted">
+              {githubConnected && firstResults
+                ? "Here's what NexusBrain found from your connected data."
+                : "Try asking NexusBrain something. You can always explore more later."}
+            </p>
           </div>
-          <div className="space-y-2">
-            {SUGGESTED_QUESTIONS.map((q) => (
-              <button key={q} onClick={() => setSelectedQuestion(q)} className={cn("w-full text-left px-4 py-3 rounded-lg border text-sm transition-all", selectedQuestion === q ? "border-accent bg-accent/5 text-foreground" : "border-border-subtle text-muted-foreground hover:border-border hover:text-foreground")}>{q}</button>
-            ))}
-          </div>
-          {selectedQuestion && (
-            <div className="p-4 rounded-lg bg-surface border border-border-subtle">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-xs text-success font-medium">NexusBrain thinking...</span>
+
+          {/* Real results if GitHub connected */}
+          {githubConnected && firstResults ? (
+            <>
+              {/* Stats strip */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "PRs Analyzed", value: firstResults.prCount ?? 0, icon: "🔍" },
+                  { label: "Signals Found", value: firstResults.signalCount ?? 0, icon: "⚡" },
+                  { label: "Findings", value: firstResults.findingCount ?? 0, icon: "💡" },
+                ].map((stat) => (
+                  <div key={stat.label} className="p-3 rounded-xl bg-surface border border-border-subtle text-center">
+                    <span className="text-lg">{stat.icon}</span>
+                    <div className="text-xl font-bold tabular-nums mt-1">{stat.value}</div>
+                    <div className="text-[10px] text-muted mt-0.5">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
-              </p>
-            </div>
+
+              {/* Top findings */}
+              {firstResults.topFindings && firstResults.topFindings.length > 0 && (
+                <div className="rounded-xl bg-surface border border-border-subtle divide-y divide-border-subtle">
+                  {firstResults.topFindings.map((finding, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3.5">
+                      <div className="w-6 h-6 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-mono text-accent">{finding.type}</span>
+                        <p className="text-sm text-muted leading-relaxed mt-0.5 line-clamp-2">{finding.summary}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* CTA to dashboard */}
+              <button
+                onClick={handleFinish}
+                disabled={loading}
+                className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? "Launching..." : (
+                  <>
+                    Open Engineering Dashboard
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Fallback: suggested questions */}
+              <div className="space-y-2">
+                {SUGGESTED_QUESTIONS.map((q) => (
+                  <button key={q} onClick={() => setSelectedQuestion(q)} className={cn("w-full text-left px-4 py-3 rounded-lg border text-sm transition-all", selectedQuestion === q ? "border-accent bg-accent/5 text-foreground" : "border-border-subtle text-muted-foreground hover:border-border hover:text-foreground")}>{q}</button>
+                ))}
+              </div>
+              {selectedQuestion && (
+                <div className="p-4 rounded-lg bg-surface border border-border-subtle">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-xs text-success font-medium">NexusBrain thinking...</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
+                  </p>
+                </div>
+              )}
+              <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch NexusBrain"}</button>
+            </>
           )}
-          <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch NexusBrain"}</button>
         </div>
       )}
     </div>

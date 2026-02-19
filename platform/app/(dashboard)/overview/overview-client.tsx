@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { ActivationChecklist } from "@/components/onboarding/ActivationChecklist";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -67,6 +68,10 @@ interface OverviewClientProps {
     autonomous_cycles_run: number | null;
     dream_insights_surfaced: number | null;
   };
+  /** Whether this org is a design partner (shows ActivationChecklist instead of OnboardingWizard) */
+  isDesignPartner?: boolean;
+  /** Organization display name for checklist header */
+  orgName?: string;
 }
 
 /* ── Intelligence Stream + Brain Learning Feed tab switcher ──────────────── */
@@ -159,6 +164,8 @@ export function OverviewClient({
   brainDiscoveriesThisWeek = 0,
   brainLearningEvents = [],
   brainLearningMeta,
+  isDesignPartner = false,
+  orgName = "your organization",
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
@@ -180,10 +187,17 @@ export function OverviewClient({
 
   return (
     <div className="space-y-6">
-      {/* Onboarding Wizard — guided 3-step flow for design partners */}
-      {showWizard && (
+      {/* Activation Checklist (design partners) or Onboarding Wizard (others) */}
+      {isDesignPartner && !wizardDismissed ? (
+        <ActivationChecklist
+          orgName={orgName}
+          onDismiss={() => {
+            setWizardDismissed(true);
+          }}
+        />
+      ) : showWizard ? (
         <OnboardingWizard
-          orgName="your organization"
+          orgName={orgName}
           hasConnectors={hasConnectors}
           hasSignals={hasSignals}
           onDismiss={() => {
@@ -191,7 +205,7 @@ export function OverviewClient({
             localStorage.setItem("nexus_onboarding_dismissed", "true");
           }}
         />
-      )}
+      ) : null}
 
       {/* ── Zone 1: Brain Vitals Strip ───────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 stagger-fade-in">

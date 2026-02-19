@@ -373,6 +373,16 @@ export default async function OverviewPage() {
 
   const totalSignalRate = signalRates.reduce((sum, s) => sum + s.rate, 0);
 
+  // Fetch org metadata for design partner flag
+  const { data: orgMeta } = await supabase
+    .from("organizations")
+    .select("name, is_design_partner")
+    .eq("id", currentOrgId)
+    .maybeSingle();
+
+  const isDesignPartner = orgMeta?.is_design_partner ?? false;
+  const orgDisplayName = orgMeta?.name ?? "your organization";
+
   const connectors = (connectorsResult.data || []).map((c: any) => ({
     type: c.connector_type,
     name: c.display_name || c.connector_type,
@@ -418,6 +428,8 @@ export default async function OverviewPage() {
       brainHealthScore={latest?.brain_health_score ?? 0}
       brainLearningEvents={brainLearningEvents}
       brainLearningMeta={brainLearningMeta}
+      isDesignPartner={isDesignPartner}
+      orgName={orgDisplayName}
     />
   );
 }

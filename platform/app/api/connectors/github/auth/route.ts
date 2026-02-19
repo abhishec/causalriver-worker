@@ -60,7 +60,10 @@ export async function GET(request: NextRequest) {
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/connectors/github/callback`;
 
     const nonce = randomBytes(16).toString('hex');
-    const state = `${orgId}:${user.id}:${Date.now()}:${nonce}`;
+    // If returnMode=popup is set, append 'popup' to state so the callback
+    // returns HTML with postMessage instead of a redirect (for onboarding inline flow)
+    const returnMode = request.nextUrl.searchParams.get('returnMode');
+    const state = `${orgId}:${user.id}:${Date.now()}:${nonce}${returnMode === 'popup' ? ':popup' : ''}`;
 
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id', clientId);

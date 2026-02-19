@@ -2,9 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 
 /**
+ * Returns a minimal HTML page that sends a postMessage to the opener
+ * window (onboarding wizard) and closes itself.
+ * Used when `returnMode=popup` is encoded in the OAuth state.
+ */
+function popupHtml(
+  type: string,
+  error?: string,
+  payload?: Record<string, unknown>
+): string {
+  const message = JSON.stringify({ type, error, ...payload });
+  return `<!DOCTYPE html>
+<html><head><title>Connecting…</title></head>
+<body>
+<script>
+  if (window.opener) {
+    window.opener.postMessage(${message}, window.location.origin);
+  }
+  window.close();
+</script>
+<p style="font-family:system-ui;color:#a1a1aa;text-align:center;margin-top:40vh">
+  Connected — this window will close automatically.
+</p>
+</body></html>`;
+}
+
+/**
  * GET /api/connectors/github/callback
  *
- * Handles GitHub OAuth callback and stores credentials
+ * Handles GitHub OAuth callback and stores credentials.
+ * Supports popup mode (state includes 5th part "popup") for
+ * inline onboarding OAuth — returns HTML with postMessage instead of redirect.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -147,8 +175,29 @@ export async function GET(request: NextRequest) {
 
     if (storeError) {
       console.error('Failed to store GitHub credentials:', storeError);
+      const isPopup = parts.length >= 5 && parts[4] === 'popup';
+      if (isPopup) {
+        return new NextResponse(
+          popupHtml('github-error', 'Failed to store credentials'),
+          { headers: { 'Content-Type': 'text/html' } }
+        );
+      }
       return NextResponse.redirect(
         new URL('/admin/connectors?error=storage_failed', request.url)
+      );
+    }
+
+    // Check if this was a popup-mode OAuth (for onboarding inline flow)
+    const isPopup = parts.length >= 5 && parts[4] === 'popup';
+
+    if (isPopup) {
+      return new NextResponse(
+        popupHtml('github-connected', undefined, {
+          login: githubUser.login,
+          name: githubUser.name,
+          avatar: githubUser.avatar_url,
+        }),
+        { headers: { 'Content-Type': 'text/html' } }
       );
     }
 

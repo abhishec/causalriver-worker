@@ -11,6 +11,7 @@ import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
+import { PartnerDashboard } from "@/components/settings/PartnerDashboard";
 
 interface Connector {
   id: string;
@@ -22,7 +23,7 @@ interface Connector {
 }
 
 interface SettingsClientProps {
-  org: { id: string; name: string; slug: string; plan: string } | null;
+  org: { id: string; name: string; slug: string; plan: string; is_design_partner?: boolean } | null;
   orgId: string;
   budget: any;
   apiKeys: any[];
@@ -56,6 +57,7 @@ const TAB_ICONS: Record<string, string> = {
   api:           "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
   danger:        "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
   operations:    "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 15.828a5 5 0 010-7.072m5.656 0a5 5 0 010 7.072M13 12a1 1 0 11-2 0 1 1 0 012 0z",
+  partner:       "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
 };
 
 export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: SettingsClientProps) {
@@ -79,6 +81,8 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
     };
   }, []);
 
+  const isDesignPartner = org?.is_design_partner ?? false;
+
   const tabs = [
     { id: "general", label: "General" },
     { id: "members", label: "Members" },
@@ -87,6 +91,7 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
     { id: "operations", label: "Brain Ops" },
     { id: "notifications", label: "Notifications" },
     { id: "api", label: "API Keys", count: apiKeys.length },
+    ...(isDesignPartner ? [{ id: "partner", label: "Partner Program" }] : []),
     { id: "danger", label: "Danger Zone" },
   ];
 
@@ -362,6 +367,14 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
             <p className="text-xs text-muted mb-6">Manage API keys for SDK and REST API access</p>
             <ApiKeysSection initialKeys={apiKeys} orgId={orgId} />
           </div>
+        )}
+
+        {/* Partner Program Tab (design partners only) */}
+        {activeTab === "partner" && isDesignPartner && (
+          <PartnerDashboard
+            orgId={orgId}
+            orgName={org?.name ?? "Organization"}
+          />
         )}
 
         {/* Danger Zone Tab */}

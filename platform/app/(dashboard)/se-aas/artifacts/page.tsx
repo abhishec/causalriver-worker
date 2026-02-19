@@ -10,28 +10,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { DOMAIN_LABELS } from "@/lib/se-aas/domain-catalogue";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "SE-AAS Artifacts" };
-
-const DOMAIN_LABELS: Record<string, { label: string; icon: string; color: string }> = {
-  "early-warning":      { label: "Early Warning",   icon: "⚡", color: "text-red-400" },
-  "pr-review":          { label: "PR Review",        icon: "🔍", color: "text-blue-400" },
-  "tdd":                { label: "TDD Agent",         icon: "🧪", color: "text-green-400" },
-  "boilerplate-scaffold": { label: "Scaffolding",    icon: "🏗️", color: "text-purple-400" },
-  "dependency-upgrade": { label: "Dep Upgrade",      icon: "📦", color: "text-orange-400" },
-  "design-doc-generator": { label: "HLD / LLD",     icon: "📐", color: "text-cyan-400" },
-  "test-case-generator": { label: "Test Cases",     icon: "✅", color: "text-emerald-400" },
-  "test-data-generator": { label: "Test Data",      icon: "🎲", color: "text-teal-400" },
-  "codebase-qa":        { label: "Codebase Q&A",    icon: "💬", color: "text-violet-400" },
-  "dead-code-detector": { label: "Dead Code",       icon: "🧹", color: "text-gray-400" },
-  "impact-analysis":    { label: "Impact Analysis", icon: "💥", color: "text-red-400" },
-  "incident-diagnosis": { label: "Incident RCA",    icon: "🚨", color: "text-pink-400" },
-  "log-query":          { label: "Log Query",        icon: "📋", color: "text-yellow-400" },
-  "performance-profiler": { label: "Perf Profiler", icon: "⚡", color: "text-amber-400" },
-  "sql-analyzer":       { label: "SQL Analyzer",    icon: "🗄️", color: "text-blue-400" },
-  "data-lineage":       { label: "Data Lineage",    icon: "🔗", color: "text-indigo-400" },
-};
 
 export default async function SeAaSArtifactsPage({
   searchParams,
