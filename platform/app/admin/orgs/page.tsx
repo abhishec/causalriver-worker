@@ -4,6 +4,7 @@ import { StatValue } from "@/components/ui/StatValue";
 import { Card } from "@/components/ui/Card";
 import { StatusDot } from "@/components/ui/StatusDot";
 import Link from "next/link";
+import { CreateWorkspaceModal } from "./create-workspace-modal";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin — Customers & Workspaces" };
@@ -114,11 +115,14 @@ export default async function AdminOrgsPage() {
     <div className="space-y-8 max-w-7xl">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Customers & Workspaces</h1>
-        <p className="text-xs text-muted mt-0.5">
-          Users belong to <strong>Customers</strong> — workspaces are isolated brain tracks within a customer
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Customers & Workspaces</h1>
+          <p className="text-xs text-muted mt-0.5">
+            Users belong to <strong>Customers</strong> — workspaces are isolated brain tracks within a customer
+          </p>
+        </div>
+        <CreateWorkspaceModal customers={customers} />
       </div>
 
       {/* ── Stats ───────────────────────────────────────────────────────── */}
