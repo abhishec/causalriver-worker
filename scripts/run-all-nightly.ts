@@ -120,11 +120,14 @@ interface PhaseResult {
 // ============================================================================
 
 const HEAP_TIERS = [
-  // Minimum 4096MB — cognitive stack L3-L15 + consolidation engine needs ~3GB
-  // even for orgs with few signals. GitHub Actions runner has 7GB total.
-  { maxSignals: 100_000, heapMB: 4096 },  // Normal:  4GB
-  { maxSignals: 500_000, heapMB: 5120 },  // Large:   5GB
-  { maxSignals: Infinity, heapMB: 6144 }, // Huge:    6GB (max safe on 7GB runner)
+  // Minimum 4GB, max 10GB — give each org plenty of headroom.
+  // GitHub Actions large runners have 14GB; standard has 7GB.
+  // The freemem() clamp below will cap to actual available memory.
+  { maxSignals: 10_000,   heapMB: 4096 },   // Small:   4GB
+  { maxSignals: 50_000,   heapMB: 5120 },   // Medium:  5GB
+  { maxSignals: 100_000,  heapMB: 6144 },   // Large:   6GB
+  { maxSignals: 500_000,  heapMB: 8192 },   // XLarge:  8GB
+  { maxSignals: Infinity, heapMB: 10240 },  // Huge:   10GB
 ];
 
 /** Retry multiplier: if an org OOMs, retry with this much more heap */
@@ -340,7 +343,7 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
         } catch (err: any) {
           const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
           if (isOOM && attempt < MAX_OOM_RETRIES) {
-            const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
+            const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
             logError('PHASE-2', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
             currentHeap = nextHeap;
             continue;
@@ -390,7 +393,7 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
     } catch (err: any) {
       const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
       if (isOOM && attempt < MAX_OOM_RETRIES) {
-        const nextHeap = Math.min(6144, Math.round(currentCoreHeap * HEAP_RETRY_MULTIPLIER));
+        const nextHeap = Math.min(10240, Math.round(currentCoreHeap * HEAP_RETRY_MULTIPLIER));
         logError('PHASE-2', `OOM for Core Brain at ${currentCoreHeap}MB — retrying with ${nextHeap}MB`);
         currentCoreHeap = nextHeap;
         continue;
@@ -568,7 +571,7 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, cus
         } catch (err: any) {
           const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
           if (isOOM && attempt < MAX_OOM_RETRIES) {
-            const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
+            const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
             logError('PHASE-4', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
             currentHeap = nextHeap;
             continue;
@@ -612,7 +615,7 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, cus
       } catch (err: any) {
         const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
         if (isOOM && attempt < MAX_OOM_RETRIES) {
-          const nextHeap = Math.min(6144, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
+          const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
           logError('PHASE-4', `OOM for Core Brain at ${currentHeap}MB — retrying with ${nextHeap}MB`);
           currentHeap = nextHeap;
           continue;
