@@ -1,5 +1,5 @@
 /**
- * GET /api/accounting-jarvis/export?sheet=pl|bs|tb|gst|txns|all
+ * GET /api/aaas/export?sheet=pl|bs|tb|gst|txns|all
  *
  * Generates a downloadable CSV file from the GL analysis data.
  * This is the "Excel Output Package" from Spec Function 01:

@@ -269,7 +269,7 @@ export function OnboardingWizard({
               {[
                 { q: "Show me our P&L summary", route: "/copilot" },
                 { q: "What anomalies are in our GL data?", route: "/copilot" },
-                { q: "What's our monthly burn rate?", route: "/accounting-jarvis" },
+                { q: "What's our monthly burn rate?", route: "/aaas" },
               ].map((example) => (
                 <button
                   key={example.q}

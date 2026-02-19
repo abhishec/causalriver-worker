@@ -1,8 +1,8 @@
 /**
- * Accounting Jarvis API — Brain-Connected Accounting Intelligence
+ * AAAS API — Brain-Connected Accounting Intelligence
  *
- * GET  /api/accounting-jarvis — Raw GL analysis (backward compat for dashboard)
- * POST /api/accounting-jarvis — Brain-connected agent execution via SSE streaming
+ * GET  /api/aaas — Raw GL analysis (deterministic in-memory)
+ * POST /api/aaas — Brain-connected agent execution via SSE streaming
  *
  * POST runs the 6 accounting agents + V9 causal accountant against GL data:
  *   1. brain-bookkeeper       → Categorize & create journal entries
@@ -818,7 +818,7 @@ export async function GET(request: Request) {
 // ============================================================================
 
 /**
- * POST /api/accounting-jarvis
+ * POST /api/aaas
  *
  * Body: {
  *   action: 'bookkeep' | 'reconcile' | 'statements' | 'tax' | 'audit' | 'anomaly' | 'causal-analysis' | 'full',

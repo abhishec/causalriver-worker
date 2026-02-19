@@ -1,5 +1,5 @@
 /**
- * GET /api/accounting-jarvis/artifacts
+ * GET /api/aaas/artifacts
  *
  * Returns recent AAS agent run artifacts for the authenticated user's org.
  * AAS artifacts are stored in the shared se_aas_artifacts table with

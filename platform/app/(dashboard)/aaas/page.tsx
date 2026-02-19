@@ -1194,7 +1194,7 @@ function AgentExecutionPanel({ onRunComplete }: { onRunComplete?: () => void }) 
     setRunState({ status: "running", action: selectedAction, messages: [], progress: 0 });
 
     try {
-      const res = await fetch("/api/accounting-jarvis", {
+      const res = await fetch("/api/aaas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: selectedAction }),
@@ -2131,7 +2131,7 @@ function RecentAASArtifactsPanel({ refreshTrigger }: { refreshTrigger: number })
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/accounting-jarvis/artifacts?limit=8")
+    fetch("/api/aaas/artifacts?limit=8")
       .then(r => r.json())
       .then(d => {
         setArtifacts(d.artifacts || []);
@@ -2257,7 +2257,7 @@ function NoDataState({ onUploadComplete }: { onUploadComplete: () => void }) {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function AccountingJarvisPage() {
+export default function AaasPage() {
   const [data, setData] = useState<AccountingAnalysis | null>(null);
   const [meta, setMeta] = useState<{ company?: string; organizationId?: string; brainMetadata?: Record<string, unknown> } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -2272,7 +2272,7 @@ export default function AccountingJarvisPage() {
     setError(null);
     setNoData(false);
 
-    fetch("/api/accounting-jarvis")
+    fetch("/api/aaas")
       .then(r => r.json())
       .then(d => {
         if (d.error && !d.analysis) {
@@ -2347,7 +2347,7 @@ export default function AccountingJarvisPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-semibold">AAS — Accounting as a Service</h1>
+              <h1 className="text-xl font-semibold">AAAS — Accounting as a Service</h1>
               <p className="text-xs text-muted">Accounting as a Service · Xero GL Intelligence</p>
             </div>
           </div>
@@ -2377,7 +2377,7 @@ export default function AccountingJarvisPage() {
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-semibold">AAS — Accounting as a Service</h1>
+            <h1 className="text-xl font-semibold">AAAS — Accounting as a Service</h1>
             <p className="text-xs text-muted">
               {meta?.company} · {s.jurisdiction} · {s.currency} · {s.dateRange.from} → {s.dateRange.to}
             </p>
@@ -2390,7 +2390,7 @@ export default function AccountingJarvisPage() {
         </div>
         <div className="flex gap-2">
           <a
-            href="/api/accounting-jarvis/export"
+            href="/api/aaas/export"
             download
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
           >
@@ -2455,7 +2455,7 @@ export default function AccountingJarvisPage() {
               <div>
                 <p className="text-xs font-semibold text-emerald-300 mb-0.5">Req 1 — Phase 1: Core Bookkeeping (Pure GL Processing)</p>
                 <p className="text-[11px] text-muted/70 leading-relaxed">
-                  Deterministic in-memory processing of your Xero GL export. No AI required — <strong className="text-muted">account classification, P&L, Balance Sheet, and Benford&apos;s Law anomaly detection</strong> computed instantly from raw GL data. This is what the accounting partner gets on GET <code className="bg-surface rounded px-1">/api/accounting-jarvis</code>.
+                  Deterministic in-memory processing of your Xero GL export. No AI required — <strong className="text-muted">account classification, P&L, Balance Sheet, and Benford&apos;s Law anomaly detection</strong> computed instantly from raw GL data. This is what the accounting partner gets on GET <code className="bg-surface rounded px-1">/api/aaas</code>.
                 </p>
               </div>
             </div>
@@ -2771,7 +2771,7 @@ export default function AccountingJarvisPage() {
                 GST F5 computation is in Req 2 — run the Tax Compliance agent. Export CSV for Excel-ready output package.
               </p>
               <a
-                href="/api/accounting-jarvis/export"
+                href="/api/aaas/export"
                 download
                 className="shrink-0 flex items-center gap-1 text-[10px] text-emerald-400/70 hover:text-emerald-400 transition-colors"
               >
@@ -2806,7 +2806,7 @@ export default function AccountingJarvisPage() {
               <div>
                 <p className="text-xs font-semibold text-indigo-300 mb-0.5">Req 2 — Phase 1.5: NexusBrain Causal Layer</p>
                 <p className="text-[11px] text-muted/70 leading-relaxed">
-                  <strong className="text-muted">7 Brain-connected AI agents</strong> run against your GL data with full causal context. Goes beyond raw numbers — correlates financial signals with operational events. Result streams in real-time via SSE from <code className="bg-surface rounded px-1">POST /api/accounting-jarvis</code>. Artifacts fed back into the Brain for continuous learning.
+                  <strong className="text-muted">7 Brain-connected AI agents</strong> run against your GL data with full causal context. Goes beyond raw numbers — correlates financial signals with operational events. Result streams in real-time via SSE from <code className="bg-surface rounded px-1">POST /api/aaas</code>. Artifacts fed back into the Brain for continuous learning.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {["brain-bookkeeper", "brain-reconciler", "brain-statement-gen", "brain-tax-compliance", "brain-audit-preparer", "brain-anomaly-detect", "brain-causal-accountant ✦"].map(a => (

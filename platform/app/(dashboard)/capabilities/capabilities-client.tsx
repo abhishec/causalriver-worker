@@ -52,7 +52,7 @@ const SERVICE_PACKS: ServicePack[] = [
       text: "text-emerald-400",
       badge: "bg-emerald-500/15 text-emerald-400",
     },
-    dashboardHref: "/accounting-jarvis",
+    dashboardHref: "/aaas",
     filterKey: "accounting",
   },
   {
