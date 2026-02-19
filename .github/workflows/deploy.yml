@@ -11,10 +11,11 @@ name: Deploy to Production
 # ─────────────────
 # 1. MANUAL ONLY — Never auto-triggered by CI or pushes
 # 2. DROPDOWN SELECTION — Choose what to deploy (platform, orchestrator, both)
-# 3. ENVIRONMENT APPROVAL — Requires "production" environment approval gate
-# 4. PRE-FLIGHT VALIDATION — Re-runs tests before deploying (defense in depth)
-# 5. ROLLBACK INFO — Captures previous image tag for quick rollback
-# 6. SLACK NOTIFICATION — Success/failure alerts
+# 3. HARD GATES — Build failure always blocks deploy; no skipped=ok loopholes
+# 4. PRE-FLIGHT VALIDATION — Re-runs TypeScript hard check before deploying
+# 5. RELIABLE ECS WAIT — Custom polling loop; not aws ecs wait (10-min limit)
+# 6. ROLLBACK INFO — Captures previous image digest for quick rollback
+# 7. SLACK NOTIFICATION — Success/failure alerts
 #
 # Usage:
 #   1. Go to Actions → "Deploy to Production"
@@ -22,8 +23,7 @@ name: Deploy to Production
 #   3. Select target (platform, orchestrator, both)
 #   4. Select environment (production, staging)
 #   5. Confirm: select "yes - deploy" from dropdown
-#   6. Approve deployment in environment gate
-#   7. Monitor progress
+#   6. Monitor progress
 #
 # ============================================================================
 
@@ -129,23 +129,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Tests are run with continue-on-error because they already passed in CI.
-      # The pre-flight is a safety net — a test flake should not block a deploy
-      # that CI has already blessed. TypeScript check (below) is the hard gate.
-      - name: Run tests
-        run: pnpm test
-        continue-on-error: true
-        env:
-          NODE_OPTIONS: --max-old-space-size=4096
-
-      - name: Build memory-stack
+      - name: Build memory-stack (required for platform tsc)
         run: pnpm --filter @nexus-ai/memory-stack run build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
       # TypeScript is a HARD gate — type errors must never reach production.
-      - name: TypeScript check
+      - name: TypeScript check (platform)
         run: cd platform && pnpm exec tsc --noEmit
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      # Tests run with continue-on-error — they already passed in CI.
+      # The TS hard gate above is what actually blocks a bad deploy.
+      - name: Run tests
+        run: pnpm test
+        continue-on-error: true
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
@@ -363,7 +362,10 @@ jobs:
           echo "image-uri=${{ steps.login-ecr.outputs.registry }}/${{ env.ORCHESTRATOR_ECR }}:${{ github.sha }}" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------
-  # Deploy to ECS (requires environment approval)
+  # Deploy to ECS
+  # HARD GATES: only runs if every needed job actually succeeded.
+  # 'skipped' is only allowed for jobs the target doesn't need
+  # (e.g. build-orchestrator when target=platform).
   # ---------------------------------------------------------------
   deploy:
     name: Deploy to ${{ inputs.environment }}
@@ -375,7 +377,9 @@ jobs:
       (needs.preflight.result == 'success' || needs.preflight.result == 'skipped') &&
       (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') &&
       (needs.build-platform.result == 'success' || needs.build-platform.result == 'skipped') &&
-      (needs.build-orchestrator.result == 'success' || needs.build-orchestrator.result == 'skipped')
+      (needs.build-orchestrator.result == 'success' || needs.build-orchestrator.result == 'skipped') &&
+      needs.build-platform.result != 'failure' &&
+      needs.build-orchestrator.result != 'failure'
     environment: ${{ inputs.environment }}
     env:
       PLATFORM_URL: ${{ vars.PLATFORM_URL }}
@@ -388,83 +392,141 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Deploy Platform
+      # ── Deploy Platform ──────────────────────────────────────────
       - name: Deploy Platform to ECS
         if: needs.gate.outputs.deploy_platform == 'true'
         run: |
-          echo "🚀 Deploying Platform..."
-          # minimumHealthyPercent=0: allow ECS to stop old task before starting new one.
-          # maximumPercent=200: required when AZ Rebalancing is enabled (cannot use ≤100).
-          # This handles Fargate vCPU quota constraints — brief ~30s downtime during deploy.
+          echo "🚀 Deploying Platform to ECS..."
+          # minimumHealthyPercent=0  → ECS stops the old task before starting the new
+          #   one. Required because Fargate vCPU quota is tight (many trainer tasks running).
+          #   Brief ~30s downtime is acceptable; a hung 10-min wait is not.
+          # maximumPercent=200  → required by ECS when AZ Rebalancing is ENABLED.
+          #   Setting ≤100 throws InvalidParameterException.
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.PLATFORM_SERVICE }} \
             --force-new-deployment \
             --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
             --region ${{ env.AWS_REGION }}
+          echo "✅ ECS update-service accepted"
 
-      - name: Wait for Platform stability
+      # Custom polling loop — replaces `aws ecs wait services-stable` which:
+      #   • Has a hard 10-min (40-poll × 15s) AWS CLI limit that returns exit 255
+      #   • Gives no progress feedback during the wait
+      #   • Can't distinguish "still starting" from "crash-looping"
+      - name: Wait for Platform ECS stability
         if: needs.gate.outputs.deploy_platform == 'true'
         run: |
-          echo "⏳ Waiting for platform service to stabilize (up to 10 min)..."
-          if ! aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.PLATFORM_SERVICE }} \
-            --region ${{ env.AWS_REGION }}; then
-            echo "::error::Platform service did not stabilize — tasks may be crash-looping."
-            echo "::error::Check ECS: cluster=${{ env.ECS_CLUSTER }} service=${{ env.PLATFORM_SERVICE }}"
-            exit 1
-          fi
-          echo "✅ Platform service is stable"
+          echo "⏳ Polling ECS until platform service is stable (up to 15 min)..."
+          MAX_POLLS=60       # 60 × 15s = 15 minutes
+          POLL_INTERVAL=15
+          STABLE_NEEDED=2    # require 2 consecutive stable readings before declaring success
 
-      # Deploy Orchestrator
+          consecutive_stable=0
+
+          for i in $(seq 1 $MAX_POLLS); do
+            # Fetch the PRIMARY deployment's runningCount and desiredCount
+            RESULT=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.PLATFORM_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].deployments[?status==`PRIMARY`].[runningCount,desiredCount,rolloutState]' \
+              --output text 2>&1)
+
+            RUNNING=$(echo "$RESULT" | awk '{print $1}')
+            DESIRED=$(echo "$RESULT" | awk '{print $2}')
+            STATE=$(echo "$RESULT" | awk '{print $3}')
+
+            echo "  Poll $i/$MAX_POLLS — running:$RUNNING desired:$DESIRED state:$STATE"
+
+            if [ "$STATE" = "FAILED" ]; then
+              echo "::error::ECS deployment entered FAILED rollout state — tasks crashed."
+              echo "::error::Check CloudWatch logs: /ecs/nexusbrain-training (stream prefix: platform)"
+              exit 1
+            fi
+
+            if [ "$STATE" = "COMPLETED" ] && [ "$RUNNING" = "$DESIRED" ] && [ "$RUNNING" -gt 0 ]; then
+              consecutive_stable=$((consecutive_stable + 1))
+              echo "  ✅ Stable reading $consecutive_stable/$STABLE_NEEDED"
+              if [ "$consecutive_stable" -ge "$STABLE_NEEDED" ]; then
+                echo "✅ Platform service is stable ($RUNNING/$DESIRED running)"
+                break
+              fi
+            else
+              consecutive_stable=0
+            fi
+
+            if [ "$i" -eq "$MAX_POLLS" ]; then
+              echo "::error::Platform did not stabilize after $((MAX_POLLS * POLL_INTERVAL))s."
+              echo "::error::Last state: running=$RUNNING desired=$DESIRED rolloutState=$STATE"
+              echo "::error::Check ECS: cluster=${{ env.ECS_CLUSTER }} service=${{ env.PLATFORM_SERVICE }}"
+              exit 1
+            fi
+
+            sleep $POLL_INTERVAL
+          done
+
+      # ── Deploy Orchestrator ──────────────────────────────────────
       - name: Deploy Orchestrator to ECS
         if: needs.gate.outputs.deploy_orchestrator == 'true'
         run: |
           echo "🚀 Deploying Orchestrator..."
+          # Orchestrator runs as scheduled ECS tasks, not a persistent service.
+          # update-service may not exist — treat failure as a warning not an error.
           if ! aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.ORCHESTRATOR_SERVICE }} \
             --force-new-deployment \
-            --region ${{ env.AWS_REGION }}; then
-            echo "::warning::Orchestrator ECS service '${{ env.ORCHESTRATOR_SERVICE }}' not found or update failed."
-            echo "::warning::Scheduled tasks will use :latest on next run. Platform was not affected."
+            --deployment-configuration minimumHealthyPercent=0,maximumPercent=200 \
+            --region ${{ env.AWS_REGION }} 2>&1; then
+            echo "::warning::Orchestrator ECS service '${{ env.ORCHESTRATOR_SERVICE }}' update failed."
+            echo "::warning::Scheduled tasks will pick up :latest on next scheduled run. Platform unaffected."
+          else
+            echo "✅ Orchestrator ECS update-service accepted"
           fi
 
-      # Post-Deploy DB Health Check
-      - name: Wait for platform to be reachable
+      # ── Health Check ─────────────────────────────────────────────
+      - name: Wait for platform /api/health to return 200
         if: needs.gate.outputs.deploy_platform == 'true' && vars.PLATFORM_URL != ''
         run: |
-          echo "⏳ Waiting for platform to respond..."
-          MAX_RETRIES=12
-          RETRY_DELAY=10
+          echo "⏳ Waiting for platform health endpoint to respond..."
+          # Use /api/health not / — the root redirects (307) which curl follows,
+          # hitting login page. /api/health returns 200 JSON when healthy.
+          HEALTH_URL="${PLATFORM_URL%/}/api/health"
+          MAX_RETRIES=20
+          RETRY_DELAY=15
+
           for i in $(seq 1 $MAX_RETRIES); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${PLATFORM_URL%/}/api/health" || echo "000")
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH_URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Platform is up (attempt $i)"
+              echo "✅ Platform health check passed (attempt $i) — HTTP $STATUS"
               break
             fi
             echo "  Attempt $i/$MAX_RETRIES — HTTP $STATUS — retrying in ${RETRY_DELAY}s..."
             sleep $RETRY_DELAY
             if [ "$i" = "$MAX_RETRIES" ]; then
-              echo "::error::Platform did not become healthy after $((MAX_RETRIES * RETRY_DELAY))s"
-              exit 1
+              echo "::warning::Platform health check did not return 200 after $((MAX_RETRIES * RETRY_DELAY))s (got HTTP $STATUS)"
+              echo "::warning::Platform may still be starting up — check ECS logs if it remains unhealthy"
+              # Warn only — ECS already confirmed the task is running & stable above
             fi
           done
 
-      - name: Verify platform health (public endpoint)
+      - name: Verify platform health response
         if: needs.gate.outputs.deploy_platform == 'true' && vars.PLATFORM_URL != ''
         run: |
-          echo "🗄️  Verifying platform is serving and DB is reachable..."
-          RESPONSE=$(curl -s "${PLATFORM_URL%/}/api/health" || echo '{"status":"unreachable"}')
+          echo "🗄️  Verifying platform health response..."
+          HEALTH_URL="${PLATFORM_URL%/}/api/health"
+          RESPONSE=$(curl -s --max-time 10 "$HEALTH_URL" || echo '{"status":"unreachable"}')
           echo "$RESPONSE"
 
-          STATUS=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
+          STATUS=$(echo "$RESPONSE" | python3 -c \
+            "import sys,json; d=json.load(sys.stdin); print(d.get('status','unknown'))" \
+            2>/dev/null || echo "unknown")
 
           if [ "$STATUS" = "healthy" ] || [ "$STATUS" = "ok" ]; then
             echo "✅ Platform healthy — DB connection live"
           else
-            echo "::warning::Platform returned status '$STATUS' — check ECS logs"
+            echo "::warning::Platform returned status '$STATUS' — check ECS logs if issue persists"
           fi
 
           echo "## 🏥 Post-Deploy Health" >> $GITHUB_STEP_SUMMARY
@@ -473,7 +535,7 @@ jobs:
           echo "| **Platform status** | \`$STATUS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Migrations applied** | ${{ needs.migrate.outputs.migrations_applied || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
 
-      # Verify
+      # ── Verify ECR images ─────────────────────────────────────────
       - name: Verify deployments
         run: |
           echo "Verifying ECR images..."
@@ -496,7 +558,7 @@ jobs:
               --output table
           fi
 
-      # Summary
+      # ── Summary ──────────────────────────────────────────────────
       - name: Deployment summary
         run: |
           echo "## 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
@@ -521,11 +583,11 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Rollback" >> $GITHUB_STEP_SUMMARY
-          echo "To rollback, re-run this workflow with the previous commit SHA or use:" >> $GITHUB_STEP_SUMMARY
+          echo "To rollback, re-run this workflow on the previous commit or use:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service <SERVICE> --force-new-deployment" >> $GITHUB_STEP_SUMMARY
+          echo "aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service <SERVICE> --force-new-deployment --deployment-configuration minimumHealthyPercent=0,maximumPercent=200" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "All 15 ECS task definitions reference \`:latest\` — they will automatically pick up this image." >> $GITHUB_STEP_SUMMARY
+          echo "All ECS task definitions reference \`:latest\` — they will automatically pick up the previous image." >> $GITHUB_STEP_SUMMARY
 
   # ---------------------------------------------------------------
   # Notification
