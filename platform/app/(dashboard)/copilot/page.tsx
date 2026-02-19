@@ -1,19 +1,46 @@
 "use client";
 
-import { useState, useCallback, useEffect, Suspense } from "react";
+import { useState, useCallback, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
 import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/CopilotChat";
 import { ArtifactPane } from "@/components/copilot/ArtifactPane";
 import { ConversationSidebar } from "@/components/copilot/ConversationSidebar";
+import { ServiceContextPane } from "@/components/copilot/ServiceContextPane";
 import { useConversations } from "@/lib/use-conversations";
 import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { cn } from "@/lib/utils";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
 type ServiceMode = "general" | "aas" | "seaas";
+
+const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color: string; alwaysVisible: boolean }[] = [
+  {
+    id: "general",
+    label: "Copilot",
+    description: "Your causal intelligence co-pilot — every answer grounded in statistical evidence",
+    color: "accent",
+    alwaysVisible: true,
+  },
+  {
+    id: "aas",
+    label: "Accounting",
+    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by causal AI",
+    color: "emerald",
+    alwaysVisible: false, // Only if enabled for this org
+  },
+  {
+    id: "seaas",
+    label: "Engineering",
+    description: "Your AI software engineer — branch-scoped code intelligence, PR review, impact analysis, and cross-release risk assessment",
+    color: "blue",
+    alwaysVisible: false, // Only if enabled for this org
+  },
+];
 
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
@@ -64,14 +91,23 @@ function CopilotPageInner() {
   const [activeService, setActiveService] = useState<ServiceMode>("general");
   const persona = SERVICE_PERSONAS[activeService];
 
+  // For now, enable all service tabs (in future: read from org settings/capabilities)
+  const enabledServices: ServiceMode[] = ["general", "aas", "seaas"];
+
+  const visibleTabs = SERVICE_TABS.filter(
+    (tab) => tab.alwaysVisible || enabledServices.includes(tab.id)
+  );
+
   // ── Layout state ──────────────────────────────────────────────────────────
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
 
+  // Always show right pane (either artifacts or context)
+  const rightPaneVisible = true;
+
   // ── Artifact state ────────────────────────────────────────────────────────
   const [artifacts, setArtifacts] = useState<UnifiedArtifact[]>([]);
   const [activeArtifactId, setActiveArtifactId] = useState<string | null>(null);
-  // Map of message index → artifacts produced by that message (for inline link footer)
   const [messageArtifactMap, setMessageArtifactMap] = useState<Map<number, { id: string; type: string; title: string }[]>>(new Map());
 
   // ── Brain meta state ──────────────────────────────────────────────────────
@@ -89,12 +125,16 @@ function CopilotPageInner() {
     renameConversation,
   } = useConversations(currentOrg?.id);
 
+  // ── Filter conversations by active service ────────────────────────────────
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((c) => c.service_mode === activeService);
+  }, [conversations, activeService]);
+
   // ── Auto-inject prompt from ?q= or ?service= query params ─────────────────
   useEffect(() => {
     const svc = searchParams.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
       setActiveService(svc);
-      // Auto-open artifact pane when a service is pre-selected
       if (svc !== "general") {
         setArtifactPaneOpen(true);
       }
@@ -125,7 +165,6 @@ function CopilotPageInner() {
     setArtifacts((prev) => [...prev, newArtifact]);
     setActiveArtifactId(newArtifact.id);
     setArtifactPaneOpen(true);
-    // Track which message produced this artifact
     if (artifact.messageIndex !== undefined) {
       setMessageArtifactMap((prev) => {
         const next = new Map(prev);
@@ -145,9 +184,7 @@ function CopilotPageInner() {
     const newArtifact: UnifiedArtifact = {
       id: artifactId,
       type: isAAS ? "financial-statement" : "engineering-analysis",
-      title: isAAS
-        ? "Financial Statement"
-        : "Engineering Analysis",
+      title: isAAS ? "Financial Statement" : "Engineering Analysis",
       content: JSON.stringify(result.data, null, 2),
       rawData: result.data,
       createdAt: Date.now(),
@@ -158,7 +195,6 @@ function CopilotPageInner() {
     setActiveArtifactId(artifactId);
     setArtifactPaneOpen(true);
 
-    // Fire-and-forget: persist artifact to DB if we have a conversation
     if (activeConversationId && currentOrg?.id) {
       fetch("/api/se-aas/artifacts", {
         method: "POST",
@@ -170,7 +206,7 @@ function CopilotPageInner() {
           title: newArtifact.title,
           resultData: result.data,
         }),
-      }).catch(() => {}); // Non-blocking
+      }).catch(() => {});
     }
   }, [activeConversationId, currentOrg?.id]);
 
@@ -189,10 +225,19 @@ function CopilotPageInner() {
   // ── Service mode switch ───────────────────────────────────────────────────
   const handleServiceChange = useCallback((svc: ServiceMode) => {
     setActiveService(svc);
-    if (svc !== "general") {
-      setArtifactPaneOpen(true);
-    }
+    // Reset conversation selection when switching services
+    setActiveConversationId(null);
+    setArtifacts([]);
+    setActiveArtifactId(null);
+    setArtifactPaneOpen(false);
+    window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
   }, []);
+
+  // ── Tab click handler ─────────────────────────────────────────────────────
+  const handleTabClick = useCallback((svc: ServiceMode) => {
+    if (svc === activeService) return;
+    handleServiceChange(svc);
+  }, [activeService, handleServiceChange]);
 
   // ── Conversation actions ──────────────────────────────────────────────────
   const handleSelectConversation = useCallback(async (id: string) => {
@@ -203,12 +248,10 @@ function CopilotPageInner() {
 
     const data = await loadConversation(id);
     if (data) {
-      // Restore service mode
       if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
         setActiveService(data.service_mode);
       }
 
-      // Load artifacts for this conversation
       try {
         const artifactsRes = await fetch(`/api/se-aas/artifacts?conversationId=${id}&limit=50`);
         if (artifactsRes.ok) {
@@ -231,10 +274,9 @@ function CopilotPageInner() {
           }
         }
       } catch {
-        // Non-blocking — artifacts load is best-effort
+        // Non-blocking
       }
 
-      // Inject conversation messages into the chat component
       window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
         detail: { messages: data.messages, title: data.title },
       }));
@@ -246,7 +288,6 @@ function CopilotPageInner() {
     setArtifacts([]);
     setActiveArtifactId(null);
     setArtifactPaneOpen(false);
-    // Dispatch event to clear chat
     window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
   }, []);
 
@@ -272,7 +313,7 @@ function CopilotPageInner() {
     });
     if (id) {
       setActiveConversationId(id);
-      await loadList(); // Refresh sidebar
+      await loadList();
     }
   }, [saveConversation, activeConversationId, loadList]);
 
@@ -288,64 +329,109 @@ function CopilotPageInner() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  return (
-    <div className="flex h-[calc(100vh-7rem)] -mx-6 -mt-2">
-      {/* ── Left: Conversation Sidebar ─────────────────────────────────── */}
-      <ConversationSidebar
-        conversations={conversations}
-        activeId={activeConversationId}
-        onSelect={handleSelectConversation}
-        onNew={handleNewConversation}
-        onDelete={handleDeleteConversation}
-        onRename={handleRenameConversation}
-        loading={conversationsLoading}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-      />
+  // Service artifacts for the current service
+  const serviceArtifacts = artifacts.filter((a) => a.service === activeService);
 
-      {/* ── Center: Chat ───────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <ErrorBoundary section="Copilot Chat">
-          <CopilotChat
-            endpoint="/api/copilot/chat"
-            extraParams={{ organizationId: currentOrg?.id }}
-            activeService={activeService}
-            persona={{
-              name: persona.name,
-              description: persona.description,
-              color: persona.color,
-            }}
-            examplePrompts={EXAMPLE_PROMPTS[activeService]}
-            onArtifact={handleArtifact}
-            onBrainMeta={handleBrainMeta}
-            onDomainResult={handleDomainResult}
-            onServiceChange={handleServiceChange}
-            onArtifactPaneOpen={() => setArtifactPaneOpen(true)}
-            onSave={handleSave}
-            messageArtifacts={messageArtifactMap}
-            onOpenArtifact={(id) => {
-              setActiveArtifactId(id);
-              setArtifactPaneOpen(true);
-            }}
-          />
-        </ErrorBoundary>
+  return (
+    <div className="flex flex-col h-[calc(100vh-0rem)] -mx-6 -mt-6">
+      {/* ── Service Tabs Bar ─────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between h-12 px-4 border-b border-border-subtle bg-background shrink-0">
+        {/* Left: empty space for balance */}
+        <div className="w-24" />
+
+        {/* Center: Service tabs */}
+        <div className="flex items-center gap-1">
+          {visibleTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabClick(tab.id)}
+              className={cn(
+                "px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150",
+                activeService === tab.id
+                  ? "bg-surface-hover text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-surface-hover/50"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Right: Theme toggle */}
+        <div className="w-24 flex items-center justify-end gap-2">
+          <ThemeToggle />
+        </div>
       </div>
 
-      {/* ── Right: Artifact Pane ───────────────────────────────────────── */}
-      <ArtifactPane
-        open={artifactPaneOpen}
-        artifacts={artifacts}
-        activeArtifactId={activeArtifactId}
-        onSelectArtifact={setActiveArtifactId}
-        onPinArtifact={handlePinArtifact}
-        onClose={() => setArtifactPaneOpen(false)}
-      />
+      {/* ── Main 3-column layout ─────────────────────────────────────────── */}
+      <div className="flex flex-1 min-h-0">
+        {/* ── Left: Conversation Sidebar ───────────────────────────────── */}
+        <ConversationSidebar
+          conversations={filteredConversations}
+          activeId={activeConversationId}
+          onSelect={handleSelectConversation}
+          onNew={handleNewConversation}
+          onDelete={handleDeleteConversation}
+          onRename={handleRenameConversation}
+          loading={conversationsLoading}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
 
-      {/* ── Floating toggle when pane is closed ────────────────────────── */}
+        {/* ── Center: Chat ─────────────────────────────────────────────── */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          <ErrorBoundary section="Copilot Chat">
+            <CopilotChat
+              endpoint="/api/copilot/chat"
+              extraParams={{ organizationId: currentOrg?.id }}
+              activeService={activeService}
+              persona={{
+                name: persona.name,
+                description: persona.description,
+                color: persona.color,
+              }}
+              examplePrompts={EXAMPLE_PROMPTS[activeService]}
+              onArtifact={handleArtifact}
+              onBrainMeta={handleBrainMeta}
+              onDomainResult={handleDomainResult}
+              onServiceChange={handleServiceChange}
+              onArtifactPaneOpen={() => setArtifactPaneOpen(true)}
+              onSave={handleSave}
+              messageArtifacts={messageArtifactMap}
+              onOpenArtifact={(id) => {
+                setActiveArtifactId(id);
+                setArtifactPaneOpen(true);
+              }}
+            />
+          </ErrorBoundary>
+        </div>
+
+        {/* ── Right: Artifact Pane OR Context Pane ─────────────────────── */}
+        {artifactPaneOpen && artifacts.length > 0 ? (
+          <ArtifactPane
+            open={artifactPaneOpen}
+            artifacts={artifacts}
+            activeArtifactId={activeArtifactId}
+            onSelectArtifact={setActiveArtifactId}
+            onPinArtifact={handlePinArtifact}
+            onClose={() => setArtifactPaneOpen(false)}
+          />
+        ) : (
+          <ServiceContextPane
+            activeService={activeService}
+            onOpenArtifact={(type) => {
+              // TODO: Generate artifact of this type via chat prompt
+              console.log("Open artifact type:", type);
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Floating toggle when artifacts pane is closed but artifacts exist ── */}
       {!artifactPaneOpen && artifacts.length > 0 && (
         <button
           onClick={() => setArtifactPaneOpen(true)}
-          className="fixed right-6 top-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-accent/20 hover:bg-card-hover text-accent transition-colors shadow-lg z-10"
+          className="fixed right-6 top-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border-subtle hover:bg-surface-hover text-muted-foreground transition-colors shadow-lg z-10"
           title="Show artifacts (Cmd+\)"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -363,7 +449,7 @@ function CopilotPageInner() {
 export default function CopilotPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center h-[calc(100vh-7rem)]">
+      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
         <div className="text-sm text-muted">Loading...</div>
       </div>
     }>

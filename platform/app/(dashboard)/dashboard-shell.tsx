@@ -26,7 +26,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div
       className={cn(
         "flex-1 transition-all duration-200",
-        collapsed ? "ml-16" : "ml-60"
+        collapsed ? "ml-16" : "ml-[260px]"
       )}
     >
       {children}
