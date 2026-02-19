@@ -709,8 +709,28 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
   }> {
     const start = Date.now();
     try {
+      // Sample signals to prevent OOM in pattern mining algorithms.
+      // Apriori/PrefixSpan have combinatorial complexity — 500 signals
+      // is enough for statistically meaningful pattern discovery while
+      // keeping memory well within 4GB heap.
+      const MAX_MINING_SIGNALS = 500;
+      let miningSignals = signals;
+      if (signals.length > MAX_MINING_SIGNALS) {
+        // Stratified sample: pick evenly across the time range to preserve temporal distribution
+        const sorted = [...signals].sort((a, b) => {
+          const ta = new Date(a.signal_timestamp || a.created_at || 0).getTime();
+          const tb = new Date(b.signal_timestamp || b.created_at || 0).getTime();
+          return ta - tb;
+        });
+        const step = sorted.length / MAX_MINING_SIGNALS;
+        miningSignals = Array.from({ length: MAX_MINING_SIGNALS }, (_, i) =>
+          sorted[Math.min(Math.floor(i * step), sorted.length - 1)]
+        );
+        log('PATTERNS', `Sampled ${MAX_MINING_SIGNALS}/${signals.length} signals for mining (stratified)`);
+      }
+
       // Build temporal events first (used by multiple mining steps)
-      const temporalEvents: TemporalEvent[] = signals
+      const temporalEvents: TemporalEvent[] = miningSignals
         .filter((s: any) => s.signal_timestamp)
         .map((s: any) => ({
           event: `${s.source_domain}:${s.signal_type}`,
@@ -719,29 +739,32 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         }));
 
       // Frequent itemset mining (Apriori + K-Means++)
-      const transactions = groupSignalsIntoTransactions(signals);
+      const transactions = groupSignalsIntoTransactions(miningSignals);
+      // Don't pass temporalEvents here — sequential + temporal mining are called
+      // separately below with tuned absolute-count thresholds. Passing them into
+      // discoverPatterns would run them a second time with fractional minSupport,
+      // wasting memory and CPU.
       const discoveryResult = discoverPatterns(
         transactions,
         [], // No entity features for cross-domain pattern mining
         {
-          minSupport: 0.15, // Tightened from 0.05: require 15% support to filter noise patterns
-          minConfidence: 0.65, // Tightened from 0.5: only keep patterns with meaningful confidence
-          temporalEvents,
+          minSupport: 0.2, // Require 20% support to filter noise and reduce candidate explosion
+          minConfidence: 0.65, // Only keep patterns with meaningful confidence
         }
       );
       const patterns = discoveryResult.patterns || [];
 
       // Sequential pattern mining (PrefixSpan)
       const sequentialPatterns = mineSequentialPatterns(temporalEvents, {
-        minSupport: 10, // Tightened from 3: require 10+ observations to be considered a real pattern
+        minSupport: 10, // Require 10+ observations to be considered a real pattern
         maxGap: 7 * 24 * 60 * 60 * 1000, // 7 days max gap
-        maxLength: 5,
+        maxLength: 4, // Reduced from 5 to limit recursion depth
       });
 
       // Temporal association rules
       const temporalRules = mineTemporalAssociationRules(temporalEvents, {
-        minSupport: 10, // Tightened from 3: require 10+ occurrences
-        minConfidence: 0.65, // Tightened from 0.5: require 65% confidence
+        minSupport: 10, // Require 10+ occurrences
+        minConfidence: 0.65, // Require 65% confidence
         maxWindow: 30 * 24 * 60 * 60 * 1000, // 30 days max window
       });
 
@@ -2327,11 +2350,17 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       steps.push(anomalyStep);
       if (anomalyStep.status === 'error') errors.push('Anomaly detection failed');
 
+      // GC before pattern mining — steps 1-3 generate large intermediate data
+      if (typeof globalThis.gc === 'function') globalThis.gc();
+
       // Step 4: PATTERNS
       log('4/10', 'Mining patterns (Apriori + PrefixSpan + temporal rules)...');
       const { patterns, sequentialPatterns, temporalRules, step: patternStep } = await minePatterns(signals);
       steps.push(patternStep);
       if (patternStep.status === 'error') errors.push('Pattern mining failed');
+
+      // GC after pattern mining — release Apriori bitmaps, candidate sets
+      if (typeof globalThis.gc === 'function') globalThis.gc();
 
       // Step 5: GENERATE
       log('5/10', 'Generating training packs from discoveries...');

@@ -161,20 +161,31 @@ export function mineAssociationRules(
   const frequentItems = Array.from(itemCounts.entries())
     .filter(([_, count]) => count / n >= minSupport)
     .map(([item, _]) => item);
-  
+
+  // Cap frequent items BEFORE bitmap creation to prevent OOM.
+  // At 200+ items, bitmaps alone consume significant memory, and
+  // 3-itemset generation is O(n³). Keep only the top items by frequency.
+  const MAX_FREQUENT_ITEMS = 100;
+  const cappedFrequentItems = frequentItems.length > MAX_FREQUENT_ITEMS
+    ? frequentItems
+        .map(item => ({ item, count: itemCounts.get(item)! }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, MAX_FREQUENT_ITEMS)
+        .map(x => x.item)
+    : frequentItems;
+
   // Generate frequent itemsets (simplified - up to size 3)
   const frequentItemsets = new Map<string, number>();
-  
-  // 1-itemsets
-  for (const item of frequentItems) {
+
+  // 1-itemsets (only capped items)
+  for (const item of cappedFrequentItems) {
     frequentItemsets.set(item, itemCounts.get(item)!);
   }
-  
+
   // Pre-compute transaction bitmaps for O(1) support counting
-  // Instead of re-scanning all transactions for each candidate pair/triple,
-  // build a bitmap (Set of transaction indices) per item.
+  // Only build bitmaps for capped items (not all frequent items).
   const txBitmaps = new Map<string, Set<number>>();
-  for (const item of frequentItems) {
+  for (const item of cappedFrequentItems) {
     const bitmap = new Set<number>();
     for (let t = 0; t < transactions.length; t++) {
       if (transactions[t].includes(item)) {
@@ -183,17 +194,6 @@ export function mineAssociationRules(
     }
     txBitmaps.set(item, bitmap);
   }
-
-  // Cap frequent items to prevent combinatorial explosion at scale
-  // At 1000+ frequent items, 3-itemsets = C(1000,3) = 166M candidates → OOM
-  const MAX_FREQUENT_ITEMS = 200;
-  const cappedFrequentItems = frequentItems.length > MAX_FREQUENT_ITEMS
-    ? frequentItems
-        .map(item => ({ item, count: itemCounts.get(item)! }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, MAX_FREQUENT_ITEMS)
-        .map(x => x.item)
-    : frequentItems;
 
   // 2-itemsets (using bitmap intersection instead of full transaction scan)
   for (let i = 0; i < cappedFrequentItems.length; i++) {

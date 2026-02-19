@@ -329,7 +329,7 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
             timeout: 1200000, // 20 min per org
             env: {
               ...process.env,
-              NODE_OPTIONS: `--max-old-space-size=${currentHeap}`,
+              NODE_OPTIONS: `--max-old-space-size=${currentHeap} --expose-gc`,
               ORGANIZATION_ID: org.id,
               CONSOLIDATION_MODE: 'once',
               SKIP_CORE_BRAIN: 'true', // Bug #2 fix: orchestrator handles core brain in Phase 2B
@@ -344,14 +344,16 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
           processed++;
           break;
         } catch (err: any) {
-          const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+          // OOM detection: check message + stderr + signal (SIGABRT from V8 OOM killer)
+          const combined = `${err.message || ''} ${err.stderr || ''} ${err.signal || ''}`;
+          const isOOM = /heap|out of memory|allocation failed|ENOMEM|SIGABRT|SIGKILL|exit code 134/i.test(combined);
           if (isOOM && attempt < MAX_OOM_RETRIES) {
             const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
             logError('PHASE-2', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
             currentHeap = nextHeap;
             continue;
           }
-          const errMsg = `Brain consolidation failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+          const errMsg = `Brain consolidation failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${(err.message || '').substring(0, 300)}`;
           errors.push(errMsg);
           logError('PHASE-2', errMsg);
           // Continue with next org — don't let one failure stop everything
@@ -383,7 +385,7 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
         timeout: 1200000, // 20 min
         env: {
           ...process.env,
-          NODE_OPTIONS: `--max-old-space-size=${currentCoreHeap}`,
+          NODE_OPTIONS: `--max-old-space-size=${currentCoreHeap} --expose-gc`,
           ORGANIZATION_ID: CORE_BRAIN_ORG_ID,
           CONSOLIDATION_MODE: 'once',
           VERBOSE: VERBOSE ? 'true' : 'false',
@@ -394,14 +396,15 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
       processed++;
       break;
     } catch (err: any) {
-      const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+      const combined = `${err.message || ''} ${err.stderr || ''} ${err.signal || ''}`;
+      const isOOM = /heap|out of memory|allocation failed|ENOMEM|SIGABRT|SIGKILL|exit code 134/i.test(combined);
       if (isOOM && attempt < MAX_OOM_RETRIES) {
         const nextHeap = Math.min(10240, Math.round(currentCoreHeap * HEAP_RETRY_MULTIPLIER));
         logError('PHASE-2', `OOM for Core Brain at ${currentCoreHeap}MB — retrying with ${nextHeap}MB`);
         currentCoreHeap = nextHeap;
         continue;
       }
-      const errMsg = `Brain consolidation failed for Core Brain${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+      const errMsg = `Brain consolidation failed for Core Brain${isOOM ? ' (OOM even after retry)' : ''}: ${(err.message || '').substring(0, 300)}`;
       errors.push(errMsg);
       logError('PHASE-2', errMsg);
     }
@@ -572,14 +575,15 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, cus
           processed++;
           break;
         } catch (err: any) {
-          const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+          const combined = `${err.message || ''} ${err.stderr || ''} ${err.signal || ''}`;
+          const isOOM = /heap|out of memory|allocation failed|ENOMEM|SIGABRT|SIGKILL|exit code 134/i.test(combined);
           if (isOOM && attempt < MAX_OOM_RETRIES) {
             const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
             logError('PHASE-4', `OOM for ${org.name} at ${currentHeap}MB — retrying with ${nextHeap}MB`);
             currentHeap = nextHeap;
             continue;
           }
-          const errMsg = `Full pipeline failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+          const errMsg = `Full pipeline failed for ${org.name}${isOOM ? ' (OOM even after retry)' : ''}: ${(err.message || '').substring(0, 300)}`;
           errors.push(errMsg);
           logError('PHASE-4', errMsg);
           // Continue with next org — don't let one failure stop everything
@@ -616,14 +620,15 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, cus
         processed++;
         break;
       } catch (err: any) {
-        const isOOM = /heap|out of memory|allocation failed|ENOMEM/i.test(err.message || '');
+        const combined = `${err.message || ''} ${err.stderr || ''} ${err.signal || ''}`;
+        const isOOM = /heap|out of memory|allocation failed|ENOMEM|SIGABRT|SIGKILL|exit code 134/i.test(combined);
         if (isOOM && attempt < MAX_OOM_RETRIES) {
           const nextHeap = Math.min(10240, Math.round(currentHeap * HEAP_RETRY_MULTIPLIER));
           logError('PHASE-4', `OOM for Core Brain at ${currentHeap}MB — retrying with ${nextHeap}MB`);
           currentHeap = nextHeap;
           continue;
         }
-        const errMsg = `Full pipeline failed for Core Brain${isOOM ? ' (OOM even after retry)' : ''}: ${err.message}`;
+        const errMsg = `Full pipeline failed for Core Brain${isOOM ? ' (OOM even after retry)' : ''}: ${(err.message || '').substring(0, 300)}`;
         errors.push(errMsg);
         logError('PHASE-4', errMsg);
       }
