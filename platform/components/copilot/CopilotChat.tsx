@@ -1575,6 +1575,9 @@ export function CopilotChat({
     }
   }, [endpoint, extraParams, isLoading]); // Bug fix #1/#2: removed messages and onArtifact — use refs instead
 
+  // Keep sendMessageRef in sync so event handlers can call it
+  sendMessageRef.current = sendMessage;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     sendMessage(input);

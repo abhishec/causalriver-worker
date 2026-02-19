@@ -485,7 +485,9 @@ export function ArtifactsPanel({
                   result={
                     activeArtifact.service === "aas"
                       ? { service: "aas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
-                      : { service: "seaas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
+                      : activeArtifact.domainId === "delivery-intelligence"
+                        ? { service: "delivery-intelligence" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
+                        : { service: "seaas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
                   }
                 />
               </div>

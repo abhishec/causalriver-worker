@@ -234,9 +234,9 @@ export function ServiceContextPane({ activeService, onOpenArtifact }: ServiceCon
         onUploaded={(result) => {
           setUploadOpen(false);
           if (result.success && result.fileType === "gl-data") {
-            // Auto-trigger full financial analysis via copilot prompt injection
+            // Auto-trigger full financial analysis — inject AND submit immediately
             window.dispatchEvent(
-              new CustomEvent("copilot-inject-prompt", {
+              new CustomEvent("copilot-inject-and-submit", {
                 detail: "Run a full financial analysis on the uploaded GL data — generate P&L, Balance Sheet, Trial Balance, GST F5, and Transaction Interpretations",
               })
             );

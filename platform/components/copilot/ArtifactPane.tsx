@@ -79,22 +79,20 @@ export function ArtifactPane({
 
   if (!open) return null;
 
-  // Adapt UnifiedArtifact[] → Artifact[] for existing ArtifactsPanel
+  // Adapt UnifiedArtifact[] → Artifact[] for ArtifactsPanel
+  // CRITICAL: preserve rawData, service, domainId — these are needed for rich domain rendering
   const panelArtifacts = artifacts.map((a) => ({
     id: a.id,
-    type: a.type === "financial-statement"
-      ? ("analysis" as const)
-      : a.type === "engineering-analysis"
-      ? ("analysis" as const)
-      : a.type === "mermaid-diagram"
-      ? ("code" as const)
-      : (a.type as "code" | "analysis" | "table" | "chart" | "document"),
+    type: a.type as "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram",
     title: a.title,
     language: a.type === "mermaid-diagram" ? "mermaid" : a.language,
     content: a.content,
+    rawData: a.rawData,
     createdAt: a.createdAt,
     pinned: a.pinned,
     messageIndex: a.messageIndex,
+    service: a.service,
+    domainId: a.domainId,
   }));
 
   return (

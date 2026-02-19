@@ -374,9 +374,117 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ─── Tab: Anomalies ─────────────────────────────────────────────────────────
+
+function AnomaliesTab({ anomalies }: { anomalies: AccountingDomainData["anomalies"] }) {
+  if (!anomalies || anomalies.length === 0) return <EmptyState message="No anomalies detected. Ask: 'Detect unusual transaction patterns'" />;
+
+  const sevColors: Record<string, string> = {
+    high: "bg-danger/10 text-danger border-danger/20",
+    medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+    low: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  };
+
+  const sevDots: Record<string, string> = {
+    high: "bg-danger",
+    medium: "bg-yellow-400",
+    low: "bg-blue-400",
+  };
+
+  return (
+    <div className="flex flex-col gap-0 pb-3">
+      <div className="px-3 py-2 border-b border-border-subtle flex items-center justify-between">
+        <span className="text-[11px] text-muted">Anomaly Detection</span>
+        <span className="text-[12px] font-semibold text-foreground tabular-nums">{anomalies.length} detected</span>
+      </div>
+      {anomalies.map((a, i) => {
+        const sev = a.severity?.toLowerCase() || "medium";
+        return (
+          <div key={i} className="px-3 py-2.5 border-b border-border-subtle/40 hover:bg-surface/20 transition-colors">
+            <div className="flex items-start gap-2.5">
+              <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border shrink-0 mt-0.5", sevColors[sev] || sevColors.medium)}>
+                <span className={cn("w-1.5 h-1.5 rounded-full", sevDots[sev] || sevDots.medium)} />
+                {sev.toUpperCase()}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-semibold text-foreground leading-snug">{a.type}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{a.description}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── KPI Summary Header ────────────────────────────────────────────────────
+
+function KPISummary({ data }: { data: AccountingDomainData }) {
+  const kpis: Array<{ label: string; value: string; sub?: string; accent?: boolean }> = [];
+
+  if (data.profitAndLoss) {
+    kpis.push({
+      label: "Revenue",
+      value: `$${(data.profitAndLoss.revenue / 1000).toFixed(0)}K`,
+      accent: true,
+    });
+    kpis.push({
+      label: "Net Income",
+      value: `$${(data.profitAndLoss.netIncome / 1000).toFixed(0)}K`,
+      sub: data.profitAndLoss.netIncome >= 0 ? "Profit" : "Loss",
+    });
+    if (data.profitAndLoss.ebitda !== undefined) {
+      kpis.push({
+        label: "EBITDA",
+        value: `$${(data.profitAndLoss.ebitda / 1000).toFixed(0)}K`,
+      });
+    }
+  }
+  if (data.balanceSheet) {
+    kpis.push({
+      label: "Total Assets",
+      value: `$${(data.balanceSheet.totalAssets / 1000).toFixed(0)}K`,
+    });
+  }
+  if (data.trialBalance) {
+    kpis.push({
+      label: "Accounts",
+      value: String(data.trialBalance.accounts.length),
+      sub: data.trialBalance.balanced ? "Balanced" : "Unbalanced",
+    });
+  }
+  if (data.gstF5) {
+    kpis.push({
+      label: "GST Payable",
+      value: `$${formatSGD(data.gstF5.box8_netTaxPayable)}`,
+      sub: data.gstF5.box8_netTaxPayable < 0 ? "Refund" : "Payable",
+    });
+  }
+
+  if (kpis.length === 0) return null;
+
+  return (
+    <div className="px-3 py-3 border-b border-border-subtle bg-gradient-to-r from-emerald-500/5 via-transparent to-transparent">
+      <div className="grid grid-cols-3 gap-2">
+        {kpis.slice(0, 3).map((kpi) => (
+          <div key={kpi.label} className={cn(
+            "rounded-lg border p-2 flex flex-col gap-0.5",
+            kpi.accent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border-subtle bg-surface/40"
+          )}>
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">{kpi.label}</span>
+            <span className={cn("text-[16px] font-bold tabular-nums leading-tight", kpi.accent ? "text-emerald-400" : "text-foreground")}>{kpi.value}</span>
+            {kpi.sub && <span className="text-[10px] text-muted">{kpi.sub}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Tab definitions ──────────────────────────────────────────────────────────
 
-type TabId = "pl" | "bs" | "tb" | "gst" | "txns";
+type TabId = "pl" | "bs" | "tb" | "gst" | "txns" | "anomalies";
 
 const TABS: Array<{ id: TabId; label: string; shortLabel: string }> = [
   { id: "pl", label: "P&L", shortLabel: "P&L" },
@@ -384,6 +492,7 @@ const TABS: Array<{ id: TabId; label: string; shortLabel: string }> = [
   { id: "tb", label: "Trial Balance", shortLabel: "TB" },
   { id: "gst", label: "GST F5", shortLabel: "GST" },
   { id: "txns", label: "Transactions", shortLabel: "Txns" },
+  { id: "anomalies", label: "Anomalies", shortLabel: "Risk" },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -400,6 +509,7 @@ export function FinancialStatementsPanel({ data }: FinancialStatementsPanelProps
     if (data.trialBalance) return "tb";
     if (data.gstF5) return "gst";
     if (data.transactionSummary) return "txns";
+    if (data.anomalies && data.anomalies.length > 0) return "anomalies";
     return "pl";
   };
 
@@ -412,10 +522,14 @@ export function FinancialStatementsPanel({ data }: FinancialStatementsPanelProps
     tb: !!data.trialBalance,
     gst: !!data.gstF5,
     txns: !!data.transactionSummary,
+    anomalies: !!(data.anomalies && data.anomalies.length > 0),
   };
 
   return (
     <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
+      {/* KPI Summary Header */}
+      <KPISummary data={data} />
+
       {/* Tab bar */}
       <div className="flex shrink-0 border-b border-border-subtle bg-surface/30">
         {TABS.map((tab) => (
@@ -450,6 +564,7 @@ export function FinancialStatementsPanel({ data }: FinancialStatementsPanelProps
         {activeTab === "tb" && <TrialBalanceTab tb={data.trialBalance} />}
         {activeTab === "gst" && <GSTF5Tab gst={data.gstF5} />}
         {activeTab === "txns" && <TransactionsTab txns={data.transactionSummary} />}
+        {activeTab === "anomalies" && <AnomaliesTab anomalies={data.anomalies} />}
       </div>
 
       {/* Footer — data currency */}

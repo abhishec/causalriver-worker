@@ -51,9 +51,46 @@ export const DOMAIN_CATALOGUE: DomainEntry[] = [
     badgeVariant: "accent",
     badgePulse: true,
     href: "/early-warning",
+    copilotPrompt: "Analyse delivery velocity and predict risk of velocity collapse across engagements",
     colorClass: "text-red-400",
     ringClass: "border-red-500/25",
     bgClass: "bg-red-500/5",
+  },
+  {
+    id: "delivery-intelligence",
+    label: "Engagement Health",
+    icon: "💊",
+    category: "P0 · Delivery Intelligence",
+    description:
+      "Health score dashboard — delivery velocity, Jira resolution, scope drift, team sentiment, and forecast confidence across all engagements.",
+    copilotPrompt: "Show me the delivery intelligence dashboard with engagement health scores, scope alerts, and team health",
+    colorClass: "text-emerald-400",
+    ringClass: "border-emerald-500/25",
+    bgClass: "bg-emerald-500/5",
+  },
+  {
+    id: "pod-match",
+    label: "Pod Match",
+    icon: "🎯",
+    category: "P0 · Delivery Intelligence",
+    description:
+      "Recommend the best pod for an engagement — tech stack overlap, past performance, cycle time, and capacity analysis.",
+    copilotPrompt: "Which pod should work on this engagement? Recommend the best team match",
+    colorClass: "text-cyan-400",
+    ringClass: "border-cyan-500/25",
+    bgClass: "bg-cyan-500/5",
+  },
+  {
+    id: "scope-creep",
+    label: "Scope Creep",
+    icon: "📏",
+    category: "P0 · Delivery Intelligence",
+    description:
+      "Detect scope creep alerts — story point drift, sprint scope changes, and baseline vs current workload analysis.",
+    copilotPrompt: "Check for scope creep alerts across all active engagements and sprints",
+    colorClass: "text-warning",
+    ringClass: "border-warning/25",
+    bgClass: "bg-warning/5",
   },
 
   // ── P1: Code Intelligence ──────────────────────────────────────────────

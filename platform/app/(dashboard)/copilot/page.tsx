@@ -180,17 +180,20 @@ function CopilotPageInner() {
   // ── Handle domain result (AAS / SE-aaS structured output) → wrap as artifact
   const handleDomainResult = useCallback((result: DomainResult) => {
     const isAAS = result.service === "aas";
-    const isSeaas = result.service === "seaas";
+    const isDelivery = result.service === "delivery-intelligence";
+    const isSeaas = result.service === "seaas" || isDelivery; // delivery-intelligence IS part of SE-aaS
     const artifactId = `domain-${Date.now()}`;
     const svc: "aas" | "seaas" | "general" = isAAS ? "aas" : isSeaas ? "seaas" : "general";
     const newArtifact: UnifiedArtifact = {
       id: artifactId,
       type: isAAS ? "financial-statement" : "engineering-analysis",
-      title: isAAS ? "Financial Statement" : "Engineering Analysis",
+      title: isAAS ? "Financial Statement" : isDelivery ? "Delivery Intelligence" : "Engineering Analysis",
       content: JSON.stringify(result.data, null, 2),
       rawData: result.data,
       createdAt: Date.now(),
       service: svc,
+      // Tag delivery-intelligence so we can route to the right panel
+      domainId: isDelivery ? "delivery-intelligence" : undefined,
       pinned: false,
     };
     setArtifacts((prev) => [...prev, newArtifact]);
@@ -433,8 +436,9 @@ function CopilotPageInner() {
               const aasEntry = AAS_COMMANDS.find((c) => c.id === type);
               const prompt = domainEntry?.copilotPrompt || aasEntry?.prompt || GENERAL_PROMPTS[type];
               if (prompt) {
+                // Auto-submit: inject AND run the prompt immediately
                 window.dispatchEvent(
-                  new CustomEvent("copilot-inject-prompt", { detail: prompt })
+                  new CustomEvent("copilot-inject-and-submit", { detail: prompt })
                 );
               }
             }}
