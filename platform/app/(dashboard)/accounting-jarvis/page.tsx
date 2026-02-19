@@ -55,6 +55,34 @@ interface TransactionInterpretation {
   category: string;
 }
 
+interface PriorPeriodComparison {
+  currentPeriodMonths: string[];
+  priorPeriodMonths: string[];
+  current: { totalRevenue: number; totalExpenses: number; netProfit: number };
+  prior: { totalRevenue: number; totalExpenses: number; netProfit: number };
+  variance: {
+    revenue: number;
+    revenuePct: number;
+    expenses: number;
+    expensesPct: number;
+    netProfit: number;
+    netProfitPct: number;
+  };
+  autoCommentary: string[];
+  hasEnoughData: boolean;
+}
+
+interface BalanceMovementAlert {
+  account: string;
+  accountType: string;
+  currentBalance: number;
+  priorBalance: number;
+  movementPct: number;
+  direction: 'increase' | 'decrease';
+  severity: 'critical' | 'high' | 'medium';
+  narrative: string;
+}
+
 interface AccountingAnalysis {
   summary: {
     totalTransactions: number;
@@ -76,6 +104,8 @@ interface AccountingAnalysis {
     grossMargin: number;
     topExpenseCategories: ExpenseCategory[];
   };
+  priorPeriodComparison?: PriorPeriodComparison;
+  balanceMovementAlerts?: BalanceMovementAlert[];
   balanceSheet: {
     totalAssets: number;
     totalLiabilities: number;
@@ -192,6 +222,344 @@ function BenfordsChart({ expected, observed }: { expected: number[]; observed: n
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Prior-Period Comparison Panel ───────────────────────────────────────────
+
+function PriorPeriodPanel({ comparison }: { comparison: PriorPeriodComparison }) {
+  if (!comparison.hasEnoughData) {
+    return (
+      <div className="rounded-xl bg-card border border-border-subtle p-5">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+            <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">Prior-Period Comparison</h3>
+            <p className="text-[11px] text-muted/60">Need 2+ periods of GL data for comparison</p>
+          </div>
+        </div>
+        <p className="text-xs text-muted/50">Upload at least 2 periods of Xero GL data to enable prior-period comparison and 20% movement alerts.</p>
+      </div>
+    );
+  }
+
+  const v = comparison.variance;
+  const fmt = (n: number) => `$${Math.abs(n / 1000).toFixed(0)}K`;
+  const varColor = (pct: number) => pct > 0 ? 'text-emerald-400' : 'text-red-400';
+  const varIcon = (pct: number) => pct > 0 ? '↑' : '↓';
+
+  return (
+    <div className="rounded-xl bg-card border border-border-subtle overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+        <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+          <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold">Prior-Period P&L Comparison</h3>
+          <p className="text-[11px] text-muted/60">
+            Current: {comparison.currentPeriodMonths[0]} → {comparison.currentPeriodMonths[comparison.currentPeriodMonths.length - 1] || comparison.currentPeriodMonths[0]}
+            {' '}&nbsp;|&nbsp; Prior: {comparison.priorPeriodMonths[0]} → {comparison.priorPeriodMonths[comparison.priorPeriodMonths.length - 1] || comparison.priorPeriodMonths[0]}
+          </p>
+        </div>
+        <div className="ml-auto">
+          <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-medium">Function 01</span>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {/* 3-column comparison table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border-subtle">
+                <th className="text-left py-2 text-muted/60 font-normal">Metric</th>
+                <th className="text-right py-2 text-muted/60 font-normal">Current Period</th>
+                <th className="text-right py-2 text-muted/60 font-normal">Prior Period</th>
+                <th className="text-right py-2 text-muted/60 font-normal">Variance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {
+                  label: 'Total Revenue',
+                  cur: comparison.current.totalRevenue,
+                  pri: comparison.prior.totalRevenue,
+                  pct: v.revenuePct,
+                  colorCur: 'text-emerald-400',
+                },
+                {
+                  label: 'Total Expenses',
+                  cur: comparison.current.totalExpenses,
+                  pri: comparison.prior.totalExpenses,
+                  pct: v.expensesPct,
+                  colorCur: 'text-red-400',
+                },
+                {
+                  label: 'Net Profit / (Loss)',
+                  cur: comparison.current.netProfit,
+                  pri: comparison.prior.netProfit,
+                  pct: v.netProfitPct,
+                  colorCur: comparison.current.netProfit >= 0 ? 'text-emerald-400' : 'text-red-400',
+                  bold: true,
+                },
+              ].map((row) => (
+                <tr key={row.label} className={cn("border-b border-border-subtle/40", row.bold && "font-semibold")}>
+                  <td className="py-2 text-muted/70">{row.label}</td>
+                  <td className={cn("py-2 text-right font-mono", row.colorCur)}>{fmt(row.cur)}</td>
+                  <td className="py-2 text-right font-mono text-muted/60">{fmt(row.pri)}</td>
+                  <td className={cn("py-2 text-right font-mono", varColor(row.pct))}>
+                    {varIcon(row.pct)} {Math.abs(row.pct).toFixed(1)}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Auto-commentary */}
+        <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-blue-400/70 mb-1.5">Auto-Commentary</p>
+          <ul className="space-y-1">
+            {comparison.autoCommentary.map((c, i) => (
+              <li key={i} className="flex gap-2 text-[11px] text-muted/80">
+                <span className="text-blue-400/50 shrink-0">→</span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Balance Movement Alerts Panel ───────────────────────────────────────────
+
+function BalanceMovementAlertsPanel({ alerts }: { alerts: BalanceMovementAlert[] }) {
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const critical = alerts.filter(a => a.severity === 'critical');
+  const high = alerts.filter(a => a.severity === 'high');
+  const medium = alerts.filter(a => a.severity === 'medium');
+
+  if (alerts.length === 0) return null;
+
+  const sevConfig = {
+    critical: { badge: 'bg-red-500/10 text-red-400 border-red-500/20', dot: 'bg-red-400', label: 'Critical' },
+    high:     { badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20', dot: 'bg-amber-400', label: 'High' },
+    medium:   { badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', dot: 'bg-yellow-400', label: 'Medium' },
+  };
+
+  return (
+    <div className="rounded-xl bg-card border border-border-subtle overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+        <div className="w-7 h-7 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
+          <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold">20% Balance Movement Alerts</h3>
+          <p className="text-[11px] text-muted/60">
+            {alerts.length} accounts moved ≥20% vs prior period
+            {critical.length > 0 && ` · ${critical.length} critical`}
+            {high.length > 0 && ` · ${high.length} high`}
+          </p>
+        </div>
+        <div className="ml-auto flex gap-1">
+          {critical.length > 0 && <span className="text-[10px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">{critical.length} Critical</span>}
+          {high.length > 0 && <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full">{high.length} High</span>}
+        </div>
+      </div>
+
+      <div className="divide-y divide-border-subtle/50">
+        {alerts.slice(0, 10).map((alert, idx) => {
+          const sc = sevConfig[alert.severity];
+          const isOpen = expanded === idx;
+          return (
+            <div
+              key={idx}
+              className="group cursor-pointer hover:bg-surface/50 transition-colors"
+              onClick={() => setExpanded(isOpen ? null : idx)}
+            >
+              <div className="flex items-center gap-3 px-5 py-3">
+                <div className={cn("w-2 h-2 rounded-full shrink-0", sc.dot)} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium truncate">{alert.account}</p>
+                    <span className={cn("text-[9px] px-1.5 py-0.5 rounded border shrink-0", sc.badge)}>{alert.accountType}</span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className={cn("text-xs font-mono font-semibold", alert.direction === 'increase' ? 'text-amber-400' : 'text-blue-400')}>
+                    {alert.direction === 'increase' ? '↑' : '↓'} {Math.abs(alert.movementPct).toFixed(1)}%
+                  </div>
+                  <div className={cn("text-[9px] px-1.5 py-0.5 rounded border mt-0.5", sc.badge)}>{sc.label}</div>
+                </div>
+                <svg className={cn("w-3.5 h-3.5 text-muted/30 shrink-0 transition-transform", isOpen && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
+              {isOpen && (
+                <div className="px-5 pb-4 pt-0">
+                  <div className="ml-5 pl-3 border-l-2 border-amber-500/20">
+                    <p className="text-[11px] text-muted/80 leading-relaxed">{alert.narrative}</p>
+                    <div className="flex gap-4 mt-2 text-[10px] text-muted/50 font-mono">
+                      <span>Prior: SGD {Math.abs(alert.priorBalance).toLocaleString('en-SG', { maximumFractionDigits: 0 })}</span>
+                      <span>Current: SGD {Math.abs(alert.currentBalance).toLocaleString('en-SG', { maximumFractionDigits: 0 })}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {alerts.length > 10 && (
+        <div className="px-5 py-2 border-t border-border-subtle/50 text-[10px] text-muted/40">
+          +{alerts.length - 10} more alerts — export CSV for full list
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── CAS Score Panel (Causal Anomaly Score) ───────────────────────────────────
+
+interface CASData {
+  casScore?: number;
+  casRating?: string;
+  casBreakdown?: {
+    completeness: number;
+    consistency: number;
+    conformity: number;
+    conditionAlerts: number;
+    brainIntelligence: number;
+  };
+  highRiskConditions?: Array<{ type: string; condition?: string; description: string; severity: string }>;
+  causalAnomalies?: Array<{ type: string; condition?: string; description: string; severity: string }>;
+  brainValueAdd?: string;
+  edgesAnalyzed?: number;
+}
+
+function CASScorePanel({ data }: { data: CASData }) {
+  if (data.casScore === undefined) return null;
+
+  const score = data.casScore;
+  const rating = data.casRating || '';
+  const bd = data.casBreakdown;
+
+  const ratingConfig = {
+    low_risk:      { label: 'Low Risk', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', bar: 'bg-emerald-400' },
+    elevated_risk: { label: 'Elevated Risk', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', bar: 'bg-amber-400' },
+    high_risk:     { label: 'High Risk', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', bar: 'bg-orange-400' },
+    critical_risk: { label: 'Critical Risk', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', bar: 'bg-red-400' },
+  };
+  const rc = ratingConfig[rating as keyof typeof ratingConfig] || ratingConfig.elevated_risk;
+
+  const conditionLabels: Record<string, string> = {
+    A: 'Revenue Recognition Risk',
+    B: 'Audit-Window Expense Spike',
+    C: 'CPF / Payroll Link Absent',
+    D: 'Weak Causal Relationship',
+  };
+
+  return (
+    <div className={cn("rounded-xl border overflow-hidden", rc.bg)}>
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+        <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center shrink-0">
+          <svg className="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold">Causal Anomaly Score (CAS)</h3>
+          <p className="text-[11px] text-muted/60">0–100 · 5 structured dimensions · Function 02</p>
+        </div>
+        <div className="ml-auto flex items-center gap-3">
+          <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium border", rc.bg, rc.color)}>{rc.label}</span>
+          <span className={cn("text-3xl font-bold tabular-nums", rc.color)}>{score}</span>
+          <span className="text-muted/40 text-xs">/100</span>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {/* Score bar */}
+        <div>
+          <div className="h-2 bg-surface/60 rounded-full overflow-hidden">
+            <div className={cn("h-full rounded-full transition-all", rc.bar)} style={{ width: `${score}%` }} />
+          </div>
+          <div className="flex justify-between text-[10px] text-muted/40 mt-1">
+            <span>0 — Critical</span><span>40</span><span>60</span><span>80</span><span>100 — Clean</span>
+          </div>
+        </div>
+
+        {/* 5-dimension breakdown */}
+        {bd && (
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted/50 mb-2">Score Breakdown (5 Dimensions, max 20 each)</p>
+            <div className="space-y-1.5">
+              {[
+                { key: 'completeness', label: 'Causal Edge Completeness', value: bd.completeness },
+                { key: 'consistency', label: 'Statistical Consistency', value: bd.consistency },
+                { key: 'conformity', label: 'Distributional Conformity', value: bd.conformity },
+                { key: 'conditionAlerts', label: 'High-Risk Condition Alerts (A–D)', value: bd.conditionAlerts },
+                { key: 'brainIntelligence', label: 'Brain Intelligence Level', value: bd.brainIntelligence },
+              ].map(dim => (
+                <div key={dim.key} className="flex items-center gap-3">
+                  <span className="text-[10px] text-muted/60 w-52 shrink-0 truncate">{dim.label}</span>
+                  <div className="flex-1 h-1.5 bg-surface/60 rounded-full overflow-hidden">
+                    <div className={cn("h-full rounded-full", dim.value >= 15 ? 'bg-emerald-400' : dim.value >= 8 ? 'bg-amber-400' : 'bg-red-400')}
+                      style={{ width: `${(dim.value / 20) * 100}%` }} />
+                  </div>
+                  <span className="text-[10px] font-mono w-8 text-right text-muted/60">{dim.value}/20</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* High-risk conditions A-D */}
+        {data.highRiskConditions && data.highRiskConditions.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted/50 mb-2">
+              High-Risk Conditions Triggered ({data.highRiskConditions.length})
+            </p>
+            <div className="space-y-2">
+              {data.highRiskConditions.map((c, i) => (
+                <div key={i} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[9px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-mono font-bold">
+                      Condition {c.condition}
+                    </span>
+                    <span className="text-xs font-medium text-red-300">
+                      {conditionLabels[c.condition || ''] || c.type.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted/80 leading-relaxed">{c.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Brain value add */}
+        {data.brainValueAdd && (
+          <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-3">
+            <p className="text-[10px] uppercase tracking-wider text-purple-400/70 mb-1">🧠 NexusBrain vs Pure AI</p>
+            <p className="text-[11px] text-purple-200/80 leading-relaxed">{data.brainValueAdd}</p>
+            {data.edgesAnalyzed !== undefined && (
+              <p className="text-[10px] text-purple-400/50 mt-1">{data.edgesAnalyzed} causal edges analysed · invisible to Claude, GPT, or any base LLM</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1553,7 +1921,7 @@ function GenericResultView({ result }: { result: Record<string, unknown> }) {
   const narrative = result.narrative as string | undefined;
   const summary = result.summary as string | undefined;
   const anomalies = result.anomalies as Array<{ reason: string; severity?: string; transaction?: unknown }> | undefined;
-  const causalAnomalies = (result.causalAnomalies as Array<{ type: string; description: string; severity: string }>) || [];
+  const causalAnomalies = (result.causalAnomalies as Array<{ type: string; condition?: string; description: string; severity: string }>) || [];
   const findings = result.findings as Array<{ description: string }> | undefined;
   const recommendations = result.recommendations as string[] | undefined;
   const confidence = result.confidence as number | undefined;
@@ -1564,10 +1932,26 @@ function GenericResultView({ result }: { result: Record<string, unknown> }) {
   const benfordsLaw = result.benfordsLaw as { conforming: boolean; chiSquare: number } | undefined;
   const innerData = result.data as Record<string, unknown> | undefined;
 
-  const hasContent = narrative || summary || anomalies?.length || causalAnomalies.length || findings?.length || recommendations?.length || brainValueAdd || triageReport || transactionInterpretations?.length;
+  // CAS fields (causal-analysis / full agent)
+  const casData: CASData = {
+    casScore: result.casScore as number | undefined,
+    casRating: result.casRating as string | undefined,
+    casBreakdown: result.casBreakdown as CASData['casBreakdown'],
+    highRiskConditions: result.highRiskConditions as CASData['highRiskConditions'],
+    causalAnomalies: causalAnomalies,
+    brainValueAdd,
+    edgesAnalyzed: result.edgesAnalyzed as number | undefined,
+  };
+
+  const hasContent = narrative || summary || anomalies?.length || causalAnomalies.length || findings?.length || recommendations?.length || brainValueAdd || triageReport || transactionInterpretations?.length || casData.casScore !== undefined;
 
   return (
     <div className="space-y-3 text-xs">
+      {/* CAS Score Panel — shown first for causal-analysis / full agent */}
+      {casData.casScore !== undefined && (
+        <CASScorePanel data={casData} />
+      )}
+
       {confidence !== undefined && (
         <div className="flex items-center gap-2">
           <span className="text-muted/60">Confidence:</span>
@@ -1582,7 +1966,8 @@ function GenericResultView({ result }: { result: Record<string, unknown> }) {
       {narrative && <p className="text-muted/80 leading-relaxed">{narrative}</p>}
       {summary && !narrative && <p className="text-muted/80 leading-relaxed">{summary}</p>}
 
-      {brainValueAdd && (
+      {/* Only show brainValueAdd if not already rendered inside CASScorePanel */}
+      {brainValueAdd && casData.casScore === undefined && (
         <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2.5">
           <p className="text-[10px] uppercase tracking-wider text-purple-400/70 mb-1">🧠 Causal Intelligence</p>
           <p className="text-purple-200/80">{brainValueAdd}</p>
@@ -2004,6 +2389,16 @@ export default function AccountingJarvisPage() {
           )}
         </div>
         <div className="flex gap-2">
+          <a
+            href="/api/accounting-jarvis/export"
+            download
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Export CSV
+          </a>
           <Link href="/finance-jarvis" className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors">
             Finance Jarvis
           </Link>
@@ -2344,15 +2739,25 @@ export default function AccountingJarvisPage() {
             <TransactionInterpretationsPanel interpretations={data.transactionInterpretations} />
           )}
 
+          {/* Prior-Period P&L Comparison — Function 01 requirement */}
+          {data.priorPeriodComparison && (
+            <PriorPeriodPanel comparison={data.priorPeriodComparison} />
+          )}
+
+          {/* 20% Balance Movement Alerts — Function 01 automated check */}
+          {data.balanceMovementAlerts && data.balanceMovementAlerts.length > 0 && (
+            <BalanceMovementAlertsPanel alerts={data.balanceMovementAlerts} />
+          )}
+
           {/* Req 1 Artifacts Summary */}
           <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-4">
             <p className="text-[11px] font-semibold text-emerald-300 mb-2">✅ Req 1 Artifacts Delivered</p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               {[
                 { label: "Trial Balance", status: s.doubleEntryBalanced ? "Balanced ✓" : "Variance !", ok: s.doubleEntryBalanced },
-                { label: "P&L Statement", status: `Net ${fmtK(pnl.netProfit)}`, ok: true },
+                { label: "P&L + Prior Period", status: data.priorPeriodComparison?.hasEnoughData ? `Rev ${data.priorPeriodComparison.variance.revenuePct >= 0 ? '+' : ''}${data.priorPeriodComparison.variance.revenuePct.toFixed(1)}% vs prior` : `Net ${fmtK(pnl.netProfit)}`, ok: true },
                 { label: "Balance Sheet", status: bs.balanced ? "Balanced ✓" : "Check equity", ok: bs.balanced },
-                { label: "GST Computation", status: "Run Tax agent →", ok: true },
+                { label: "GST F5", status: "Run Tax agent →", ok: true },
                 { label: "Transaction NL", status: `${(data.transactionInterpretations || []).length} narratives`, ok: (data.transactionInterpretations || []).length > 0 },
               ].map(a => (
                 <div key={a.label} className="rounded-lg bg-card/60 border border-border-subtle p-2">
@@ -2361,9 +2766,21 @@ export default function AccountingJarvisPage() {
                 </div>
               ))}
             </div>
-            <p className="text-[10px] text-muted/40 mt-2">
-              GST F5 computation is in Req 2 — run the Tax Compliance agent. All 5 Req 1 deliverables available via GET /api/accounting-jarvis.
-            </p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-[10px] text-muted/40">
+                GST F5 computation is in Req 2 — run the Tax Compliance agent. Export CSV for Excel-ready output package.
+              </p>
+              <a
+                href="/api/accounting-jarvis/export"
+                download
+                className="shrink-0 flex items-center gap-1 text-[10px] text-emerald-400/70 hover:text-emerald-400 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                Download Excel Package →
+              </a>
+            </div>
           </div>
 
           {/* Data Source Footer */}
@@ -2407,12 +2824,12 @@ export default function AccountingJarvisPage() {
 
           {/* Req 2 Artifacts Summary */}
           <div className="rounded-xl bg-indigo-500/5 border border-indigo-500/20 p-4">
-            <p className="text-[11px] font-semibold text-indigo-300 mb-2">🤖 Req 2 Intelligence Layer</p>
+            <p className="text-[11px] font-semibold text-indigo-300 mb-2">🤖 Req 2 Intelligence Layer — Function 02</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
               {[
-                { label: "Early Causal Signals", desc: "9 accounting causal edges bootstrapped on GL upload. Revenue→Cash, Payroll→CPF, GST→IRAS, Deferred→Rev-rec and more.", icon: "📡" },
+                { label: "CAS Score (0–100)", desc: "Causal Anomaly Score across 5 dimensions: completeness, consistency, conformity, condition alerts (A–D), and brain intelligence.", icon: "🎯" },
+                { label: "4 High-Risk Conditions", desc: "Conditions A (revenue recognition), B (audit-window expenses), C (CPF/payroll link), D (weak causal relationships) — invisible to pure LLMs.", icon: "⚠️" },
                 { label: "Federated Learning", desc: "After each agent run, causal delta is promoted to CORE brain via FedAvg (privacy-preserving). Your insights improve AAS for all orgs.", icon: "🌐" },
-                { label: "Day-1 Causal Graph", desc: "Brain starts with domain-expert accounting priors. As more GL data flows, statistical edges are confirmed or adjusted.", icon: "🧠" },
               ].map(item => (
                 <div key={item.label} className="rounded-lg bg-card/60 border border-border-subtle p-3">
                   <div className="text-base mb-1">{item.icon}</div>
@@ -2422,7 +2839,7 @@ export default function AccountingJarvisPage() {
               ))}
             </div>
             <p className="text-[10px] text-muted/40">
-              Run each agent above to get full Req 2 output. brain-causal-accountant is the differentiator — uses the causal graph to find anomalies invisible to pure LLMs.
+              Run "Full Causal Analysis" or "Causal Analysis" above to generate the CAS score and high-risk condition report. brain-causal-accountant is the differentiator — uses the causal graph to find anomalies invisible to pure LLMs.
             </p>
           </div>
         </div>

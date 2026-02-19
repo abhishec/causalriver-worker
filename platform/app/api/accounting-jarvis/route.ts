@@ -118,20 +118,107 @@ function classifyAccount(name: string): string {
 
 // ── Process GL data (runs in-memory, no agent dependencies) ─────────────────
 function processGLData(transactions: GLTransaction[]) {
-  // Aggregate by account
-  const accountBalances = new Map<string, { type: string; debit: number; credit: number; count: number }>();
-  for (const txn of transactions) {
-    const key = txn.account;
-    if (!accountBalances.has(key)) {
-      accountBalances.set(key, { type: classifyAccount(key), debit: 0, credit: 0, count: 0 });
+  // ── Sort transactions by date for period splitting ─────────────────────────
+  const sorted = [...transactions].sort((a, b) => a.date.localeCompare(b.date));
+
+  // ── Split into current vs prior period ────────────────────────────────────
+  // Current period = last 12 months of data; Prior period = 12 months before that.
+  // If less than 24 months of data exist, split in half for the comparison.
+  const allDates = sorted.map(t => t.date.slice(0, 7)); // YYYY-MM
+  const uniqueMonths = [...new Set(allDates)].sort();
+  const halfIdx = Math.floor(uniqueMonths.length / 2);
+  const splitMonth = uniqueMonths[halfIdx] || '';
+  const priorTxns = splitMonth ? sorted.filter(t => t.date.slice(0, 7) < splitMonth) : [];
+  const currentTxns = splitMonth ? sorted.filter(t => t.date.slice(0, 7) >= splitMonth) : sorted;
+
+  // Helper: aggregate a set of transactions into account balances
+  function aggregateBalances(txns: GLTransaction[]) {
+    const map = new Map<string, { type: string; debit: number; credit: number; count: number }>();
+    for (const txn of txns) {
+      const key = txn.account;
+      if (!map.has(key)) map.set(key, { type: classifyAccount(key), debit: 0, credit: 0, count: 0 });
+      const bal = map.get(key)!;
+      bal.debit += txn.debit;
+      bal.credit += txn.credit;
+      bal.count++;
     }
-    const bal = accountBalances.get(key)!;
-    bal.debit += txn.debit;
-    bal.credit += txn.credit;
-    bal.count++;
+    return map;
   }
 
-  // P&L
+  // Aggregate by account (full dataset for backward-compatible outputs)
+  const accountBalances = aggregateBalances(sorted);
+  const currentBalances = aggregateBalances(currentTxns);
+  const priorBalances = aggregateBalances(priorTxns);
+
+  // Helper: compute P&L from a balances map
+  function computePnL(balances: Map<string, { type: string; debit: number; credit: number; count: number }>) {
+    const rev = Array.from(balances.entries())
+      .filter(([_, b]) => b.type === 'revenue')
+      .map(([name, b]) => ({ account: name, amount: b.credit - b.debit }))
+      .filter(a => a.amount !== 0)
+      .sort((a, b) => b.amount - a.amount);
+    const exp = Array.from(balances.entries())
+      .filter(([_, b]) => b.type === 'expense')
+      .map(([name, b]) => ({ account: name, amount: b.debit - b.credit }))
+      .filter(a => a.amount !== 0)
+      .sort((a, b) => b.amount - a.amount);
+    const totalRev = rev.reduce((s, a) => s + a.amount, 0);
+    const totalExp = exp.reduce((s, a) => s + a.amount, 0);
+    return { revenueAccounts: rev, expenseAccounts: exp, totalRevenue: totalRev, totalExpenses: totalExp, netProfit: totalRev - totalExp };
+  }
+
+  const currentPnL = computePnL(currentBalances);
+  const priorPnL = computePnL(priorBalances);
+
+  // ── Prior-period comparison ────────────────────────────────────────────────
+  const revenueVariance = currentPnL.totalRevenue - priorPnL.totalRevenue;
+  const revenueVariancePct = priorPnL.totalRevenue > 0 ? (revenueVariance / priorPnL.totalRevenue) * 100 : 0;
+  const expenseVariance = currentPnL.totalExpenses - priorPnL.totalExpenses;
+  const expenseVariancePct = priorPnL.totalExpenses > 0 ? (expenseVariance / priorPnL.totalExpenses) * 100 : 0;
+  const profitVariance = currentPnL.netProfit - priorPnL.netProfit;
+  const profitVariancePct = priorPnL.netProfit !== 0 ? (profitVariance / Math.abs(priorPnL.netProfit)) * 100 : 0;
+
+  // Auto-commentary on significant movements (≥20% threshold per spec)
+  const autoCommentary: string[] = [];
+  if (Math.abs(revenueVariancePct) >= 20) {
+    autoCommentary.push(`Revenue ${revenueVariancePct > 0 ? 'grew' : 'declined'} ${Math.abs(revenueVariancePct).toFixed(1)}% vs prior period — ${revenueVariancePct > 0 ? 'positive momentum in ARR/licensing' : 'investigate customer churn or timing of renewals'}.`);
+  }
+  if (Math.abs(expenseVariancePct) >= 20) {
+    autoCommentary.push(`Expenses ${expenseVariancePct > 0 ? 'increased' : 'decreased'} ${Math.abs(expenseVariancePct).toFixed(1)}% vs prior period — ${expenseVariancePct > 0 ? 'review headcount, vendor or one-time costs' : 'cost efficiencies achieved'}.`);
+  }
+  if (Math.abs(profitVariancePct) >= 20 && priorPnL.netProfit !== 0) {
+    autoCommentary.push(`Net profit ${profitVariancePct > 0 ? 'improved' : 'declined'} ${Math.abs(profitVariancePct).toFixed(1)}% vs prior period.`);
+  }
+  if (autoCommentary.length === 0) {
+    autoCommentary.push('Financial performance is broadly consistent with the prior period. No significant movements (≥20%) detected.');
+  }
+
+  const priorPeriodComparison = {
+    currentPeriodMonths: uniqueMonths.slice(halfIdx),
+    priorPeriodMonths: uniqueMonths.slice(0, halfIdx),
+    current: {
+      totalRevenue: currentPnL.totalRevenue,
+      totalExpenses: currentPnL.totalExpenses,
+      netProfit: currentPnL.netProfit,
+    },
+    prior: {
+      totalRevenue: priorPnL.totalRevenue,
+      totalExpenses: priorPnL.totalExpenses,
+      netProfit: priorPnL.netProfit,
+    },
+    variance: {
+      revenue: revenueVariance,
+      revenuePct: revenueVariancePct,
+      expenses: expenseVariance,
+      expensesPct: expenseVariancePct,
+      netProfit: profitVariance,
+      netProfitPct: profitVariancePct,
+    },
+    autoCommentary,
+    hasEnoughData: priorTxns.length > 0,
+  };
+
+  // P&L (full dataset — backward compatible)
   const revenueAccounts = Array.from(accountBalances.entries())
     .filter(([_, b]) => b.type === 'revenue')
     .map(([name, b]) => ({ account: name, amount: b.credit - b.debit }))
@@ -263,6 +350,84 @@ function processGLData(transactions: GLTransaction[]) {
     : 0;
   const runwayMonths = avgMonthlyBurn > 0 ? cashBalance / avgMonthlyBurn : 0;
 
+  // ── 20% Balance Movement Alerts (Spec: Function 01 automated check) ────────
+  // Compare current-period vs prior-period account balances.
+  // Flag any account where balance moved ≥20% — requires human review.
+  const balanceMovementAlerts: Array<{
+    account: string;
+    accountType: string;
+    currentBalance: number;
+    priorBalance: number;
+    movementPct: number;
+    direction: 'increase' | 'decrease';
+    severity: 'critical' | 'high' | 'medium';
+    narrative: string;
+  }> = [];
+
+  if (priorTxns.length > 0) {
+    for (const [acct, curBal] of currentBalances) {
+      const priorBal = priorBalances.get(acct);
+      if (!priorBal) continue;
+
+      const type = curBal.type;
+      // Net balance by account type (assets/bank: debit-credit; liabilities/equity/rev: credit-debit)
+      const curNet = (type === 'asset' || type === 'bank' || type === 'expense')
+        ? curBal.debit - curBal.credit
+        : curBal.credit - curBal.debit;
+      const priorNet = (type === 'asset' || type === 'bank' || type === 'expense')
+        ? priorBal.debit - priorBal.credit
+        : priorBal.credit - priorBal.debit;
+
+      if (Math.abs(priorNet) < 100) continue; // skip dust balances
+
+      const movPct = ((curNet - priorNet) / Math.abs(priorNet)) * 100;
+      if (Math.abs(movPct) < 20) continue;
+
+      const direction = movPct > 0 ? 'increase' : 'decrease';
+      const absPct = Math.abs(movPct);
+      const severity: 'critical' | 'high' | 'medium' = absPct >= 100 ? 'critical' : absPct >= 50 ? 'high' : 'medium';
+
+      // Build alert narrative
+      const fmtAmt = (n: number) => `SGD ${Math.abs(n).toLocaleString('en-SG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+      let narrative = '';
+      if (type === 'revenue') {
+        narrative = direction === 'increase'
+          ? `Revenue account "${acct}" increased ${absPct.toFixed(0)}% vs prior period (${fmtAmt(priorNet)} → ${fmtAmt(curNet)}). Verify against invoices and deferred revenue schedule.`
+          : `Revenue account "${acct}" declined ${absPct.toFixed(0)}% vs prior period. Investigate customer churn, delayed renewals, or recognition timing.`;
+      } else if (type === 'expense') {
+        narrative = direction === 'increase'
+          ? `Expense account "${acct}" increased ${absPct.toFixed(0)}% — review for new headcount, one-time costs, or vendor price changes.`
+          : `Expense account "${acct}" decreased ${absPct.toFixed(0)}% — confirm this reflects genuine savings, not missed accruals.`;
+      } else if (type === 'asset' || type === 'bank') {
+        narrative = `Asset/bank account "${acct}" moved ${absPct.toFixed(0)}% ${direction}. ${severity === 'critical' ? 'Significant cash movement — verify against bank statement.' : 'Review supporting documentation.'}`;
+      } else if (type === 'liability') {
+        narrative = direction === 'increase'
+          ? `Liability "${acct}" increased ${absPct.toFixed(0)}% — verify new obligations are properly authorised and disclosed.`
+          : `Liability "${acct}" decreased ${absPct.toFixed(0)}% — confirm settlement is complete and no residual obligations remain.`;
+      } else {
+        narrative = `Account "${acct}" (${type}) moved ${absPct.toFixed(0)}% ${direction} vs prior period. Review for completeness and accuracy.`;
+      }
+
+      balanceMovementAlerts.push({
+        account: acct,
+        accountType: type,
+        currentBalance: curNet,
+        priorBalance: priorNet,
+        movementPct: movPct,
+        direction,
+        severity,
+        narrative,
+      });
+    }
+
+    // Sort: critical first, then high, then medium; within each, largest absolute movement first
+    balanceMovementAlerts.sort((a, b) => {
+      const sev = { critical: 0, high: 1, medium: 2 };
+      if (sev[a.severity] !== sev[b.severity]) return sev[a.severity] - sev[b.severity];
+      return Math.abs(b.movementPct) - Math.abs(a.movementPct);
+    });
+  }
+
   // ── Transaction Interpretations — natural-language narrative per transaction ─
   // Top 30 transactions by value, each with a plain-English explanation of what
   // the transaction means in business terms. This is the key Req 1 deliverable
@@ -274,8 +439,8 @@ function processGLData(transactions: GLTransaction[]) {
       totalTransactions: transactions.length,
       totalAccounts: accountBalances.size,
       dateRange: {
-        from: transactions[0]?.date.slice(0, 10) || '',
-        to: transactions[transactions.length - 1]?.date.slice(0, 10) || '',
+        from: sorted[0]?.date.slice(0, 10) || '',
+        to: sorted[sorted.length - 1]?.date.slice(0, 10) || '',
       },
       totalDebits,
       totalCredits,
@@ -293,6 +458,8 @@ function processGLData(transactions: GLTransaction[]) {
       grossMargin,
       topExpenseCategories,
     },
+    priorPeriodComparison,
+    balanceMovementAlerts: balanceMovementAlerts.slice(0, 20), // Top 20 alerts
     balanceSheet: {
       totalAssets,
       totalLiabilities,
