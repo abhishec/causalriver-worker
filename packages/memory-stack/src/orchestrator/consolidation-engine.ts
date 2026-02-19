@@ -1828,7 +1828,9 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     const start = Date.now();
     try {
       // Store consolidation run record
-      await supabase.from('consolidation_runs').insert({
+      // Bug #7 fix: upsert instead of insert — the lock acquisition step already
+      // inserted a 'partial' record with this runId, so we upsert the final result.
+      await supabase.from('consolidation_runs').upsert({
         id: result.runId,
         organization_id: organizationId,
         is_core_brain: isCoreBrain,
@@ -1839,10 +1841,10 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
         steps: result.steps,
         report: result.report,
         errors: result.errors,
-      }).then(({ error }) => {
+      }, { onConflict: 'id' }).then(({ error }) => {
         // If table doesn't exist yet, log but don't fail
         if (error) {
-          log('PERSIST', `Note: consolidation_runs table insert: ${error.message}`);
+          log('PERSIST', `Note: consolidation_runs table upsert: ${error.message}`);
         }
       });
 
@@ -2175,7 +2177,24 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
     try {
       log('LOCK', 'Acquiring consolidation lock');
 
-      // Insert our run record (schema requires status in 'success'|'partial'|'failed')
+      // Bug #1 fix: Check for an in-progress ('partial') run on the same org
+      // within the last 30 minutes. If one exists, another process is consolidating
+      // this org — skip to prevent concurrent writes and data corruption.
+      const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data: activeRuns, error: queryError } = await supabase
+        .from('consolidation_runs')
+        .select('id, started_at')
+        .eq('organization_id', organizationId)
+        .eq('status', 'partial')
+        .gte('started_at', thirtyMinAgo)
+        .limit(1);
+
+      if (!queryError && activeRuns && activeRuns.length > 0) {
+        log('LOCK', `Consolidation already in progress for org ${organizationId} (run ${activeRuns[0].id}, started ${activeRuns[0].started_at}) — skipping`);
+        return false;
+      }
+
+      // No active run — insert our lock record
       const { error: insertError } = await supabase.from('consolidation_runs').insert({
         id: runId,
         organization_id: organizationId,
@@ -2187,8 +2206,6 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       });
 
       if (insertError) {
-        // Insert failures are non-fatal — allow consolidation to proceed
-        // The most common cause is transient DB issues, not actual concurrency
         log('LOCK', `Lock insert warning (proceeding anyway): ${insertError.message}`);
       }
 

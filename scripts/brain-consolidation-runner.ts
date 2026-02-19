@@ -286,7 +286,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       logError('CORE', 'Failed to consolidate core brain', err);
     }
   } else if (ORGANIZATION_ID !== CORE_BRAIN_ORG_ID) {
-    // Consolidate specific org, then core brain
+    // Consolidate specific org
     try {
       const orgResult = await consolidateOrg(supabase, ORGANIZATION_ID);
       results.push(orgResult);
@@ -294,12 +294,18 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       logError('ORG', `Failed to consolidate org ${ORGANIZATION_ID.substring(0, 8)}`, err);
     }
 
-    // Also consolidate core brain
-    try {
-      const coreResult = await consolidateOrg(supabase, CORE_BRAIN_ORG_ID);
-      results.push(coreResult);
-    } catch (err) {
-      logError('CORE', 'Failed to consolidate core brain', err);
+    // Bug #2 fix: Only auto-consolidate core brain if NOT called from the nightly
+    // orchestrator (which handles core brain separately in Phase 2B).
+    // When SKIP_CORE_BRAIN=true, the orchestrator is managing core brain itself.
+    if (process.env.SKIP_CORE_BRAIN !== 'true') {
+      try {
+        const coreResult = await consolidateOrg(supabase, CORE_BRAIN_ORG_ID);
+        results.push(coreResult);
+      } catch (err) {
+        logError('CORE', 'Failed to consolidate core brain', err);
+      }
+    } else {
+      log('INIT', 'Skipping core brain consolidation (orchestrator handles it separately)');
     }
   } else {
     // Core brain only
@@ -552,6 +558,12 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   }
 
   // ── POST-CONSOLIDATION: Real Learning Steps ──
+  // Bug #9 fix: skip learning if SKIP_LEARNING=true — the nightly orchestrator
+  // runs learning separately in Phase 4 (run-full-consolidation.ts), so running
+  // it here in Phase 2 would be redundant (2-3x the Bayesian/embedding/contrastive work).
+  if (process.env.SKIP_LEARNING === 'true') {
+    log('LEARN', 'Skipping learning steps (orchestrator handles them in Phase 4)');
+  } else {
   divider('REAL LEARNING (Bayesian + Embeddings + Contrastive)');
 
   // Bayesian weight updates — replace naive ×1.05 with proper posteriors
@@ -749,6 +761,7 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   } catch (err) {
     logError('LEARN', 'Attention policy learning failed (non-fatal)', err);
   }
+  } // end SKIP_LEARNING guard
 
   // ── POST-LEARNING: Fast-Path Invalidation + Pre-Warming (Cerebellum) ──
   // After consolidation changes the causal graph, stale fast-path caches
@@ -947,7 +960,14 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
   // ═══════════════════════════════════════════════════════
   // CORPUS CALLOSUM: Federation — Promote discoveries to core brain
   // Includes approval governance: expire stale items, log stats
+  //
+  // Bug #10 fix: skip if SKIP_FEDERATION=true — the consolidation engine
+  // already runs upstream federation as a bonus step inside runConsolidation().
+  // Running it again here is redundant (promotes the same knowledge twice).
   // ═══════════════════════════════════════════════════════
+  if (process.env.SKIP_FEDERATION === 'true') {
+    log('FEDERATION', 'Skipping (consolidation engine already ran federation)');
+  } else
   try {
     // Only promote if we consolidated an org brain (not the core brain itself)
     if (ORGANIZATION_ID !== CORE_BRAIN_ORG_ID) {

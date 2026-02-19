@@ -332,6 +332,9 @@ async function phase2Consolidation(supabase: ReturnType<typeof createClient>, cu
               NODE_OPTIONS: `--max-old-space-size=${currentHeap}`,
               ORGANIZATION_ID: org.id,
               CONSOLIDATION_MODE: 'once',
+              SKIP_CORE_BRAIN: 'true', // Bug #2 fix: orchestrator handles core brain in Phase 2B
+              SKIP_LEARNING: 'true', // Bug #9 fix: learning runs in Phase 4, not Phase 2
+              SKIP_FEDERATION: 'true', // Bug #10 fix: consolidation engine already runs federation
               VERBOSE: VERBOSE ? 'true' : 'false',
             },
           });
