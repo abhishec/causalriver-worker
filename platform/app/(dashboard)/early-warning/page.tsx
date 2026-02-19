@@ -4,6 +4,8 @@ import Link from "next/link";
 import { EarlyWarningActions } from "./actions";
 import { ReviewerDistributionChart, BRSBreakdown } from "./bottleneck-charts";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +16,6 @@ export default async function EarlyWarningPage() {
   const orgId = await getCurrentOrgId();
 
   // ── Workspace / Branch context ──────────────────────────────────────────
-  // Each workspace-org has a primaryBranch stored in org_connectors.
-  // We surface this as a badge so the user knows this velocity/bottleneck
-  // data is scoped to their specific branch (e.g. release/6.3.4).
   const { data: githubConnector } = await supabase
     .from("org_connectors")
     .select("config")
@@ -39,13 +38,13 @@ export default async function EarlyWarningPage() {
     .order("snapshot_date", { ascending: false })
     .limit(30);
 
-  // Fetch latest bottleneck snapshot
+  // Fetch latest 2 bottleneck snapshots (for week-over-week BRS trend)
   const { data: bottleneckSnapshots } = await supabase
     .from("bottleneck_snapshots")
     .select("*")
     .eq("organization_id", orgId)
-    .order("snapshot_date", { ascending: false})
-    .limit(1);
+    .order("snapshot_date", { ascending: false })
+    .limit(2);
 
   // Fetch Brain causal edges for root cause explanations
   const { data: causalEdges } = await supabase
@@ -65,26 +64,50 @@ export default async function EarlyWarningPage() {
     .limit(5);
 
   const latestBottleneck = bottleneckSnapshots?.[0];
+  const prevBottleneck = bottleneckSnapshots?.[1];
   const latestVelocity = velocitySnapshots?.[0];
 
-  // Calculate velocity trend (last 7 days vs previous 7 days)
+  // ── Velocity trend (7d vs prev 7d) ──────────────────────────────────────
   const last7Days = velocitySnapshots?.slice(0, 7) || [];
   const prev7Days = velocitySnapshots?.slice(7, 14) || [];
-
   const avgLast7 = last7Days.reduce((sum: number, s: any) => sum + (s.prs_merged || 0), 0) / (last7Days.length || 1);
   const avgPrev7 = prev7Days.reduce((sum: number, s: any) => sum + (s.prs_merged || 0), 0) / (prev7Days.length || 1);
   const velocityChange = avgPrev7 > 0 ? ((avgLast7 - avgPrev7) / avgPrev7) * 100 : 0;
+  const isVelocityCollapse = velocityChange < -25;
 
-  const isVelocityCollapse = velocityChange < -25; // 25% drop
+  // ── BRS week-over-week trend ─────────────────────────────────────────────
+  const brsNow = latestBottleneck?.bottleneck_risk_score ?? null;
+  const brsPrev = prevBottleneck?.bottleneck_risk_score ?? null;
+  const brsDelta = brsNow != null && brsPrev != null ? brsNow - brsPrev : null;
+  const brsTrend: 'improving' | 'stable' | 'worsening' | null =
+    brsDelta == null ? null :
+    brsDelta <= -5 ? 'improving' :
+    brsDelta >= 5 ? 'worsening' : 'stable';
 
-  // Find engineering-related causal edges for Brain explanations
+  // ── New P0 spec fields from snapshots ────────────────────────────────────
+  // These are persisted as JSONB by analyze/route.ts after the last run
+  const signalDrivers: Array<{ signal: string; description: string; importance: number; direction: string }> =
+    (latestVelocity as any)?.signal_drivers ?? [];
+  const recommendedAction: string | null = (latestVelocity as any)?.recommended_action ?? null;
+  const leadTimeSprints: number = (latestVelocity as any)?.lead_time_sprints ?? 1;
+  const engineersWithZeroMerges: string[] = (latestVelocity as any)?.engineers_with_zero_merges ?? [];
+  const underUtilizedReviewers: Array<{ reviewer: string; reviewCount: number; capacityToAbsorb: number }> =
+    (latestBottleneck as any)?.under_utilized_reviewers ?? [];
+  const absenceSimulation: {
+    blockedPRsEstimate: number;
+    estimatedCycleTimeIncreaseHours: number;
+    absorberCount: number;
+    riskNarrative: string;
+  } | null = (latestBottleneck as any)?.absence_simulation ?? null;
+
+  // Engineering causal edges for Brain Intelligence card
   const engineeringCauses = (causalEdges || []).filter(
     (e: any) => e.source_domain === 'engineering' || e.target_domain === 'engineering'
   );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Early Warning System</h1>
@@ -109,7 +132,7 @@ export default async function EarlyWarningPage() {
         </Link>
       </div>
 
-      {/* Workspace / Branch Context Badge */}
+      {/* ── Workspace / Branch Context ──────────────────────────────────────── */}
       {(primaryBranch || githubRepo) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
           <span className="text-muted">Workspace scope:</span>
@@ -128,9 +151,7 @@ export default async function EarlyWarningPage() {
               v{releaseVersion}
             </span>
           )}
-          <span className="text-muted">
-            · All metrics isolated to this workspace
-          </span>
+          <span className="text-muted">· All metrics isolated to this workspace</span>
           <Link
             href="/se-aas"
             className="ml-auto text-accent hover:text-accent/80 transition-colors"
@@ -140,7 +161,77 @@ export default async function EarlyWarningPage() {
         </div>
       )}
 
-      {/* Brain Intelligence Summary */}
+      {/* ── Alert Payload Banner (P0 Spec: "which signals drove the warning") ─ */}
+      {(isVelocityCollapse || (latestBottleneck && latestBottleneck.risk_level === 'high')) && (
+        <Card variant="elevated" padding="md" className="border-l-4 border-l-danger">
+          <div className="flex items-start gap-3">
+            <div className="text-xl mt-0.5">🚨</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h3 className="text-sm font-semibold">Active Early Warning</h3>
+                {isVelocityCollapse && (
+                  <Badge variant="danger" size="sm">Velocity Collapse</Badge>
+                )}
+                {latestBottleneck?.risk_level === 'high' && (
+                  <Badge variant="warning" size="sm">Bottleneck Critical</Badge>
+                )}
+                {leadTimeSprints >= 1 && (
+                  <Badge variant="info" size="sm">⏱ {leadTimeSprints} sprint{leadTimeSprints > 1 ? 's' : ''} lead time</Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted mb-3">
+                {isVelocityCollapse
+                  ? `Deploy velocity dropped ${Math.abs(velocityChange).toFixed(0)}% in the last 7 days — below the 25% collapse threshold. Action required at least 1 sprint ahead.`
+                  : `Reviewer concentration risk is critical. Top reviewer handles ${((latestBottleneck?.top_reviewer_share || 0) * 100).toFixed(0)}% of all reviews.`
+                }
+              </p>
+
+              {/* Recommended Action — P0 spec requirement */}
+              {recommendedAction && (
+                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-warning/10 border border-warning/20 mb-3">
+                  <span className="text-sm">⚡</span>
+                  <div>
+                    <div className="text-xs font-semibold text-warning">Recommended Action</div>
+                    <div className="text-xs text-foreground">{recommendedAction}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Signal Drivers — P0 spec: alert payload must show which signals drove the warning */}
+              {signalDrivers.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">
+                    Signals driving this warning
+                  </div>
+                  <div className="space-y-1.5">
+                    {signalDrivers.slice(0, 4).map((driver, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className="w-24 shrink-0">
+                          <div className="h-1.5 rounded-full bg-surface overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                driver.direction === 'decrease' ? 'bg-danger' :
+                                driver.direction === 'spike' ? 'bg-warning' : 'bg-accent'
+                              }`}
+                              style={{ width: `${Math.round(driver.importance * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-xs text-foreground flex-1 min-w-0 truncate">{driver.description}</span>
+                        <span className="text-[10px] text-muted shrink-0">
+                          {Math.round(driver.importance * 100)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Brain Intelligence Summary ──────────────────────────────────────── */}
       {(engineeringCauses.length > 0 || (brainAlerts && brainAlerts.length > 0)) && (
         <div className="rounded-xl bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-indigo-500/20 p-5">
           <div className="flex items-center justify-between mb-3">
@@ -161,7 +252,6 @@ export default async function EarlyWarningPage() {
             </Link>
           </div>
 
-          {/* Brain Causal Insights */}
           {engineeringCauses.length > 0 && (
             <div className="space-y-2 mb-3">
               <div className="text-xs font-medium text-muted uppercase tracking-wider">Causal Relationships Discovered</div>
@@ -177,7 +267,6 @@ export default async function EarlyWarningPage() {
             </div>
           )}
 
-          {/* Recent Brain Alerts */}
           {brainAlerts && brainAlerts.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-medium text-muted uppercase tracking-wider">Recent Brain Alerts</div>
@@ -212,24 +301,32 @@ export default async function EarlyWarningPage() {
         </div>
       )}
 
-      {/* Alert Cards */}
+      {/* ── P0 Alert Cards ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
         {/* Velocity Collapse Alert */}
-        <div className={`rounded-xl border p-5 ${
-          isVelocityCollapse
-            ? 'bg-danger/5 border-danger'
-            : 'bg-card border-border-subtle'
-        }`}>
+        <Card
+          variant={isVelocityCollapse ? "elevated" : "default"}
+          padding="md"
+          className={isVelocityCollapse ? "border-danger" : ""}
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="text-sm font-medium">Velocity Collapse Risk</h3>
               <p className="text-xs text-muted mt-1">Deploy velocity trend</p>
             </div>
-            {isVelocityCollapse && (
-              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-danger/10 text-danger">
-                ⚠️ High Risk
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              {leadTimeSprints >= 1 && latestVelocity && (
+                <Badge variant="accent" size="sm">
+                  ⏱ {leadTimeSprints}+ sprint ahead
+                </Badge>
+              )}
+              {isVelocityCollapse ? (
+                <Badge variant="danger" size="sm" pulse>⚠️ High Risk</Badge>
+              ) : (
+                <Badge variant="success" size="sm">Healthy</Badge>
+              )}
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -256,7 +353,6 @@ export default async function EarlyWarningPage() {
                     <div className="text-xs text-muted">Avg cycle time</div>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-sm font-medium">{latestVelocity.open_pr_count || 0}</div>
@@ -273,41 +369,89 @@ export default async function EarlyWarningPage() {
                 </div>
               </>
             )}
+
+            {/* Engineers with Zero Merges — P0 spec requirement */}
+            {engineersWithZeroMerges.length > 0 && (
+              <div className="pt-3 border-t border-border-subtle">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+                    Engineers with 0 merges (7d)
+                  </div>
+                  <Badge variant="warning" size="sm">{engineersWithZeroMerges.length}</Badge>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {engineersWithZeroMerges.slice(0, 6).map((eng, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-warning/10 text-warning border border-warning/20"
+                    >
+                      {eng}
+                    </span>
+                  ))}
+                  {engineersWithZeroMerges.length > 6 && (
+                    <span className="text-[10px] text-muted self-center">
+                      +{engineersWithZeroMerges.length - 6} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </Card>
 
         {/* Bottleneck Risk Alert */}
-        <div className={`rounded-xl border p-5 ${
-          latestBottleneck && latestBottleneck.risk_level === 'high'
-            ? 'bg-warning/5 border-warning'
-            : 'bg-card border-border-subtle'
-        }`}>
+        <Card
+          variant={latestBottleneck?.risk_level === 'high' ? "elevated" : "default"}
+          padding="md"
+          className={latestBottleneck?.risk_level === 'high' ? "border-warning" : ""}
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="text-sm font-medium">Bottleneck Concentration</h3>
               <p className="text-xs text-muted mt-1">Reviewer concentration risk</p>
             </div>
-            {latestBottleneck && (
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                latestBottleneck.risk_level === 'high'
-                  ? 'bg-danger/10 text-danger'
-                  : latestBottleneck.risk_level === 'medium'
-                  ? 'bg-warning/10 text-warning'
-                  : 'bg-success/10 text-success'
-              }`}>
-                {latestBottleneck.risk_level === 'high' && '⚠️'}
-                {latestBottleneck.risk_level === 'medium' && '⚡'}
-                {latestBottleneck.risk_level === 'low' && '✓'}
-                {' '}{latestBottleneck.risk_level} risk
-              </span>
-            )}
+            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              {/* BRS Week-over-Week Trend — P0 spec requirement */}
+              {brsTrend && (
+                <Badge
+                  variant={brsTrend === 'improving' ? 'success' : brsTrend === 'worsening' ? 'danger' : 'default'}
+                  size="sm"
+                >
+                  {brsTrend === 'improving' ? '↓' : brsTrend === 'worsening' ? '↑' : '→'} {brsTrend}
+                </Badge>
+              )}
+              {latestBottleneck && (
+                <Badge
+                  variant={
+                    latestBottleneck.risk_level === 'high' ? 'danger' :
+                    latestBottleneck.risk_level === 'medium' ? 'warning' : 'success'
+                  }
+                  size="sm"
+                  pulse={latestBottleneck.risk_level === 'high'}
+                >
+                  {latestBottleneck.risk_level === 'high' && '⚠️ '}
+                  {latestBottleneck.risk_level === 'medium' && '⚡ '}
+                  {latestBottleneck.risk_level === 'low' && '✓ '}
+                  {latestBottleneck.risk_level} risk
+                </Badge>
+              )}
+            </div>
           </div>
 
           {latestBottleneck ? (
             <div className="space-y-3">
-              <div>
-                <div className="text-2xl font-bold">{latestBottleneck.bottleneck_risk_score?.toFixed(0) || 0}</div>
-                <div className="text-xs text-muted">Risk score (0-100)</div>
+              <div className="flex items-end gap-3">
+                <div>
+                  <div className="text-2xl font-bold">{latestBottleneck.bottleneck_risk_score?.toFixed(0) || 0}</div>
+                  <div className="text-xs text-muted">Risk score (0–100)</div>
+                </div>
+                {brsDelta != null && (
+                  <div className="mb-0.5">
+                    <span className={`text-sm font-medium ${brsDelta > 0 ? 'text-danger' : brsDelta < 0 ? 'text-success' : 'text-muted'}`}>
+                      {brsDelta > 0 ? '+' : ''}{brsDelta.toFixed(0)} vs last week
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border-subtle">
@@ -334,9 +478,7 @@ export default async function EarlyWarningPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <div className={`text-sm font-medium ${
-                    latestBottleneck.reviewer_hhi > 0.25 ? 'text-danger' : ''
-                  }`}>
+                  <div className={`text-sm font-medium ${latestBottleneck.reviewer_hhi > 0.25 ? 'text-danger' : ''}`}>
                     {latestBottleneck.reviewer_hhi?.toFixed(3) || '-'}
                   </div>
                   <div className="text-xs text-muted">HHI index</div>
@@ -366,10 +508,10 @@ export default async function EarlyWarningPage() {
               className="py-8"
             />
           )}
-        </div>
+        </Card>
       </div>
 
-      {/* Velocity Prediction (from GBRT model) */}
+      {/* ── Velocity Prediction (GBRT Model) ───────────────────────────────── */}
       {latestVelocity?.predicted_velocity != null && (
         <div className="rounded-xl bg-gradient-to-r from-blue-500/5 to-cyan-500/5 border border-blue-500/20 p-5">
           <div className="flex items-center gap-2 mb-3">
@@ -390,7 +532,7 @@ export default async function EarlyWarningPage() {
               <div className="text-sm font-medium">
                 [{latestVelocity.prediction_lower_bound?.toFixed(1)} — {latestVelocity.prediction_upper_bound?.toFixed(1)}]
               </div>
-              <div className="text-xs text-muted">95% confidence interval</div>
+              <div className="text-xs text-muted">Confidence interval</div>
             </div>
             <div>
               <div className={`text-sm font-medium ${
@@ -410,10 +552,88 @@ export default async function EarlyWarningPage() {
         </div>
       )}
 
-      {/* Reviewer Distribution + BRS Breakdown */}
+      {/* ── Under-Utilized Reviewers + Absence Simulation ──────────────────── */}
+      {latestBottleneck && (underUtilizedReviewers.length > 0 || absenceSimulation) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Under-Utilized Reviewers — P0 spec: "who can absorb load" */}
+          {underUtilizedReviewers.length > 0 && (
+            <Card variant="default" padding="md">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-medium">Under-Utilized Reviewers</h3>
+                <Badge variant="accent" size="sm">{underUtilizedReviewers.length} available</Badge>
+              </div>
+              <p className="text-xs text-muted mb-3">
+                Engineers with &lt;5 PR reviews in the last 14 days — candidates to absorb load from{' '}
+                <span className="font-medium text-foreground">{latestBottleneck.top_reviewer_login || 'top reviewer'}</span>.
+              </p>
+              <div className="space-y-2">
+                {underUtilizedReviewers.map((r, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 border-t border-border-subtle first:border-t-0 first:pt-0">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-[10px] font-mono font-medium">
+                        {r.reviewer.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-xs font-medium font-mono">{r.reviewer}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-muted">{r.reviewCount} reviews (14d)</span>
+                      <Badge variant="success" size="sm">+{r.capacityToAbsorb} capacity</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* 5-Day Absence Simulation — P0 spec requirement */}
+          {absenceSimulation && (
+            <Card
+              variant={absenceSimulation.absorberCount < 2 ? "elevated" : "default"}
+              padding="md"
+              className={absenceSimulation.absorberCount < 2 ? "border-danger" : ""}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-medium">5-Day Absence Simulation</h3>
+                <Badge
+                  variant={absenceSimulation.absorberCount < 2 ? "danger" : absenceSimulation.absorberCount < 3 ? "warning" : "success"}
+                  size="sm"
+                >
+                  {absenceSimulation.absorberCount < 2 ? 'Critical' : absenceSimulation.absorberCount < 3 ? 'Moderate' : 'Resilient'}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted mb-3">
+                Projected impact if <span className="font-medium text-foreground">{latestBottleneck.top_reviewer_login || 'top reviewer'}</span>{' '}
+                is unavailable for 5 business days.
+              </p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                  <div className={`text-lg font-bold ${absenceSimulation.blockedPRsEstimate > 5 ? 'text-danger' : 'text-warning'}`}>
+                    ~{absenceSimulation.blockedPRsEstimate}
+                  </div>
+                  <div className="text-[10px] text-muted">PRs blocked</div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-surface border border-border-subtle">
+                  <div className={`text-lg font-bold ${absenceSimulation.estimatedCycleTimeIncreaseHours > 24 ? 'text-danger' : 'text-warning'}`}>
+                    +{(absenceSimulation.estimatedCycleTimeIncreaseHours / 24).toFixed(1)}d
+                  </div>
+                  <div className="text-[10px] text-muted">Cycle time increase</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 p-2.5 rounded-lg bg-surface border border-border-subtle">
+                <span className="text-sm mt-0.5 shrink-0">
+                  {absenceSimulation.absorberCount < 2 ? '🔴' : absenceSimulation.absorberCount < 3 ? '🟡' : '🟢'}
+                </span>
+                <p className="text-xs text-muted">{absenceSimulation.riskNarrative}</p>
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ── Reviewer Distribution + BRS Breakdown ──────────────────────────── */}
       {latestBottleneck && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Reviewer Distribution Chart */}
           <div className="rounded-xl bg-card border border-border-subtle p-5">
             <div className="flex items-center gap-2 mb-3">
               <h3 className="text-sm font-medium">Reviewer Distribution</h3>
@@ -426,7 +646,6 @@ export default async function EarlyWarningPage() {
             />
           </div>
 
-          {/* BRS Component Breakdown */}
           <div className="rounded-xl bg-card border border-border-subtle p-5">
             <div className="flex items-center gap-2 mb-3">
               <h3 className="text-sm font-medium">Risk Score Breakdown</h3>
@@ -454,7 +673,7 @@ export default async function EarlyWarningPage() {
         </div>
       )}
 
-      {/* Velocity Trend Chart (last 30 days) */}
+      {/* ── Velocity Trend Chart (last 30 days) ────────────────────────────── */}
       <div className="rounded-xl bg-card border border-border-subtle p-5">
         <h3 className="text-sm font-medium mb-4">Deploy Velocity Trend (Last 30 Days)</h3>
         {velocitySnapshots && velocitySnapshots.length > 0 ? (
@@ -498,7 +717,7 @@ export default async function EarlyWarningPage() {
         )}
       </div>
 
-      {/* Quick Actions — WIRED to real API calls */}
+      {/* ── Quick Actions ─────────────────────────────────────────────────── */}
       <EarlyWarningActions orgId={orgId} />
     </div>
   );

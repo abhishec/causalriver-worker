@@ -213,6 +213,9 @@ export async function POST(req: NextRequest) {
       risk_level: bottleneckAnalysis.riskLevel,
       reviewer_breakdown: bottleneckAnalysis.reviewerBreakdown,
       reviewer_count: bottleneckAnalysis.reviewerBreakdown?.length || 0,
+      // Extended spec fields
+      under_utilized_reviewers: bottleneckAnalysis.underUtilizedReviewers,
+      absence_simulation: bottleneckAnalysis.absenceSimulation,
     });
 
     // ========================================================================
@@ -402,6 +405,11 @@ export async function POST(req: NextRequest) {
           zScore: velocityAnalysis.zScore,
           collapseReasons: velocityAnalysis.collapseReason,
           confidence: velocityAnalysis.confidence,
+          // Alert payload enrichment (spec: "which signals drove the warning")
+          signalDrivers: velocityAnalysis.signalDrivers,
+          recommendedAction: velocityAnalysis.recommendedAction,
+          leadTimeSprints: velocityAnalysis.leadTimeSprints,
+          engineersWithZeroMerges: velocityAnalysis.engineersWithZeroMerges,
         },
         velocityPrediction: prediction ? {
           predictedVelocity: prediction.predictedVelocity,
@@ -421,6 +429,9 @@ export async function POST(req: NextRequest) {
           hhi: bottleneckAnalysis.hhi,
           top3Share: bottleneckAnalysis.top3Share,
           avgReviewLatencyHours: bottleneckAnalysis.avgReviewLatencyHours,
+          // Extended spec fields
+          underUtilizedReviewers: bottleneckAnalysis.underUtilizedReviewers,
+          absenceSimulation: bottleneckAnalysis.absenceSimulation,
         },
         dataSource: 'cross_domain_signals (Brain L1)',
         workspaceContext: {
