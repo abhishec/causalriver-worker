@@ -72,7 +72,56 @@ function createSSEStream() {
     controller?.close();
   };
 
-  return { stream, send, sendText, sendError, close };
+  // ── Agent Streaming Events (Week 2: OpenClaw + Agent Integration) ──
+
+  /** Stream an agent execution step to the UI */
+  const sendAgentStep = (step: {
+    stepNumber: number;
+    type: "thinking" | "querying" | "acting" | "observing" | "reflecting";
+    title: string;
+    content?: string;
+    toolName?: string;
+    durationMs?: number;
+    status: "started" | "completed" | "failed";
+  }) => {
+    send(JSON.stringify({ agentStep: step }));
+  };
+
+  /** Stream a progressive artifact that builds incrementally */
+  const sendProgressiveArtifact = (artifact: {
+    id: string;
+    type: string;
+    title: string;
+    content: string;
+    isPartial: boolean;
+    service?: "seaas" | "aas" | "core";
+  }) => {
+    send(JSON.stringify({ progressiveArtifact: artifact }));
+  };
+
+  /** Stream agent task status changes */
+  const sendAgentStatus = (status: {
+    taskId: string;
+    status: "starting" | "running" | "completed" | "failed" | "awaiting_approval";
+    agentType?: string;
+    message?: string;
+  }) => {
+    send(JSON.stringify({ agentStatus: status }));
+  };
+
+  /** Stream proactive insights (\"while you were away\") */
+  const sendProactiveInsights = (insights: Array<{
+    domain: string;
+    content: string;
+    importance: number;
+  }>) => {
+    send(JSON.stringify({ proactiveInsights: insights }));
+  };
+
+  return {
+    stream, send, sendText, sendError, close,
+    sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
+  };
 }
 
 // ============================================================================
@@ -628,10 +677,11 @@ export async function POST(request: NextRequest) {
           interpretation, // Phase 3: pass interpretation for targeted context
         });
 
-        const isDeliveryDomain = seaasRoute.domainType === 'pod-match' || seaasRoute.domainType === 'delivery-intelligence';
+        const DELIVERY_DOMAINS = ['pod-match', 'delivery-intelligence', 'early-warning', 'scope-creep'];
+        const isDeliveryDomain = DELIVERY_DOMAINS.includes(seaasRoute.domainType);
 
         if (isDeliveryDomain) {
-          // Pod-match and delivery-intelligence route to the SEaaSDeliveryPanel
+          // All P0 Delivery Intelligence domains route to the SEaaSDeliveryPanel
           // Fetch the full delivery intelligence data from the dedicated API
           try {
             const healthRes = await fetch(
@@ -641,18 +691,24 @@ export async function POST(request: NextRequest) {
             if (healthRes.ok) {
               const healthData = await healthRes.json();
               deliveryIntelligenceResult = {
+                _domainType: seaasRoute.domainType, // Preserve which P0 domain triggered
                 ...healthData,
                 podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+                // Pass through domain-specific results (e.g. velocity predictions, bottleneck data)
+                domainResult: domainResult.result,
               };
             } else {
-              // Fallback: just the pod recommendation without health scores
               deliveryIntelligenceResult = {
+                _domainType: seaasRoute.domainType,
                 podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+                domainResult: domainResult.result,
               };
             }
           } catch {
             deliveryIntelligenceResult = {
+              _domainType: seaasRoute.domainType,
               podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+              domainResult: domainResult.result,
             };
           }
         } else {

@@ -1,22 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
 
 const SIDEBAR_COLLAPSED_KEY = "nexus_sidebar_collapsed";
+const SIDEBAR_WIDTH_KEY = "nexus_sidebar_width";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [marginLeft, setMarginLeft] = useState(260);
 
   useEffect(() => {
     // Init from localStorage
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    if (saved === "true") setCollapsed(true);
+    const savedCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    const savedWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY);
+    const width = savedWidth ? Number(savedWidth) : 260;
 
-    // Listen for sidebar toggle events
+    if (savedCollapsed === "true") {
+      setMarginLeft(64);
+    } else {
+      // +6px for the resize handle
+      setMarginLeft(width + 6);
+    }
+
+    // Listen for sidebar toggle/resize events
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      setCollapsed(detail.collapsed);
+      if (detail.collapsed) {
+        setMarginLeft(64);
+      } else {
+        setMarginLeft((detail.width || 260) + 6);
+      }
     };
     window.addEventListener("sidebar-collapse", handler);
     return () => window.removeEventListener("sidebar-collapse", handler);
@@ -24,10 +36,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={cn(
-        "flex-1 transition-all duration-200",
-        collapsed ? "ml-16" : "ml-[260px]"
-      )}
+      style={{ marginLeft }}
+      className="flex-1 transition-[margin-left] duration-200"
     >
       {children}
     </div>

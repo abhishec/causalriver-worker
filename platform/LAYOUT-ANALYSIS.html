@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusBrain Copilot — Interactive Prototype</title>
+<style>
+/* ══════════════════════════════════════════════════════════
+   CLAUDE UI EXACT COLOR PALETTE
+   bg-100: #faf9f5  (main bg — warm cream)
+   bg-200: #f5f4ed  (sidebar bg)
+   bg-300: #f0eee6  (hover state)
+   bg-400: #e8e6dc  (active/pressed)
+   text-100: #141413 (primary — near black)
+   text-200: #3d3d3a (secondary)
+   text-400: #73726c (muted)
+   border: rgba(31,30,29,0.15)
+   accent: #c6613f  (terracotta orange)
+   accent-blue: #2c84db
+   input-box: #fff, radius 20px, shadow
+   ══════════════════════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Söhne',ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#faf9f5;color:#141413;overflow:hidden;height:100vh}
+
+/* Service bar */
+.svc-bar{height:44px;display:flex;align-items:center;justify-content:center;gap:4px;border-bottom:1px solid rgba(31,30,29,.1);background:#faf9f5;flex-shrink:0}
+.svc-tab{padding:6px 16px;border-radius:8px;font-size:13px;font-weight:500;color:#73726c;cursor:pointer;border:none;background:none;transition:all .15s}
+.svc-tab:hover{color:#3d3d3a;background:rgba(31,30,29,.06)}
+.svc-tab.active{color:#141413;background:rgba(31,30,29,.08);font-weight:600}
+
+/* Main 4-col layout */
+.main{display:flex;height:calc(100vh - 44px);min-height:0}
+
+/* Col 1: Sidebar */
+.sidebar{width:260px;background:#f5f4ed;border-right:1px solid rgba(31,30,29,.1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sb-header{padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.sb-logo{font-size:18px;font-weight:700;color:#141413;letter-spacing:-.3px}
+.sb-actions{display:flex;gap:2px}
+.sb-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:#73726c;cursor:pointer;font-size:14px;transition:all .15s}
+.sb-btn:hover{background:rgba(31,30,29,.08);color:#3d3d3a}
+.sb-nav{padding:0 8px;margin-bottom:8px}
+.sb-nav-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;font-size:13px;color:#3d3d3a;cursor:pointer;transition:all .12s;font-weight:400}
+.sb-nav-item:hover{background:rgba(31,30,29,.06)}
+.sb-nav-item.active{background:rgba(31,30,29,.08);font-weight:500;color:#141413}
+.sb-nav-item svg{width:16px;height:16px;color:#73726c;flex-shrink:0}
+.sb-sep{height:1px;background:rgba(31,30,29,.08);margin:6px 16px}
+
+/* Commands section in sidebar */
+.cmd-section{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.cmd-section-header{padding:6px 16px;font-size:11px;font-weight:600;color:#73726c;text-transform:uppercase;letter-spacing:.5px}
+.cmd-scroll{flex:1;overflow-y:auto;padding:0 8px 8px}
+.cmd-scroll::-webkit-scrollbar{width:4px}
+.cmd-scroll::-webkit-scrollbar-thumb{background:rgba(31,30,29,.15);border-radius:2px}
+.cmd-cat{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#73726c;padding:10px 8px 4px;opacity:.7}
+.cmd-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;transition:all .12s}
+.cmd-item:hover{background:rgba(31,30,29,.06)}
+.cmd-item.sel{background:rgba(198,97,63,.08);color:#c6613f}
+.cmd-emoji{font-size:14px;flex-shrink:0}
+.cmd-label{font-size:13px;font-weight:500;color:#141413}
+.cmd-item.sel .cmd-label{color:#c6613f}
+.cmd-desc{font-size:10px;color:#73726c;margin-top:1px}
+
+/* History */
+.hist-section{border-top:1px solid rgba(31,30,29,.08);flex-shrink:0;overflow:hidden;transition:max-height .3s;max-height:36px}
+.hist-section.open{max-height:160px}
+.hist-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;cursor:pointer;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#73726c}
+.hist-toggle:hover{color:#3d3d3a}
+.hist-arrow{transition:transform .2s;font-size:9px}
+.hist-section.open .hist-arrow{transform:rotate(180deg)}
+.hist-list{padding:0 8px 6px}
+.hist-item{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;color:#73726c;cursor:pointer;transition:background .12s}
+.hist-item:hover{background:rgba(31,30,29,.06);color:#3d3d3a}
+
+/* Sidebar footer / org */
+.sb-footer{padding:10px 12px;border-top:1px solid rgba(31,30,29,.08);display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
+.sb-footer:hover{background:rgba(31,30,29,.04)}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:#141413;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#faf9f5;flex-shrink:0}
+.sb-footer-name{font-size:12px;font-weight:500;color:#141413}
+.sb-footer-sub{font-size:10px;color:#73726c}
+
+/* Col 2: Chat */
+.chat-col{flex:1;display:flex;flex-direction:column;background:#faf9f5;min-width:0}
+.chat-area{flex:1;overflow-y:auto;padding:24px 0;display:flex;flex-direction:column;gap:0;align-items:center}
+.chat-area::-webkit-scrollbar{width:4px}
+.chat-area::-webkit-scrollbar-thumb{background:rgba(31,30,29,.15);border-radius:2px}
+.chat-inner{max-width:680px;width:100%;padding:0 24px;display:flex;flex-direction:column;gap:4px}
+.chat-welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px}
+.chat-welcome .cw-icon{width:32px;height:32px;margin-bottom:16px}
+.chat-welcome .cw-spark{color:#c6613f;font-size:28px}
+.chat-welcome h4{font-size:16px;font-weight:500;color:#73726c}
+
+/* Messages */
+.msg{max-width:680px;width:100%;padding:0 24px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.msg-user{padding:12px 0}
+.msg-user-text{font-size:15px;color:#141413;line-height:1.6;font-weight:400}
+.msg-asst{padding:12px 0}
+.msg-asst-text{font-size:15px;color:#3d3d3a;line-height:1.7}
+.msg-asst-text strong{color:#141413;font-weight:600}
+.msg-art-link{margin-top:8px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:rgba(198,97,63,.06);border:1px solid rgba(198,97,63,.12);font-size:12px;color:#c6613f;cursor:pointer;transition:all .15s;font-weight:500}
+.msg-art-link:hover{background:rgba(198,97,63,.12)}
+.new-chat-badge{text-align:center;font-size:11px;color:#73726c;padding:8px 0;display:flex;align-items:center;justify-content:center;gap:4px}
+.typing{display:flex;gap:5px;padding:12px 24px}
+.typing span{width:7px;height:7px;border-radius:50%;background:#c6613f;opacity:.3;animation:tbounce .6s infinite alternate}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tbounce{to{opacity:1;transform:translateY(-3px)}}
+
+/* Chat input */
+.chat-input-area{padding:12px 24px 20px;flex-shrink:0;display:flex;justify-content:center}
+.chat-input-box{max-width:680px;width:100%;background:#fff;border-radius:20px;box-shadow:rgba(0,0,0,.035) 0 4px 20px,rgba(31,30,29,.15) 0 0 0 .5px;padding:12px 16px;display:flex;align-items:center;gap:8px}
+.chat-input-box input{flex:1;border:none;outline:none;font-size:14px;color:#141413;background:transparent;font-family:inherit}
+.chat-input-box input::placeholder{color:#73726c}
+.chat-send{width:28px;height:28px;border-radius:50%;background:#141413;border:none;color:#faf9f5;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s}
+.chat-send:hover{opacity:.8}
+
+/* Col 3: Artifact panel */
+.art-col{width:440px;background:#fff;border-left:1px solid rgba(31,30,29,.1);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.art-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#73726c}
+.art-empty .ae-icon{font-size:24px;margin-bottom:8px;opacity:.4}
+.art-empty h4{font-size:14px;font-weight:500;color:#73726c}
+.art-empty p{font-size:12px;color:rgba(115,114,108,.6);margin-top:4px}
+.art-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(31,30,29,.1);flex-shrink:0}
+.art-head .a-icon{font-size:16px}
+.art-head .a-title{font-size:14px;font-weight:600;flex:1;color:#141413}
+.art-head .a-conf{font-size:12px;font-weight:600}
+.art-tabs{display:flex;gap:2px;padding:4px 12px;border-bottom:1px solid rgba(31,30,29,.08);flex-shrink:0;overflow-x:auto}
+.art-tab{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:500;color:#73726c;cursor:pointer;border:none;background:none;transition:all .15s;white-space:nowrap}
+.art-tab:hover{color:#3d3d3a;background:rgba(31,30,29,.06)}
+.art-tab.active{color:#141413;background:rgba(31,30,29,.08);font-weight:600}
+.art-tab .dot{display:inline-block;width:4px;height:4px;border-radius:50%;margin-left:3px;vertical-align:middle}
+.dot.has{background:#22c55e}
+.art-body{flex:1;overflow-y:auto;padding:12px 16px}
+.art-body::-webkit-scrollbar{width:4px}
+.art-body::-webkit-scrollbar-thumb{background:rgba(31,30,29,.15);border-radius:2px}
+
+/* ── Artifact sub-components ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.stat-card{background:#faf9f5;border:1px solid rgba(31,30,29,.1);border-radius:10px;padding:10px 12px}
+.stat-card .sc-label{font-size:10px;color:#73726c;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.stat-card .sc-val{font-size:18px;font-weight:700;margin-top:2px}
+.insight-box{padding:10px 12px;border-radius:10px;border:1px solid rgba(198,97,63,.15);background:rgba(198,97,63,.04);font-size:12px;color:#c6613f;margin:8px 0;line-height:1.5}
+.insight-box strong{font-weight:600}
+.finding{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(31,30,29,.06)}
+.finding:last-child{border-bottom:none}
+.sev{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;flex-shrink:0;letter-spacing:.3px}
+.sev-crit{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.15)}
+.sev-high{background:rgba(217,119,6,.08);color:#d97706;border:1px solid rgba(217,119,6,.15)}
+.sev-med{background:rgba(202,138,4,.08);color:#ca8a04;border:1px solid rgba(202,138,4,.15)}
+.sev-low{background:rgba(37,99,235,.08);color:#2563eb;border:1px solid rgba(37,99,235,.15)}
+.finding-text{font-size:13px;color:#3d3d3a;line-height:1.5}
+.file-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;background:#f5f4ed;border:1px solid rgba(31,30,29,.1);font-size:10px;font-family:'SF Mono',Monaco,monospace;color:#73726c;margin-top:4px}
+.branch-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.12);font-size:10px;font-family:'SF Mono',Monaco,monospace;color:#2563eb}
+.action-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:10px;border:1px solid rgba(31,30,29,.08);margin-bottom:6px;background:#faf9f5}
+.action-pri{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.action-pri.hi{background:rgba(220,38,38,.08);color:#dc2626}
+.action-pri.md{background:rgba(217,119,6,.08);color:#d97706}
+.action-pri.lo{background:rgba(37,99,235,.08);color:#2563eb}
+.score-bar{margin-bottom:8px}
+.score-bar-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.score-bar-label span:first-child{color:#73726c}
+.score-bar-label span:last-child{font-weight:600}
+.score-bar-track{height:6px;background:rgba(31,30,29,.06);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* KPI row */
+.kpi-row{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid rgba(31,30,29,.08);flex-shrink:0;overflow-x:auto}
+.kpi-card{padding:8px 10px;border-radius:8px;background:#faf9f5;border:1px solid rgba(31,30,29,.08);min-width:0;flex:1}
+.kpi-card.accent{border-color:rgba(198,97,63,.2)}
+.kpi-label{font-size:9px;color:#73726c;text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.kpi-val{font-size:14px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:9px;color:#73726c}
+
+/* Financial rows */
+.fin-section{padding:5px 12px;background:rgba(31,30,29,.03);border-top:1px solid rgba(31,30,29,.06);border-bottom:1px solid rgba(31,30,29,.06)}
+.fin-section span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#73726c}
+.fin-row{display:flex;justify-content:space-between;padding:5px 12px;transition:background .1s}
+.fin-row:hover{background:rgba(31,30,29,.03)}
+.fin-row .fr-label{font-size:12px;color:#3d3d3a}
+.fin-row .fr-label.indent{padding-left:14px}
+.fin-row .fr-val{font-size:12px;font-family:'SF Mono',Monaco,monospace;font-variant-numeric:tabular-nums}
+.fin-row.bold{border-top:1px solid rgba(31,30,29,.08);margin-top:2px}
+.fin-row.bold .fr-label{font-weight:600;color:#141413}
+.fin-row.bold .fr-val{font-weight:600}
+.fin-total{display:flex;justify-content:space-between;padding:10px 12px;background:rgba(31,30,29,.04);border-radius:8px;margin:8px 4px}
+.fin-total .ft-label{font-size:13px;font-weight:600;color:#141413}
+.fin-total .ft-val{font-size:14px;font-weight:700;font-family:'SF Mono',Monaco,monospace}
+
+/* Health ring */
+.health-ring{position:relative;display:flex;align-items:center;justify-content:center}
+.health-ring .hr-val{position:absolute;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.eng-card{border:1px solid rgba(31,30,29,.1);border-radius:12px;padding:12px;margin-bottom:8px;background:#fff}
+.eng-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.eng-name{font-size:13px;font-weight:600;color:#141413}
+.eng-sub{font-size:11px;color:#73726c}
+.alert-banner{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:10px;margin-bottom:8px}
+.alert-banner.crit{background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.12)}
+.alert-banner.warn{background:rgba(217,119,6,.04);border:1px solid rgba(217,119,6,.12)}
+.tech-chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;background:rgba(37,99,235,.06);color:#2563eb;border:1px solid rgba(37,99,235,.1);margin:2px}
+
+/* GST */
+.gst-row{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;transition:background .1s}
+.gst-row:hover{background:rgba(31,30,29,.03)}
+.gst-box{font-size:10px;font-family:'SF Mono',Monaco,monospace;font-weight:700;color:#73726c;margin-right:8px}
+.gst-label{font-size:12px;flex:1;color:#3d3d3a}
+.gst-note{font-size:10px;color:#73726c}
+.gst-val{font-size:12px;font-family:'SF Mono',Monaco,monospace;font-variant-numeric:tabular-nums;margin-left:8px;color:#141413}
+.gst-row.hl{background:rgba(31,30,29,.04);border-top:1px solid rgba(31,30,29,.08);margin-top:4px}
+.gst-row.hl .gst-label{font-weight:600;color:#141413}
+.gst-row.hl .gst-val{font-weight:700}
+.balance-check{margin:8px;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px}
+.balance-check.ok{background:rgba(22,163,74,.06);color:#16a34a;border:1px solid rgba(22,163,74,.12)}
+.balance-check.bad{background:rgba(220,38,38,.06);color:#dc2626;border:1px solid rgba(220,38,38,.12)}
+.green{color:#16a34a}.red{color:#dc2626}.amber{color:#d97706}.blue{color:#2563eb}.purple{color:#7c3aed}.white{color:#141413}
+
+/* Resizable dividers */
+.resize-handle{width:5px;cursor:col-resize;background:transparent;flex-shrink:0;position:relative;z-index:10;transition:background .2s}
+.resize-handle:hover,.resize-handle.dragging{background:rgba(198,97,63,.3)}
+.resize-handle::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3px;height:32px;border-radius:2px;background:rgba(31,30,29,.15);opacity:0;transition:opacity .2s}
+.resize-handle:hover::after,.resize-handle.dragging::after{opacity:1;background:#c6613f}
+
+/* Overlay pages (Connectors, Settings, Artifacts list) */
+.overlay-page{position:absolute;top:0;left:0;right:0;bottom:0;background:#faf9f5;z-index:50;display:none;flex-direction:column;overflow:hidden}
+.overlay-page.show{display:flex}
+.overlay-header{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid rgba(31,30,29,.1);flex-shrink:0}
+.overlay-header h3{font-size:16px;font-weight:600;color:#141413;flex:1}
+.overlay-close{width:32px;height:32px;border-radius:8px;border:none;background:none;color:#73726c;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.overlay-close:hover{background:rgba(31,30,29,.08);color:#141413}
+.overlay-body{flex:1;overflow-y:auto;padding:24px}
+.overlay-body::-webkit-scrollbar{width:4px}
+.overlay-body::-webkit-scrollbar-thumb{background:rgba(31,30,29,.15);border-radius:2px}
+
+/* Connector cards */
+.connector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.connector-card{border:1px solid rgba(31,30,29,.1);border-radius:12px;padding:16px;background:#fff;cursor:pointer;transition:all .15s}
+.connector-card:hover{border-color:rgba(198,97,63,.3);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.connector-card.connected{border-color:rgba(22,163,74,.3)}
+.cc-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.cc-name{font-size:14px;font-weight:600;color:#141413}
+.cc-desc{font-size:12px;color:#73726c;line-height:1.4;margin-bottom:10px}
+.cc-status{font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+.cc-status.on{background:rgba(22,163,74,.08);color:#16a34a}
+.cc-status.off{background:rgba(31,30,29,.06);color:#73726c}
+.cc-section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#73726c;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(31,30,29,.06)}
+.cc-section-title:first-child{margin-top:0}
+
+/* Settings page */
+.settings-nav{display:flex;gap:2px;padding:0 24px 16px;border-bottom:1px solid rgba(31,30,29,.06);margin-bottom:16px}
+.settings-tab{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:#73726c;cursor:pointer;border:none;background:none;transition:all .15s}
+.settings-tab:hover{color:#3d3d3a;background:rgba(31,30,29,.06)}
+.settings-tab.active{color:#141413;background:rgba(31,30,29,.08);font-weight:600}
+.settings-section{margin-bottom:24px}
+.settings-section h4{font-size:14px;font-weight:600;color:#141413;margin-bottom:12px}
+.settings-field{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(31,30,29,.04)}
+.settings-field label{font-size:13px;color:#3d3d3a}
+.settings-field .sf-val{font-size:13px;color:#141413;font-weight:500}
+.org-card{border:1px solid rgba(31,30,29,.1);border-radius:12px;padding:14px;background:#fff;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.org-card:hover{border-color:rgba(198,97,63,.3);background:rgba(198,97,63,.02)}
+.org-card.active-org{border-color:#c6613f;background:rgba(198,97,63,.04)}
+.org-avatar-lg{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.org-info{flex:1}
+.org-info .org-title{font-size:14px;font-weight:600;color:#141413}
+.org-info .org-detail{font-size:11px;color:#73726c}
+.create-org-btn{border:2px dashed rgba(31,30,29,.15);border-radius:12px;padding:14px;background:none;cursor:pointer;width:100%;text-align:center;font-size:13px;color:#73726c;transition:all .15s;margin-bottom:8px}
+.create-org-btn:hover{border-color:#c6613f;color:#c6613f;background:rgba(198,97,63,.02)}
+
+/* Org switcher dropdown */
+.org-dropdown{position:absolute;bottom:56px;left:8px;right:8px;background:#fff;border:1px solid rgba(31,30,29,.1);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);z-index:60;display:none;padding:6px;max-height:300px;overflow-y:auto}
+.org-dropdown.show{display:block}
+.org-dd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .12s;font-size:13px;color:#3d3d3a}
+.org-dd-item:hover{background:rgba(31,30,29,.06)}
+.org-dd-item.active{background:rgba(198,97,63,.08);color:#c6613f;font-weight:500}
+.org-dd-avatar{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.org-dd-sep{height:1px;background:rgba(31,30,29,.08);margin:4px 6px}
+.org-dd-action{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12px;color:#c6613f;transition:all .12s}
+.org-dd-action:hover{background:rgba(198,97,63,.06)}
+
+/* Chat history tree */
+.chat-tree{flex:1;overflow-y:auto;padding:0 8px 8px}
+.chat-tree::-webkit-scrollbar{width:4px}
+.chat-tree::-webkit-scrollbar-thumb{background:rgba(31,30,29,.15);border-radius:2px}
+.ct-group{margin-bottom:4px}
+.ct-group-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#73726c;padding:8px 10px 4px;opacity:.7}
+.ct-item{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;font-size:12px;color:#3d3d3a;cursor:pointer;transition:all .12s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-item:hover{background:rgba(31,30,29,.06);color:#141413}
+.ct-item.active{background:rgba(198,97,63,.08);color:#c6613f}
+.ct-icon{font-size:11px;flex-shrink:0;opacity:.6}
+
+/* Artifacts list page */
+.artifact-list-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid rgba(31,30,29,.08);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all .15s;background:#fff}
+.artifact-list-item:hover{border-color:rgba(198,97,63,.2);background:rgba(198,97,63,.02)}
+.ali-icon{font-size:18px;flex-shrink:0}
+.ali-info{flex:1;min-width:0}
+.ali-title{font-size:13px;font-weight:600;color:#141413}
+.ali-sub{font-size:11px;color:#73726c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ali-badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500;flex-shrink:0}
+
+/* Trial balance */
+.tb-head{display:grid;grid-template-columns:1fr 60px 90px 90px;gap:4px;padding:5px 12px;border-bottom:1px solid rgba(31,30,29,.08)}
+.tb-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#73726c}
+.tb-row{display:grid;grid-template-columns:1fr 60px 90px 90px;gap:4px;padding:4px 12px;border-bottom:1px solid rgba(31,30,29,.04);font-size:12px}
+.tb-row:hover{background:rgba(31,30,29,.03)}
+.tb-row .tb-acc{color:#141413;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-row .tb-type{color:#73726c;font-size:10px;text-align:right}
+.tb-row .tb-amt{font-family:'SF Mono',Monaco,monospace;font-variant-numeric:tabular-nums;text-align:right;color:#141413}
+</style>
+</head>
+<body>
+<div class="svc-bar">
+  <button class="svc-tab" id="tab-general" onclick="setService('general')">General</button>
+  <button class="svc-tab active" id="tab-seaas" onclick="setService('seaas')">SE-aaS</button>
+  <button class="svc-tab" id="tab-aas" onclick="setService('aas')">AAAS</button>
+</div>
+<div class="main">
+  <!-- Sidebar (Col 1+2 merged like Claude) -->
+  <div class="sidebar">
+    <div class="sb-header">
+      <span class="sb-logo">NexusBrain</span>
+      <div class="sb-actions">
+        <button class="sb-btn" onclick="newChat()" title="New chat">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4H4M8 8V0M0 8h16"/></svg>
+          +
+        </button>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-nav-item" onclick="newChat()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        New chat
+      </div>
+      <div class="sb-nav-item">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        Search
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-nav" style="margin-bottom:4px">
+      <div class="sb-nav-item active">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+        Chats
+      </div>
+      <div class="sb-nav-item">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Connectors
+      </div>
+      <div class="sb-nav-item">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+        Artifacts
+      </div>
+    </div>
+    <div class="sb-sep"></div>
+    <!-- Commands -->
+    <div class="cmd-section">
+      <div class="cmd-section-header" id="cmd-title">SE-aaS Commands</div>
+      <div class="cmd-scroll" id="cmd-scroll"></div>
+    </div>
+    <!-- History -->
+    <div class="hist-section" id="hist-section">
+      <div class="hist-toggle" onclick="toggleHist()"><span>Recent Chats</span><span class="hist-arrow" id="hist-arrow">▾</span></div>
+      <div class="hist-list" id="hist-list"></div>
+    </div>
+    <!-- Footer -->
+    <div class="sb-footer" onclick="toggleOrg()">
+      <div class="sb-avatar" id="org-avatar">AC</div>
+      <div><div class="sb-footer-name" id="org-name">Abhishek Chatterjee</div><div class="sb-footer-sub" id="org-sub">Tookitaki Holding</div></div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-col">
+    <div class="chat-area" id="chat-area"></div>
+    <div class="chat-input-area">
+      <div class="chat-input-box">
+        <input type="text" placeholder="How can I help you today?" id="chat-input" onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Artifact -->
+  <div class="art-col" id="art-col">
+    <div id="art-wrap" style="display:flex;flex-direction:column;height:100%">
+      <div class="art-empty"><div class="ae-icon">✦</div><h4>No artifact yet</h4><p>Click a command to see results</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let svc='seaas',selCmd=null,msgs=[],hist=[],histOpen=false,artTabState={};
+
+const SEAAS=[
+  {cat:'P0 · Delivery Intelligence',items:[
+    {id:'early-warning',e:'⚡',l:'Early Warning',d:'Velocity prediction',p:'Analyse delivery velocity and predict risk of velocity collapse'},
+    {id:'engagement-health',e:'💊',l:'Engagement Health',d:'Health dashboard',p:'Show delivery intelligence dashboard with engagement health scores'},
+    {id:'pod-match',e:'🎯',l:'Pod Match',d:'Team recommendation',p:'Which pod should work on this engagement?'},
+    {id:'scope-creep',e:'📏',l:'Scope Creep',d:'Scope drift detection',p:'Check for scope creep alerts across all active engagements'},
+  ]},
+  {cat:'P1 · Code Intelligence',items:[
+    {id:'pr-review',e:'🔍',l:'PR Review',d:'Causal code review',p:'Review PR #1247 and show causal business impact'},
+    {id:'tdd',e:'🧪',l:'TDD Agent',d:'Red-Green-Refactor',p:'Generate TDD tests for FRAMLRuleEngine module'},
+    {id:'scaffolding',e:'🏗️',l:'Scaffolding',d:'Boilerplate gen',p:'Generate a production-ready FastAPI microservice scaffold'},
+    {id:'dep-upgrade',e:'📦',l:'Dep Upgrade',d:'Audit packages',p:'Audit dependencies for outdated packages and CVEs'},
+    {id:'hld-lld',e:'📐',l:'HLD / LLD',d:'Design docs',p:'Generate HLD and LLD for FRAML 6.2 architecture'},
+  ]},
+  {cat:'P1 · Test Intelligence',items:[
+    {id:'test-cases',e:'✅',l:'Test Cases',d:'Comprehensive suites',p:'Generate comprehensive test suite for SanctionsScreeningService'},
+    {id:'test-data',e:'🎲',l:'Test Data',d:'Synthetic data gen',p:'Generate 10K synthetic transactions for testing'},
+  ]},
+  {cat:'SWE · Codebase',items:[
+    {id:'codebase-qa',e:'💬',l:'Codebase Q&A',d:'Ask about code',p:'How does the sanctions screening pipeline work?'},
+    {id:'dead-code',e:'🧹',l:'Dead Code',d:'Unused detection',p:'Find all dead code and unreachable functions'},
+    {id:'impact',e:'💥',l:'Impact Analysis',d:'Blast radius',p:'What is the blast radius if I refactor the rule engine?'},
+    {id:'architecture',e:'🏛️',l:'Architecture',d:'System structure',p:'Extract the full FRAML 6.2 architecture'},
+  ]},
+  {cat:'Observability',items:[
+    {id:'incident',e:'🚨',l:'Incident RCA',d:'Root cause analysis',p:'Diagnose the sanctions screening latency spike'},
+    {id:'log-query',e:'📋',l:'Log Query',d:'Pattern detection',p:'Find all ERROR patterns in the last 24h logs'},
+    {id:'perf',e:'⚡',l:'Perf Profiler',d:'APM analysis',p:'Analyze APM data and identify top bottlenecks'},
+  ]},
+  {cat:'Data',items:[
+    {id:'sql',e:'🗄️',l:'SQL Analyzer',d:'Query optimization',p:'Analyze the transactions JOIN query for performance'},
+    {id:'lineage',e:'🔗',l:'Data Lineage',d:'Data flow mapping',p:'Map the data lineage for the transactions table'},
+  ]},
+];
+const AAAS=[
+  {cat:'Financial Statements',items:[
+    {id:'pnl',e:'📊',l:'P&L Statement',d:'Revenue & expenses',p:'Show the P&L statement for FY2025'},
+    {id:'bs',e:'📋',l:'Balance Sheet',d:'Assets & liabilities',p:'Generate the balance sheet as at 31 December 2025'},
+    {id:'tb',e:'📝',l:'Trial Balance',d:'Debit/credit check',p:'Show the trial balance with all GL accounts'},
+    {id:'gst',e:'🏛️',l:'GST F5 Review',d:'IRAS compliance',p:'Compute GST F5 return and check IRAS compliance'},
+  ]},
+  {cat:'Analysis',items:[
+    {id:'anomaly',e:'🔮',l:'Anomaly Check',d:'Unusual patterns',p:'Detect unusual transaction patterns and anomalies'},
+    {id:'txns',e:'💰',l:'Transactions',d:'Transaction review',p:'Summarize all FY2025 transactions with classification'},
+    {id:'benchmark',e:'📈',l:'Benchmark',d:'Industry comparison',p:'Benchmark our financials against SaaS industry standards'},
+  ]},
+];
+const GENERAL=[
+  {cat:'Intelligence',items:[
+    {id:'causal',e:'📊',l:'Causal Analysis',d:'Cause and effect',p:'Run a causal analysis across the organization'},
+    {id:'anomaly-gen',e:'⚠️',l:'Anomaly Report',d:'Unusual patterns',p:'What anomalies were detected today?'},
+    {id:'intel-report',e:'📄',l:'Intelligence Report',d:'Full org intel',p:'Give me the full intelligence report'},
+    {id:'predict',e:'📈',l:'Prediction',d:'Forecast outcomes',p:'Forecast key business metrics for next quarter'},
+  ]},
+];
+function getCmds(){return svc==='seaas'?SEAAS:svc==='aas'?AAAS:GENERAL}
+
+// Helpers
+function hc(s){return s>=75?'#16a34a':s>=50?'#d97706':'#dc2626'}
+function ring(score,sz=48){const r=(sz-6)/2,c=2*Math.PI*r,p=Math.min(Math.max(score,0),100)/100,d=p*c,col=hc(score);return`<div class="health-ring" style="width:${sz}px;height:${sz}px"><svg width="${sz}" height="${sz}" style="transform:rotate(-90deg)"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="rgba(31,30,29,.08)" stroke-width="3"/><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${d} ${c-d}"/></svg><span class="hr-val" style="color:${col}">${Math.round(score)}</span></div>`}
+function sbar(val,label,mx=100){const p=Math.min(100,Math.max(0,(val||0)/mx*100)),c=p>=75?'#16a34a':p>=50?'#ca8a04':'#dc2626';return`<div class="score-bar"><div class="score-bar-label"><span>${label}</span><span style="color:${c}">${Math.round(val||0)}</span></div><div class="score-bar-track"><div class="score-bar-fill" style="width:${p}%;background:${c}"></div></div></div>`}
+
+// ═══ MOCK RESPONSES ═══
+const RESP={
+'early-warning':{sum:'Velocity analysis complete for <strong>Tookitaki FRAML 6.2</strong>. Sprint velocity declined from <strong>42 → 28 pts/sprint</strong> (33% drop over 3 sprints). <strong>HIGH RISK</strong> — velocity collapse predicted within 2 sprints. SPOF detected: Senior engineer "Raj K." owns 67% of rule engine commits.',art:'early-warning'},
+'engagement-health':{sum:'Dashboard shows <strong>4 active engagements</strong>. <strong>OCBC FRAML 6.2</strong> health dropped to 58 (at risk) due to scope drift. <strong>MAS Regulatory</strong> is critical at 44. DBS Transaction Screening is healthy at 82.',art:'engagement-health'},
+'pod-match':{sum:'Recommended <strong>Pod Alpha</strong> for the engagement with <strong>87% match score</strong>. Strong TypeScript/Python overlap. Average cycle time 18h, 24 PRs/week.',art:'pod-match'},
+'scope-creep':{sum:'<strong>2 scope alerts detected</strong>. CRITICAL: OCBC FRAML 6.2 scope drifted <strong>+34%</strong> this sprint (89→119 story points). WARNING: MAS Regulatory drifted +18%.',art:'scope-creep'},
+'pr-review':{sum:'Analysed <strong>PR #1247</strong> — "feat(framl): add real-time sanctions screening pipeline". 12 files changed, +847/-234 lines. <strong>2 CRITICAL</strong> issues: N+1 query and missing rate limiting. HIGH causal link to compliance metrics.',art:'pr-review'},
+'tdd':{sum:'Generated <strong>34 test cases</strong> for FRAMLRuleEngine. Coverage: <strong>34% → 91%</strong>. 8 RGR cycles. Found 3 untested edge cases in rule priority resolution.',art:'tdd'},
+'scaffolding':{sum:'Generated <strong>tookitaki-framl-microservice</strong> scaffold. FastAPI + SQLAlchemy + Kafka. <strong>24 files</strong> across src/, tests/, config/, docker/.',art:'scaffolding'},
+'dep-upgrade':{sum:'<strong>12 outdated packages</strong>. CRITICAL CVE in kafka-python 2.0.2 (deserialization). HIGH: sqlalchemy memory leak. 3 breaking changes in pydantic.',art:'dep-upgrade'},
+'hld-lld':{sum:'Generated HLD/LLD for <strong>FRAML 6.2</strong>. 8 microservices. API Gateway → Screening → Rule Engine → Case Manager → Reporting.',art:'hld-lld'},
+'test-cases':{sum:'Generated <strong>48 test cases</strong> for SanctionsScreeningService. 12 happy path, 8 edge, 6 boundary, 10 integration, 6 negative, 6 security.',art:'test-cases'},
+'test-data':{sum:'Generated <strong>10,000 synthetic transactions</strong>. 8,500 legitimate, 1,000 sanctions-adjacent, 300 high-risk, 200 PEP-related. PII-safe.',art:'test-data'},
+'codebase-qa':{sum:'The sanctions screening pipeline has <strong>3 main modules</strong>: Ingestion, Screening, Case Management. PostgreSQL + Redis + Kafka.',art:'codebase-qa'},
+'dead-code':{sum:'Found <strong>23 dead code items</strong>: 8 unused functions (340 lines), 7 imports, 4 dead files, 4 branches. Safe to remove: 19/23.',art:'dead-code'},
+'impact':{sum:'Blast radius for <strong>framl/rule_engine</strong>: 14 downstream modules. 5 direct, 9 indirect. Circular import risk. <strong>67% of codebase affected</strong>.',art:'impact'},
+'architecture':{sum:'<strong>FRAML 6.2</strong>: 8 microservices, 12 data flows, 4 teams. 2 architecture risks identified.',art:'architecture'},
+'incident':{sum:'<strong>Incident RCA</strong>: Sanctions screening latency spike (p99 > 5s). Duration 1h 24m. Root cause: Redis cache eviction from bulk import.',art:'incident'},
+'log-query':{sum:'Last 24h: <strong>12,847 ERROR logs</strong>. Top: ConnectionPoolExhausted (64%), KafkaConsumerTimeout (22%), SanctionsListParseError (10%).',art:'log-query'},
+'perf':{sum:'Top bottleneck: /api/v2/screen p99=<strong>4.2s</strong> (SLA breach). Memory leak in CaseManager: 12MB/hour.',art:'perf'},
+'sql':{sum:'<strong>CRITICAL</strong>: Full table scan on 450M rows. SELECT * returns 42 columns, only 6 needed. Missing LIMIT.',art:'sql'},
+'lineage':{sum:'<strong>transactions</strong> table: 3 upstream sources, 7 downstream consumers. 4 transformation chains. PDPA-compliant.',art:'lineage'},
+'pnl':{sum:'P&L for <strong>FY2025</strong>. Revenue: <strong>SGD 7,799,000</strong>. Expenses: <strong>SGD 10,568,000</strong>. Net Loss: <strong>(SGD 2,769,000)</strong>.',art:'pnl'},
+'bs':{sum:'Balance Sheet as at <strong>31 Dec 2025</strong>. Total Assets: <strong>SGD 12,632,000</strong>. Equity: SGD 4,853,000. <strong>✓ Balanced</strong>.',art:'bs'},
+'tb':{sum:'Trial Balance <strong>FY2025</strong>. 416 accounts. Total Debits = Credits = <strong>SGD 82,341,000</strong>. <strong>✓ Balanced</strong>.',art:'tb'},
+'gst':{sum:'GST F5 <strong>FY2025</strong>. Output Tax: <strong>SGD 615,000</strong>. Input Tax: SGD 571,000. Net Payable: <strong>SGD 44,000</strong>.',art:'gst'},
+'anomaly':{sum:'<strong>4 anomalies</strong> detected. CRITICAL: $890K unusual software expense. HIGH: $1.2M single-day booking. MEDIUM: Duplicate $45.2K payment.',art:'anomaly'},
+'txns':{sum:'<strong>63,653 transactions</strong> in FY2025. By source: Xero Manual (28,412), Bank Feed (22,891), Invoice (8,234), Bill (4,116).',art:'txns'},
+'benchmark':{sum:'Benchmarked vs <strong>SaaS Series B-C</strong>. Revenue growth 23% (median 35%). Gross margin 62% (industry 70%). Burn multiple 2.8x.',art:'benchmark'},
+'causal':{sum:'Key insight: Engineering velocity decline has <strong>HIGH causal link</strong> to delayed implementations → revenue delay → cash flow pressure.',art:'general'},
+'anomaly-gen':{sum:'<strong>3 anomalies today</strong>. Engineering velocity drop. Unusual software expense. 2 engineers at burnout risk.',art:'general'},
+'intel-report':{sum:'<strong>Intelligence Report — Tookitaki</strong>. Overall health: 67/100. Engineering: 1 critical engagement. Finance: Net loss $2.8M, 14mo runway.',art:'general'},
+'predict':{sum:'<strong>Q2 2026</strong>: Revenue SGD 2.1M (+8%). Expenses SGD 2.7M. Net loss narrows. OCBC renewal uncertain. 72% confidence.',art:'general'},
+};
+
+// ═══ ARTIFACT RENDERERS ═══
+function renderArt(id){const w=document.getElementById('art-wrap');const fn=ART[id];if(fn){w.innerHTML=fn();}else{w.innerHTML=renderGenericArt(id);}}
+const ART={
+'pnl':()=>{artTabState.pnl=artTabState.pnl||'pl';const t=artTabState.pnl;
+  let tabs=`<div class="art-tabs">${['pl','bs','tb','gst','txn','anom'].map(x=>`<button class="art-tab${t===x?' active':''}" onclick="artTabState.pnl='${x}';renderArt('pnl')">${{pl:'P&L',bs:'BS',tb:'TB',gst:'GST',txn:'Txns',anom:'Anomalies'}[x]}<span class="dot has"></span></button>`).join('')}</div>`;
+  let kpi=`<div class="kpi-row"><div class="kpi-card accent"><div class="kpi-label">Revenue</div><div class="kpi-val green">SGD 7.8M</div></div><div class="kpi-card"><div class="kpi-label">Net Income</div><div class="kpi-val red">(2.8M)</div><div class="kpi-sub">Loss</div></div><div class="kpi-card"><div class="kpi-label">EBITDA</div><div class="kpi-val red">(2.7M)</div></div><div class="kpi-card"><div class="kpi-label">Accounts</div><div class="kpi-val">416</div></div><div class="kpi-card"><div class="kpi-label">GST Net</div><div class="kpi-val amber">44K</div></div></div>`;
+  let body='';
+  if(t==='pl')body=renderPL();else if(t==='bs')body=renderBS();else if(t==='tb')body=renderTB();else if(t==='gst')body=renderGST();else if(t==='txn')body=renderTxns();else if(t==='anom')body=renderAnomalies();
+  return`<div class="art-head"><span class="a-icon">📊</span><span class="a-title">Financial Statements — FY2025</span></div>${kpi}${tabs}<div class="art-body">${body}</div>`;},
+'bs':()=>{artTabState.pnl='bs';return ART.pnl();},'tb':()=>{artTabState.pnl='tb';return ART.pnl();},'gst':()=>{artTabState.pnl='gst';return ART.pnl();},'anomaly':()=>{artTabState.pnl='anom';return ART.pnl();},'txns':()=>{artTabState.pnl='txn';return ART.pnl();},
+'benchmark':()=>`<div class="art-head"><span class="a-icon">📈</span><span class="a-title">SaaS Benchmark — FY2025</span><span class="a-conf amber">62%</span></div><div class="art-body"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#73726c;margin-bottom:8px">vs SaaS Industry (Series B-C)</div>${sbar(23,'Revenue Growth (industry: 35%)',50)}${sbar(62,'Gross Margin (industry: 70%)',100)}${sbar(36,'R&D Efficiency',100)}${sbar(55,'Rule of 40',100)}<div style="height:8px"></div><div class="stat-grid"><div class="stat-card"><div class="sc-label">Burn Multiple</div><div class="sc-val red">2.8x</div></div><div class="stat-card"><div class="sc-label">CAC Payback</div><div class="sc-val amber">18mo</div></div><div class="stat-card"><div class="sc-label">NRR</div><div class="sc-val green">112%</div></div><div class="stat-card"><div class="sc-label">Runway</div><div class="sc-val amber">14mo</div></div></div><div class="insight-box"><strong>Key Insight:</strong> R&D spend at 48% of revenue is above median. Contractor costs ($2.2M) suggest opportunity to convert for 30% savings.</div></div>`,
+'engagement-health':()=>{const engs=[{n:'OCBC',p:'FRAML 6.2 Migration',s:58,v:45,j:52,sc:35,se:62,r:true,d:45,c:42},{n:'DBS',p:'Transaction Screening',s:82,v:88,j:85,sc:90,se:78,r:false,d:12,c:91},{n:'Standard Chartered',p:'CRS Integration',s:71,v:70,j:74,sc:65,se:75,r:false,d:28,c:68},{n:'MAS',p:'Regulatory Compliance',s:44,v:30,j:38,sc:22,se:55,r:true,d:60,c:28}];return`<div class="art-head"><span class="a-icon">💊</span><span class="a-title">Delivery Intelligence</span></div><div class="art-body"><div class="alert-banner crit"><span class="sev sev-crit">CRITICAL</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#dc2626">MAS Regulatory — Score 44</div><div style="font-size:12px;color:#3d3d3a">Velocity at 30, scope drifted +78%. Immediate attention required.</div></div></div>${engs.map(e=>`<div class="eng-card"><div class="eng-header">${ring(e.s,52)}<div style="flex:1"><div class="eng-name">${e.n}</div><div class="eng-sub">${e.p}</div></div></div>${sbar(e.v,'Delivery velocity')}${sbar(e.j,'Jira resolution')}${sbar(e.sc,'Scope stability')}${sbar(e.se,'Team sentiment')}<div style="margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid ${e.r?'rgba(220,38,38,.12)':'rgba(22,163,74,.12)'};background:${e.r?'rgba(220,38,38,.04)':'rgba(22,163,74,.04)'};color:${e.r?'#dc2626':'#16a34a'}">${e.r?'⚠ At risk':'✓ On track'} — ~${e.d} days · ${e.c}% confidence</div></div>`).join('')}</div>`;},
+'early-warning':()=>`<div class="art-head"><span class="a-icon">⚡</span><span class="a-title">Early Warning — Velocity</span><span class="a-conf red">HIGH RISK</span></div><div class="art-tabs"><button class="art-tab active">Summary</button><button class="art-tab">Findings</button><button class="art-tab">Actions</button><button class="art-tab">Metrics</button></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Current Velocity</div><div class="sc-val red">28 pts</div></div><div class="stat-card"><div class="sc-label">Previous</div><div class="sc-val amber">42 pts</div></div><div class="stat-card"><div class="sc-label">Decline</div><div class="sc-val red">-33%</div></div><div class="stat-card"><div class="sc-label">Risk Window</div><div class="sc-val red">2 sprints</div></div></div><div class="insight-box"><strong>⚡ SPOF Alert:</strong> Senior engineer "Raj K." owns 67% of FRAML rule engine commits.</div><div style="margin-top:8px"><span class="branch-pill">feature/framl-6.2-rule-engine</span><span style="font-size:11px;color:#73726c;margin-left:6px">847 uncommitted changes</span></div><div style="margin-top:12px">${sbar(28,'Sprint 23',50)}${sbar(35,'Sprint 22',50)}${sbar(42,'Sprint 21',50)}</div></div>`,
+'pod-match':()=>`<div class="art-head"><span class="a-icon">🎯</span><span class="a-title">Pod Match</span></div><div class="art-body"><div class="eng-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div><div style="font-size:10px;color:#73726c;text-transform:uppercase;letter-spacing:.5px;font-weight:500">Recommended Pod</div><div style="font-size:16px;font-weight:700;color:#141413">Pod Alpha</div></div><div style="text-align:right"><span style="font-size:26px;font-weight:800;color:#16a34a">87<span style="font-size:13px;font-weight:400;color:#73726c">%</span></span><div style="font-size:10px;color:#73726c">match</div></div></div><div class="stat-grid"><div class="stat-card"><div class="sc-label">Avg Cycle Time</div><div class="sc-val blue">18h</div></div><div class="stat-card"><div class="sc-label">PRs / Week</div><div class="sc-val green">24</div></div></div><div style="margin-bottom:8px"><div style="font-size:10px;color:#73726c;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.5px">Tech Stack</div><span class="tech-chip">TypeScript</span><span class="tech-chip">Python</span><span class="tech-chip">PostgreSQL</span><span class="tech-chip">Redis</span><span class="tech-chip">Kafka</span><span class="tech-chip">React</span></div><div style="font-size:10px;color:#73726c;margin:8px 0 4px;font-weight:500;text-transform:uppercase;letter-spacing:.5px">Past Engagements</div><div style="display:flex;gap:6px"><div style="flex:1;padding:8px 10px;border-radius:8px;background:#faf9f5;border:1px solid rgba(31,30,29,.08)"><div style="font-size:12px;font-weight:600;color:#141413">DBS FRAML 5.x</div><div style="font-size:10px;color:#73726c">Score: <span style="color:#16a34a;font-weight:600">88</span></div></div><div style="flex:1;padding:8px 10px;border-radius:8px;background:#faf9f5;border:1px solid rgba(31,30,29,.08)"><div style="font-size:12px;font-weight:600;color:#141413">UOB AML</div><div style="font-size:10px;color:#73726c">Score: <span style="color:#16a34a;font-weight:600">79</span></div></div></div></div></div>`,
+'scope-creep':()=>`<div class="art-head"><span class="a-icon">📏</span><span class="a-title">Scope Creep Alerts</span></div><div class="art-body"><div class="alert-banner crit"><span class="sev sev-crit">CRITICAL</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#dc2626">OCBC — FRAML 6.2</div><div style="font-size:12px;color:#3d3d3a">Scope drifted <strong>+34%</strong>. Baseline 89 → Current 119 pts.</div></div></div><div class="alert-banner warn"><span class="sev sev-high">WARNING</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:#d97706">MAS — Regulatory</div><div style="font-size:12px;color:#3d3d3a">Scope drifted <strong>+18%</strong>. Baseline 45 → Current 53 pts.</div></div></div><div style="margin-top:12px">${sbar(34,'OCBC drift',50)}${sbar(18,'MAS drift',50)}${sbar(2,'DBS drift',50)}${sbar(5,'StanChart drift',50)}</div><div class="insight-box"><strong>Root Cause:</strong> 12 new requirements added after client stakeholder change. Recommend scope freeze.</div></div>`,
+'pr-review':()=>{artTabState.pr=artTabState.pr||'summary';const t=artTabState.pr;return`<div class="art-head"><span class="a-icon">🔍</span><span class="a-title">PR #1247 — Sanctions Pipeline</span>${ring(87,40)}</div><div class="art-tabs">${['summary','findings','actions','metrics'].map(x=>`<button class="art-tab${t===x?' active':''}" onclick="artTabState.pr='${x}';renderArt('pr-review')">${x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div><div class="art-body">${t==='summary'?`<div style="margin-bottom:6px"><span class="branch-pill">feat/framl-sanctions-screening</span></div><div class="stat-grid"><div class="stat-card"><div class="sc-label">Files</div><div class="sc-val blue">12</div></div><div class="stat-card"><div class="sc-label">Critical</div><div class="sc-val red">2</div></div><div class="stat-card"><div class="sc-label">Added</div><div class="sc-val green">+847</div></div><div class="stat-card"><div class="sc-label">Removed</div><div class="sc-val amber">-234</div></div></div><div class="insight-box"><strong>Causal Impact:</strong> Sanctions pipeline has HIGH causal link to compliance → customer trust → revenue retention.</div>`:t==='findings'?`<div class="finding"><span class="sev sev-crit">CRITICAL</span><div><div class="finding-text">N+1 query in SanctionsList.objects.filter inside loop</div><div class="file-chip">sanctions_checker.py:147</div></div></div><div class="finding"><span class="sev sev-crit">CRITICAL</span><div><div class="finding-text">Missing rate limiting on /api/v2/screen — DDoS vector</div><div class="file-chip">api/v2/routes.py:89</div></div></div><div class="finding"><span class="sev sev-high">HIGH</span><div><div class="finding-text">Hardcoded 30s timeout — should use env config</div><div class="file-chip">kafka_producer.ts:89</div></div></div><div class="finding"><span class="sev sev-med">MEDIUM</span><div><div class="finding-text">Unused pandas import</div><div class="file-chip">data_transformer.py:3</div></div></div>`:t==='actions'?`<div class="action-item"><div class="action-pri hi">↑</div><div><div style="font-size:13px;font-weight:600;color:#141413">Fix N+1 query</div><div style="font-size:12px;color:#73726c">Use prefetch_related() in sanctions_checker.py</div></div></div><div class="action-item"><div class="action-pri hi">↑</div><div><div style="font-size:13px;font-weight:600;color:#141413">Add rate limiting</div><div style="font-size:12px;color:#73726c">Apply throttle to /api/v2/screen (100 req/min)</div></div></div><div class="action-item"><div class="action-pri md">→</div><div><div style="font-size:13px;font-weight:600;color:#141413">Externalize timeout</div><div style="font-size:12px;color:#73726c">Move to KAFKA_PRODUCER_TIMEOUT env variable</div></div></div>`:`${sbar(87,'Code quality',100)}${sbar(72,'Test coverage',100)}${sbar(45,'Complexity (lower=better)',100)}${sbar(91,'Security posture',100)}`}</div>`;},
+'tdd':()=>`<div class="art-head"><span class="a-icon">🧪</span><span class="a-title">TDD — FRAMLRuleEngine</span>${ring(91,40)}</div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Tests</div><div class="sc-val green">34</div></div><div class="stat-card"><div class="sc-label">Coverage</div><div class="sc-val green">91%</div></div><div class="stat-card"><div class="sc-label">RGR Cycles</div><div class="sc-val blue">8</div></div><div class="stat-card"><div class="sc-label">Edge Cases</div><div class="sc-val amber">3</div></div></div><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#73726c;margin:8px 0 4px;letter-spacing:.5px">Key Tests</div><div class="finding"><span class="sev" style="background:rgba(22,163,74,.08);color:#16a34a;border:1px solid rgba(22,163,74,.15)">PASS</span><div class="finding-text" style="font-family:monospace;font-size:11px">rule_evaluation_with_circular_dependency</div></div><div class="finding"><span class="sev" style="background:rgba(22,163,74,.08);color:#16a34a;border:1px solid rgba(22,163,74,.15)">PASS</span><div class="finding-text" style="font-family:monospace;font-size:11px">sanctions_match_fuzzy_threshold</div></div><div class="finding"><span class="sev" style="background:rgba(22,163,74,.08);color:#16a34a;border:1px solid rgba(22,163,74,.15)">PASS</span><div class="finding-text" style="font-family:monospace;font-size:11px">transaction_velocity_breach_detection</div></div><div class="insight-box"><strong>Untested:</strong> Rule priority tie-breaking, concurrent evaluation, chain depth >10.</div></div>`,
+'scaffolding':()=>`<div class="art-head"><span class="a-icon">🏗️</span><span class="a-title">Scaffold — FRAML Microservice</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Files</div><div class="sc-val blue">24</div></div><div class="stat-card"><div class="sc-label">Template</div><div class="sc-val purple">FastAPI</div></div></div><div style="font-family:monospace;font-size:11px;color:#3d3d3a;line-height:1.8;padding:10px;background:#faf9f5;border-radius:8px;border:1px solid rgba(31,30,29,.08);margin-top:8px">📁 src/<br>&nbsp;&nbsp;📁 api/ — routes, middleware<br>&nbsp;&nbsp;📁 core/ — config, deps<br>&nbsp;&nbsp;📁 models/ — SQLAlchemy<br>&nbsp;&nbsp;📁 services/ — business logic<br>&nbsp;&nbsp;📁 consumers/ — Kafka<br>📁 tests/ — pytest<br>📁 docker/ — Dockerfile, compose<br>📄 pyproject.toml</div><div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:3px"><span class="tech-chip">Health Check</span><span class="tech-chip">OpenTelemetry</span><span class="tech-chip">Structured Logging</span><span class="tech-chip">Alembic</span><span class="tech-chip">Docker Multi-stage</span></div></div>`,
+'dep-upgrade':()=>`<div class="art-head"><span class="a-icon">📦</span><span class="a-title">Dependency Audit</span><span class="a-conf red">12 outdated</span></div><div class="art-body"><div class="finding"><span class="sev sev-crit">CVE</span><div><div class="finding-text"><strong>kafka-python</strong> 2.0.2 → 2.1.0</div><div style="font-size:11px;color:#dc2626">Deserialization vulnerability</div></div></div><div class="finding"><span class="sev sev-high">HIGH</span><div><div class="finding-text"><strong>sqlalchemy</strong> 2.0.23 → 2.0.35</div><div style="font-size:11px;color:#d97706">Memory leak in connection pool</div></div></div><div class="finding"><span class="sev sev-med">MEDIUM</span><div><div class="finding-text"><strong>pydantic</strong> 2.5.2 → 2.10.1</div><div style="font-size:11px;color:#ca8a04">3 breaking changes</div></div></div><div class="finding"><span class="sev sev-low">LOW</span><div><div class="finding-text"><strong>9 minor updates</strong></div><div style="font-size:11px;color:#73726c">httpx, uvicorn, pytest, ruff, mypy...</div></div></div><div class="insight-box"><strong>Priority:</strong> Update kafka-python immediately — active CVE.</div></div>`,
+'hld-lld':()=>`<div class="art-head"><span class="a-icon">📐</span><span class="a-title">HLD/LLD — FRAML 6.2</span></div><div class="art-body"><div style="padding:12px;background:#faf9f5;border:1px solid rgba(31,30,29,.08);border-radius:10px;font-family:monospace;font-size:10px;color:#3d3d3a;line-height:1.8;white-space:pre">┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  API Gateway │────▶│  Screening   │────▶│ Rule Engine  │
+│   (FastAPI)  │     │   Service    │     │  (Python)    │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                     │
+       ▼                    ▼                     ▼
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│    Kafka     │     │    Redis     │     │ PostgreSQL  │
+└──────┬───────┘     └──────────────┘     └─────────────┘
+       ▼
+┌─────────────┐     ┌──────────────┐
+│Case Manager │────▶│  Reporting   │
+└─────────────┘     └──────────────┘</div><div class="stat-grid" style="margin-top:10px"><div class="stat-card"><div class="sc-label">Transactions</div><div class="sc-val blue" style="font-size:13px">450M rows</div></div><div class="stat-card"><div class="sc-label">Rules</div><div class="sc-val purple" style="font-size:13px">2,400</div></div><div class="stat-card"><div class="sc-label">Cases/mo</div><div class="sc-val amber" style="font-size:13px">12K</div></div><div class="stat-card"><div class="sc-label">Alerts/mo</div><div class="sc-val red" style="font-size:13px">45K</div></div></div></div>`,
+'test-cases':()=>`<div class="art-head"><span class="a-icon">✅</span><span class="a-title">Test Suite — Sanctions</span>${ring(96,40)}</div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Total</div><div class="sc-val green">48</div></div><div class="stat-card"><div class="sc-label">Categories</div><div class="sc-val blue">6</div></div></div>${sbar(12,'Happy path',48)}${sbar(8,'Edge cases',48)}${sbar(6,'Boundary',48)}${sbar(10,'Integration',48)}${sbar(6,'Negative',48)}${sbar(6,'Security',48)}<div class="insight-box"><strong>Security tests:</strong> SQL injection, XSS in names, SSRF in webhooks.</div></div>`,
+'test-data':()=>`<div class="art-head"><span class="a-icon">🎲</span><span class="a-title">Synthetic Test Data</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Records</div><div class="sc-val blue">10,000</div></div><div class="stat-card"><div class="sc-label">PII Safe</div><div class="sc-val green">✓</div></div></div>${sbar(85,'Legitimate',100)}${sbar(10,'Sanctions-adjacent',100)}${sbar(3,'High-risk',100)}${sbar(2,'PEP-related',100)}<div class="insight-box"><strong>Quality:</strong> All FK constraints satisfied. Faker-generated names. Production-matching distribution.</div></div>`,
+'codebase-qa':()=>`<div class="art-head"><span class="a-icon">💬</span><span class="a-title">Codebase Q&A</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Modules</div><div class="sc-val blue">3</div></div><div class="stat-card"><div class="sc-label">Databases</div><div class="sc-val purple">2</div></div><div class="stat-card"><div class="sc-label">Queue</div><div class="sc-val amber">1</div></div><div class="stat-card"><div class="sc-label">Endpoints</div><div class="sc-val green">8</div></div></div><div style="font-family:monospace;font-size:11px;color:#3d3d3a;line-height:1.7;padding:10px;background:#faf9f5;border-radius:8px;border:1px solid rgba(31,30,29,.08)">Ingest → Kafka → Enrich → Screen → Alert → Case → Export</div></div>`,
+'dead-code':()=>`<div class="art-head"><span class="a-icon">🧹</span><span class="a-title">Dead Code</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Dead Items</div><div class="sc-val amber">23</div></div><div class="stat-card"><div class="sc-label">Safe Remove</div><div class="sc-val green">19</div></div><div class="stat-card"><div class="sc-label">Dead Lines</div><div class="sc-val blue">340</div></div><div class="stat-card"><div class="sc-label">Savings</div><div class="sc-val purple">12KB</div></div></div><div class="finding"><span class="sev sev-high">FUNC</span><div class="finding-text">8 unused functions across 4 modules</div></div><div class="finding"><span class="sev sev-med">IMPORT</span><div class="finding-text">7 unused imports across 5 files</div></div><div class="finding"><span class="sev sev-low">FILE</span><div class="finding-text">4 dead files — legacy v4 migration</div></div><div class="insight-box"><strong>Note:</strong> 4 items need manual review — possible dynamic imports.</div></div>`,
+'impact':()=>`<div class="art-head"><span class="a-icon">💥</span><span class="a-title">Impact — rule_engine</span><span class="a-conf red">HIGH</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Blast Radius</div><div class="sc-val red">14</div></div><div class="stat-card"><div class="sc-label">Direct</div><div class="sc-val amber">5</div></div><div class="stat-card"><div class="sc-label">Indirect</div><div class="sc-val blue">9</div></div><div class="stat-card"><div class="sc-label">Codebase</div><div class="sc-val red">67%</div></div></div><div class="finding"><span class="sev sev-crit">⚠</span><div class="finding-text">sanctions_checker — circular import risk</div></div><div class="finding"><span class="sev sev-high">→</span><div class="finding-text">velocity_monitor, case_manager</div></div><div class="finding"><span class="sev sev-med">→</span><div class="finding-text">reporting, api_v2</div></div><div class="insight-box"><strong>Warning:</strong> Circular dependency. Refactor with dependency injection.</div></div>`,
+'architecture':()=>`<div class="art-head"><span class="a-icon">🏛️</span><span class="a-title">Architecture — FRAML 6.2</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Services</div><div class="sc-val blue">8</div></div><div class="stat-card"><div class="sc-label">Flows</div><div class="sc-val purple">12</div></div><div class="stat-card"><div class="sc-label">Teams</div><div class="sc-val green">4</div></div><div class="stat-card"><div class="sc-label">Risks</div><div class="sc-val red">2</div></div></div><div class="finding"><span class="sev sev-crit">RISK</span><div class="finding-text">SPOF in Rule Engine — no redundancy</div></div><div class="finding"><span class="sev sev-high">RISK</span><div class="finding-text">No circuit breaker on external APIs</div></div><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px"><span class="tech-chip" style="background:rgba(124,58,237,.06);color:#7c3aed;border-color:rgba(124,58,237,.12)">Platform (3)</span><span class="tech-chip" style="background:rgba(22,163,74,.06);color:#16a34a;border-color:rgba(22,163,74,.12)">ML (2)</span><span class="tech-chip" style="background:rgba(217,119,6,.06);color:#d97706;border-color:rgba(217,119,6,.12)">Compliance (2)</span><span class="tech-chip" style="background:rgba(37,99,235,.06);color:#2563eb;border-color:rgba(37,99,235,.12)">DevOps (1)</span></div></div>`,
+'incident':()=>`<div class="art-head"><span class="a-icon">🚨</span><span class="a-title">Incident RCA — Latency Spike</span></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Duration</div><div class="sc-val red">1h 24m</div></div><div class="stat-card"><div class="sc-label">Impact</div><div class="sc-val amber">p99 > 5s</div></div></div><div style="font-family:monospace;font-size:11px;color:#3d3d3a;line-height:1.8;padding:10px;background:#faf9f5;border-radius:8px;border:1px solid rgba(31,30,29,.08)">Bulk import → Redis 98% → Cache eviction<br>→ DB fallback → Pool exhaustion<br>→ <span style="color:#dc2626">Latency spike (p99 > 5s)</span></div><div style="margin-top:10px"><div class="action-item"><div class="action-pri hi">1</div><div style="font-size:13px;font-weight:600">Increase Redis maxmemory</div></div><div class="action-item"><div class="action-pri md">2</div><div style="font-size:13px;font-weight:600">Add circuit breaker</div></div><div class="action-item"><div class="action-pri lo">3</div><div style="font-size:13px;font-weight:600">Incremental list loading</div></div></div></div>`,
+'log-query':()=>`<div class="art-head"><span class="a-icon">📋</span><span class="a-title">Log Analysis — 24h</span><span class="a-conf red">12,847</span></div><div class="art-body">${sbar(64,'ConnectionPoolExhausted (8,234)',100)}${sbar(22,'KafkaConsumerTimeout (2,891)',100)}${sbar(10,'SanctionsListParseError (1,234)',100)}${sbar(4,'AuthTokenExpired (488)',100)}<div class="insight-box"><strong>Root Cause:</strong> 64% linked to Redis cache eviction incident.</div></div>`,
+'perf':()=>`<div class="art-head"><span class="a-icon">⚡</span><span class="a-title">Performance Profile</span></div><div class="art-body"><div class="finding"><span class="sev sev-crit">SLA ✗</span><div><div class="finding-text"><strong>/api/v2/screen</strong> — p99: 4.2s (SLA: 2s)</div></div></div><div class="finding"><span class="sev sev-high">SLOW</span><div><div class="finding-text"><strong>/api/v2/cases/search</strong> — p99: 1.8s (N+1)</div></div></div><div class="finding"><span class="sev sev-high">SLOW</span><div><div class="finding-text"><strong>/api/v2/reports</strong> — p99: 8.4s (unindexed)</div></div></div><div class="alert-banner crit" style="margin-top:8px"><span style="color:#dc2626;font-size:11px;font-weight:700">MEMORY LEAK</span><div style="flex:1;font-size:12px;color:#3d3d3a">CaseManager +12MB/hour — unreleased connections</div></div></div>`,
+'sql':()=>`<div class="art-head"><span class="a-icon">🗄️</span><span class="a-title">SQL Analysis</span></div><div class="art-body"><div style="font-family:monospace;font-size:11px;color:#2563eb;padding:10px;background:#faf9f5;border-radius:8px;border:1px solid rgba(31,30,29,.08);line-height:1.6;margin-bottom:8px"><span style="color:#7c3aed">SELECT</span> * <span style="color:#7c3aed">FROM</span> transactions t<br><span style="color:#7c3aed">JOIN</span> alerts a <span style="color:#7c3aed">ON</span> t.id = a.transaction_id<br><span style="color:#7c3aed">WHERE</span> t.created_at > '2025-01-01'</div><div class="finding"><span class="sev sev-crit">CRITICAL</span><div class="finding-text">Full table scan on 450M rows</div></div><div class="finding"><span class="sev sev-high">HIGH</span><div class="finding-text">SELECT * — 42 columns, only 6 needed</div></div><div class="finding"><span class="sev sev-med">MEDIUM</span><div class="finding-text">Missing LIMIT — could return 10M+ rows</div></div><div class="insight-box"><strong>Fix:</strong> Add INDEX on created_at, explicit columns, LIMIT 1000.</div></div>`,
+'lineage':()=>`<div class="art-head"><span class="a-icon">🔗</span><span class="a-title">Data Lineage — transactions</span></div><div class="art-body"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#73726c;margin-bottom:4px;letter-spacing:.5px">Upstream (3)</div><div style="display:flex;gap:4px;margin-bottom:10px"><span class="tech-chip">Bank Feed API</span><span class="tech-chip">Manual Entry</span><span class="tech-chip">Bulk Import</span></div><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:#73726c;margin-bottom:4px;letter-spacing:.5px">Downstream (7)</div><div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px"><span class="tech-chip">alerts</span><span class="tech-chip">cases</span><span class="tech-chip">reports</span><span class="tech-chip">sanctions_results</span><span class="tech-chip">velocity_metrics</span><span class="tech-chip">audit_log</span><span class="tech-chip">compliance_export</span></div><div style="font-family:monospace;font-size:11px;color:#3d3d3a;padding:8px;background:#faf9f5;border-radius:8px;border:1px solid rgba(31,30,29,.08)">raw → <span style="color:#2563eb">cleaned</span> → <span style="color:#7c3aed">enriched</span> → <span style="color:#16a34a">aggregated</span></div><div class="balance-check ok">✓ PDPA-compliant — PII encrypted at rest</div></div>`,
+};
+function renderPL(){return`<div class="fin-section"><span>Revenue</span></div><div class="fin-row"><span class="fr-label indent">License Fees</span><span class="fr-val green">8,836,000</span></div><div class="fin-row"><span class="fr-label indent">Implementation Fees</span><span class="fr-val green">1,612,000</span></div><div class="fin-row"><span class="fr-label indent">Support Fees</span><span class="fr-val green">616,000</span></div><div class="fin-row"><span class="fr-label indent">Overage Fees</span><span class="fr-val green">444,000</span></div><div class="fin-row"><span class="fr-label indent">Technology Support Service</span><span class="fr-val red">(3,709,000)</span></div><div class="fin-row bold"><span class="fr-label">Total Revenue</span><span class="fr-val green">7,799,000</span></div><div class="fin-section"><span>Expenses</span></div><div class="fin-row"><span class="fr-label indent">Software Subscriptions</span><span class="fr-val">3,118,000</span></div><div class="fin-row"><span class="fr-label indent">Salaries & Benefits</span><span class="fr-val">2,201,000</span></div><div class="fin-row"><span class="fr-label indent">Contractor Costs</span><span class="fr-val">2,184,000</span></div><div class="fin-row"><span class="fr-label indent">Director Remuneration</span><span class="fr-val">592,000</span></div><div class="fin-row"><span class="fr-label indent">Travel & Entertainment</span><span class="fr-val">455,000</span></div><div class="fin-row"><span class="fr-label indent">Recruitment</span><span class="fr-val">407,000</span></div><div class="fin-row"><span class="fr-label indent">Marketing & Events</span><span class="fr-val">401,000</span></div><div class="fin-row"><span class="fr-label indent">Consultancy Fees</span><span class="fr-val">335,000</span></div><div class="fin-row"><span class="fr-label indent">Legal & Professional</span><span class="fr-val">236,000</span></div><div class="fin-row"><span class="fr-label indent">Cloud & Hosting</span><span class="fr-val">214,000</span></div><div class="fin-row"><span class="fr-label indent">Office & Admin</span><span class="fr-val">180,000</span></div><div class="fin-row"><span class="fr-label indent">Insurance</span><span class="fr-val">156,000</span></div><div class="fin-row"><span class="fr-label indent">Depreciation</span><span class="fr-val">89,000</span></div><div class="fin-row bold"><span class="fr-label">Total Expenses</span><span class="fr-val red">10,568,000</span></div><div class="fin-total"><span class="ft-label">Net Income / (Loss)</span><span class="ft-val red">SGD (2,769,000)</span></div><div style="margin:4px 4px;padding:8px 12px;border-radius:8px;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.08)"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#3d3d3a">EBITDA</span><span style="font-weight:700;color:#dc2626;font-family:monospace">SGD (2,680,000)</span></div></div>`}
+function renderBS(){return`<div style="padding:5px 12px;font-size:11px;color:#73726c;border-bottom:1px solid rgba(31,30,29,.06)">As at: <span style="color:#141413;font-weight:500">31 December 2025</span></div><div class="fin-section"><span>Assets</span></div><div class="fin-row"><span class="fr-label indent">Cash — UOB USD</span><span class="fr-val">2,488,000</span></div><div class="fin-row"><span class="fr-label indent">Cash — UOB SGD</span><span class="fr-val">156,000</span></div><div class="fin-row"><span class="fr-label indent">Cash — DBS SGD</span><span class="fr-val">42,000</span></div><div class="fin-row"><span class="fr-label indent">Trade Debtors</span><span class="fr-val">9,489,000</span></div><div class="fin-row"><span class="fr-label indent">Prepayments</span><span class="fr-val">312,000</span></div><div class="fin-row"><span class="fr-label indent">Fixed Assets (net)</span><span class="fr-val">145,000</span></div><div class="fin-row bold"><span class="fr-label">Total Assets</span><span class="fr-val green">12,632,000</span></div><div class="fin-section"><span>Liabilities</span></div><div class="fin-row"><span class="fr-label indent">Deferred Revenue</span><span class="fr-val">4,712,000</span></div><div class="fin-row"><span class="fr-label indent">Accrued Expenses</span><span class="fr-val">2,345,000</span></div><div class="fin-row"><span class="fr-label indent">Trade Creditors</span><span class="fr-val">678,000</span></div><div class="fin-row"><span class="fr-label indent">GST Payable</span><span class="fr-val">44,000</span></div><div class="fin-row bold"><span class="fr-label">Total Liabilities</span><span class="fr-val amber">7,779,000</span></div><div class="fin-section"><span>Equity</span></div><div class="fin-row"><span class="fr-label indent">Paid-up Capital</span><span class="fr-val">27,322,000</span></div><div class="fin-row"><span class="fr-label indent">Accumulated Losses</span><span class="fr-val red">(22,469,000)</span></div><div class="fin-row bold"><span class="fr-label">Total Equity</span><span class="fr-val green">4,853,000</span></div><div class="fin-total"><span class="ft-label">Liabilities + Equity</span><span class="ft-val">SGD 12,632,000</span></div><div class="balance-check ok">✓ Balance sheet is balanced</div>`}
+function renderTB(){const a=[['Paid-up Capital','equity','','27,322,000'],['Accumulated Losses','equity','22,469,000',''],['Trade Debtors','asset','9,489,000',''],['License Fees','revenue','','8,836,000'],['Deferred Revenue','liability','','4,712,000'],['Technology Support','expense','3,709,000',''],['Software Subscriptions','expense','3,118,000',''],['Cash — UOB USD','asset','2,488,000',''],['Accrued Expenses','liability','','2,345,000'],['Salaries & Benefits','expense','2,201,000',''],['Contractor Costs','expense','2,184,000',''],['Implementation Fees','revenue','','1,612,000'],['Trade Creditors','liability','','678,000'],['Support Fees','revenue','','616,000'],['Output Tax','liability','','615,000'],['Director Remuneration','expense','592,000',''],['Input Tax','asset','571,000',''],['Travel & Entertainment','expense','455,000',''],['Overage Fees','revenue','','444,000'],['Recruitment','expense','407,000','']];return`<div style="padding:5px 12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(31,30,29,.06)"><span style="font-size:11px;color:#73726c">Period: <span style="color:#141413;font-weight:500">FY2025</span></span><span style="font-size:10px;padding:2px 8px;border-radius:8px;background:rgba(22,163,74,.06);color:#16a34a;font-weight:500">✓ Balanced</span></div><div class="tb-head"><span>Account</span><span style="text-align:right">Type</span><span style="text-align:right">Debit</span><span style="text-align:right">Credit</span></div>${a.map(r=>`<div class="tb-row"><span class="tb-acc">${r[0]}</span><span class="tb-type">${r[1]}</span><span class="tb-amt">${r[2]||'—'}</span><span class="tb-amt">${r[3]||'—'}</span></div>`).join('')}<div style="border-top:1px solid rgba(31,30,29,.08);padding:6px 12px;display:grid;grid-template-columns:1fr 60px 90px 90px;gap:4px;background:rgba(31,30,29,.03)"><span style="font-size:12px;font-weight:600">Total</span><span></span><span style="font-size:12px;font-weight:600;font-family:monospace;text-align:right">82,341,000</span><span style="font-size:12px;font-weight:600;font-family:monospace;text-align:right">82,341,000</span></div>`}
+function renderGST(){const b=[{b:'Box 1',l:'Standard-Rated Supplies',v:'11,508,000',n:'9% GST'},{b:'Box 2',l:'Zero-Rated Supplies',v:'0',n:'Int\'l SaaS'},{b:'Box 3',l:'Exempt Supplies',v:'0'},{b:'Box 4',l:'Total Supplies',v:'11,508,000',sep:1},{b:'Box 5',l:'Taxable Supplies',v:'11,508,000'},{b:'Box 6',l:'Output Tax',v:'615,000',n:'Tax collected'},{b:'Box 7',l:'Input Tax Claimable',v:'571,000',n:'Tax paid'},{b:'Box 8',l:'Net Tax Payable',v:'44,000',hl:1}];return`<div style="padding:5px 12px;font-size:11px;color:#73726c;border-bottom:1px solid rgba(31,30,29,.06)">IRAS GST F5 Return — Singapore</div>${b.map(x=>`${x.sep?'<div style="height:1px;background:rgba(31,30,29,.06);margin:2px 12px"></div>':''}<div class="gst-row${x.hl?' hl':''}"><span class="gst-box">${x.b}</span><span class="gst-label">${x.l}</span>${x.n?`<span class="gst-note">${x.n}</span>`:''}<span class="gst-val">SGD ${x.v}</span></div>`).join('')}<div style="margin:8px;padding:8px 12px;border-radius:8px;background:rgba(217,119,6,.04);border:1px solid rgba(217,119,6,.1);font-size:11px;color:#d97706">⚠️ Net GST Payable SGD 44,000 — due to IRAS</div>`}
+function renderTxns(){return`<div style="padding:5px 12px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(31,30,29,.06)"><span style="font-size:11px;color:#73726c">Period: <span style="color:#141413;font-weight:500">FY2025</span></span><span style="font-size:12px;font-weight:600">63,653 txns</span></div><div class="fin-section"><span>By Source</span></div><div class="fin-row"><span class="fr-label indent">Xero Manual</span><span class="fr-val">28,412</span></div><div class="fin-row"><span class="fr-label indent">Bank Feed</span><span class="fr-val">22,891</span></div><div class="fin-row"><span class="fr-label indent">Invoice</span><span class="fr-val">8,234</span></div><div class="fin-row"><span class="fr-label indent">Bill</span><span class="fr-val">4,116</span></div><div class="fin-section"><span>Top Transactions</span></div><div style="padding:8px 12px;border-bottom:1px solid rgba(31,30,29,.04)"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#141413">License Fee — OCBC</span><span style="font-size:12px;font-family:monospace;color:#16a34a">Dr 2,400,000</span></div><div style="font-size:10px;color:#73726c">Invoice · 15 Mar 2025</div></div><div style="padding:8px 12px;border-bottom:1px solid rgba(31,30,29,.04)"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#141413">License Fee — DBS</span><span style="font-size:12px;font-family:monospace;color:#16a34a">Dr 1,800,000</span></div><div style="font-size:10px;color:#73726c">Invoice · 22 Jun 2025</div></div><div style="padding:8px 12px;border-bottom:1px solid rgba(31,30,29,.04)"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#141413">AWS Infrastructure</span><span style="font-size:12px;font-family:monospace;color:#dc2626">Cr 890,000</span></div><div style="font-size:10px;color:#73726c">Bill · 30 Nov 2025</div></div><div style="padding:8px 12px"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#141413">Implementation — StanChart</span><span style="font-size:12px;font-family:monospace;color:#16a34a">Dr 480,000</span></div><div style="font-size:10px;color:#73726c">Invoice · 10 Oct 2025</div></div>`}
+function renderAnomalies(){return`<div class="finding"><span class="sev sev-crit">CRITICAL</span><div><div class="finding-text">Unusual <strong>$890K</strong> Software Subscriptions in Nov 2025</div><div style="font-size:11px;color:#73726c">3.2x monthly average — investigate AWS bulk payment</div></div></div><div class="finding"><span class="sev sev-high">HIGH</span><div><div class="finding-text">Revenue recognition: <strong>$1.2M</strong> License Fee single day</div><div style="font-size:11px;color:#73726c">Dec 28, 2025 — unusual year-end timing</div></div></div><div class="finding"><span class="sev sev-med">MEDIUM</span><div><div class="finding-text">Duplicate contractor payment — TechCorp Solutions</div><div style="font-size:11px;color:#73726c">$45,200 on Sep 28 and Sep 29</div></div></div><div class="finding"><span class="sev sev-low">LOW</span><div><div class="finding-text">GST rounding discrepancy</div><div style="font-size:11px;color:#73726c">$12.40 variance in output tax</div></div></div><div class="insight-box"><strong>Action:</strong> Verify Nov AWS payment ($890K) — 3.2x average, possible billing error.</div>`}
+function renderGenericArt(id){return`<div class="art-head"><span class="a-icon">✦</span><span class="a-title">Intelligence Analysis</span>${ring(72,40)}</div><div class="art-tabs"><button class="art-tab active">Summary</button><button class="art-tab">Findings</button><button class="art-tab">Actions</button></div><div class="art-body"><div class="stat-grid"><div class="stat-card"><div class="sc-label">Signals</div><div class="sc-val blue">8</div></div><div class="stat-card"><div class="sc-label">Insights</div><div class="sc-val green">5</div></div><div class="stat-card"><div class="sc-label">Risks</div><div class="sc-val amber">3</div></div><div class="stat-card"><div class="sc-label">Actions</div><div class="sc-val purple">4</div></div></div><div class="insight-box"><strong>Key:</strong> Engineering velocity decline → delayed implementations → revenue delay → cash flow pressure.</div></div>`}
+
+// ═══ RENDERING ═══
+function renderCmds(){const c=getCmds(),s=document.getElementById('cmd-scroll'),total=c.reduce((n,g)=>n+g.items.length,0);document.getElementById('cmd-title').textContent={seaas:'SE-aaS Commands',aas:'AAAS Commands',general:'Intelligence'}[svc];let h='';for(const g of c){h+=`<div class="cmd-cat">${g.cat}</div>`;for(const i of g.items)h+=`<div class="cmd-item${selCmd===i.id?' sel':''}" onclick="clickCmd('${i.id}')"><span class="cmd-emoji">${i.e}</span><div><div class="cmd-label">${i.l}</div><div class="cmd-desc">${i.d}</div></div></div>`;}s.innerHTML=h;}
+function renderChat(){const a=document.getElementById('chat-area');if(!msgs.length){const l={seaas:'SE-aaS Engineering Intelligence',aas:'AAAS Accounting Intelligence',general:'Intelligence Copilot'}[svc];a.innerHTML=`<div class="chat-welcome"><div class="cw-spark">✦</div><h4>How can I help you today?</h4></div>`;return;}let h='<div class="chat-inner">';for(const m of msgs){if(m.t==='badge')h+=`<div class="new-chat-badge">✦ New conversation</div>`;else if(m.t==='typing')h+=`<div class="typing"><span></span><span></span><span></span></div>`;else if(m.r==='user')h+=`<div class="msg-user"><div class="msg-user-text">${m.c}</div></div>`;else h+=`<div class="msg-asst"><div class="msg-asst-text">${m.c}${m.art?`<div class="msg-art-link" onclick="renderArt('${m.art}')">✦ View Artifact →</div>`:''}</div></div>`;}h+='</div>';a.innerHTML=h;a.scrollTop=a.scrollHeight;}
+function renderHist(){const l=document.getElementById('hist-list');if(!hist.length){l.innerHTML='<div style="padding:4px 10px;font-size:11px;color:#73726c">No previous chats</div>';return;}l.innerHTML=hist.slice(-5).reverse().map(h=>`<div class="hist-item">${h}</div>`).join('');}
+
+// ═══ ACTIONS ═══
+function setService(s){svc=s;selCmd=null;msgs=[];artTabState={};document.querySelectorAll('.svc-tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+s).classList.add('active');renderCmds();renderChat();document.getElementById('art-wrap').innerHTML='<div class="art-empty"><div class="ae-icon">✦</div><h4>No artifact yet</h4><p>Click a command to see results</p></div>';renderHist();}
+function clickCmd(id){let cmd;for(const g of getCmds())for(const i of g.items)if(i.id===id)cmd=i;if(!cmd)return;if(msgs.length>1){const f=msgs.find(m=>m.r==='user');hist.push(f?f.c.slice(0,40)+'...':'Untitled');}selCmd=id;msgs=[{t:'badge'},{r:'user',c:cmd.p},{t:'typing'}];renderCmds();renderChat();renderHist();setTimeout(()=>{const r=RESP[id]||{sum:'Analysis complete.',art:'general'};msgs.pop();msgs.push({r:'asst',c:r.sum,art:r.art||id});renderChat();renderArt(r.art||id);},800);}
+function newChat(){if(msgs.length>1){const f=msgs.find(m=>m.r==='user');hist.push(f?f.c.slice(0,40)+'...':'Untitled');}selCmd=null;msgs=[];artTabState={};renderCmds();renderChat();renderHist();document.getElementById('art-wrap').innerHTML='<div class="art-empty"><div class="ae-icon">✦</div><h4>No artifact yet</h4><p>Click a command to see results</p></div>';}
+function sendChat(){const inp=document.getElementById('chat-input'),txt=inp.value.trim();if(!txt)return;inp.value='';if(!msgs.length)msgs.push({t:'badge'});msgs.push({r:'user',c:txt},{t:'typing'});renderChat();setTimeout(()=>{msgs.pop();msgs.push({r:'asst',c:'I\'ve analyzed your request across the intelligence graph. Several patterns and insights correlate with your query.'});renderChat();},600);}
+function toggleHist(){histOpen=!histOpen;document.getElementById('hist-section').classList.toggle('open',histOpen);}
+function toggleOrg(){/* could add org menu */}
+
+renderCmds();renderChat();renderHist();
+</script>
+</body>
+</html>

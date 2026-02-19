@@ -6,15 +6,14 @@ import { CopilotChat } from "@/components/copilot/CopilotChat";
 import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/CopilotChat";
 import { ArtifactPane } from "@/components/copilot/ArtifactPane";
 import { ConversationSidebar } from "@/components/copilot/ConversationSidebar";
-import { ServiceContextPane } from "@/components/copilot/ServiceContextPane";
+// ServiceContextPane removed — replaced with simple empty state matching HTML prototype
 import { useConversations } from "@/lib/use-conversations";
 import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/utils";
-import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
-import { AAS_COMMANDS } from "@/components/copilot/aas-commands";
+// DOMAIN_CATALOGUE / AAS_COMMANDS removed — no longer needed since ServiceContextPane was replaced
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -23,23 +22,23 @@ type ServiceMode = "general" | "aas" | "seaas";
 const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color: string; alwaysVisible: boolean }[] = [
   {
     id: "general",
-    label: "Copilot",
+    label: "General",
     description: "Your intelligence co-pilot — every answer grounded in evidence-based analysis",
     color: "accent",
     alwaysVisible: true,
-  },
-  {
-    id: "aas",
-    label: "AAAS",
-    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
-    color: "emerald",
-    alwaysVisible: false, // Only if enabled for this org
   },
   {
     id: "seaas",
     label: "SE-aaS",
     description: "Your AI software engineer — branch-scoped code intelligence, PR review, impact analysis, and cross-release risk assessment",
     color: "blue",
+    alwaysVisible: false, // Only if enabled for this org
+  },
+  {
+    id: "aas",
+    label: "AAAS",
+    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
+    color: "emerald",
     alwaysVisible: false, // Only if enabled for this org
   },
 ];
@@ -90,7 +89,7 @@ function CopilotPageInner() {
   const searchParams = useSearchParams();
 
   // ── Service mode ──────────────────────────────────────────────────────────
-  const [activeService, setActiveService] = useState<ServiceMode>("general");
+  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
   const persona = SERVICE_PERSONAS[activeService];
 
   // For now, enable all service tabs (in future: read from org settings/capabilities)
@@ -104,8 +103,7 @@ function CopilotPageInner() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
 
-  // Always show right pane (either artifacts or context)
-  const rightPaneVisible = true;
+  // Right pane always visible (artifacts or empty state)
 
   // ── Artifact state ────────────────────────────────────────────────────────
   const [artifacts, setArtifacts] = useState<UnifiedArtifact[]>([]);
@@ -184,22 +182,91 @@ function CopilotPageInner() {
     const isSeaas = result.service === "seaas" || isDelivery; // delivery-intelligence IS part of SE-aaS
     const artifactId = `domain-${Date.now()}`;
     const svc: "aas" | "seaas" | "general" = isAAS ? "aas" : isSeaas ? "seaas" : "general";
+
+    // Resolve the specific domain type from _domainType field (works for ALL services)
+    const rawData = result.data as unknown as Record<string, unknown>;
+    const embeddedDomainType = (rawData?._domainType as string) || undefined;
+
+    // For delivery-intelligence, fall back to "delivery-intelligence" if no _domainType
+    const resolvedDomainId = embeddedDomainType
+      || (isDelivery ? "delivery-intelligence" : undefined)
+      || (isAAS ? (rawData?._commandId as string) : undefined);
+
+    // Map domain IDs to human-readable titles for ALL 31 commands
+    const DOMAIN_TITLES: Record<string, string> = {
+      // P0 Delivery
+      "early-warning": "Early Warning — Velocity",
+      "delivery-intelligence": "Delivery Intelligence",
+      "pod-match": "Pod Match",
+      "scope-creep": "Scope Creep Alerts",
+      // P1 Code
+      "pr-review": "PR Review",
+      "tdd": "TDD — Test Suite",
+      "boilerplate-scaffold": "Scaffolding",
+      "dependency-upgrade": "Dependency Audit",
+      "design-doc-generator": "HLD / LLD",
+      // Test
+      "test-case-generator": "Test Cases",
+      "test-data-generator": "Test Data",
+      // SWE Codebase
+      "codebase-qa": "Codebase Q&A",
+      "dead-code-detector": "Dead Code",
+      "impact-analysis": "Impact Analysis",
+      "architecture-extractor": "Architecture",
+      // Observability
+      "incident-diagnosis": "Incident RCA",
+      "log-query": "Log Analysis",
+      "performance-profiler": "Performance Profile",
+      // Data
+      "sql-analyzer": "SQL Analysis",
+      "data-lineage": "Data Lineage",
+      // AAS
+      "aas-pl": "Profit & Loss",
+      "aas-balance": "Balance Sheet",
+      "aas-trial": "Trial Balance",
+      "aas-gst": "GST Return",
+      "aas-anomaly": "Anomaly Detection",
+      "aas-transactions": "Transactions",
+      "aas-benchmark": "SaaS Benchmark",
+      // General
+      "causal": "Causal Analysis",
+      "anomaly-gen": "Anomaly Detection",
+      "intel-report": "Intelligence Report",
+      "predict": "Prediction",
+    };
+
+    const title = resolvedDomainId
+      ? (DOMAIN_TITLES[resolvedDomainId] ?? (isAAS ? "Financial Statement" : "Engineering Analysis"))
+      : (isAAS ? "Financial Statement" : isDelivery ? "Delivery Intelligence" : "Engineering Analysis");
+
     const newArtifact: UnifiedArtifact = {
       id: artifactId,
       type: isAAS ? "financial-statement" : "engineering-analysis",
-      title: isAAS ? "Financial Statement" : isDelivery ? "Delivery Intelligence" : "Engineering Analysis",
+      title,
       content: JSON.stringify(result.data, null, 2),
       rawData: result.data,
       createdAt: Date.now(),
       service: svc,
-      // Tag delivery-intelligence so we can route to the right panel
-      domainId: isDelivery ? "delivery-intelligence" : undefined,
+      // Preserve domain ID for ALL commands — enables specific renderer routing
+      domainId: resolvedDomainId,
       pinned: false,
     };
     setArtifacts((prev) => [...prev, newArtifact]);
     setActiveArtifactId(artifactId);
     setArtifactPaneOpen(true);
 
+    // Link artifact to its source chat message (so "View Artifact →" link appears in chat)
+    if (result.messageIndex !== undefined) {
+      setMessageArtifactMap((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(result.messageIndex!) || [];
+        next.set(result.messageIndex!, [...existing, { id: artifactId, type: newArtifact.type, title: newArtifact.title }]);
+        return next;
+      });
+    }
+
+    // Persist artifact with the specific domain type
+    const persistDomainType = resolvedDomainId || (isAAS ? "aas-financial" : (result.data as any)?.domainType || "seaas-analysis");
     if (activeConversationId && currentOrg?.id) {
       fetch("/api/se-aas/artifacts", {
         method: "POST",
@@ -207,7 +274,7 @@ function CopilotPageInner() {
         body: JSON.stringify({
           organizationId: currentOrg.id,
           conversationId: activeConversationId,
-          domainType: newArtifact.domainId || (isAAS ? "aas-financial" : "seaas-analysis"),
+          domainType: persistDomainType,
           title: newArtifact.title,
           resultData: result.data,
         }),
@@ -226,6 +293,11 @@ function CopilotPageInner() {
       prev.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a))
     );
   }, []);
+
+  // ── Broadcast service mode to sidebar commands ──────────────────────────
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: activeService }));
+  }, [activeService]);
 
   // ── Service mode switch ───────────────────────────────────────────────────
   const handleServiceChange = useCallback((svc: ServiceMode) => {
@@ -411,7 +483,7 @@ function CopilotPageInner() {
           </ErrorBoundary>
         </div>
 
-        {/* ── Right: Artifact Pane OR Context Pane ─────────────────────── */}
+        {/* ── Right: Artifact Pane OR Empty state ─────────────────────── */}
         {artifactPaneOpen && artifacts.length > 0 ? (
           <ArtifactPane
             open={artifactPaneOpen}
@@ -422,27 +494,34 @@ function CopilotPageInner() {
             onClose={() => setArtifactPaneOpen(false)}
           />
         ) : (
-          <ServiceContextPane
-            activeService={activeService}
-            onOpenArtifact={(type) => {
-              // Look up prompt from the catalogues
-              const GENERAL_PROMPTS: Record<string, string> = {
-                "causal-analysis": "Run a causal analysis across my organization",
-                "anomaly-report": "What anomalies were detected today?",
-                "intelligence-report": "Give me the full intelligence report",
-                "prediction": "Forecast key business metrics for the next quarter",
-              };
-              const domainEntry = DOMAIN_CATALOGUE.find((d) => d.id === type);
-              const aasEntry = AAS_COMMANDS.find((c) => c.id === type);
-              const prompt = domainEntry?.copilotPrompt || aasEntry?.prompt || GENERAL_PROMPTS[type];
-              if (prompt) {
-                // Auto-submit: inject AND run the prompt immediately
-                window.dispatchEvent(
-                  new CustomEvent("copilot-inject-and-submit", { detail: prompt })
-                );
-              }
+          /* Empty artifact state — matches HTML .art-col > .art-empty */
+          <div
+            style={{
+              width: 440,
+              flexShrink: 0,
+              background: "#fff",
+              borderLeft: "1px solid rgba(31,30,29,.1)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
-          />
+          >
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                color: "#73726c",
+              }}
+            >
+              <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.4 }}>✦</div>
+              <h4 style={{ fontSize: 14, fontWeight: 500, color: "#73726c" }}>No artifact yet</h4>
+              <p style={{ fontSize: 12, color: "rgba(115,114,108,.6)", marginTop: 4 }}>Click a command to see results</p>
+            </div>
+          </div>
         )}
       </div>
 

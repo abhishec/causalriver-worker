@@ -5,13 +5,14 @@ import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
 import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
 import { DomainResultRenderer } from "@/components/copilot/DomainResultRenderer";
+import { AgentExecutionCard } from "@/components/copilot/AgentExecutionCard";
 import { useTheme } from "@/lib/theme-context";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface Artifact {
   id: string;
-  type: "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram";
+  type: "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram" | "agent-execution";
   title: string;
   language?: string;
   content: string;
@@ -24,7 +25,7 @@ export interface Artifact {
   /** Source message index in the conversation */
   messageIndex?: number;
   /** Which service produced this artifact */
-  service?: "general" | "aas" | "seaas";
+  service?: "general" | "aas" | "seaas" | "agent";
   /** Domain ID (e.g. "pr-review", "balance-sheet") */
   domainId?: string;
 }
@@ -192,6 +193,12 @@ function ArtifactTypeIcon({ type }: { type: Artifact["type"] }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
         </svg>
       );
+    case "agent-execution":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+        </svg>
+      );
     case "table":
       return (
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -288,6 +295,7 @@ const SERVICE_COLORS: Record<string, string> = {
   aas: "bg-emerald-500/10 text-emerald-500",
   seaas: "bg-blue-500/10 text-blue-500",
   general: "bg-accent/10 text-accent",
+  agent: "bg-purple-500/10 text-purple-500",
 };
 
 // ─── Artifacts Panel Component ──────────────────────────────────────────────
@@ -468,7 +476,27 @@ export function ArtifactsPanel({
 
           {/* Code / Chart / Domain / Content viewer */}
           <div className="flex-1 overflow-auto">
-            {activeArtifact.type === "chart" ? (
+            {activeArtifact.type === "agent-execution" ? (
+              <div className="p-4 overflow-auto h-full">
+                <AgentExecutionCard
+                  data={(() => {
+                    try {
+                      return typeof activeArtifact.rawData === "object" && activeArtifact.rawData
+                        ? activeArtifact.rawData as any
+                        : JSON.parse(activeArtifact.content);
+                    } catch {
+                      return {
+                        taskId: activeArtifact.id,
+                        agentType: "Agent",
+                        status: "completed" as const,
+                        steps: [],
+                        summary: activeArtifact.content,
+                      };
+                    }
+                  })()}
+                />
+              </div>
+            ) : activeArtifact.type === "chart" ? (
               (() => {
                 const spec = parseChartSpec(activeArtifact.content);
                 return spec ? (
@@ -480,12 +508,13 @@ export function ArtifactsPanel({
                 );
               })()
             ) : activeArtifact.type === "financial-statement" || activeArtifact.type === "engineering-analysis" ? (
-              <div className="p-4 overflow-auto">
+              <div className="h-full overflow-hidden">
                 <DomainResultRenderer
+                  domainId={activeArtifact.domainId}
                   result={
                     activeArtifact.service === "aas"
                       ? { service: "aas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
-                      : activeArtifact.domainId === "delivery-intelligence"
+                      : activeArtifact.domainId
                         ? { service: "delivery-intelligence" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
                         : { service: "seaas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
                   }
@@ -568,7 +597,7 @@ export function ArtifactsPanel({
                   <div className="flex items-center gap-2 text-[10px] text-muted">
                     {artifact.service && artifact.service !== "general" && (
                       <span className={cn("px-1 py-0.5 rounded text-[9px] font-medium", SERVICE_COLORS[artifact.service])}>
-                        {artifact.service === "aas" ? "AAS" : "SE-aaS"}
+                        {artifact.service === "aas" ? "AAS" : artifact.service === "agent" ? "Agent" : "SE-aaS"}
                       </span>
                     )}
                     {artifact.language && (

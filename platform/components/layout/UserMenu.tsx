@@ -154,7 +154,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           <>
             <div className="flex-1 min-w-0 text-left">
               <div className="text-[13px] font-medium truncate text-foreground">{displayName}</div>
-              <div className="text-[11px] text-muted truncate">{planLabel}</div>
+              <div className="text-[11px] text-muted truncate">{currentOrg.customer_name || currentOrg.name}</div>
             </div>
             {/* Chevron up/down */}
             <svg className="w-4 h-4 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -186,28 +186,37 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
 
             <div className="h-px bg-border-subtle mx-2 my-1" />
 
-            {/* ── Org list ──────────────────────────────────────────────── */}
-            <div className="px-1 py-1">
-              {Array.from(customerGroups.entries()).map(([, memberships]) => (
-                memberships.map((m) => (
-                  <OrgRow
-                    key={m.organization_id}
-                    membership={m}
-                    isActive={m.organization_id === currentOrg.id}
-                    onSelect={() => {
-                      setOpen(false);
-                      if (m.organization_id !== currentOrg.id) {
-                        switchOrg(m.organization_id);
-                      }
-                    }}
-                  />
-                ))
+            {/* ── Org list — grouped by customer ──────────────────────── */}
+            <div className="px-1 py-1 max-h-[40vh] overflow-y-auto">
+              {Array.from(customerGroups.entries()).map(([customerName, memberships]) => (
+                <div key={customerName}>
+                  {/* Customer group header */}
+                  <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70 mt-1 first:mt-0">
+                    {customerName}
+                  </div>
+                  {memberships.map((m) => (
+                    <OrgRow
+                      key={m.organization_id}
+                      membership={m}
+                      isActive={m.organization_id === currentOrg.id}
+                      onSelect={() => {
+                        setOpen(false);
+                        if (m.organization_id !== currentOrg.id) {
+                          switchOrg(m.organization_id);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
               ))}
 
               {/* Core brain (platform admins) */}
               {coreOrgs.length > 0 && (
                 <>
                   <div className="h-px bg-border-subtle mx-2 my-1" />
+                  <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+                    Core Brain
+                  </div>
                   {coreOrgs.map((m) => (
                     <OrgRow
                       key={m.organization_id}
@@ -222,6 +231,32 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                     />
                   ))}
                 </>
+              )}
+
+              {/* ── Create New Organization ─────────────────────────── */}
+              <div className="h-px bg-border-subtle mx-2 my-1" />
+              <Link
+                href="/settings?tab=general&action=create-org"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] text-accent hover:bg-accent/8 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span className="font-medium">Create Organization</span>
+              </Link>
+
+              {isPlatformAdmin && (
+                <Link
+                  href="/admin/orgs"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                  </svg>
+                  <span>Manage All Organizations</span>
+                </Link>
               )}
             </div>
 

@@ -22,7 +22,7 @@ export function ArtifactPane({
   onClose,
   onPinArtifact,
 }: ArtifactPaneProps) {
-  const [width, setWidth] = useState(480);
+  const [width, setWidth] = useState(440);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);

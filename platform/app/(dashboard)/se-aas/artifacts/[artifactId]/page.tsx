@@ -25,23 +25,44 @@ export const dynamic = "force-dynamic";
 // ── Domain metadata ───────────────────────────────────────────────────────
 
 const DOMAIN_META: Record<string, { label: string; icon: string; colorClass: string; bgClass: string; ringClass: string }> = {
-  "early-warning":        { label: "Early Warning",   icon: "⚡", colorClass: "text-red-400",    bgClass: "bg-red-500/8",    ringClass: "border-red-500/25" },
-  "pr-review":            { label: "PR Review",        icon: "🔍", colorClass: "text-blue-400",   bgClass: "bg-blue-500/8",   ringClass: "border-blue-500/25" },
-  "tdd":                  { label: "TDD Agent",         icon: "🧪", colorClass: "text-green-400",  bgClass: "bg-green-500/8",  ringClass: "border-green-500/25" },
-  "boilerplate-scaffold": { label: "Scaffolding",      icon: "🏗️", colorClass: "text-purple-400", bgClass: "bg-purple-500/8", ringClass: "border-purple-500/25" },
-  "dependency-upgrade":   { label: "Dep Upgrade",      icon: "📦", colorClass: "text-orange-400", bgClass: "bg-orange-500/8", ringClass: "border-orange-500/25" },
-  "design-doc-generator": { label: "HLD / LLD",        icon: "📐", colorClass: "text-cyan-400",   bgClass: "bg-cyan-500/8",   ringClass: "border-cyan-500/25" },
-  "test-case-generator":  { label: "Test Cases",       icon: "✅", colorClass: "text-emerald-400",bgClass: "bg-emerald-500/8",ringClass: "border-emerald-500/25" },
-  "test-data-generator":  { label: "Test Data",        icon: "🎲", colorClass: "text-teal-400",   bgClass: "bg-teal-500/8",   ringClass: "border-teal-500/25" },
-  "codebase-qa":          { label: "Codebase Q&A",     icon: "💬", colorClass: "text-violet-400", bgClass: "bg-violet-500/8", ringClass: "border-violet-500/25" },
-  "dead-code-detector":   { label: "Dead Code",        icon: "🧹", colorClass: "text-gray-400",   bgClass: "bg-gray-500/8",   ringClass: "border-gray-500/25" },
-  "impact-analysis":      { label: "Impact Analysis",  icon: "💥", colorClass: "text-red-400",    bgClass: "bg-red-500/8",    ringClass: "border-red-500/25" },
-  "incident-diagnosis":   { label: "Incident RCA",     icon: "🚨", colorClass: "text-pink-400",   bgClass: "bg-pink-500/8",   ringClass: "border-pink-500/25" },
-  "log-query":            { label: "Log Query",         icon: "📋", colorClass: "text-yellow-400", bgClass: "bg-yellow-500/8", ringClass: "border-yellow-500/25" },
-  "performance-profiler": { label: "Perf Profiler",    icon: "⚡", colorClass: "text-amber-400",  bgClass: "bg-amber-500/8",  ringClass: "border-amber-500/25" },
-  "sql-analyzer":         { label: "SQL Analyzer",     icon: "🗄️", colorClass: "text-blue-400",   bgClass: "bg-blue-500/8",   ringClass: "border-blue-500/25" },
-  "data-lineage":         { label: "Data Lineage",     icon: "🔗", colorClass: "text-indigo-400", bgClass: "bg-indigo-500/8", ringClass: "border-indigo-500/25" },
-  "architecture-extractor":  { label: "Architecture",    icon: "🏛️", colorClass: "text-sky-400",   bgClass: "bg-sky-500/8",   ringClass: "border-sky-500/25" },
+  // P0 — Delivery Intelligence
+  "early-warning":        { label: "Early Warning",          icon: "⚡", colorClass: "text-red-400",     bgClass: "bg-red-500/8",     ringClass: "border-red-500/25" },
+  "delivery-intelligence":{ label: "Engagement Health",      icon: "💊", colorClass: "text-emerald-400", bgClass: "bg-emerald-500/8", ringClass: "border-emerald-500/25" },
+  "pod-match":            { label: "Pod Match",              icon: "🎯", colorClass: "text-cyan-400",    bgClass: "bg-cyan-500/8",    ringClass: "border-cyan-500/25" },
+  "scope-creep":          { label: "Scope Creep",            icon: "📏", colorClass: "text-yellow-400",  bgClass: "bg-yellow-500/8",  ringClass: "border-yellow-500/25" },
+  // P1 — Code Intelligence
+  "pr-review":            { label: "PR Review",              icon: "🔍", colorClass: "text-blue-400",    bgClass: "bg-blue-500/8",    ringClass: "border-blue-500/25" },
+  "tdd":                  { label: "TDD Agent",              icon: "🧪", colorClass: "text-green-400",   bgClass: "bg-green-500/8",   ringClass: "border-green-500/25" },
+  "boilerplate-scaffold": { label: "Scaffolding",            icon: "🏗️", colorClass: "text-purple-400",  bgClass: "bg-purple-500/8",  ringClass: "border-purple-500/25" },
+  "dependency-upgrade":   { label: "Dep Upgrade",            icon: "📦", colorClass: "text-orange-400",  bgClass: "bg-orange-500/8",  ringClass: "border-orange-500/25" },
+  "design-doc-generator": { label: "HLD / LLD",              icon: "📐", colorClass: "text-cyan-400",    bgClass: "bg-cyan-500/8",    ringClass: "border-cyan-500/25" },
+  "test-case-generator":  { label: "Test Cases",             icon: "✅", colorClass: "text-emerald-400", bgClass: "bg-emerald-500/8", ringClass: "border-emerald-500/25" },
+  "test-data-generator":  { label: "Test Data",              icon: "🎲", colorClass: "text-teal-400",    bgClass: "bg-teal-500/8",    ringClass: "border-teal-500/25" },
+  "codebase-qa":          { label: "Codebase Q&A",           icon: "💬", colorClass: "text-violet-400",  bgClass: "bg-violet-500/8",  ringClass: "border-violet-500/25" },
+  "dead-code-detector":   { label: "Dead Code",              icon: "🧹", colorClass: "text-gray-400",    bgClass: "bg-gray-500/8",    ringClass: "border-gray-500/25" },
+  "impact-analysis":      { label: "Impact Analysis",        icon: "💥", colorClass: "text-red-400",     bgClass: "bg-red-500/8",     ringClass: "border-red-500/25" },
+  "incident-diagnosis":   { label: "Incident RCA",           icon: "🚨", colorClass: "text-pink-400",    bgClass: "bg-pink-500/8",    ringClass: "border-pink-500/25" },
+  "log-query":            { label: "Log Query",              icon: "📋", colorClass: "text-yellow-400",  bgClass: "bg-yellow-500/8",  ringClass: "border-yellow-500/25" },
+  "performance-profiler": { label: "Perf Profiler",          icon: "⚡", colorClass: "text-amber-400",   bgClass: "bg-amber-500/8",   ringClass: "border-amber-500/25" },
+  "sql-analyzer":         { label: "SQL Analyzer",           icon: "🗄️", colorClass: "text-blue-400",    bgClass: "bg-blue-500/8",    ringClass: "border-blue-500/25" },
+  "data-lineage":         { label: "Data Lineage",           icon: "🔗", colorClass: "text-indigo-400",  bgClass: "bg-indigo-500/8",  ringClass: "border-indigo-500/25" },
+  "architecture-extractor":{ label: "Architecture",          icon: "🏛️", colorClass: "text-sky-400",     bgClass: "bg-sky-500/8",     ringClass: "border-sky-500/25" },
+  // AAAS — Accounting Intelligence
+  "aas-bookkeep":         { label: "Bookkeeper",             icon: "📒", colorClass: "text-emerald-400", bgClass: "bg-emerald-500/8", ringClass: "border-emerald-500/25" },
+  "aas-reconcile":        { label: "Reconciler",             icon: "⚖️",  colorClass: "text-blue-400",    bgClass: "bg-blue-500/8",    ringClass: "border-blue-500/25" },
+  "aas-statements":       { label: "Financial Statements",   icon: "📊", colorClass: "text-violet-400",  bgClass: "bg-violet-500/8",  ringClass: "border-violet-500/25" },
+  "aas-tax":              { label: "Tax Compliance",          icon: "🏛️", colorClass: "text-orange-400",  bgClass: "bg-orange-500/8",  ringClass: "border-orange-500/25" },
+  "aas-audit":            { label: "Audit Preparer",          icon: "🔎", colorClass: "text-pink-400",    bgClass: "bg-pink-500/8",    ringClass: "border-pink-500/25" },
+  "aas-anomaly":          { label: "Anomaly Detective",       icon: "🔮", colorClass: "text-red-400",     bgClass: "bg-red-500/8",     ringClass: "border-red-500/25" },
+  "aas-causal-analysis":  { label: "Causal Analysis",         icon: "🧠", colorClass: "text-indigo-400",  bgClass: "bg-indigo-500/8",  ringClass: "border-indigo-500/25" },
+  "aas-full":             { label: "Full Financial Report",   icon: "📊", colorClass: "text-violet-400",  bgClass: "bg-violet-500/8",  ringClass: "border-violet-500/25" },
+  "aas-financial":        { label: "Financial Analysis",      icon: "📊", colorClass: "text-violet-400",  bgClass: "bg-violet-500/8",  ringClass: "border-violet-500/25" },
+  // AAAS — Slash command IDs (map to same Financial Statements renderer)
+  "aas-pl":               { label: "Profit & Loss",           icon: "📊", colorClass: "text-violet-400",  bgClass: "bg-violet-500/8",  ringClass: "border-violet-500/25" },
+  "aas-balance":          { label: "Balance Sheet",           icon: "⚖️",  colorClass: "text-blue-400",    bgClass: "bg-blue-500/8",    ringClass: "border-blue-500/25" },
+  "aas-trial":            { label: "Trial Balance",           icon: "📋", colorClass: "text-cyan-400",    bgClass: "bg-cyan-500/8",    ringClass: "border-cyan-500/25" },
+  "aas-gst":              { label: "GST F5 Review",           icon: "🏛️", colorClass: "text-orange-400",  bgClass: "bg-orange-500/8",  ringClass: "border-orange-500/25" },
+  "aas-transactions":     { label: "Transactions",            icon: "💳", colorClass: "text-teal-400",    bgClass: "bg-teal-500/8",    ringClass: "border-teal-500/25" },
 };
 
 // ── Severity helper ───────────────────────────────────────────────────────
@@ -1402,10 +1423,909 @@ function SectionCard({
   );
 }
 
+// ── AAAS: Bookkeeper — Journal Entries & GL Classification ───────────────
+
+function BookkeeperRenderer({ data }: { data: Record<string, any> }) {
+  const journalEntries = (data.journalEntries as Array<Record<string, any>> | undefined)
+    ?? (data.entries as Array<Record<string, any>> | undefined) ?? [];
+  const classifications = (data.classifications as Array<Record<string, any>> | undefined) ?? [];
+  const summary = data.summary ?? data.narrative ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={journalEntries.length} label="Journal Entries" accent={journalEntries.length > 0} />
+        <StatTile value={classifications.length} label="Classifications" />
+        <StatTile value={data.totalDebit ?? "—"} label="Total Debit" />
+        <StatTile value={data.totalCredit ?? "—"} label="Total Credit" />
+      </div>
+      {summary && (
+        <SectionCard title="Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {journalEntries.length > 0 && (
+        <SectionCard title={`Journal Entries (${journalEntries.length})`} padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {journalEntries.slice(0, 20).map((entry, i) => (
+              <div key={i} className="px-4 py-2.5 flex items-center gap-3 text-xs">
+                <span className="text-[10px] text-muted font-mono w-20 shrink-0">{entry.date ?? entry.created_at ?? "—"}</span>
+                <span className="flex-1 font-medium">{entry.description ?? entry.narration ?? entry.memo ?? "—"}</span>
+                <span className="text-muted shrink-0">{entry.account ?? entry.accountName ?? "—"}</span>
+                {entry.debit != null && <span className="text-green-400 tabular-nums w-20 text-right">{entry.debit}</span>}
+                {entry.credit != null && <span className="text-red-400 tabular-nums w-20 text-right">{entry.credit}</span>}
+              </div>
+            ))}
+            {journalEntries.length > 20 && (
+              <div className="px-4 py-2 text-xs text-muted">+ {journalEntries.length - 20} more entries</div>
+            )}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── AAAS: Reconciler ─────────────────────────────────────────────────────
+
+function ReconcilerRenderer({ data }: { data: Record<string, any> }) {
+  const matchedItems = (data.matchedItems as Array<Record<string, any>> | undefined)
+    ?? (data.matches as Array<Record<string, any>> | undefined) ?? [];
+  const unmatched = (data.unmatchedItems as Array<Record<string, any>> | undefined)
+    ?? (data.discrepancies as Array<Record<string, any>> | undefined) ?? [];
+  const summary = data.summary ?? data.narrative ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={matchedItems.length} label="Matched" accent={matchedItems.length > 0} />
+        <StatTile value={unmatched.length} label="Unmatched" danger={unmatched.length > 0} />
+        <StatTile value={data.matchRate != null ? `${Math.round(data.matchRate * 100)}%` : "—"} label="Match Rate" accent={(data.matchRate ?? 0) > 0.9} />
+        <StatTile value={data.variance ?? data.totalVariance ?? "—"} label="Total Variance" danger={(data.variance ?? 0) > 0} />
+      </div>
+      {summary && (
+        <SectionCard title="Reconciliation Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {unmatched.length > 0 && (
+        <SectionCard title={`Unmatched Items (${unmatched.length})`} padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {unmatched.slice(0, 15).map((item, i) => (
+              <div key={i} className="px-4 py-2.5">
+                <div className="flex items-center gap-2 mb-1">
+                  {severityBadge(item.severity ?? "warning")}
+                  <span className="text-xs font-medium">{item.description ?? item.reference ?? `Item ${i + 1}`}</span>
+                  <span className="ml-auto text-xs text-muted font-mono">{item.amount ?? "—"}</span>
+                </div>
+                {item.source && <p className="text-[10px] text-muted">Source: {item.source}</p>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── AAAS: Tax Compliance ─────────────────────────────────────────────────
+
+function TaxComplianceRenderer({ data }: { data: Record<string, any> }) {
+  const issues = (data.complianceIssues as Array<Record<string, any>> | undefined)
+    ?? (data.issues as Array<Record<string, any>> | undefined) ?? [];
+  const summary = data.summary ?? data.narrative ?? null;
+  const gstData = data.gstF5 ?? data.gst ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatTile value={issues.length} label="Compliance Issues" danger={issues.length > 0} />
+        <StatTile value={data.complianceScore != null ? `${data.complianceScore}%` : "—"} label="Compliance Score" accent={(data.complianceScore ?? 0) >= 90} />
+        <StatTile value={data.taxLiability ?? data.totalTax ?? "—"} label="Tax Liability" />
+      </div>
+      {summary && (
+        <SectionCard title="Tax Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {gstData && (
+        <SectionCard title="GST F5 Summary">
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            {Object.entries(gstData).filter(([k]) => typeof gstData[k] !== "object").map(([k, v]) => (
+              <div key={k} className="flex justify-between py-1 border-b border-border-subtle">
+                <span className="text-muted">{k.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}</span>
+                <span className="font-semibold tabular-nums">{String(v)}</span>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+      {issues.length > 0 && (
+        <SectionCard title="Compliance Issues" padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {issues.map((iss, i) => (
+              <div key={i} className="px-4 py-3">
+                <div className="flex items-center gap-2 mb-1">
+                  {severityBadge(iss.severity ?? "warning")}
+                  <span className="text-sm font-medium">{iss.title ?? iss.description ?? `Issue ${i + 1}`}</span>
+                </div>
+                {iss.detail && <p className="text-xs text-muted">{iss.detail}</p>}
+                {iss.recommendation && <p className="text-xs text-accent mt-1">Fix: {iss.recommendation}</p>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── AAAS: Audit Preparer ─────────────────────────────────────────────────
+
+function AuditRenderer({ data }: { data: Record<string, any> }) {
+  const workpapers = (data.workpapers as Array<Record<string, any>> | undefined)
+    ?? (data.auditItems as Array<Record<string, any>> | undefined) ?? [];
+  const controlTests = (data.controlTests as Array<Record<string, any>> | undefined) ?? [];
+  const summary = data.summary ?? data.narrative ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatTile value={workpapers.length} label="Workpapers" accent={workpapers.length > 0} />
+        <StatTile value={controlTests.length} label="Control Tests" />
+        <StatTile value={data.readinessScore != null ? `${data.readinessScore}%` : "—"} label="Audit Readiness" accent={(data.readinessScore ?? 0) >= 80} />
+      </div>
+      {summary && (
+        <SectionCard title="Audit Preparation Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {workpapers.length > 0 && (
+        <SectionCard title={`Workpapers (${workpapers.length})`} padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {workpapers.slice(0, 15).map((wp, i) => (
+              <div key={i} className="px-4 py-2.5">
+                <div className="text-xs font-medium">{wp.title ?? wp.name ?? `Workpaper ${i + 1}`}</div>
+                {wp.area && <Badge variant="default" size="xs" className="mt-1">{wp.area}</Badge>}
+                {wp.status && <span className={`text-[10px] ml-2 ${wp.status === "complete" ? "text-success" : "text-warning"}`}>{wp.status}</span>}
+                {wp.description && <p className="text-xs text-muted mt-0.5">{wp.description}</p>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── AAAS: Anomaly Detective ──────────────────────────────────────────────
+
+function AnomalyRenderer({ data }: { data: Record<string, any> }) {
+  const anomalies = (data.anomalies as Array<Record<string, any>> | undefined)
+    ?? (data.items as Array<Record<string, any>> | undefined) ?? [];
+  const benfords = data.benfordsResult ?? data.benfordsLaw ?? null;
+  const summary = data.summary ?? data.narrative ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatTile value={anomalies.length} label="Anomalies Found" danger={anomalies.length > 3} />
+        <StatTile value={anomalies.filter((a: any) => (a.severity ?? "").toLowerCase() === "critical").length} label="Critical" danger />
+        <StatTile value={benfords ? (benfords.passes ? "Pass" : "Fail") : "—"} label="Benford's Law" danger={benfords && !benfords.passes} />
+      </div>
+      {summary && (
+        <SectionCard title="Anomaly Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {benfords && !benfords.passes && (
+        <div className="rounded-xl border border-danger/30 bg-danger/5 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-base">🔮</span>
+            <span className="text-sm font-semibold text-danger">Benford&apos;s Law Deviation</span>
+          </div>
+          <p className="text-xs text-muted">{benfords.explanation ?? "First-digit distribution deviates significantly from expected Benford's Law pattern, suggesting potential irregularities."}</p>
+        </div>
+      )}
+      {anomalies.length > 0 && (
+        <SectionCard title={`Anomalies (${anomalies.length})`} padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {anomalies.map((a, i) => (
+              <div key={i} className="px-4 py-3">
+                <div className="flex items-center gap-2 mb-1">
+                  {severityBadge(a.severity ?? "warning")}
+                  <span className="text-sm font-medium">{a.title ?? a.description ?? `Anomaly ${i + 1}`}</span>
+                  {a.amount != null && <span className="ml-auto text-xs font-mono text-muted">{a.amount}</span>}
+                </div>
+                {a.detail && <p className="text-xs text-muted">{a.detail}</p>}
+                {a.account && <p className="text-[10px] text-muted">Account: {a.account}</p>}
+                {a.explanation && <p className="text-xs text-accent mt-1">{a.explanation}</p>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── AAAS: Financial Statements ───────────────────────────────────────────
+
+function FinancialStatementsRenderer({ data }: { data: Record<string, any> }) {
+  const pl = data.profitAndLoss ?? null;
+  const bs = data.balanceSheet ?? null;
+  const tb = data.trialBalance ?? null;
+  const summary = data.summary ?? data.narrative ?? null;
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {pl?.totalRevenue != null && <StatTile value={pl.totalRevenue} label="Revenue" accent />}
+        {pl?.netIncome != null && <StatTile value={pl.netIncome} label="Net Income" accent={(pl.netIncome ?? 0) > 0} danger={(pl.netIncome ?? 0) < 0} />}
+        {bs?.totalAssets != null && <StatTile value={bs.totalAssets} label="Total Assets" />}
+        {bs?.totalLiabilities != null && <StatTile value={bs.totalLiabilities} label="Total Liabilities" />}
+      </div>
+      {summary && (
+        <SectionCard title="Financial Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{summary}</p>
+        </SectionCard>
+      )}
+      {pl && (
+        <SectionCard title="Profit & Loss">
+          <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed overflow-auto max-h-80">
+            {typeof pl === "string" ? pl : JSON.stringify(pl, null, 2)}
+          </pre>
+        </SectionCard>
+      )}
+      {bs && (
+        <SectionCard title="Balance Sheet">
+          <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed overflow-auto max-h-80">
+            {typeof bs === "string" ? bs : JSON.stringify(bs, null, 2)}
+          </pre>
+        </SectionCard>
+      )}
+      {tb && (
+        <SectionCard title="Trial Balance">
+          <pre className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed overflow-auto max-h-80">
+            {typeof tb === "string" ? tb : JSON.stringify(tb, null, 2)}
+          </pre>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── P0: Early Warning — Velocity Collapse + Bottleneck Concentration ─────
+
+function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
+  const predictions = (data.predictions as Array<Record<string, any>> | undefined) ?? [];
+  const bottlenecks = (data.bottlenecks as Array<Record<string, any>> | undefined) ?? [];
+  const signals: Array<Record<string, any>> = (data.signals as Array<Record<string, any>> | undefined)
+    ?? (data.drivingSignals as string[] | undefined)?.map(s => ({ description: s } as Record<string, any>))
+    ?? [];
+  const recommendations = (data.recommendations as string[] | undefined)
+    ?? (data.actions as string[] | undefined) ?? [];
+  const spofAlerts = (data.spofAlerts as Array<Record<string, any>> | undefined)
+    ?? (data.spof ? [data.spof] : []);
+  const sprintVelocity = (data.sprintVelocity as Array<Record<string, any>> | undefined)
+    ?? (data.velocityHistory as Array<Record<string, any>> | undefined) ?? [];
+
+  // Extract top-level velocity fields
+  const currentVelocity = data.currentVelocity ?? data.current_velocity ?? null;
+  const previousVelocity = data.previousVelocity ?? data.previous_velocity ?? null;
+  const declinePct = data.declinePct ?? data.decline_pct ?? data.velocityDropPct ?? null;
+  const riskWindow = data.riskWindow ?? data.risk_window ?? data.sprintsToCollapse ?? null;
+  const confidence = data.confidence ?? data.predictionConfidence ?? null;
+  const riskLevel = (data.riskLevel ?? data.risk_level ?? "").toUpperCase();
+  const engagementName = data.engagementName ?? data.engagement_name ?? data.teamName ?? data.team_name ?? "";
+  const clientName = data.clientName ?? data.client_name ?? "";
+
+  // Feature set breakdown
+  const featureSet = data.featureSet ?? data.features ?? null;
+  const prFlow = featureSet?.prFlow ?? data.prFlow ?? null;
+  const reviewHealth = featureSet?.reviewHealth ?? data.reviewHealth ?? null;
+  const wipMetrics = featureSet?.wip ?? data.wip ?? null;
+  const loadMetrics = featureSet?.load ?? data.load ?? null;
+
+  return (
+    <div className="space-y-5">
+      {/* Risk header */}
+      {riskLevel && (
+        <div className="flex items-center gap-3 flex-wrap">
+          {severityBadge(riskLevel === "HIGH" ? "critical" : riskLevel === "MEDIUM" ? "warning" : "info")}
+          <span className="text-sm font-semibold">
+            {clientName ? `${clientName} — ` : ""}{engagementName}
+          </span>
+          {riskLevel && (
+            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+              riskLevel === "HIGH" ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning"
+            }`}>
+              {riskLevel} RISK
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile
+          value={currentVelocity != null ? `${currentVelocity} pts` : "—"}
+          label="Current Velocity"
+          danger={declinePct != null && Math.abs(declinePct) > 20}
+        />
+        <StatTile
+          value={previousVelocity != null ? `${previousVelocity} pts` : "—"}
+          label="Previous Velocity"
+        />
+        <StatTile
+          value={declinePct != null ? `${declinePct > 0 ? "-" : "+"}${Math.abs(declinePct)}%` : "—"}
+          label="Decline"
+          danger={declinePct != null && Math.abs(declinePct) > 20}
+        />
+        <StatTile
+          value={riskWindow != null ? `${riskWindow} sprints` : "—"}
+          label="Risk Window"
+          danger={riskWindow != null && riskWindow <= 2}
+        />
+      </div>
+
+      {/* Confidence */}
+      {confidence != null && (
+        <div className="flex items-center gap-2 text-xs text-muted">
+          <span>Prediction confidence:</span>
+          <span className="font-semibold tabular-nums">
+            {typeof confidence === "number" && confidence <= 1
+              ? `${(confidence * 100).toFixed(0)}%`
+              : `${confidence}%`}
+          </span>
+          {typeof confidence === "number" && (confidence > 0.7 || confidence > 70) && (
+            <span className="text-success">Above threshold</span>
+          )}
+        </div>
+      )}
+
+      {/* Sprint Velocity Trend */}
+      {sprintVelocity.length > 0 && (
+        <SectionCard title="Sprint Velocity Trend">
+          <div className="space-y-2">
+            {sprintVelocity.map((sprint, i) => {
+              const vel = sprint.velocity ?? sprint.points ?? sprint.value ?? 0;
+              const maxVel = Math.max(...sprintVelocity.map((s: any) => s.velocity ?? s.points ?? s.value ?? 0), 1);
+              const pct = (vel / maxVel) * 100;
+              const color = i === sprintVelocity.length - 1
+                ? (pct < 60 ? "bg-red-500" : pct < 80 ? "bg-yellow-400" : "bg-green-500")
+                : "bg-green-500";
+              return (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-[10px] text-muted w-20 shrink-0 text-right font-mono">
+                    {sprint.sprintName ?? sprint.sprint ?? sprint.name ?? `Sprint ${i + 1}`}
+                  </span>
+                  <div className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%`, transition: "width 0.4s ease" }} />
+                  </div>
+                  <span className="text-xs font-semibold tabular-nums w-8 text-right">{vel}</span>
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Feature Set Breakdown — P0-01 spec */}
+      {(prFlow || reviewHealth || wipMetrics || loadMetrics) && (
+        <SectionCard title="Feature Set — Rolling 14-Day Window">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {prFlow && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted">PR Flow</div>
+                {prFlow.meanCycleTime != null && <div className="text-xs">Mean cycle time: <span className="font-semibold">{prFlow.meanCycleTime}h</span></div>}
+                {prFlow.cycleTimeVariance != null && <div className="text-xs">Cycle time variance: <span className="font-semibold">{prFlow.cycleTimeVariance}</span></div>}
+                {prFlow.openPrCount != null && <div className="text-xs">Open PRs: <span className="font-semibold">{prFlow.openPrCount}</span></div>}
+                {prFlow.mergeRate != null && <div className="text-xs">Merge rate: <span className="font-semibold">{(prFlow.mergeRate * 100).toFixed(0)}%</span></div>}
+                {prFlow.prSizeMean != null && <div className="text-xs">Avg PR size: <span className="font-semibold">{prFlow.prSizeMean} LOC</span></div>}
+                {prFlow.reviewerCountPerPr != null && <div className="text-xs">Reviewers/PR: <span className="font-semibold">{prFlow.reviewerCountPerPr}</span></div>}
+              </div>
+            )}
+            {reviewHealth && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Review Health</div>
+                {reviewHealth.meanReviewLatency != null && <div className="text-xs">Mean review latency: <span className="font-semibold">{reviewHealth.meanReviewLatency}h</span></div>}
+                {reviewHealth.reviewConcentrationIndex != null && (
+                  <div className="text-xs">
+                    Gini coefficient: <span className={`font-semibold ${reviewHealth.reviewConcentrationIndex > 0.5 ? "text-danger" : ""}`}>
+                      {reviewHealth.reviewConcentrationIndex.toFixed(2)}
+                    </span>
+                    {reviewHealth.reviewConcentrationIndex > 0.5 && <span className="text-danger text-[10px] ml-1">High concentration</span>}
+                  </div>
+                )}
+              </div>
+            )}
+            {wipMetrics && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Work in Progress</div>
+                {wipMetrics.openPrTrend != null && <div className="text-xs">Open PR trend: <span className="font-semibold">{wipMetrics.openPrTrend}</span></div>}
+                {wipMetrics.ticketsInProgress != null && <div className="text-xs">Tickets in progress: <span className="font-semibold">{wipMetrics.ticketsInProgress}</span></div>}
+                {wipMetrics.avgTicketCycleTime != null && <div className="text-xs">Avg ticket cycle time: <span className="font-semibold">{wipMetrics.avgTicketCycleTime}d</span></div>}
+              </div>
+            )}
+            {loadMetrics && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted">Load</div>
+                {loadMetrics.prsPerEngineer != null && <div className="text-xs">PRs/engineer: <span className="font-semibold">{loadMetrics.prsPerEngineer}</span></div>}
+                {loadMetrics.ticketsPerEngineer != null && <div className="text-xs">Tickets/engineer: <span className="font-semibold">{loadMetrics.ticketsPerEngineer}</span></div>}
+              </div>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* SPOF / Bottleneck Alerts — P0-02 spec */}
+      {spofAlerts.length > 0 && (
+        <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base">⚡</span>
+            <span className="text-sm font-semibold">SPOF / Bottleneck Alert</span>
+          </div>
+          {spofAlerts.map((spof, i) => (
+            <div key={i} className="space-y-2">
+              <p className="text-sm">{spof.description ?? spof.message ?? spof.alert ?? `${spof.engineerName ?? "Engineer"} owns ${spof.commitPct ?? spof.reviewPct ?? "—"}% of ${spof.area ?? "commits"}`}</p>
+              {spof.engineerName && (
+                <div className="text-xs text-muted">Engineer: <span className="font-semibold text-foreground">{spof.engineerName}</span></div>
+              )}
+              {spof.reviewLatencyHours != null && (
+                <div className="text-xs text-muted">Avg review latency caused: <span className="font-semibold text-warning">{spof.reviewLatencyHours}h</span></div>
+              )}
+              {spof.unavailabilitySimulation && (
+                <div className="text-xs text-muted">If unavailable for 5 days: <span className="font-semibold text-danger">{spof.unavailabilitySimulation}</span></div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Bottleneck Concentration Metrics — P0-02 spec */}
+      {bottlenecks.length > 0 && (
+        <SectionCard title="Bottleneck Concentration Risk" padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {bottlenecks.map((b, i) => (
+              <div key={i} className="px-4 py-3 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold">{b.engineerName ?? b.name ?? `Reviewer ${i + 1}`}</span>
+                  {b.brsScore != null && (
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                      b.brsScore > 70 ? "bg-danger/10 text-danger" : b.brsScore > 40 ? "bg-warning/10 text-warning" : "bg-surface text-muted"
+                    }`}>
+                      BRS {b.brsScore}/100
+                    </span>
+                  )}
+                  {b.trend && (
+                    <span className={`text-[10px] ${b.trend === "worsening" ? "text-danger" : b.trend === "improving" ? "text-success" : "text-muted"}`}>
+                      {b.trend === "worsening" ? "↗ Worsening" : b.trend === "improving" ? "↘ Improving" : "→ Stable"}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  {b.prSharePct != null && (
+                    <div className="bg-surface-elevated rounded p-2">
+                      <div className="text-[10px] text-muted">PR share</div>
+                      <div className="font-semibold">{b.prSharePct}%</div>
+                    </div>
+                  )}
+                  {b.giniCoefficient != null && (
+                    <div className="bg-surface-elevated rounded p-2">
+                      <div className="text-[10px] text-muted">Gini</div>
+                      <div className="font-semibold">{b.giniCoefficient.toFixed(2)}</div>
+                    </div>
+                  )}
+                  {b.hhi != null && (
+                    <div className="bg-surface-elevated rounded p-2">
+                      <div className="text-[10px] text-muted">HHI</div>
+                      <div className={`font-semibold ${b.hhi > 0.25 ? "text-danger" : ""}`}>{b.hhi.toFixed(3)}</div>
+                    </div>
+                  )}
+                  {b.betweennessCentrality != null && (
+                    <div className="bg-surface-elevated rounded p-2">
+                      <div className="text-[10px] text-muted">Betweenness</div>
+                      <div className="font-semibold">{b.betweennessCentrality.toFixed(2)}</div>
+                    </div>
+                  )}
+                </div>
+                {b.repos && (
+                  <div className="text-xs text-muted">Concentrated in: <span className="font-mono">{Array.isArray(b.repos) ? b.repos.join(", ") : b.repos}</span></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Under-utilized reviewers — P0-02 spec */}
+      {data.underUtilizedReviewers && (data.underUtilizedReviewers as Array<Record<string, any>>).length > 0 && (
+        <SectionCard title="Under-Utilized Reviewers">
+          <p className="text-xs text-muted mb-2">Engineers who reviewed fewer than 5 PRs in the last 14 days — candidates to absorb load.</p>
+          <div className="flex flex-wrap gap-2">
+            {(data.underUtilizedReviewers as Array<Record<string, any>>).map((r, i) => (
+              <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border-subtle">
+                <span className="text-xs font-medium">{r.name ?? r.engineerName}</span>
+                <span className="text-[10px] text-muted">{r.reviewCount ?? r.prsReviewed ?? 0} PRs</span>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Driving Signals — P0-01 spec */}
+      {signals.length > 0 && (
+        <SectionCard title="Driving Signals">
+          <div className="space-y-2">
+            {signals.map((s, i) => (
+              <div key={i} className="flex items-start gap-2.5 text-sm">
+                <span className="shrink-0 mt-0.5 text-warning">⚠</span>
+                <span className="text-muted-foreground">{typeof s === "string" ? s : s.description ?? s.signal ?? s.message}</span>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Predictions */}
+      {predictions.length > 0 && (
+        <SectionCard title="Velocity Predictions" padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {predictions.map((p, i) => (
+              <div key={i} className="px-4 py-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-medium">{p.teamName ?? p.team ?? p.engagement ?? `Team ${i + 1}`}</span>
+                  {severityBadge(p.risk ?? p.severity ?? "info")}
+                </div>
+                <p className="text-xs text-muted">
+                  Predicted: <span className="font-semibold">{p.predictedVelocity ?? p.predicted}</span>
+                  {p.baseline != null && <> vs baseline <span className="font-semibold">{p.baseline}</span></>}
+                  {p.confidence != null && <> · {typeof p.confidence === "number" && p.confidence <= 1 ? `${(p.confidence * 100).toFixed(0)}%` : `${p.confidence}%`} confidence</>}
+                </p>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Recommended Actions — P0-01 spec */}
+      {recommendations.length > 0 && (
+        <SectionCard title="Recommended Actions">
+          <ol className="space-y-2">
+            {recommendations.map((r, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent/10 text-accent flex items-center justify-center text-[10px] font-bold mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="text-muted-foreground leading-relaxed">{r}</span>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── P0: Scope Creep — Drift Detection ────────────────────────────────────
+
+function ScopeCreepRenderer({ data }: { data: Record<string, any> }) {
+  const alerts = (data.alerts as Array<Record<string, any>> | undefined)
+    ?? (data.scope_alerts as Array<Record<string, any>> | undefined) ?? [];
+  const engagements = (data.engagements as Array<Record<string, any>> | undefined) ?? [];
+  const rootCause = data.rootCause ?? data.root_cause ?? null;
+  const recommendations = (data.recommendations as string[] | undefined) ?? [];
+  const totalAlerts = alerts.length;
+  const criticalCount = alerts.filter(a => (a.severity ?? "").toLowerCase() === "critical").length;
+
+  // Build drift items (either from alerts or engagements)
+  const driftItems = engagements.length > 0
+    ? engagements
+    : alerts.map(a => ({
+        name: a.engagements?.engagement_name ?? a.engagement_name ?? a.engagement_id ?? "Unknown",
+        clientName: a.engagements?.client_name ?? a.client_name ?? "",
+        severity: a.severity,
+        deltaPct: a.delta_pct ?? a.deltaPct,
+        baselinePts: a.baseline_pts ?? a.baselinePts,
+        currentPts: a.current_pts ?? a.currentPts,
+        sprintName: a.sprint_name ?? a.sprintName,
+        message: a.alert_message ?? a.message,
+      }));
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={totalAlerts} label="Scope Alerts" danger={criticalCount > 0} />
+        <StatTile value={criticalCount} label="Critical" danger={criticalCount > 0} />
+        <StatTile
+          value={driftItems.length > 0 ? `${driftItems.length}` : "—"}
+          label="Engagements Affected"
+        />
+        <StatTile
+          value={driftItems.length > 0 ? `+${Math.max(...driftItems.map((d: any) => d.deltaPct ?? 0))}%` : "—"}
+          label="Max Drift"
+          danger={driftItems.some((d: any) => (d.deltaPct ?? 0) > 25)}
+        />
+      </div>
+
+      {/* Drift bars per engagement */}
+      {driftItems.length > 0 && (
+        <SectionCard title="Scope Drift by Engagement">
+          <div className="space-y-3">
+            {driftItems.map((item: any, i: number) => {
+              const drift = item.deltaPct ?? 0;
+              const maxDrift = Math.max(...driftItems.map((d: any) => Math.abs(d.deltaPct ?? 0)), 1);
+              const barPct = Math.min(100, (Math.abs(drift) / maxDrift) * 100);
+              const barColor = Math.abs(drift) > 25 ? "bg-red-500" : Math.abs(drift) > 10 ? "bg-yellow-400" : "bg-green-500";
+              return (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      {item.severity && severityBadge(item.severity)}
+                      <span className="text-xs font-semibold">
+                        {item.clientName ? `${item.clientName} — ` : ""}{item.name ?? item.engagement_name}
+                      </span>
+                    </div>
+                    <span className={`text-xs font-bold tabular-nums ${Math.abs(drift) > 25 ? "text-danger" : "text-warning"}`}>
+                      {drift > 0 ? "+" : ""}{drift}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barPct}%`, transition: "width 0.4s ease" }} />
+                    </div>
+                  </div>
+                  {(item.baselinePts != null || item.currentPts != null) && (
+                    <div className="text-[10px] text-muted mt-0.5">
+                      Baseline {item.baselinePts ?? "—"} → Current {item.currentPts ?? "—"} pts
+                      {item.sprintName && <span className="ml-1">· {item.sprintName}</span>}
+                    </div>
+                  )}
+                  {item.message && (
+                    <p className="text-[11px] text-muted mt-0.5">{item.message}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Root Cause */}
+      {rootCause && (
+        <div className="rounded-xl border border-warning/30 bg-warning/5 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-base">🔍</span>
+            <span className="text-sm font-semibold">Root Cause</span>
+          </div>
+          <p className="text-sm text-muted-foreground">{rootCause}</p>
+        </div>
+      )}
+
+      {/* Recommendations */}
+      {recommendations.length > 0 && (
+        <SectionCard title="Recommended Actions">
+          <ol className="space-y-2">
+            {recommendations.map((r, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent/10 text-accent flex items-center justify-center text-[10px] font-bold mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="text-muted-foreground leading-relaxed">{r}</span>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── P0: Engagement Health — Health Score Dashboard ────────────────────────
+
+function EngagementHealthRenderer({ data }: { data: Record<string, any> }) {
+  const healthScores = (data.health_scores as Array<Record<string, any>> | undefined)
+    ?? (data.healthScores as Array<Record<string, any>> | undefined)
+    ?? (data.engagements as Array<Record<string, any>> | undefined) ?? [];
+  const scopeAlerts = (data.scope_alerts as Array<Record<string, any>> | undefined) ?? [];
+  const engineerSummary = (data.engineer_health_summary ?? data.engineerHealthSummary ?? null) as Record<string, any> | null;
+  const activeCount = healthScores.filter((h: any) => (h.status ?? "active") === "active").length;
+  const atRiskCount = healthScores.filter((h: any) => h.health_score < 50 || h.forecast_at_risk).length;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={healthScores.length} label="Engagements" accent={healthScores.length > 0} />
+        <StatTile value={activeCount} label="Active" />
+        <StatTile value={atRiskCount} label="At Risk" danger={atRiskCount > 0} />
+        <StatTile value={scopeAlerts.length} label="Scope Alerts" danger={scopeAlerts.length > 0} />
+      </div>
+
+      {/* Engagement Health Cards */}
+      {healthScores.length > 0 && (
+        <SectionCard title="Engagement Health Scores" padding={false}>
+          <div className="divide-y divide-border-subtle">
+            {healthScores.map((eng: any, i: number) => {
+              const score = eng.health_score ?? eng.healthScore ?? 0;
+              const scoreColor = score >= 75 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
+              const ringColor = score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+              return (
+                <div key={i} className="px-4 py-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    {/* Mini health ring */}
+                    <div className="relative w-10 h-10 shrink-0">
+                      <svg width={40} height={40} style={{ transform: "rotate(-90deg)" }}>
+                        <circle cx={20} cy={20} r={16} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={3} />
+                        <circle cx={20} cy={20} r={16} fill="none" stroke={ringColor} strokeWidth={3} strokeLinecap="round"
+                          strokeDasharray={`${(score / 100) * (2 * Math.PI * 16)} ${2 * Math.PI * 16}`} />
+                      </svg>
+                      <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold ${scoreColor}`}>{Math.round(score)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-semibold">{eng.client_name ?? eng.clientName}</span>
+                        <span className="text-[10px] text-muted">{eng.engagement_name ?? eng.engagementName}</span>
+                      </div>
+                    </div>
+                    {eng.forecast_at_risk && (
+                      <span className="text-[10px] font-bold text-danger bg-danger/10 px-2 py-0.5 rounded">AT RISK</span>
+                    )}
+                  </div>
+                  {/* Score bars */}
+                  <div className="grid grid-cols-5 gap-2">
+                    {[
+                      { label: "Delivery", value: eng.delivery_velocity ?? eng.deliveryVelocity },
+                      { label: "Jira", value: eng.jira_resolution_rate ?? eng.jiraResolutionRate },
+                      { label: "Scope", value: eng.scope_drift ?? eng.scopeDrift },
+                      { label: "Balance", value: eng.team_concentration ?? eng.teamConcentration },
+                      { label: "Sentiment", value: eng.slack_sentiment ?? eng.slackSentiment },
+                    ].map((metric, j) => {
+                      const v = metric.value ?? 0;
+                      const c = v >= 75 ? "bg-green-500" : v >= 50 ? "bg-yellow-400" : "bg-red-500";
+                      return (
+                        <div key={j}>
+                          <div className="text-[9px] text-muted mb-0.5">{metric.label}</div>
+                          <div className="h-1.5 bg-surface-elevated rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${c}`} style={{ width: `${Math.min(100, v)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Forecast */}
+                  {eng.forecast_days_remaining != null && (
+                    <div className={`mt-2 text-[10px] ${eng.forecast_at_risk ? "text-danger" : "text-success"}`}>
+                      {eng.forecast_at_risk ? "⚠ At risk" : "✓ On track"} — ~{eng.forecast_days_remaining} days
+                      {eng.forecast_confidence != null && ` · ${Math.round((eng.forecast_confidence ?? 0) * 100)}% conf.`}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Engineer Health Summary */}
+      {engineerSummary && (
+        <SectionCard title="Engineer Health Summary">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <StatTile value={engineerSummary.total_engineers ?? engineerSummary.totalEngineers ?? 0} label="Total Engineers" />
+            <StatTile value={engineerSummary.at_risk_count ?? engineerSummary.atRiskCount ?? 0} label="At Risk" danger={(engineerSummary.at_risk_count ?? 0) > 0} />
+            <StatTile value={engineerSummary.overallocated_count ?? engineerSummary.overallocatedCount ?? 0} label="Overloaded" danger={(engineerSummary.overallocated_count ?? 0) > 0} />
+            <StatTile value={`${engineerSummary.avg_review_burden ?? engineerSummary.avgReviewBurden ?? 0} PRs/wk`} label="Review Burden" />
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// ── P0: Pod Match — Team Recommendation ──────────────────────────────────
+
+function PodMatchRenderer({ data }: { data: Record<string, any> }) {
+  const matches = (data.pod_matches as Array<Record<string, any>> | undefined)
+    ?? (data.podMatches as Array<Record<string, any>> | undefined)
+    ?? (data.matches as Array<Record<string, any>> | undefined)
+    ?? (data.recommended_pod_name ? [data] : []);
+
+  return (
+    <div className="space-y-5">
+      {data.summary && (
+        <SectionCard title="Match Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.summary}</p>
+        </SectionCard>
+      )}
+
+      {matches.map((match: any, i: number) => {
+        const ev = match.evidence ?? {};
+        const matchPct = Math.round((ev.matchScore ?? match.confidence ?? 0) * 100);
+        const techStack = ev.techStackMatch ?? ev.techStack ?? [];
+        const pastEng = ev.pastEngagements ?? [];
+
+        return (
+          <div key={i} className="rounded-xl border border-border-subtle bg-surface/40 p-4 space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[10px] text-muted font-bold uppercase tracking-wider">
+                  {i === 0 ? "Recommended Pod" : `Alternative ${i}`}
+                </div>
+                <div className="text-base font-bold">{match.recommended_pod_name ?? match.podName ?? match.name}</div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={`text-2xl font-black tabular-nums ${
+                  matchPct >= 80 ? "text-green-400" : matchPct >= 60 ? "text-yellow-400" : "text-red-400"
+                }`}>
+                  {matchPct}<span className="text-sm font-normal text-muted">%</span>
+                </span>
+                <span className="text-[10px] text-muted">match</span>
+              </div>
+            </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {ev.avgCycleTimeHours != null && (
+                <StatTile value={`${ev.avgCycleTimeHours}h`} label="Avg Cycle Time" />
+              )}
+              {ev.weeklyPrCount != null && (
+                <StatTile value={ev.weeklyPrCount} label="PRs / Week" />
+              )}
+              {ev.techStackOverlapScore != null && (
+                <StatTile value={`${Math.round(ev.techStackOverlapScore * 100)}%`} label="Tech Overlap" accent />
+              )}
+              {match.confidence != null && (
+                <StatTile value={`${Math.round(match.confidence * 100)}%`} label="Confidence" />
+              )}
+            </div>
+
+            {/* Tech Stack */}
+            {techStack.length > 0 && (
+              <div>
+                <div className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1.5">Tech Stack</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {techStack.map((tech: string, j: number) => (
+                    <span key={j} className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Past Engagements */}
+            {pastEng.length > 0 && (
+              <div>
+                <div className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1.5">Past Engagements</div>
+                <div className="space-y-1.5">
+                  {pastEng.map((p: any, j: number) => (
+                    <div key={j} className="flex items-center justify-between text-xs py-1 border-b border-border-subtle last:border-0">
+                      <div>
+                        <span className="font-medium">{p.engagementName ?? p.name}</span>
+                        {p.clientName && <span className="text-muted ml-1">({p.clientName})</span>}
+                      </div>
+                      <span className={`font-semibold tabular-nums ${
+                        (p.healthScore ?? 0) >= 75 ? "text-green-400" : (p.healthScore ?? 0) >= 50 ? "text-yellow-400" : "text-red-400"
+                      }`}>
+                        Score: {p.healthScore ?? "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Domain renderer dispatcher ────────────────────────────────────────────
 
 function renderDomain(domainType: string, data: Record<string, any>) {
   switch (domainType) {
+    // P0 — Delivery Intelligence
+    case "early-warning":          return <EarlyWarningRenderer data={data} />;
+    case "scope-creep":            return <ScopeCreepRenderer data={data} />;
+    case "delivery-intelligence":  return <EngagementHealthRenderer data={data} />;
+    case "pod-match":              return <PodMatchRenderer data={data} />;
+    // P1 — Code Intelligence + others
     case "pr-review":            return <PRReviewRenderer data={data} />;
     case "tdd":                  return <TDDRenderer data={data} />;
     case "design-doc-generator": return <DesignDocRenderer data={data} />;
@@ -1422,6 +2342,15 @@ function renderDomain(domainType: string, data: Record<string, any>) {
     case "data-lineage":           return <DataLineageRenderer data={data} />;
     case "test-case-generator":    return <TestCaseRenderer data={data} />;
     case "test-data-generator":    return <TestCaseRenderer data={data} />;
+    // AAAS — Accounting Intelligence
+    case "aas-bookkeep":           return <BookkeeperRenderer data={data} />;
+    case "aas-reconcile":          return <ReconcilerRenderer data={data} />;
+    case "aas-statements":
+    case "aas-full":
+    case "aas-financial":          return <FinancialStatementsRenderer data={data} />;
+    case "aas-tax":                return <TaxComplianceRenderer data={data} />;
+    case "aas-audit":              return <AuditRenderer data={data} />;
+    case "aas-anomaly":            return <AnomalyRenderer data={data} />;
     default:
       return <GenericRichRenderer data={data} domainType={domainType} />;
   }

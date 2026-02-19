@@ -62,7 +62,22 @@ const DOMAIN_COLORS: Record<string, string> = {
   operations: "bg-muted/15 text-muted-foreground",
   marketing: "bg-danger/10 text-danger",
   cs: "bg-brain-alert/10 text-brain-alert",
+  accounting: "bg-emerald-500/10 text-emerald-600",
   any: "bg-muted/10 text-muted",
+};
+
+/* ── Service grouping: maps connector types to NexusBrain services ────── */
+
+const SERVICE_MAP: Record<string, string> = {
+  github: "seaas", jira: "seaas", slack: "seaas", notion: "seaas", linear: "seaas",
+  cloudwatch: "seaas", datadog: "seaas", elk: "seaas", logs: "seaas",
+  xero: "aaas", quickbooks: "aaas", stripe: "aaas", "s3-storage": "aaas",
+};
+
+const SERVICE_LABELS: Record<string, { label: string; desc: string }> = {
+  seaas: { label: "SE-aaS \u2014 Engineering Intelligence", desc: "Code, delivery, and engineering velocity" },
+  aaas: { label: "AAAS \u2014 Accounting Intelligence", desc: "Financial data, GL sync, and compliance" },
+  general: { label: "General Intelligence", desc: "CRM, support, marketing, and cross-domain" },
 };
 
 /* ── Helpers ───────────────────────────────────────────────────── */
@@ -512,13 +527,23 @@ export function ConnectorsClient({
         </div>
       )}
 
-      {/* ── Available Connectors ───────────────────────────────── */}
-      <div>
-        <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
-          Available ({availableConnectors.length})
+      {/* ── Available Connectors — grouped by service ──────────── */}
+      {(["seaas", "aaas", "general"] as const).map((svcKey) => {
+        const svcInfo = SERVICE_LABELS[svcKey];
+        const svcConnectors = availableConnectors.filter(
+          (c) => (SERVICE_MAP[c.type] || "general") === svcKey
+        );
+        if (svcConnectors.length === 0) return null;
+        return (
+      <div key={svcKey}>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
+            {svcInfo.label}
+          </div>
+          <span className="text-[10px] text-muted/60">{svcInfo.desc}</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {availableConnectors.map((connector) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+          {svcConnectors.map((connector) => {
             const signalCount = domainCounts[connector.domain] || 0;
             const hasSignals = activeDomains.has(connector.domain);
             const isGitHub = connector.type === "github";
@@ -655,6 +680,8 @@ export function ConnectorsClient({
           })}
         </div>
       </div>
+        );
+      })}
 
       {/* ── Info Cards ─────────────────────────────────────────── */}
       <div className="grid md:grid-cols-3 gap-3">

@@ -5,10 +5,7 @@ import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
 import { useTheme } from "@/lib/theme-context";
 import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
-import { ThinkingBlock } from "./ThinkingBlock";
 import { SlashCommandPicker, ALL_SLASH_COMMANDS, type SlashCommand } from "./SlashCommandPicker";
-import { ServiceBadge } from "./ServiceBadge";
-import { ARTIFACT_TYPE_ICONS } from "./types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -97,9 +94,9 @@ import type { DeliveryIntelligenceData as _DeliveryIntelligenceData } from "@/co
 export type DeliveryIntelligenceData = _DeliveryIntelligenceData;
 
 export type DomainResult =
-  | { service: "aas"; data: AccountingDomainData }
-  | { service: "seaas"; data: SEaaSDomainData }
-  | { service: "delivery-intelligence"; data: DeliveryIntelligenceData };
+  | { service: "aas"; data: AccountingDomainData; messageIndex?: number }
+  | { service: "seaas"; data: SEaaSDomainData; messageIndex?: number }
+  | { service: "delivery-intelligence"; data: DeliveryIntelligenceData; messageIndex?: number };
 
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
@@ -1027,11 +1024,49 @@ function MessageActions({
 // Shared SSE parser used by the chat component and exported for reuse
 // in the CopilotOverlay.
 
+// ── Agent Streaming Types ────────────────────────────────────────────────────
+
+export interface AgentStep {
+  stepNumber: number;
+  type: "thinking" | "querying" | "acting" | "observing" | "reflecting";
+  title: string;
+  content?: string;
+  toolName?: string;
+  durationMs?: number;
+  status: "started" | "completed" | "failed";
+}
+
+export interface AgentStatus {
+  taskId: string;
+  status: "starting" | "running" | "completed" | "failed" | "awaiting_approval";
+  agentType?: string;
+  message?: string;
+}
+
+export interface ProgressiveArtifact {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  isPartial: boolean;
+  service?: "seaas" | "aas" | "core";
+}
+
+export interface ProactiveInsight {
+  domain: string;
+  content: string;
+  importance: number;
+}
+
 export interface SSECallbacks {
   onText: (text: string, accumulated: string) => void;
   onError: (error: string) => void;
   onBrainMeta: (meta: BrainMeta) => void;
   onDomainResult: (result: DomainResult) => void;
+  onAgentStep?: (step: AgentStep) => void;
+  onAgentStatus?: (status: AgentStatus) => void;
+  onProgressiveArtifact?: (artifact: ProgressiveArtifact) => void;
+  onProactiveInsights?: (insights: ProactiveInsight[]) => void;
   onDone: () => void;
 }
 
@@ -1088,6 +1123,19 @@ export async function consumeSSEStream(
             if (parsed.deliveryIntelligenceResult) {
               callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
             }
+            // Agent streaming events (OpenClaw / Brain agent integration)
+            if (parsed.agentStep) {
+              callbacks.onAgentStep?.(parsed.agentStep);
+            }
+            if (parsed.agentStatus) {
+              callbacks.onAgentStatus?.(parsed.agentStatus);
+            }
+            if (parsed.progressiveArtifact) {
+              callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
+            }
+            if (parsed.proactiveInsights) {
+              callbacks.onProactiveInsights?.(parsed.proactiveInsights);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1117,6 +1165,10 @@ export async function consumeSSEStream(
             if (parsed.accountingResult) callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
             if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
             if (parsed.deliveryIntelligenceResult) callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
+            if (parsed.agentStep) callbacks.onAgentStep?.(parsed.agentStep);
+            if (parsed.agentStatus) callbacks.onAgentStatus?.(parsed.agentStatus);
+            if (parsed.progressiveArtifact) callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
+            if (parsed.proactiveInsights) callbacks.onProactiveInsights?.(parsed.proactiveInsights);
           } catch { /* skip */ }
         }
       }
@@ -1267,8 +1319,6 @@ export function CopilotChat({
     description: "Your intelligence co-pilot, backed by causal evidence",
     color: "accent",
   },
-  headerLinks,
-  showHeader = true,
   onArtifact,
   onBrainMeta,
   onDomainResult,
@@ -1286,7 +1336,7 @@ export function CopilotChat({
   const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
@@ -1522,7 +1572,8 @@ export function CopilotChat({
           },
           onDomainResult: (result) => {
             if (controller.signal.aborted) return;
-            onDomainResultRef.current?.(result);
+            // Attach the message index so the parent can link this artifact to the chat message
+            onDomainResultRef.current?.({ ...result, messageIndex: messageIdx });
           },
           onDone: () => {
             // Bug fix #4: Don't emit artifacts if aborted
@@ -1604,8 +1655,8 @@ export function CopilotChat({
     setTimeout(() => sendMessage(lastUserMsg.content), 50);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSubmit(e as unknown as FormEvent);
     }
@@ -1619,273 +1670,99 @@ export function CopilotChat({
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      {showHeader && (
-        <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-          <div className="flex items-center gap-3 px-1">
-            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", `bg-${color}/15`)}>
-              <svg
-                className={cn("w-5 h-5", `text-${color}`)}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold">{persona.name}</h1>
-              <p className="text-xs text-muted">{persona.description}</p>
-            </div>
-          </div>
-          {headerLinks && headerLinks.length > 0 && (
-            <div className="flex gap-2">
-              {headerLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+    <div className="flex flex-col h-full" style={{ background: "#faf9f5" }}>
 
-      {/* V5 Brain Context Panel — Claude-style collapsible thought process */}
-      {brainMeta && (
-        <BrainContextPanel meta={brainMeta} isLoading={isLoading} />
-      )}
-
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto py-6 space-y-4">
+      {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
+      <div className="flex-1 overflow-y-auto" style={{ padding: "24px 0" }}>
         {messages.length === 0 ? (
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6", `bg-${color}/10`)}>
-              <svg
-                className={cn("w-8 h-8", `text-${color}`)}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">
-              Ask NexusBrain anything
-            </h2>
-            <p className="text-sm text-muted max-w-md mb-8">
-              {persona.description}. All answers are grounded in evidence-based
-              analysis from the NexusBrain intelligence engine.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl w-full">
-              {examplePrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handlePromptClick(prompt)}
-                  className="text-left px-4 py-3 rounded-xl bg-card border border-border-subtle hover:border-accent/30 hover:bg-card-hover transition-all text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+          /* Empty state — matches HTML prototype: .chat-welcome with ✦ spark + simple text */
+          <div className="flex flex-col items-center justify-center h-full text-center" style={{ padding: "60px 24px" }}>
+            <div style={{ color: "#c6613f", fontSize: 28, marginBottom: 16 }}>✦</div>
+            <h4 style={{ fontSize: 16, fontWeight: 500, color: "#73726c" }}>
+              How can I help you today?
+            </h4>
           </div>
         ) : (
-          /* Message list — centered single-column layout (Claude Code / Cowork style) */
-          <>
+          /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */
+          <div style={{ maxWidth: 680, width: "100%", margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 4 }}>
             {messages.map((msg, i) => {
               const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
-              const msgBrainMeta = brainMetaPerMessage.get(i);
               const artifacts = messageArtifacts?.get(i);
 
               return (
                 <div
                   key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
-                  className="max-w-3xl mx-auto w-full animate-message-in"
+                  className="animate-message-in"
                 >
-                  {/* ThinkingBlock — shown above assistant messages that have brainMeta */}
-                  {msg.role === "assistant" && msgBrainMeta && (
-                    <ThinkingBlock
-                      brainMeta={msgBrainMeta}
-                      isStreaming={isLastAssistant && isLoading}
-                    />
-                  )}
-
                   {msg.role === "user" ? (
-                    /* ── User message — left-aligned, no bubble (Claude pattern) ── */
-                    <div className="group">
-                      <div className="flex gap-3">
-                        {/* User avatar */}
-                        <div className="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center shrink-0 mt-0.5">
-                          <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                          </svg>
-                        </div>
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 pt-1">
-                          <p className="text-sm leading-relaxed text-foreground font-medium">{msg.content}</p>
-                        </div>
+                    /* ── User message — matches HTML .msg-user ── */
+                    <div style={{ padding: "12px 0" }}>
+                      <div style={{ fontSize: 15, color: "#141413", lineHeight: 1.6, fontWeight: 400 }}>
+                        {msg.content}
                       </div>
                     </div>
                   ) : (
-                    /* ── Assistant message — full width within centered container ── */
-                    <div className="group">
-                      <div className="flex gap-3">
-                        {/* Avatar */}
-                        <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                          <svg
-                            className="w-4 h-4 text-accent"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={1.5}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                            />
-                          </svg>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm leading-relaxed text-foreground">
-                            {msg.content ? (
-                              <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
-                                {renderMarkdown(msg.content)}
-                              </div>
-                            ) : (
-                              /* Loading dots */
-                              <span className="inline-flex items-center gap-1.5 py-1">
-                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:0ms]" />
-                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:200ms]" />
-                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:400ms]" />
-                              </span>
-                            )}
+                    /* ── Assistant message — matches HTML .msg-asst ── */
+                    <div style={{ padding: "12px 0" }}>
+                      <div className="text-sm leading-relaxed" style={{ fontSize: 15, color: "#3d3d3a", lineHeight: 1.7 }}>
+                        {msg.content ? (
+                          <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
+                            {renderMarkdown(msg.content)}
                           </div>
-
-                          {/* Artifact link footer — clickable buttons for artifacts produced by this message */}
-                          {artifacts && artifacts.length > 0 && onOpenArtifact && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {artifacts.map((a) => (
-                                <button
-                                  key={a.id}
-                                  type="button"
-                                  onClick={() => onOpenArtifact(a.id)}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface border border-border-subtle text-[11px] text-muted-foreground hover:text-foreground hover:border-accent/30 transition-colors"
-                                >
-                                  <svg className="w-3.5 h-3.5 text-accent/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d={ARTIFACT_TYPE_ICONS[a.type as keyof typeof ARTIFACT_TYPE_ICONS] || ARTIFACT_TYPE_ICONS.document} />
-                                  </svg>
-                                  {a.title}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Message actions (copy, regenerate) — appear on hover */}
-                          {msg.content && !isLoading && (
-                            <MessageActions
-                              content={msg.content}
-                              onRegenerate={isLastAssistant ? handleRegenerate : undefined}
-                              isLast={isLastAssistant}
-                              messageIndex={i}
-                              organizationId={extraParams?.organizationId as string | undefined}
-                              conversationId={conversationId}
-                            />
-                          )}
-                        </div>
+                        ) : (
+                          /* Loading dots — matches HTML .typing */
+                          <span className="inline-flex items-center" style={{ gap: 5, padding: "12px 0" }}>
+                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "0ms" }} />
+                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "200ms" }} />
+                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "400ms" }} />
+                          </span>
+                        )}
                       </div>
+
+                      {/* Artifact link footer — "✦ View Artifact →" matching HTML .msg-art-link */}
+                      {artifacts && artifacts.length > 0 && onOpenArtifact && (
+                        <div style={{ marginTop: 8 }}>
+                          {artifacts.map((a) => (
+                            <button
+                              key={a.id}
+                              type="button"
+                              onClick={() => onOpenArtifact(a.id)}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "6px 12px",
+                                borderRadius: 8,
+                                background: "rgba(198,97,63,.06)",
+                                border: "1px solid rgba(198,97,63,.12)",
+                                fontSize: 12,
+                                color: "#c6613f",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                transition: "all .15s",
+                              }}
+                              className="hover:!bg-[rgba(198,97,63,.12)]"
+                            >
+                              <span>✦</span>
+                              View Artifact →
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })}
 
-            {/* Follow-up suggestions — shown after last assistant response */}
-            {followUps.length > 0 && !isLoading && (
-              <div className="stagger-chip-in flex flex-wrap gap-2 max-w-3xl mx-auto w-full pt-3 pl-11">
-                {followUps.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => handleFollowUpClick(suggestion)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-accent/5 border border-accent/15 text-[12px] text-accent/80 hover:text-accent hover:bg-accent/10 hover:border-accent/30 shadow-[var(--shadow-xs)] transition-all duration-200"
-                  >
-                    <svg className="w-3 h-3 shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                    </svg>
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            )}
-
             <div ref={messagesEndRef} />
-          </>
+          </div>
         )}
       </div>
 
-      {/* Input bar — fixed to bottom */}
-      <div className="border-t border-border-subtle pt-4 pb-2">
-        {/* Branch selector — shown only when GitHub connector has tracked branches */}
-        {trackedBranches.length > 0 && (
-          <div className="max-w-4xl mx-auto mb-2 flex items-center gap-2">
-            <svg className="w-3.5 h-3.5 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 3v12m0 0a3 3 0 106 0m-6 0a3 3 0 006 0m0 0v-5.25m0 0a3 3 0 106 0m-6 0a3 3 0 006 0" />
-            </svg>
-            <span className="text-[10px] text-muted">Branch:</span>
-            <div className="flex flex-wrap gap-1.5">
-              {trackedBranches.map((b) => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setSelectedBranch(b === selectedBranch ? "" : b)}
-                  className={cn(
-                    "px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-colors border",
-                    b === selectedBranch
-                      ? "bg-accent/15 text-accent border-accent/30"
-                      : "bg-surface text-muted border-border-subtle hover:border-accent/20 hover:text-foreground"
-                  )}
-                  title={b === selectedBranch ? "Click to deselect branch" : `Use code intelligence from ${b}`}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-            {selectedBranch && (
-              <span className="text-[10px] text-accent/70 ml-auto">
-                Code intelligence active
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Active service badge — shown above input when a slash command set the service mode */}
-        {activeService !== "general" && onServiceChange && (
-          <div className="max-w-4xl mx-auto mb-1.5 flex items-center gap-2">
-            <ServiceBadge
-              service={activeService}
-              onClear={() => onServiceChange("general")}
-            />
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
+      {/* Input bar — matches HTML .chat-input-area */}
+      <div style={{ padding: "12px 24px 20px", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <form onSubmit={handleSubmit} className="relative" style={{ maxWidth: 680, width: "100%" }}>
 
           {/* Slash command picker — floating above the input */}
           {showSlashPicker && (
@@ -1895,15 +1772,14 @@ export function CopilotChat({
                 onSelect={(cmd: SlashCommand) => {
                   setShowSlashPicker(false);
                   setSlashQuery("");
-                  // Set the prompt from the selected command
-                  setInput(cmd.prompt);
-                  // Switch service mode if needed
                   if (cmd.service !== "general" && onServiceChange) {
                     onServiceChange(cmd.service);
                   }
-                  // Auto-open artifact pane
                   onArtifactPaneOpen?.();
-                  inputRef.current?.focus();
+                  setInput(cmd.prompt);
+                  setTimeout(() => {
+                    sendMessageRef.current?.(cmd.prompt);
+                  }, 50);
                 }}
                 onClose={() => {
                   setShowSlashPicker(false);
@@ -1913,102 +1789,111 @@ export function CopilotChat({
             </div>
           )}
 
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => {
-              const val = e.target.value;
-              setInput(val);
-              // Auto-grow: reset height, then set to scrollHeight (capped at 200px)
-              const el = e.target;
-              el.style.height = "auto";
-              el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-
-              // Slash command detection: if the input starts with "/" or user just typed "/"
-              if (val === "/") {
-                setShowSlashPicker(true);
-                setSlashQuery("");
-              } else if (val.startsWith("/") && !val.includes(" ")) {
-                setShowSlashPicker(true);
-                setSlashQuery(val.slice(1));
-              } else if (showSlashPicker) {
-                setShowSlashPicker(false);
-                setSlashQuery("");
-              }
+          {/* Input box — matches HTML .chat-input-box */}
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 20,
+              boxShadow: "rgba(0,0,0,.035) 0 4px 20px, rgba(31,30,29,.15) 0 0 0 .5px",
+              padding: "12px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
-            onKeyDown={(e) => {
-              // Close slash picker on Escape
-              if (e.key === "Escape" && showSlashPicker) {
-                e.preventDefault();
-                setShowSlashPicker(false);
-                setSlashQuery("");
-                return;
-              }
-              handleKeyDown(e);
-            }}
-            placeholder="Message..."
-            rows={1}
-            disabled={isLoading}
-            className={cn(
-              "w-full resize-none rounded-xl bg-input border border-input-border",
-              "px-4 py-3 pr-24 text-sm text-foreground placeholder:text-muted",
-              "shadow-[var(--shadow-input)]",
-              "focus:outline-none focus:shadow-[var(--shadow-input-focus)] focus:border-input-focus",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              "transition-all duration-200"
-            )}
-            style={{ maxHeight: 200 }}
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-            {isLoading && (
+          >
+            <input
+              ref={inputRef as React.RefObject<HTMLInputElement>}
+              type="text"
+              value={input}
+              onChange={(e) => {
+                const val = e.target.value;
+                setInput(val);
+                if (val === "/") {
+                  setShowSlashPicker(true);
+                  setSlashQuery("");
+                } else if (val.startsWith("/") && !val.includes(" ")) {
+                  setShowSlashPicker(true);
+                  setSlashQuery(val.slice(1));
+                } else if (showSlashPicker) {
+                  setShowSlashPicker(false);
+                  setSlashQuery("");
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && showSlashPicker) {
+                  e.preventDefault();
+                  setShowSlashPicker(false);
+                  setSlashQuery("");
+                  return;
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit(e as unknown as FormEvent);
+                }
+              }}
+              placeholder="How can I help you today?"
+              disabled={isLoading}
+              style={{
+                flex: 1,
+                border: "none",
+                outline: "none",
+                fontSize: 14,
+                color: "#141413",
+                background: "transparent",
+                fontFamily: "inherit",
+              }}
+            />
+            {isLoading ? (
               <button
                 type="button"
                 onClick={handleStop}
-                className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
-                  "bg-danger/20 text-danger",
-                  "hover:bg-danger/30 transition-colors"
-                )}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: "#dc2626",
+                  border: "none",
+                  color: "#faf9f5",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
                 title="Stop generation"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="6" y="6" width="12" height="12" rx="2" />
                 </svg>
               </button>
-            )}
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center",
-                "text-muted-foreground hover:text-foreground",
-                "hover:bg-surface-hover transition-colors",
-                "disabled:opacity-30 disabled:cursor-not-allowed"
-              )}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+            ) : (
+              /* Send button — matches HTML .chat-send: circular dark bg, ↑ arrow */
+              <button
+                type="submit"
+                disabled={!input.trim()}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: "#141413",
+                  border: "none",
+                  color: "#faf9f5",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: input.trim() ? "pointer" : "not-allowed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: input.trim() ? 1 : 0.3,
+                  transition: "opacity .15s",
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
-                />
-              </svg>
-            </button>
+                ↑
+              </button>
+            )}
           </div>
         </form>
-        <p className="text-center text-[10px] text-muted/50 mt-2">
-          Type <span className="font-mono text-muted/70">/</span> for services
-        </p>
       </div>
     </div>
   );
