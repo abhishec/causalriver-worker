@@ -23,7 +23,7 @@ export function DeadCodeRenderer({ data }: { data: Record<string, any> }) {
           <StatCard label="Savings" value={savings} color="purple" />
         </StatGrid>
         {findings.map((f: any, i: number) => (
-          <FindingRow key={i} severity={f.severity} text={f.text} />
+          <FindingRow key={i} severity={f.severity} text={f.text} label={f.label} />
         ))}
         <InsightBox><strong>Note:</strong> 4 items need manual review — possible dynamic imports.</InsightBox>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { DomainResult } from "@/components/copilot/CopilotChat";
-import { FinancialStatementsPanel } from "@/components/copilot/FinancialStatementsPanel";
+import { FinancialStatementsPanel, AAS_DOMAIN_TO_TAB } from "@/components/copilot/FinancialStatementsPanel";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
 import { SEaaSDeliveryPanel } from "@/components/copilot/SEaaSDeliveryPanel";
 
@@ -105,7 +105,8 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
 
   // ── 2. AAS service → FinancialStatementsPanel (P&L, Balance Sheet, Trial Balance, GST, Anomalies, Transactions)
   if (result.service === "aas") {
-    return <FinancialStatementsPanel data={result.data} />;
+    const tabFromDomain = domainId ? AAS_DOMAIN_TO_TAB[domainId] : undefined;
+    return <FinancialStatementsPanel data={result.data} initialTab={tabFromDomain} />;
   }
 
   // ── 3. Try to extract domainId from data._domainType (fallback for older integrations)

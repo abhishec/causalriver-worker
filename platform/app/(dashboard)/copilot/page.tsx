@@ -190,7 +190,8 @@ function CopilotPageInner() {
     // For delivery-intelligence, fall back to "delivery-intelligence" if no _domainType
     const resolvedDomainId = embeddedDomainType
       || (isDelivery ? "delivery-intelligence" : undefined)
-      || (isAAS ? (rawData?._commandId as string) : undefined);
+      || (isAAS ? (rawData?._commandId as string) : undefined)
+      || (rawData?._commandId as string | undefined);
 
     // Map domain IDs to human-readable titles for ALL 31 commands
     const DOMAIN_TITLES: Record<string, string> = {

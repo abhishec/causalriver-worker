@@ -6,6 +6,7 @@ export function LineageRenderer({ data }: { data: Record<string, any> }) {
   const downstream = data?.downstream ?? ["alerts", "cases", "reports", "sanctions_results", "velocity_metrics", "audit_log", "compliance_export"];
   const flow = data?.flow ?? "raw → cleaned → enriched → aggregated";
   const compliant = data?.compliant ?? true;
+  const complianceLabel = data?.complianceLabel ?? "PDPA-compliant — PII encrypted at rest";
 
   return (
     <div className="flex flex-col h-full">
@@ -17,7 +18,7 @@ export function LineageRenderer({ data }: { data: Record<string, any> }) {
         <div className="flex flex-wrap mb-2.5">{downstream.map((d: string) => <TechChip key={d} label={d} />)}</div>
         <MonoBlock>{flow}</MonoBlock>
         <div className="mt-2">
-          <BalanceCheck balanced={compliant} />
+          <BalanceCheck balanced={compliant} label={complianceLabel} />
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { useShikiHighlight } from "@/lib/shiki";
 import { useTheme } from "@/lib/theme-context";
 import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
 import { SlashCommandPicker, ALL_SLASH_COMMANDS, type SlashCommand } from "./SlashCommandPicker";
+import { AgentStepTimeline } from "./AgentStepTimeline";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -24,12 +25,16 @@ export interface BrainMeta {
 
 export interface CopilotArtifact {
   id: string;
-  type: "code" | "analysis" | "table" | "chart" | "document";
+  type: "code" | "analysis" | "table" | "chart" | "document" | "agent-execution";
   title: string;
   language?: string;
   content: string;
   createdAt: number;
   messageIndex?: number;
+  /** Raw structured data for rich rendering (e.g. agent execution data) */
+  rawData?: unknown;
+  /** Source service */
+  service?: "general" | "aas" | "seaas" | "agent";
 }
 
 // ─── Domain Result Types (AAS + SE-aaS structured outputs) ──────────────────
@@ -1067,6 +1072,7 @@ export interface SSECallbacks {
   onAgentStatus?: (status: AgentStatus) => void;
   onProgressiveArtifact?: (artifact: ProgressiveArtifact) => void;
   onProactiveInsights?: (insights: ProactiveInsight[]) => void;
+  onAgentExecutionArtifact?: (artifact: { id: string; type: string; title: string; service: string; rawData: unknown }) => void;
   onDone: () => void;
 }
 
@@ -1136,6 +1142,9 @@ export async function consumeSSEStream(
             if (parsed.proactiveInsights) {
               callbacks.onProactiveInsights?.(parsed.proactiveInsights);
             }
+            if (parsed.agentExecutionArtifact) {
+              callbacks.onAgentExecutionArtifact?.(parsed.agentExecutionArtifact);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1169,6 +1178,7 @@ export async function consumeSSEStream(
             if (parsed.agentStatus) callbacks.onAgentStatus?.(parsed.agentStatus);
             if (parsed.progressiveArtifact) callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
             if (parsed.proactiveInsights) callbacks.onProactiveInsights?.(parsed.proactiveInsights);
+            if (parsed.agentExecutionArtifact) callbacks.onAgentExecutionArtifact?.(parsed.agentExecutionArtifact);
           } catch { /* skip */ }
         }
       }
@@ -1342,6 +1352,16 @@ export function CopilotChat({
   // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
   const [brainMetaPerMessage, setBrainMetaPerMessage] = useState<Map<number, BrainMeta>>(new Map());
 
+  // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
+  const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
+  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
+  const agentStepsRef = useRef(agentSteps);
+  agentStepsRef.current = agentSteps;
+
+  // ── Proactive insights state (Week 6: "While you were away") ──────────
+  const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
+  const [insightsDismissed, setInsightsDismissed] = useState(false);
+
   // ── Slash command picker state ───────────────────────────────────────────
   const [showSlashPicker, setShowSlashPicker] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
@@ -1503,6 +1523,10 @@ export function CopilotChat({
 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
+    // Reset agent state for new message
+    setAgentSteps([]);
+    setAgentStatus(null);
+
     // Bug fix #2: Read history from ref to avoid stale closure
     const currentMessages = messagesRef.current;
     const history = currentMessages.map((m) => ({ role: m.role, content: m.content }));
@@ -1605,6 +1629,61 @@ export function CopilotChat({
               }
             }
           },
+          // ── Agent execution SSE callbacks (Week 3: OpenClaw) ──
+          onAgentStep: (step) => {
+            if (controller.signal.aborted) return;
+            setAgentSteps((prev) => {
+              // Update existing step or append new one
+              const existing = prev.findIndex((s) => s.stepNumber === step.stepNumber);
+              if (existing >= 0) {
+                const updated = [...prev];
+                updated[existing] = step;
+                return updated;
+              }
+              return [...prev, step];
+            });
+          },
+          onAgentStatus: (status) => {
+            if (controller.signal.aborted) return;
+            setAgentStatus(status);
+          },
+          onProgressiveArtifact: (artifact) => {
+            if (controller.signal.aborted) return;
+            // Forward progressive artifacts to the parent as copilot artifacts
+            const artifactCb = onArtifactRef.current;
+            if (artifactCb) {
+              artifactCb({
+                id: artifact.id,
+                type: "analysis",
+                title: artifact.title,
+                content: artifact.content,
+                createdAt: Date.now(),
+                messageIndex: messageIdx,
+              });
+            }
+          },
+          onAgentExecutionArtifact: (execArtifact) => {
+            if (controller.signal.aborted) return;
+            // Create an agent-execution artifact for the right panel
+            const artifactCb = onArtifactRef.current;
+            if (artifactCb) {
+              artifactCb({
+                id: execArtifact.id,
+                type: "agent-execution" as any,
+                title: execArtifact.title,
+                content: JSON.stringify(execArtifact.rawData),
+                rawData: execArtifact.rawData,
+                createdAt: Date.now(),
+                messageIndex: messageIdx,
+                service: "agent" as any,
+              });
+            }
+          },
+          onProactiveInsights: (insights) => {
+            if (controller.signal.aborted) return;
+            setProactiveInsights(insights);
+            setInsightsDismissed(false);
+          },
         },
         controller.signal
       );
@@ -1685,6 +1764,31 @@ export function CopilotChat({
         ) : (
           /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */
           <div style={{ maxWidth: 680, width: "100%", margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {/* Proactive Insights Banner (Week 6: "While you were away") */}
+            {proactiveInsights.length > 0 && !insightsDismissed && (
+              <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 mb-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-accent">While you were away</span>
+                  <button
+                    onClick={() => setInsightsDismissed(true)}
+                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+                <div className="space-y-1.5">
+                  {proactiveInsights.map((insight, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-xs text-foreground/80">
+                      <span className="flex-shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-accent/60" />
+                      <span>
+                        <span className="font-medium text-foreground/90">{insight.domain}:</span>{" "}
+                        {insight.content}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {messages.map((msg, i) => {
               const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
               const artifacts = messageArtifacts?.get(i);
@@ -1704,11 +1808,20 @@ export function CopilotChat({
                   ) : (
                     /* ── Assistant message — matches HTML .msg-asst ── */
                     <div style={{ padding: "12px 0" }}>
+                      {/* Agent step timeline — shows live when agent is executing */}
+                      {isLastAssistant && agentSteps.length > 0 && (
+                        <div style={{ marginBottom: 12 }}>
+                          <AgentStepTimeline steps={agentSteps} agentStatus={agentStatus} />
+                        </div>
+                      )}
                       <div className="text-sm leading-relaxed" style={{ fontSize: 15, color: "#3d3d3a", lineHeight: 1.7 }}>
                         {msg.content ? (
                           <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
                             {renderMarkdown(msg.content)}
                           </div>
+                        ) : agentSteps.length > 0 && isLastAssistant ? (
+                          /* When agent is running, don't show loading dots (timeline is visible) */
+                          null
                         ) : (
                           /* Loading dots — matches HTML .typing */
                           <span className="inline-flex items-center" style={{ gap: 5, padding: "12px 0" }}>
@@ -1772,7 +1885,7 @@ export function CopilotChat({
                 onSelect={(cmd: SlashCommand) => {
                   setShowSlashPicker(false);
                   setSlashQuery("");
-                  if (cmd.service !== "general" && onServiceChange) {
+                  if (onServiceChange) {
                     onServiceChange(cmd.service);
                   }
                   onArtifactPaneOpen?.();

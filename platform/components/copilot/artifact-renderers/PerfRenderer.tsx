@@ -13,7 +13,7 @@ export function PerfRenderer({ data }: { data: Record<string, any> }) {
       <ArtifactHeader icon="⚡" title="Performance Profile" />
       <div className="flex-1 overflow-y-auto p-4">
         {findings.map((f: any, i: number) => (
-          <FindingRow key={i} severity={f.severity} text={f.text} />
+          <FindingRow key={i} severity={f.severity} text={f.text} label={f.label} />
         ))}
         <AlertBanner
           type="critical"

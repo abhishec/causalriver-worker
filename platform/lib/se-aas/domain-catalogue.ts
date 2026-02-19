@@ -2,7 +2,7 @@
  * Shared Domain Catalogue — SE-AAS & AAAS
  * ========================================
  *
- * Single source of truth for all 17 SE-aaS domain definitions
+ * Single source of truth for all 20 SE-aaS domain definitions
  * and 6 AAAS agent definitions. Consumed by:
  *   - se-aas/page.tsx (service marketplace)
  *   - se-aas/artifacts/page.tsx (artifact list domain labels)
@@ -36,7 +36,7 @@ export type DomainLabel = {
   color: string;
 };
 
-// ── SE-AAS Domain Catalogue (17 domains) ───────────────────────────────────
+// ── SE-AAS Domain Catalogue (20 domains) ───────────────────────────────────
 
 export const DOMAIN_CATALOGUE: DomainEntry[] = [
   // ── P0: Delivery Intelligence ──────────────────────────────────────────

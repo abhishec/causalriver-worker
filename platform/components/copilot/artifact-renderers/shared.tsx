@@ -88,15 +88,17 @@ export function SeverityBadge({ level, label }: { level: "critical" | "high" | "
 
 // ─── Finding Row ─────────────────────────────────────────────────────────────
 
-export function FindingRow({ severity, text, file, detail }: {
+export function FindingRow({ severity, text, file, detail, label }: {
   severity: "critical" | "high" | "medium" | "low";
   text: string;
   file?: string;
   detail?: string;
+  /** Override the default severity label (e.g. "FUNC", "SLA ✗", "SLOW") */
+  label?: string;
 }) {
   return (
     <div className="flex items-start gap-2 py-2 border-b border-border-subtle last:border-b-0">
-      <SeverityBadge level={severity} />
+      <SeverityBadge level={severity} label={label} />
       <div className="min-w-0">
         <div className="text-[13px] text-muted-foreground leading-snug" dangerouslySetInnerHTML={{ __html: text }} />
         {detail && <div className="text-[11px] text-muted mt-0.5">{detail}</div>}
@@ -338,7 +340,8 @@ export function MonoBlock({ children }: { children: React.ReactNode }) {
 
 // ─── Balance Check ───────────────────────────────────────────────────────────
 
-export function BalanceCheck({ balanced }: { balanced: boolean }) {
+export function BalanceCheck({ balanced, label }: { balanced: boolean; label?: string }) {
+  const defaultLabel = balanced ? "Balance sheet is balanced" : "Balance sheet does not balance";
   return (
     <div className={cn(
       "mx-2 px-3 py-2 rounded-lg text-[11px] font-medium flex items-center gap-1.5",
@@ -346,7 +349,7 @@ export function BalanceCheck({ balanced }: { balanced: boolean }) {
         ? "bg-success/6 text-success border border-success/12"
         : "bg-danger/6 text-danger border border-danger/12"
     )}>
-      {balanced ? "✓ Balance sheet is balanced" : "✗ Balance sheet does not balance"}
+      {balanced ? "✓" : "✗"} {label || defaultLabel}
     </div>
   );
 }

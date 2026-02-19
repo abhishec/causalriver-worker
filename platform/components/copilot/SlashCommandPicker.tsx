@@ -17,10 +17,19 @@ export interface SlashCommand {
   category: string;
 }
 
-// ─── Build unified command list from domain-catalogue + AAS ─────────────────
+// ─── General Intelligence commands (4) ──────────────────────────────────────
+
+const GENERAL_COMMANDS: SlashCommand[] = [
+  { id: "causal",       label: "causal-analysis",    icon: "📊", description: "Cross-domain cause-and-effect analysis",     prompt: "Run a causal analysis across the organization",       service: "general", category: "Intelligence" },
+  { id: "anomaly-gen",  label: "anomaly-report",     icon: "⚠️",  description: "Detect unusual patterns across all signals", prompt: "What anomalies were detected today?",                 service: "general", category: "Intelligence" },
+  { id: "intel-report", label: "intelligence-report", icon: "📄", description: "Full organizational intelligence report",    prompt: "Give me the full intelligence report",                service: "general", category: "Intelligence" },
+  { id: "predict",      label: "prediction",         icon: "📈", description: "Forecast key business outcomes",             prompt: "Forecast key business metrics for next quarter",      service: "general", category: "Intelligence" },
+];
+
+// ─── Build unified command list from domain-catalogue + AAS + General ───────
 
 export const ALL_SLASH_COMMANDS: SlashCommand[] = [
-  // SE-aaS domains (17)
+  // SE-aaS domains (20)
   ...DOMAIN_CATALOGUE.map((d) => ({
     id: d.id,
     label: d.label.toLowerCase().replace(/[\s/]+/g, "-"),
@@ -30,8 +39,10 @@ export const ALL_SLASH_COMMANDS: SlashCommand[] = [
     service: "seaas" as const,
     category: d.category,
   })),
-  // AAS domains (6)
+  // AAS domains (7)
   ...AAS_COMMANDS,
+  // General Intelligence (4)
+  ...GENERAL_COMMANDS,
 ];
 
 // ─── Component ──────────────────────────────────────────────────────────────

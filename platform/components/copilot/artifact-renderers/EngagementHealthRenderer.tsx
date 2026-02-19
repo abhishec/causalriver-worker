@@ -1,5 +1,5 @@
 "use client";
-import { HealthRing, ScoreBar, AlertBanner, ArtifactHeader } from "./shared";
+import { StatGrid, StatCard, HealthRing, ScoreBar, AlertBanner, ArtifactHeader } from "./shared";
 
 interface Engagement {
   name: string;
@@ -21,12 +21,27 @@ export function EngagementHealthRenderer({ data }: { data: Record<string, any> }
     { name: "Standard Chartered", project: "CRS Integration", score: 71, velocity: 70, jira: 74, scope: 65, sentiment: 75, atRisk: false, daysRemaining: 28, confidence: 68 },
     { name: "MAS", project: "Regulatory Compliance", score: 44, velocity: 30, jira: 38, scope: 22, sentiment: 55, atRisk: true, daysRemaining: 60, confidence: 28 },
   ];
-  const criticalEng = engagements.find(e => e.score < 50);
+
+  // ── Derived KPIs ──────────────────────────────────────────────────────────
+  const total = engagements.length;
+  const active = engagements.filter((e) => !e.atRisk || e.score >= 50).length;
+  const atRiskCount = engagements.filter((e) => e.atRisk).length;
+  const scopeAlerts = engagements.filter((e) => e.scope < 50).length;
+  const criticalEng = engagements.find((e) => e.score < 50);
 
   return (
     <div className="flex flex-col h-full">
       <ArtifactHeader icon="💊" title="Delivery Intelligence" />
       <div className="flex-1 overflow-y-auto p-4">
+        {/* ── KPI Header Tiles ─────────────────────────────────────── */}
+        <StatGrid cols={4}>
+          <StatCard label="Engagements" value={total} color="blue" />
+          <StatCard label="Active" value={active} color="green" />
+          <StatCard label="At Risk" value={atRiskCount} color={atRiskCount > 0 ? "red" : "green"} />
+          <StatCard label="Scope Alerts" value={scopeAlerts} color={scopeAlerts > 0 ? "amber" : "green"} />
+        </StatGrid>
+
+        {/* ── Critical Alert Banner ────────────────────────────────── */}
         {criticalEng && (
           <AlertBanner
             type="critical"
@@ -35,6 +50,8 @@ export function EngagementHealthRenderer({ data }: { data: Record<string, any> }
             description={`Velocity at ${criticalEng.velocity}, scope drifted +${100 - criticalEng.scope}%. Immediate attention required.`}
           />
         )}
+
+        {/* ── Engagement Cards ─────────────────────────────────────── */}
         {engagements.map((e) => (
           <div key={e.name} className="border border-border-subtle rounded-xl p-3 mb-2 bg-card">
             <div className="flex items-center gap-2.5 mb-2.5">

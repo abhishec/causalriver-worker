@@ -283,7 +283,7 @@ function GSTF5Tab({ gst }: { gst: AccountingDomainData["gstF5"] }) {
         "mx-3 mt-3 px-3 py-2 rounded-lg border text-[11px] font-medium flex items-center gap-2",
         netRefund
           ? "bg-success/10 border-success/20 text-success"
-          : "bg-danger/10 border-danger/20 text-danger"
+          : "bg-amber-500/10 border-amber-500/20 text-amber-400"
       )}>
         <span>{netRefund ? "💰" : "⚠️"}</span>
         <span>
@@ -380,12 +380,14 @@ function AnomaliesTab({ anomalies }: { anomalies: AccountingDomainData["anomalie
   if (!anomalies || anomalies.length === 0) return <EmptyState message="No anomalies detected. Ask: 'Detect unusual transaction patterns'" />;
 
   const sevColors: Record<string, string> = {
+    critical: "bg-red-600/10 text-red-500 border-red-600/20",
     high: "bg-danger/10 text-danger border-danger/20",
     medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
     low: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   };
 
   const sevDots: Record<string, string> = {
+    critical: "bg-red-500",
     high: "bg-danger",
     medium: "bg-yellow-400",
     low: "bg-blue-400",
@@ -414,69 +416,90 @@ function AnomaliesTab({ anomalies }: { anomalies: AccountingDomainData["anomalie
           </div>
         );
       })}
+      {/* Insight box — highlight the most critical anomaly */}
+      {anomalies.length > 0 && (
+        <div className="mx-3 mt-3 px-3 py-2.5 rounded-[10px] border border-amber-500/15 bg-amber-500/4 text-[12px] text-amber-400 leading-relaxed">
+          <strong>Action:</strong> {anomalies.find((a) => a.severity?.toLowerCase() === "critical")?.description
+            || anomalies[0]?.description
+            || "Review flagged anomalies for potential billing errors or compliance issues."}
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── KPI Summary Header ────────────────────────────────────────────────────
 
+function formatMillions(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `${n < 0 ? "(" : ""}${(abs / 1_000_000).toFixed(1)}M${n < 0 ? ")" : ""}`;
+  if (abs >= 1_000) return `${n < 0 ? "(" : ""}${(abs / 1_000).toFixed(0)}K${n < 0 ? ")" : ""}`;
+  return formatSGD(n);
+}
+
 function KPISummary({ data }: { data: AccountingDomainData }) {
-  const kpis: Array<{ label: string; value: string; sub?: string; accent?: boolean }> = [];
+  const kpis: Array<{ label: string; value: string; sub?: string; color?: "green" | "red" | "amber" | "default" }> = [];
 
   if (data.profitAndLoss) {
     kpis.push({
       label: "Revenue",
-      value: `$${(data.profitAndLoss.revenue / 1000).toFixed(0)}K`,
-      accent: true,
+      value: `SGD ${formatMillions(data.profitAndLoss.revenue)}`,
+      color: "green",
     });
     kpis.push({
       label: "Net Income",
-      value: `$${(data.profitAndLoss.netIncome / 1000).toFixed(0)}K`,
+      value: `SGD ${formatMillions(data.profitAndLoss.netIncome)}`,
       sub: data.profitAndLoss.netIncome >= 0 ? "Profit" : "Loss",
+      color: data.profitAndLoss.netIncome >= 0 ? "green" : "red",
     });
     if (data.profitAndLoss.ebitda !== undefined) {
       kpis.push({
         label: "EBITDA",
-        value: `$${(data.profitAndLoss.ebitda / 1000).toFixed(0)}K`,
+        value: `SGD ${formatMillions(data.profitAndLoss.ebitda)}`,
+        color: data.profitAndLoss.ebitda >= 0 ? "green" : "red",
       });
     }
-  }
-  if (data.balanceSheet) {
-    kpis.push({
-      label: "Total Assets",
-      value: `$${(data.balanceSheet.totalAssets / 1000).toFixed(0)}K`,
-    });
   }
   if (data.trialBalance) {
     kpis.push({
       label: "Accounts",
       value: String(data.trialBalance.accounts.length),
       sub: data.trialBalance.balanced ? "Balanced" : "Unbalanced",
+      color: "default",
     });
   }
   if (data.gstF5) {
     kpis.push({
-      label: "GST Payable",
-      value: `$${formatSGD(data.gstF5.box8_netTaxPayable)}`,
+      label: "GST Net",
+      value: `SGD ${formatMillions(data.gstF5.box8_netTaxPayable)}`,
       sub: data.gstF5.box8_netTaxPayable < 0 ? "Refund" : "Payable",
+      color: "amber",
     });
   }
 
   if (kpis.length === 0) return null;
 
+  const colorMap = {
+    green: { border: "border-emerald-500/30", bg: "bg-emerald-500/5", text: "text-emerald-400" },
+    red: { border: "border-danger/30", bg: "bg-danger/5", text: "text-danger" },
+    amber: { border: "border-amber-500/30", bg: "bg-amber-500/5", text: "text-amber-400" },
+    default: { border: "border-border-subtle", bg: "bg-surface/40", text: "text-foreground" },
+  };
+
+  // Responsive: use flex-wrap so tiles flow naturally for any count
   return (
     <div className="px-3 py-3 border-b border-border-subtle bg-gradient-to-r from-emerald-500/5 via-transparent to-transparent">
-      <div className="grid grid-cols-3 gap-2">
-        {kpis.slice(0, 3).map((kpi) => (
-          <div key={kpi.label} className={cn(
-            "rounded-lg border p-2 flex flex-col gap-0.5",
-            kpi.accent ? "border-emerald-500/30 bg-emerald-500/5" : "border-border-subtle bg-surface/40"
-          )}>
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">{kpi.label}</span>
-            <span className={cn("text-[16px] font-bold tabular-nums leading-tight", kpi.accent ? "text-emerald-400" : "text-foreground")}>{kpi.value}</span>
-            {kpi.sub && <span className="text-[10px] text-muted">{kpi.sub}</span>}
-          </div>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {kpis.map((kpi) => {
+          const c = colorMap[kpi.color || "default"];
+          return (
+            <div key={kpi.label} className={cn("rounded-lg border p-2 flex flex-col gap-0.5 flex-1 min-w-[72px]", c.border, c.bg)}>
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">{kpi.label}</span>
+              <span className={cn("text-[14px] font-bold tabular-nums leading-tight", c.text)}>{kpi.value}</span>
+              {kpi.sub && <span className="text-[10px] text-muted">{kpi.sub}</span>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -492,18 +515,31 @@ const TABS: Array<{ id: TabId; label: string; shortLabel: string }> = [
   { id: "tb", label: "Trial Balance", shortLabel: "TB" },
   { id: "gst", label: "GST F5", shortLabel: "GST" },
   { id: "txns", label: "Transactions", shortLabel: "Txns" },
-  { id: "anomalies", label: "Anomalies", shortLabel: "Risk" },
+  { id: "anomalies", label: "Anomalies", shortLabel: "Anomalies" },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 interface FinancialStatementsPanelProps {
   data: AccountingDomainData;
+  /** Force a specific tab open (e.g. from /bs → "bs", /gst → "gst") */
+  initialTab?: TabId;
 }
 
-export function FinancialStatementsPanel({ data }: FinancialStatementsPanelProps) {
-  // Auto-select the tab that has data
+/** Map AAS slash-command domainIds to tab IDs */
+export const AAS_DOMAIN_TO_TAB: Record<string, TabId> = {
+  "aas-pl": "pl",
+  "aas-balance": "bs",
+  "aas-trial": "tb",
+  "aas-gst": "gst",
+  "aas-anomaly": "anomalies",
+  "aas-transactions": "txns",
+};
+
+export function FinancialStatementsPanel({ data, initialTab }: FinancialStatementsPanelProps) {
+  // Auto-select: prefer initialTab, then first tab with data
   const getDefaultTab = (): TabId => {
+    if (initialTab) return initialTab;
     if (data.profitAndLoss) return "pl";
     if (data.balanceSheet) return "bs";
     if (data.trialBalance) return "tb";

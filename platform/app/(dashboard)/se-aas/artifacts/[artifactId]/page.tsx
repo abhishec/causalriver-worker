@@ -63,6 +63,7 @@ const DOMAIN_META: Record<string, { label: string; icon: string; colorClass: str
   "aas-trial":            { label: "Trial Balance",           icon: "📋", colorClass: "text-cyan-400",    bgClass: "bg-cyan-500/8",    ringClass: "border-cyan-500/25" },
   "aas-gst":              { label: "GST F5 Review",           icon: "🏛️", colorClass: "text-orange-400",  bgClass: "bg-orange-500/8",  ringClass: "border-orange-500/25" },
   "aas-transactions":     { label: "Transactions",            icon: "💳", colorClass: "text-teal-400",    bgClass: "bg-teal-500/8",    ringClass: "border-teal-500/25" },
+  "aas-benchmark":        { label: "SaaS Benchmark",          icon: "📐", colorClass: "text-amber-400",   bgClass: "bg-amber-500/8",   ringClass: "border-amber-500/25" },
 };
 
 // ── Severity helper ───────────────────────────────────────────────────────
