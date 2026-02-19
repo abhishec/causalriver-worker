@@ -33,10 +33,10 @@ export async function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://github.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    "form-action 'self' https://*.supabase.co https://accounts.google.com https://github.com",
     "object-src 'none'",
     "upgrade-insecure-requests",
   ].join('; ');
@@ -74,7 +74,7 @@ export async function middleware(request: NextRequest) {
   // Cross-Origin policies
   // Use 'credentialless' instead of 'require-corp' to allow OAuth flows and CDN resources
   response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
 
   // Remove server identification headers
