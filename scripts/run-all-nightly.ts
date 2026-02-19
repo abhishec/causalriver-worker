@@ -6,10 +6,9 @@
  * EVERY active organization gets the FULL treatment:
  *
  *   Phase 1: Edge Function jobs (verification, weights, decay, thresholds, retention)
- *   Phase 2: Brain Consolidation (10-step sleep + cognitive stack L3-L15)
- *   Phase 3: Federation (org → core, core → org)
- *   Phase 4: Oracle (autonomous prediction verification + UCB1 bandit RL)
- *   Phase 5: Full Consolidation pipeline (brain-pipeline.runFullCycle per org)
+ *   Phase 2: Brain Consolidation — per-org isolation (10-step sleep + cognitive stack)
+ *   Phase 3: Oracle (autonomous prediction verification + UCB1 bandit RL)
+ *   Phase 4: Full Consolidation pipeline (brain-pipeline.runFullCycle per org)
  *
  * For every customer → every org → every brain.
  *
@@ -62,6 +61,8 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 // ── Logging ──
+const IS_CI = !!process.env.CI || !!process.env.GITHUB_ACTIONS;
+
 function log(phase: string, msg: string): void {
   const time = new Date().toISOString().substring(11, 19);
   console.log(`[${time}] [${phase}] ${msg}`);
@@ -74,9 +75,21 @@ function logError(phase: string, msg: string, err?: unknown): void {
 }
 
 function divider(title: string): void {
+  // GitHub Actions collapsible group
+  if (IS_CI) console.log(`::group::${title}`);
   console.log(`\n${'═'.repeat(72)}`);
   console.log(`  ${title}`);
   console.log(`${'═'.repeat(72)}\n`);
+}
+
+function endGroup(): void {
+  if (IS_CI) console.log('::endgroup::');
+}
+
+function progress(current: number, total: number, label: string): string {
+  const pct = Math.round((current / total) * 100);
+  const bar = '█'.repeat(Math.round(pct / 5)) + '░'.repeat(20 - Math.round(pct / 5));
+  return `[${current}/${total}] ${bar} ${pct}% — ${label}`;
 }
 
 // ── Types ──
@@ -104,8 +117,9 @@ async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>,
   const errors: string[] = [];
   let processed = 0;
 
-  for (const org of orgs) {
-    log('PHASE-1', `Running daily edge jobs for ${org.name} (${org.id.substring(0, 8)}...)`);
+  for (let i = 0; i < orgs.length; i++) {
+    const org = orgs[i];
+    log('PHASE-1', progress(i + 1, orgs.length, `Edge jobs for ${org.name}`));
 
     if (DRY_RUN) {
       log('PHASE-1', `  [DRY RUN] Would run: verification, weights, decay, threshold, retention, federation`);
@@ -160,38 +174,90 @@ async function phase1EdgeFunctionJobs(supabase: ReturnType<typeof createClient>,
 
 // ============================================================================
 // PHASE 2: Brain Consolidation (10-step sleep + cognitive stack L3-L15)
+//
+// Architecture: Runs each org in its OWN subprocess so each gets a fresh 4GB
+// heap. Previously used CONSOLIDATE_ALL_ORGS=true which crammed all 11 orgs
+// into one process and OOM'd on GitHub Actions' 7GB runner.
+//
+// Each org is consolidated individually via ORGANIZATION_ID=<org-id>.
+// The consolidation runner automatically also consolidates core brain after
+// each org, so we skip the explicit core brain pass at the end.
 // ============================================================================
 
-async function phase2Consolidation(): Promise<PhaseResult> {
+async function phase2Consolidation(orgs: OrgInfo[]): Promise<PhaseResult> {
   const start = Date.now();
   const errors: string[] = [];
+  let processed = 0;
 
-  log('PHASE-2', 'Running full brain consolidation for ALL orgs + core brain...');
+  log('PHASE-2', `Running brain consolidation for ${orgs.length} orgs (each in isolated process)...`);
 
   if (DRY_RUN) {
-    log('PHASE-2', '[DRY RUN] Would run: brain-consolidation-runner.ts with CONSOLIDATE_ALL_ORGS=true');
+    for (const org of orgs) {
+      log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for ${org.name}`);
+    }
+    log('PHASE-2', `  [DRY RUN] Would run: brain-consolidation-runner.ts for Core Brain (final pass)`);
     return { phase: 'Brain Consolidation', success: true, orgsProcessed: 0, durationMs: 0, errors };
   }
 
+  // Process each org brain in its own subprocess (fresh 4GB heap each time)
+  const totalConsolidation = orgs.length + 1; // +1 for core brain
+  for (let i = 0; i < orgs.length; i++) {
+    const org = orgs[i];
+    const orgStart = Date.now();
+    log('PHASE-2', progress(i + 1, totalConsolidation, `Consolidating ${org.name}`));
+
+    try {
+      execSync(
+        `pnpm exec tsx scripts/brain-consolidation-runner.ts`,
+        {
+          stdio: 'inherit',
+          cwd: resolve(import.meta.dirname || __dirname, '..'),
+          timeout: 1200000, // 20 min per org
+          env: {
+            ...process.env,
+            NODE_OPTIONS: '--max-old-space-size=4096',
+            ORGANIZATION_ID: org.id,
+            CONSOLIDATION_MODE: 'once',
+            VERBOSE: VERBOSE ? 'true' : 'false',
+          },
+        }
+      );
+
+      const elapsed = ((Date.now() - orgStart) / 1000).toFixed(1);
+      log('PHASE-2', `  ✓ ${org.name} consolidated (${elapsed}s)`);
+      processed++;
+    } catch (err: any) {
+      const errMsg = `Brain consolidation failed for ${org.name}: ${err.message}`;
+      errors.push(errMsg);
+      logError('PHASE-2', errMsg);
+      // Continue with next org — don't let one failure stop everything
+    }
+  }
+
+  // Final pass: consolidate core brain (receives all federated knowledge)
+  log('PHASE-2', progress(totalConsolidation, totalConsolidation, 'Core Brain (final federation pass)'));
+  const coreStart = Date.now();
   try {
     execSync(
-      `NODE_OPTIONS="--max-old-space-size=4096" npx tsx scripts/brain-consolidation-runner.ts`,
+      `pnpm exec tsx scripts/brain-consolidation-runner.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
-        timeout: 7200000, // 2 hour timeout
+        timeout: 1200000, // 20 min
         env: {
           ...process.env,
-          CONSOLIDATE_ALL_ORGS: 'true',
+          NODE_OPTIONS: '--max-old-space-size=4096',
+          ORGANIZATION_ID: CORE_BRAIN_ORG_ID,
           CONSOLIDATION_MODE: 'once',
           VERBOSE: VERBOSE ? 'true' : 'false',
         },
       }
     );
-
-    log('PHASE-2', '✓ Brain consolidation complete for all orgs');
+    const elapsed = ((Date.now() - coreStart) / 1000).toFixed(1);
+    log('PHASE-2', `  ✓ Core Brain consolidated (${elapsed}s)`);
+    processed++;
   } catch (err: any) {
-    const errMsg = `Brain consolidation failed: ${err.message}`;
+    const errMsg = `Brain consolidation failed for Core Brain: ${err.message}`;
     errors.push(errMsg);
     logError('PHASE-2', errMsg);
   }
@@ -199,9 +265,9 @@ async function phase2Consolidation(): Promise<PhaseResult> {
   return {
     phase: 'Brain Consolidation',
     success: errors.length === 0,
-    orgsProcessed: 1, // Runs all orgs internally
+    orgsProcessed: processed,
     durationMs: Date.now() - start,
-    details: 'CONSOLIDATE_ALL_ORGS=true — iterates all active orgs + core brain',
+    details: `Per-org isolation — ${processed}/${orgs.length + 1} orgs consolidated (4GB heap each)`,
     errors,
   };
 }
@@ -224,13 +290,14 @@ async function phase3Oracle(): Promise<PhaseResult> {
   try {
     // Oracle already iterates all orgs when ORGANIZATION_ID is unset
     execSync(
-      `NODE_OPTIONS="--max-old-space-size=4096" npx tsx scripts/run-oracle-job.ts`,
+      `pnpm exec tsx scripts/run-oracle-job.ts`,
       {
         stdio: 'inherit',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 600000, // 10 min timeout
         env: {
           ...process.env,
+          NODE_OPTIONS: '--max-old-space-size=4096',
           VERBOSE: 'true',
         },
       }
@@ -262,8 +329,9 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
   const errors: string[] = [];
   let processed = 0;
 
-  for (const org of orgs) {
-    log('PHASE-4', `Running full brain pipeline (L3-L15) for ${org.name}...`);
+  for (let i = 0; i < orgs.length; i++) {
+    const org = orgs[i];
+    log('PHASE-4', progress(i + 1, orgs.length, `Full pipeline for ${org.name}`));
 
     if (DRY_RUN) {
       log('PHASE-4', `  [DRY RUN] Would run: run-full-consolidation.ts for ${org.name}`);
@@ -273,13 +341,14 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
 
     try {
       execSync(
-        `NODE_OPTIONS="--max-old-space-size=4096" npx tsx scripts/run-full-consolidation.ts`,
+        `pnpm exec tsx scripts/run-full-consolidation.ts`,
         {
           stdio: 'inherit',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
           timeout: 3600000, // 1 hour per org
           env: {
             ...process.env,
+            NODE_OPTIONS: '--max-old-space-size=4096',
             ORGANIZATION_ID: org.id,
             VERBOSE: VERBOSE ? 'true' : 'false',
           },
@@ -358,6 +427,7 @@ async function main(): Promise<void> {
   if (coreBrain) {
     log('INIT', `  Core Brain: ${coreBrain.name}`);
   }
+  endGroup();
 
   // ── Run all phases ──
   const results: PhaseResult[] = [];
@@ -365,16 +435,19 @@ async function main(): Promise<void> {
   // Phase 1: Edge Function daily maintenance (verification, weights, decay, etc.)
   divider('PHASE 1: EDGE FUNCTION DAILY JOBS (ALL ORGS)');
   results.push(await phase1EdgeFunctionJobs(supabase, orgs));
+  endGroup();
 
   // Phase 2: Brain Consolidation (10-step sleep + cognitive stack)
-  // This already handles all orgs internally via CONSOLIDATE_ALL_ORGS=true
+  // Each org gets its own subprocess with a fresh 4GB heap (no more OOM)
   divider('PHASE 2: BRAIN CONSOLIDATION (ALL ORGS + CORE BRAIN)');
-  results.push(await phase2Consolidation());
+  results.push(await phase2Consolidation(orgBrains));
+  endGroup();
 
   // Phase 3: Oracle RL (prediction verification + bandit updates)
   // This already handles all orgs internally
   divider('PHASE 3: ORACLE — REINFORCEMENT LEARNING (ALL ORGS)');
   results.push(await phase3Oracle());
+  endGroup();
 
   // Phase 4: Full brain pipeline per org (cognitive stack L3-L15)
   // Run for each org individually so each gets its own LEAP states
@@ -382,6 +455,7 @@ async function main(): Promise<void> {
   const allOrgsForPipeline = [...orgBrains];
   if (coreBrain) allOrgsForPipeline.push(coreBrain); // Core brain last
   results.push(await phase4FullPipeline(allOrgsForPipeline));
+  endGroup();
 
   // ── Final Summary ──
   const totalDuration = Date.now() - overallStart;
