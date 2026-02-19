@@ -175,14 +175,14 @@ async function phase2Consolidation(): Promise<PhaseResult> {
 
   try {
     execSync(
-      `tsx scripts/brain-consolidation-runner.ts`,
+      `node --max-old-space-size=4096 --import tsx/esm scripts/brain-consolidation-runner.ts`,
       {
         stdio: 'inherit',
+        shell: '/bin/bash',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 7200000, // 2 hour timeout
         env: {
           ...process.env,
-          NODE_OPTIONS: '--max-old-space-size=4096',
           CONSOLIDATE_ALL_ORGS: 'true',
           CONSOLIDATION_MODE: 'once',
           VERBOSE: VERBOSE ? 'true' : 'false',
@@ -225,14 +225,14 @@ async function phase3Oracle(): Promise<PhaseResult> {
   try {
     // Oracle already iterates all orgs when ORGANIZATION_ID is unset
     execSync(
-      `tsx scripts/run-oracle-job.ts`,
+      `node --max-old-space-size=4096 --import tsx/esm scripts/run-oracle-job.ts`,
       {
         stdio: 'inherit',
+        shell: '/bin/bash',
         cwd: resolve(import.meta.dirname || __dirname, '..'),
         timeout: 600000, // 10 min timeout
         env: {
           ...process.env,
-          NODE_OPTIONS: '--max-old-space-size=4096',
           VERBOSE: 'true',
         },
       }
@@ -275,14 +275,14 @@ async function phase4FullPipeline(orgs: OrgInfo[]): Promise<PhaseResult> {
 
     try {
       execSync(
-        `tsx scripts/run-full-consolidation.ts`,
+        `node --max-old-space-size=4096 --import tsx/esm scripts/run-full-consolidation.ts`,
         {
           stdio: 'inherit',
+          shell: '/bin/bash',
           cwd: resolve(import.meta.dirname || __dirname, '..'),
           timeout: 3600000, // 1 hour per org
           env: {
             ...process.env,
-            NODE_OPTIONS: '--max-old-space-size=4096',
             ORGANIZATION_ID: org.id,
             VERBOSE: VERBOSE ? 'true' : 'false',
           },
