@@ -40,6 +40,7 @@ const DOMAIN_META: Record<string, { label: string; icon: string; colorClass: str
   "performance-profiler": { label: "Perf Profiler",    icon: "⚡", colorClass: "text-amber-400",  bgClass: "bg-amber-500/8",  ringClass: "border-amber-500/25" },
   "sql-analyzer":         { label: "SQL Analyzer",     icon: "🗄️", colorClass: "text-blue-400",   bgClass: "bg-blue-500/8",   ringClass: "border-blue-500/25" },
   "data-lineage":         { label: "Data Lineage",     icon: "🔗", colorClass: "text-indigo-400", bgClass: "bg-indigo-500/8", ringClass: "border-indigo-500/25" },
+  "architecture-extractor":  { label: "Architecture",    icon: "🏛️", colorClass: "text-sky-400",   bgClass: "bg-sky-500/8",   ringClass: "border-sky-500/25" },
 };
 
 // ── Severity helper ───────────────────────────────────────────────────────
@@ -799,6 +800,380 @@ function CodebaseQARenderer({ data }: { data: Record<string, any> }) {
   );
 }
 
+// Architecture Extractor
+function ArchitectureRenderer({ data }: { data: Record<string, any> }) {
+  const services = (data.services as Array<Record<string, any>> | undefined) ?? [];
+  const dataFlows = (data.dataFlows as Array<Record<string, any>> | undefined) ?? [];
+  const riskAreas = (data.riskAreas as Array<Record<string, any>> | undefined) ?? [];
+  const techStack = (data.techStack as Array<Record<string, any>> | undefined) ?? [];
+  const externalIntegrations = (data.externalIntegrations as Array<Record<string, any>> | undefined) ?? [];
+  const insights = (data.architectureInsights as string[] | undefined) ?? [];
+
+  return (
+    <div className="space-y-5">
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={services.length} label="Services" accent={services.length > 0} />
+        <StatTile value={dataFlows.length} label="Data Flows" />
+        <StatTile value={riskAreas.filter((r: any) => r.severity === "high").length} label="High Risks" danger={riskAreas.filter((r: any) => r.severity === "high").length > 0} />
+        <StatTile value={techStack.length} label="Tech Stack" />
+      </div>
+
+      {/* Summary */}
+      {data.summary && (
+        <SectionCard title="Architecture Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.summary}</p>
+        </SectionCard>
+      )}
+
+      {/* Mermaid Service Graph */}
+      {data.mermaidServiceGraph && (
+        <SectionCard title="Service Dependency Graph">
+          <pre className="text-xs font-mono bg-surface rounded-lg p-4 overflow-x-auto text-muted leading-relaxed border border-border-subtle whitespace-pre-wrap">
+            {data.mermaidServiceGraph}
+          </pre>
+          <p className="text-[10px] text-muted mt-2">Copy the above into <a href="https://mermaid.live" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">mermaid.live</a> to render the interactive diagram.</p>
+        </SectionCard>
+      )}
+
+      {/* Mermaid Data Flow Diagram */}
+      {data.mermaidDataFlow && (
+        <SectionCard title="Data Flow Diagram">
+          <pre className="text-xs font-mono bg-surface rounded-lg p-4 overflow-x-auto text-muted leading-relaxed border border-border-subtle whitespace-pre-wrap">
+            {data.mermaidDataFlow}
+          </pre>
+        </SectionCard>
+      )}
+
+      {/* Services */}
+      {services.length > 0 && (
+        <SectionCard title={`Services (${services.length})`}>
+          <div className="space-y-2">
+            {services.map((svc: any, i: number) => (
+              <div key={i} className="flex items-start gap-3 py-2 border-b border-border-subtle last:border-0">
+                <span className="text-base mt-0.5">
+                  {svc.type === "api" ? "🔌" : svc.type === "database" ? "🗄️" : svc.type === "queue" ? "📨" : svc.type === "frontend" ? "🖥️" : svc.type === "worker" ? "⚙️" : svc.type === "gateway" ? "🚪" : "📦"}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium">{svc.name}</span>
+                    <Badge variant="default" size="xs">{svc.type}</Badge>
+                    {svc.language && <Badge variant="accent" size="xs">{svc.language}</Badge>}
+                    {svc.ownerTeam && <Badge variant="info" size="xs">{svc.ownerTeam}</Badge>}
+                  </div>
+                  {svc.description && <p className="text-xs text-muted mt-0.5 line-clamp-2">{svc.description}</p>}
+                  {svc.dependencies?.length > 0 && (
+                    <p className="text-[10px] text-muted mt-1">Depends on: {(svc.dependencies as string[]).join(", ")}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Risk Areas */}
+      {riskAreas.length > 0 && (
+        <SectionCard title="Architecture Risks">
+          <div className="space-y-2">
+            {riskAreas.map((risk: any, i: number) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-border-subtle bg-surface/50">
+                <div className="mt-0.5 shrink-0">{severityBadge(risk.severity)}</div>
+                <div>
+                  <div className="text-xs font-medium">{risk.area}</div>
+                  <div className="text-xs text-muted mt-0.5">{risk.risk}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Tech Stack */}
+      {techStack.length > 0 && (
+        <SectionCard title="Tech Stack">
+          <div className="flex flex-wrap gap-2">
+            {techStack.map((t: any, i: number) => (
+              <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface border border-border-subtle">
+                <span className="text-xs font-medium">{t.name}</span>
+                {t.version && <span className="text-[10px] text-muted">v{t.version}</span>}
+                {t.purpose && <span className="text-[10px] text-muted">· {t.purpose}</span>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* External Integrations */}
+      {externalIntegrations.length > 0 && (
+        <SectionCard title="External Integrations">
+          <div className="space-y-1.5">
+            {externalIntegrations.map((ext: any, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-xs py-1.5 border-b border-border-subtle last:border-0">
+                <span className="font-medium">{ext.name}</span>
+                <Badge variant="default" size="xs">{ext.type}</Badge>
+                {ext.description && <span className="text-muted">{ext.description}</span>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Architecture Insights */}
+      {insights.length > 0 && (
+        <SectionCard title="Architecture Insights">
+          <ul className="space-y-1.5">
+            {insights.map((ins: string, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-muted">
+                <span className="text-accent mt-0.5 shrink-0">→</span>
+                <span>{ins}</span>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// Scaffolding / Boilerplate Generator
+function ScaffoldingRenderer({ data }: { data: Record<string, any> }) {
+  const files = (data.files as Array<Record<string, any>> | undefined) ?? [];
+  const structure = (data.structure as string[] | undefined) ?? [];
+  const commands = (data.setupCommands as string[] | undefined) ?? [];
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatTile value={files.length || structure.length} label="Files Generated" accent={files.length > 0} />
+        <StatTile value={data.type ?? data.serviceType ?? "—"} label="Service Type" />
+        <StatTile value={data.language ?? "—"} label="Language" />
+      </div>
+
+      {data.summary && (
+        <SectionCard title="Overview">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.summary}</p>
+        </SectionCard>
+      )}
+
+      {/* File Tree */}
+      {structure.length > 0 && (
+        <SectionCard title="File Structure">
+          <pre className="text-xs font-mono text-muted bg-surface rounded-lg p-4 border border-border-subtle leading-relaxed overflow-x-auto">
+            {structure.join("\n")}
+          </pre>
+        </SectionCard>
+      )}
+
+      {/* Generated Files */}
+      {files.length > 0 && (
+        <SectionCard title={`Generated Files (${files.length})`}>
+          <div className="space-y-3">
+            {files.slice(0, 8).map((file: any, i: number) => (
+              <div key={i} className="rounded-lg border border-border-subtle overflow-hidden">
+                <div className="flex items-center gap-2 px-3 py-2 bg-surface border-b border-border-subtle">
+                  <span className="text-[10px] font-mono text-accent">{file.path ?? file.name}</span>
+                  {file.language && <Badge variant="default" size="xs">{file.language}</Badge>}
+                </div>
+                {file.content && (
+                  <pre className="text-[11px] font-mono text-muted p-3 overflow-x-auto leading-relaxed max-h-48">
+                    {String(file.content).slice(0, 800)}{String(file.content).length > 800 ? "\n..." : ""}
+                  </pre>
+                )}
+              </div>
+            ))}
+            {files.length > 8 && (
+              <p className="text-xs text-muted">+ {files.length - 8} more files in the artifact</p>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Setup commands */}
+      {commands.length > 0 && (
+        <SectionCard title="Setup Commands">
+          <div className="space-y-1.5">
+            {commands.map((cmd: string, i: number) => (
+              <pre key={i} className="text-xs font-mono bg-surface rounded px-3 py-2 border border-border-subtle text-muted">{cmd}</pre>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// Data Lineage Mapper
+function DataLineageRenderer({ data }: { data: Record<string, any> }) {
+  const entities = (data.entities as Array<Record<string, any>> | undefined) ?? [];
+  const relationships = (data.relationships as Array<Record<string, any>> | undefined) ?? [];
+  const lineagePaths = (data.lineagePaths as Array<Record<string, any>> | undefined) ?? [];
+  const orphanTables = (data.orphanTables as string[] | undefined) ?? [];
+  const circular = (data.circularDependencies as string[][] | undefined) ?? [];
+  const risks = (data.dataQualityRisks as Array<Record<string, any>> | undefined) ?? [];
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={entities.length} label="Tables / Entities" accent={entities.length > 0} />
+        <StatTile value={relationships.length} label="Relationships" />
+        <StatTile value={orphanTables.length} label="Orphan Tables" danger={orphanTables.length > 0} />
+        <StatTile value={circular.length} label="Circular Deps" danger={circular.length > 0} />
+      </div>
+
+      {data.summary && (
+        <SectionCard title="Lineage Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.summary}</p>
+        </SectionCard>
+      )}
+
+      {/* Lineage Paths — the key output */}
+      {lineagePaths.length > 0 && (
+        <SectionCard title="Data Lineage Paths">
+          <div className="space-y-2">
+            {lineagePaths.map((path: any, i: number) => (
+              <div key={i} className="flex items-center gap-1.5 flex-wrap py-1.5 border-b border-border-subtle last:border-0">
+                {(path.path as string[] ?? [path.from, path.to]).map((step: string, j: number) => (
+                  <span key={j} className="flex items-center gap-1.5">
+                    {j > 0 && <span className="text-muted text-xs">→</span>}
+                    <span className="text-xs font-mono bg-surface border border-border-subtle rounded px-2 py-0.5">{step}</span>
+                  </span>
+                ))}
+                {path.transformations?.length > 0 && (
+                  <Badge variant="info" size="xs" className="ml-2">{path.transformations.length} transforms</Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Entities */}
+      {entities.length > 0 && (
+        <SectionCard title={`Entities (${entities.length})`}>
+          <div className="flex flex-wrap gap-2">
+            {entities.map((e: any, i: number) => (
+              <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface border border-border-subtle">
+                <span className="text-xs font-mono font-medium">{e.name}</span>
+                {e.isJunctionTable && <Badge variant="default" size="xs">junction</Badge>}
+                {e.primaryKey?.length > 0 && <span className="text-[10px] text-muted">PK: {e.primaryKey.join(", ")}</span>}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Orphan Tables + Circular Deps */}
+      {(orphanTables.length > 0 || circular.length > 0) && (
+        <SectionCard title="Issues Detected">
+          {orphanTables.length > 0 && (
+            <div className="mb-3">
+              <div className="text-[10px] font-semibold text-warning uppercase tracking-wider mb-2">Orphan Tables (no relationships)</div>
+              <div className="flex flex-wrap gap-1.5">
+                {orphanTables.map((t: string, i: number) => (
+                  <Badge key={i} variant="warning" size="xs">{t}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          {circular.length > 0 && (
+            <div>
+              <div className="text-[10px] font-semibold text-danger uppercase tracking-wider mb-2">Circular Dependencies</div>
+              {circular.map((cycle: string[], i: number) => (
+                <div key={i} className="text-xs font-mono text-danger flex items-center gap-1 flex-wrap mb-1">
+                  {cycle.map((t, j) => (
+                    <span key={j} className="flex items-center gap-1">{j > 0 && <span>→</span>}{t}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {/* Data Quality Risks */}
+      {risks.length > 0 && (
+        <SectionCard title="Data Quality Risks">
+          <div className="space-y-2">
+            {risks.map((r: any, i: number) => (
+              <div key={i} className="flex items-start gap-2 py-1.5 border-b border-border-subtle last:border-0">
+                {severityBadge(r.severity ?? "medium")}
+                <div>
+                  <div className="text-xs font-medium">{r.table ?? r.field}</div>
+                  <div className="text-xs text-muted">{r.description ?? r.risk}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+// Test Case Generator
+function TestCaseRenderer({ data }: { data: Record<string, any> }) {
+  const testCases = (data.testCases as Array<Record<string, any>> | undefined) ?? [];
+  const suites = (data.testSuites as Array<Record<string, any>> | undefined) ?? [];
+  const coverage = data.estimatedCoverage ?? data.coveragePercentage ?? null;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={testCases.length || suites.reduce((s: number, suite: any) => s + (suite.tests?.length ?? 0), 0)} label="Test Cases" accent />
+        <StatTile value={coverage != null ? `${Math.round(Number(coverage))}%` : "—"} label="Est. Coverage" accent={Number(coverage) >= 80} />
+        <StatTile value={testCases.filter((t: any) => t.type === "unit").length || "—"} label="Unit Tests" />
+        <StatTile value={testCases.filter((t: any) => t.type === "integration").length || "—"} label="Integration" />
+      </div>
+
+      {data.summary && (
+        <SectionCard title="Coverage Summary">
+          <p className="text-sm text-muted-foreground leading-relaxed">{data.summary}</p>
+        </SectionCard>
+      )}
+
+      {/* Test suites */}
+      {suites.length > 0 && (
+        <SectionCard title={`Test Suites (${suites.length})`}>
+          <div className="space-y-4">
+            {suites.slice(0, 5).map((suite: any, i: number) => (
+              <div key={i}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium">{suite.name ?? suite.describe}</span>
+                  <Badge variant="default" size="xs">{suite.tests?.length ?? 0} tests</Badge>
+                </div>
+                {suite.code && (
+                  <pre className="text-[11px] font-mono text-muted bg-surface rounded-lg p-3 border border-border-subtle overflow-x-auto leading-relaxed max-h-48">
+                    {String(suite.code).slice(0, 600)}{String(suite.code).length > 600 ? "\n..." : ""}
+                  </pre>
+                )}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Individual test cases if no suites */}
+      {testCases.length > 0 && suites.length === 0 && (
+        <SectionCard title={`Test Cases (${testCases.length})`}>
+          <div className="space-y-2">
+            {testCases.slice(0, 10).map((tc: any, i: number) => (
+              <div key={i} className="flex items-start gap-2 py-2 border-b border-border-subtle last:border-0">
+                <Badge variant={tc.type === "unit" ? "success" : tc.type === "integration" ? "info" : "default"} size="xs">{tc.type ?? "test"}</Badge>
+                <div>
+                  <div className="text-xs font-medium">{tc.name ?? tc.description}</div>
+                  {tc.scenario && <div className="text-xs text-muted">{tc.scenario}</div>}
+                </div>
+              </div>
+            ))}
+            {testCases.length > 10 && <p className="text-xs text-muted">+ {testCases.length - 10} more test cases</p>}
+          </div>
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
 // Test Cases / Test Data / Scaffolding / Data Lineage — Generic rich renderer
 function GenericRichRenderer({ data, domainType }: { data: Record<string, any>; domainType: string }) {
   const narrative = data.narrative ?? data.summary ?? data.answer ?? data.description ?? null;
@@ -920,6 +1295,11 @@ function renderDomain(domainType: string, data: Record<string, any>) {
     case "log-query":            return <LogQueryRenderer data={data} />;
     case "dead-code-detector":   return <DeadCodeRenderer data={data} />;
     case "codebase-qa":          return <CodebaseQARenderer data={data} />;
+    case "architecture-extractor": return <ArchitectureRenderer data={data} />;
+    case "boilerplate-scaffold":   return <ScaffoldingRenderer data={data} />;
+    case "data-lineage":           return <DataLineageRenderer data={data} />;
+    case "test-case-generator":    return <TestCaseRenderer data={data} />;
+    case "test-data-generator":    return <TestCaseRenderer data={data} />;
     default:
       return <GenericRichRenderer data={data} domainType={domainType} />;
   }

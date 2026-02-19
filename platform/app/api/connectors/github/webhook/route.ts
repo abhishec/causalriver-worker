@@ -280,6 +280,33 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
       console.warn('[PR Review] Brain auto-trigger error:', triggerErr);
     }
 
+    // Auto-trigger SE-AAS PR Review on PR open/sync
+    if (action === 'opened' || action === 'synchronize') {
+      try {
+        const pr = pull_request;
+        const diff = pr.diff_url ? `PR #${pr.number}: ${pr.title}\n\nChanged files: ${pr.changed_files ?? 'unknown'}\n\nDiff URL: ${pr.diff_url}` : `PR #${pr.number}: ${pr.title}`;
+
+        await supabase.from('agent_queue').insert({
+          organization_id: organizationId,
+          agent_type: 'se-aas',
+          task_type: 'pr-review',
+          status: 'pending',
+          priority: 80,
+          payload: {
+            diff,
+            title: pr.title,
+            description: pr.body ?? '',
+            targetBranch: pr.base?.ref ?? 'main',
+            prNumber: pr.number,
+            prUrl: pr.html_url,
+            triggeredBy: 'github-webhook',
+          },
+        });
+      } catch {
+        // Non-fatal — webhook auto-trigger is best-effort
+      }
+    }
+
     return NextResponse.json({
       success: true,
       prNumber: pull_request.number,

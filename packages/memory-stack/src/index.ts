@@ -2657,6 +2657,15 @@ export {
   type PodEvidence,
 } from './orchestrator/action-domain-pod-match';
 
+// P1-15 Architecture Extractor — Service graph, Mermaid diagrams, module ownership
+export {
+  architectureExtractorDomain,
+  type ArchitectureExtractRequest,
+  type ArchitectureExtractResult,
+  type ServiceNode,
+  type DataFlow,
+} from './orchestrator/action-domains-architecture';
+
 export {
   runDeliveryHealthAggregation,
   computeReviewBurden,

@@ -48,6 +48,8 @@ import {
   pushCoreInsightsToOrg,
   // SE-aaS Delivery Intelligence — Pod Match (Sprint 5 WOW Artifact #3)
   podMatchDomain,
+  // P1-15 Architecture Extractor — NEW
+  architectureExtractorDomain,
 } from "@nexus-ai/memory-stack";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
@@ -87,6 +89,8 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   // "delivery-intelligence" is handled by the dedicated API endpoint,
   // but can also be invoked via copilot as a pod-match + health score composite
   "delivery-intelligence": { domain: podMatchDomain, sync: true },
+  // P1-15 Architecture Extractor
+  "architecture-extractor": { domain: architectureExtractorDomain, sync: false },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {

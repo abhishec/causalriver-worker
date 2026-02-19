@@ -67,6 +67,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Code Intelligence",
     description:
       "Brain-augmented code review with causal cascade impact — see how this PR ripples through NPS, customer success, and revenue via L4 causal graph edges.",
+    href: "/se-aas/pr-review",
     copilotPrompt: "Review my latest PR diff and show me the causal business impact",
     colorClass: "text-blue-400",
     ringClass: "border-blue-500/25",
@@ -91,6 +92,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Code Intelligence",
     description:
       "Generate production-ready boilerplate: REST API, microservice, React component, CLI tool — opinionated templates with your team's patterns baked in.",
+    href: "/se-aas/scaffolding",
     copilotPrompt: "Generate a production-ready TypeScript REST API scaffold",
     colorClass: "text-purple-400",
     ringClass: "border-purple-500/25",
@@ -103,6 +105,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Code Intelligence",
     description:
       "Audit outdated packages, detect breaking changes, generate migration steps with risk scores, flag CVEs, and surface npm advisory security issues.",
+    href: "/se-aas/dep-upgrade",
     copilotPrompt: "Audit my package.json for outdated dependencies and security issues",
     colorClass: "text-orange-400",
     ringClass: "border-orange-500/25",
@@ -115,6 +118,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "P1 · Code Intelligence",
     description:
       "Forward mode (requirements → design) or reverse mode (code → design): generates HLD & LLD docs with Mermaid architecture, sequence, and ER diagrams.",
+    href: "/se-aas/design-doc",
     copilotPrompt: "Generate an HLD and LLD for my system with Mermaid architecture diagrams",
     colorClass: "text-cyan-400",
     ringClass: "border-cyan-500/25",
@@ -155,6 +159,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "SWE · Codebase Understanding",
     description:
       "Ask natural language questions about your codebase — Brain-augmented with learned team patterns, architectural decisions, and cross-module dependency knowledge.",
+    href: "/se-aas/codebase-qa",
     copilotPrompt: "Explain how the authentication system works in our codebase",
     colorClass: "text-violet-400",
     ringClass: "border-violet-500/25",
@@ -167,6 +172,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "SWE · Codebase Understanding",
     description:
       "Identify unreachable functions, unused imports, dead files — safe removal plan with confidence scores ranked by impact on bundle size and maintenance burden.",
+    href: "/se-aas/dead-code",
     copilotPrompt: "Find all dead code, unused imports, and unreachable functions in my codebase",
     colorClass: "text-gray-400",
     ringClass: "border-gray-500/25",
@@ -179,6 +185,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "SWE · Codebase Understanding",
     description:
       "Blast radius analysis: what breaks if you change module X? Traces dependency graph paths, identifies fragile coupling, and ranks downstream risk.",
+    href: "/se-aas/impact",
     copilotPrompt: "What's the blast radius if I refactor the auth module?",
     colorClass: "text-red-400",
     ringClass: "border-red-500/25",
@@ -193,6 +200,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Observability",
     description:
       "Root cause analysis with Brain causal intelligence — trace production incidents upstream through signal history to the engineering or config change that triggered them.",
+    href: "/se-aas/incident",
     copilotPrompt: "Diagnose our production incident and trace the root cause using Brain causal intelligence",
     colorClass: "text-pink-400",
     ringClass: "border-pink-500/25",
@@ -205,6 +213,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Observability",
     description:
       "Query logs with natural language — pattern detection, error clustering, anomaly timeline construction, and structured export for post-mortems.",
+    href: "/se-aas/log-query",
     copilotPrompt: "Find all ERROR patterns in the last 24h logs and cluster them by root cause",
     colorClass: "text-yellow-400",
     ringClass: "border-yellow-500/25",
@@ -217,6 +226,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Observability",
     description:
       "APM analysis: identify slow endpoints, N+1 queries, memory leaks, and SLA risk — ranked by business impact from Brain's revenue-performance causal model.",
+    href: "/se-aas/perf-profiler",
     copilotPrompt: "Analyze our APM data and identify the top 3 performance bottlenecks",
     colorClass: "text-amber-400",
     ringClass: "border-amber-500/25",
@@ -231,6 +241,7 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Data",
     description:
       "SQL correctness, performance optimisation, N+1 detection, injection prevention, and style linting — with execution plan analysis where DB access is available.",
+    href: "/se-aas/sql-analyze",
     copilotPrompt: "Analyze this SQL query for performance issues, N+1 patterns, and security risks",
     colorClass: "text-blue-400",
     ringClass: "border-blue-500/25",
@@ -243,10 +254,27 @@ const DOMAIN_CATALOGUE: DomainEntry[] = [
     category: "Data",
     description:
       "Map data flow through your system — FK relationships, transformation chains, circular dependency detection, and compliance-ready lineage reports.",
+    href: "/se-aas/lineage",
     copilotPrompt: "Map the data lineage for our user transaction table",
     colorClass: "text-indigo-400",
     ringClass: "border-indigo-500/25",
     bgClass: "bg-indigo-500/5",
+  },
+
+  // ── SWE · Architecture ────────────────────────────────────────────────
+  {
+    id: "architecture-extractor",
+    label: "Architecture",
+    icon: "🏛️",
+    category: "SWE · Codebase Understanding",
+    description:
+      "Extract your full system architecture: service graph, data flows, module ownership, Mermaid diagrams, and architecture risks — auto-updated as code changes.",
+    href: "/se-aas/architecture",
+    badge: "New",
+    badgeVariant: "accent",
+    colorClass: "text-sky-400",
+    ringClass: "border-sky-500/25",
+    bgClass: "bg-sky-500/5",
   },
 ];
 
