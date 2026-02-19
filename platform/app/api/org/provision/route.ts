@@ -13,7 +13,7 @@ import { provisionOrg } from "@/lib/org-provisioning";
  *
  * Called during onboarding Step 3 to replace the fake "brain waking" animation.
  *
- * Body: { orgId: string, selectedConnectors?: string[] }
+ * Body: { orgId: string, selectedConnectors?: string[], isDesignPartner?: boolean }
  */
 export async function POST(request: Request) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     // 2. Parse body
     const body = await request.json();
-    const { orgId, selectedConnectors } = body;
+    const { orgId, selectedConnectors, isDesignPartner } = body;
 
     if (!orgId) {
       return NextResponse.json(
@@ -67,14 +67,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Run provisioning
+    // 4. Set design partner flag if requested
+    if (isDesignPartner) {
+      await service
+        .from("organizations")
+        .update({ is_design_partner: true })
+        .eq("id", orgId);
+    }
+
+    // 5. Run provisioning
     const result = await provisionOrg(orgId, {
       selectedConnectors: Array.isArray(selectedConnectors)
         ? selectedConnectors
         : undefined,
     });
 
-    // 5. Return result
+    // 6. Return result
     return NextResponse.json(result);
   } catch (err: unknown) {
     console.error("[/api/org/provision] Error:", err);

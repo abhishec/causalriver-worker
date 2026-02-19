@@ -31,7 +31,7 @@ RUN apk add --no-cache python3 py3-pip make g++ curl github-cli && \
 # Install pnpm — pin exact version to match packageManager field in package.json
 # pnpm@9 (latest 9.x) has a different pnpmfileChecksum algorithm than 9.0.0
 # and will reject the lockfile with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
-RUN npm install -g pnpm@9.0.0
+RUN npm install -g pnpm@9.0.0 --prefer-offline
 
 WORKDIR /app
 
@@ -56,7 +56,8 @@ COPY platform/package.json ./platform/
 # ── Layer 3: Install ALL dependencies (not --prod!) ──
 # Scripts use tsx which needs TypeScript + type definitions at runtime.
 # pnpm install with hoisted linker will create workspace symlinks.
-RUN pnpm install --frozen-lockfile
+# --prefer-offline: use local store first → faster in CI with cache mounted
+RUN pnpm install --frozen-lockfile --prefer-offline
 
 # ── Layer 4: Copy source code ──
 # Copy ONLY what the brain-orchestrator needs:
@@ -91,7 +92,7 @@ RUN apk add --no-cache curl python3 py3-pip github-cli && \
     pip3 install --break-system-packages openai tqdm requests
 
 # Install pnpm + tsx globally (pnpm needed for `pnpm exec tsx` in docker-entrypoint.sh)
-RUN npm install -g pnpm@9.0.0 tsx
+RUN npm install -g pnpm@9.0.0 tsx --prefer-offline
 
 # Security: non-root user
 RUN addgroup -g 1001 -S nodejs && \

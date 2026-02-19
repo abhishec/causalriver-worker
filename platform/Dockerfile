@@ -25,12 +25,14 @@
 FROM node:20-alpine AS deps
 
 # Native module build tools (tree-sitter needs python3, make, g++)
+# Combine into one RUN to reduce layers
 RUN apk add --no-cache python3 make g++
 
 # Install pnpm — pin exact version to match packageManager field in package.json
 # pnpm@9 (latest 9.x) has a different pnpmfileChecksum algorithm than 9.0.0
 # and will reject the lockfile with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
-RUN npm install -g pnpm@9.0.0
+# Use --prefer-offline to maximise cache hit rate in CI.
+RUN npm install -g pnpm@9.0.0 --prefer-offline
 
 WORKDIR /app
 
@@ -50,14 +52,15 @@ COPY platform/package.json ./platform/
 
 # ── Layer 3: Install ALL dependencies ──
 # Need devDeps for tsup (memory-stack build) and Next.js build tooling.
-RUN pnpm install --frozen-lockfile
+# --prefer-offline: use local store first → faster in CI with cache mounted
+RUN pnpm install --frozen-lockfile --prefer-offline
 
 # ─────────────────────────────────────────────────────────────
 # Stage 2: Build everything
 # ─────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-RUN npm install -g pnpm@9.0.0
+RUN npm install -g pnpm@9.0.0 --prefer-offline
 
 WORKDIR /app
 
