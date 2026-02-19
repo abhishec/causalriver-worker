@@ -411,11 +411,14 @@ function parseRows(rows: unknown[][]): ParseResult {
     const row = rows[i] as unknown[];
     if (!row || row.length === 0) continue;
 
-    const firstCell = String(row[0] || "").trim();
-    if (!firstCell) continue;
+    // Check if row has any non-empty content
+    const nonEmptyCells = row.filter((c) => c !== null && c !== undefined && String(c).trim() !== "");
+    if (nonEmptyCells.length === 0) continue;
 
-    // Skip totals, subtotals, net movement rows
-    if (isSkipRow(firstCell)) {
+    const firstCell = String(row[0] || "").trim();
+
+    // Skip totals, subtotals, net movement rows (check first cell)
+    if (firstCell && isSkipRow(firstCell)) {
       skippedRows++;
       continue;
     }
@@ -426,12 +429,12 @@ function parseRows(rows: unknown[][]): ParseResult {
       continue;
     }
 
-    // Try to parse as a transaction
+    // Try to parse as a transaction using the DETECTED date column (not column 0)
     const dateRaw = colMap.date !== undefined ? row[colMap.date] : null;
     const dateStr = parseDate(dateRaw);
     if (!dateStr) {
       // Not a transaction row
-      if (firstCell && !isSkipRow(firstCell) && !isAccountHeader(row, colMap.date)) {
+      if (nonEmptyCells.length > 0 && firstCell && !isSkipRow(firstCell) && !isAccountHeader(row, colMap.date)) {
         parseErrors++;
       } else {
         skippedRows++;
