@@ -49,19 +49,18 @@ export interface PRReviewComment {
   confidence: number;
 }
 
-/** Causal cascade impact — added when Brain graph is available */
+/** Causal cascade impact — added when Brain graph is available.
+ *  All fields use business language; statistical internals are kept private. */
 export interface CausalCascadeImpact {
-  /** Domain affected (e.g. 'customer_success', 'revenue') */
+  /** Business domain affected (e.g. 'customer_success', 'revenue') */
   domain: string;
-  /** The causal relationship in plain English */
+  /** Human-readable business impact description — NO statistical terms */
   relationship: string;
-  /** Effect size from Granger causal graph */
+  /** Internal signal strength (0–1). NOT surfaced in UI — used only for sorting/severity */
   effectSize: number;
-  /** Confidence of the causal edge */
-  confidence: number;
-  /** Lag in days before downstream impact appears */
+  /** Approximate time before impact appears — expressed as a human phrase in UI */
   lagDays: number;
-  /** Severity label based on effectSize */
+  /** Business urgency label */
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
@@ -130,7 +129,7 @@ export const prReviewDomain = {
         },
         confidence: result.overallScore / 100,
         narrative: causalCascade.length > 0
-          ? `${result.summary}\n\n🧠 Brain causal cascade: This change to the engineering domain has ${causalCascade.length} downstream causal impact(s) — ${causalCascade.map(c => `${c.domain} (effect: ${c.effectSize.toFixed(2)}, lag: ${c.lagDays}d)`).join(', ')}.`
+          ? `${result.summary}\n\n🧠 Brain Business Impact: Merging this PR may have downstream effects on ${causalCascade.map(c => c.domain.replace(/_/g, ' ')).join(', ')}. ${causalCascade.filter(c => ['high','critical'].includes(c.severity)).length} impact(s) are high priority — review the Business Impact section before merging.`
           : result.summary,
         interventions: [
           ...result.recommendations.map((r, i) => ({
@@ -139,25 +138,25 @@ export const prReviewDomain = {
             description: r,
             priority: i < 3 ? 'high' : 'medium',
           })),
-          // Surface high-severity causal cascade items as interventions
+          // Surface high-urgency causal cascade items as business interventions
           ...causalCascade
             .filter(c => c.severity === 'high' || c.severity === 'critical')
             .map((c, i) => ({
               id: `cascade-${i}`,
-              type: 'causal_risk',
-              description: `⚡ Causal risk: ${c.relationship} (${c.domain}, effect_size ${c.effectSize.toFixed(2)}, manifests in ~${c.lagDays} days)`,
+              type: 'business_impact_risk',
+              description: `⚡ Business impact: ${c.relationship}`,
               priority: c.severity === 'critical' ? 'critical' : 'high',
             })),
         ],
         evidence: [
           {
             type: 'claude_review',
-            description: `Claude analyzed ${request.diff.split('\n').length} diff lines across ${result.comments.length} comments`,
+            description: `Claude reviewed ${request.diff.split('\n').length} diff lines with ${result.comments.length} code comments`,
             weight: 0.9,
           },
           ...(causalCascade.length > 0 ? [{
-            type: 'brain_causal_graph',
-            description: `Brain L4 causal graph: ${causalCascade.length} downstream causal edges from engineering domain`,
+            type: 'brain_business_impact',
+            description: `Brain identified ${causalCascade.length} downstream business area(s) likely to be affected by this change`,
             weight: 0.85,
           }] : []),
         ],
@@ -172,20 +171,22 @@ export const prReviewDomain = {
 /**
  * Extract causal cascade impacts from the Brain context (L4 causal graph).
  *
- * The Brain's causal_relationships_statistical table holds edges like:
- *   engineering → customer_success (effect_size 0.55, lag 45d, confidence 0.84)
- *   engineering → revenue (effect_size -0.65, lag 75d, confidence 0.91)
+ * The Brain's internal causal model contains edges like:
+ *   engineering → customer_success (various metrics, various time horizons)
+ *   engineering → revenue (various metrics, various time horizons)
  *
- * We surface these in PR reviews so developers see business-level ripple effects.
- * This is the "wow" insight: "This PR touches engineering which causally affects
- * NPS (effect 0.55) in ~45 days — make sure we have test coverage."
+ * We surface these in PR reviews so developers understand the BUSINESS IMPACT
+ * of what they're merging — expressed entirely in business language.
+ *
+ * IMPORTANT: Statistical internals (effect_size, p_values, confidence intervals)
+ * are used only for internal sorting/severity classification and are NEVER
+ * surfaced in the UI. The output uses only plain business language.
  */
 function buildCausalCascadeFromBrain(ctx: ActionDomainContext): CausalCascadeImpact[] {
-  // Brain context carries causal edges via ctx.brain.dag or ctx.brain.causalEdges
   const brain = ctx.brain as Record<string, any>;
   const edges: any[] = brain?.causalEdges ?? brain?.dag?.edges ?? [];
 
-  // Filter to edges where source domain is engineering (this PR's domain)
+  // Filter to edges where the source domain is engineering
   const engineeringEdges = edges.filter((e: any) =>
     (e.source_domain ?? e.sourceDomain ?? e.source ?? '').toLowerCase().includes('engineering')
   );
@@ -193,12 +194,17 @@ function buildCausalCascadeFromBrain(ctx: ActionDomainContext): CausalCascadeImp
   return engineeringEdges
     .filter((e: any) => (e.effect_size ?? e.effectSize ?? 0) !== 0)
     .map((e: any): CausalCascadeImpact => {
+      // Internal signal strength — used only for sorting/severity, never shown in UI
       const effectSize = Math.abs(e.effect_size ?? e.effectSize ?? 0);
-      const lagDays = e.lag ?? e.lag_days ?? e.lagDays ?? 0;
-      const confidence = e.confidence ?? e.p_value ?? 0.5;
+      const rawLagDays = e.lag ?? e.lag_days ?? e.lagDays ?? 30;
+      const isNegative = (e.effect_size ?? e.effectSize ?? 0) < 0;
       const targetDomain = e.target_domain ?? e.targetDomain ?? e.target ?? 'unknown';
       const targetMetric = e.target_metric ?? e.targetMetric ?? '';
-      const naturalLanguage = e.natural_language ?? e.naturalLanguage ?? `Engineering changes affect ${targetDomain}${targetMetric ? ` (${targetMetric})` : ''}`;
+
+      // Plain business language — no statistical terms
+      const naturalLanguage =
+        e.natural_language ?? e.naturalLanguage ??
+        buildBusinessLanguage(targetDomain, targetMetric, isNegative, rawLagDays);
 
       const severity: CausalCascadeImpact['severity'] =
         effectSize >= 0.7 ? 'critical' :
@@ -207,16 +213,80 @@ function buildCausalCascadeFromBrain(ctx: ActionDomainContext): CausalCascadeImp
 
       return {
         domain: targetDomain,
-        relationship: naturalLanguage,
-        effectSize,
-        confidence,
-        lagDays,
+        relationship: naturalLanguage,   // Business language only
+        effectSize,                      // Internal — NOT rendered in UI
+        lagDays: rawLagDays,            // Internal — UI converts to human time phrase
         severity,
       };
     })
-    // Sort by effect size descending — most impactful cascades first
+    // Sort by signal strength — most impactful business areas first
     .sort((a, b) => b.effectSize - a.effectSize)
-    .slice(0, 5); // Cap at 5 cascades to keep review focused
+    .slice(0, 5); // Cap at 5 to keep review focused
+}
+
+/**
+ * Generate plain business language for a causal impact.
+ * Called when no pre-existing natural_language field is available.
+ * NEVER includes statistical terminology.
+ */
+function buildBusinessLanguage(
+  domain: string,
+  metric: string,
+  isNegative: boolean,
+  lagDays: number
+): string {
+  const timePhrase =
+    lagDays <= 7  ? 'within the next week' :
+    lagDays <= 14 ? 'within the next two weeks' :
+    lagDays <= 30 ? 'over the next month' :
+    lagDays <= 60 ? 'over the next couple of months' :
+    lagDays <= 90 ? 'over the next quarter' : 'in the coming months';
+
+  const domainPhrases: Record<string, { neg: string; pos: string }> = {
+    customer_success: {
+      neg: `Customer satisfaction may decline ${timePhrase}`,
+      pos: `Customer satisfaction is likely to improve ${timePhrase}`,
+    },
+    revenue: {
+      neg: `Revenue or renewal rates may be impacted ${timePhrase}`,
+      pos: `Revenue performance may improve ${timePhrase}`,
+    },
+    churn: {
+      neg: `Customer churn risk may increase ${timePhrase}`,
+      pos: `Customer retention is likely to improve ${timePhrase}`,
+    },
+    support: {
+      neg: `Support ticket volume may increase ${timePhrase}`,
+      pos: `Support load may decrease ${timePhrase}`,
+    },
+    sales: {
+      neg: `Sales performance may be affected ${timePhrase}`,
+      pos: `Sales momentum may improve ${timePhrase}`,
+    },
+    nps: {
+      neg: `Team or customer sentiment scores may dip ${timePhrase}`,
+      pos: `Team or customer sentiment is likely to improve ${timePhrase}`,
+    },
+    operations: {
+      neg: `Operational costs or incidents may increase ${timePhrase}`,
+      pos: `Operational efficiency is likely to improve ${timePhrase}`,
+    },
+    product: {
+      neg: `Product adoption may slow ${timePhrase}`,
+      pos: `Product adoption is likely to improve ${timePhrase}`,
+    },
+  };
+
+  const key = Object.keys(domainPhrases).find((k) => domain.toLowerCase().includes(k));
+  if (key) {
+    return isNegative ? domainPhrases[key].neg : domainPhrases[key].pos;
+  }
+
+  const domainLabel = domain.replace(/_/g, ' ');
+  const metricNote = metric ? ` (${metric.replace(/_/g, ' ')})` : '';
+  return isNegative
+    ? `${domainLabel}${metricNote} may be negatively affected ${timePhrase}`
+    : `${domainLabel}${metricNote} is likely to benefit ${timePhrase}`;
 }
 
 async function reviewWithClaude(
