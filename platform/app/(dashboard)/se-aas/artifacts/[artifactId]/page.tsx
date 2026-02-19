@@ -1370,12 +1370,12 @@ function StatTile({
       danger
         ? "border-danger/30 bg-danger/5"
         : accent
-        ? "border-blue-500/30 bg-blue-500/5"
+        ? "border-accent/30 bg-accent/5"
         : "border-border-subtle bg-surface/40"
     }`}>
       <div className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</div>
       <div className={`text-lg font-bold tabular-nums leading-tight ${
-        danger ? "text-danger" : accent ? "text-blue-400" : "text-foreground"
+        danger ? "text-danger" : accent ? "text-accent-light" : "text-foreground"
       }`}>
         {value}
       </div>

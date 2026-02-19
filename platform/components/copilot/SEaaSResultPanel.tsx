@@ -303,9 +303,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function StatCard({ label, value, sub, accent = false }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
   return (
-    <div className={cn("rounded-xl border p-3 flex flex-col gap-0.5", accent ? "border-blue-500/30 bg-blue-500/5" : "border-border-subtle bg-surface/40")}>
+    <div className={cn("rounded-xl border p-3 flex flex-col gap-0.5", accent ? "border-accent/30 bg-accent/5" : "border-border-subtle bg-surface/40")}>
       <div className="text-[9px] font-semibold uppercase tracking-wider text-muted">{label}</div>
-      <div className={cn("text-[18px] font-bold tabular-nums leading-tight", accent ? "text-blue-400" : "text-foreground")}>{value}</div>
+      <div className={cn("text-[18px] font-bold tabular-nums leading-tight", accent ? "text-accent-light" : "text-foreground")}>{value}</div>
       {sub && <div className="text-[10px] text-muted">{sub}</div>}
     </div>
   );
@@ -353,13 +353,13 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
     <div className="flex flex-col h-full bg-card rounded-xl border border-border-subtle overflow-hidden">
 
       {/* ── Header strip ──────────────────────────────────────────────────────── */}
-      <div className="shrink-0 px-4 py-3 border-b border-border-subtle bg-gradient-to-r from-blue-500/5 via-transparent to-transparent">
+      <div className="shrink-0 px-4 py-3 border-b border-border-subtle bg-gradient-to-r from-accent/5 via-transparent to-transparent">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             {domainCfg ? (
               <span className={cn("shrink-0", domainCfg.accent)}>{domainCfg.icon}</span>
             ) : (
-              <svg className="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-3.5 h-3.5 text-accent-light shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
               </svg>
             )}
@@ -407,21 +407,21 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
             className={cn(
               "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium transition-all relative flex-1 justify-center",
               activeTab === tab.id
-                ? "text-blue-400 bg-blue-500/5"
+                ? "text-accent-light bg-accent/5"
                 : "text-muted hover:text-foreground hover:bg-surface/50",
               !hasData[tab.id] && "opacity-40"
             )}
           >
-            <span className={cn(activeTab === tab.id ? "text-blue-400" : "text-muted")}>{tab.icon}</span>
+            <span className={cn(activeTab === tab.id ? "text-accent-light" : "text-muted")}>{tab.icon}</span>
             {tab.label}
             {hasData[tab.id] && tab.id === "findings" && (sevCounts.critical ?? 0) > 0 && (
               <span className="w-1.5 h-1.5 rounded-full bg-danger shrink-0 animate-pulse" />
             )}
             {hasData[tab.id] && tab.id !== "findings" && (
-              <span className={cn("w-1 h-1 rounded-full shrink-0", activeTab === tab.id ? "bg-blue-400" : "bg-blue-500/40")} />
+              <span className={cn("w-1 h-1 rounded-full shrink-0", activeTab === tab.id ? "bg-accent-light" : "bg-accent/40")} />
             )}
             {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 rounded-t-full" />
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-light rounded-t-full" />
             )}
           </button>
         ))}
@@ -516,7 +516,7 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                     ))}
                   {data.findings.length > 3 && (
                     <button
-                      className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
+                      className="text-[11px] text-accent-light hover:text-accent transition-colors"
                       onClick={() => setActiveTab("findings")}
                     >
                       View all {data.findings.length} findings →
@@ -531,7 +531,7 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
               <div>
                 <SectionLabel>Top Action</SectionLabel>
                 <div
-                  className="flex items-start gap-2.5 p-2.5 rounded-lg border border-blue-500/20 bg-blue-500/5 cursor-pointer hover:bg-blue-500/10 transition-colors"
+                  className="flex items-start gap-2.5 p-2.5 rounded-lg border border-accent/20 bg-accent/5 cursor-pointer hover:bg-accent/10 transition-colors"
                   onClick={() => setActiveTab("recommendations")}
                 >
                   <PriorityIcon priority={data.recommendations[0].priority} />
@@ -542,7 +542,7 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                 </div>
                 {data.recommendations.length > 1 && (
                   <button
-                    className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors mt-1.5"
+                    className="text-[11px] text-accent-light hover:text-accent transition-colors mt-1.5"
                     onClick={() => setActiveTab("recommendations")}
                   >
                     +{data.recommendations.length - 1} more actions →
@@ -554,8 +554,8 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
             {/* Empty state */}
             {!data.summary && !data.findings?.length && !data.recommendations?.length && (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-3">
-                  <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-3">
+                  <svg className="w-6 h-6 text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                   </svg>
                 </div>
