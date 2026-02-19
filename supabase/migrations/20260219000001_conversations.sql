@@ -16,9 +16,13 @@ CREATE TABLE IF NOT EXISTS conversations (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Link artifacts to conversations
-ALTER TABLE se_aas_artifacts
-  ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL;
+-- Link artifacts to conversations (guard: se_aas_artifacts may not exist yet in all envs)
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'se_aas_artifacts') THEN
+    ALTER TABLE se_aas_artifacts
+      ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- ── Indexes ──────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_conversations_org_user
@@ -27,9 +31,16 @@ CREATE INDEX IF NOT EXISTS idx_conversations_org_user
 CREATE INDEX IF NOT EXISTS idx_conversations_updated
   ON conversations(updated_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_se_aas_artifacts_conversation
-  ON se_aas_artifacts(conversation_id)
-  WHERE conversation_id IS NOT NULL;
+-- Guard: only create if se_aas_artifacts exists
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'se_aas_artifacts') THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_se_aas_artifacts_conversation') THEN
+      CREATE INDEX idx_se_aas_artifacts_conversation
+        ON se_aas_artifacts(conversation_id)
+        WHERE conversation_id IS NOT NULL;
+    END IF;
+  END IF;
+END $$;
 
 -- ── Auto-update updated_at trigger ──────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_conversations_updated_at()
