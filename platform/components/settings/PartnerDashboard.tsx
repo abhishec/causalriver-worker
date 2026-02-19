@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -64,22 +65,41 @@ export function PartnerDashboard({ orgId, orgName }: PartnerDashboardProps) {
     }
   }, []);
 
-  // Fetch usage data from se_aas_artifacts
+  // Fetch usage data from se_aas_artifacts — group by domain_type with counts
   const fetchUsage = useCallback(async () => {
     setLoadingUsage(true);
     try {
-      const res = await fetch(`/api/partner/activation`);
-      if (res.ok) {
-        // We'll piggyback on activation API for now, but also need domain usage
-        // For domain usage, we query client-side via supabase
-        // Actually, let's create a lightweight approach using just the artifacts
+      const supabase = createClient();
+      const { data: artifacts } = await supabase
+        .from("se_aas_artifacts")
+        .select("domain_type, created_at")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .limit(500);
+
+      if (artifacts && artifacts.length > 0) {
+        // Group by domain_type and count
+        const counts: Record<string, { count: number; last_used: string | null }> = {};
+        for (const a of artifacts) {
+          const dt = a.domain_type;
+          if (!counts[dt]) counts[dt] = { count: 0, last_used: null };
+          counts[dt].count++;
+          if (!counts[dt].last_used) counts[dt].last_used = a.created_at;
+        }
+        setUsage(
+          Object.entries(counts).map(([domain_type, { count, last_used }]) => ({
+            domain_type,
+            count,
+            last_used,
+          }))
+        );
       }
     } catch {
       // Silently fail
     } finally {
       setLoadingUsage(false);
     }
-  }, []);
+  }, [orgId]);
 
   useEffect(() => {
     fetchActivation();

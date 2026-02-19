@@ -4,7 +4,7 @@
 
 import * as readline from "readline";
 
-const PLATFORM_URL = "https://platform.usebrainos.com";
+const PLATFORM_URL = process.env.PLATFORM_URL || "http://localhost:3001";
 const DEMO_ORG_ID  = "00000000-0000-4000-b000-000000000001";
 const history      = [];
 
@@ -76,7 +76,7 @@ rl.on("line", async (line) => {
 
   } catch (err) {
     console.error(`\n[Error] ${err.message}`);
-    console.error("  Is the platform running at localhost:3001?");
+    console.error(`  Is the platform running at ${PLATFORM_URL}?`);
   }
 
   console.log("\n");

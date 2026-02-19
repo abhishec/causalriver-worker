@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     // 2. Parse body
     const body = await request.json();
-    const { orgId, selectedConnectors, isDesignPartner } = body;
+    const { orgId, selectedConnectors, isDesignPartner, selectedRepos } = body;
 
     if (!orgId) {
       return NextResponse.json(
@@ -67,22 +67,49 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Set design partner flag if requested
+    // 4. Set design partner flag if requested (on both organizations and parent customer)
     if (isDesignPartner) {
       await service
         .from("organizations")
         .update({ is_design_partner: true })
         .eq("id", orgId);
+
+      // Also sync to parent customer if one exists
+      const { data: org } = await service
+        .from("organizations")
+        .select("customer_id")
+        .eq("id", orgId)
+        .maybeSingle();
+
+      if (org?.customer_id) {
+        await service
+          .from("customers")
+          .update({ is_design_partner: true })
+          .eq("id", org.customer_id);
+      }
     }
 
-    // 5. Run provisioning
+    // 5. Save selected repos to GitHub connector config if any
+    if (Array.isArray(selectedRepos) && selectedRepos.length > 0) {
+      await service
+        .from("org_connectors")
+        .update({
+          config: {
+            tracked_repos: selectedRepos,
+          },
+        })
+        .eq("organization_id", orgId)
+        .eq("connector_type", "github");
+    }
+
+    // 6. Run provisioning
     const result = await provisionOrg(orgId, {
       selectedConnectors: Array.isArray(selectedConnectors)
         ? selectedConnectors
         : undefined,
     });
 
-    // 6. Return result
+    // 7. Return result
     return NextResponse.json(result);
   } catch (err: unknown) {
     console.error("[/api/org/provision] Error:", err);

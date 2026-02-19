@@ -83,9 +83,10 @@ export async function updateSession(request: NextRequest) {
 
   // Onboarding check: if user is logged in, check if they've completed onboarding
   // Skip for invite pages (they should be able to accept invites without onboarding)
+  // Use !onboarding_complete to catch both `false` and `undefined` (new OAuth users)
   if (user && !isPublicRoute && !isOnboarding && !isInvitePage) {
     const meta = user.user_metadata;
-    if (meta && meta.onboarding_complete === false) {
+    if (!meta?.onboarding_complete) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);

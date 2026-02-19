@@ -183,6 +183,7 @@ export default function OnboardingPage() {
           orgId,
           selectedConnectors,
           isDesignPartner,
+          selectedRepos,
         }),
       });
 
@@ -219,7 +220,7 @@ export default function OnboardingPage() {
       provisionStarted.current = false;
       console.error("[Onboarding] Provision error:", err);
     }
-  }, [orgId, selectedConnectors, isDesignPartner]);
+  }, [orgId, selectedConnectors, isDesignPartner, selectedRepos]);
 
   // Trigger provisioning when entering Step 3
   useEffect(() => {

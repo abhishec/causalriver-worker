@@ -115,8 +115,8 @@ export async function GET() {
       completedItems.push("ask_copilot");
     }
 
-    // 8. Generate artifact
-    if (artifacts.length > 0) {
+    // 8. Generate artifact (needs a domain-specific artifact, not just a chat)
+    if (artifactDomains.size > 0) {
       completedItems.push("generate_artifact");
     }
 
@@ -181,15 +181,15 @@ export async function POST(request: Request) {
 
       await service
         .from("org_settings")
-        .update({
+        .upsert({
+          organization_id: orgId,
           partner_activation: {
             ...existing,
             checklist_dismissed: true,
             dismissed_at: new Date().toISOString(),
             dismissed_by: user.id,
           },
-        })
-        .eq("organization_id", orgId);
+        }, { onConflict: "organization_id" });
 
       return NextResponse.json({ success: true });
     }

@@ -57,14 +57,14 @@ export async function POST(request: Request) {
 
     await service
       .from("org_settings")
-      .update({
+      .upsert({
+        organization_id: orgId,
         partner_activation: {
           ...existing,
           feedback_history: feedbackHistory,
           last_feedback_at: new Date().toISOString(),
         },
-      })
-      .eq("organization_id", orgId);
+      }, { onConflict: "organization_id" });
 
     return NextResponse.json({ success: true, id: newEntry.id });
   } catch (err) {

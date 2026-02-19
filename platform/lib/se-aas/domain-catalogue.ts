@@ -374,7 +374,7 @@ export function groupByCategory<T extends { category?: string }>(
   items: T[]
 ): Record<string, T[]> {
   return items.reduce<Record<string, T[]>>((acc, item) => {
-    const key = (item as any).category ?? "Other";
+    const key = item.category ?? "Other";
     if (!acc[key]) acc[key] = [];
     acc[key].push(item);
     return acc;

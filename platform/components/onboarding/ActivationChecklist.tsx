@@ -12,8 +12,7 @@
  * accent gradient header with ProgressRing.
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ProgressRing } from "@/components/ui/ProgressRing";
@@ -85,7 +84,7 @@ const CHECKLIST_ITEMS: Array<{
     href: "/se-aas",
   },
   {
-    id: "configure_notifications",
+    id: "configure_digest",
     label: "Configure notifications",
     description: "Set up digest emails and alert preferences",
     href: "/settings?tab=notifications",
@@ -93,7 +92,7 @@ const CHECKLIST_ITEMS: Array<{
 ];
 
 export function ActivationChecklist({ orgName, onDismiss }: ActivationChecklistProps) {
-  const router = useRouter();
+  const abortRef = useRef<AbortController | null>(null);
   const [items, setItems] = useState<ActivationItem[]>(
     CHECKLIST_ITEMS.map((item) => ({ ...item, completed: item.id === "create_org" }))
   );
@@ -108,7 +107,11 @@ export function ActivationChecklist({ orgName, onDismiss }: ActivationChecklistP
   // Fetch activation state from API
   const fetchActivation = useCallback(async () => {
     try {
-      const res = await fetch("/api/partner/activation");
+      abortRef.current?.abort();
+      abortRef.current = new AbortController();
+      const res = await fetch("/api/partner/activation", {
+        signal: abortRef.current.signal,
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.dismissed) {
@@ -123,7 +126,8 @@ export function ActivationChecklist({ orgName, onDismiss }: ActivationChecklistP
           }))
         );
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       // Silently fail — show defaults
     } finally {
       setLoading(false);
@@ -132,12 +136,16 @@ export function ActivationChecklist({ orgName, onDismiss }: ActivationChecklistP
 
   useEffect(() => {
     fetchActivation();
+    return () => abortRef.current?.abort();
   }, [fetchActivation]);
 
   // Poll for updates every 30s (items complete as user takes actions in other tabs)
   useEffect(() => {
     const interval = setInterval(fetchActivation, 30_000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      abortRef.current?.abort();
+    };
   }, [fetchActivation]);
 
   async function handleDismiss() {

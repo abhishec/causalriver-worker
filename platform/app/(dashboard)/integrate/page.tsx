@@ -12,8 +12,8 @@ const QUICK_STEPS = [
     code: `import { NexusBrain } from '@nexusbrain/sdk';
 
 const brain = new NexusBrain({
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_KEY,
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   organizationId: 'your-org-id',
 });`,
   },
