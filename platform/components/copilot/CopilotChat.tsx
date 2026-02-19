@@ -3,7 +3,12 @@
 import { useState, useRef, useEffect, useCallback, useId, FormEvent } from "react";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
+import { useTheme } from "@/lib/theme-context";
 import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
+import { ThinkingBlock } from "./ThinkingBlock";
+import { SlashCommandPicker, ALL_SLASH_COMMANDS, type SlashCommand } from "./SlashCommandPicker";
+import { ServiceBadge } from "./ServiceBadge";
+import { ARTIFACT_TYPE_ICONS } from "./types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -123,6 +128,16 @@ export interface CopilotChatProps {
   activeService?: "general" | "aas" | "seaas";
   /** Pre-configured branches from the GitHub connector (overrides internal fetch) */
   trackedBranches?: string[];
+  /** Map of message index → artifacts produced by that message (for inline link footer) */
+  messageArtifacts?: Map<number, { id: string; type: string; title: string }[]>;
+  /** Callback when user clicks an artifact link in a message footer */
+  onOpenArtifact?: (artifactId: string) => void;
+  /** Callback when user changes service mode via slash command */
+  onServiceChange?: (service: "general" | "aas" | "seaas") => void;
+  /** Called when a slash command auto-opens the artifact pane */
+  onArtifactPaneOpen?: () => void;
+  /** Called after each completed assistant stream to persist conversation */
+  onSave?: (opts: { messages: Message[]; title: string; serviceMode: string }) => void;
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -236,6 +251,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const uniqueId = useId();
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     let cancelled = false;
@@ -243,19 +259,31 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
     (async () => {
       try {
         const mermaid = (await import("mermaid")).default;
+        const isDark = resolvedTheme === "dark";
         mermaid.initialize({
           startOnLoad: false,
-          theme: "dark",
-          themeVariables: {
-            darkMode: true,
-            background: "#0d1117",
-            primaryColor: "#58a6ff",
-            primaryTextColor: "#e6edf3",
-            primaryBorderColor: "#30363d",
-            lineColor: "#8b949e",
-            secondaryColor: "#161b22",
-            tertiaryColor: "#21262d",
-          },
+          theme: isDark ? "dark" : "default",
+          themeVariables: isDark
+            ? {
+                darkMode: true,
+                background: "#0d1117",
+                primaryColor: "#58a6ff",
+                primaryTextColor: "#e6edf3",
+                primaryBorderColor: "#30363d",
+                lineColor: "#8b949e",
+                secondaryColor: "#161b22",
+                tertiaryColor: "#21262d",
+              }
+            : {
+                darkMode: false,
+                background: "#ffffff",
+                primaryColor: "#4f87f7",
+                primaryTextColor: "#1a1a2e",
+                primaryBorderColor: "#d0d7de",
+                lineColor: "#636c76",
+                secondaryColor: "#f6f8fa",
+                tertiaryColor: "#eaeef2",
+              },
           flowchart: { htmlLabels: true, curve: "basis" },
           securityLevel: "strict",
         });
@@ -269,7 +297,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
     })();
 
     return () => { cancelled = true; };
-  }, [code, blockKey, uniqueId]);
+  }, [code, blockKey, uniqueId, resolvedTheme]);
 
   if (error) {
     return (
@@ -1245,6 +1273,11 @@ export function CopilotChat({
   onDomainResult,
   activeService = "general",
   trackedBranches: trackedBranchesProp,
+  messageArtifacts,
+  onOpenArtifact,
+  onServiceChange,
+  onArtifactPaneOpen,
+  onSave,
 }: CopilotChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1254,6 +1287,13 @@ export function CopilotChat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
+  const [brainMetaPerMessage, setBrainMetaPerMessage] = useState<Map<number, BrainMeta>>(new Map());
+
+  // ── Slash command picker state ───────────────────────────────────────────
+  const [showSlashPicker, setShowSlashPicker] = useState(false);
+  const [slashQuery, setSlashQuery] = useState("");
 
   // ── Branch selector state ─────────────────────────────────────────────
   // Branches come from: prop override → fetched from GitHub status API → empty
@@ -1289,6 +1329,8 @@ export function CopilotChat({
   onBrainMetaRef.current = onBrainMeta;
   const onDomainResultRef = useRef(onDomainResult);
   onDomainResultRef.current = onDomainResult;
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
   const selectedBranchRef = useRef(selectedBranch);
   selectedBranchRef.current = selectedBranch;
 
@@ -1401,6 +1443,12 @@ export function CopilotChat({
           onBrainMeta: (meta) => {
             if (controller.signal.aborted) return;
             setBrainMeta(meta);
+            // Store brainMeta for this specific assistant message index
+            setBrainMetaPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, meta);
+              return next;
+            });
             // Bug fix #7: Forward brain meta to parent via callback
             onBrainMetaRef.current?.(meta);
           },
@@ -1421,6 +1469,20 @@ export function CopilotChat({
               const artifactCb = onArtifactRef.current;
               if (artifactCb) {
                 extractArtifacts(finalAssistantContent, trimmed, messageIdx).forEach((a) => artifactCb(a));
+              }
+
+              // Persist conversation via onSave callback
+              const saveCb = onSaveRef.current;
+              if (saveCb) {
+                // Auto-generate title from first user message
+                const allMsgs = messagesRef.current;
+                const firstUser = allMsgs.find((m) => m.role === "user");
+                const title = firstUser
+                  ? firstUser.content.length > 60
+                    ? firstUser.content.slice(0, 57) + "..."
+                    : firstUser.content
+                  : "Untitled conversation";
+                saveCb({ messages: allMsgs, title, serviceMode: activeService });
               }
             }
           },
@@ -1572,87 +1634,112 @@ export function CopilotChat({
             </div>
           </div>
         ) : (
-          /* Message list */
+          /* Message list — centered single-column layout (Claude Code / Cowork style) */
           <>
             {messages.map((msg, i) => {
               const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
+              const msgBrainMeta = brainMetaPerMessage.get(i);
+              const artifacts = messageArtifacts?.get(i);
 
               return (
                 <div
                   key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
-                  className={cn(
-                    "group flex gap-3 max-w-4xl animate-message-in",
-                    msg.role === "user"
-                      ? "ml-auto flex-row-reverse"
-                      : "mr-auto"
-                  )}
+                  className="max-w-3xl mx-auto w-full animate-message-in"
                 >
-                  {/* Avatar */}
-                  {msg.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg
-                        className="w-4 h-4 text-accent"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                        />
-                      </svg>
-                    </div>
+                  {/* ThinkingBlock — shown above assistant messages that have brainMeta */}
+                  {msg.role === "assistant" && msgBrainMeta && (
+                    <ThinkingBlock
+                      brainMeta={msgBrainMeta}
+                      isStreaming={isLastAssistant && isLoading}
+                    />
                   )}
 
-                  {/* Bubble + Actions */}
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className={cn(
-                        "rounded-xl px-4 py-3 text-sm leading-relaxed",
-                        msg.role === "user"
-                          ? "bg-accent text-accent-foreground max-w-md ml-auto shadow-[var(--shadow-sm)]"
-                          : "bg-card border border-border-subtle text-foreground shadow-[var(--shadow-card)]"
-                      )}
-                    >
-                      {msg.content ? (
-                        msg.role === "assistant" ? (
-                          <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
-                            {renderMarkdown(msg.content)}
-                          </div>
-                        ) : (
-                          msg.content
-                        )
-                      ) : (
-                        /* Loading dots — gentler pulse instead of bounce */
-                        <span className="inline-flex items-center gap-1.5 py-1">
-                          <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:0ms]" />
-                          <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:200ms]" />
-                          <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:400ms]" />
-                        </span>
-                      )}
+                  {msg.role === "user" ? (
+                    /* ── User bubble — right-aligned within centered container ── */
+                    <div className="flex justify-end">
+                      <div className="bg-accent/8 border border-accent/15 rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed text-foreground max-w-md shadow-[var(--shadow-sm)]">
+                        {msg.content}
+                      </div>
                     </div>
+                  ) : (
+                    /* ── Assistant message — full width within centered container ── */
+                    <div className="group">
+                      <div className="flex gap-3">
+                        {/* Avatar */}
+                        <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
+                          <svg
+                            className="w-4 h-4 text-accent"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                            />
+                          </svg>
+                        </div>
 
-                    {/* Message actions (copy, regenerate) — appear on hover */}
-                    {msg.role === "assistant" && msg.content && !isLoading && (
-                      <MessageActions
-                        content={msg.content}
-                        onRegenerate={isLastAssistant ? handleRegenerate : undefined}
-                        isLast={isLastAssistant}
-                        messageIndex={i}
-                        organizationId={extraParams?.organizationId as string | undefined}
-                        conversationId={conversationId}
-                      />
-                    )}
-                  </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm leading-relaxed text-foreground">
+                            {msg.content ? (
+                              <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
+                                {renderMarkdown(msg.content)}
+                              </div>
+                            ) : (
+                              /* Loading dots */
+                              <span className="inline-flex items-center gap-1.5 py-1">
+                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:0ms]" />
+                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:200ms]" />
+                                <span className="w-2 h-2 rounded-full bg-accent/50 animate-pulse [animation-delay:400ms]" />
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Artifact link footer — clickable buttons for artifacts produced by this message */}
+                          {artifacts && artifacts.length > 0 && onOpenArtifact && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {artifacts.map((a) => (
+                                <button
+                                  key={a.id}
+                                  type="button"
+                                  onClick={() => onOpenArtifact(a.id)}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface border border-border-subtle text-[11px] text-muted-foreground hover:text-foreground hover:border-accent/30 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5 text-accent/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d={ARTIFACT_TYPE_ICONS[a.type as keyof typeof ARTIFACT_TYPE_ICONS] || ARTIFACT_TYPE_ICONS.document} />
+                                  </svg>
+                                  {a.title}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Message actions (copy, regenerate) — appear on hover */}
+                          {msg.content && !isLoading && (
+                            <MessageActions
+                              content={msg.content}
+                              onRegenerate={isLastAssistant ? handleRegenerate : undefined}
+                              isLast={isLastAssistant}
+                              messageIndex={i}
+                              organizationId={extraParams?.organizationId as string | undefined}
+                              conversationId={conversationId}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
 
             {/* Follow-up suggestions — shown after last assistant response */}
             {followUps.length > 0 && !isLoading && (
-              <div className="stagger-chip-in flex flex-wrap gap-2 max-w-4xl pt-3 pl-11">
+              <div className="stagger-chip-in flex flex-wrap gap-2 max-w-3xl mx-auto w-full pt-3 pl-11">
                 {followUps.map((suggestion) => (
                   <button
                     key={suggestion}
@@ -1709,23 +1796,82 @@ export function CopilotChat({
         )}
 
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
+          {/* Active service badge — shown when a slash command set the service mode */}
+          {activeService !== "general" && onServiceChange && (
+            <div className="absolute left-3 top-2.5 z-10">
+              <ServiceBadge
+                service={activeService}
+                onClear={() => onServiceChange("general")}
+              />
+            </div>
+          )}
+
+          {/* Slash command picker — floating above the input */}
+          {showSlashPicker && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 z-20">
+              <SlashCommandPicker
+                query={slashQuery}
+                onSelect={(cmd: SlashCommand) => {
+                  setShowSlashPicker(false);
+                  setSlashQuery("");
+                  // Set the prompt from the selected command
+                  setInput(cmd.prompt);
+                  // Switch service mode if needed
+                  if (cmd.service !== "general" && onServiceChange) {
+                    onServiceChange(cmd.service);
+                  }
+                  // Auto-open artifact pane
+                  onArtifactPaneOpen?.();
+                  inputRef.current?.focus();
+                }}
+                onClose={() => {
+                  setShowSlashPicker(false);
+                  setSlashQuery("");
+                }}
+              />
+            </div>
+          )}
+
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => {
-              setInput(e.target.value);
+              const val = e.target.value;
+              setInput(val);
               // Auto-grow: reset height, then set to scrollHeight (capped at 200px)
               const el = e.target;
               el.style.height = "auto";
               el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+
+              // Slash command detection: if the input starts with "/" or user just typed "/"
+              if (val === "/") {
+                setShowSlashPicker(true);
+                setSlashQuery("");
+              } else if (val.startsWith("/") && !val.includes(" ")) {
+                setShowSlashPicker(true);
+                setSlashQuery(val.slice(1));
+              } else if (showSlashPicker) {
+                setShowSlashPicker(false);
+                setSlashQuery("");
+              }
             }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              // Close slash picker on Escape
+              if (e.key === "Escape" && showSlashPicker) {
+                e.preventDefault();
+                setShowSlashPicker(false);
+                setSlashQuery("");
+                return;
+              }
+              handleKeyDown(e);
+            }}
             placeholder="Ask NexusBrain anything..."
             rows={1}
             disabled={isLoading}
             className={cn(
               "w-full resize-none rounded-xl bg-input border border-input-border",
               "px-4 py-3 pr-24 text-sm text-foreground placeholder:text-muted",
+              activeService !== "general" && onServiceChange ? "pl-24" : "",
               "shadow-[var(--shadow-input)]",
               "focus:outline-none focus:shadow-[var(--shadow-input-focus)] focus:border-input-focus",
               "disabled:opacity-50 disabled:cursor-not-allowed",
@@ -1781,7 +1927,7 @@ export function CopilotChat({
           </div>
         </form>
         <p className="text-center text-[10px] text-muted/50 mt-2">
-          Powered by NexusBrain&apos;s causal intelligence engine
+          Type <span className="font-mono text-muted/70">/</span> for commands &middot; Powered by NexusBrain
         </p>
       </div>
     </div>

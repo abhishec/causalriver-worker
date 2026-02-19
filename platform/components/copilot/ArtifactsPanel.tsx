@@ -4,21 +4,29 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
 import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
+import { DomainResultRenderer } from "@/components/copilot/DomainResultRenderer";
+import { useTheme } from "@/lib/theme-context";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface Artifact {
   id: string;
-  type: "code" | "analysis" | "table" | "chart" | "document";
+  type: "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram";
   title: string;
   language?: string;
   content: string;
+  /** Parsed domain data for rich rendering (financial statements, engineering analysis) */
+  rawData?: unknown;
   /** Timestamp when the artifact was created */
   createdAt: number;
   /** Whether the user has pinned this artifact */
   pinned?: boolean;
   /** Source message index in the conversation */
   messageIndex?: number;
+  /** Which service produced this artifact */
+  service?: "general" | "aas" | "seaas";
+  /** Domain ID (e.g. "pr-review", "balance-sheet") */
+  domainId?: string;
 }
 
 export interface ArtifactsPanelProps {
@@ -166,9 +174,22 @@ function ArtifactTypeIcon({ type }: { type: Artifact["type"] }) {
         </svg>
       );
     case "analysis":
+    case "engineering-analysis":
       return (
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+      );
+    case "financial-statement":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+        </svg>
+      );
+    case "mermaid-diagram":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
         </svg>
       );
     case "table":
@@ -226,6 +247,48 @@ function ShikiCodeViewer({ code, language, wordWrap }: { code: string; language:
     </pre>
   );
 }
+
+// ─── Mermaid Viewer ─────────────────────────────────────────────────────────
+
+function MermaidViewer({ code }: { code: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: resolvedTheme === "dark" ? "dark" : "default",
+          securityLevel: "loose",
+        });
+        if (cancelled || !containerRef.current) return;
+        const id = `mermaid-artifact-${Date.now()}`;
+        const { svg } = await mermaid.render(id, code);
+        if (!cancelled && containerRef.current) {
+          containerRef.current.innerHTML = svg;
+        }
+      } catch {
+        if (!cancelled && containerRef.current) {
+          containerRef.current.innerHTML = `<pre class="text-sm text-muted p-4">${code}</pre>`;
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [code, resolvedTheme]);
+
+  return <div ref={containerRef} className="p-4 flex items-center justify-center min-h-[200px]" />;
+}
+
+// ─── Service Badge for artifact history ─────────────────────────────────────
+
+const SERVICE_COLORS: Record<string, string> = {
+  aas: "bg-emerald-500/10 text-emerald-500",
+  seaas: "bg-blue-500/10 text-blue-500",
+  general: "bg-accent/10 text-accent",
+};
 
 // ─── Artifacts Panel Component ──────────────────────────────────────────────
 
@@ -411,7 +474,7 @@ export function ArtifactsPanel({
             </div>
           </div>
 
-          {/* Code / Chart / Content viewer */}
+          {/* Code / Chart / Domain / Content viewer */}
           <div className="flex-1 overflow-auto">
             {activeArtifact.type === "chart" ? (
               (() => {
@@ -424,6 +487,18 @@ export function ArtifactsPanel({
                   <div className="px-4 py-3 text-sm text-muted">Could not render chart data</div>
                 );
               })()
+            ) : activeArtifact.type === "financial-statement" || activeArtifact.type === "engineering-analysis" ? (
+              <div className="p-4 overflow-auto">
+                <DomainResultRenderer
+                  result={
+                    activeArtifact.service === "aas"
+                      ? { service: "aas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
+                      : { service: "seaas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
+                  }
+                />
+              </div>
+            ) : activeArtifact.type === "mermaid-diagram" ? (
+              <MermaidViewer code={activeArtifact.content} />
             ) : activeArtifact.type === "code" ? (
               <ShikiCodeViewer
                 code={activeArtifact.content}
@@ -433,7 +508,6 @@ export function ArtifactsPanel({
             ) : (
               <div className="px-4 py-3 text-sm text-muted-foreground leading-relaxed">
                 {activeArtifact.content.split("\n").map((line, i) => {
-                  // Simple markdown rendering for analysis results
                   if (line.startsWith("# ")) return <h2 key={i} className="text-base font-semibold mt-4 mb-2 text-foreground">{line.slice(2)}</h2>;
                   if (line.startsWith("## ")) return <h3 key={i} className="text-sm font-semibold mt-3 mb-1.5 text-foreground">{line.slice(3)}</h3>;
                   if (line.startsWith("### ")) return <h4 key={i} className="text-xs font-semibold mt-2 mb-1 text-muted-foreground uppercase tracking-wider">{line.slice(4)}</h4>;
@@ -498,6 +572,11 @@ export function ArtifactsPanel({
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-muted">
+                    {artifact.service && artifact.service !== "general" && (
+                      <span className={cn("px-1 py-0.5 rounded text-[9px] font-medium", SERVICE_COLORS[artifact.service])}>
+                        {artifact.service === "aas" ? "AAS" : "SE-aaS"}
+                      </span>
+                    )}
                     {artifact.language && (
                       <span className="px-1 py-0.5 rounded bg-surface text-[9px] uppercase font-medium">
                         {LANG_LABELS[artifact.language.toLowerCase()] || artifact.language}

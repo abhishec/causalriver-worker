@@ -12,13 +12,14 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const domainType = url.searchParams.get("domainType") || undefined;
+    const conversationId = url.searchParams.get("conversationId") || undefined;
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
     const offset = parseInt(url.searchParams.get("offset") || "0", 10);
 
     const { artifacts, total } = await listArtifacts(
       auth.supabase,
       auth.organizationId,
-      { domainType, limit, offset }
+      { domainType, conversationId, limit, offset }
     );
 
     return createSeAaSResponse(request, {

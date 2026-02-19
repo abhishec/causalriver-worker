@@ -1,48 +1,54 @@
 @import "tailwindcss";
 
-/* ── NexusBrain Platform — Intelligence Command Center Theme ───────────────── */
+/* ── NexusBrain Platform — Dual Theme (Light default + Dark) ──────────────── */
+
+/*
+ * Tailwind v4 requires @theme for token registration.
+ * We register all tokens here (dark values as base since they were original),
+ * then override with :root (light) and html.dark (dark) CSS blocks.
+ */
 
 @theme {
   /* ── Backgrounds ──────────────────────────────────────────────────────────── */
-  --color-background: #09090b;
-  --color-foreground: #e4e4e7;
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
   --color-muted: #71717a;
-  --color-muted-foreground: #a1a1aa;
+  --color-muted-foreground: #52525b;
 
   /* ── Surfaces (layered depth) ─────────────────────────────────────────────── */
-  --color-surface: #0c0c10;
-  --color-surface-hover: #14141f;
-  --color-card: #0f1019;
-  --color-card-hover: #141520;
-  --color-card-foreground: #e4e4e7;
-  --color-surface-elevated: #12121a;
-  --color-surface-active: #18182a;
+  --color-surface: #fafafa;
+  --color-surface-hover: #f4f4f5;
+  --color-card: #ffffff;
+  --color-card-hover: #f9f9fb;
+  --color-card-foreground: #09090b;
+  --color-surface-elevated: #f9f9fb;
+  --color-surface-active: #f4f4f5;
 
   /* ── Borders ──────────────────────────────────────────────────────────────── */
-  --color-border: #1e1e2e;
-  --color-border-subtle: #141420;
+  --color-border: #e4e4e7;
+  --color-border-subtle: #f0f0f2;
 
-  /* ── Accent (blue-violet, distinctive) ────────────────────────────────────── */
+  /* ── Accent (blue-violet, distinctive — same in both themes) ─────────────── */
   --color-accent: #7c6cf0;
   --color-accent-dark: #6558d4;
   --color-accent-light: #9b8ff8;
   --color-accent-foreground: #ffffff;
-  --color-accent-subtle: rgba(124, 108, 240, 0.08);
-  --color-accent-muted: rgba(124, 108, 240, 0.15);
+  --color-accent-subtle: rgba(124, 108, 240, 0.06);
+  --color-accent-muted: rgba(124, 108, 240, 0.12);
 
   /* ── Semantic Colors ──────────────────────────────────────────────────────── */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
 
-  /* ── Brain State Colors ───────────────────────────────────────────────────── */
-  --color-brain-active: #34d399;
-  --color-brain-training: #a78bfa;
-  --color-brain-discovery: #38bdf8;
-  --color-brain-alert: #fbbf24;
+  /* ── Brain State Colors ─────────────────────────────────────────────────── */
+  --color-brain-active: #10b981;
+  --color-brain-training: #8b5cf6;
+  --color-brain-discovery: #0ea5e9;
+  --color-brain-alert: #eab308;
 
-  /* ── Domain Colors ────────────────────────────────────────────────────────── */
+  /* ── Domain Colors ──────────────────────────────────────────────────────── */
   --color-domain-finance: #10b981;
   --color-domain-engineering: #3b82f6;
   --color-domain-sales: #f43f5e;
@@ -54,19 +60,75 @@
   --color-domain-communication: #14b8a6;
 
   /* ── Sidebar ──────────────────────────────────────────────────────────────── */
-  --color-sidebar: #08080d;
-  --color-sidebar-hover: #0f0f17;
+  --color-sidebar: #f8f8fa;
+  --color-sidebar-hover: #f0f0f4;
 
-  /* ── Inputs ───────────────────────────────────────────────────────────────── */
-  --color-input: #12121a;
-  --color-input-border: #1e1e2e;
+  /* ── Inputs ─────────────────────────────────────────────────────────────── */
+  --color-input: #ffffff;
+  --color-input-border: #e4e4e7;
   --color-input-focus: #7c6cf0;
 
-  /* ── Fonts ────────────────────────────────────────────────────────────────── */
+  /* ── Fonts ──────────────────────────────────────────────────────────────── */
   --font-sans: "Geist", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
 
-  /* ── Shadows (Apple-grade layered depth system) ─────────────────────────── */
+  /* ── Shadows (light theme — softer) ────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(124, 108, 240, 0.08);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(124, 108, 240, 0.3), 0 0 0 3px rgba(124, 108, 240, 0.1);
+}
+
+/* ── Light theme (default) ────────────────────────────────────────────────── */
+html {
+  color-scheme: light;
+}
+
+/* ── Dark theme overrides ─────────────────────────────────────────────────── */
+html.dark {
+  color-scheme: dark;
+
+  --color-background: #09090b;
+  --color-foreground: #e4e4e7;
+  --color-muted: #71717a;
+  --color-muted-foreground: #a1a1aa;
+
+  --color-surface: #0c0c10;
+  --color-surface-hover: #14141f;
+  --color-card: #0f1019;
+  --color-card-hover: #141520;
+  --color-card-foreground: #e4e4e7;
+  --color-surface-elevated: #12121a;
+  --color-surface-active: #18182a;
+
+  --color-border: #1e1e2e;
+  --color-border-subtle: #141420;
+
+  --color-accent-subtle: rgba(124, 108, 240, 0.08);
+  --color-accent-muted: rgba(124, 108, 240, 0.15);
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --color-brain-active: #34d399;
+  --color-brain-training: #a78bfa;
+  --color-brain-discovery: #38bdf8;
+  --color-brain-alert: #fbbf24;
+
+  --color-sidebar: #08080d;
+  --color-sidebar-hover: #0f0f17;
+
+  --color-input: #12121a;
+  --color-input-border: #1e1e2e;
+
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
@@ -79,10 +141,6 @@
   --shadow-input-focus: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(124, 108, 240, 0.3), 0 0 0 3px rgba(124, 108, 240, 0.1);
 }
 
-html {
-  color-scheme: dark;
-}
-
 body {
   background: var(--color-background);
   color: var(--color-foreground);
@@ -91,7 +149,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+/* ── Scrollbar (theme-aware) ─────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -100,11 +158,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e1e2e;
+  background: var(--color-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2a3e;
+  background: var(--color-muted);
 }
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
@@ -187,7 +245,7 @@ body {
 }
 
 .bg-gradient-sidebar {
-  background: linear-gradient(180deg, #08080d 0%, #0a0a12 100%);
+  background: linear-gradient(180deg, var(--color-sidebar) 0%, var(--color-sidebar-hover) 100%);
 }
 
 .bg-gradient-intelligence {
@@ -202,6 +260,15 @@ body {
 }
 .animate-slide-in-left {
   animation: slide-in-left 0.2s ease-out forwards;
+}
+
+/* ── Slide-in from right (artifact pane) ─────────────────────────────────── */
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s ease-out forwards;
 }
 
 /* ── Scale up (modals, popovers) ─────────────────────────────────────────── */

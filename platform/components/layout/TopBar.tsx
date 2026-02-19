@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import type { User } from "@supabase/supabase-js";
 
 /* ── Breadcrumb Config ────────────────────────────────────────────────────── */
@@ -130,8 +131,11 @@ export function TopBar() {
         )}
       </div>
 
-      {/* ── Right: Search + User ──────────────────────────────────────── */}
+      {/* ── Right: Theme + Search + User ───────────────────────────────── */}
       <div className="flex items-center gap-3">
+        {/* Theme toggle */}
+        <ThemeToggle />
+
         {/* Quick search trigger */}
         <button
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-border-subtle text-xs text-muted transition-colors"

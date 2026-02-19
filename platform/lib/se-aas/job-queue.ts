@@ -56,6 +56,7 @@ export interface ArtifactRecord {
 
 export interface ListArtifactsParams {
   domainType?: string;
+  conversationId?: string;
   limit?: number;
   offset?: number;
 }
@@ -246,6 +247,10 @@ export async function listArtifacts(
 
   if (params.domainType) {
     query = query.eq("domain_type", params.domainType);
+  }
+
+  if (params.conversationId) {
+    query = query.eq("conversation_id", params.conversationId);
   }
 
   const { data, error, count } = await query;
