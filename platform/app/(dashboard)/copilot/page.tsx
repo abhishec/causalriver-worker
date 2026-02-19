@@ -13,6 +13,8 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
+import { AAS_COMMANDS } from "@/components/copilot/aas-commands";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -420,8 +422,21 @@ function CopilotPageInner() {
           <ServiceContextPane
             activeService={activeService}
             onOpenArtifact={(type) => {
-              // TODO: Generate artifact of this type via chat prompt
-              console.log("Open artifact type:", type);
+              // Look up prompt from the catalogues
+              const GENERAL_PROMPTS: Record<string, string> = {
+                "causal-analysis": "Run a causal analysis across my organization",
+                "anomaly-report": "What anomalies were detected today?",
+                "intelligence-report": "Give me the full intelligence report",
+                "prediction": "Forecast key business metrics for the next quarter",
+              };
+              const domainEntry = DOMAIN_CATALOGUE.find((d) => d.id === type);
+              const aasEntry = AAS_COMMANDS.find((c) => c.id === type);
+              const prompt = domainEntry?.copilotPrompt || aasEntry?.prompt || GENERAL_PROMPTS[type];
+              if (prompt) {
+                window.dispatchEvent(
+                  new CustomEvent("copilot-inject-prompt", { detail: prompt })
+                );
+              }
             }}
           />
         )}
