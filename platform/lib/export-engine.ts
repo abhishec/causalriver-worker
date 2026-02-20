@@ -67,7 +67,6 @@ async function exportPNG(options: ExportOptions): Promise<ExportResult> {
 
   try {
     // html2canvas is an optional peer dependency — lazy-loaded
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error -- optional peer dependency, installed at runtime
     const html2canvas = (await import("html2canvas")).default as (
       element: HTMLElement,
@@ -115,17 +114,14 @@ async function exportPDF(options: ExportOptions): Promise<ExportResult> {
 
   try {
     // html2canvas + jspdf are optional peer dependencies — lazy-loaded
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error -- optional peer dependency
     const html2canvasModule = await import("html2canvas");
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error -- optional peer dependency
     const jsPDFModule = await import("jspdf");
     const html2canvas = html2canvasModule.default as (
       element: HTMLElement,
       options?: Record<string, unknown>
     ) => Promise<HTMLCanvasElement>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const jsPDF = jsPDFModule.jsPDF as any;
 
     const canvas = await html2canvas(element, {
