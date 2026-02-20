@@ -12,6 +12,7 @@ import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { OpenClawPanel } from "@/components/copilot/OpenClawPanel";
 import { cn } from "@/lib/utils";
 // DOMAIN_CATALOGUE / AAS_COMMANDS removed — no longer needed since ServiceContextPane was replaced
 
@@ -443,18 +444,26 @@ function CopilotPageInner() {
 
       {/* ── Main 3-column layout ─────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
-        {/* ── Left: Conversation Sidebar ───────────────────────────────── */}
-        <ConversationSidebar
-          conversations={filteredConversations}
-          activeId={activeConversationId}
-          onSelect={handleSelectConversation}
-          onNew={handleNewConversation}
-          onDelete={handleDeleteConversation}
-          onRename={handleRenameConversation}
-          loading={conversationsLoading}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-        />
+        {/* ── Left: Conversation Sidebar + OpenClaw Panel ────────────── */}
+        <div className="flex flex-col" style={{ width: sidebarCollapsed ? 48 : 260, flexShrink: 0 }}>
+          <ConversationSidebar
+            conversations={filteredConversations}
+            activeId={activeConversationId}
+            onSelect={handleSelectConversation}
+            onNew={handleNewConversation}
+            onDelete={handleDeleteConversation}
+            onRename={handleRenameConversation}
+            loading={conversationsLoading}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+          />
+          {/* OpenClaw Reinforcement Dashboard — always visible at bottom of sidebar */}
+          {!sidebarCollapsed && (
+            <div className="border-t border-border-subtle">
+              <OpenClawPanel organizationId={currentOrg?.id} />
+            </div>
+          )}
+        </div>
 
         {/* ── Center: Chat ─────────────────────────────────────────────── */}
         <div className="flex-1 min-w-0 flex flex-col">

@@ -17,7 +17,7 @@ export function StatGrid({ children, cols = 2 }: { children: React.ReactNode; co
   );
 }
 
-export function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
+export function StatCard({ label, value, color }: { label: string; value: string | number | null | undefined; color?: string }) {
   const colorClass = color === "red" ? "text-danger"
     : color === "green" ? "text-success"
     : color === "amber" ? "text-warning"
@@ -27,7 +27,7 @@ export function StatCard({ label, value, color }: { label: string; value: string
   return (
     <div className="bg-surface border border-border-subtle rounded-[10px] px-3 py-2.5">
       <div className="text-[10px] text-muted uppercase tracking-wider font-medium">{label}</div>
-      <div className={cn("text-lg font-bold mt-0.5 tabular-nums", colorClass)}>{value}</div>
+      <div className={cn("text-lg font-bold mt-0.5 tabular-nums", colorClass)}>{value ?? "—"}</div>
     </div>
   );
 }
@@ -35,13 +35,15 @@ export function StatCard({ label, value, color }: { label: string; value: string
 // ─── Score Bar (progress bar with color thresholds) ──────────────────────────
 
 export function ScoreBar({ value, label, max = 100 }: { value: number; label: string; max?: number }) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+  const safeVal = value ?? 0;
+  const safeMax = max || 100;
+  const pct = Math.min(100, Math.max(0, (safeVal / safeMax) * 100));
   const color = pct >= 75 ? "#16a34a" : pct >= 50 ? "#ca8a04" : "#dc2626";
   return (
     <div className="mb-2">
       <div className="flex justify-between text-[11px] mb-0.5">
         <span className="text-muted">{label}</span>
-        <span className="font-semibold" style={{ color }}>{Math.round(value)}</span>
+        <span className="font-semibold" style={{ color }}>{Math.round(safeVal)}</span>
       </div>
       <div className="h-1.5 bg-surface rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
@@ -53,18 +55,19 @@ export function ScoreBar({ value, label, max = 100 }: { value: number; label: st
 // ─── Health Ring (SVG donut) ─────────────────────────────────────────────────
 
 export function HealthRing({ score, size = 48 }: { score: number; size?: number }) {
+  const safeScore = score ?? 0;
   const r = (size - 6) / 2;
   const c = 2 * Math.PI * r;
-  const p = Math.min(Math.max(score, 0), 100) / 100;
+  const p = Math.min(Math.max(safeScore, 0), 100) / 100;
   const d = p * c;
-  const color = score >= 75 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626";
+  const color = safeScore >= 75 ? "#16a34a" : safeScore >= 50 ? "#ca8a04" : "#dc2626";
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(31,30,29,.08)" strokeWidth={3} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" strokeDasharray={`${d} ${c - d}`} />
       </svg>
-      <span className="absolute text-xs font-bold tabular-nums" style={{ color }}>{Math.round(score)}</span>
+      <span className="absolute text-xs font-bold tabular-nums" style={{ color }}>{Math.round(safeScore)}</span>
     </div>
   );
 }
@@ -120,11 +123,15 @@ export function FileChip({ file }: { file: string }) {
 
 // ─── Branch Pill ─────────────────────────────────────────────────────────────
 
-export function BranchPill({ branch }: { branch: string }) {
+export function BranchPill({ branch, detail }: { branch: string; detail?: string }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-info/6 border border-info/12 text-[10px] font-mono text-info">
-      {branch}
-    </span>
+    <div className="inline-flex items-center gap-1.5 max-w-full">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xl bg-info/6 border border-info/12 text-[10px] font-mono text-info max-w-[280px]">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" className="shrink-0"><path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM5 3.25a.75.75 0 1 0 0 0h-.75A.75.75 0 0 0 3.5 4v3.25a.75.75 0 0 0 .75.75h1.5a.75.75 0 0 1 .75.75v1.5a2.25 2.25 0 1 0 1.5 0v-1.5A2.25 2.25 0 0 0 5.75 6.5h-1V4a.75.75 0 0 0-.75-.75Zm6.75 0a.75.75 0 1 0 0 0H11A.75.75 0 0 0 10.25 4v2.75A2.25 2.25 0 0 0 8 8.75v.582a2.25 2.25 0 1 0 1.5 0V8.75a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 0 .75-.75V4a.75.75 0 0 0-.75-.75Z"/></svg>
+        <span className="truncate">{branch}</span>
+      </span>
+      {detail && <span className="text-[10px] text-muted">{detail}</span>}
+    </div>
   );
 }
 

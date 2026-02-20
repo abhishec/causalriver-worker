@@ -1345,6 +1345,7 @@ export function CopilotChat({
   const [isLoading, setIsLoading] = useState(false);
   const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
+  const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -1520,6 +1521,7 @@ export function CopilotChat({
     setIsLoading(true);
     setBrainMeta(null);
     setFollowUps([]);
+    setLastFailedPrompt(null);
 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
@@ -1691,11 +1693,14 @@ export function CopilotChat({
       if (err instanceof DOMException && err.name === "AbortError") return;
       const errorText =
         err instanceof Error ? err.message : "Something went wrong";
+      // Store the user prompt for retry
+      const userMsg = messagesRef.current[messagesRef.current.length - 2];
+      if (userMsg?.role === "user") setLastFailedPrompt(userMsg.content);
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: `Sorry, I encountered an error: ${errorText}. Please try again.`,
+          content: `__ERROR__${errorText}`,
         };
         return updated;
       });
@@ -1754,16 +1759,30 @@ export function CopilotChat({
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
       <div className="flex-1 overflow-y-auto" style={{ padding: "24px 0" }}>
         {messages.length === 0 ? (
-          /* Empty state — matches HTML prototype: .chat-welcome with ✦ spark + simple text */
+          /* Empty state — matches HTML prototype: .chat-welcome with ✦ spark + service-specific text */
           <div className="flex flex-col items-center justify-center h-full text-center" style={{ padding: "60px 24px" }}>
             <div style={{ color: "#c6613f", fontSize: 28, marginBottom: 16 }}>✦</div>
             <h4 style={{ fontSize: 16, fontWeight: 500, color: "#73726c" }}>
-              How can I help you today?
+              {activeService === "seaas" ? "How can I help with your engineering?" :
+               activeService === "aas" ? "How can I help with your finances?" :
+               "How can I help you today?"}
             </h4>
+            <p style={{ fontSize: 12, color: "#a3a39e", marginTop: 6 }}>
+              {activeService === "seaas" ? "Type / to browse SE-aaS commands" :
+               activeService === "aas" ? "Type / to browse accounting commands" :
+               "Type / to browse all intelligence commands"}
+            </p>
           </div>
         ) : (
           /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */
           <div style={{ maxWidth: 680, width: "100%", margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {/* New conversation badge — matches HTML .new-chat-badge */}
+            <div style={{ textAlign: "center", padding: "4px 0 12px" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 12, background: "rgba(198,97,63,.06)", border: "1px solid rgba(198,97,63,.1)", fontSize: 11, color: "#c6613f", fontWeight: 500 }}>
+                ✦ New conversation
+              </span>
+            </div>
+
             {/* Proactive Insights Banner (Week 6: "While you were away") */}
             {proactiveInsights.length > 0 && !insightsDismissed && (
               <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 mb-2">
@@ -1815,7 +1834,33 @@ export function CopilotChat({
                         </div>
                       )}
                       <div className="text-sm leading-relaxed" style={{ fontSize: 15, color: "#3d3d3a", lineHeight: 1.7 }}>
-                        {msg.content ? (
+                        {msg.content?.startsWith("__ERROR__") ? (
+                          /* ── Error state with retry button ── */
+                          <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(220,38,38,.05)", border: "1px solid rgba(220,38,38,.12)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                              <span style={{ fontSize: 14 }}>⚠️</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#dc2626" }}>Something went wrong</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#73726c", marginBottom: 10 }}>
+                              {msg.content.replace("__ERROR__", "")}
+                            </div>
+                            {lastFailedPrompt && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const prompt = lastFailedPrompt;
+                                  setLastFailedPrompt(null);
+                                  // Remove the error message, keep the user message
+                                  setMessages((prev) => prev.slice(0, -1));
+                                  setTimeout(() => sendMessageRef.current?.(prompt), 50);
+                                }}
+                                style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8, background: "#141413", color: "#faf9f5", fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer" }}
+                              >
+                                ↻ Retry
+                              </button>
+                            )}
+                          </div>
+                        ) : msg.content ? (
                           <div className={cn("space-y-0", isLastAssistant && isLoading && "streaming-cursor")}>
                             {renderMarkdown(msg.content)}
                           </div>
@@ -1944,7 +1989,11 @@ export function CopilotChat({
                   handleSubmit(e as unknown as FormEvent);
                 }
               }}
-              placeholder="How can I help you today?"
+              placeholder={
+                activeService === "seaas" ? "Ask about engineering, or type / for commands…" :
+                activeService === "aas" ? "Ask about finances, or type / for commands…" :
+                "Ask anything, or type / for commands…"
+              }
               disabled={isLoading}
               style={{
                 flex: 1,

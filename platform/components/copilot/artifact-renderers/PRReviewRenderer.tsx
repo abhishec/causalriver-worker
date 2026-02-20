@@ -35,7 +35,7 @@ export function PRReviewRenderer({ data }: { data: Record<string, any> }) {
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border-subtle shrink-0">
         <span className="text-base">🔍</span>
-        <span className="text-sm font-semibold flex-1 text-foreground">PR #1247 — Sanctions Pipeline</span>
+        <span className="text-sm font-semibold flex-1 text-foreground">{data?.title ?? "PR #1247 — Sanctions Pipeline"}</span>
         <HealthRing score={qualityScore} size={40} />
       </div>
       <ArtifactTabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
@@ -49,21 +49,29 @@ export function PRReviewRenderer({ data }: { data: Record<string, any> }) {
               <StatCard label="Added" value={`+${added}`} color="green" />
               <StatCard label="Removed" value={`-${removed}`} color="amber" />
             </StatGrid>
-            <InsightBox><strong>Causal Impact:</strong> Sanctions pipeline has HIGH causal link to compliance → customer trust → revenue retention.</InsightBox>
+            <InsightBox><strong>Causal Impact:</strong> {data?.insight ?? "Sanctions pipeline has HIGH causal link to compliance → customer trust → revenue retention."}</InsightBox>
           </>
         )}
-        {activeTab === "findings" && findings.map((f: any, i: number) => (
-          <FindingRow key={i} severity={f.severity} text={f.text} file={f.file} />
-        ))}
-        {activeTab === "actions" && actions.map((a: any, i: number) => (
-          <ActionItem key={i} priority={a.priority} title={a.title} description={a.description} />
-        ))}
+        {activeTab === "findings" && (
+          findings.length > 0
+            ? findings.map((f: any, i: number) => (
+                <FindingRow key={i} severity={f.severity} text={f.text} file={f.file} />
+              ))
+            : <p className="text-[12px] text-muted text-center py-6">No findings detected.</p>
+        )}
+        {activeTab === "actions" && (
+          actions.length > 0
+            ? actions.map((a: any, i: number) => (
+                <ActionItem key={i} priority={a.priority} title={a.title} description={a.description} />
+              ))
+            : <p className="text-[12px] text-muted text-center py-6">No actions recommended.</p>
+        )}
         {activeTab === "metrics" && (
           <>
-            <ScoreBar value={87} label="Code quality" />
-            <ScoreBar value={72} label="Test coverage" />
-            <ScoreBar value={45} label="Complexity (lower=better)" />
-            <ScoreBar value={91} label="Security posture" />
+            <ScoreBar value={data?.codeQuality ?? 87} label="Code quality" />
+            <ScoreBar value={data?.testCoverage ?? 72} label="Test coverage" />
+            <ScoreBar value={data?.complexity ?? 45} label="Complexity (lower=better)" />
+            <ScoreBar value={data?.security ?? 91} label="Security posture" />
           </>
         )}
       </div>

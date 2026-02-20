@@ -12,17 +12,17 @@ export function BenchmarkRenderer({ data }: { data: Record<string, any> }) {
 
   return (
     <div className="flex flex-col h-full">
-      <ArtifactHeader icon="📈" title="SaaS Benchmark — FY2025" badge="62%" badgeColor="amber" />
+      <ArtifactHeader icon="📐" title={data?.title ?? "SaaS Benchmark — FY2025"} badge={data?.badge ?? "62%"} badgeColor={(data?.badgeColor as "red" | "green" | "amber" | "blue") ?? "amber"} />
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-2">vs SaaS Industry (Series B-C)</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-2">{data?.subtitle ?? "vs SaaS Industry (Series B-C)"}</div>
         {metrics.map((m: any) => (
           <ScoreBar key={m.name} value={m.value} label={m.name} max={m.max} />
         ))}
         <StatGrid>
-          <StatCard label="Burn Multiple" value="2.8x" color="red" />
-          <StatCard label="CAC Payback" value="18mo" color="amber" />
-          <StatCard label="NRR" value="112%" color="green" />
-          <StatCard label="Runway" value="14mo" color="amber" />
+          <StatCard label="Burn Multiple" value={data?.burnMultiple ?? "2.8x"} color="red" />
+          <StatCard label="CAC Payback" value={data?.cacPayback ?? "18mo"} color="amber" />
+          <StatCard label="NRR" value={data?.nrr ?? "112%"} color="green" />
+          <StatCard label="Runway" value={data?.runway ?? "14mo"} color="amber" />
         </StatGrid>
         <InsightBox><strong>Key Insight:</strong> {insight}</InsightBox>
       </div>

@@ -65,9 +65,8 @@ export function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
 
             <InsightBox><strong>⚡ SPOF Alert:</strong> {spofAlert}</InsightBox>
 
-            <div className="mt-2 flex items-center gap-1.5">
-              <BranchPill branch={branch} />
-              <span className="text-[11px] text-muted">{uncommitted} uncommitted changes</span>
+            <div className="mt-2">
+              <BranchPill branch={branch} detail={`${uncommitted} uncommitted changes`} />
             </div>
 
             <div className="mt-3">
@@ -79,14 +78,22 @@ export function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
         )}
 
         {/* ── Findings Tab ─────────────────────────────────────────────── */}
-        {activeTab === "findings" && findings.map((f: any, i: number) => (
-          <FindingRow key={i} severity={f.severity} text={f.text} detail={f.detail} file={f.file} />
-        ))}
+        {activeTab === "findings" && (
+          findings.length > 0
+            ? findings.map((f: any, i: number) => (
+                <FindingRow key={i} severity={f.severity} text={f.text} detail={f.detail} file={f.file} />
+              ))
+            : <p className="text-[12px] text-muted text-center py-6">No findings detected.</p>
+        )}
 
         {/* ── Actions Tab ──────────────────────────────────────────────── */}
-        {activeTab === "actions" && actions.map((a: any, i: number) => (
-          <ActionItem key={i} priority={a.priority} title={a.title} description={a.description} />
-        ))}
+        {activeTab === "actions" && (
+          actions.length > 0
+            ? actions.map((a: any, i: number) => (
+                <ActionItem key={i} priority={a.priority} title={a.title} description={a.description} />
+              ))
+            : <p className="text-[12px] text-muted text-center py-6">No actions recommended.</p>
+        )}
 
         {/* ── Metrics Tab ──────────────────────────────────────────────── */}
         {activeTab === "metrics" && (
