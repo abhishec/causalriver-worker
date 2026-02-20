@@ -5,14 +5,16 @@
 # Multi-stage build for deploying the Next.js platform to ECS/Fargate.
 # Uses Next.js standalone output mode for minimal image size.
 #
-# Key design decisions:
-#   1. pnpm workspace with hoisted node-linker — workspace symlinks
-#      must be created via `pnpm install` (not copied between stages).
-#   2. memory-stack must be built BEFORE platform (turbo dependency).
-#   3. Next.js standalone bundles its own node_modules — the runner
-#      stage only needs .next/standalone + static + public.
-#   4. Native modules (tree-sitter) are externalized via
-#      serverExternalPackages in next.config.ts.
+# Optimized for fast CI builds (~5 min vs ~10 min):
+#   1. Merged deps + builder into single stage — eliminates the
+#      ~500MB COPY --from=deps /app ./ that broke layer caching.
+#   2. BuildKit cache mounts for pnpm store — downloaded packages
+#      persist across builds, only new deps are fetched.
+#   3. BuildKit cache mount for .next/cache — SWC/webpack only
+#      recompiles changed modules on incremental builds.
+#   4. memory-stack builds BEFORE platform source is copied, so it
+#      stays cached when only platform/ code changes.
+#   5. Removed diagnostic output that added ~10-20s per build.
 #
 # Usage:
 #   docker build -f platform/Dockerfile -t nexusbrain-platform .
@@ -20,18 +22,14 @@
 # ═══════════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────
-# Stage 1: Install dependencies
+# Stage 1: Install + build (single stage for better caching)
 # ─────────────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:20-alpine AS builder
 
 # Native module build tools (tree-sitter needs python3, make, g++)
-# Combine into one RUN to reduce layers
 RUN apk add --no-cache python3 make g++
 
 # Install pnpm — pin exact version to match packageManager field in package.json
-# pnpm@9 (latest 9.x) has a different pnpmfileChecksum algorithm than 9.0.0
-# and will reject the lockfile with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
-# Use --prefer-offline to maximise cache hit rate in CI.
 RUN npm install -g pnpm@9.0.0 --prefer-offline
 
 WORKDIR /app
@@ -51,39 +49,30 @@ COPY packages/slack-connector/package.json ./packages/slack-connector/
 COPY platform/package.json ./platform/
 
 # ── Layer 3: Install ALL dependencies ──
-# Need devDeps for tsup (memory-stack build) and Next.js build tooling.
-# --prefer-offline: use local store first → faster in CI with cache mounted
-RUN pnpm install --frozen-lockfile --prefer-offline
+# BuildKit cache mount for pnpm store — downloaded packages persist across
+# builds so only new/changed deps are fetched. Saves ~1-2 min on repeat builds.
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
 
-# ─────────────────────────────────────────────────────────────
-# Stage 2: Build everything
-# ─────────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
-
-RUN npm install -g pnpm@9.0.0 --prefer-offline
-
-WORKDIR /app
-
-# Copy installed workspace (preserves hoisted symlinks + node_modules)
-COPY --from=deps /app ./
-
-# Copy source code
+# ── Layer 4a: Copy memory-stack source (changes less often) ──
 COPY packages/memory-stack/src ./packages/memory-stack/src
 COPY packages/memory-stack/tsup.config.ts ./packages/memory-stack/
 
-# Copy other packages (in case of cross-references)
+# Copy other packages
 COPY packages/domain-agents/ ./packages/domain-agents/
 COPY packages/client/ ./packages/client/
 COPY packages/mcp-server/ ./packages/mcp-server/
 COPY packages/slack-connector/ ./packages/slack-connector/
 
-# Copy platform source
-COPY platform/ ./platform/
-
-# Step 1: Build memory-stack (platform depends on it)
+# ── Layer 5: Build memory-stack (platform depends on it) ──
+# Separate layer BEFORE platform source — if only platform/ changed,
+# this layer stays cached and saves ~1-2 min.
 RUN cd packages/memory-stack && pnpm build
 
-# Step 2: Build Next.js platform with standalone output
+# ── Layer 6: Copy platform source (changes most often → last) ──
+COPY platform/ ./platform/
+
+# ── Layer 7: Build Next.js ──
 WORKDIR /app/platform
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -91,34 +80,21 @@ ENV NODE_ENV=production
 ENV SKIP_ENV_VALIDATION=1
 
 # NEXT_PUBLIC_ vars must be available at build time (baked into client JS bundle).
-# Pass these via --build-arg when building the image, OR set as env vars in CI.
-# At runtime, server-side code reads them from process.env normally.
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 
-# Create public directory if it doesn't exist
 RUN mkdir -p public
 
-# Build Next.js (standalone output is set in next.config.ts)
-RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
-
-# Diagnostic: verify standalone output structure for debugging.
-# next.config.ts sets outputFileTracingRoot = monorepo root (/app),
-# so standalone mirrors the monorepo layout: platform/server.js sits
-# inside a platform/ sub-dir and its node_modules/next/ is adjacent.
-RUN echo "=== Standalone output structure ===" && \
-    ls -la .next/standalone/ && \
-    echo "--- platform dir ---" && \
-    ls -la .next/standalone/platform/ 2>/dev/null || echo "(no platform/ sub-dir)" && \
-    echo "--- server.js location ---" && \
-    find .next/standalone -name "server.js" -maxdepth 3 && \
-    echo "--- next module location ---" && \
-    find .next/standalone -path "*/node_modules/next/package.json" -maxdepth 5
+# Build Next.js with persistent cache mount.
+# .next/cache stores webpack/SWC compilation artifacts — mounting it as a
+# BuildKit cache means incremental builds only recompile changed modules.
+RUN --mount=type=cache,id=nextjs-cache,target=/app/platform/.next/cache \
+    NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
 # ─────────────────────────────────────────────────────────────
-# Stage 3: Production runtime (minimal)
+# Stage 2: Production runtime (minimal)
 # ─────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 
@@ -131,8 +107,6 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 # AWS ECS Fargate: 4GB RAM per task — give Next.js server 3.5GB heap.
-# Brain cycle API routes stream large signal datasets; without this flag
-# Node defaults to ~1.5GB and OOMs on full historical training requests.
 ENV NODE_OPTIONS="--max-old-space-size=3584"
 
 # Security: non-root user (Alpine-compatible syntax)
@@ -148,12 +122,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/platform/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/platform/.next/static ./platform/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/platform/public ./platform/public
 
-# ── Fix monorepo standalone module resolution ──────────────────────────────
+# ── Fix monorepo standalone module resolution ──
 # Next.js standalone in a monorepo may place server.js at the root but
-# bundles the `next` package under platform/node_modules/.  Node's module
-# resolution from /app/server.js only checks /app/node_modules/ — which
-# won't contain `next`.  Symlink platform/node_modules/next into the root
-# node_modules so require('next') resolves from either location.
+# bundles the `next` package under platform/node_modules/. Symlink it
+# so require('next') resolves from either location.
 RUN if [ -f server.js ] && [ -d platform/node_modules/next ] && [ ! -d node_modules/next ]; then \
       mkdir -p node_modules && \
       ln -s /app/platform/node_modules/next node_modules/next && \
@@ -169,8 +141,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Next.js standalone in a pnpm monorepo: server.js may end up at the
-# standalone root or inside platform/ depending on how outputFileTracingRoot
-# is resolved.  Use a shell wrapper that tries both paths so the container
-# always starts regardless of which layout was produced.
 CMD ["sh", "-c", "if [ -f platform/server.js ]; then exec node platform/server.js; else exec node server.js; fi"]

@@ -1370,6 +1370,15 @@ export function CopilotChat({
   // Ref for gathering state so sendMessage closure always reads latest values
   const gatheringRef = useRef(gathering);
   gatheringRef.current = gathering;
+  // Refs for sidebar inject-and-submit handler (avoids stale closures in [] deps)
+  const onServiceChangeRef = useRef(onServiceChange);
+  onServiceChangeRef.current = onServiceChange;
+  const customCommandsRef = useRef(customCommands);
+  customCommandsRef.current = customCommands;
+  const customGatheringMapRef = useRef(customGatheringMap);
+  customGatheringMapRef.current = customGatheringMap;
+  const onArtifactPaneOpenRef = useRef(onArtifactPaneOpen);
+  onArtifactPaneOpenRef.current = onArtifactPaneOpen;
   // Ref for sendMessage so event handlers can call it without stale closures
   const sendMessageRef = useRef<((msg: string) => void) | null>(null);
 
@@ -1403,14 +1412,43 @@ export function CopilotChat({
       }
     };
     const handleInjectAndSubmit = (event: Event) => {
-      const prompt = (event as CustomEvent).detail;
-      if (typeof prompt === "string" && prompt.trim()) {
-        setInput(prompt);
-        // Use sendMessageRef to auto-submit after a brief render tick
-        setTimeout(() => {
-          sendMessageRef.current?.(prompt);
-        }, 50);
+      const detail = (event as CustomEvent).detail;
+
+      // Support both plain string (legacy) and command object from sidebar
+      const prompt = typeof detail === "string" ? detail : detail?.prompt;
+      const commandId = typeof detail === "object" ? detail?.commandId : undefined;
+      const service = typeof detail === "object" ? detail?.service : undefined;
+
+      if (!prompt || typeof prompt !== "string" || !prompt.trim()) return;
+
+      // Switch service mode if the command belongs to a different service
+      if (service && onServiceChangeRef.current && service !== "custom") {
+        onServiceChangeRef.current(service);
       }
+
+      // Check if this command has interactive gathering params
+      if (commandId) {
+        const systemGathering = COMMAND_GATHERING_MAP[commandId];
+        const customG = customGatheringMapRef.current?.[commandId];
+        const gatheringConfig = systemGathering || customG;
+        if (gatheringConfig && gatheringConfig.params.length > 0) {
+          // Find the full command object to pass to startGathering
+          const cmd = ALL_SLASH_COMMANDS.find((c) => c.id === commandId)
+            || customCommandsRef.current?.find((c) => c.id === commandId);
+          if (cmd) {
+            onArtifactPaneOpenRef.current?.();
+            gatheringRef.current.startGathering(cmd);
+            setInput("");
+            return;
+          }
+        }
+      }
+
+      // No gathering needed — submit directly
+      setInput(prompt);
+      setTimeout(() => {
+        sendMessageRef.current?.(prompt);
+      }, 50);
     };
     // "copilot-jump-to-message" scrolls to a specific message in the chat (artifact → message linking)
     const handleJumpToMessage = (event: Event) => {

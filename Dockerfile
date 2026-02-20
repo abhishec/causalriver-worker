@@ -56,13 +56,12 @@ COPY platform/package.json ./platform/
 # ── Layer 3: Install ALL dependencies (not --prod!) ──
 # Scripts use tsx which needs TypeScript + type definitions at runtime.
 # pnpm install with hoisted linker will create workspace symlinks.
-# --prefer-offline: use local store first → faster in CI with cache mounted
-RUN pnpm install --frozen-lockfile --prefer-offline
+# BuildKit cache mount for pnpm store — downloaded packages persist across
+# builds so only new/changed deps are fetched. Saves ~1-2 min on repeat builds.
+RUN --mount=type=cache,id=pnpm-store-orch,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
 
-# ── Layer 4: Copy source code ──
-# Copy ONLY what the brain-orchestrator needs:
-#   - packages/memory-stack/src (imported directly by scripts via tsx)
-#   - scripts/ (the entry point + agent framework)
+# ── Layer 4: Copy package source (changes less often than scripts) ──
 COPY packages/memory-stack/src ./packages/memory-stack/src
 COPY packages/memory-stack/tsup.config.ts ./packages/memory-stack/
 
@@ -72,12 +71,13 @@ COPY packages/client/ ./packages/client/
 COPY packages/mcp-server/ ./packages/mcp-server/
 COPY packages/slack-connector/ ./packages/slack-connector/
 
-COPY scripts/ ./scripts/
-
 # ── Layer 5: Build memory-stack (validates types + creates dist/) ──
-# Some imports might reference dist/ in edge cases, so build it.
-# If the build fails here, it's a real error — don't swallow it.
+# Build BEFORE copying scripts/ — if only scripts changed, this layer
+# stays cached and saves ~1-2 min per build.
 RUN cd packages/memory-stack && NODE_OPTIONS="--max-old-space-size=4096" pnpm build
+
+# ── Layer 6: Copy scripts (changes most often → last) ──
+COPY scripts/ ./scripts/
 
 # Install tsx globally for runtime TypeScript execution
 RUN npm install -g tsx
