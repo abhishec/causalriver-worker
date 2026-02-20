@@ -14,6 +14,9 @@ import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { OpenClawPanel } from "@/components/copilot/OpenClawPanel";
 import { cn } from "@/lib/utils";
+import { useTemplates } from "@/lib/templates/useTemplates";
+import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
+import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
 // DOMAIN_CATALOGUE / AAS_COMMANDS removed — no longer needed since ServiceContextPane was replaced
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
@@ -113,6 +116,20 @@ function CopilotPageInner() {
 
   // ── Brain meta state ──────────────────────────────────────────────────────
   const [brainLoading, setBrainLoading] = useState(false);
+
+  // ── Agent Composer + Save Template state ────────────────────────────────
+  const [showComposer, setShowComposer] = useState(false);
+  const [saveDialogArtifact, setSaveDialogArtifact] = useState<UnifiedArtifact | null>(null);
+  const [compositionForSave, setCompositionForSave] = useState<{
+    name: string; persona: string; tools: string[]; executionPlan: string[]; prompt: string;
+  } | null>(null);
+
+  // ── Templates (custom commands) ─────────────────────────────────────────
+  const {
+    customCommands,
+    customGatheringMap,
+    refetch: refetchTemplates,
+  } = useTemplates(currentOrg?.id);
 
   // ── Conversation state ────────────────────────────────────────────────────
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -489,6 +506,9 @@ function CopilotPageInner() {
                 setActiveArtifactId(id);
                 setArtifactPaneOpen(true);
               }}
+              customCommands={customCommands}
+              customGatheringMap={customGatheringMap}
+              onCreateAgent={() => setShowComposer(true)}
             />
           </ErrorBoundary>
         </div>
@@ -502,6 +522,10 @@ function CopilotPageInner() {
             onSelectArtifact={setActiveArtifactId}
             onPinArtifact={handlePinArtifact}
             onClose={() => setArtifactPaneOpen(false)}
+            onJumpToMessage={(messageIndex) => {
+              window.dispatchEvent(new CustomEvent("copilot-jump-to-message", { detail: { messageIndex } }));
+            }}
+            onSaveAsCommand={(artifact) => setSaveDialogArtifact(artifact)}
           />
         ) : (
           /* Empty artifact state — matches HTML .art-col > .art-empty */
@@ -547,6 +571,66 @@ function CopilotPageInner() {
           </svg>
           <span className="text-xs font-medium">{artifacts.length}</span>
         </button>
+      )}
+
+      {/* ── Agent Composer Modal ──────────────────────────────────────── */}
+      {showComposer && (
+        <AgentComposerPanel
+          organizationId={currentOrg?.id}
+          onClose={() => setShowComposer(false)}
+          onArtifact={(artifact) => {
+            handleArtifact({
+              id: artifact.id,
+              type: artifact.type as any,
+              title: artifact.title,
+              content: artifact.content,
+              createdAt: Date.now(),
+            });
+          }}
+          onSaved={refetchTemplates}
+          onSaveAsCommand={(compositionData) => {
+            setCompositionForSave(compositionData);
+            setShowComposer(false);
+          }}
+        />
+      )}
+
+      {/* ── Save Template Dialog (from artifact) ──────────────────────── */}
+      {saveDialogArtifact && currentOrg?.id && (
+        <SaveTemplateDialog
+          artifact={{
+            id: saveDialogArtifact.id,
+            title: saveDialogArtifact.title,
+            content: saveDialogArtifact.content,
+            service: saveDialogArtifact.service,
+            domainId: saveDialogArtifact.domainId,
+            rawData: saveDialogArtifact.rawData,
+          }}
+          organizationId={currentOrg.id}
+          onClose={() => setSaveDialogArtifact(null)}
+          onSaved={() => {
+            setSaveDialogArtifact(null);
+            refetchTemplates();
+          }}
+        />
+      )}
+
+      {/* ── Save Template Dialog (from composer) ──────────────────────── */}
+      {compositionForSave && currentOrg?.id && (
+        <SaveTemplateDialog
+          artifact={{
+            id: `composer-${Date.now()}`,
+            title: compositionForSave.name,
+            content: compositionForSave.prompt,
+          }}
+          organizationId={currentOrg.id}
+          compositionData={compositionForSave}
+          onClose={() => setCompositionForSave(null)}
+          onSaved={() => {
+            setCompositionForSave(null);
+            refetchTemplates();
+          }}
+        />
       )}
     </div>
   );

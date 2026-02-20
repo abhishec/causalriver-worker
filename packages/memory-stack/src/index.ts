@@ -1080,6 +1080,33 @@ export {
   type ReconciliationResult,
 } from './orchestrator/agents-accounting';
 
+// Cash Flow Prophet Agent
+export { brainCashFlowProphetAgent } from './orchestrator/agents-cash-flow-prophet';
+export type { CashFlowProphetInput, CashFlowProphetOutput } from './orchestrator/agents-cash-flow-prophet';
+
+// Revenue Leakage Detector Agent
+export { brainRevenueLeakageAgent } from './orchestrator/agents-revenue-leakage';
+export type { RevenueLeakageInput, RevenueLeakageOutput, LeakageFinding, LeakageFindingType } from './orchestrator/agents-revenue-leakage';
+
+// Causal P&L Narrator Agent
+export { brainCausalPLNarratorAgent } from './orchestrator/agents-causal-pl-narrator';
+export type { CausalPLInput, CausalPLOutput } from './orchestrator/agents-causal-pl-narrator';
+
+// Cash Flow Data Pipeline & Forecaster
+export { assembleCashFlowInputs } from './causality/cash-flow-data-pipeline';
+export type { CashFlowInputs } from './causality/cash-flow-data-pipeline';
+export { generateCashFlowForecast, compareForecastToActuals } from './causality/cash-flow-forecaster';
+export type { CashFlowForecast, WeeklyProjection, ForecastComparison, CashFlowRisk } from './causality/cash-flow-forecaster';
+
+// Variance Analysis Engine & Narrative Generator
+export { computeVariances, attributeVarianceCauses } from './causality/variance-analysis-engine';
+export type { Variance, CausalAttribution, PLLineItem, Attribution } from './causality/variance-analysis-engine';
+export { generateVarianceNarrative, generateExecutiveSummary } from './causality/narrative-generator';
+
+// Contract Ingestion
+export { ingestContractTerms, syncContractsFromXero, importContractCSV } from './connectors/contract-ingestion';
+export type { ContractTerm, PricingTier } from './connectors/contract-ingestion';
+
 // Software Engineering Enhanced Domains (Phase 2) — Real AST parsing, Claude generation, GitHub API
 export {
   codebaseComprehendEnhancedDomain,

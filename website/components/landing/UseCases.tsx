@@ -17,7 +17,7 @@ export function UseCases() {
             Use Cases
           </h2>
           <p className="text-lg text-muted">
-            NexusBrain&apos;s causal memory powers autonomous agent services that transform how organisations work.
+            Brain OS&apos;s causal memory powers autonomous agent services that transform how organisations work.
             Each service is backed by causal evidence — not correlation, not guesswork.
           </p>
         </motion.div>

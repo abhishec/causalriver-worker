@@ -323,7 +323,7 @@ export function Sidebar() {
           title={collapsed ? "Expand sidebar (\u2318[)" : "Collapse sidebar (\u2318[)"}
         >
           {!collapsed ? (
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">NexusBrain</span>
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">Brain OS</span>
           ) : (
             <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
               <span className="text-sm font-bold text-accent">N</span>

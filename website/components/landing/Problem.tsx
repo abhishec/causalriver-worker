@@ -33,7 +33,7 @@ export function Problem() {
           </h2>
           <p className="mb-16 text-lg text-muted">
             These ripple effects take days or weeks to show up. By the time leadership notices, the damage is done.
-            NexusBrain&apos;s causal memory sees these connections before the damage happens.
+            Brain OS&apos;s causal memory sees these connections before the damage happens.
           </p>
         </motion.div>
 

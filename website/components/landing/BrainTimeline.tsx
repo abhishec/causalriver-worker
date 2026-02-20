@@ -138,7 +138,7 @@ export function BrainTimeline() {
             </span>
           </h2>
           <p className="text-lg text-muted">
-            Every night NexusBrain runs its sleep cycle &mdash; consolidating knowledge, pruning weak edges, and waking up smarter.
+            Every night Brain OS runs its sleep cycle &mdash; consolidating knowledge, pruning weak edges, and waking up smarter.
             Here&apos;s what it discovered &mdash; real insights, real connections, getting better every day.
           </p>
           {isLive && (

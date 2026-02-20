@@ -165,7 +165,7 @@ export function LiveBrainPulse() {
             Watch It Think
           </h2>
           <p className="text-lg text-muted">
-            This isn&apos;t a static diagram. NexusBrain is a living system &mdash; firing neurons,
+            This isn&apos;t a static diagram. Brain OS is a living system &mdash; firing neurons,
             making discoveries, strengthening causal connections every hour of every day.
           </p>
         </motion.div>

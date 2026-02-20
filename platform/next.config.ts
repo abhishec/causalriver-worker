@@ -11,9 +11,23 @@ const nextConfig: NextConfig = {
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Skip ESLint during CI builds — run separately via `pnpm lint`.
-    ignoreDuringBuilds: true,
+  // ── Turbopack — lock root to the platform dir so stray lockfiles in ~/ don't
+  // confuse Next.js 16 into picking the wrong workspace root.
+  turbopack: {
+    root: __dirname,
+  },
+  // ── Dev server performance ──────────────────────────────────────────────────
+  // Automatically tree-shake + barrel-file-optimize these heavy packages so
+  // only the used exports are compiled instead of the entire library.
+  experimental: {
+    optimizePackageImports: [
+      'recharts',
+      'framer-motion',
+      'shiki',
+      'lucide-react',
+      '@supabase/supabase-js',
+      'xlsx',
+    ],
   },
   // Native Node.js modules — resolved at runtime, not bundled by webpack.
   // @nexus-ai/memory-stack is pre-built via tsup (dist/index.js) with tree-sitter

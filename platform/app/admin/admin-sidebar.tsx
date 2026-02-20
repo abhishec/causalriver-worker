@@ -61,7 +61,7 @@ export function AdminSidebar() {
             <span className="text-sm font-bold text-warning">N</span>
           </div>
           <div className="min-w-0">
-            <span className="text-sm font-semibold tracking-tight">NexusBrain</span>
+            <span className="text-sm font-semibold tracking-tight">Brain OS</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="px-1.5 py-px rounded bg-warning/10 text-warning text-[9px] font-semibold uppercase tracking-wider">
                 Admin

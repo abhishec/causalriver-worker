@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── NexusBrain Platform — Dual Theme (Light default + Dark) ──────────────── */
+/* ── Brain OS Platform — Dual Theme (Light default + Dark) ──────────────── */
 
 /*
  * Tailwind v4 requires @theme for token registration.
@@ -344,6 +344,27 @@ body {
   animation: overlay-panel-out 0.18s ease-in forwards;
 }
 
+/* ── Streaming shimmer (Claude-style text shimmer during generation) ── */
+@keyframes text-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.streaming-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-accent) 40%,
+    var(--color-accent-light) 50%,
+    var(--color-accent) 60%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 2s ease-in-out infinite;
+}
+
 /* ── Streaming cursor (blinking caret) ────────────────────────────────── */
 @keyframes blink-cursor {
   0%, 100% { opacity: 1; }
@@ -355,6 +376,15 @@ body {
   color: var(--color-accent);
   animation: blink-cursor 1s step-end infinite;
   margin-left: 1px;
+}
+
+/* ── Scrollbar hide utility ──────────────────────────────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Follow-up chip stagger ───────────────────────────────────────────── */

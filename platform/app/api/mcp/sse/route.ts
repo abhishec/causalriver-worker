@@ -430,7 +430,7 @@ const BRAIN_MCP_TOOLS = [
   {
     name: "brain_query",
     description:
-      "Query the NexusBrain causal knowledge graph. Returns causal relationships, patterns, and impact analysis. Use to understand WHY things happen — root causes, downstream effects, cross-domain cascades.",
+      "Query the Brain OS causal knowledge graph. Returns causal relationships, patterns, and impact analysis. Use to understand WHY things happen — root causes, downstream effects, cross-domain cascades.",
     inputSchema: {
       type: "object" as const,
       properties: {

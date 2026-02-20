@@ -32,7 +32,7 @@ export function Comparison() {
           className="mx-auto mb-16 max-w-3xl text-center"
         >
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-            How NexusBrain Compares
+            How Brain OS Compares
           </h2>
           <p className="text-lg text-muted">
             Not another dashboard. Not another chatbot. A benchmark-tested causal memory
@@ -52,7 +52,7 @@ export function Comparison() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-muted">Feature</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-muted">Traditional BI</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-muted">AI Chatbot</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-accent-light">NexusBrain</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-accent-light">Brain OS</th>
               </tr>
             </thead>
             <tbody>

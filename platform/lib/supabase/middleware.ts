@@ -40,7 +40,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Public routes that don't require auth
-  const publicRoutes = ["/login", "/signup", "/callback"];
+  const publicRoutes = ["/login", "/signup", "/callback", "/forgot-password", "/reset-password"];
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
@@ -66,6 +66,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isPublicRoute) {
+    // Exception: allow authenticated users to stay on reset-password page
+    // (they arrive here via recovery flow with an active session from callback)
+    if (pathname === "/reset-password") {
+      return supabaseResponse;
+    }
+
     // User is logged in but on login/signup page → redirect to dashboard
     // Exception: if there's a `next` param (e.g. from invite flow), honor it
     const nextParam = request.nextUrl.searchParams.get("next");

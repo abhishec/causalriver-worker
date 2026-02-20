@@ -1,5 +1,5 @@
 /**
- * Build-time stats generator for NexusBrain website.
+ * Build-time stats generator for Brain OS website.
  *
  * Reads actual data from the codebase to generate accurate stats
  * instead of hardcoding values that go stale.
@@ -151,7 +151,7 @@ function loadBenchmarkResults(): {
 // ─── Main ──────────────────────────────────────────────────────────────
 
 function generate() {
-  console.log("🧠 Generating NexusBrain stats from source...\n");
+  console.log("🧠 Generating Brain OS stats from source...\n");
 
   // 1. Test counts
   const testStats = countTestFiles(join(MEMORY_STACK, "src"));

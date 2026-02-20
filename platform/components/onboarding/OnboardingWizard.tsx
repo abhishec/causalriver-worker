@@ -94,7 +94,7 @@ export function OnboardingWizard({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold">
-              Welcome to NexusBrain
+              Welcome to Brain OS
             </h2>
             <p className="text-xs text-muted mt-0.5">
               Get {orgName} set up in 3 steps

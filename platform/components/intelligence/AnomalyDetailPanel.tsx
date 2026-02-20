@@ -232,7 +232,7 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
       onClose={onClose}
       width="lg"
       title={isAnomaly ? "Anomaly Detail" : "Intelligence Detail"}
-      subtitle={isAnomaly ? "What NexusBrain knows vs what Claude would say without context" : undefined}
+      subtitle={isAnomaly ? "What Brain OS knows vs what Claude would say without context" : undefined}
     >
       <div className="space-y-5">
 
@@ -269,7 +269,7 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
                   <div className="w-5 h-5 rounded-md bg-accent/20 flex items-center justify-center">
                     <span className="text-[10px] font-bold text-accent">N</span>
                   </div>
-                  <span className="text-[11px] font-semibold text-accent">NexusBrain</span>
+                  <span className="text-[11px] font-semibold text-accent">Brain OS</span>
                   <Badge variant="accent" size="xs" pulse>
                     knows your data
                   </Badge>

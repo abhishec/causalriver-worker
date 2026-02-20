@@ -28,6 +28,8 @@ import { registerSignalHarvester } from './reinforcement/signal-harvester.js';
 import { registerTechDebtAlarm } from './proactive/tech-debt-alarm.js';
 import { registerReconciliationRunner } from './proactive/reconciliation-runner.js';
 import { registerCashFlowProphet } from './proactive/cash-flow-prophet.js';
+import { registerRevenueLeakageDetector } from './proactive/revenue-leakage-detector.js';
+import { registerCausalPLNarrator } from './proactive/causal-pl-narrator.js';
 
 // ---------------------------------------------------------------------------
 // Minimal OpenClaw host API (union of all module requirements)
@@ -111,6 +113,8 @@ export default async function nexusBrainPlugin(api: OpenClawApi): Promise<void> 
   registerTechDebtAlarm(api, config);
   registerReconciliationRunner(api, config);
   registerCashFlowProphet(api, config);
+  registerRevenueLeakageDetector(api, config);
+  registerCausalPLNarrator(api, config);
 
   api.log?.('info', 'NexusBrain plugin ready — 8 commands, 21 tools, hooks + services + copilot bridge active');
 }
@@ -131,4 +135,6 @@ export { registerSignalHarvester } from './reinforcement/signal-harvester.js';
 export { registerTechDebtAlarm } from './proactive/tech-debt-alarm.js';
 export { registerReconciliationRunner } from './proactive/reconciliation-runner.js';
 export { registerCashFlowProphet } from './proactive/cash-flow-prophet.js';
+export { registerRevenueLeakageDetector } from './proactive/revenue-leakage-detector.js';
+export { registerCausalPLNarrator } from './proactive/causal-pl-narrator.js';
 export { registerCopilotBridge, serviceTracker } from './copilot-bridge.js';

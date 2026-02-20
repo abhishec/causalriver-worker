@@ -1,12 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useId, FormEvent } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
 import { useTheme } from "@/lib/theme-context";
-import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
+import dynamic from "next/dynamic";
+import { parseChartSpec } from "@/components/copilot/chart-utils";
+
+// Lazy-load InlineChart — recharts (150+ KB) is only loaded when a chart is rendered
+const InlineChart = dynamic(
+  () => import("@/components/copilot/InlineChart").then(m => ({ default: m.InlineChart })),
+  { ssr: false },
+);
 import { SlashCommandPicker, ALL_SLASH_COMMANDS, type SlashCommand } from "./SlashCommandPicker";
 import { AgentStepTimeline } from "./AgentStepTimeline";
+import { useCommandGathering } from "./useCommandGathering";
+import { COMMAND_GATHERING_MAP } from "./command-gathering";
+import { GatheringElement } from "./GatheringElements";
+import { VerificationPromptCard } from "./VerificationPromptCard";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -141,6 +153,12 @@ export interface CopilotChatProps {
   onArtifactPaneOpen?: () => void;
   /** Called after each completed assistant stream to persist conversation */
   onSave?: (opts: { messages: Message[]; title: string; serviceMode: string }) => void;
+  /** Custom commands from agent_templates (dynamic slash commands) */
+  customCommands?: SlashCommand[];
+  /** Custom gathering map from templates (for interactive params) */
+  customGatheringMap?: Record<string, import("./command-gathering").CommandGathering>;
+  /** Called when user clicks "Create new agent..." in SlashCommandPicker */
+  onCreateAgent?: () => void;
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -1063,6 +1081,24 @@ export interface ProactiveInsight {
   importance: number;
 }
 
+/** Agent Composer: composition progress event */
+export interface CompositionStep {
+  phase: "analyzing" | "selecting-tools" | "building-persona" | "inferring-params" | "planning" | "ready";
+  title: string;
+  detail?: string;
+}
+
+/** Agent Composer: full composition result */
+export interface CompositionResult {
+  name: string;
+  persona: string;
+  selectedTools: Array<{ id: string; name: string; description: string; source: string; category: string }>;
+  inferredGathering: Array<{ id: string; label: string; type: string; required: boolean; description?: string }> | null;
+  executionPrompt: string;
+  executionPlan: string[];
+  complexity: "light" | "medium" | "heavy";
+}
+
 export interface SSECallbacks {
   onText: (text: string, accumulated: string) => void;
   onError: (error: string) => void;
@@ -1073,6 +1109,10 @@ export interface SSECallbacks {
   onProgressiveArtifact?: (artifact: ProgressiveArtifact) => void;
   onProactiveInsights?: (insights: ProactiveInsight[]) => void;
   onAgentExecutionArtifact?: (artifact: { id: string; type: string; title: string; service: string; rawData: unknown }) => void;
+  /** Agent Composer: composition progress (phase updates) */
+  onCompositionStep?: (step: CompositionStep) => void;
+  /** Agent Composer: full composition result */
+  onCompositionResult?: (result: CompositionResult) => void;
   onDone: () => void;
 }
 
@@ -1145,6 +1185,13 @@ export async function consumeSSEStream(
             if (parsed.agentExecutionArtifact) {
               callbacks.onAgentExecutionArtifact?.(parsed.agentExecutionArtifact);
             }
+            // Agent Composer events
+            if (parsed.compositionStep) {
+              callbacks.onCompositionStep?.(parsed.compositionStep);
+            }
+            if (parsed.compositionResult) {
+              callbacks.onCompositionResult?.(parsed.compositionResult);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1179,6 +1226,8 @@ export async function consumeSSEStream(
             if (parsed.progressiveArtifact) callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
             if (parsed.proactiveInsights) callbacks.onProactiveInsights?.(parsed.proactiveInsights);
             if (parsed.agentExecutionArtifact) callbacks.onAgentExecutionArtifact?.(parsed.agentExecutionArtifact);
+            if (parsed.compositionStep) callbacks.onCompositionStep?.(parsed.compositionStep);
+            if (parsed.compositionResult) callbacks.onCompositionResult?.(parsed.compositionResult);
           } catch { /* skip */ }
         }
       }
@@ -1339,6 +1388,9 @@ export function CopilotChat({
   onServiceChange,
   onArtifactPaneOpen,
   onSave,
+  customCommands,
+  customGatheringMap,
+  onCreateAgent,
 }: CopilotChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1363,9 +1415,24 @@ export function CopilotChat({
   const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
   const [insightsDismissed, setInsightsDismissed] = useState(false);
 
+  // ── Pending verification prompts (reinforcement learning ground truth) ──
+  const [pendingVerifications, setPendingVerifications] = useState<Array<{
+    predictionId: string;
+    verificationId?: string;
+    domain?: string;
+    description?: string;
+    confidence?: number;
+    predictedAt?: string;
+    scheduledFor?: string;
+    source: "scheduled" | "prediction";
+  }>>([]);
+
   // ── Slash command picker state ───────────────────────────────────────────
   const [showSlashPicker, setShowSlashPicker] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
+
+  // ── Interactive command gathering (Claude-like param collection) ──────
+  const gathering = useCommandGathering(customGatheringMap);
 
   // ── Branch selector state ─────────────────────────────────────────────
   // Branches come from: prop override → fetched from GitHub status API → empty
@@ -1389,6 +1456,25 @@ export function CopilotChat({
     return () => { cancelled = true; };
   }, [trackedBranchesProp]);
 
+  // ── Fetch pending verifications on mount (reinforcement learning ground truth) ──
+  const organizationId = extraParams?.organizationId as string | undefined;
+  useEffect(() => {
+    if (!organizationId) return;
+    let cancelled = false;
+    fetch(`/api/copilot/pending-verifications?organizationId=${organizationId}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (cancelled || !data?.verifications) return;
+        setPendingVerifications(data.verifications);
+      })
+      .catch(() => { /* Silently fail — verifications are non-critical */ });
+    return () => { cancelled = true; };
+  }, [organizationId]);
+
+  const handleDismissVerification = useCallback((predictionId: string) => {
+    setPendingVerifications((prev) => prev.filter((v) => v.predictionId !== predictionId));
+  }, []);
+
   // Stable conversation ID for feedback tracking (one per chat session)
   const [conversationId] = useState(() => `conv_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`);
 
@@ -1407,6 +1493,9 @@ export function CopilotChat({
   selectedBranchRef.current = selectedBranch;
   const activeServiceRef = useRef(activeService);
   activeServiceRef.current = activeService;
+  // Ref for gathering state so sendMessage closure always reads latest values
+  const gatheringRef = useRef(gathering);
+  gatheringRef.current = gathering;
   // Ref for sendMessage so event handlers can call it without stale closures
   const sendMessageRef = useRef<((msg: string) => void) | null>(null);
 
@@ -1449,11 +1538,29 @@ export function CopilotChat({
         }, 50);
       }
     };
+    // "copilot-jump-to-message" scrolls to a specific message in the chat (artifact → message linking)
+    const handleJumpToMessage = (event: Event) => {
+      const { messageIndex } = (event as CustomEvent).detail ?? {};
+      if (typeof messageIndex !== "number") return;
+      // Find the message element by data attribute and scroll to it with a highlight flash
+      const container = messagesEndRef.current?.parentElement;
+      if (!container) return;
+      const msgEl = container.querySelector(`[data-msg-index="${messageIndex}"]`);
+      if (msgEl) {
+        msgEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        msgEl.classList.add("ring-2", "ring-accent/30", "rounded-lg");
+        setTimeout(() => {
+          msgEl.classList.remove("ring-2", "ring-accent/30", "rounded-lg");
+        }, 2000);
+      }
+    };
     window.addEventListener("copilot-inject-prompt", handleInjectPrompt);
     window.addEventListener("copilot-inject-and-submit", handleInjectAndSubmit);
+    window.addEventListener("copilot-jump-to-message", handleJumpToMessage);
     return () => {
       window.removeEventListener("copilot-inject-prompt", handleInjectPrompt);
       window.removeEventListener("copilot-inject-and-submit", handleInjectAndSubmit);
+      window.removeEventListener("copilot-jump-to-message", handleJumpToMessage);
     };
   }, []);
 
@@ -1495,6 +1602,8 @@ export function CopilotChat({
       setBrainMetaPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
+      // Cancel any active gathering when loading a saved conversation
+      gatheringRef.current.cancel();
       // Scroll to bottom after render
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1549,6 +1658,9 @@ export function CopilotChat({
           serviceMode: activeServiceRef.current !== "general" ? activeServiceRef.current : undefined,
           // Phase 4: include selected branch so SE-aaS domains get code intelligence
           ...(branch ? { branch } : {}),
+          // Interactive gathering: include command ID and gathered params (use ref for fresh values)
+          ...(gatheringRef.current.state.command ? { commandId: gatheringRef.current.state.command.id } : {}),
+          ...(Object.keys(gatheringRef.current.state.collectedParams).length > 0 ? { commandParams: gatheringRef.current.state.collectedParams } : {}),
           ...extraParams,
         }),
         signal: controller.signal,
@@ -1677,7 +1789,7 @@ export function CopilotChat({
                 rawData: execArtifact.rawData,
                 createdAt: Date.now(),
                 messageIndex: messageIdx,
-                service: "agent" as any,
+                service: "agent",
               });
             }
           },
@@ -1707,6 +1819,10 @@ export function CopilotChat({
     } finally {
       setIsLoading(false);
       abortRef.current = null;
+      // Reset gathering state after execution completes (fix: stuck "executing" phase)
+      if (gatheringRef.current.state.phase === "executing") {
+        gatheringRef.current.reset();
+      }
     }
   }, [endpoint, extraParams, isLoading]); // Bug fix #1/#2: removed messages and onArtifact — use refs instead
 
@@ -1808,14 +1924,31 @@ export function CopilotChat({
                 </div>
               </div>
             )}
+
+            {/* Verification Prompts — predictions due for ground truth */}
+            {pendingVerifications.length > 0 && organizationId && (
+              <div className="space-y-2 mb-3">
+                {pendingVerifications.map((v) => (
+                  <VerificationPromptCard
+                    key={v.predictionId}
+                    verification={v}
+                    organizationId={organizationId}
+                    onDismiss={handleDismissVerification}
+                  />
+                ))}
+              </div>
+            )}
             {messages.map((msg, i) => {
               const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
               const artifacts = messageArtifacts?.get(i);
 
               return (
-                <div
+                <motion.div
                   key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
-                  className="animate-message-in"
+                  data-msg-index={i}
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 30, delay: i > messages.length - 3 ? 0.05 : 0 }}
                 >
                   {msg.role === "user" ? (
                     /* ── User message — matches HTML .msg-user ── */
@@ -1868,12 +2001,12 @@ export function CopilotChat({
                           /* When agent is running, don't show loading dots (timeline is visible) */
                           null
                         ) : (
-                          /* Loading dots — matches HTML .typing */
-                          <span className="inline-flex items-center" style={{ gap: 5, padding: "12px 0" }}>
-                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "0ms" }} />
-                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "200ms" }} />
-                            <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: "50%", background: "#c6613f", opacity: 0.3, animationDelay: "400ms" }} />
-                          </span>
+                          /* Shimmer streaming indicator — Claude-style */
+                          <div className="py-3">
+                            <div className="streaming-shimmer text-[15px] font-medium">
+                              Thinking...
+                            </div>
+                          </div>
                         )}
                       </div>
 
@@ -1909,9 +2042,102 @@ export function CopilotChat({
                       )}
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })}
+
+            {/* Gathering conversation — renders after messages when gathering is active */}
+            {gathering.isActive && gathering.state.messages.map((gMsg, gi) => (
+              <motion.div
+                key={`gathering-${gi}`}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30, delay: 0.05 }}
+              >
+                {gMsg.role === "user" ? (
+                  <div style={{ padding: "12px 0" }}>
+                    <div style={{ fontSize: 15, color: "#141413", lineHeight: 1.6, fontWeight: 400 }}>
+                      {gMsg.content}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: "12px 0" }}>
+                    <div className="text-sm leading-relaxed" style={{ fontSize: 15, color: "#3d3d3a", lineHeight: 1.7 }}>
+                      {gMsg.content}
+                    </div>
+                    {/* Render interactive gathering element */}
+                    {gMsg.interactive && (
+                      <GatheringElement
+                        interactive={gMsg.interactive}
+                        onSelect={(val) => gathering.submitParam(val)}
+                        onSkip={() => gathering.skipParam()}
+                        onConfirm={() => {
+                          const prompt = gathering.confirm();
+                          if (prompt) {
+                            sendMessageRef.current?.(prompt);
+                          }
+                        }}
+                        onModify={() => gathering.cancel()}
+                        loading={gathering.state.loadingOptions}
+                        disabled={gathering.state.phase === "executing"}
+                      />
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+
+            {/* Confirmation card at end of gathering */}
+            {gathering.state.phase === "confirming" && gathering.state.currentInteractive?.type === "confirm" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <GatheringElement
+                  interactive={gathering.state.currentInteractive}
+                  onSelect={() => {}}
+                  onConfirm={() => {
+                    const prompt = gathering.confirm();
+                    if (prompt) {
+                      sendMessageRef.current?.(prompt);
+                    }
+                  }}
+                  onModify={() => gathering.cancel()}
+                />
+              </motion.div>
+            )}
+
+            {/* Follow-up suggestions — animated chips */}
+            <AnimatePresence>
+              {followUps.length > 0 && !isLoading && !gathering.isActive && (
+                <motion.div
+                  className="flex flex-wrap gap-2 pt-2 pb-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {followUps.map((suggestion, si) => (
+                    <motion.button
+                      key={suggestion}
+                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 28, delay: si * 0.06 }}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => handleFollowUpClick(suggestion)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px]
+                                 font-medium border border-border bg-surface hover:bg-surface-hover
+                                 hover:border-accent/20 text-foreground/70 hover:text-foreground
+                                 transition-colors cursor-pointer"
+                    >
+                      <span className="text-accent text-[10px]">✦</span>
+                      {suggestion}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div ref={messagesEndRef} />
           </div>
@@ -1927,17 +2153,33 @@ export function CopilotChat({
             <div className="absolute bottom-full left-0 right-0 mb-2 z-20">
               <SlashCommandPicker
                 query={slashQuery}
+                customCommands={customCommands}
+                customGatheringIds={customGatheringMap ? new Set(Object.keys(customGatheringMap)) : undefined}
+                onCreateAgent={onCreateAgent}
                 onSelect={(cmd: SlashCommand) => {
                   setShowSlashPicker(false);
                   setSlashQuery("");
-                  if (onServiceChange) {
+                  if (onServiceChange && cmd.service !== "custom") {
                     onServiceChange(cmd.service);
                   }
                   onArtifactPaneOpen?.();
-                  setInput(cmd.prompt);
-                  setTimeout(() => {
-                    sendMessageRef.current?.(cmd.prompt);
-                  }, 50);
+
+                  // Check if this command has interactive gathering params
+                  // Check both system and custom gathering maps
+                  const systemGathering = COMMAND_GATHERING_MAP[cmd.id];
+                  const customGathering = customGatheringMap?.[cmd.id];
+                  const gatheringConfig = systemGathering || customGathering;
+                  if (gatheringConfig && gatheringConfig.params.length > 0) {
+                    // Start interactive gathering — don't auto-submit
+                    gathering.startGathering(cmd);
+                    setInput("");
+                  } else {
+                    // No gathering needed — auto-submit as before
+                    setInput(cmd.prompt);
+                    setTimeout(() => {
+                      sendMessageRef.current?.(cmd.prompt);
+                    }, 50);
+                  }
                 }}
                 onClose={() => {
                   setShowSlashPicker(false);

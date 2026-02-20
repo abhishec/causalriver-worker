@@ -3,7 +3,7 @@
 /**
  * BrainLearningFeed
  *
- * Surfaces what NexusBrain is actively learning in plain English.
+ * Surfaces what Brain OS is actively learning in plain English.
  * Polls /api/brain/emergence and renders events in a compact timeline,
  * with Supabase Realtime push for live updates.
  *

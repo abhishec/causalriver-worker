@@ -229,7 +229,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    name: "NexusBrain Motor Execution API",
+    name: "Brain OS Motor Execution API",
     version: "2.0.0",
     status: "operational",
   });

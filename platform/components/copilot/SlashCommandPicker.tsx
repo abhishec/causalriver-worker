@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
 import { AAS_COMMANDS } from "./aas-commands";
+import { GATHERING_COMMAND_IDS } from "./command-gathering";
 import { cn } from "@/lib/utils";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -13,7 +14,7 @@ export interface SlashCommand {
   description: string;
   icon: string;
   prompt: string;
-  service: "general" | "aas" | "seaas";
+  service: "general" | "aas" | "seaas" | "custom";
   category: string;
 }
 
@@ -54,25 +55,37 @@ interface SlashCommandPickerProps {
   onSelect: (cmd: SlashCommand) => void;
   /** Called on Escape or click-away */
   onClose: () => void;
+  /** Dynamic custom commands from agent_templates */
+  customCommands?: SlashCommand[];
+  /** Called when user clicks "Create new agent..." */
+  onCreateAgent?: () => void;
+  /** Custom gathering IDs (for showing "interactive" badge on custom commands) */
+  customGatheringIds?: Set<string>;
 }
 
-export function SlashCommandPicker({ query, onSelect, onClose }: SlashCommandPickerProps) {
+export function SlashCommandPicker({ query, onSelect, onClose, customCommands, onCreateAgent, customGatheringIds }: SlashCommandPickerProps) {
   const [selected, setSelected] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
+  // Merge system + custom commands
+  const allCommands = useMemo(
+    () => [...ALL_SLASH_COMMANDS, ...(customCommands || [])],
+    [customCommands]
+  );
+
   // Filter commands
   const filtered = useMemo(() => {
-    if (!query) return ALL_SLASH_COMMANDS.slice(0, 12);
+    if (!query) return allCommands.slice(0, 14);
     const q = query.toLowerCase();
-    return ALL_SLASH_COMMANDS.filter(
+    return allCommands.filter(
       (c) =>
         c.label.includes(q) ||
         c.description.toLowerCase().includes(q) ||
         c.category.toLowerCase().includes(q) ||
         c.id.includes(q)
-    ).slice(0, 12);
-  }, [query]);
+    ).slice(0, 14);
+  }, [query, allCommands]);
 
   // Reset selection when filtered list changes
   useEffect(() => {
@@ -126,9 +139,11 @@ export function SlashCommandPicker({ query, onSelect, onClose }: SlashCommandPic
   const seaasCmds = filtered.filter((c) => c.service === "seaas");
   const aasCmds = filtered.filter((c) => c.service === "aas");
   const generalCmds = filtered.filter((c) => c.service === "general");
+  const customCmds = filtered.filter((c) => c.service === "custom");
   if (seaasCmds.length > 0) grouped.push({ group: "Engineering (SE-aaS)", cmds: seaasCmds });
   if (aasCmds.length > 0) grouped.push({ group: "Accounting (AAS)", cmds: aasCmds });
   if (generalCmds.length > 0) grouped.push({ group: "General", cmds: generalCmds });
+  if (customCmds.length > 0) grouped.push({ group: "Custom", cmds: customCmds });
 
   return (
     <div
@@ -166,6 +181,11 @@ export function SlashCommandPicker({ query, onSelect, onClose }: SlashCommandPic
                 <div className="flex-1 min-w-0 text-left">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-xs font-mono">/{cmd.label}</span>
+                    {(GATHERING_COMMAND_IDS.has(cmd.id) || customGatheringIds?.has(cmd.id)) && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-accent/10 text-accent leading-none">
+                        interactive
+                      </span>
+                    )}
                   </div>
                   <div className="text-[11px] text-muted truncate">{cmd.description}</div>
                 </div>
@@ -174,6 +194,21 @@ export function SlashCommandPicker({ query, onSelect, onClose }: SlashCommandPic
           })}
         </div>
       ))}
+      {/* ── "Create new agent" footer ── */}
+      {onCreateAgent && (
+        <div className="border-t border-border-subtle">
+          <button
+            onMouseDown={(e) => { e.preventDefault(); onCreateAgent(); onClose(); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-accent hover:bg-accent/5 transition-colors"
+          >
+            <span className="text-base shrink-0 w-6 text-center">✨</span>
+            <div className="flex-1 min-w-0 text-left">
+              <span className="font-medium text-xs">Create new agent...</span>
+              <div className="text-[11px] text-muted">Compose an agent from natural language</div>
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

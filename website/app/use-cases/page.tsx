@@ -10,7 +10,7 @@ export default function UseCasesPage() {
     <div className="mx-auto max-w-4xl px-6 py-24 pt-32">
       <h1 className="mb-4 text-3xl font-bold">Use Cases</h1>
       <p className="mb-12 text-lg text-muted">
-        NexusBrain&apos;s causal memory powers autonomous agent services that transform how organisations work.
+        Brain OS&apos;s causal memory powers autonomous agent services that transform how organisations work.
         Each service is backed by causal evidence from peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval).
       </p>
 
@@ -40,7 +40,7 @@ export default function UseCasesPage() {
               </p>
             </div>
             <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-3">
-              <p className="text-xs font-medium uppercase text-accent-light mb-2">NexusBrain approach</p>
+              <p className="text-xs font-medium uppercase text-accent-light mb-2">Brain OS approach</p>
               <p className="text-sm text-zinc-300">
                 Ask the causal memory: &quot;Why did this metric change?&quot; In 30 seconds, get an evidence-based answer
                 with the root cause, the full causal chain across domains, the timeline,
@@ -53,7 +53,7 @@ export default function UseCasesPage() {
         <div className="rounded-xl border border-border bg-surface p-6">
           <h2 className="mb-2 text-xl font-semibold">Who Is It For?</h2>
           <ul className="space-y-2 text-sm text-muted">
-            <li><span className="font-medium text-foreground">Service Builders</span> &mdash; Build autonomous agent services (SE-aaS, Accountant-aaS, CS-aaS, HR-aaS, Strategy-aaS) powered by NexusBrain&apos;s causal memory.</li>
+            <li><span className="font-medium text-foreground">Service Builders</span> &mdash; Build autonomous agent services (SE-aaS, Accountant-aaS, CS-aaS, HR-aaS, Strategy-aaS) powered by Brain OS&apos;s causal memory.</li>
             <li><span className="font-medium text-foreground">CEOs / Founders</span> &mdash; See how every department affects the bottom line. Decisions based on causal evidence, not intuition.</li>
             <li><span className="font-medium text-foreground">CTOs / Engineering Leaders</span> &mdash; Trace how engineering decisions cascade through CI/CD, production, and business outcomes with statistical proof.</li>
             <li><span className="font-medium text-foreground">COOs</span> &mdash; Understand operational ripple effects before they cascade. Intervene early with data-backed interventions.</li>

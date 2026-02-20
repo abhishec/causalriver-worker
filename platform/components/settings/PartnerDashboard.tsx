@@ -266,7 +266,7 @@ export function PartnerDashboard({ orgId, orgName }: PartnerDashboardProps) {
                 {/* Star rating */}
                 <div>
                   <label className="block text-xs font-medium mb-2">
-                    How would you rate NexusBrain so far?
+                    How would you rate Brain OS so far?
                   </label>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (

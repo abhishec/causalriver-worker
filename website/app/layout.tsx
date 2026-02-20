@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NexusBrain - The Causal Memory for Organisations | usebrainos.com",
-    template: "%s | NexusBrain",
+    default: "Brain OS - The Causal Memory for Organisations | usebrainos.com",
+    template: "%s | Brain OS",
   },
   description:
-    "NexusBrain is the causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
+    "Brain OS is the causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
   keywords: [
     "causal memory",
     "organisational intelligence",
@@ -29,21 +29,21 @@ export const metadata: Metadata = {
     "AI agents",
     "cause and effect",
     "agent as a service",
-    "NexusBrain",
+    "Brain OS",
     "usebrainos",
   ],
   authors: [{ name: "Monetize Organisation" }],
   openGraph: {
-    title: "NexusBrain - The Causal Memory for Organisations",
+    title: "Brain OS - The Causal Memory for Organisations",
     description:
       "The causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
     url: "https://usebrainos.com",
-    siteName: "NexusBrain",
+    siteName: "Brain OS",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NexusBrain - The Causal Memory for Organisations",
+    title: "Brain OS - The Causal Memory for Organisations",
     description:
       "The causal memory for organisations — a deep knowledge system that perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
   },

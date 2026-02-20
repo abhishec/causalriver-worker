@@ -136,7 +136,7 @@ export default async function AdminOrgsPage() {
 
       {/* ── Core Brain ──────────────────────────────────────────────────── */}
       {coreOrgs.length > 0 && (
-        <Section label="Core Brain" sublabel="Platform intelligence — NexusBrain internal">
+        <Section label="Core Brain" sublabel="Platform intelligence — Brain OS internal">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {coreOrgs.map((org) => (
               <WorkspaceCard

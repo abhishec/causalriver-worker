@@ -10,7 +10,7 @@ export default function MCPPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">MCP Server</h1>
       <p className="mb-8 text-lg text-muted">
-        The NexusBrain MCP server gives Claude Desktop and Claude Code direct access to your organisation&apos;s causal memory
+        The Brain OS MCP server gives Claude Desktop and Claude Code direct access to your organisation&apos;s causal memory
         via the Model Context Protocol.
       </p>
 
@@ -24,7 +24,7 @@ export default function MCPPage() {
       <CodeBlock
         code={`{
   "mcpServers": {
-    "nexus-brain": {
+    "brain-os": {
       "command": "npx",
       "args": ["@nexus-ai/mcp-server"],
       "env": {
@@ -63,7 +63,7 @@ export default function MCPPage() {
           },
           {
             name: "nexus_webhook",
-            description: "Forward webhooks. Claude can relay external events to NexusBrain for processing.",
+            description: "Forward webhooks. Claude can relay external events to Brain OS for processing.",
             example: 'nexus_webhook({ source: "stripe", payload: { ... } })',
           },
           {

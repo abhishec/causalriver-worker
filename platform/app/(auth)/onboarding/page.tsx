@@ -371,7 +371,7 @@ export default function OnboardingPage() {
         <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
           <span className="text-lg font-bold text-accent">N</span>
         </div>
-        <span className="text-lg font-semibold">NexusBrain</span>
+        <span className="text-lg font-semibold">Brain OS</span>
       </div>
 
       {/* Step indicator */}
@@ -716,8 +716,8 @@ export default function OnboardingPage() {
             </h2>
             <p className="text-muted">
               {githubConnected && firstResults
-                ? "Here's what NexusBrain found from your connected data."
-                : "Try asking NexusBrain something. You can always explore more later."}
+                ? "Here's what Brain OS found from your connected data."
+                : "Try asking Brain OS something. You can always explore more later."}
             </p>
           </div>
 
@@ -784,14 +784,14 @@ export default function OnboardingPage() {
                 <div className="p-4 rounded-lg bg-surface border border-border-subtle">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-xs text-success font-medium">NexusBrain thinking...</span>
+                    <span className="text-xs text-success font-medium">Brain OS thinking...</span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
                   </p>
                 </div>
               )}
-              <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch NexusBrain"}</button>
+              <button onClick={handleFinish} disabled={loading} className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent-dark text-accent-foreground font-medium transition-colors disabled:opacity-50">{loading ? "Launching..." : "Launch Brain OS"}</button>
             </>
           )}
         </div>

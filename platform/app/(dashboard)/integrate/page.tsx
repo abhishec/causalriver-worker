@@ -4,14 +4,14 @@ const QUICK_STEPS = [
   {
     step: 1,
     title: "Install the SDK",
-    code: `npm install @nexusbrain/sdk`,
+    code: `npm install @brainos/sdk`,
   },
   {
     step: 2,
-    title: "Connect NexusBrain",
-    code: `import { NexusBrain } from '@nexusbrain/sdk';
+    title: "Connect Brain OS",
+    code: `import { BrainOS } from '@brainos/sdk';
 
-const brain = new NexusBrain({
+const brain = new BrainOS({
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   organizationId: 'your-org-id',
@@ -70,7 +70,7 @@ const PATTERNS = [
     icon: "\u{269B}\u{FE0F}",
     title: "React Hooks",
     description: "Use the brain directly in your React components with built-in hooks for real-time updates and streaming responses.",
-    code: `import { useBrain, useSignals } from '@nexusbrain/react';
+    code: `import { useBrain, useSignals } from '@brainos/react';
 
 function Dashboard() {
   const { ask, isLoading } = useBrain();
@@ -85,7 +85,7 @@ function Dashboard() {
     icon: "\u{1F916}",
     title: "Agent Memory",
     description: "Give AI agents persistent memory with causal reasoning. Agents inherit the brain's knowledge graph and can contribute new signals.",
-    code: `import { AgentBrain } from '@nexusbrain/sdk';
+    code: `import { AgentBrain } from '@brainos/sdk';
 
 const agent = new AgentBrain({
   brain,
@@ -103,7 +103,7 @@ const context = await agent.getContext(
     title: "MCP Server",
     description: "Expose the brain as a Model Context Protocol server. Any MCP-compatible AI assistant can query causal intelligence directly.",
     code: `// Start as MCP server
-import { startMCPServer } from '@nexusbrain/mcp';
+import { startMCPServer } from '@brainos/mcp';
 
 startMCPServer({
   brain,

@@ -1,35 +1,38 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import type { DomainResult } from "@/components/copilot/CopilotChat";
 import { FinancialStatementsPanel, AAS_DOMAIN_TO_TAB } from "@/components/copilot/FinancialStatementsPanel";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
 import { SEaaSDeliveryPanel } from "@/components/copilot/SEaaSDeliveryPanel";
+import { ArtifactFeedback } from "@/components/copilot/artifact-renderers/ArtifactFeedback";
 
-// ── All 22 domain-specific artifact renderers ────────────────────────────────
-import {
-  EarlyWarningRenderer,
-  EngagementHealthRenderer,
-  PodMatchRenderer,
-  ScopeCreepRenderer,
-  PRReviewRenderer,
-  TDDRenderer,
-  ScaffoldingRenderer,
-  DepUpgradeRenderer,
-  HLDLLDRenderer,
-  TestCasesRenderer,
-  TestDataRenderer,
-  CodebaseQARenderer,
-  DeadCodeRenderer,
-  ImpactRenderer,
-  ArchitectureRenderer,
-  IncidentRenderer,
-  LogQueryRenderer,
-  PerfRenderer,
-  SQLRenderer,
-  LineageRenderer,
-  BenchmarkRenderer,
-  GenericIntelRenderer,
-} from "@/components/copilot/artifact-renderers";
+// ── Lazy-loaded artifact renderers ──────────────────────────────────────────
+// Each renderer is code-split into its own chunk and only loaded when needed.
+// This prevents bundling all 22 renderers into the initial page load.
+const EarlyWarningRenderer      = dynamic(() => import("@/components/copilot/artifact-renderers/EarlyWarningRenderer").then(m => ({ default: m.EarlyWarningRenderer })),      { ssr: false });
+const EngagementHealthRenderer  = dynamic(() => import("@/components/copilot/artifact-renderers/EngagementHealthRenderer").then(m => ({ default: m.EngagementHealthRenderer })),  { ssr: false });
+const PodMatchRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/PodMatchRenderer").then(m => ({ default: m.PodMatchRenderer })),          { ssr: false });
+const ScopeCreepRenderer        = dynamic(() => import("@/components/copilot/artifact-renderers/ScopeCreepRenderer").then(m => ({ default: m.ScopeCreepRenderer })),        { ssr: false });
+const PRReviewRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/PRReviewRenderer").then(m => ({ default: m.PRReviewRenderer })),          { ssr: false });
+const TDDRenderer               = dynamic(() => import("@/components/copilot/artifact-renderers/TDDRenderer").then(m => ({ default: m.TDDRenderer })),               { ssr: false });
+const ScaffoldingRenderer       = dynamic(() => import("@/components/copilot/artifact-renderers/ScaffoldingRenderer").then(m => ({ default: m.ScaffoldingRenderer })),       { ssr: false });
+const DepUpgradeRenderer        = dynamic(() => import("@/components/copilot/artifact-renderers/DepUpgradeRenderer").then(m => ({ default: m.DepUpgradeRenderer })),        { ssr: false });
+const HLDLLDRenderer            = dynamic(() => import("@/components/copilot/artifact-renderers/HLDLLDRenderer").then(m => ({ default: m.HLDLLDRenderer })),            { ssr: false });
+const TestCasesRenderer         = dynamic(() => import("@/components/copilot/artifact-renderers/TestCasesRenderer").then(m => ({ default: m.TestCasesRenderer })),         { ssr: false });
+const TestDataRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/TestDataRenderer").then(m => ({ default: m.TestDataRenderer })),          { ssr: false });
+const CodebaseQARenderer        = dynamic(() => import("@/components/copilot/artifact-renderers/CodebaseQARenderer").then(m => ({ default: m.CodebaseQARenderer })),        { ssr: false });
+const DeadCodeRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/DeadCodeRenderer").then(m => ({ default: m.DeadCodeRenderer })),          { ssr: false });
+const ImpactRenderer            = dynamic(() => import("@/components/copilot/artifact-renderers/ImpactRenderer").then(m => ({ default: m.ImpactRenderer })),            { ssr: false });
+const ArchitectureRenderer      = dynamic(() => import("@/components/copilot/artifact-renderers/ArchitectureRenderer").then(m => ({ default: m.ArchitectureRenderer })),      { ssr: false });
+const IncidentRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/IncidentRenderer").then(m => ({ default: m.IncidentRenderer })),          { ssr: false });
+const LogQueryRenderer          = dynamic(() => import("@/components/copilot/artifact-renderers/LogQueryRenderer").then(m => ({ default: m.LogQueryRenderer })),          { ssr: false });
+const PerfRenderer              = dynamic(() => import("@/components/copilot/artifact-renderers/PerfRenderer").then(m => ({ default: m.PerfRenderer })),              { ssr: false });
+const SQLRenderer               = dynamic(() => import("@/components/copilot/artifact-renderers/SQLRenderer").then(m => ({ default: m.SQLRenderer })),               { ssr: false });
+const LineageRenderer           = dynamic(() => import("@/components/copilot/artifact-renderers/LineageRenderer").then(m => ({ default: m.LineageRenderer })),           { ssr: false });
+const BenchmarkRenderer         = dynamic(() => import("@/components/copilot/artifact-renderers/BenchmarkRenderer").then(m => ({ default: m.BenchmarkRenderer })),         { ssr: false });
+const GenericIntelRenderer      = dynamic(() => import("@/components/copilot/artifact-renderers/GenericIntelRenderer").then(m => ({ default: m.GenericIntelRenderer })),      { ssr: false });
 
 // ── Domain ID → Renderer mapping ─────────────────────────────────────────────
 // Covers ALL 31 commands from DOMAIN_CATALOGUE (20) + AAS_COMMANDS (7) + GENERAL (4)
@@ -94,19 +97,37 @@ interface DomainResultRendererProps {
  */
 export function DomainResultRenderer({ result, domainId }: DomainResultRendererProps) {
   const rawData = result.data as Record<string, any>;
+  const resolvedDomainId = domainId || rawData?._domainType as string || "unknown";
+  const artifactId = rawData?.artifactId || rawData?.id || `${resolvedDomainId}_${Date.now()}`;
+
+  // Helper: wrap any renderer output with the feedback footer
+  const withFeedback = (content: React.ReactNode) => (
+    <div>
+      {content}
+      <ArtifactFeedback
+        artifactId={artifactId}
+        domainId={resolvedDomainId}
+        service={result.service as "seaas" | "aas" | "general"}
+      />
+    </div>
+  );
 
   // ── 1. Try specific domain renderer first ─────────────────────────────────
   if (domainId) {
     const SpecificRenderer = DOMAIN_RENDERER_MAP[domainId];
     if (SpecificRenderer) {
-      return <SpecificRenderer data={rawData} />;
+      return withFeedback(
+        <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+          <SpecificRenderer data={rawData} />
+        </Suspense>
+      );
     }
   }
 
   // ── 2. AAS service → FinancialStatementsPanel (P&L, Balance Sheet, Trial Balance, GST, Anomalies, Transactions)
   if (result.service === "aas") {
     const tabFromDomain = domainId ? AAS_DOMAIN_TO_TAB[domainId] : undefined;
-    return <FinancialStatementsPanel data={result.data} initialTab={tabFromDomain} />;
+    return withFeedback(<FinancialStatementsPanel data={result.data} initialTab={tabFromDomain} />);
   }
 
   // ── 3. Try to extract domainId from data._domainType (fallback for older integrations)
@@ -114,20 +135,38 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
   if (embeddedDomainId) {
     const EmbeddedRenderer = DOMAIN_RENDERER_MAP[embeddedDomainId];
     if (EmbeddedRenderer) {
-      return <EmbeddedRenderer data={rawData} />;
+      return withFeedback(
+        <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+          <EmbeddedRenderer data={rawData} />
+        </Suspense>
+      );
     }
   }
 
   // ── 4. delivery-intelligence service → SEaaSDeliveryPanel (legacy)
   if (result.service === "delivery-intelligence") {
-    return <SEaaSDeliveryPanel data={result.data} />;
+    return withFeedback(<SEaaSDeliveryPanel data={result.data} />);
   }
 
   // ── 5. SE-aaS service → SEaaSResultPanel (legacy generic panel)
   if (result.service === "seaas") {
-    return <SEaaSResultPanel data={result.data} />;
+    return withFeedback(<SEaaSResultPanel data={result.data} />);
+  }
+
+  // ── 5.5. Custom template results → GenericIntelRenderer
+  // Custom commands (domainId starts with "custom-" or service === "custom")
+  if (domainId?.startsWith("custom-") || result.service === "custom") {
+    return withFeedback(
+      <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+        <GenericIntelRenderer data={rawData} />
+      </Suspense>
+    );
   }
 
   // ── 6. Final fallback — GenericIntelRenderer for anything unrecognized
-  return <GenericIntelRenderer data={rawData} />;
+  return withFeedback(
+    <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+      <GenericIntelRenderer data={rawData} />
+    </Suspense>
+  );
 }

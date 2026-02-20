@@ -79,16 +79,21 @@ startProactiveEviction();
 
 export async function POST(request: NextRequest) {
   try {
-    // ── Auth ──────────────────────────────────────────────────────
+    // ── Auth (allow internal cron bypass) ──────────────────────────
+    const isInternalCron =
+      request.headers.get("x-internal-cron") === "true" &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY &&
+      request.headers.get("authorization") === `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`;
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user && !isInternalCron) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ── Rate limit ───────────────────────────────────────────────
-    const rateLimit = checkSessionRateLimit(user.id, "/api/brain/cycle");
+    // ── Rate limit (skip for internal cron) ──────────────────────
+    const rateLimit = !isInternalCron ? checkSessionRateLimit(user!.id, "/api/brain/cycle") : { allowed: true };
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Brain cycles are resource-intensive." },
@@ -110,28 +115,30 @@ export async function POST(request: NextRequest) {
 
     const orgId = organizationId || await getCurrentOrgId();
 
-    // ── Verify membership ────────────────────────────────────────
-    const { data: membership } = await supabase
-      .from("org_members")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("organization_id", orgId)
-      .single();
-
-    if (!membership) {
-      const { data: admin } = await supabase
+    // ── Verify membership (skip for internal cron) ────────────────
+    if (!isInternalCron) {
+      const { data: membership } = await supabase
         .from("org_members")
-        .select("is_platform_admin")
-        .eq("user_id", user.id)
-        .eq("is_platform_admin", true)
-        .limit(1)
+        .select("role")
+        .eq("user_id", user!.id)
+        .eq("organization_id", orgId)
         .single();
 
-      if (!admin) {
-        return NextResponse.json(
-          { error: "Not a member of this organization" },
-          { status: 403 }
-        );
+      if (!membership) {
+        const { data: admin } = await supabase
+          .from("org_members")
+          .select("is_platform_admin")
+          .eq("user_id", user!.id)
+          .eq("is_platform_admin", true)
+          .limit(1)
+          .single();
+
+        if (!admin) {
+          return NextResponse.json(
+            { error: "Not a member of this organization" },
+            { status: 403 }
+          );
+        }
       }
     }
 

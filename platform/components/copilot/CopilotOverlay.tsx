@@ -312,7 +312,7 @@ export function CopilotOverlay() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask NexusBrain anything..."
+              placeholder="Ask Brain OS anything..."
               disabled={isLoading}
               className="flex-1 bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted focus:outline-none disabled:opacity-50"
             />
@@ -393,7 +393,7 @@ export function CopilotOverlay() {
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-border-subtle bg-surface/30">
           <span className="text-[10px] text-muted/50">
-            Powered by NexusBrain&apos;s causal intelligence
+            Powered by Brain OS&apos;s causal intelligence
           </span>
           <button
             onClick={handleExpandToCopilot}

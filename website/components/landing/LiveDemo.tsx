@@ -7,13 +7,13 @@ const STATIC_CONVERSATIONS = [
   {
     question: "Why did churn spike last month?",
     answer:
-      "Churn increased 23% MoM. NexusBrain traced it to a causal chain: support ticket volume rose 40% after a billing system migration (lag: 3 days), which degraded CSAT scores from 4.2 to 3.6 (lag: 7 days), leading to increased cancellations concentrated in the SMB segment (lag: 14 days). Confidence: 87%.",
+      "Churn increased 23% MoM. Brain OS traced it to a causal chain: support ticket volume rose 40% after a billing system migration (lag: 3 days), which degraded CSAT scores from 4.2 to 3.6 (lag: 7 days), leading to increased cancellations concentrated in the SMB segment (lag: 14 days). Confidence: 87%.",
     domain: "customer",
   },
   {
     question: "What will happen if we increase marketing spend 20%?",
     answer:
-      "Simulating +20% marketing spend cascade: Lead volume increases ~12% (confidence: 85%, lag: 14d). Pipeline value grows ~8% (confidence: 72%, lag: 30d). Monthly revenue impact: +5.2% (confidence: 58%, lag: 60d). Note: NexusBrain detects diminishing returns above 15% increase based on historical patterns.",
+      "Simulating +20% marketing spend cascade: Lead volume increases ~12% (confidence: 85%, lag: 14d). Pipeline value grows ~8% (confidence: 72%, lag: 30d). Monthly revenue impact: +5.2% (confidence: 58%, lag: 60d). Note: Brain OS detects diminishing returns above 15% increase based on historical patterns.",
     domain: "financial",
   },
 ];
@@ -31,10 +31,10 @@ export function LiveDemo() {
   const [isTyping, setIsTyping] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Build dynamic "What did NexusBrain learn today?" from real data
+  // Build dynamic "What did Brain OS learn today?" from real data
   const dynamicAnswer = useMemo(() => {
     if (!latest) {
-      return "Today NexusBrain discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. System health: 94%.";
+      return "Today Brain OS discovered 3 new causal edges: (1) GitHub PR merge velocity correlates with deployment frequency at 0.82 strength. (2) Slack #support channel sentiment is a leading indicator of NPS score changes with 5-day lag. (3) Marketing email open rates predict demo bookings with 0.71 confidence. System health: 94%.";
     }
 
     const discoveries = (latest.top_discoveries || []).filter(Boolean);
@@ -49,9 +49,9 @@ export function LiveDemo() {
 
     if (discoveries.length > 0) {
       const numbered = discoveries.slice(0, 3).map((d, i) => `(${i + 1}) ${d}`).join(". ");
-      parts.push(`Today NexusBrain discovered ${discoveries.length} new insight${discoveries.length !== 1 ? "s" : ""}: ${numbered}.`);
+      parts.push(`Today Brain OS discovered ${discoveries.length} new insight${discoveries.length !== 1 ? "s" : ""}: ${numbered}.`);
     } else {
-      parts.push(`Today NexusBrain processed signals across ${regions} active brain regions.`);
+      parts.push(`Today Brain OS processed signals across ${regions} active brain regions.`);
     }
 
     if (newConns > 0 || patterns > 0) {
@@ -79,7 +79,7 @@ export function LiveDemo() {
   const conversations = useMemo(() => [
     ...STATIC_CONVERSATIONS,
     {
-      question: "What did NexusBrain learn today?",
+      question: "What did Brain OS learn today?",
       answer: dynamicAnswer,
       domain: "intelligence",
     },
@@ -127,8 +127,8 @@ export function LiveDemo() {
           </h2>
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
             {isLive
-              ? "These are real outputs from NexusBrain\u2019s causal reasoning engine. Click a question to see how the causal memory responds."
-              : "Click a question to see how NexusBrain\u2019s causal reasoning engine responds."}
+              ? "These are real outputs from Brain OS\u2019s causal reasoning engine. Click a question to see how the causal memory responds."
+              : "Click a question to see how Brain OS\u2019s causal reasoning engine responds."}
           </p>
         </div>
 
@@ -165,7 +165,7 @@ export function LiveDemo() {
                 <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
                 <div className="w-3 h-3 rounded-full bg-green-500/60" />
               </div>
-              <span className="text-xs text-white/40 ml-2 font-mono">NexusBrain Copilot</span>
+              <span className="text-xs text-white/40 ml-2 font-mono">Brain OS Copilot</span>
               {isLive && (
                 <span className="ml-auto flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -183,7 +183,7 @@ export function LiveDemo() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                   </div>
-                  <p className="text-sm text-white/30">Click a question above to see NexusBrain respond</p>
+                  <p className="text-sm text-white/30">Click a question above to see Brain OS respond</p>
                 </div>
               ) : (
                 <div className="space-y-4">

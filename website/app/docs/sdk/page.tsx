@@ -36,7 +36,7 @@ const packages = [
   },
   {
     name: "@nexus-ai/client",
-    description: "Lightweight HTTP client for NexusBrain API. Works in Node.js, Deno, Bun, browsers.",
+    description: "Lightweight HTTP client for Brain OS API. Works in Node.js, Deno, Bun, browsers.",
     install: "pnpm add @nexus-ai/client",
     subpaths: [],
   },
@@ -65,7 +65,7 @@ export default function SDKPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">SDK Reference</h1>
       <p className="mb-8 text-lg text-muted">
-        NexusBrain is distributed as 5 npm packages. All support tree-shaking via subpath imports.
+        Brain OS is distributed as 5 npm packages. All support tree-shaking via subpath imports.
       </p>
 
       <div className="space-y-12">

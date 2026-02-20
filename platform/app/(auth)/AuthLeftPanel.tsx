@@ -185,7 +185,7 @@ export function AuthLeftPanel({ stats }: AuthLeftPanelProps) {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold text-foreground">NexusBrain</h1>
+      <h1 className="text-2xl font-bold text-foreground">Brain OS</h1>
       <p className="text-muted text-center text-sm max-w-xs">
         The causal memory for organisations — it perceives your data, discovers
         cause-and-effect, and gets smarter every cycle.
@@ -224,7 +224,7 @@ export function AuthLeftPanel({ stats }: AuthLeftPanelProps) {
         <div className="flex items-center gap-2 mb-2">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-medium text-emerald-400">
-            {stats.isLive ? "Live — NexusBrain is thinking" : "Demo — Simulated Activity"}
+            {stats.isLive ? "Live — Brain OS is thinking" : "Demo — Simulated Activity"}
           </span>
         </div>
         <div className="flex items-start gap-2 min-h-[2.5rem]">

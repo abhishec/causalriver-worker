@@ -693,7 +693,7 @@ export function ConnectorsClient({
             Secure & Private
           </CardTitle>
           <p className="text-xs text-muted leading-relaxed">
-            All credentials encrypted at rest. NexusBrain only accesses data you explicitly grant.
+            All credentials encrypted at rest. Brain OS only accesses data you explicitly grant.
           </p>
         </Card>
 

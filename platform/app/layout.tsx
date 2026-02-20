@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NexusBrain Platform",
-    template: "%s | NexusBrain Platform",
+    default: "Brain OS",
+    template: "%s | Brain OS",
   },
-  description: "Your organisation's causal memory — monitor, configure, and interact with NexusBrain's deep knowledge system.",
+  description: "Your organisation's causal memory — monitor, configure, and interact with Brain OS's deep knowledge system.",
 };
 
 export default function RootLayout({

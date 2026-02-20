@@ -1,9 +1,17 @@
 /**
  * OutcomeCollector — Polls scheduled_verifications, fetches actual metric values
  *
- * This is the critical missing piece in NexusBrain's reinforcement loop.
- * Predictions are recorded and verifications are scheduled, but nobody
- * ever measures the actual outcomes. This service does that automatically.
+ * REWIRED (Gap 3): Previously asked the brain "What is the current value?"
+ * — circular, the brain verified its own predictions against its own memory.
+ *
+ * NOW: Queries cross_domain_signals from connector-ingested data (Jira, GitHub,
+ * Xero, PagerDuty) for real ground truth. If no signal data exists, marks the
+ * prediction for user verification (Gap 2: VerificationPromptCard).
+ *
+ * The full resolver registry (with direct API calls to Jira/GitHub/Xero/PagerDuty)
+ * lives in @nexus-ai/memory-stack and is used server-side by feedback-loop.ts.
+ * This plugin-side collector uses the simpler signal-based approach since it
+ * has direct Supabase access but not connector API credentials.
  *
  * Schedule: Every 6 hours (configurable)
  */
@@ -28,6 +36,7 @@ interface PendingVerification {
   predicted_direction: string;
   predicted_value: number;
   confidence: number;
+  organization_id?: string;
 }
 
 interface CollectedOutcome {
@@ -35,21 +44,38 @@ interface CollectedOutcome {
   actualValue: number;
   actualDirection: 'increase' | 'decrease' | 'stable';
   collectedAt: string;
+  source: 'connector_signals' | 'brain_fallback' | 'user_verification_pending';
 }
+
+// Domains that have connector-backed signals for automated verification
+const SIGNAL_BACKED_DOMAINS = new Set([
+  'early-warning',       // Jira sprint signals
+  'scope-creep',         // Jira sprint/issue signals
+  'delivery-intelligence', // Jira+GitHub composite signals
+  'pod-match',           // Jira+GitHub composite signals
+  'pr-review',           // GitHub PR/CI signals
+  'dead-code-detector',  // GitHub PR/CI signals
+  'incident-diagnosis',  // PagerDuty incident signals
+  'performance-profiler', // PagerDuty incident signals
+  'bookkeeper',          // Xero transaction signals
+  'reconciler',          // Xero transaction signals
+  'anomaly',             // Xero transaction signals
+]);
 
 // Helper to query Supabase REST API directly
 async function querySupabase<T>(
   supabase: SupabaseConfig,
   table: string,
   filters: Record<string, string>,
-  limit = 50,
+  options?: { limit?: number; order?: string; select?: string },
 ): Promise<T[]> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
     params.set(key, value);
   }
-  params.set('limit', String(limit));
-  params.set('order', 'scheduled_for.asc');
+  if (options?.select) params.set('select', options.select);
+  params.set('limit', String(options?.limit ?? 50));
+  params.set('order', options?.order ?? 'scheduled_for.asc');
 
   const url = `${supabase.supabaseUrl}/rest/v1/${table}?${params}`;
   const res = await fetch(url, {
@@ -85,6 +111,105 @@ async function updateSupabase(
   if (!res.ok) throw new Error(`Supabase update failed: ${res.status}`);
 }
 
+/**
+ * Resolve actual outcome from connector-ingested signals in Supabase.
+ * This is the NON-CIRCULAR approach: reads real data that connectors
+ * (Jira, GitHub, Xero, PagerDuty) have already synced into cross_domain_signals.
+ */
+async function resolveFromSignals(
+  supabase: SupabaseConfig,
+  v: PendingVerification,
+  log?: (level: string, msg: string) => void,
+): Promise<{ value: number; direction: 'increase' | 'decrease' | 'stable'; source: string } | null> {
+  const orgId = v.organization_id || supabase.orgId;
+
+  // Query cross_domain_signals for the target metric's actual values
+  try {
+    const signals = await querySupabase<{
+      signal_value: number;
+      signal_timestamp: string;
+      signal_type: string;
+      metadata: Record<string, unknown> | null;
+    }>(
+      supabase,
+      'cross_domain_signals',
+      {
+        'organization_id': `eq.${orgId}`,
+        'entity_type': `eq.${v.entity_type}`,
+        'entity_id': `eq.${v.entity_id}`,
+        'signal_type': `eq.${v.target_metric}`,
+      },
+      { limit: 5, order: 'signal_timestamp.desc', select: 'signal_value,signal_timestamp,signal_type,metadata' },
+    );
+
+    if (signals.length >= 2) {
+      // We have before/after data — compute the actual change
+      const current = signals[0].signal_value;
+      const previous = signals[1].signal_value;
+      const change = current - previous;
+      const stableThreshold = 0.05;
+
+      const direction: 'increase' | 'decrease' | 'stable' =
+        change > stableThreshold ? 'increase' :
+        change < -stableThreshold ? 'decrease' : 'stable';
+
+      return { value: current, direction, source: 'connector_signals' };
+    }
+
+    // Try broader signal type match (e.g., sprint_completed contains velocity data)
+    const broadSignals = await querySupabase<{
+      signal_value: number;
+      signal_type: string;
+      metadata: Record<string, unknown> | null;
+    }>(
+      supabase,
+      'cross_domain_signals',
+      {
+        'organization_id': `eq.${orgId}`,
+        'source_domain': `eq.${mapDomainToSignalDomain(v.domain)}`,
+      },
+      { limit: 10, order: 'signal_timestamp.desc', select: 'signal_value,signal_type,metadata' },
+    );
+
+    if (broadSignals.length >= 2) {
+      // Use the most recent signal values as a proxy
+      const current = broadSignals[0].signal_value;
+      const previous = broadSignals[1].signal_value;
+      const change = current - previous;
+
+      const direction: 'increase' | 'decrease' | 'stable' =
+        change > 0.05 ? 'increase' :
+        change < -0.05 ? 'decrease' : 'stable';
+
+      return { value: current, direction, source: 'connector_signals_broad' };
+    }
+  } catch (err) {
+    log?.('debug', `OutcomeCollector: signal query failed for ${v.prediction_id}: ${err}`);
+  }
+
+  return null;
+}
+
+/**
+ * Map NexusBrain domain IDs to cross_domain_signals source_domain values.
+ */
+function mapDomainToSignalDomain(domain: string): string {
+  const map: Record<string, string> = {
+    'early-warning': 'engineering',
+    'scope-creep': 'engineering',
+    'delivery-intelligence': 'engineering',
+    'pod-match': 'engineering',
+    'pr-review': 'engineering',
+    'dead-code-detector': 'engineering',
+    'incident-diagnosis': 'engineering',
+    'performance-profiler': 'engineering',
+    'bookkeeper': 'finance',
+    'reconciler': 'finance',
+    'anomaly': 'finance',
+  };
+  return map[domain] || domain;
+}
+
 export async function collectOutcomes(
   client: NexusClient,
   supabase: SupabaseConfig,
@@ -103,7 +228,7 @@ export async function collectOutcomes(
         'scheduled_for': `lte.${now}`,
         'organization_id': `eq.${supabase.orgId}`,
       },
-      100,
+      { limit: 100 },
     );
   } catch (err) {
     log?.('warn', `OutcomeCollector: failed to fetch pending verifications: ${err}`);
@@ -117,72 +242,75 @@ export async function collectOutcomes(
 
   log?.('info', `OutcomeCollector: found ${pending.length} pending verification(s)`);
 
-  // 2. For each, ask the brain for the current actual value
+  // 2. For each verification, try to resolve from connector signals (NOT the brain)
   const collected: CollectedOutcome[] = [];
 
   for (const v of pending) {
     try {
-      const result = await client.query(
-        `What is the current measured value of "${v.target_metric}" for entity "${v.entity_id}" (type: ${v.entity_type})? ` +
-        `Return ONLY the numeric value and whether it increased, decreased, or stayed stable compared to baseline. ` +
-        `This is for automated prediction verification — be precise.`,
-        { domain: v.domain as 'finance' | 'engineering' | 'cs' | 'marketing' | 'people' | 'revenue' },
-      );
+      // ── Strategy 1: Signal-based resolution (from connector data) ──────
+      if (SIGNAL_BACKED_DOMAINS.has(v.domain)) {
+        const result = await resolveFromSignals(supabase, v, log);
 
-      // Parse actual value from brain response
-      const parsed = parseActualValue(result.answer, v);
-      if (parsed) {
-        collected.push({
-          verification: v,
-          actualValue: parsed.value,
-          actualDirection: parsed.direction,
-          collectedAt: new Date().toISOString(),
-        });
+        if (result) {
+          collected.push({
+            verification: v,
+            actualValue: result.value,
+            actualDirection: result.direction,
+            collectedAt: new Date().toISOString(),
+            source: 'connector_signals',
+          });
 
-        // Mark verification as collected in DB
+          // Mark verification as collected in DB
+          await updateSupabase(supabase, 'scheduled_verifications', v.id, {
+            status: 'collected',
+            actual_value: result.value,
+            actual_direction: result.direction,
+            collected_at: new Date().toISOString(),
+            resolution_source: result.source,
+          });
+
+          log?.('info',
+            `OutcomeCollector: ✓ resolved from signals — prediction ${v.prediction_id}: ` +
+            `${result.direction} (${result.value}) [source: ${result.source}]`,
+          );
+          continue;
+        }
+
+        // No signal data available — mark for user verification
+        log?.('info',
+          `OutcomeCollector: no signal data for ${v.prediction_id} (${v.domain}), ` +
+          `marking for user verification`,
+        );
         await updateSupabase(supabase, 'scheduled_verifications', v.id, {
-          status: 'collected',
-          actual_value: parsed.value,
-          actual_direction: parsed.direction,
-          collected_at: new Date().toISOString(),
+          status: 'awaiting_user_verification',
+          resolution_note: 'No connector signals available for automated resolution',
         });
-
-        log?.('info', `OutcomeCollector: collected outcome for prediction ${v.prediction_id}: ${parsed.direction} (${parsed.value})`);
-      } else {
-        log?.('debug', `OutcomeCollector: could not parse actual value for ${v.prediction_id}, will retry`);
+        continue;
       }
+
+      // ── Strategy 2: Domains without connectors → user verification ─────
+      // These domains (tdd, design-doc, test-cases, etc.) have no external API
+      // to verify against. They MUST be verified by the user via
+      // VerificationPromptCard (Gap 2).
+      log?.('debug',
+        `OutcomeCollector: ${v.domain} has no automated resolver, ` +
+        `flagging for user verification`,
+      );
+      await updateSupabase(supabase, 'scheduled_verifications', v.id, {
+        status: 'awaiting_user_verification',
+        resolution_note: `Domain "${v.domain}" requires user verification — no automated resolver`,
+      });
+
     } catch (err) {
       log?.('warn', `OutcomeCollector: failed to collect outcome for ${v.prediction_id}: ${err}`);
     }
   }
 
-  log?.('info', `OutcomeCollector: collected ${collected.length}/${pending.length} outcomes`);
+  log?.('info',
+    `OutcomeCollector: collected ${collected.length}/${pending.length} outcomes ` +
+    `(${pending.length - collected.length} deferred to user verification)`,
+  );
   return collected;
-}
-
-function parseActualValue(
-  answer: string,
-  verification: PendingVerification,
-): { value: number; direction: 'increase' | 'decrease' | 'stable' } | null {
-  // Try to extract a number from the brain's answer
-  const numberMatch = answer.match(/-?\d+(?:\.\d+)?/);
-  if (!numberMatch) return null;
-
-  const value = parseFloat(numberMatch[0]);
-  if (isNaN(value)) return null;
-
-  // Determine direction
-  const lowerAnswer = answer.toLowerCase();
-  let direction: 'increase' | 'decrease' | 'stable';
-  if (lowerAnswer.includes('increase') || lowerAnswer.includes('rose') || lowerAnswer.includes('grew') || lowerAnswer.includes('higher')) {
-    direction = 'increase';
-  } else if (lowerAnswer.includes('decrease') || lowerAnswer.includes('dropped') || lowerAnswer.includes('fell') || lowerAnswer.includes('lower') || lowerAnswer.includes('declined')) {
-    direction = 'decrease';
-  } else {
-    direction = 'stable';
-  }
-
-  return { value, direction };
 }
 
 export function registerOutcomeCollector(

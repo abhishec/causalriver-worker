@@ -67,7 +67,7 @@ export default function DemoChatPage() {
           endpoint="/api/copilot/chat"
           extraParams={{ organizationId: DEMO_ORG_ID }}
           persona={{
-            name: "NexusBrain Demo",
+            name: "Brain OS Demo",
             description: "Demo workspace — causal intelligence, SE-aaS, and accounting in one place",
           }}
           examplePrompts={[

@@ -230,7 +230,7 @@ export default function InvitePage() {
         <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
           <span className="text-lg font-bold text-accent">N</span>
         </div>
-        <span className="text-lg font-semibold">NexusBrain</span>
+        <span className="text-lg font-semibold">Brain OS</span>
       </div>
 
       <h2 className="text-2xl font-bold mb-1">You&apos;re invited</h2>

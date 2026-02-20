@@ -1,0 +1,156 @@
+import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
+import { labelToCommandId } from "@/lib/templates/types";
+
+export const dynamic = "force-dynamic";
+
+// ── System command IDs — custom templates must not collide ──────────────────
+const SYSTEM_COMMAND_IDS = new Set(ALL_SLASH_COMMANDS.map((c) => c.id));
+
+/**
+ * GET /api/templates?orgId=<uuid>
+ * List the org's templates + public templates from other orgs.
+ */
+export async function GET(req: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const orgId = req.nextUrl.searchParams.get("orgId");
+  if (!orgId) {
+    return NextResponse.json({ error: "orgId required" }, { status: 400 });
+  }
+
+  // Verify org membership
+  const { data: member } = await supabase
+    .from("org_members")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!member) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Org templates (sorted by usage, most-used first)
+  const { data: templates, error: orgError } = await supabase
+    .from("agent_templates")
+    .select("*")
+    .eq("org_id", orgId)
+    .eq("is_archived", false)
+    .order("usage_count", { ascending: false });
+
+  if (orgError) {
+    return NextResponse.json({ error: orgError.message }, { status: 500 });
+  }
+
+  // Public templates from other orgs
+  const { data: publicTemplates, error: pubError } = await supabase
+    .from("agent_templates")
+    .select("*")
+    .eq("is_public", true)
+    .eq("is_archived", false)
+    .neq("org_id", orgId)
+    .order("usage_count", { ascending: false })
+    .limit(50);
+
+  if (pubError) {
+    return NextResponse.json({ error: pubError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    templates: templates || [],
+    publicTemplates: publicTemplates || [],
+  });
+}
+
+/**
+ * POST /api/templates
+ * Create a new agent template.
+ *
+ * Body: { orgId, label, description, icon?, prompt, category?,
+ *         gatheringSchema?, agentConfig?, sourceArtifactId?, sourceDomainId?, isPublic? }
+ */
+export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const { orgId, label, description, prompt } = body;
+
+  if (!orgId || !label || !description || !prompt) {
+    return NextResponse.json(
+      { error: "orgId, label, description, and prompt are required" },
+      { status: 400 }
+    );
+  }
+
+  // Verify org membership
+  const { data: member } = await supabase
+    .from("org_members")
+    .select("id")
+    .eq("organization_id", orgId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!member) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Generate command_id from label
+  const commandId = labelToCommandId(label);
+
+  // Check collision with system commands
+  if (SYSTEM_COMMAND_IDS.has(commandId)) {
+    return NextResponse.json(
+      { error: "This name conflicts with a built-in command. Please choose a different name." },
+      { status: 409 }
+    );
+  }
+
+  // Insert template
+  const { data, error } = await supabase
+    .from("agent_templates")
+    .insert({
+      org_id: orgId,
+      created_by: user.id,
+      command_id: commandId,
+      label: label.trim(),
+      description: description.trim(),
+      icon: body.icon || "🔧",
+      prompt: prompt.trim(),
+      category: body.category || "Custom",
+      service: "custom",
+      gathering_schema: body.gatheringSchema || null,
+      agent_config: body.agentConfig || null,
+      source_artifact_id: body.sourceArtifactId || null,
+      source_domain_id: body.sourceDomainId || null,
+      is_public: body.isPublic || false,
+    })
+    .select("id, command_id")
+    .single();
+
+  if (error) {
+    // Handle unique constraint violation
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "A command with this name already exists in your organization." },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ id: data.id, commandId: data.command_id });
+}

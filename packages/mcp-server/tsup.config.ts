@@ -6,7 +6,7 @@ export default defineConfig([
     entry: ['src/index.ts'],
     format: ['esm'],
     dts: true,
-    sourcemap: true,
+    sourcemap: process.env.TSUP_SOURCEMAP === 'true',
     clean: true,
     minify: false,
     banner: {
@@ -22,7 +22,7 @@ export default defineConfig([
     ],
     format: ['esm'],
     dts: true,
-    sourcemap: true,
+    sourcemap: process.env.TSUP_SOURCEMAP === 'true',
     clean: false,
     minify: false,
   },

@@ -375,7 +375,7 @@ export default function ConnectorsPageV2() {
             Secure & Private
           </CardTitle>
           <p className="text-xs text-muted leading-relaxed">
-            All credentials are encrypted. NexusBrain only accesses data you explicitly grant permission to.
+            All credentials are encrypted. Brain OS only accesses data you explicitly grant permission to.
           </p>
         </Card>
 

@@ -75,6 +75,10 @@ export * from './cascade-tracker';
 export * from './threshold-optimizer';
 export * from './feedback-loop';
 
+// Phase 4b: Automated Outcome Resolution (Gap 3: Ground Truth from Source Systems)
+export * from './automated-outcome-resolver';
+export * from './resolvers/index';
+
 // Phase 5: Advanced Causal Discovery (CausalRivers-proven techniques)
 export * from './multivariate-var';
 export * from './advanced-discovery';

@@ -127,7 +127,7 @@ export function Benchmarks() {
             </span>
           </h2>
           <p className="text-lg text-muted">
-            We don&apos;t just claim causal memory — we prove it. NexusBrain is rigorously tested against
+            We don&apos;t just claim causal memory — we prove it. Brain OS is rigorously tested against
             established causal discovery and memory benchmarks used by the research community.
           </p>
         </motion.div>
@@ -241,7 +241,7 @@ export function Benchmarks() {
           className="mt-8 mx-auto max-w-5xl rounded-xl border border-accent/20 bg-accent/5 p-4 text-center"
         >
           <p className="text-sm text-muted">
-            All benchmarks run with NexusBrain&apos;s default ensemble methods — no cherry-picking or dataset-specific tuning.
+            All benchmarks run with Brain OS&apos;s default ensemble methods — no cherry-picking or dataset-specific tuning.
             <span className="text-accent-light ml-1">
               Results are reproducible from the open-source repository.
             </span>

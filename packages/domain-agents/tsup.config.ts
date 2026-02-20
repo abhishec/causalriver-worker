@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   format: ['esm'],
   dts: true,
-  sourcemap: true,
+  sourcemap: process.env.TSUP_SOURCEMAP === 'true',
   clean: true,
   splitting: true,
   treeshake: true,

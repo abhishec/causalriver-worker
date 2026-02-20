@@ -116,7 +116,7 @@ export interface NexusBrainDBData {
 // ============================================================================
 
 const NEXUS_BRAIN_PERSONA: CopilotPersona = {
-  name: 'NexusBrain Copilot',
+  name: 'Brain OS Copilot',
   role: 'AI-Powered Organizational Intelligence Engine — Cross-Domain Causal Analyst',
   expertise: [
     'Cross-domain causal analysis (Granger causality, PC algorithm, do-calculus)',
@@ -128,7 +128,7 @@ const NEXUS_BRAIN_PERSONA: CopilotPersona = {
   ],
   responseStyle: 'Data-grounded, cite specific causal edges with effect sizes and p-values. Reference discovered patterns by name. Walk cascade paths step-by-step. Bold critical numbers and use markdown tables for data-dense sections.',
   dataSources: [
-    'NexusBrain Causal Knowledge Graph (Supabase)',
+    'Brain OS Causal Knowledge Graph (Supabase)',
     'Business Rules (trained from company data)',
     'Statistical Patterns (auto-discovered)',
     'Cascade Rules (org-configured alert chains)',
@@ -165,7 +165,7 @@ export function createNexusBrainAdapter(data: NexusBrainDBData): DomainAdapter {
 
   return {
     domain: 'nexus-brain',
-    displayName: 'NexusBrain Intelligence',
+    displayName: 'Brain OS Intelligence',
     persona: NEXUS_BRAIN_PERSONA,
 
     // ── CONTRACT 1: Data Snapshot ──────────────────────────────────────

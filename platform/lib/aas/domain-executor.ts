@@ -27,6 +27,9 @@ import {
   brainAuditPreparerAgent,
   brainAnomalyDetectiveAgent,
   brainCausalAccountantAgent,
+  brainCashFlowProphetAgent,
+  brainRevenueLeakageAgent,
+  brainCausalPLNarratorAgent,
   createBrainContextMesh,
   createBrainFeedbackBus,
   snapshotCausalWeights,
@@ -56,7 +59,10 @@ export type AccountingAction =
   | 'audit'
   | 'anomaly'
   | 'causal-analysis'
-  | 'full';
+  | 'full'
+  | 'cash-forecast'
+  | 'revenue-leakage'
+  | 'causal-pl';
 
 export interface ExecuteAccountingParams {
   action: AccountingAction;
@@ -102,6 +108,9 @@ const ACCOUNTING_AGENT_MAP: Record<string, { agent: AgentDefinition<any, any>; n
   'anomaly':          { agent: brainAnomalyDetectiveAgent, name: 'brain-anomaly-detective' },
   'causal-analysis':  { agent: brainCausalAccountantAgent, name: 'brain-causal-accountant' },
   'full':             { agent: brainCausalAccountantAgent, name: 'brain-causal-accountant' },
+  'cash-forecast':    { agent: brainCashFlowProphetAgent, name: 'brain-cash-flow-prophet' },
+  'revenue-leakage':  { agent: brainRevenueLeakageAgent, name: 'brain-revenue-leakage-detector' },
+  'causal-pl':        { agent: brainCausalPLNarratorAgent, name: 'brain-causal-pl-narrator' },
 };
 
 export function getAccountingAgentInfo(action: string): { agent: AgentDefinition; name: string } | null {

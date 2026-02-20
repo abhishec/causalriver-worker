@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "Engineering · NexusBrain" };
+export const metadata = { title: "Engineering · Brain OS" };
 
 /**
  * SE-aaS page — redirects to the unified Intelligence copilot with SE-aaS service pre-selected.

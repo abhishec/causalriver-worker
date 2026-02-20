@@ -6,7 +6,7 @@ const INTEGRATION_STEPS = [
   {
     step: 1,
     title: "Connect Your Data",
-    description: "Plug in Stripe, HubSpot, GitHub, Slack — or any API. NexusBrain starts ingesting signals immediately.",
+    description: "Plug in Stripe, HubSpot, GitHub, Slack — or any API. Brain OS starts ingesting signals immediately.",
     code: `import { createBrain } from '@nexus-ai/memory-stack';
 
 const brain = createBrain({ organizationId: 'your-org' });
@@ -20,7 +20,7 @@ brain.connect('hubspot', { apiKey: process.env.HUBSPOT_KEY });`,
     step: 2,
     title: "It Learns Automatically",
     description: "No training. No configuration. The causal memory discovers cause-and-effect, detects anomalies, and builds predictions on its own.",
-    code: `// NexusBrain runs autonomously:
+    code: `// Brain OS runs autonomously:
 // Every 4 hours → scans for insights
 // Every night → consolidates memories
 // Every cycle → gets smarter
@@ -105,7 +105,7 @@ export function PlatformIntegration() {
             </span>
           </h2>
           <p className="text-lg text-muted">
-            NexusBrain is infrastructure, not a product. Any developer can connect their app
+            Brain OS is infrastructure, not a product. Any developer can connect their app
             and inherit a deep causal knowledge system. Four steps. That&apos;s it.
           </p>
         </motion.div>

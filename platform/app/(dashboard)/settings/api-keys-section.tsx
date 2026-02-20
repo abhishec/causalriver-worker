@@ -241,7 +241,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
           </svg>
           <p className="text-sm text-muted-foreground">No API keys yet</p>
           <p className="text-xs text-muted mt-1">
-            Generate a key to start using the NexusBrain SDK
+            Generate a key to start using the Brain OS SDK
           </p>
         </div>
       ) : null}

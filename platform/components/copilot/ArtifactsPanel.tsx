@@ -3,16 +3,23 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
-import { InlineChart, parseChartSpec } from "@/components/copilot/InlineChart";
+import dynamic from "next/dynamic";
+import { parseChartSpec } from "@/components/copilot/chart-utils";
+
+const InlineChart = dynamic(
+  () => import("@/components/copilot/InlineChart").then(m => ({ default: m.InlineChart })),
+  { ssr: false },
+);
 import { DomainResultRenderer } from "@/components/copilot/DomainResultRenderer";
 import { AgentExecutionCard } from "@/components/copilot/AgentExecutionCard";
 import { useTheme } from "@/lib/theme-context";
+import { exportArtifact, getAvailableFormats, type ExportFormat } from "@/lib/export-engine";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface Artifact {
   id: string;
-  type: "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram" | "agent-execution";
+  type: "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram" | "agent-execution" | "presentation" | "pdf" | "infographic";
   title: string;
   language?: string;
   content: string;
@@ -36,6 +43,14 @@ export interface ArtifactsPanelProps {
   onSelectArtifact: (id: string) => void;
   onPinArtifact: (id: string) => void;
   onClose: () => void;
+  /** Callback to scroll the chat to the source message that created an artifact */
+  onJumpToMessage?: (messageIndex: number) => void;
+  /** Callback to save an artifact as a reusable command template */
+  onSaveAsCommand?: (artifact: Artifact) => void;
+  /** Enter comparison mode with the active artifact pre-selected */
+  onCompare?: (artifactId: string) => void;
+  /** Whether comparison mode is currently active */
+  comparisonMode?: boolean;
 }
 
 // ─── Language label mapping ─────────────────────────────────────────────────
@@ -187,6 +202,24 @@ function ArtifactTypeIcon({ type }: { type: Artifact["type"] }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
         </svg>
       );
+    case "presentation":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
+        </svg>
+      );
+    case "pdf":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+      );
+    case "infographic":
+      return (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z M13.5 3.5a7.5 7.5 0 017.5 7.5h-7.5V3.5z" />
+        </svg>
+      );
     case "mermaid-diagram":
       return (
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -306,9 +339,17 @@ export function ArtifactsPanel({
   onSelectArtifact,
   onPinArtifact,
   onClose,
+  onJumpToMessage,
+  onSaveAsCommand,
+  onCompare,
+  comparisonMode,
 }: ArtifactsPanelProps) {
-  const [view, setView] = useState<"viewer" | "history">("viewer");
+  const [view, setView] = useState<"viewer" | "gallery">("viewer");
   const [wordWrap, setWordWrap] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const tabStripRef = useRef<HTMLDivElement>(null);
+  const viewerContentRef = useRef<HTMLDivElement>(null);
 
   const activeArtifact = artifacts.find((a) => a.id === activeArtifactId) || artifacts[artifacts.length - 1] || null;
 
@@ -317,12 +358,35 @@ export function ArtifactsPanel({
     if (activeArtifactId) setView("viewer");
   }, [activeArtifactId]);
 
-  // Sort history: pinned first, then by time
+  // Auto-scroll the tab strip to make active tab visible
+  useEffect(() => {
+    if (!tabStripRef.current || !activeArtifactId) return;
+    const activeTab = tabStripRef.current.querySelector(`[data-artifact-id="${activeArtifactId}"]`);
+    if (activeTab) {
+      activeTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [activeArtifactId]);
+
+  // Sort for gallery: pinned first, then by time
   const sortedArtifacts = [...artifacts].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return b.createdAt - a.createdAt;
   });
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handler = () => setShowExportMenu(false);
+    // Delay to avoid closing on the same click that opens
+    const timer = setTimeout(() => {
+      window.addEventListener("click", handler);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("click", handler);
+    };
+  }, [showExportMenu]);
 
   const handleDownload = useCallback(() => {
     if (!activeArtifact) return;
@@ -380,42 +444,82 @@ export function ArtifactsPanel({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* ── Header ────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-subtle">
-        <div className="flex items-center gap-2 min-w-0">
-          <ArtifactTypeIcon type={activeArtifact?.type || "document"} />
-          <span className="text-xs font-medium truncate">{activeArtifact?.title || "Artifact"}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          {/* View toggle */}
-          <div className="flex items-center rounded-lg bg-surface border border-border-subtle p-0.5">
+      <div className="border-b border-border-subtle">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+              Artifacts
+            </span>
+            <span className="px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-semibold tabular-nums">
+              {artifacts.length}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            {/* View toggle */}
+            <div className="flex items-center rounded-lg bg-surface border border-border-subtle p-0.5">
+              <button
+                onClick={() => setView("viewer")}
+                className={cn(
+                  "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
+                  view === "viewer" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-muted-foreground"
+                )}
+              >
+                Viewer
+              </button>
+              <button
+                onClick={() => setView("gallery")}
+                className={cn(
+                  "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
+                  view === "gallery" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-muted-foreground"
+                )}
+              >
+                Gallery
+              </button>
+            </div>
             <button
-              onClick={() => setView("viewer")}
-              className={cn(
-                "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
-                view === "viewer" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-muted-foreground"
-              )}
+              onClick={onClose}
+              className="p-1 rounded hover:bg-surface-hover text-muted transition-colors ml-1"
             >
-              Viewer
-            </button>
-            <button
-              onClick={() => setView("history")}
-              className={cn(
-                "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
-                view === "history" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-muted-foreground"
-              )}
-            >
-              History
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-surface-hover text-muted transition-colors ml-1"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
+
+        {/* ── Scrollable Tab Strip — quick artifact switching ────────── */}
+        {artifacts.length > 1 && view === "viewer" && (
+          <div
+            ref={tabStripRef}
+            className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-hide"
+          >
+            {artifacts.map((a) => {
+              const isActive = a.id === activeArtifact?.id;
+              return (
+                <button
+                  key={a.id}
+                  data-artifact-id={a.id}
+                  onClick={() => onSelectArtifact(a.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all shrink-0",
+                    isActive
+                      ? "bg-accent/10 text-accent border border-accent/20"
+                      : "text-muted hover:text-foreground hover:bg-surface-hover border border-transparent"
+                  )}
+                  title={a.title}
+                >
+                  {a.pinned && (
+                    <svg className="w-2.5 h-2.5 text-accent shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    </svg>
+                  )}
+                  <ArtifactTypeIcon type={a.type} />
+                  <span className="max-w-[100px] truncate">{a.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Viewer Tab ────────────────────────────────────────────────── */}
@@ -433,6 +537,18 @@ export function ArtifactsPanel({
               )}
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              {/* Save as Command */}
+              {onSaveAsCommand && (
+                <button
+                  onClick={() => onSaveAsCommand(activeArtifact)}
+                  className="p-1.5 rounded-md text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+                  title="Save as Command"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                  </svg>
+                </button>
+              )}
               {/* Pin */}
               <button
                 onClick={() => onPinArtifact(activeArtifact.id)}
@@ -461,21 +577,89 @@ export function ArtifactsPanel({
               </button>
               {/* Copy */}
               <CopyButton text={activeArtifact.content} label="Copy" className="p-1.5 rounded-md hover:bg-surface-hover" iconOnly />
-              {/* Download */}
-              <button
-                onClick={handleDownload}
-                className="p-1.5 rounded-md text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
-                title="Download file"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-              </button>
+              {/* Jump to source message */}
+              {onJumpToMessage && activeArtifact.messageIndex !== undefined && (
+                <button
+                  onClick={() => onJumpToMessage(activeArtifact.messageIndex!)}
+                  className="p-1.5 rounded-md text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+                  title="Jump to source message"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                </button>
+              )}
+              {/* Compare — only show when 2+ artifacts exist */}
+              {onCompare && artifacts.length >= 2 && (
+                <button
+                  onClick={() => onCompare(activeArtifact.id)}
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    comparisonMode ? "text-accent bg-accent/10" : "text-muted hover:text-foreground hover:bg-surface-hover"
+                  )}
+                  title="Compare artifacts side-by-side"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                  </svg>
+                </button>
+              )}
+              {/* Export dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    showExportMenu ? "text-accent bg-accent/10" : "text-muted hover:text-foreground hover:bg-surface-hover"
+                  )}
+                  title="Export artifact"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                </button>
+                {showExportMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border-subtle rounded-lg shadow-xl py-1 z-50 animate-dropdown-in">
+                    {/* Always show raw download */}
+                    <button
+                      onClick={() => { handleDownload(); setShowExportMenu(false); }}
+                      className="w-full text-left px-3 py-1.5 text-[11px] text-foreground hover:bg-surface-hover transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                      </svg>
+                      Download Raw
+                    </button>
+                    {/* Rich export formats */}
+                    {getAvailableFormats(activeArtifact.type).map(({ format, label }) => (
+                      <button
+                        key={format}
+                        disabled={exporting}
+                        onClick={async () => {
+                          setExporting(true);
+                          setShowExportMenu(false);
+                          await exportArtifact(format, {
+                            element: viewerContentRef.current || undefined,
+                            title: activeArtifact.title,
+                            content: activeArtifact.content,
+                            data: activeArtifact.rawData as Record<string, unknown> | undefined,
+                          });
+                          setExporting(false);
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-[11px] text-foreground hover:bg-surface-hover transition-colors flex items-center gap-2 disabled:opacity-40"
+                      >
+                        <span className="text-[10px] font-mono text-muted uppercase w-6">{format}</span>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Code / Chart / Domain / Content viewer */}
-          <div className="flex-1 overflow-auto">
+          <div ref={viewerContentRef} className="flex-1 overflow-auto">
             {activeArtifact.type === "agent-execution" ? (
               <div className="p-4 overflow-auto h-full">
                 <AgentExecutionCard
@@ -565,10 +749,10 @@ export function ArtifactsPanel({
         </div>
       )}
 
-      {/* ── History Tab ───────────────────────────────────────────────── */}
-      {view === "history" && (
+      {/* ── Gallery Tab — 2-column grid of artifact cards ──────────── */}
+      {view === "gallery" && (
         <div className="flex-1 overflow-y-auto">
-          <div className="p-2 space-y-1">
+          <div className="grid grid-cols-2 gap-2 p-3">
             {sortedArtifacts.map((artifact) => {
               const isActive = artifact.id === (activeArtifact?.id || "");
               return (
@@ -579,35 +763,38 @@ export function ArtifactsPanel({
                     setView("viewer");
                   }}
                   className={cn(
-                    "w-full text-left px-3 py-2.5 rounded-lg transition-colors",
+                    "text-left p-3 rounded-xl transition-all group",
                     isActive
-                      ? "bg-accent/10 border border-accent/20"
-                      : "hover:bg-surface-hover border border-transparent"
+                      ? "bg-accent/8 border border-accent/20 shadow-sm"
+                      : "bg-surface hover:bg-surface-hover border border-border-subtle hover:border-border hover:shadow-sm"
                   )}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <ArtifactTypeIcon type={artifact.type} />
-                    <span className="text-[12px] font-medium truncate flex-1">{artifact.title}</span>
+                  {/* Icon + pin */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center",
+                      isActive ? "bg-accent/15 text-accent" : "bg-surface-hover text-muted group-hover:text-foreground"
+                    )}>
+                      <ArtifactTypeIcon type={artifact.type} />
+                    </div>
                     {artifact.pinned && (
-                      <svg className="w-3 h-3 text-accent shrink-0" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                      <svg className="w-3 h-3 text-accent shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                       </svg>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-muted">
+                  {/* Title */}
+                  <p className="text-[12px] font-medium truncate text-foreground mb-1">
+                    {artifact.title}
+                  </p>
+                  {/* Meta row */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {artifact.service && artifact.service !== "general" && (
                       <span className={cn("px-1 py-0.5 rounded text-[9px] font-medium", SERVICE_COLORS[artifact.service])}>
                         {artifact.service === "aas" ? "AAS" : artifact.service === "agent" ? "Agent" : "SE-aaS"}
                       </span>
                     )}
-                    {artifact.language && (
-                      <span className="px-1 py-0.5 rounded bg-surface text-[9px] uppercase font-medium">
-                        {LANG_LABELS[artifact.language.toLowerCase()] || artifact.language}
-                      </span>
-                    )}
-                    <span className="tabular-nums">{artifact.content.split("\n").length} lines</span>
-                    <span className="text-muted/50">·</span>
-                    <span>{timeAgo(artifact.createdAt)}</span>
+                    <span className="text-[9px] text-muted tabular-nums">{timeAgo(artifact.createdAt)}</span>
                   </div>
                 </button>
               );

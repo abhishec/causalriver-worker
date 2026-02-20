@@ -23,7 +23,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   if (items.length === 0) {
     return (
       <div className="text-center py-8 text-muted text-sm">
-        No recent activity. NexusBrain is in sleep cycle...
+        No recent activity. Brain OS is in sleep cycle...
       </div>
     );
   }

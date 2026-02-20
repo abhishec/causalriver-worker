@@ -29,7 +29,7 @@ const NEXUS_BRAIN_TOOLS = [
     function: {
       name: "nexus_brain_query",
       description:
-        "Query the NexusBrain causal knowledge graph. Returns causal relationships, " +
+        "Query the Brain OS causal knowledge graph. Returns causal relationships, " +
         "patterns, impact analysis, and cascade paths for any business domain. " +
         "Use this to understand WHY things happen in an organization — root causes, " +
         "downstream effects, and cross-domain cascades.",
@@ -148,7 +148,7 @@ const NEXUS_BRAIN_TOOLS = [
 
 export async function GET() {
   return NextResponse.json({
-    name: "NexusBrain",
+    name: "Brain OS",
     version: "1.0.0",
     description:
       "Causal intelligence engine that understands organizations as living systems. " +

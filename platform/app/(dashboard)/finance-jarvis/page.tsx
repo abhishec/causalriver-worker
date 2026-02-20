@@ -262,7 +262,7 @@ export default function FinanceJarvisPage() {
 
       {/* Data Source Footer */}
       <div className="text-center py-4 text-[10px] text-muted/30">
-        Data sources: Xero (accounting) + Volopay (corporate cards) | Analyzed through NexusBrain causal intelligence engine
+        Data sources: Xero (accounting) + Volopay (corporate cards) | Analyzed through Brain OS causal intelligence engine
       </div>
     </div>
   );

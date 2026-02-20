@@ -716,14 +716,15 @@ export function createFeedbackLoop(config: Partial<FeedbackLoopConfig> = {}) {
             continue;
           }
 
-          // Fetch actual outcome from domain signals
+          // Fetch actual outcome — uses resolver registry first, then signal fallback
           const actualOutcome = await fetchActualOutcome(
             supabase,
             prediction.organization_id,
             prediction.target_domain,
             prediction.entity_type,
             prediction.entity_id,
-            prediction.target_metric
+            prediction.target_metric,
+            prediction, // Pass full prediction for resolver context
           );
 
           if (actualOutcome) {
@@ -872,6 +873,15 @@ function calculateCalibrationError(predictions: Array<{
 
 /**
  * Fetch actual outcome for verification
+ *
+ * REWIRED (Gap 3): Now uses the OutcomeResolverRegistry to fetch ground truth
+ * from actual source system APIs (Jira, GitHub, Xero, PagerDuty) before
+ * falling back to signal-based comparison.
+ *
+ * Priority:
+ * 1. Resolver registry → direct API call to source system (highest confidence)
+ * 2. Cross-domain signals → connector-ingested data (medium confidence)
+ * 3. null → defers to user verification via VerificationPromptCard (Gap 2)
  */
 async function fetchActualOutcome(
   supabase: SupabaseClient,
@@ -879,9 +889,43 @@ async function fetchActualOutcome(
   targetDomain: string,
   entityType: string,
   entityId: string,
-  targetMetric: string
+  targetMetric: string,
+  prediction?: { predicted_direction?: string; predicted_magnitude?: number; confidence?: number; predicted_at?: string; feature_snapshot?: Record<string, number> },
 ): Promise<{ direction: 'increase' | 'decrease' | 'stable'; magnitude: number } | null> {
-  // Get the most recent signal for this entity in the target domain
+  // ── Strategy 1: Try the automated outcome resolver registry ──────────
+  try {
+    const resolverModule = await import('./automated-outcome-resolver.js');
+    const registry = resolverModule.createResolverRegistry();
+
+    if (registry.hasResolver(targetDomain)) {
+      const ctx = {
+        predictionId: `auto_${Date.now()}`,
+        organizationId,
+        domain: targetDomain,
+        targetMetric,
+        entityType,
+        entityId,
+        predictedDirection: (prediction?.predicted_direction as 'increase' | 'decrease' | 'stable') || 'stable',
+        predictedMagnitude: prediction?.predicted_magnitude || 0,
+        predictedAt: prediction?.predicted_at ? new Date(prediction.predicted_at) : new Date(),
+        confidence: prediction?.confidence || 0.5,
+        featureSnapshot: prediction?.feature_snapshot,
+      };
+
+      const result = await registry.resolve(ctx, supabase);
+      if (result) {
+        return {
+          direction: result.actualDirection,
+          magnitude: result.actualMagnitude,
+        };
+      }
+    }
+  } catch (err) {
+    // Resolver registry not available or failed — fall through to signals
+    console.debug('[FeedbackLoop] Resolver registry unavailable, using signal fallback:', err instanceof Error ? err.message : err);
+  }
+
+  // ── Strategy 2: Fall back to cross_domain_signals ────────────────────
   const { data, error } = await supabase
     .from('cross_domain_signals')
     .select('signal_value')

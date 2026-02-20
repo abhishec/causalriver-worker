@@ -71,7 +71,7 @@ export default function ArchitecturePage() {
 
       <h2 className="mb-4 mt-12 text-2xl font-semibold">Core Brain vs Client Brains</h2>
       <p className="mb-4 text-muted">
-        NexusBrain separates the Core Brain (the intelligence engine that discovers, learns, and stores causal knowledge)
+        Brain OS separates the Core Brain (the intelligence engine that discovers, learns, and stores causal knowledge)
         from Client Brains (lightweight instances that agents and apps use to query, contribute signals, and receive intelligence).
       </p>
       <ul className="list-inside list-disc space-y-2 text-sm text-muted">

@@ -3,13 +3,13 @@ import { BRAIN_STATS, BENCHMARK_RESULTS } from "./generated-stats";
 export { BRAIN_STATS, BENCHMARK_RESULTS };
 
 export const SITE = {
-  name: "NexusBrain",
+  name: "Brain OS",
   tagline: "The causal memory for organisations — it perceives your data, discovers cause-and-effect, and transforms how your organisation works.",
   url: "https://usebrainos.com",
   github: "https://github.com/abhishec/nexus-intelligence",
   platform: "https://platform.usebrainos.com",
   description:
-    `NexusBrain is the causal memory for organisations — a deep knowledge system with ${BRAIN_STATS.brainRegions} brain regions that perceives your data, discovers cause-and-effect with ${BRAIN_STATS.causalMethods} ensemble methods, and transforms organisational intelligence. Tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval).`,
+    `Brain OS is the causal memory for organisations — a deep knowledge system with ${BRAIN_STATS.brainRegions} brain regions that perceives your data, discovers cause-and-effect with ${BRAIN_STATS.causalMethods} ensemble methods, and transforms organisational intelligence. Tested against peer-reviewed benchmarks (CausalRivers ICLR 2025, CauseME, LongMemEval).`,
 };
 
 export const NAV_LINKS = [
@@ -112,27 +112,27 @@ export const LAYERS = [
 export const USE_CASES = [
   {
     title: "Software Engineering as a Service (SE-aaS)",
-    description: "NexusBrain's causal memory powers autonomous engineering agents that understand your codebase, infrastructure, and deployment pipelines. The agent traces how code changes cascade through CI/CD, monitoring, and production — with statistical proof of what caused what. It learns your engineering patterns, predicts incidents before they happen, and compounds knowledge across every sprint.",
+    description: "Brain OS's causal memory powers autonomous engineering agents that understand your codebase, infrastructure, and deployment pipelines. The agent traces how code changes cascade through CI/CD, monitoring, and production — with statistical proof of what caused what. It learns your engineering patterns, predicts incidents before they happen, and compounds knowledge across every sprint.",
     example: "PR merged → CI pipeline regression detected (3h lag) → deployment risk scored 87% → incident predicted in staging (p=0.004) → auto-remediation triggered",
   },
   {
     title: "Accountant as a Service",
-    description: "NexusBrain's causal memory gives financial agents deep understanding of your organisation's financial flows, compliance patterns, and business drivers. The agent traces how operational decisions cascade into financial outcomes — revenue, cash flow, and margin — with causal evidence, not just correlation. It learns your financial rhythms and surfaces anomalies before they become problems.",
+    description: "Brain OS's causal memory gives financial agents deep understanding of your organisation's financial flows, compliance patterns, and business drivers. The agent traces how operational decisions cascade into financial outcomes — revenue, cash flow, and margin — with causal evidence, not just correlation. It learns your financial rhythms and surfaces anomalies before they become problems.",
     example: "Client payment delays (7d lag) → cash flow impact (p=0.003) → accounts receivable risk scored → proactive collection triggered → compliance status updated",
   },
   {
     title: "Customer Service Agent as a Service",
-    description: "NexusBrain's causal memory enables customer service agents that understand why customers contact you, what drives satisfaction, and how issues cascade across the customer lifecycle. The agent resolves tickets with full causal context — not just the symptom, but the root cause chain across product, engineering, and operations.",
+    description: "Brain OS's causal memory enables customer service agents that understand why customers contact you, what drives satisfaction, and how issues cascade across the customer lifecycle. The agent resolves tickets with full causal context — not just the symptom, but the root cause chain across product, engineering, and operations.",
     example: "Product bug deployed (3d ago) → support tickets spike +40% → CSAT drops from 4.2 to 3.6 (14d lag) → churn risk for SMB segment increases (p=0.008) → proactive outreach triggered",
   },
   {
     title: "HR Agent as a Service",
-    description: "NexusBrain's causal memory powers HR agents that understand the causal chains between hiring, team dynamics, performance, and organisational outcomes. The agent traces how workforce decisions ripple through engineering velocity, product delivery, and business results — enabling evidence-based people strategy.",
+    description: "Brain OS's causal memory powers HR agents that understand the causal chains between hiring, team dynamics, performance, and organisational outcomes. The agent traces how workforce decisions ripple through engineering velocity, product delivery, and business results — enabling evidence-based people strategy.",
     example: "Hiring pipeline slows (21d) → engineering velocity drops 15% → product releases delayed (14d lag) → competitor feature gap widens → retention risk increases (p=0.012)",
   },
   {
     title: "Strategy as a Service",
-    description: "NexusBrain's causal memory transforms strategic planning from intuition to evidence. The agent runs counterfactual simulations across the entire organisational causal graph — modelling 'what if' scenarios with statistical confidence. It traces how every department affects the bottom line and identifies the highest-leverage interventions.",
+    description: "Brain OS's causal memory transforms strategic planning from intuition to evidence. The agent runs counterfactual simulations across the entire organisational causal graph — modelling 'what if' scenarios with statistical confidence. It traces how every department affects the bottom line and identifies the highest-leverage interventions.",
     example: "What if marketing spend +20%? → pipeline grows ~8% (30d lag, confidence: 72%) → but engineering capacity constrains delivery → net revenue impact +3.1% (p=0.04) → recommend hiring 2 engineers first",
   },
 ] as const;

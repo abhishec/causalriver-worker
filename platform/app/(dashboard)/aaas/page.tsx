@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "Accounting · NexusBrain" };
+export const metadata = { title: "Accounting · Brain OS" };
 
 /**
  * AAAS page — redirects to the unified Intelligence copilot with AAS service pre-selected.

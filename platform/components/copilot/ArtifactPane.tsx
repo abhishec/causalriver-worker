@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ArtifactsPanel } from "./ArtifactsPanel";
+import { ComparisonView } from "./ComparisonView";
 import type { UnifiedArtifact } from "./types";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,10 @@ interface ArtifactPaneProps {
   onSelectArtifact: (id: string) => void;
   onClose: () => void;
   onPinArtifact: (id: string) => void;
+  /** Scroll chat to the message that produced an artifact */
+  onJumpToMessage?: (messageIndex: number) => void;
+  /** Save artifact as reusable command template */
+  onSaveAsCommand?: (artifact: UnifiedArtifact) => void;
 }
 
 export function ArtifactPane({
@@ -21,8 +26,12 @@ export function ArtifactPane({
   onSelectArtifact,
   onClose,
   onPinArtifact,
+  onJumpToMessage,
+  onSaveAsCommand,
 }: ArtifactPaneProps) {
   const [width, setWidth] = useState(440);
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [comparisonLeftId, setComparisonLeftId] = useState<string | null>(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
@@ -77,13 +86,31 @@ export function ArtifactPane({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // ── Enter comparison mode ────────────────────────────────────────────────
+  const handleCompare = useCallback(
+    (artifactId: string) => {
+      setComparisonMode(true);
+      setComparisonLeftId(artifactId);
+      // Widen the pane for comparison (need more space for two columns)
+      setWidth((prev) => Math.max(prev, 700));
+    },
+    []
+  );
+
+  // ── Exit comparison mode ─────────────────────────────────────────────────
+  const handleExitComparison = useCallback(() => {
+    setComparisonMode(false);
+    setComparisonLeftId(null);
+    setWidth(440);
+  }, []);
+
   if (!open) return null;
 
   // Adapt UnifiedArtifact[] → Artifact[] for ArtifactsPanel
   // CRITICAL: preserve rawData, service, domainId — these are needed for rich domain rendering
   const panelArtifacts = artifacts.map((a) => ({
     id: a.id,
-    type: a.type as "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram",
+    type: a.type as "code" | "analysis" | "table" | "chart" | "document" | "financial-statement" | "engineering-analysis" | "mermaid-diagram" | "agent-execution" | "presentation" | "pdf" | "infographic",
     title: a.title,
     language: a.type === "mermaid-diagram" ? "mermaid" : a.language,
     content: a.content,
@@ -109,15 +136,34 @@ export function ArtifactPane({
       {/* ── Panel content ──────────────────────────────────────────────────── */}
       <div
         style={{ width }}
-        className="h-full overflow-hidden flex flex-col border-l border-border-subtle bg-background"
+        className="h-full overflow-hidden flex flex-col border-l border-border-subtle bg-background transition-[width] duration-200"
       >
-        <ArtifactsPanel
-          artifacts={panelArtifacts}
-          activeArtifactId={activeArtifactId}
-          onSelectArtifact={onSelectArtifact}
-          onPinArtifact={onPinArtifact}
-          onClose={onClose}
-        />
+        {comparisonMode ? (
+          <ComparisonView
+            artifacts={panelArtifacts}
+            initialLeftId={comparisonLeftId || undefined}
+            initialRightId={
+              panelArtifacts.find((a) => a.id !== comparisonLeftId)?.id
+            }
+            onClose={handleExitComparison}
+          />
+        ) : (
+          <ArtifactsPanel
+            artifacts={panelArtifacts}
+            activeArtifactId={activeArtifactId}
+            onSelectArtifact={onSelectArtifact}
+            onPinArtifact={onPinArtifact}
+            onClose={onClose}
+            onJumpToMessage={onJumpToMessage}
+            onCompare={handleCompare}
+            comparisonMode={comparisonMode}
+            onSaveAsCommand={onSaveAsCommand ? (artifact) => {
+              // Convert Artifact back to UnifiedArtifact for the save dialog
+              const unified = artifacts.find((a) => a.id === artifact.id);
+              if (unified) onSaveAsCommand(unified);
+            } : undefined}
+          />
+        )}
       </div>
     </div>
   );

@@ -23,6 +23,8 @@ export interface ProactiveConfig {
   techDebtAlarmEnabled: boolean;
   reconciliationRunnerEnabled: boolean;
   cashFlowProphetEnabled: boolean;
+  revenueLeakageDetectorEnabled: boolean;
+  causalPLNarratorEnabled: boolean;
 }
 
 export interface AlertsConfig {
@@ -62,6 +64,8 @@ const DEFAULT_PROACTIVE: ProactiveConfig = {
   techDebtAlarmEnabled: true,
   reconciliationRunnerEnabled: false,
   cashFlowProphetEnabled: false,
+  revenueLeakageDetectorEnabled: false,
+  causalPLNarratorEnabled: false,
 };
 
 // ---------------------------------------------------------------------------

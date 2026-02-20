@@ -28,7 +28,7 @@ npx supabase db push`,
       },
       {
         q: "TypeScript errors about missing types after installation",
-        a: "NexusBrain packages export types. Ensure your tsconfig.json has 'moduleResolution': 'bundler' or 'node16' and includes the packages in your type roots.",
+        a: "Brain OS packages export types. Ensure your tsconfig.json has 'moduleResolution': 'bundler' or 'node16' and includes the packages in your type roots.",
         code: `// tsconfig.json
 {
   "compilerOptions": {
@@ -43,11 +43,11 @@ npx supabase db push`,
     category: "MCP Server",
     questions: [
       {
-        q: "Claude Desktop doesn't show NexusBrain MCP server",
+        q: "Claude Desktop doesn't show Brain OS MCP server",
         a: "Check your claude_desktop_config.json location and formatting. On macOS it's at ~/Library/Application Support/Claude/claude_desktop_config.json. Restart Claude Desktop after editing.",
         code: `{
   "mcpServers": {
-    "nexusbrain": {
+    "brainos": {
       "command": "npx",
       "args": ["-y", "@nexus-ai/mcp-server"],
       "env": {
@@ -266,7 +266,7 @@ for (let i = 0; i < signals.length; i += BATCH_SIZE) {
       },
       {
         q: "Embeddings generation taking too long",
-        a: "NexusBrain uses CPU-based N-gram embeddings (no GPU required). For large text volumes, increase batch size or use streaming ingestion.",
+        a: "Brain OS uses CPU-based N-gram embeddings (no GPU required). For large text volumes, increase batch size or use streaming ingestion.",
         code: `// Faster embedding config
 import { createEmbeddings } from '@nexus-ai/memory-stack/embeddings';
 
@@ -284,7 +284,7 @@ export default function TroubleshootingPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">Troubleshooting FAQ</h1>
       <p className="mb-8 text-lg text-muted">
-        Common issues and solutions for NexusBrain setup, causal discovery, connectors, and production deployment.
+        Common issues and solutions for Brain OS setup, causal discovery, connectors, and production deployment.
       </p>
 
       <div className="mb-8 rounded-xl border border-amber-400/30 bg-amber-400/5 p-6">

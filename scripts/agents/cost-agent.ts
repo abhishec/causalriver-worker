@@ -72,7 +72,7 @@ export class CostAgent extends ManusNativeAgent {
   async fetch(): Promise<FetchResult> {
     this.log('Fetching cost data...');
     const costTracker = createCostTracker(this.supabase, this.organizationId);
-    const llmReport = await costTracker.generateReport(this.config.lookbackDays!);
+    const llmReport = await costTracker.generateCostReport(this.config.lookbackDays!);
     this.log(`LLM: $${llmReport.totalCost.toFixed(4)} (${llmReport.totalCalls} calls), Period: ${llmReport.periodStart} to ${llmReport.periodEnd}`);
 
     let awsCosts: AWSCostData | null = null;

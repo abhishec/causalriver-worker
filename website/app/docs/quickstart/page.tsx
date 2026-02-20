@@ -10,7 +10,7 @@ export default function QuickstartPage() {
     <div>
       <h1 className="mb-4 text-3xl font-bold">Quickstart</h1>
       <p className="mb-8 text-lg text-muted">
-        Get up and running with NexusBrain in 5 minutes. Start with zero dependencies &mdash; no database, no API keys, no network calls.
+        Get up and running with Brain OS in 5 minutes. Start with zero dependencies &mdash; no database, no API keys, no network calls.
       </p>
 
       <h2 className="mb-4 mt-12 text-2xl font-semibold">Install</h2>

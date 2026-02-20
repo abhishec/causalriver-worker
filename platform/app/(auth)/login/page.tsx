@@ -13,8 +13,13 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const authType = searchParams.get("type");
   const [error, setError] = useState<string | null>(
-    authError === "auth_failed" ? "Authentication failed. Please try again or use a different sign-in method." : null
+    authError === "auth_failed"
+      ? authType === "recovery"
+        ? "Password reset link is invalid or expired. Please request a new one."
+        : "Authentication failed. Please try again or use a different sign-in method."
+      : null
   );
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
@@ -95,7 +100,7 @@ function LoginForm() {
         <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
           <span className="text-lg font-bold text-accent">N</span>
         </div>
-        <span className="text-lg font-semibold">NexusBrain</span>
+        <span className="text-lg font-semibold">Brain OS</span>
       </div>
 
       <h2 className="text-2xl font-bold mb-1">Welcome back</h2>
@@ -126,7 +131,12 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1.5">Password</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="password" className="block text-sm font-medium">Password</label>
+            <Link href="/forgot-password" className="text-xs text-accent hover:text-accent-light">
+              Forgot password?
+            </Link>
+          </div>
           <input
             id="password"
             type="password"

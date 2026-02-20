@@ -153,7 +153,7 @@ export function Hero() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-                <span className="text-xs font-medium text-emerald-400">NexusBrain is thinking...</span>
+                <span className="text-xs font-medium text-emerald-400">Brain OS is thinking...</span>
                 {isLive && (
                   <span className="text-[9px] text-emerald-400/50 bg-emerald-400/5 px-1.5 py-0.5 rounded-full border border-emerald-400/20">
                     live

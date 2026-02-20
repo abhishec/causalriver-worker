@@ -67,7 +67,7 @@ export async function detectThreats(request: Request): Promise<ThreatDetection> 
   const xssPatterns = [
     /<script[\s\S]*?>[\s\S]*?<\/script>/i,      // <script> tags
     /javascript:/i,                              // javascript: protocol
-    /on\w+\s*=/i,                               // Event handlers (onclick, onerror, etc.)
+    /(?<![a-z])on\w+\s*=/i,                      // Event handlers (onclick, onerror, etc.) — negative lookbehind avoids matching param names like organizationId=
     /<iframe/i,                                  // <iframe> tags
     /<embed/i,                                   // <embed> tags
     /<object/i,                                  // <object> tags
