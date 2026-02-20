@@ -62,14 +62,15 @@ export default async function BrainPage() {
       .order("created_at", { ascending: false })
       .limit(15)),
 
-    // Signal activity for timeline (last 90 days, capped at 5000 for perf)
+    // Signal activity for timeline (last 30 days, capped at 200 for perf)
+    // The client aggregates by day anyway — 200 recent signals is enough for the chart.
     safe(supabase
       .from("cross_domain_signals")
       .select("id, domain, source_type, created_at")
       .eq("organization_id", CORE_ORG_ID)
-      .gte("created_at", new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+      .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false })
-      .limit(5000)),
+      .limit(200)),
   ]);
 
   const causalEdges = causalResult.data || [];

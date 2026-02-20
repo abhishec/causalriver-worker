@@ -37,6 +37,7 @@ export default async function OverviewPage() {
     connectorsResult,
     artifactsResult,
     emergenceResult,
+    orgMetaResult,
   ] = await Promise.all([
     // Latest brain snapshots (30 days)
     safe(supabase
@@ -92,13 +93,14 @@ export default async function OverviewPage() {
       .limit(30)),
 
     // Signals grouped by domain (for signal rate panel)
+    // 100 recent signals is enough to compute per-domain rates — saves ~400 rows transfer.
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain, created_at")
       .eq("organization_id", currentOrgId)
       .gte("created_at", thirtyDaysAgo)
       .order("created_at", { ascending: false })
-      .limit(500)),
+      .limit(100)),
 
     // Early warning: velocity collapse + bottleneck alerts
     safe(supabase
@@ -132,6 +134,13 @@ export default async function OverviewPage() {
       .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false })
       .limit(10)),
+
+    // Org metadata for design partner flag (was sequential — now parallel)
+    safe(supabase
+      .from("organizations")
+      .select("name, is_design_partner")
+      .eq("id", currentOrgId)
+      .maybeSingle()),
   ]);
 
   const snapshots = snapshotsResult.data || [];
@@ -373,13 +382,7 @@ export default async function OverviewPage() {
 
   const totalSignalRate = signalRates.reduce((sum, s) => sum + s.rate, 0);
 
-  // Fetch org metadata for design partner flag
-  const { data: orgMeta } = await supabase
-    .from("organizations")
-    .select("name, is_design_partner")
-    .eq("id", currentOrgId)
-    .maybeSingle();
-
+  const orgMeta = orgMetaResult.data as { name?: string; is_design_partner?: boolean } | null;
   const isDesignPartner = orgMeta?.is_design_partner ?? false;
   const orgDisplayName = orgMeta?.name ?? "your organization";
 
