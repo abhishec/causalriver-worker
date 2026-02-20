@@ -50,21 +50,36 @@ export default function ArtifactsPage() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
+    if (!currentOrg?.id) {
+      setLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
     async function loadArtifacts() {
-      if (!currentOrg?.id) return;
       try {
-        const res = await fetch(`/api/se-aas/artifacts?organizationId=${currentOrg.id}&limit=50`);
+        const res = await fetch(
+          `/api/se-aas/artifacts?organizationId=${currentOrg!.id}&limit=50`,
+          { signal: controller.signal }
+        );
         if (res.ok) {
           const json = await res.json();
           setArtifacts(json.artifacts || []);
         }
       } catch {
-        // silent
+        // silent — timeout or network error
       } finally {
+        clearTimeout(timeout);
         setLoading(false);
       }
     }
     loadArtifacts();
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
   }, [currentOrg?.id]);
 
   const filtered = filter === "all"
