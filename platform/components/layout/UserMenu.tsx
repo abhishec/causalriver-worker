@@ -124,7 +124,21 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
     return { customerGroups: groups, coreOrgs: core };
   }, [organizations]);
 
-  if (isLoading || !currentOrg) return null;
+  if (isLoading || !currentOrg) {
+    return (
+      <div className={cn("shrink-0 border-t border-border-subtle", collapsed ? "px-2 py-3" : "px-3 py-3")}>
+        <div className={cn("flex items-center", collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5")}>
+          <div className="w-8 h-8 rounded-full bg-surface-hover animate-pulse shrink-0" />
+          {!collapsed && (
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="h-3 w-20 bg-surface-hover rounded animate-pulse" />
+              <div className="h-2.5 w-14 bg-surface-hover rounded animate-pulse" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -154,7 +168,13 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           <>
             <div className="flex-1 min-w-0 text-left">
               <div className="text-[13px] font-medium truncate text-foreground">{displayName}</div>
-              <div className="text-[11px] text-muted truncate">{currentOrg.customer_name || currentOrg.name}</div>
+              {currentOrg.customer_name ? (
+                <div className="text-[11px] text-muted truncate">
+                  {currentOrg.customer_name} › {currentOrg.name}
+                </div>
+              ) : (
+                <div className="text-[11px] text-muted truncate">{currentOrg.name}</div>
+              )}
             </div>
             {/* Chevron up/down */}
             <svg className="w-4 h-4 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

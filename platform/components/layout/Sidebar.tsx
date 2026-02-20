@@ -43,30 +43,42 @@ const MAX_WIDTH = 400;
 
 /* ── Chat History Group ──────────────────────────────────────────────────── */
 
-function ChatHistoryGroup({ label, items, activePath }: {
+function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
   label: string;
   items: ChatHistoryItem[];
   activePath: string;
+  activeConversationId: string | null;
 }) {
+  const router = useRouter();
+
+  function handleClick(item: ChatHistoryItem) {
+    // If already on copilot page, dispatch event to load conversation without navigation
+    if (activePath.startsWith("/copilot")) {
+      window.dispatchEvent(new CustomEvent("copilot-select-conversation", { detail: item.id }));
+    } else {
+      router.push(`/copilot?c=${item.id}`);
+    }
+  }
+
   return (
     <div className="mb-1">
       <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
         {label}
       </div>
       {items.map((item) => (
-        <Link
+        <button
           key={item.id}
-          href={`/copilot?c=${item.id}`}
+          onClick={() => handleClick(item)}
           className={cn(
-            "flex items-center gap-1.5 px-2 py-1.5 mx-1 rounded-lg text-xs transition-colors truncate",
-            activePath.includes(item.id)
+            "flex items-center gap-1.5 px-2 py-1.5 mx-1 rounded-lg text-xs transition-colors truncate w-full text-left",
+            activeConversationId === item.id
               ? "bg-accent/8 text-foreground font-medium"
               : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
           )}
         >
           <span className="text-[10px] opacity-60 shrink-0">💬</span>
           <span className="truncate">{item.title}</span>
-        </Link>
+        </button>
       ))}
     </div>
   );
@@ -127,14 +139,16 @@ function CommandsSection() {
 
   function handleCommandClick(cmd: SlashCommand) {
     setSelectedCmd(cmd.id);
+    // Always start a fresh chat when clicking a command
+    window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
     // Navigate to copilot and auto-submit the command prompt
     router.push("/copilot");
-    // Use copilot-inject-and-submit event — same mechanism as ServiceContextPane
+    // Use copilot-inject-and-submit event — give time for new-conversation to reset state
     setTimeout(() => {
       window.dispatchEvent(
         new CustomEvent("copilot-inject-and-submit", { detail: cmd.prompt })
       );
-    }, 100);
+    }, 200);
   }
 
   return (
@@ -187,18 +201,20 @@ function ChatHistorySection({
   groups,
   historyLoading,
   activePath,
+  activeConversationId,
 }: {
   groups: { label: string; items: ChatHistoryItem[] }[];
   historyLoading: boolean;
   activePath: string;
+  activeConversationId: string | null;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   return (
-    <div className="shrink-0 border-t border-border-subtle">
+    <div className="flex-1 min-h-0 flex flex-col border-t border-border-subtle">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-muted-foreground transition-colors"
+        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-muted-foreground transition-colors shrink-0"
       >
         <span>Recent Chats</span>
         <svg
@@ -209,7 +225,7 @@ function ChatHistorySection({
         </svg>
       </button>
       {open && (
-        <div className="max-h-[160px] overflow-y-auto px-2 pb-2 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-thin">
           {historyLoading ? (
             <div className="px-3 py-2 text-center text-[10px] text-muted">Loading...</div>
           ) : groups.length === 0 ? (
@@ -221,6 +237,7 @@ function ChatHistorySection({
                 label={group.label}
                 items={group.items}
                 activePath={activePath}
+                activeConversationId={activeConversationId}
               />
             ))
           )}
@@ -236,10 +253,21 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
   const { groups, loading: historyLoading } = useChatHistory();
+
+  // Track active conversation from copilot page
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent).detail;
+      setActiveConversationId(typeof id === "string" ? id : null);
+    };
+    window.addEventListener("copilot-active-conversation-changed", handler);
+    return () => window.removeEventListener("copilot-active-conversation-changed", handler);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
@@ -426,6 +454,7 @@ export function Sidebar() {
           groups={groups}
           historyLoading={historyLoading}
           activePath={pathname}
+          activeConversationId={activeConversationId}
         />
       )}
       {collapsed && <div className="flex-1" />}

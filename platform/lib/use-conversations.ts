@@ -55,15 +55,25 @@ export function useConversations(orgId: string | undefined) {
       serviceMode: "general" | "aas" | "seaas";
       messages: ConversationMessage[];
     }): Promise<string> => {
-      const res = await fetch("/api/copilot/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgId, ...opts }),
-      });
-      const json = await res.json();
-      // Refresh list in background
-      loadList();
-      return json.id;
+      try {
+        const res = await fetch("/api/copilot/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orgId, ...opts }),
+        });
+        if (!res.ok) {
+          console.error("[useConversations] save failed:", res.status, await res.text());
+          return opts.conversationId || "";
+        }
+        const json = await res.json();
+        // Refresh list and notify sidebar
+        await loadList();
+        window.dispatchEvent(new Event("conversation-updated"));
+        return json.id;
+      } catch (err) {
+        console.error("[useConversations] save error:", err);
+        return opts.conversationId || "";
+      }
     },
     [orgId, loadList]
   );
@@ -84,6 +94,7 @@ export function useConversations(orgId: string | undefined) {
     async (id: string) => {
       await fetch(`/api/copilot/conversations/${id}`, { method: "DELETE" });
       setConversations((prev) => prev.filter((c) => c.id !== id));
+      window.dispatchEvent(new Event("conversation-updated"));
     },
     []
   );
@@ -99,6 +110,7 @@ export function useConversations(orgId: string | undefined) {
       setConversations((prev) =>
         prev.map((c) => (c.id === id ? { ...c, title } : c))
       );
+      window.dispatchEvent(new Event("conversation-updated"));
     },
     []
   );
