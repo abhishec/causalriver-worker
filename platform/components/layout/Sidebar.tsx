@@ -153,15 +153,23 @@ function CommandsSection({ activeService }: { activeService: ServiceMode }) {
 
   function handleCommandClick(cmd: SlashCommand) {
     setSelectedCmd(cmd.id);
-    window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-    router.push("/copilot");
-    setTimeout(() => {
-      window.dispatchEvent(
-        new CustomEvent("copilot-inject-and-submit", {
-          detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
-        })
-      );
-    }, 200);
+
+    const isCopilot = window.location.pathname.startsWith("/copilot");
+
+    if (isCopilot) {
+      // Already on copilot — dispatch events directly
+      window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("copilot-inject-and-submit", {
+            detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
+          })
+        );
+      }, 150);
+    } else {
+      // Navigate to copilot with command in URL — page picks it up on mount
+      router.push(`/copilot?cmd=${encodeURIComponent(cmd.id)}`);
+    }
   }
 
   return (

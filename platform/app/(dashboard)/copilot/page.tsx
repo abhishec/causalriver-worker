@@ -11,11 +11,10 @@ import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { cn } from "@/lib/utils";
 import { useTemplates } from "@/lib/templates/useTemplates";
 import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
 import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
-// DOMAIN_CATALOGUE / AAS_COMMANDS removed — no longer needed since ServiceContextPane was replaced
+import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -109,7 +108,7 @@ function CopilotPageInner() {
     loadConversation,
   } = useConversations(currentOrg?.id);
 
-  // ── Auto-inject prompt from ?q= or ?service= query params ──────────────────
+  // ── Auto-inject from ?q=, ?service=, or ?cmd= query params ──────────────────
   useEffect(() => {
     const svc = searchParams.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
@@ -118,6 +117,33 @@ function CopilotPageInner() {
         setArtifactPaneOpen(true);
       }
     }
+
+    // ?cmd=<commandId> — from sidebar command click on non-copilot page
+    const cmdId = searchParams.get("cmd");
+    if (cmdId) {
+      // Look up command from ALL_SLASH_COMMANDS or GENERAL_COMMANDS
+      const allCmds = [...ALL_SLASH_COMMANDS];
+      const cmd = allCmds.find((c) => c.id === cmdId);
+      if (cmd) {
+        // Reset state for new conversation
+        setActiveConversationId(null);
+        setArtifacts([]);
+        setActiveArtifactId(null);
+        setArtifactPaneOpen(false);
+        setMessageArtifactMap(new Map());
+        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+        // Inject and submit after component is fully mounted
+        const timer = setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("copilot-inject-and-submit", {
+              detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
+            })
+          );
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }
+
     const q = searchParams.get("q");
     if (q) {
       const timer = setTimeout(() => {
