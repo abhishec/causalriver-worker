@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
+import { ALL_SLASH_COMMANDS } from "@/components/copilot/slash-commands";
 import { labelToCommandId } from "@/lib/templates/types";
 
 export const dynamic = "force-dynamic";

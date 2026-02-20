@@ -306,7 +306,7 @@ export async function executeComposedAgent(
       const brainType = toolIdToDomainType(tool.id);
       const brainContext = await mesh.assemble(
         `${brainType}: ${prompt}`,
-        "brain",
+        "copilot",
       );
 
       // Extract relevant brain data based on tool type
@@ -316,13 +316,13 @@ export async function executeComposedAgent(
           brainResult = {
             causalEdges: brainContext.causalEdges?.slice(0, 10),
             patterns: brainContext.patterns?.slice(0, 5),
-            summary: brainContext.fullPrompt?.slice(0, 500),
+            summary: brainContext.brainInsights?.slice(0, 5),
           };
           break;
         case "causal":
           brainResult = {
             causalEdges: brainContext.causalEdges,
-            crossDomainInsights: brainContext.crossDomainInsights,
+            crossDomainInsights: brainContext.crossDomainContext,
           };
           break;
         case "anomaly":
@@ -334,7 +334,7 @@ export async function executeComposedAgent(
           break;
         case "predict":
           brainResult = {
-            predictions: brainContext.predictions,
+            predictions: brainContext.orgPatterns,
             causalEdges: brainContext.causalEdges?.slice(0, 5),
           };
           break;
@@ -345,7 +345,7 @@ export async function executeComposedAgent(
           };
           break;
         default:
-          brainResult = { context: brainContext.fullPrompt?.slice(0, 1000) };
+          brainResult = { context: brainContext.brainInsights?.slice(0, 10) };
       }
 
       const artifact: ExecutionArtifact = {
@@ -411,7 +411,7 @@ export async function executeComposedAgent(
       const toolMethod = toolIdToDomainType(tool.id);
 
       // Execute via gateway RPC
-      const rpcResult = await conn.rpc(toolMethod, {
+      const rpcResult = await conn.send(toolMethod, {
         prompt,
         ...context.params,
       });
