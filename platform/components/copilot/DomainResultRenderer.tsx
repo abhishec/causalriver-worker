@@ -33,9 +33,12 @@ const SQLRenderer               = dynamic(() => import("@/components/copilot/art
 const LineageRenderer           = dynamic(() => import("@/components/copilot/artifact-renderers/LineageRenderer").then(m => ({ default: m.LineageRenderer })),           { ssr: false });
 const BenchmarkRenderer         = dynamic(() => import("@/components/copilot/artifact-renderers/BenchmarkRenderer").then(m => ({ default: m.BenchmarkRenderer })),         { ssr: false });
 const GenericIntelRenderer      = dynamic(() => import("@/components/copilot/artifact-renderers/GenericIntelRenderer").then(m => ({ default: m.GenericIntelRenderer })),      { ssr: false });
+const CashFlowForecastRenderer = dynamic(() => import("@/components/copilot/artifact-renderers/CashFlowForecastRenderer").then(m => ({ default: m.CashFlowForecastRenderer })), { ssr: false });
+const RevenueLeakageRenderer   = dynamic(() => import("@/components/copilot/artifact-renderers/RevenueLeakageRenderer").then(m => ({ default: m.RevenueLeakageRenderer })),     { ssr: false });
+const CausalPLRenderer         = dynamic(() => import("@/components/copilot/artifact-renderers/CausalPLRenderer").then(m => ({ default: m.CausalPLRenderer })),                 { ssr: false });
 
 // ── Domain ID → Renderer mapping ─────────────────────────────────────────────
-// Covers ALL 31 commands from DOMAIN_CATALOGUE (20) + AAS_COMMANDS (7) + GENERAL (4)
+// Covers ALL 34 commands from DOMAIN_CATALOGUE (20) + AAS_COMMANDS (10) + GENERAL (4)
 const DOMAIN_RENDERER_MAP: Record<string, React.ComponentType<{ data: Record<string, any> }>> = {
   // ── SE-aaS: P0 Delivery Intelligence (4) ──────────────────────────────────
   "early-warning":          EarlyWarningRenderer,
@@ -69,8 +72,11 @@ const DOMAIN_RENDERER_MAP: Record<string, React.ComponentType<{ data: Record<str
   "sql-analyzer":           SQLRenderer,
   "data-lineage":           LineageRenderer,
 
-  // ── AAS: Benchmark (1 — the other 6 AAS commands route to FinancialStatementsPanel) ──
+  // ── AAS: Benchmark + Financial Intelligence (4 — the other 6 AAS commands route to FinancialStatementsPanel) ──
   "aas-benchmark":          BenchmarkRenderer,
+  "aas-cash-forecast":      CashFlowForecastRenderer,
+  "aas-revenue-leakage":    RevenueLeakageRenderer,
+  "aas-causal-pl":          CausalPLRenderer,
 
   // ── General: Cross-domain intelligence (4) ────────────────────────────────
   "causal":                 GenericIntelRenderer,

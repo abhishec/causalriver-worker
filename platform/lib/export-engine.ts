@@ -258,6 +258,7 @@ function extractTableData(data: unknown): string | null {
     "accounts", "transactions", "items", "rows", "data",
     "topTransactions", "revenueBreakdown", "expenseBreakdown",
     "assets", "liabilities", "equity",
+    "predictions", "findings", "variances", "causalAttributions",
   ];
 
   for (const key of tableKeys) {
@@ -324,17 +325,17 @@ export function getAvailableFormats(
   const formats: { format: ExportFormat; label: string }[] = [];
 
   // PNG — available for all visual artifacts
-  if (["chart", "financial-statement", "engineering-analysis", "infographic", "presentation", "mermaid-diagram"].includes(artifactType)) {
+  if (["chart", "financial-statement", "engineering-analysis", "infographic", "presentation", "mermaid-diagram", "cash-flow-forecast", "revenue-leakage", "causal-pl"].includes(artifactType)) {
     formats.push({ format: "png", label: "PNG Image" });
   }
 
   // PDF — available for all visual artifacts
-  if (["chart", "financial-statement", "engineering-analysis", "infographic", "presentation", "mermaid-diagram", "document", "analysis"].includes(artifactType)) {
+  if (["chart", "financial-statement", "engineering-analysis", "infographic", "presentation", "mermaid-diagram", "document", "analysis", "cash-flow-forecast", "revenue-leakage", "causal-pl"].includes(artifactType)) {
     formats.push({ format: "pdf", label: "PDF Document" });
   }
 
   // CSV — available for data artifacts
-  if (["financial-statement", "table", "engineering-analysis"].includes(artifactType)) {
+  if (["financial-statement", "table", "engineering-analysis", "cash-flow-forecast", "revenue-leakage", "causal-pl"].includes(artifactType)) {
     formats.push({ format: "csv", label: "CSV Spreadsheet" });
   }
 

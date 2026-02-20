@@ -39,6 +39,9 @@ import {
   type AgentDefinition,
   type AgentExecutionContext,
 } from './agent-registry';
+import { brainCashFlowProphetAgent } from './agents-cash-flow-prophet';
+import { brainRevenueLeakageAgent } from './agents-revenue-leakage';
+import { brainCausalPLNarratorAgent } from './agents-causal-pl-narrator';
 
 // ============================================================================
 // SHARED TYPES — Accounting Data Structures
@@ -2062,10 +2065,13 @@ export const ALL_ACCOUNTING_AGENTS: AgentDefinition[] = [
   brainTaxComplianceAgent as AgentDefinition,
   brainAuditPreparerAgent as AgentDefinition,
   brainAnomalyDetectiveAgent as AgentDefinition,
+  brainCashFlowProphetAgent as AgentDefinition,
+  brainRevenueLeakageAgent as AgentDefinition,
+  brainCausalPLNarratorAgent as AgentDefinition,
 ];
 
 /**
- * Register all 6 accounting agents into a registry.
+ * Register all 9 accounting agents into a registry.
  */
 export function registerAccountingAgents(
   registry: { register: (def: AgentDefinition) => void },
