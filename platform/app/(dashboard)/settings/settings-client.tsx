@@ -81,9 +81,14 @@ const TAB_ICONS: Record<string, string> = {
 export function SettingsClient({ org, orgId, budget, apiKeys, connectors, customer, siblingWorkspaces = [] }: SettingsClientProps) {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "general";
+  const initialAction = searchParams.get("action");
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [showCreateWorkspace, setShowCreateWorkspace] = useState(initialAction === "create-org");
+  const [createName, setCreateName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
 
@@ -100,6 +105,31 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
+
+  const handleCreateWorkspace = useCallback(async () => {
+    if (!createName.trim()) { setCreateError("Workspace name is required."); return; }
+    if (!customer?.id) { setCreateError("No customer linked — contact admin."); return; }
+    setCreating(true);
+    setCreateError("");
+    try {
+      const res = await fetch("/api/admin/workspaces/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerId: customer.id, workspaceName: createName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setCreateError(data.error || "Failed to create workspace."); return; }
+      showToast(`Workspace "${data.workspace.name}" created!`);
+      setShowCreateWorkspace(false);
+      setCreateName("");
+      // Reload to get fresh sibling list
+      window.location.reload();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Unexpected error.");
+    } finally {
+      setCreating(false);
+    }
+  }, [createName, customer, showToast]);
 
   const isDesignPartner = org?.is_design_partner ?? false;
 
@@ -209,18 +239,21 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
             </div>
 
             {/* ── Customer & Workspaces Hierarchy ────────────────────── */}
-            {customer && (
-              <div className="mt-8 pt-6 border-t border-border-subtle">
-                <h2 className="text-sm font-medium mb-1">Customer & Workspaces</h2>
-                <p className="text-xs text-muted mb-4">
-                  Your workspaces are grouped under <span className="font-medium text-foreground">{customer.name}</span>
-                </p>
+            <div className="mt-8 pt-6 border-t border-border-subtle">
+              <h2 className="text-sm font-medium mb-1">Customer & Workspaces</h2>
+              <p className="text-xs text-muted mb-4">
+                {customer
+                  ? <>Your workspaces are grouped under <span className="font-medium text-foreground">{customer.name}</span></>
+                  : "Manage your workspaces and create new ones"
+                }
+              </p>
 
-                {/* Customer card */}
-                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4 mb-3">
-                  <div className="flex items-center gap-3 mb-3">
+              <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
+                {/* Customer header (if linked) */}
+                {customer && (
+                  <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border-subtle">
                     <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                      <svg className="w-4.5 h-4.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                       </svg>
                     </div>
@@ -232,13 +265,15 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
                       </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Workspace list */}
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/70 px-1 mb-1.5">
-                      Workspaces ({siblingWorkspaces.length})
-                    </div>
-                    {siblingWorkspaces.map((ws) => (
+                {/* Workspace list */}
+                <div className="space-y-1">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/70 px-1 mb-1.5">
+                    {customer ? `Workspaces (${siblingWorkspaces.length})` : "Current Workspace"}
+                  </div>
+                  {siblingWorkspaces.length > 0 ? (
+                    siblingWorkspaces.map((ws) => (
                       <div
                         key={ws.id}
                         className={cn(
@@ -265,14 +300,28 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    /* Show current org as the only workspace when no siblings */
+                    <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-accent/8 border border-accent/15">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="truncate text-[13px] font-medium">{org?.name || "Organization"}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
+                        <span className="text-[10px] text-accent font-medium">Current</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Create new workspace */}
+                {/* Create new workspace */}
+                {customer && !showCreateWorkspace && (
                   <button
-                    onClick={() => {
-                      showToast("To create a new workspace, use the org switcher at the bottom of the sidebar or contact your admin.");
-                    }}
+                    onClick={() => setShowCreateWorkspace(true)}
                     className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -280,9 +329,43 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
                     </svg>
                     <span className="font-medium">Create Workspace</span>
                   </button>
-                </div>
+                )}
+
+                {/* Inline create workspace form */}
+                {showCreateWorkspace && customer && (
+                  <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
+                    <div className="text-[12px] font-medium">New workspace under {customer.name}</div>
+                    <input
+                      type="text"
+                      value={createName}
+                      onChange={(e) => setCreateName(e.target.value)}
+                      placeholder={`e.g. ${customer.name} 6.x`}
+                      className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-sm placeholder:text-muted/40 focus:outline-none focus:ring-1 focus:ring-accent"
+                      autoFocus
+                      onKeyDown={(e) => { if (e.key === "Enter") handleCreateWorkspace(); }}
+                    />
+                    {createError && <p className="text-[11px] text-destructive">{createError}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setShowCreateWorkspace(false); setCreateName(""); setCreateError(""); }}
+                        className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCreateWorkspace}
+                        disabled={creating || !createName.trim()}
+                        className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {creating ? "Creating…" : "Create"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 
