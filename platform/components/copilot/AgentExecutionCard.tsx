@@ -7,7 +7,7 @@
  * Shown in the right-side artifacts panel when an agent completes execution.
  */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { AgentStep } from "./CopilotChat";
 
 interface AgentExecutionData {
@@ -35,13 +35,46 @@ interface AgentExecutionData {
 interface AgentExecutionCardProps {
   data: AgentExecutionData;
   className?: string;
+  onResume?: (taskId: string) => void;
 }
 
-export function AgentExecutionCard({ data, className = "" }: AgentExecutionCardProps) {
+export function AgentExecutionCard({ data, className = "", onResume }: AgentExecutionCardProps) {
   const [activeTab, setActiveTab] = useState<"summary" | "steps" | "actions">("summary");
+  const [resuming, setResuming] = useState(false);
+  const [resumeError, setResumeError] = useState<string | null>(null);
 
   const completedSteps = data.steps.filter((s) => s.status === "completed").length;
   const failedSteps = data.steps.filter((s) => s.status === "failed").length;
+
+  const canResume = data.status === "failed";
+
+  const handleResume = useCallback(async () => {
+    if (!canResume || resuming) return;
+    setResuming(true);
+    setResumeError(null);
+
+    try {
+      if (onResume) {
+        onResume(data.taskId);
+        return;
+      }
+
+      const res = await fetch("/api/agents/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: data.taskId }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Resume failed" }));
+        setResumeError(err.error || "Resume failed");
+      }
+    } catch {
+      setResumeError("Network error — could not resume");
+    } finally {
+      setResuming(false);
+    }
+  }, [canResume, resuming, data.taskId, onResume]);
 
   return (
     <div className={`rounded-xl border border-border/50 bg-card overflow-hidden ${className}`}>
@@ -68,8 +101,24 @@ export function AgentExecutionCard({ data, className = "" }: AgentExecutionCardP
           }`}>
             {data.status}
           </span>
+          {canResume && (
+            <button
+              onClick={handleResume}
+              disabled={resuming}
+              className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
+            >
+              {resuming ? "Resuming..." : "Resume"}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Resume error */}
+      {resumeError && (
+        <div className="px-4 py-1.5 text-[10px] text-danger bg-danger/5 border-b border-border/20">
+          {resumeError}
+        </div>
+      )}
 
       {/* Tab bar */}
       <div className="flex border-b border-border/20">

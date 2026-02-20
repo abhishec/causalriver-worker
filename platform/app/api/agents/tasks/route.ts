@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     const organizationId = params.get("organizationId");
     const taskId = params.get("taskId");
     const status = params.get("status");
+    const includeSteps = params.get("includeSteps") === "true";
     const limit = Math.min(parseInt(params.get("limit") || "20"), 50);
 
     if (!organizationId) {
@@ -134,13 +135,36 @@ export async function GET(request: NextRequest) {
       .eq("organization_id", organizationId)
       .eq("status", "running");
 
+    // If includeSteps is requested, load steps for each task
+    let tasksWithSteps = tasks || [];
+    if (includeSteps && tasksWithSteps.length > 0) {
+      const taskIds = tasksWithSteps.map((t: any) => t.id);
+      const { data: allSteps } = await service
+        .from("brain_agent_steps")
+        .select("*")
+        .in("task_id", taskIds)
+        .order("step_number", { ascending: true });
+
+      const stepsByTask = new Map<string, any[]>();
+      for (const step of allSteps || []) {
+        const existing = stepsByTask.get(step.task_id) || [];
+        existing.push(step);
+        stepsByTask.set(step.task_id, existing);
+      }
+
+      tasksWithSteps = tasksWithSteps.map((t: any) => ({
+        ...t,
+        steps: stepsByTask.get(t.id) || [],
+      }));
+    }
+
     return NextResponse.json({
       success: true,
-      tasks: tasks || [],
+      tasks: tasksWithSteps,
       counts: {
         awaiting: awaitingCount || 0,
         running: runningCount || 0,
-        total: tasks?.length || 0,
+        total: tasksWithSteps.length,
       },
     });
   } catch (error: unknown) {

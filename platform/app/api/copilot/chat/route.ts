@@ -778,6 +778,615 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ══════════════════════════════════════════════════════════════════════
+    // AGENT EXECUTION MODE — "Start an OpenClaw agent to fix JIRA-1234"
+    // When the user requests an agent, we short-circuit into agent mode:
+    //   1. Detect agent intent via regex
+    //   2. Create brain_agent_tasks record
+    //   3. Stream agent steps live via SSE (agentStep, agentStatus, progressiveArtifact)
+    //   4. Run full L1-L30 cognitive cycle with step-by-step streaming
+    //   5. Emit agent-execution artifact to right panel
+    // ══════════════════════════════════════════════════════════════════════
+
+    const agentIntent = detectAgentIntent(message);
+
+    if (agentIntent) {
+      // ── OpenClaw Gateway Fast-Path ────────────────────────────────
+      // If this org has a connected OpenClaw gateway, route the agent
+      // request through the daemon instead of running locally. The daemon
+      // has direct codebase access, runs tools locally, and the
+      // reinforcement loop operates there.
+      const openClawConn = (await import("@/lib/openclaw/gateway-client")).gatewayManager.getConnection(orgId);
+
+      if (openClawConn && openClawConn.isConnected()) {
+        const { triggerOpenClawAgent } = await import("@/lib/openclaw/gateway-client");
+        const {
+          stream: clawSSEStream, send: clawSend, sendText: clawSendText,
+          sendError: clawSendError, close: clawClose,
+          sendAgentStep: clawSendAgentStep, sendAgentStatus: clawSendAgentStatus,
+        } = createSSEStream();
+
+        // Fire-and-stream: relay OpenClaw daemon events via SSE
+        (async () => {
+          try {
+            clawSendAgentStatus({
+              taskId: "openclaw",
+              status: "starting",
+              agentType: agentIntent.agentType,
+              message: `Routing to OpenClaw daemon (${agentIntent.agentType})...`,
+            });
+
+            const agentStream = triggerOpenClawAgent({
+              orgId,
+              message: message.trim(),
+              sessionKey: `copilot-${orgId}-${Date.now()}`,
+              agentId: agentIntent.agentType,
+            });
+
+            for await (const event of agentStream) {
+              if (event === "[DONE]") {
+                break;
+              }
+              // Forward the event type-by-type to our SSE stream
+              if ("text" in event) {
+                clawSendText(event.text);
+              } else if ("agentStep" in event) {
+                clawSendAgentStep(event.agentStep);
+              } else if ("agentStatus" in event) {
+                const validStatuses = ["starting", "running", "completed", "failed", "awaiting_approval"] as const;
+                const rawStatus = event.agentStatus?.status ?? "running";
+                const mappedStatus = validStatuses.includes(rawStatus as typeof validStatuses[number])
+                  ? (rawStatus as typeof validStatuses[number])
+                  : "running";
+                clawSendAgentStatus({
+                  ...event.agentStatus,
+                  status: mappedStatus,
+                });
+              } else if ("error" in event) {
+                clawSendError(event.error);
+              }
+            }
+          } catch (err) {
+            clawSendError(err instanceof Error ? err.message : "OpenClaw agent stream failed");
+          } finally {
+            clawClose();
+          }
+        })();
+
+        return new Response(clawSSEStream, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
+          },
+        });
+      }
+
+      // ── Local Agent Execution (no OpenClaw gateway) ───────────────
+      const {
+        stream: agentSSEStream, send: agentSend, sendText: agentSendText,
+        sendError: agentSendError, close: agentClose,
+        sendAgentStep, sendProgressiveArtifact, sendAgentStatus,
+      } = createSSEStream();
+
+      // Fire-and-stream: agent runs async while SSE pushes events
+      (async () => {
+        const agentStartTime = Date.now();
+        let taskId = "";
+
+        try {
+          // ── 1. Create brain_agent_tasks record ──────────────────
+          const { data: agentTask, error: taskErr } = await service
+            .from("brain_agent_tasks")
+            .insert({
+              organization_id: orgId,
+              created_by: user.id,
+              prompt: message.trim(),
+              agent_type: agentIntent.agentType,
+              auto_execute_threshold: 0.8,
+              status: "running",
+              started_at: new Date().toISOString(),
+            })
+            .select("id")
+            .single();
+
+          if (taskErr || !agentTask) {
+            agentSendError("Failed to create agent task");
+            agentClose();
+            return;
+          }
+
+          taskId = agentTask.id;
+
+          sendAgentStatus({
+            taskId,
+            status: "starting",
+            agentType: agentIntent.agentType,
+            message: `Starting ${agentIntent.agentType} agent...`,
+          });
+
+          // ── 2. Brain Pre-Flight Intelligence (context gathering) ──
+          sendAgentStep({
+            stepNumber: 1,
+            type: "querying",
+            title: "Gathering Brain intelligence...",
+            content: `Loading causal graph, patterns, and domain context for ${agentIntent.extractedParams.jiraId || agentIntent.extractedParams.description || "task"}`,
+            status: "started",
+          });
+
+          // Helper: save durable checkpoint for resumability (Week 4)
+          const saveCheckpoint = async (stepNum: number, type: string, state: Record<string, unknown>) => {
+            await service.from("agent_checkpoints").upsert({
+              task_id: taskId,
+              step_number: stepNum,
+              checkpoint_type: type,
+              agent_state: state,
+            }, { onConflict: "task_id,step_number" }).then(() => {}, () => {});
+          };
+
+          // Record step in DB
+          await service.from("brain_agent_steps").insert({
+            task_id: taskId,
+            step_number: 1,
+            step_type: "query",
+            title: "Brain context loading",
+            content: `Loaded ${causalEdges.length} causal edges, ${patterns.length} patterns, ${rules.length} rules`,
+            started_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
+            duration_ms: Date.now() - agentStartTime,
+          });
+
+          // Checkpoint after brain context loaded
+          await saveCheckpoint(1, "iteration", {
+            phase: "brain_context_loaded",
+            causalEdgesCount: causalEdges.length,
+            patternsCount: patterns.length,
+            rulesCount: rules.length,
+            agentType: agentIntent.agentType,
+            params: agentIntent.extractedParams,
+          });
+
+          sendAgentStep({
+            stepNumber: 1,
+            type: "querying",
+            title: "Brain intelligence loaded",
+            content: `${causalEdges.length} causal edges, ${patterns.length} patterns, ${rules.length} business rules`,
+            durationMs: Date.now() - agentStartTime,
+            status: "completed",
+          });
+
+          // If Jira context requested, try to load it
+          if (agentIntent.extractedParams.jiraId) {
+            sendAgentStep({
+              stepNumber: 2,
+              type: "querying",
+              title: `Reading ${agentIntent.extractedParams.jiraId}...`,
+              toolName: "brain_jira_context",
+              status: "started",
+            });
+
+            // Attempt Jira context via org connector
+            let jiraContext: string | null = null;
+            try {
+              const { data: jiraConnector } = await service
+                .from("org_connectors")
+                .select("config")
+                .eq("organization_id", orgId)
+                .eq("connector_type", "jira")
+                .eq("status", "active")
+                .maybeSingle();
+
+              if (jiraConnector?.config) {
+                const jConf = jiraConnector.config as Record<string, any>;
+                const jiraBaseUrl = jConf.baseUrl || jConf.jira_base_url;
+                const jiraEmail = jConf.email || jConf.jira_email;
+                const jiraToken = jConf.apiToken || jConf.jira_api_token;
+
+                if (jiraBaseUrl && jiraEmail && jiraToken) {
+                  const issueRes = await fetch(
+                    `${jiraBaseUrl}/rest/api/3/issue/${agentIntent.extractedParams.jiraId}`,
+                    {
+                      headers: {
+                        Authorization: `Basic ${Buffer.from(`${jiraEmail}:${jiraToken}`).toString("base64")}`,
+                        Accept: "application/json",
+                      },
+                    }
+                  );
+                  if (issueRes.ok) {
+                    const issue = await issueRes.json();
+                    jiraContext = JSON.stringify({
+                      key: issue.key,
+                      summary: issue.fields?.summary,
+                      status: issue.fields?.status?.name,
+                      assignee: issue.fields?.assignee?.displayName,
+                      priority: issue.fields?.priority?.name,
+                      description: typeof issue.fields?.description === "string"
+                        ? issue.fields.description.slice(0, 500)
+                        : issue.fields?.description?.content?.[0]?.content?.[0]?.text?.slice(0, 500) || "",
+                    });
+                  }
+                }
+              }
+            } catch {
+              // Non-fatal: Jira context not available
+            }
+
+            sendAgentStep({
+              stepNumber: 2,
+              type: "querying",
+              title: jiraContext
+                ? `${agentIntent.extractedParams.jiraId} context loaded`
+                : `${agentIntent.extractedParams.jiraId} — no Jira connector`,
+              toolName: "brain_jira_context",
+              content: jiraContext || "Jira connector not configured. Proceeding with user description.",
+              durationMs: Date.now() - agentStartTime,
+              status: "completed",
+            });
+
+            if (jiraContext) {
+              sendProgressiveArtifact({
+                id: `jira-${taskId.slice(0, 8)}`,
+                type: "jira-context",
+                title: `${agentIntent.extractedParams.jiraId} Context`,
+                content: jiraContext,
+                isPartial: false,
+                service: "core",
+              });
+            }
+
+            await service.from("brain_agent_steps").insert({
+              task_id: taskId,
+              step_number: 2,
+              step_type: "query",
+              title: `Jira: ${agentIntent.extractedParams.jiraId}`,
+              content: jiraContext || "Jira connector not available",
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+              duration_ms: Date.now() - agentStartTime,
+            });
+
+            // Checkpoint after Jira context
+            await saveCheckpoint(2, "iteration", {
+              phase: "jira_context_loaded",
+              jiraId: agentIntent.extractedParams.jiraId,
+              hasJiraContext: !!jiraContext,
+            });
+          }
+
+          // ── 2.5. Load episodic memories for agent continuity (Week 5) ──
+          let episodicContext = "";
+          try {
+            const { data: memories } = await service
+              .from("agent_episodic_memory")
+              .select("content, episode_type, importance, created_at")
+              .eq("organization_id", orgId)
+              .eq("agent_type", agentIntent.agentType)
+              .order("importance", { ascending: false })
+              .limit(5);
+
+            if (memories && memories.length > 0) {
+              // Bump access count for loaded memories
+              const memoryIds = memories.map((m: any) => m.id).filter(Boolean);
+              if (memoryIds.length > 0) {
+                await service.rpc("increment_access_count", { memory_ids: memoryIds }).then(() => {}, () => {});
+              }
+
+              episodicContext = "\n\n[Agent Memory — Recent Episodes]\n" +
+                memories.map((m: any) =>
+                  `- [${m.episode_type}] ${m.content.slice(0, 200)}`
+                ).join("\n");
+            }
+          } catch {
+            // Non-fatal: episodic memory not available
+          }
+
+          // ── 3. Run Full L1-L30 Brain Agent Runtime ───────────────
+          sendAgentStatus({ taskId, status: "running", agentType: agentIntent.agentType });
+
+          const brainStepStart = Date.now();
+          sendAgentStep({
+            stepNumber: 3,
+            type: "thinking",
+            title: "Running L1-L30 Brain cognitive cycle...",
+            content: `Full 30-layer brain stack: cognitive (L3-L15) + deep (L16-L30) + neural cortex + RL feedback${episodicContext ? ` + ${episodicContext.split("\n").length - 2} episodic memories` : ""}`,
+            status: "started",
+          });
+
+          const {
+            createCognitiveStack: createCS,
+            createDeepLayers: createDL,
+            createDeepPipeline: createDP,
+            createNeuralCortexController: createNCC,
+            createBrainAgentRuntime: createBAR,
+            registerAllBrainAgents: regAll,
+            createDomainTaxonomy: createDT,
+            createCrossSystemEntityGraph: createCSEG,
+          } = await import("@nexus-ai/memory-stack");
+
+          const dt = createDT();
+          const eg = createCSEG();
+          const cs = createCS({ organizationId: orgId, anthropicApiKey: anthropicApiKey! });
+          const dl = createDL({ organizationId: orgId, domainTaxonomy: dt, entityGraph: eg });
+          const dp = createDP({ organizationId: orgId, supabase: service, cognitiveStack: cs, deepLayers: dl, domainTaxonomy: dt, entityGraph: eg });
+          const cortex = createNCC({ organizationId: orgId, supabase: service, pipeline: dp, cognitiveStack: cs, deepLayers: dl });
+          const closedLoop = cortex.getClosedLoopEngine();
+
+          const brainRuntime = createBAR({
+            supabase: service,
+            organizationId: orgId,
+            cortex,
+            closedLoop: closedLoop ?? undefined,
+            defaultAnthropicApiKey: anthropicApiKey!,
+            verbose: false,
+          });
+
+          regAll(brainRuntime);
+
+          // Map agent type to brain agent ID
+          const AGENT_TYPE_MAP: Record<string, string> = {
+            "openclaw": "codebase-mapper",
+            "code-review": "code-reviewer",
+            "diagnose": "incident-diagnoser",
+            "incident-diagnosis": "incident-diagnoser",
+            "build": "feature-builder",
+            "feature-build": "feature-builder",
+            "test": "test-case-generator",
+            "tdd": "tdd-generator",
+            "analyze": "impact-analyzer",
+            "impact-analysis": "impact-analyzer",
+            "general": "codebase-mapper",
+          };
+          const brainAgentId = AGENT_TYPE_MAP[agentIntent.agentType] || "codebase-mapper";
+
+          // Compose prompt with episodic context if available
+          const agentPrompt = episodicContext
+            ? `${message.trim()}${episodicContext}`
+            : message.trim();
+
+          const brainResult = await brainRuntime.execute({
+            agentId: brainAgentId,
+            input: {
+              prompt: agentPrompt,
+              agentType: agentIntent.agentType,
+              taskId,
+              ...(agentIntent.extractedParams.jiraId ? { jiraId: agentIntent.extractedParams.jiraId } : {}),
+              ...(agentIntent.extractedParams.repo ? { repo: agentIntent.extractedParams.repo } : {}),
+              ...(agentIntent.extractedParams.branch ? { branch: agentIntent.extractedParams.branch } : {}),
+            },
+            anthropicApiKey: anthropicApiKey!,
+            confidenceThreshold: 0.8,
+            userId: user.id,
+            userQuery: message.trim(),
+          });
+
+          const brainStepDuration = Date.now() - brainStepStart;
+
+          sendAgentStep({
+            stepNumber: 3,
+            type: "thinking",
+            title: `Brain cycle complete — ${(brainResult.confidence * 100).toFixed(0)}% confidence`,
+            content: `Model: ${brainResult.metrics.model}, Tokens: ${brainResult.metrics.tokensUsed}, Brain: ${brainResult.metrics.brainCycleDurationMs}ms, Claude: ${brainResult.metrics.claudeCallDurationMs}ms`,
+            durationMs: brainStepDuration,
+            status: "completed",
+          });
+
+          await service.from("brain_agent_steps").insert({
+            task_id: taskId,
+            step_number: 3,
+            step_type: "reasoning",
+            title: "L1-L30 Brain cognitive cycle",
+            content: `Confidence: ${(brainResult.confidence * 100).toFixed(0)}%, Model: ${brainResult.metrics.model}`,
+            started_at: new Date(brainStepStart).toISOString(),
+            completed_at: new Date().toISOString(),
+            duration_ms: brainStepDuration,
+          });
+
+          // Checkpoint after brain runtime (pre-action — reversible point before emitting results)
+          await saveCheckpoint(3, "post_action", {
+            phase: "brain_runtime_complete",
+            confidence: brainResult.confidence,
+            model: brainResult.metrics.model,
+            tokensUsed: brainResult.metrics.tokensUsed,
+            responseSummary: (brainResult.agentOutput.rawResponse || "").toString().slice(0, 200),
+          });
+
+          // ── 4. Extract and stream results ──────────────────────
+          const responseText = brainResult.agentOutput.rawResponse
+            ? String(brainResult.agentOutput.rawResponse)
+            : JSON.stringify(brainResult.agentOutput, null, 2);
+
+          sendAgentStep({
+            stepNumber: 4,
+            type: "acting",
+            title: "Generating results and artifacts...",
+            status: "started",
+          });
+
+          // Extract code blocks as progressive artifacts
+          const codeBlockRegex = /```(\w+)?\s*\n([\s\S]*?)```/g;
+          let codeMatch;
+          let artIdx = 0;
+          while ((codeMatch = codeBlockRegex.exec(responseText)) !== null) {
+            const lang = codeMatch[1] || "text";
+            const code = codeMatch[2].trim();
+            if (code.split("\n").length >= 2) {
+              artIdx++;
+              sendProgressiveArtifact({
+                id: `code-${taskId.slice(0, 8)}-${artIdx}`,
+                type: "code",
+                title: `Agent Output ${artIdx} (${lang})`,
+                content: code,
+                isPartial: false,
+                service: "core",
+              });
+            }
+          }
+
+          sendAgentStep({
+            stepNumber: 4,
+            type: "acting",
+            title: `${artIdx + 1} artifact(s) generated`,
+            durationMs: Date.now() - agentStartTime,
+            status: "completed",
+          });
+
+          // ── 5. Update task to completed/awaiting_approval ──────
+          const finalStatus = brainResult.status === "auto-executed" ? "completed" : "awaiting_approval";
+
+          const agentArtifacts = [
+            {
+              id: `agent_${taskId.slice(0, 8)}_analysis`,
+              type: "analysis",
+              title: `Agent Analysis: ${message.slice(0, 50)}${message.length > 50 ? "..." : ""}`,
+              language: "markdown",
+              content: responseText,
+              createdAt: Date.now(),
+            },
+          ];
+
+          await service
+            .from("brain_agent_tasks")
+            .update({
+              status: finalStatus,
+              confidence_score: brainResult.confidence,
+              result_summary: responseText.slice(0, 500),
+              result_artifacts: agentArtifacts,
+              result_metadata: {
+                tokensUsed: brainResult.metrics.tokensUsed,
+                durationMs: Date.now() - agentStartTime,
+                model: brainResult.metrics.model,
+                autoExecuted: brainResult.status === "auto-executed",
+                brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
+                claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
+                compositeConfidence: brainResult.confidence,
+                agentIntent: agentIntent,
+              },
+              completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", taskId);
+
+          // ── 6. Stream final agent-execution artifact ────────────
+          const allSteps = [
+            { stepNumber: 1, type: "querying" as const, title: "Brain intelligence loaded", status: "completed" as const, durationMs: Date.now() - agentStartTime },
+            ...(agentIntent.extractedParams.jiraId ? [{ stepNumber: 2, type: "querying" as const, title: `${agentIntent.extractedParams.jiraId} context`, toolName: "brain_jira_context", status: "completed" as const }] : []),
+            { stepNumber: 3, type: "thinking" as const, title: `Brain cycle — ${(brainResult.confidence * 100).toFixed(0)}%`, status: "completed" as const, durationMs: brainStepDuration },
+            { stepNumber: 4, type: "acting" as const, title: `${artIdx + 1} artifacts generated`, status: "completed" as const },
+          ];
+
+          // Emit agent-execution artifact for right panel
+          agentSend(JSON.stringify({
+            agentExecutionArtifact: {
+              id: `agent-exec-${taskId.slice(0, 8)}`,
+              type: "agent-execution",
+              title: `${agentIntent.agentType} Agent Execution`,
+              service: "agent",
+              rawData: {
+                taskId,
+                agentType: agentIntent.agentType,
+                status: finalStatus,
+                steps: allSteps,
+                summary: responseText.slice(0, 300),
+                artifacts: agentArtifacts.map(a => ({ id: a.id, type: a.type, title: a.title })),
+                timing: {
+                  totalMs: Date.now() - agentStartTime,
+                  stepCount: allSteps.length,
+                },
+              },
+            },
+          }));
+
+          sendAgentStatus({
+            taskId,
+            status: finalStatus === "completed" ? "completed" : "awaiting_approval",
+            agentType: agentIntent.agentType,
+            message: finalStatus === "completed"
+              ? `Agent completed with ${(brainResult.confidence * 100).toFixed(0)}% confidence.`
+              : `Agent needs approval (${(brainResult.confidence * 100).toFixed(0)}% confidence).`,
+          });
+
+          // ── 7. Stream the LLM response text as normal chat ──────
+          // This makes the agent's analysis appear as readable chat text
+          const words = responseText.split(" ");
+          for (let i = 0; i < words.length; i++) {
+            agentSendText(words[i] + (i < words.length - 1 ? " " : ""));
+            // Micro-delay for streaming effect (~50 words at a time)
+            if (i % 50 === 49) {
+              await new Promise(r => setTimeout(r, 10));
+            }
+          }
+
+          // ── 8. Emit learning signal ────────────────────────────
+          await service.from("cross_domain_signals").insert({
+            organization_id: orgId,
+            source_domain: "brain.agents",
+            signal_type: `copilot_agent_${agentIntent.agentType}_completed`,
+            signal_value: brainResult.confidence,
+            entity_type: "brain_agent_task",
+            entity_id: taskId,
+            signal_metadata: {
+              prompt: message.slice(0, 200),
+              agentType: agentIntent.agentType,
+              autoExecuted: brainResult.status === "auto-executed",
+              durationMs: Date.now() - agentStartTime,
+              userId: user.id,
+            },
+          }).then(() => {}, () => { /* non-blocking */ });
+
+          // ── 9. Store episodic memory for agent continuity (Week 5) ──
+          const runSummary = `Task: ${message.slice(0, 200)}. ` +
+            `Outcome: ${finalStatus} (${(brainResult.confidence * 100).toFixed(0)}% confidence). ` +
+            `Key findings: ${responseText.slice(0, 300)}`;
+
+          await service.from("agent_episodic_memory").insert({
+            organization_id: orgId,
+            agent_type: agentIntent.agentType,
+            episode_type: "run_summary",
+            content: runSummary,
+            importance: Math.min(0.5 + brainResult.confidence * 0.3, 0.9),
+            metadata: {
+              taskId,
+              prompt: message.slice(0, 200),
+              confidence: brainResult.confidence,
+              completedAt: new Date().toISOString(),
+            },
+          }).then(() => {}, () => { /* non-blocking */ });
+
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : "Agent execution failed";
+          console.error("[AgentMode] Error:", errMsg);
+
+          if (taskId) {
+            sendAgentStatus({ taskId, status: "failed", message: errMsg });
+            await service
+              .from("brain_agent_tasks")
+              .update({
+                status: "failed",
+                error_message: errMsg,
+                completed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", taskId)
+              .then(() => {}, () => {});
+          }
+
+          agentSendError(`Agent failed: ${errMsg}`);
+        }
+
+        agentClose();
+      })();
+
+      return new Response(agentSSEStream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
     // ── Domain Action Engine — give brain HANDS (Motor Cortex) ─────────
     // Routes intent to the RIGHT execution module (forecaster, simulator,
     // explainer) and produces structured artifacts with REAL computed data.
@@ -1253,10 +1862,38 @@ RULES FOR CORRECTIONS:
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    const { stream, send, sendText, sendError, close } = createSSEStream();
+    const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
 
     (async () => {
       try {
+        // ── Proactive Insights: "While you were away" (Week 6) ──
+        // On first message of session, surface recent insights from ai_memory
+        const isFirstMessage = !conversationHistory || conversationHistory.length === 0;
+        if (isFirstMessage) {
+          try {
+            const { data: recentInsights } = await service
+              .from("ai_memory")
+              .select("content, domain, importance")
+              .eq("organization_id", orgId)
+              .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+              .in("memory_type", ["insight", "alert", "pattern"])
+              .order("importance", { ascending: false })
+              .limit(5);
+
+            if (recentInsights && recentInsights.length > 0) {
+              sendProactiveInsights(
+                recentInsights.map((m: any) => ({
+                  domain: m.domain || "brain",
+                  content: (m.content || "").slice(0, 200),
+                  importance: m.importance || 0.5,
+                }))
+              );
+            }
+          } catch {
+            // Non-fatal: proactive insights are best-effort
+          }
+        }
+
         // Send structured artifact BEFORE LLM text stream
         // Frontend can render tables/charts from this while LLM narrates
         if (actionArtifact) {
@@ -1398,6 +2035,32 @@ RULES FOR CORRECTIONS:
         ]).catch(() => {
           // Non-blocking
         });
+
+        // ── Notify OpenClaw gateway of conversation completion ──────
+        // This lets the Signal Harvester process the conversation for
+        // causal signals, prediction outcomes, and implicit feedback.
+        try {
+          const { gatewayManager: gm } = await import("@/lib/openclaw/gateway-client");
+          const gwConn = gm.getConnection(orgId);
+          if (gwConn && gwConn.isConnected()) {
+            gwConn.send("nexusbrain.ingest", {
+              signals: [{
+                type: "conversation_completed",
+                source: "copilot",
+                orgId,
+                userId: user.id,
+                query: message.trim().slice(0, 500),
+                domain: detectedIntent || "general",
+                causalEdgesUsed: causalEdges.length,
+                patternsUsed: patterns.length,
+                brainAugmented: !!brainContext,
+                timestamp: new Date().toISOString(),
+              }],
+            }).catch(() => {}); // fire-and-forget
+          }
+        } catch {
+          // Non-blocking: gateway not available
+        }
 
         close();
       } catch (err) {
@@ -1801,3 +2464,108 @@ function detectAccountingRoute(
 
 // NOTE: classifyAccountForCopilot() has been removed — accounting analysis
 // is now delegated to the AAS domain executor via executeAccountingAgent().
+
+// ============================================================================
+// AGENT INTENT DETECTION — "Start an OpenClaw agent to fix JIRA-1234"
+// ============================================================================
+
+/**
+ * Detect if user wants to launch an agent via the Copilot.
+ *
+ * Trigger phrases:
+ *   - "start an openclaw agent to ..."
+ *   - "use agent/claw to ..."
+ *   - "run an agent to fix JIRA-1234"
+ *   - "create an openclaw agent and execute ..."
+ *   - "openclaw: implement this fix"
+ *   - "start an agent to review PR #123"
+ *   - "launch agent for JIRA-1234"
+ *
+ * Also extracts:
+ *   - Jira ID (JIRA-1234, PROJ-567)
+ *   - Repo name
+ *   - Branch name
+ *   - Agent type (code-review, diagnose, build, test, analyze)
+ */
+function detectAgentIntent(
+  message: string
+): {
+  agentType: string;
+  extractedParams: {
+    jiraId?: string;
+    repo?: string;
+    branch?: string;
+    prNumber?: number;
+    description?: string;
+  };
+} | null {
+  const lower = message.toLowerCase();
+
+  // ── Primary trigger: explicit agent invocation ────────────────
+  const agentTriggers = [
+    /(?:start|launch|run|create|use|spin\s+up)\s+(?:an?\s+)?(?:openclaw|agent|claw)\b/i,
+    /(?:openclaw|agent|claw)\s*[:\-—]\s*/i,
+    /(?:openclaw|agent|claw)\s+(?:to|for|and)\s+/i,
+    /(?:start|launch|run)\s+(?:an?\s+)?(?:brain\s+)?agent\b/i,
+    /create\s+(?:an?\s+)?(?:openclaw|agent|claw)\s+(?:agent\s+)?and\s+(?:execute|run)/i,
+  ];
+
+  const isAgentTriggered = agentTriggers.some(rx => rx.test(message));
+
+  if (!isAgentTriggered) return null;
+
+  // ── Extract parameters ────────────────────────────────────────
+
+  // Jira ID: PROJ-123, JIRA-456, NB-789, etc.
+  const jiraMatch = message.match(/\b([A-Z][A-Z0-9]+-\d+)\b/);
+  const jiraId = jiraMatch?.[1];
+
+  // PR number: PR #123, pull request #456
+  const prMatch = message.match(/(?:pr|pull\s+request)\s*#?(\d+)/i);
+  const prNumber = prMatch ? parseInt(prMatch[1]) : undefined;
+
+  // Repository: "on repo-name", "in my-repo", "repo product-amls"
+  const repoMatch = message.match(/(?:on|in|repo|repository)\s+([a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?)/i);
+  const repo = repoMatch?.[1];
+
+  // Branch: "branch release/6.3.4", "on branch main"
+  const branchMatch = message.match(/branch\s+([a-zA-Z0-9_./-]+)/i);
+  const branch = branchMatch?.[1];
+
+  // ── Detect agent type from task description ──────────────────
+  let agentType = "general";
+
+  if (/review\s+(?:pr|pull|code|diff)|pr\s+review|code\s+review/i.test(lower)) {
+    agentType = "code-review";
+  } else if (/(?:fix|implement|build|code|develop|create\s+(?:feature|fix))/i.test(lower)) {
+    agentType = "build";
+  } else if (/(?:diagnose|debug|root\s+cause|incident|why\s+is)/i.test(lower)) {
+    agentType = "diagnose";
+  } else if (/(?:test|write\s+tests?|generate\s+tests?|tdd)/i.test(lower)) {
+    agentType = "test";
+  } else if (/(?:analyze|impact|blast\s+radius|assess)/i.test(lower)) {
+    agentType = "analyze";
+  } else if (/(?:upgrade|dependency|dependencies|outdated)/i.test(lower)) {
+    agentType = "dependency-upgrade";
+  } else if (/(?:performance|profil|slow|latency)/i.test(lower)) {
+    agentType = "performance";
+  } else if (/(?:balance\s+sheet|p\s*&\s*l|financial\s+statement|accounting|reconcil|audit|tax|gst)/i.test(lower)) {
+    agentType = "analyze"; // AAAS tasks route through general analysis
+  }
+
+  // If openclaw is explicitly mentioned, tag it
+  if (/openclaw|claw/i.test(lower)) {
+    agentType = "openclaw";
+  }
+
+  return {
+    agentType,
+    extractedParams: {
+      jiraId,
+      repo,
+      branch,
+      prNumber,
+      description: message,
+    },
+  };
+}

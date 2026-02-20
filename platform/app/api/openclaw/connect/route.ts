@@ -1,0 +1,189 @@
+/**
+ * OpenClaw Connect API — Register a new gateway connection
+ * ==========================================================
+ *
+ * POST /api/openclaw/connect
+ *   Registers (or updates) an OpenClaw Gateway for the current org.
+ *   Connects via WebSocket to the gateway and returns the live status.
+ *
+ *   Auth: Supabase session + org membership (same pattern as copilot/chat)
+ *
+ *   Body: {
+ *     gatewayUrl: string,       // e.g. "wss://openclaw.mycompany.dev:18789"
+ *     authToken: string,        // Bearer token for gateway auth
+ *     organizationId?: string,  // defaults to CORE_ORG_ID
+ *     webhookUrl?: string,      // optional callback URL for async events
+ *     webhookToken?: string,    // optional token for webhook auth
+ *   }
+ *
+ *   Response: { success: true, status: GatewayStatus }
+ */
+
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { gatewayManager } from "@/lib/openclaw/gateway-client";
+import type { GatewayConfig } from "@/lib/openclaw/gateway-client";
+
+export const dynamic = "force-dynamic";
+
+export async function POST(request: NextRequest) {
+  try {
+    // ── Auth ──────────────────────────────────────────────────────
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Parse body ───────────────────────────────────────────────
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
+
+    const {
+      gatewayUrl,
+      authToken,
+      organizationId,
+      webhookUrl,
+      webhookToken,
+    } = body as {
+      gatewayUrl?: string;
+      authToken?: string;
+      organizationId?: string;
+      webhookUrl?: string;
+      webhookToken?: string;
+    };
+
+    if (!gatewayUrl || typeof gatewayUrl !== "string") {
+      return NextResponse.json(
+        { error: "gatewayUrl is required (string)" },
+        { status: 400 }
+      );
+    }
+
+    if (!authToken || typeof authToken !== "string") {
+      return NextResponse.json(
+        { error: "authToken is required (string)" },
+        { status: 400 }
+      );
+    }
+
+    // Basic URL validation
+    try {
+      new URL(gatewayUrl);
+    } catch {
+      return NextResponse.json(
+        { error: "gatewayUrl must be a valid URL" },
+        { status: 400 }
+      );
+    }
+
+    const orgId = organizationId || CORE_ORG_ID;
+
+    // ── Validate membership ──────────────────────────────────────
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id, role, is_platform_admin")
+      .eq("user_id", user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    // Platform admins can connect for any org
+    const { data: adminCheck } = !membership
+      ? await supabase
+          .from("org_members")
+          .select("is_platform_admin")
+          .eq("user_id", user.id)
+          .eq("is_platform_admin", true)
+          .limit(1)
+          .single()
+      : { data: null };
+
+    if (!membership && !adminCheck) {
+      return NextResponse.json(
+        { error: "You are not a member of this organization" },
+        { status: 403 }
+      );
+    }
+
+    // Only owners, admins, and platform admins can register connectors
+    const allowedRoles = ["owner", "admin"];
+    const isAdmin = adminCheck?.is_platform_admin === true;
+    const hasMemberRole = membership && allowedRoles.includes(membership.role as string);
+
+    if (!isAdmin && !hasMemberRole) {
+      return NextResponse.json(
+        { error: "Only organization owners and admins can register connectors" },
+        { status: 403 }
+      );
+    }
+
+    // ── Register gateway ─────────────────────────────────────────
+    const config: GatewayConfig = {
+      gatewayUrl: gatewayUrl.replace(/\/+$/, ""), // strip trailing slashes
+      authToken,
+      orgId,
+      ...(webhookUrl ? { webhookUrl } : {}),
+      ...(webhookToken ? { webhookToken } : {}),
+    };
+
+    const conn = await gatewayManager.registerGateway(orgId, config);
+    const status = conn.getStatus();
+
+    // ── Persist in org_connectors (fire-and-forget) ───────────────
+    const service = await createServiceClient();
+    service
+      .from("org_connectors")
+      .upsert(
+        {
+          organization_id: orgId,
+          connector_type: "openclaw",
+          status: status.connected ? "active" : "pending",
+          config: {
+            gatewayUrl: config.gatewayUrl,
+            authToken: config.authToken,
+            ...(config.webhookUrl ? { webhookUrl: config.webhookUrl } : {}),
+            ...(config.webhookToken ? { webhookToken: config.webhookToken } : {}),
+          },
+          last_sync_at: status.connected ? new Date().toISOString() : null,
+          error_message: status.connected ? null : (status.error || null),
+        },
+        { onConflict: "organization_id,connector_type" }
+      )
+      .then(() => {}, () => {});
+
+    // ── Log platform event ───────────────────────────────────────
+    service
+      .from("platform_events")
+      .insert({
+        organization_id: orgId,
+        user_id: user.id,
+        event_type: "openclaw_gateway_connected",
+        details: {
+          gatewayUrl: config.gatewayUrl,
+          connected: status.connected,
+          services: status.servicesRunning,
+        },
+      })
+      .then(() => {}, () => {});
+
+    return NextResponse.json({
+      success: true,
+      status,
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal error";
+    console.error("[OpenClaw/Connect] Error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

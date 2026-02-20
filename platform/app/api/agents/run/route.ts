@@ -305,6 +305,27 @@ async function executeAgentWithBrainRuntime(
   await addStep(supabase, taskId, 2, "reasoning", "Brain stack initialized",
     `Cognitive stack (L3-L15), deep layers (L16-L30), neural cortex with RL + closed-loop learning, ${brainRuntime.listAgents().length} brain agents registered.`);
 
+  // ── Step 2.5: Load episodic memories for agent continuity (Week 5) ──
+  let episodicContext = "";
+  try {
+    const { data: memories } = await supabase
+      .from("agent_episodic_memory")
+      .select("content, episode_type, importance, created_at")
+      .eq("organization_id", orgId)
+      .eq("agent_type", agentType)
+      .order("importance", { ascending: false })
+      .limit(5);
+
+    if (memories && memories.length > 0) {
+      episodicContext = "\n\n[Agent Memory — Recent Episodes]\n" +
+        memories.map((m: any) =>
+          `- [${m.episode_type}] ${m.content.slice(0, 200)}`
+        ).join("\n");
+    }
+  } catch {
+    // Non-fatal: episodic memory not available
+  }
+
   // ── Step 3: Resolve the brain agent ID ─────────────────────────
   const brainAgentId = AGENT_TYPE_TO_BRAIN_AGENT[agentType] || "codebase-mapper";
 
@@ -321,10 +342,14 @@ async function executeAgentWithBrainRuntime(
 
   // ── Step 4: Execute through Brain Agent Runtime ────────────────
   // This is THE key call: full L1-L30 cycle → format 30 layers → Claude → confidence gate
+  const agentPrompt = episodicContext
+    ? `${prompt.trim()}${episodicContext}`
+    : prompt.trim();
+
   const brainResult = await brainRuntime.execute({
     agentId: brainAgentId,
     input: {
-      prompt: prompt.trim(),
+      prompt: agentPrompt,
       agentType,
       taskId,
     },
@@ -514,6 +539,26 @@ async function executeAgentWithBrainRuntime(
       fullL1L30Cycle: true,
     },
   });
+
+  // ── Step 8: Store episodic memory for agent continuity (Week 5) ──
+  const runSummary = `Task: ${prompt.slice(0, 200)}. ` +
+    `Outcome: ${isAutoExecuted ? "auto-executed" : "awaiting approval"} ` +
+    `(${(confidence * 100).toFixed(0)}% confidence). ` +
+    `Key findings: ${responseText.slice(0, 300)}`;
+
+  await supabase.from("agent_episodic_memory").insert({
+    organization_id: orgId,
+    agent_type: agentType,
+    episode_type: "run_summary",
+    content: runSummary,
+    importance: Math.min(0.5 + confidence * 0.3, 0.9),
+    metadata: {
+      taskId,
+      prompt: prompt.slice(0, 200),
+      confidence,
+      completedAt: new Date().toISOString(),
+    },
+  }).then(() => {}, () => { /* non-blocking */ });
 }
 
 // ============================================================================

@@ -1128,3 +1128,95 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
     invalidateCache,
   };
 }
+
+// ============================================================================
+// BATCH-SCOPED MESH — Context Caching for Multi-Agent Batch Runs (Week 7)
+// ============================================================================
+//
+// When running 10+ domain agents in a batch, each agent calling assemble()
+// would hit the DB 7+ times × 10 agents = 70+ queries. The batch-scoped mesh
+// caches Layer 1 (universal) context for the ENTIRE batch duration, reducing
+// DB queries from 70+ to ~7 (one set of queries, shared by all agents).
+//
+// Usage:
+//   const batchMesh = createBatchScopedMesh(config);
+//   for (const domain of domains) {
+//     const ctx = await batchMesh.assemble(query, serviceType);
+//     runAgent(domain, ctx);
+//   }
+//   batchMesh.dispose();
+// ============================================================================
+
+export interface BatchScopedMeshConfig extends BrainContextMeshConfig {
+  /** Cache TTL in ms (default: 300000 = 5 minutes — covers a full batch run) */
+  cacheTtlMs?: number;
+}
+
+export interface BatchScopedMeshInstance extends BrainContextMeshInstance {
+  /** Dispose the batch cache (call after batch completes) */
+  dispose(): void;
+  /** Get cache stats for observability */
+  getCacheStats(): { hits: number; misses: number; cached: boolean };
+}
+
+export function createBatchScopedMesh(config: BatchScopedMeshConfig): BatchScopedMeshInstance {
+  const batchCacheTtl = config.cacheTtlMs ?? 300_000; // 5 min default
+
+  let batchUniversalCtx: UniversalBrainContext | null = null;
+  let batchCtxExpiry = 0;
+  let cacheHits = 0;
+  let cacheMisses = 0;
+
+  // Create the underlying mesh
+  const mesh = createBrainContextMesh(config);
+
+  // Wrap getUniversalContext with batch-level caching
+  const batchGetUniversalContext = async (
+    requiredData?: RequiredDataSignals
+  ): Promise<UniversalBrainContext> => {
+    if (batchUniversalCtx && Date.now() < batchCtxExpiry) {
+      cacheHits++;
+      return batchUniversalCtx;
+    }
+
+    cacheMisses++;
+    const ctx = await mesh.getUniversalContext(requiredData);
+    batchUniversalCtx = ctx;
+    batchCtxExpiry = Date.now() + batchCacheTtl;
+    return ctx;
+  };
+
+  // Wrap assemble to use batch-cached universal context
+  const batchAssemble = async (
+    query: string,
+    serviceType: ServiceType,
+    interpretation?: QueryInterpretation
+  ): Promise<AssembledBrainContext> => {
+    // Pre-warm the batch cache
+    await batchGetUniversalContext();
+    // Delegate to original assemble (which will hit the in-memory cache)
+    return mesh.assemble(query, serviceType, interpretation);
+  };
+
+  return {
+    getUniversalContext: batchGetUniversalContext,
+    getDomainContext: mesh.getDomainContext,
+    getIntentContext: mesh.getIntentContext,
+    assemble: batchAssemble,
+    invalidateCache: () => {
+      batchUniversalCtx = null;
+      batchCtxExpiry = 0;
+      mesh.invalidateCache();
+    },
+    dispose: () => {
+      batchUniversalCtx = null;
+      batchCtxExpiry = 0;
+      mesh.invalidateCache();
+    },
+    getCacheStats: () => ({
+      hits: cacheHits,
+      misses: cacheMisses,
+      cached: batchUniversalCtx !== null,
+    }),
+  };
+}

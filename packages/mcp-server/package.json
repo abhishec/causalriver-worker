@@ -15,6 +15,24 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
+    },
+    "./handlers": {
+      "import": {
+        "types": "./dist/handlers.d.ts",
+        "default": "./dist/handlers.js"
+      }
+    },
+    "./jarvis-handlers": {
+      "import": {
+        "types": "./dist/jarvis-handlers.d.ts",
+        "default": "./dist/jarvis-handlers.js"
+      }
+    },
+    "./jira-client": {
+      "import": {
+        "types": "./dist/jira-client.d.ts",
+        "default": "./dist/jira-client.js"
+      }
     }
   },
   "files": [
@@ -29,7 +47,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@modelcontextprotocol/sdk": "^1.25.3",
     "@nexus-ai/client": "workspace:*",
     "zod": "^3.23.0"
   },

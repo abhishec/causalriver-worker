@@ -1,0 +1,72 @@
+{
+  "id": "nexusbrain",
+  "name": "NexusBrain Causal Intelligence",
+  "version": "0.1.0",
+  "description": "Closes the causal reinforcement loop: always-on outcome collection, prediction verification, proactive anomaly detection, and organizational intelligence across 15+ messaging channels.",
+  "author": "NexusBrain",
+  "homepage": "https://github.com/abhishec/nexus-intelligence",
+  "configSchema": {
+    "type": "object",
+    "required": ["supabaseUrl", "supabaseKey", "orgId"],
+    "properties": {
+      "supabaseUrl": {
+        "type": "string",
+        "description": "Supabase project URL (e.g. https://xxx.supabase.co)"
+      },
+      "supabaseKey": {
+        "type": "string",
+        "description": "Supabase anon key"
+      },
+      "orgId": {
+        "type": "string",
+        "description": "NexusBrain organization ID"
+      },
+      "jiraBaseUrl": {
+        "type": "string",
+        "description": "Jira base URL (e.g. https://company.atlassian.net)"
+      },
+      "jiraEmail": {
+        "type": "string",
+        "description": "Jira account email"
+      },
+      "jiraApiToken": {
+        "type": "string",
+        "description": "Jira API token"
+      },
+      "reinforcement": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "outcomeCollectorIntervalHours": { "type": "number", "default": 6 },
+          "anomalyWatchdogIntervalMinutes": { "type": "number", "default": 60 },
+          "consolidationCronHour": { "type": "number", "default": 2 },
+          "signalHarvestingEnabled": { "type": "boolean", "default": true }
+        }
+      },
+      "proactive": {
+        "type": "object",
+        "properties": {
+          "techDebtAlarmEnabled": { "type": "boolean", "default": true },
+          "reconciliationRunnerEnabled": { "type": "boolean", "default": false },
+          "cashFlowProphetEnabled": { "type": "boolean", "default": false }
+        }
+      },
+      "alerts": {
+        "type": "object",
+        "properties": {
+          "engineeringChannel": { "type": "string" },
+          "financeChannel": { "type": "string" },
+          "adminChannel": { "type": "string" }
+        }
+      }
+    }
+  },
+  "uiHints": {
+    "supabaseKey": { "inputType": "password", "label": "Supabase Anon Key" },
+    "jiraApiToken": { "inputType": "password", "label": "Jira API Token" },
+    "orgId": { "inputType": "text", "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
+    "supabaseUrl": { "inputType": "url", "placeholder": "https://xxx.supabase.co" },
+    "jiraBaseUrl": { "inputType": "url", "placeholder": "https://company.atlassian.net" },
+    "jiraEmail": { "inputType": "email" }
+  }
+}

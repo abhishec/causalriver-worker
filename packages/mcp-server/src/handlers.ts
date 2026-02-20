@@ -685,10 +685,7 @@ export async function handleDependencyGraph(
       `Limit to ${args.limit || 20} results.`,
     ].filter(Boolean).join(' ');
 
-    const result = await client.query({
-      question: query,
-      context: `dependency_graph_query:${args.entity_id}:${args.direction || 'both'}:${args.domain || 'all'}`,
-    });
+    const result = await client.query(query);
 
     const output = [
       `## Dependencies for: ${args.entity_id}`,
@@ -727,10 +724,7 @@ export async function handleImpactAnalysis(
       args.domain ? `Filter to the ${args.domain} domain.` : '',
     ].filter(Boolean).join(' ');
 
-    const result = await client.query({
-      question: query,
-      context: `impact_analysis:${args.entity_id}:${args.domain || 'all'}`,
-    });
+    const result = await client.query(query);
 
     const output = [
       `## Impact Analysis: ${args.entity_id}`,
