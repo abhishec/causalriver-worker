@@ -135,7 +135,7 @@ export const brainRevenueLeakageAgent: AgentDefinition<
       .order('created_at', { ascending: false })
       .limit(1000);
 
-    const invoices = invoiceSignals || [];
+    const invoices: Array<{ signal_value: number; signal_metadata: unknown; entity_id: string; client_id: string; created_at: string }> = invoiceSignals || [];
     ctx.reportProgress(0.5, `Analyzing ${invoices.length} invoices against ${contracts.length} contracts...`);
 
     // ── Step 3: Run detection rules ───────────────────────────────────────

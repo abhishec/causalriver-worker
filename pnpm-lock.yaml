@@ -272,6 +272,9 @@ importers:
       '@nexus-ai/mcp-server':
         specifier: workspace:*
         version: link:../mcp-server
+      '@nexus-ai/memory-stack':
+        specifier: workspace:*
+        version: link:../memory-stack
       '@sinclair/typebox':
         specifier: ^0.32.0
         version: 0.32.35
