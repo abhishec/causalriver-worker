@@ -23,8 +23,9 @@ interface ConnectorDef {
   oauth: boolean;
 }
 
-interface ConnectorStatus {
+interface ConnectorInstance {
   id: string;
+  connectorType: string;
   status: string;
   config: Record<string, any>;
   metadata: Record<string, any>;
@@ -32,6 +33,8 @@ interface ConnectorStatus {
   signalsCount: number;
   errorMessage: string | null;
   createdAt: string;
+  instanceName?: string;
+  displayName?: string;
 }
 
 interface SyncProgress {
@@ -43,7 +46,7 @@ interface ConnectorsClientProps {
   connectors: ConnectorDef[];
   domainCounts: Record<string, number>;
   activeDomains: string[];
-  connectorStatusMap: Record<string, ConnectorStatus>;
+  connectorInstances: ConnectorInstance[];
   syncProgressMap: Record<string, SyncProgress>;
   totalSignals: number;
   /** Timestamp of the last successful full or sleep brain cycle — null if never trained */
@@ -102,7 +105,7 @@ export function ConnectorsClient({
   connectors,
   domainCounts,
   activeDomains: activeDomainsList,
-  connectorStatusMap,
+  connectorInstances,
   syncProgressMap,
   totalSignals,
   lastBrainTrainedAt,
@@ -117,7 +120,12 @@ export function ConnectorsClient({
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
 
   const activeDomains = new Set(activeDomainsList);
-  const connectedCount = Object.values(connectorStatusMap).filter((c) => c.status === "active").length;
+  const activeInstances = connectorInstances.filter((c) => c.status === "active");
+  const connectedCount = activeInstances.length;
+  // Set of connector types that have at least one active instance
+  const connectedTypes = new Set(activeInstances.map((c) => c.connectorType));
+  // Set of connector types that have any instance (active, error, disabled)
+  const hasAnyInstance = new Set(connectorInstances.map((c) => c.connectorType));
   const syncingCount = Object.keys(syncProgressMap).length;
 
   // Check URL params for OAuth callback messages
@@ -148,10 +156,14 @@ export function ConnectorsClient({
   }, []);
 
   /* ── Sync ────────────────────────────────────────────────────── */
-  const handleSync = useCallback(async (type: string) => {
+  const handleSync = useCallback(async (type: string, connectorId?: string) => {
     setMessage({ type: "info", text: `Starting ${type} sync...` });
     try {
-      const res = await fetch(`/api/connectors/${type}/sync`, { method: "POST" });
+      const res = await fetch(`/api/connectors/${type}/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connectorId }),
+      });
       if (res.ok) {
         setMessage({ type: "success", text: `${type} sync started. Data will appear shortly.` });
         setTimeout(() => router.refresh(), 2000);
@@ -165,23 +177,26 @@ export function ConnectorsClient({
   }, [router]);
 
   /* ── Test Connection ─────────────────────────────────────────── */
-  const handleTestConnection = useCallback(async (type: string) => {
-    setTestingConnection(type);
+  const handleTestConnection = useCallback(async (type: string, connectorId?: string) => {
+    setTestingConnection(connectorId || type);
     setTestResult(null);
     try {
-      const res = await fetch(`/api/connectors/${type}/status`);
+      const url = connectorId
+        ? `/api/connectors/${type}/status?connectorId=${connectorId}`
+        : `/api/connectors/${type}/status`;
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setTestResult({
-          type,
+          type: connectorId || type,
           success: true,
           message: data.status === "active" ? "Connection verified — credentials valid" : `Status: ${data.status}`,
         });
       } else {
-        setTestResult({ type, success: false, message: "Connection test failed — check credentials" });
+        setTestResult({ type: connectorId || type, success: false, message: "Connection test failed — check credentials" });
       }
     } catch {
-      setTestResult({ type, success: false, message: "Network error — unable to reach API" });
+      setTestResult({ type: connectorId || type, success: false, message: "Network error — unable to reach API" });
     } finally {
       setTestingConnection(null);
     }
@@ -265,11 +280,15 @@ export function ConnectorsClient({
   );
 
   /* ── Separate connectors into connected vs available ─────────── */
-  const connectedConnectors = connectors.filter(
-    (c) => connectorStatusMap[c.type]?.status === "active"
-  );
+  // A connector type still shows in "available" even if it has active instances
+  // (so you can connect additional repos/sites/workspaces)
   const availableConnectors = connectors.filter(
-    (c) => !connectorStatusMap[c.type] || connectorStatusMap[c.type]?.status !== "active"
+    (c) => {
+      // Types that don't support multi-instance: only show if no active instance
+      const multiInstanceTypes = new Set(["github", "jira", "slack"]);
+      if (multiInstanceTypes.has(c.type)) return true; // Always show — can add more
+      return !connectedTypes.has(c.type);
+    }
   );
 
   return (
@@ -321,11 +340,11 @@ export function ConnectorsClient({
       )}
 
       {/* ── Connected Connectors ──────────────────────────────── */}
-      {connectedConnectors.length > 0 && (
+      {activeInstances.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
-              Connected ({connectedConnectors.length})
+              Connected ({activeInstances.length})
             </div>
             {lastBrainTrainedAt ? (
               <div className="flex items-center gap-1.5 text-[11px] text-accent">
@@ -339,33 +358,38 @@ export function ConnectorsClient({
             )}
           </div>
           <div className="space-y-2">
-            {connectedConnectors.map((connector) => {
-              const status = connectorStatusMap[connector.type]!;
-              const signalCount = domainCounts[connector.domain] || 0;
-              const progress = syncProgressMap[connector.type];
+            {activeInstances.map((instance) => {
+              const connectorDef = connectors.find((c) => c.type === instance.connectorType);
+              if (!connectorDef) return null;
+              const signalCount = domainCounts[connectorDef.domain] || 0;
+              const progress = syncProgressMap[instance.connectorType];
               const isSyncing = !!progress;
-              const isTesting = testingConnection === connector.type;
-              const currentTestResult = testResult?.type === connector.type ? testResult : null;
+              const isTesting = testingConnection === instance.id;
+              const currentTestResult = testResult?.type === instance.id ? testResult : null;
+              const instanceLabel = instance.displayName || instance.instanceName;
 
               return (
-                <Card key={connector.type} variant="interactive">
+                <Card key={instance.id} variant="interactive">
                   <div className="flex items-start gap-4">
                     {/* Icon */}
                     <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center text-xl shrink-0">
-                      {connector.icon}
+                      {connectorDef.icon}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className="text-sm font-semibold">{connector.name}</span>
+                        <span className="text-sm font-semibold">{connectorDef.name}</span>
+                        {instanceLabel && instanceLabel !== "default" && (
+                          <span className="text-xs text-muted font-mono">{instanceLabel}</span>
+                        )}
                         <Badge variant="success" size="xs" pulse>Connected</Badge>
                         <Badge
                           variant="default"
                           size="xs"
-                          className={DOMAIN_COLORS[connector.domain]}
+                          className={DOMAIN_COLORS[connectorDef.domain]}
                         >
-                          {connector.domain}
+                          {connectorDef.domain}
                         </Badge>
                         {isSyncing && (
                           <Badge variant="info" size="xs" pulse>Syncing</Badge>
@@ -377,20 +401,20 @@ export function ConnectorsClient({
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-muted mb-2">{connector.description}</p>
+                      <p className="text-xs text-muted mb-2">{connectorDef.description}</p>
 
                       {/* Connection details */}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                         <span className="text-muted">
                           Signals:{" "}
                           <span className="text-foreground font-mono tabular-nums">
-                            {formatNumber(status.signalsCount || signalCount)}
+                            {formatNumber(instance.signalsCount || signalCount)}
                           </span>
                         </span>
                         <span className="text-muted">
                           Last sync:{" "}
                           <span className="text-foreground font-medium">
-                            {status.lastSyncAt ? formatRelativeTime(new Date(status.lastSyncAt)) : "Never"}
+                            {instance.lastSyncAt ? formatRelativeTime(new Date(instance.lastSyncAt)) : "Never"}
                           </span>
                         </span>
                         <span className="text-muted flex items-center gap-1">
@@ -405,38 +429,38 @@ export function ConnectorsClient({
                             {lastBrainTrainedAt ? formatRelativeTime(new Date(lastBrainTrainedAt)) : "Not yet — run Sync & Train"}
                           </span>
                         </span>
-                        {status.metadata?.team_name && (
+                        {instance.metadata?.team_name && (
                           <span className="text-muted">
-                            Workspace: <span className="text-foreground">{status.metadata.team_name}</span>
+                            Workspace: <span className="text-foreground">{instance.metadata.team_name}</span>
                           </span>
                         )}
-                        {status.metadata?.github_login && (
+                        {instance.metadata?.github_login && (
                           <span className="text-muted">
-                            Account: <span className="text-foreground">@{status.metadata.github_login}</span>
+                            Account: <span className="text-foreground">@{instance.metadata.github_login}</span>
                           </span>
                         )}
-                        {status.metadata?.site_name && (
+                        {instance.metadata?.site_name && (
                           <span className="text-muted">
-                            Site: <span className="text-foreground">{status.metadata.site_name}</span>
+                            Site: <span className="text-foreground">{instance.metadata.site_name}</span>
                           </span>
                         )}
-                        {status.config?.repoFullName && (
+                        {instance.config?.repoFullName && (
                           <span className="text-muted">
-                            Repo: <span className="text-foreground font-mono">{status.config.repoFullName}</span>
+                            Repo: <span className="text-foreground font-mono">{instance.config.repoFullName}</span>
                           </span>
                         )}
-                        {connector.type === "github" && status.config?.trackedBranches && status.config.trackedBranches.length > 0 && (
+                        {instance.connectorType === "github" && instance.config?.trackedBranches && instance.config.trackedBranches.length > 0 && (
                           <span className="text-muted">
                             Branches:{" "}
                             <span className="text-foreground font-mono text-[11px]">
-                              {(status.config.trackedBranches as string[]).slice(0, 3).join(", ")}
-                              {status.config.trackedBranches.length > 3 && ` +${status.config.trackedBranches.length - 3} more`}
+                              {(instance.config.trackedBranches as string[]).slice(0, 3).join(", ")}
+                              {instance.config.trackedBranches.length > 3 && ` +${instance.config.trackedBranches.length - 3} more`}
                             </span>
                           </span>
                         )}
-                        {connector.type === "github" && status.config?.dataLookback && (
+                        {instance.connectorType === "github" && instance.config?.dataLookback && (
                           <span className="text-muted">
-                            Lookback: <span className="text-foreground">{status.config.dataLookback}</span>
+                            Lookback: <span className="text-foreground">{instance.config.dataLookback}</span>
                           </span>
                         )}
                       </div>
@@ -463,10 +487,10 @@ export function ConnectorsClient({
                       )}
 
                       {/* Error message */}
-                      {status.errorMessage && (
+                      {instance.errorMessage && (
                         <div className="mt-2 flex items-center gap-1.5 text-[11px] text-danger">
                           <StatusDot type="error" size="sm" />
-                          {status.errorMessage}
+                          {instance.errorMessage}
                         </div>
                       )}
 
@@ -487,7 +511,7 @@ export function ConnectorsClient({
                     {/* Actions */}
                     <div className="flex flex-col gap-1.5 shrink-0">
                       <button
-                        onClick={() => handleTestConnection(connector.type)}
+                        onClick={() => handleTestConnection(instance.connectorType, instance.id)}
                         disabled={isTesting}
                         className="px-3 py-1.5 rounded-lg bg-surface border border-border-subtle text-xs font-medium hover:bg-surface-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                       >
@@ -509,7 +533,7 @@ export function ConnectorsClient({
                         )}
                       </button>
                       <button
-                        onClick={() => handleSync(connector.type)}
+                        onClick={() => handleSync(instance.connectorType, instance.id)}
                         disabled={isSyncing}
                         className="px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
@@ -544,8 +568,11 @@ export function ConnectorsClient({
             const signalCount = domainCounts[connector.domain] || 0;
             const hasSignals = activeDomains.has(connector.domain);
             const isGitHub = connector.type === "github";
-            const failedStatus = connectorStatusMap[connector.type];
-            const hasError = failedStatus?.status === "error" || failedStatus?.status === "disabled";
+            // Find any failed/errored instance for this connector type
+            const failedInstance = connectorInstances.find(
+              (ci) => ci.connectorType === connector.type && (ci.status === "error" || ci.status === "disabled")
+            );
+            const hasError = !!failedInstance;
 
             return (
               <div
@@ -580,10 +607,10 @@ export function ConnectorsClient({
                 </p>
 
                 {/* Error info if disconnected with error */}
-                {hasError && failedStatus?.errorMessage && (
+                {hasError && failedInstance?.errorMessage && (
                   <div className="mb-3 flex items-center gap-1.5 text-[10px] text-danger">
                     <StatusDot type="error" size="sm" />
-                    <span className="truncate">{failedStatus.errorMessage}</span>
+                    <span className="truncate">{failedInstance.errorMessage}</span>
                   </div>
                 )}
 

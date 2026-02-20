@@ -85,36 +85,20 @@ export default async function ConnectorsPage() {
     domainCounts[domain] = (domainCounts[domain] || 0) + 1;
   });
 
-  // Build connector status map — keyed by connector_type for backward compat
-  // When multiple instances of same type exist, last one wins in this map.
-  // The connectors-client will also get the raw list for detailed display.
-  const connectorStatusMap: Record<string, {
-    id: string;
-    status: string;
-    config: Record<string, any>;
-    metadata: Record<string, any>;
-    lastSyncAt: string | null;
-    signalsCount: number;
-    errorMessage: string | null;
-    createdAt: string;
-    instanceName?: string;
-    displayName?: string;
-  }> = {};
-
-  orgConnectors.forEach((c) => {
-    connectorStatusMap[c.connector_type] = {
-      id: c.id,
-      status: c.status as string,
-      config: c.config as Record<string, any>,
-      metadata: c.metadata as Record<string, any>,
-      lastSyncAt: c.last_sync_at,
-      signalsCount: c.signals_count,
-      errorMessage: c.error_message,
-      createdAt: c.created_at,
-      instanceName: (c as any).instance_name,
-      displayName: (c as any).display_name,
-    };
-  });
+  // Build connector instances list — supports multiple instances per type
+  const connectorInstances = orgConnectors.map((c) => ({
+    id: c.id,
+    connectorType: c.connector_type,
+    status: c.status as string,
+    config: c.config as Record<string, any>,
+    metadata: c.metadata as Record<string, any>,
+    lastSyncAt: c.last_sync_at,
+    signalsCount: c.signals_count,
+    errorMessage: c.error_message,
+    createdAt: c.created_at,
+    instanceName: c.instance_name,
+    displayName: c.display_name,
+  }));
 
   // Build sync progress map
   const syncProgressMap: Record<string, { progressPct: number; signalsIngested: number }> = {};
@@ -140,7 +124,7 @@ export default async function ConnectorsPage() {
       }))}
       domainCounts={domainCounts}
       activeDomains={activeDomains}
-      connectorStatusMap={connectorStatusMap}
+      connectorInstances={connectorInstances}
       syncProgressMap={syncProgressMap}
       totalSignals={signals.length}
       lastBrainTrainedAt={lastBrainTrainedAt}

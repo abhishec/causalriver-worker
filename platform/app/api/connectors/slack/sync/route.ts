@@ -57,13 +57,21 @@ export async function POST(request: NextRequest) {
     const service = await createServiceClient();
 
     // ── Load Slack credentials ──────────────────────────────────────────
-    const { data: connector } = await service
+    const body = await request.json().catch(() => ({}));
+    const { connectorId } = body as { connectorId?: string };
+
+    let connectorQuery = service
       .from("org_connectors")
-      .select("credentials, config, metadata")
+      .select("id, credentials, config, metadata, signals_count")
       .eq("organization_id", orgId)
       .eq("connector_type", "slack")
-      .eq("status", "active")
-      .single();
+      .eq("status", "active");
+
+    if (connectorId) {
+      connectorQuery = connectorQuery.eq("id", connectorId);
+    }
+
+    const { data: connector } = await connectorQuery.maybeSingle();
 
     if (!connector?.credentials?.access_token) {
       return NextResponse.json(
@@ -73,8 +81,8 @@ export async function POST(request: NextRequest) {
     }
 
     const token = connector.credentials.access_token;
-    const body = await request.json().catch(() => ({}));
     const lookbackDays = body.lookbackDays || 7;
+    const previousSignalsCount = connector.signals_count || 0;
     const oldest = Math.floor(
       (Date.now() - lookbackDays * 86400000) / 1000
     ).toString();
@@ -277,7 +285,7 @@ export async function POST(request: NextRequest) {
       .from("org_connectors")
       .update({
         last_sync_at: new Date().toISOString(),
-        signals_count: signalsInserted,
+        signals_count: previousSignalsCount + signalsInserted,
         config: {
           ...connector.config,
           last_sync_channels: channels.length,
@@ -285,8 +293,7 @@ export async function POST(request: NextRequest) {
           last_sync_lookback_days: lookbackDays,
         },
       })
-      .eq("organization_id", orgId)
-      .eq("connector_type", "slack");
+      .eq("id", connector.id);
 
     return NextResponse.json({
       success: true,
