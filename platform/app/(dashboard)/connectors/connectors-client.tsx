@@ -247,11 +247,8 @@ export function ConnectorsClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          siteUrl: config.siteUrl,
-          email: config.email,
-          apiToken: config.apiToken,
-          projects: config.trackedProjects,
-          lookback: config.dataLookback,
+          projectKeys: config.trackedProjects,
+          dataLookback: config.dataLookback,
           fixVersionFilter: config.fixVersionFilter,
         }),
       })

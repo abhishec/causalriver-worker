@@ -89,29 +89,31 @@ export function JiraSetupModal({
     setStep("validating");
 
     try {
-      // Test credentials by fetching projects list from Jira REST API
-      const auth = `Basic ${btoa(`${email.trim()}:${apiToken.trim()}`)}`;
-      const res = await fetch(
-        `${normUrl}/rest/api/3/project/search?maxResults=50&orderBy=NAME`,
-        { headers: { Authorization: auth, Accept: "application/json" } }
-      );
+      // Validate credentials via backend proxy (avoids CORS issues with self-hosted Jira)
+      const res = await fetch("/api/connectors/jira/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteUrl: normUrl,
+          email: email.trim(),
+          apiToken: apiToken.trim(),
+          trackedProjects: [],
+          dataLookback: "6m",
+        }),
+      });
+
+      const data = await res.json();
 
       if (!res.ok) {
-        const msg = res.status === 401
-          ? "Invalid credentials — check your email and API token"
-          : res.status === 403
-          ? "Access denied — make sure your token has read:jira-data scope"
-          : `Jira returned ${res.status}. Check the site URL.`;
-        setError(msg);
+        setError(data.error || `Jira returned ${res.status}. Check the site URL.`);
         setStep("error");
         return;
       }
 
-      const data = await res.json();
-      const projects: JiraProjectInfo[] = (data.values ?? []).map((p: any) => ({
+      const projects: JiraProjectInfo[] = (data.projects ?? []).map((p: any) => ({
         key: p.key,
         name: p.name,
-        projectType: p.projectTypeKey,
+        projectType: p.projectType,
       }));
 
       setSiteInfo({ siteUrl: normUrl, siteName: new URL(normUrl).hostname, projects });
@@ -133,9 +135,28 @@ export function JiraSetupModal({
     );
   };
 
-  const handleStartIngestion = () => {
+  const handleStartIngestion = async () => {
     if (!siteInfo) return;
     if (selectedProjects.length === 0) { setError("Select at least one project"); return; }
+
+    // Persist final project selection and config to the connector record
+    try {
+      await fetch("/api/connectors/jira/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteUrl: siteInfo.siteUrl,
+          email: email.trim(),
+          apiToken: apiToken.trim(),
+          trackedProjects: selectedProjects,
+          dataLookback: lookback,
+          fixVersionFilter: fixVersionFilter.trim() || undefined,
+        }),
+      });
+    } catch {
+      // Non-fatal — connector was already created in handleValidate
+    }
+
     onConnected(
       {
         siteUrl: siteInfo.siteUrl,
@@ -515,7 +536,7 @@ export function JiraSetupModal({
           <p className="text-[10px] text-muted text-center">
             {step === "projects"
               ? "Initial sync runs in background. Only issue metadata is read — no attachments or comments."
-              : "Credentials are used only to fetch data. Your API token is never stored in the database."}
+              : "Credentials are encrypted at rest and used only for data sync."}
           </p>
         </div>
       </div>

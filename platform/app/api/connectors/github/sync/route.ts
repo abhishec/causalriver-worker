@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     let connectorQuery = service
       .from("org_connectors")
-      .select("id, config, credentials")
+      .select("id, config, credentials, signals_count")
       .eq("organization_id", orgId)
       .eq("connector_type", "github");
 
@@ -169,12 +169,13 @@ export async function POST(request: Request) {
       console.warn("[GitHub sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
-    // 7. Update connector with results
+    // 7. Update connector with results (accumulate signals_count)
+    const previousSignalsCount = (connector as any).signals_count || 0;
     await service
       .from("org_connectors")
       .update({
         last_sync_at: new Date().toISOString(),
-        signals_count: syncResult.signalsGenerated,
+        signals_count: previousSignalsCount + syncResult.signalsGenerated,
         error_message: syncResult.errors.length > 0
           ? syncResult.errors.join("; ")
           : null,

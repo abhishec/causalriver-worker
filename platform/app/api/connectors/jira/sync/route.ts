@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     const service = await createServiceClient();
     const body = await request.json().catch(() => ({})) as {
       connectorId?: string;
+      siteUrl?: string;
       projectKeys?: string[];
       fixVersionFilter?: string;
       dataLookback?: string;
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
 
     let connectorQuery = service
       .from("org_connectors")
-      .select("id, config, credentials")
+      .select("id, config, credentials, signals_count")
       .eq("organization_id", orgId)
       .eq("connector_type", "jira");
 
@@ -130,7 +131,7 @@ export async function POST(request: Request) {
     // 4. Fetch Jira data and transform to Brain L1 signals
     const startMs = Date.now();
     const config = connector.config as Record<string, any>;
-    const siteUrl = config?.site_url || credentials.site_url || config?.cloud_id || '';
+    const siteUrl = body.siteUrl || config?.site_url || credentials.site_url || config?.cloud_id || '';
 
     let signalsGenerated = 0;
     let recordsProcessed = 0;
@@ -273,12 +274,13 @@ export async function POST(request: Request) {
       console.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
-    // 6. Update connector with results
+    // 6. Update connector with results (accumulate signals_count)
+    const previousSignalsCount = (connector as any).signals_count || 0;
     await service
       .from("org_connectors")
       .update({
         last_sync_at: new Date().toISOString(),
-        signals_count: signalsGenerated,
+        signals_count: previousSignalsCount + signalsGenerated,
         error_message: errors.length > 0 ? errors.join("; ") : null,
         config: {
           ...connector.config,

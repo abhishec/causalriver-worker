@@ -43,20 +43,20 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`/admin/connectors?error=${error}`, request.url)
+        new URL(`/connectors?error=${error}`, request.url)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL('/admin/connectors?error=invalid_callback', request.url)
+        new URL('/connectors?error=invalid_callback', request.url)
       );
     }
 
     const parts = state.split(':');
     if (parts.length < 3) {
       return NextResponse.redirect(
-        new URL('/admin/connectors?error=invalid_state', request.url)
+        new URL('/connectors?error=invalid_state', request.url)
       );
     }
     const [orgId, userId, timestamp] = parts;
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     if (isNaN(ts) || Date.now() - ts > 10 * 60 * 1000) {
       return NextResponse.redirect(
-        new URL('/admin/connectors?error=expired_state', request.url)
+        new URL('/connectors?error=expired_state', request.url)
       );
     }
 
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL('/admin/connectors?error=oauth_not_configured', request.url)
+        new URL('/connectors?error=oauth_not_configured', request.url)
       );
     }
 
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
     if (tokenData.error) {
       console.error('GitHub OAuth error:', tokenData);
       return NextResponse.redirect(
-        new URL(`/admin/connectors?error=${tokenData.error}`, request.url)
+        new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
     }
 
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
         );
       }
       return NextResponse.redirect(
-        new URL('/admin/connectors?error=storage_failed', request.url)
+        new URL('/connectors?error=storage_failed', request.url)
       );
     }
 
@@ -204,12 +204,12 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.redirect(
-      new URL('/admin/connectors?success=github_connected', request.url)
+      new URL('/connectors?success=github_connected', request.url)
     );
   } catch (error: any) {
     console.error('GitHub callback error:', error);
     return NextResponse.redirect(
-      new URL('/admin/connectors?error=auth_failed', request.url)
+      new URL('/connectors?error=auth_failed', request.url)
     );
   }
 }
