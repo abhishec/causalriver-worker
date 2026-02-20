@@ -201,7 +201,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
             className={cn(
               "absolute z-50 rounded-xl bg-card border border-border shadow-xl py-2 max-h-[70vh] overflow-y-auto",
               collapsed
-                ? "left-16 bottom-3 w-72"
+                ? "left-12 bottom-3 w-72"
                 : "left-3 right-3 bottom-[calc(100%+4px)]"
             )}
             style={collapsed ? undefined : { bottom: "60px" }}

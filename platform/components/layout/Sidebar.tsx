@@ -9,15 +9,13 @@ import { useChatHistory, type ChatHistoryItem } from "@/lib/use-chat-history";
 import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/SlashCommandPicker";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
 
-/* ── Navigation — Claude-style minimal ───────────────────────────────────── */
+/* ── Types ────────────────────────────────────────────────────────────────── */
 
-/* Nav order matches prototype: Chats → Connectors → Artifacts */
+type ServiceMode = "general" | "aas" | "seaas";
+
+/* ── Navigation — icon rail items (no "Chats") ───────────────────────────── */
+
 const NAV_ITEMS = [
-  {
-    label: "Chats",
-    href: "/copilot",
-    icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z",
-  },
   {
     label: "Connectors",
     href: "/connectors",
@@ -37,9 +35,42 @@ const NAV_ITEMS = [
 
 const SIDEBAR_COLLAPSED_KEY = "nexus_sidebar_collapsed";
 const SIDEBAR_WIDTH_KEY = "nexus_sidebar_width";
-const DEFAULT_WIDTH = 260;
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 400;
+const ICON_RAIL_WIDTH = 48;
+const DEFAULT_CONTENT_WIDTH = 212;
+const MIN_CONTENT_WIDTH = 160;
+const MAX_CONTENT_WIDTH = 340;
+
+/* ── Service Tab Pills ─────────────────────────────────────────────────── */
+
+const SERVICE_TABS: { id: ServiceMode; label: string }[] = [
+  { id: "seaas", label: "SE-aaS" },
+  { id: "aas", label: "AAAS" },
+  { id: "general", label: "General" },
+];
+
+function ServiceTabsPills({ activeService, onServiceChange }: {
+  activeService: ServiceMode;
+  onServiceChange: (svc: ServiceMode) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 px-3 py-2 shrink-0">
+      {SERVICE_TABS.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onServiceChange(tab.id)}
+          className={cn(
+            "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all",
+            activeService === tab.id
+              ? "bg-accent/10 text-accent border border-accent/20"
+              : "text-muted-foreground hover:text-foreground hover:bg-surface-hover border border-transparent"
+          )}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /* ── Chat History Group ──────────────────────────────────────────────────── */
 
@@ -52,7 +83,6 @@ function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
   const router = useRouter();
 
   function handleClick(item: ChatHistoryItem) {
-    // If already on copilot page, dispatch event to load conversation without navigation
     if (activePath.startsWith("/copilot")) {
       window.dispatchEvent(new CustomEvent("copilot-select-conversation", { detail: item.id }));
     } else {
@@ -84,9 +114,8 @@ function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
   );
 }
 
-/* ── Commands Section — matching HTML prototype .cmd-section ────────────── */
+/* ── Commands Section ────────────────────────────────────────────────────── */
 
-/* General commands (4 commands matching prototype "Intelligence" category) */
 const GENERAL_COMMANDS: SlashCommand[] = [
   { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis across the organization", service: "general", category: "Intelligence" },
   { id: "anomaly-gen", label: "anomaly-report", description: "Unusual patterns detection", icon: "⚠️", prompt: "What anomalies were detected today?", service: "general", category: "Intelligence" },
@@ -94,40 +123,25 @@ const GENERAL_COMMANDS: SlashCommand[] = [
   { id: "predict", label: "prediction", description: "Forecast business outcomes", icon: "📈", prompt: "Forecast key business metrics for next quarter", service: "general", category: "Intelligence" },
 ];
 
-function CommandsSection() {
+function CommandsSection({ activeService }: { activeService: ServiceMode }) {
   const [selectedCmd, setSelectedCmd] = useState<string | null>(null);
-  const [activeService, setActiveService] = useState<string>("seaas");
   const router = useRouter();
 
-  // Listen for service mode changes from copilot page
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const svc = (e as CustomEvent).detail;
-      if (typeof svc === "string") setActiveService(svc);
-    };
-    window.addEventListener("service-mode-changed", handler);
-    return () => window.removeEventListener("service-mode-changed", handler);
-  }, []);
-
-  // Build display name lookup from domain catalogue
   const displayNames = useMemo(() => {
     const map: Record<string, string> = {};
     for (const d of DOMAIN_CATALOGUE) map[d.id] = d.label;
     return map;
   }, []);
 
-  // Service section title — matches prototype: "SE-aaS Commands" / "AAAS Commands" / "Intelligence"
   const sectionTitle = activeService === "seaas" ? "SE-aaS Commands"
     : activeService === "aas" ? "AAAS Commands"
     : "Intelligence";
 
-  // Filter commands by active service — matches prototype behavior
   const serviceCommands = useMemo(() => {
     if (activeService === "general") return GENERAL_COMMANDS;
     return ALL_SLASH_COMMANDS.filter((cmd) => cmd.service === activeService);
   }, [activeService]);
 
-  // Group filtered commands by category
   const grouped = useMemo(() => {
     const map = new Map<string, SlashCommand[]>();
     for (const cmd of serviceCommands) {
@@ -139,11 +153,8 @@ function CommandsSection() {
 
   function handleCommandClick(cmd: SlashCommand) {
     setSelectedCmd(cmd.id);
-    // Always start a fresh chat when clicking a command
     window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-    // Navigate to copilot and auto-submit the command prompt
     router.push("/copilot");
-    // Send full command object so CopilotChat can check for gathering flow
     setTimeout(() => {
       window.dispatchEvent(
         new CustomEvent("copilot-inject-and-submit", {
@@ -197,7 +208,7 @@ function CommandsSection() {
   );
 }
 
-/* ── Chat History Section (collapsible, matching HTML .hist-section) ────── */
+/* ── Chat History Section (always visible) ───────────────────────────────── */
 
 function ChatHistorySection({
   groups,
@@ -210,55 +221,46 @@ function ChatHistorySection({
   activePath: string;
   activeConversationId: string | null;
 }) {
-  const [open, setOpen] = useState(true);
-
   return (
     <div className="flex-1 min-h-0 flex flex-col border-t border-border-subtle">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-muted-foreground transition-colors shrink-0"
-      >
-        <span>Chat History</span>
-        <svg
-          className={cn("w-3 h-3 transition-transform", open && "rotate-180")}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-        </svg>
-      </button>
-      {open && (
-        <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-thin">
-          {historyLoading ? (
-            <div className="px-3 py-2 text-center text-[10px] text-muted">Loading...</div>
-          ) : groups.length === 0 ? (
-            <div className="px-3 py-2 text-center text-[10px] text-muted">No previous chats</div>
-          ) : (
-            groups.map((group) => (
-              <ChatHistoryGroup
-                key={group.label}
-                label={group.label}
-                items={group.items}
-                activePath={activePath}
-                activeConversationId={activeConversationId}
-              />
-            ))
-          )}
-        </div>
-      )}
+      <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted shrink-0">
+        Chat History
+      </div>
+      <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-thin">
+        {historyLoading ? (
+          <div className="px-3 py-2 text-center text-[10px] text-muted">Loading...</div>
+        ) : groups.length === 0 ? (
+          <div className="px-3 py-4 text-center">
+            <div className="text-[10px] text-muted">No chats yet</div>
+            <div className="text-[9px] text-muted/60 mt-1">Click a command to start</div>
+          </div>
+        ) : (
+          groups.map((group) => (
+            <ChatHistoryGroup
+              key={group.label}
+              label={group.label}
+              items={group.items}
+              activePath={activePath}
+              activeConversationId={activeConversationId}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }
 
-/* ── Main Sidebar — Claude-style ─────────────────────────────────────────── */
+/* ── Main Sidebar — Two-Column (Icon Rail + Content Panel) ─────────────── */
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
   const isDragging = useRef(false);
   const startX = useRef(0);
-  const startWidth = useRef(0);
+  const startW = useRef(0);
   const { groups, loading: historyLoading } = useChatHistory();
 
   // Track active conversation from copilot page
@@ -271,20 +273,46 @@ export function Sidebar() {
     return () => window.removeEventListener("copilot-active-conversation-changed", handler);
   }, []);
 
+  // Listen for service-mode-changed from copilot (e.g. loading a saved conversation)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const svc = (e as CustomEvent).detail;
+      if (typeof svc === "string" && ["general", "aas", "seaas"].includes(svc)) {
+        setActiveService(svc as ServiceMode);
+      }
+    };
+    window.addEventListener("service-mode-changed", handler);
+    return () => window.removeEventListener("service-mode-changed", handler);
+  }, []);
+
+  // Restore persisted state
   useEffect(() => {
     const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
     if (saved === "true") setCollapsed(true);
     const savedWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    if (savedWidth) setSidebarWidth(Number(savedWidth));
+    if (savedWidth) {
+      const total = Number(savedWidth);
+      setContentWidth(Math.max(MIN_CONTENT_WIDTH, total - ICON_RAIL_WIDTH));
+    }
   }, []);
+
+  const totalWidth = ICON_RAIL_WIDTH + contentWidth;
 
   function toggleCollapse() {
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
-      window.dispatchEvent(new CustomEvent("sidebar-collapse", { detail: { collapsed: next, width: next ? 64 : sidebarWidth } }));
+      window.dispatchEvent(new CustomEvent("sidebar-collapse", {
+        detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
+      }));
       return next;
     });
+  }
+
+  function handleServiceChange(svc: ServiceMode) {
+    if (svc === activeService) return;
+    setActiveService(svc);
+    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: svc }));
   }
 
   // ── Resize drag handlers ──────────────────────────────────────────────
@@ -292,20 +320,21 @@ export function Sidebar() {
     if (collapsed) return;
     isDragging.current = true;
     startX.current = e.clientX;
-    startWidth.current = sidebarWidth;
+    startW.current = contentWidth;
     e.preventDefault();
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
-  }, [collapsed, sidebarWidth]);
+  }, [collapsed, contentWidth]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       const delta = e.clientX - startX.current;
-      const newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, startWidth.current + delta));
-      setSidebarWidth(newWidth);
-      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(newWidth));
-      window.dispatchEvent(new CustomEvent("sidebar-collapse", { detail: { collapsed: false, width: newWidth } }));
+      const newCW = Math.max(MIN_CONTENT_WIDTH, Math.min(MAX_CONTENT_WIDTH, startW.current + delta));
+      setContentWidth(newCW);
+      const total = ICON_RAIL_WIDTH + newCW;
+      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(total));
+      window.dispatchEvent(new CustomEvent("sidebar-collapse", { detail: { collapsed: false, width: total } }));
     };
     const onMouseUp = () => {
       if (isDragging.current) {
@@ -336,146 +365,128 @@ export function Sidebar() {
 
   return (
     <div className="flex h-screen fixed left-0 top-0 z-40">
-    <aside
-      style={collapsed ? { width: 64 } : { width: sidebarWidth }}
-      className="h-screen bg-background border-r border-border flex flex-col transition-[width] duration-200"
-    >
-      {/* ── Logo ─────────────────────────────────────────────────────────── */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          PANE 1 — Icon Rail (always visible)
+          ═══════════════════════════════════════════════════════════════════ */}
       <div
-        className={cn(
-          "flex items-center shrink-0",
-          collapsed ? "justify-center px-2 h-14" : "justify-between px-5 h-14"
-        )}
+        className="flex flex-col items-center bg-background border-r border-border-subtle shrink-0 py-2"
+        style={{ width: ICON_RAIL_WIDTH }}
       >
+        {/* Logo icon */}
         <button
           onClick={toggleCollapse}
-          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center mb-3 hover:bg-accent/25 transition-colors"
           title={collapsed ? "Expand sidebar (\u2318[)" : "Collapse sidebar (\u2318[)"}
         >
-          {!collapsed ? (
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">Brain OS</span>
-          ) : (
-            <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
-              <span className="text-sm font-bold text-accent">N</span>
-            </div>
-          )}
+          <span className="text-sm font-bold text-accent">N</span>
         </button>
-        {!collapsed && (
-          <button
-            onClick={toggleCollapse}
-            className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors"
-            title="Toggle sidebar"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-            </svg>
-          </button>
-        )}
-      </div>
 
-      {/* ── New Chat + Search ────────────────────────────────────────────── */}
-      <div className={cn("shrink-0 space-y-0.5", collapsed ? "px-2 py-2" : "px-3 py-2")}>
-        <Link
-          href="/copilot"
-          className={cn(
-            "flex items-center rounded-lg text-[13px] transition-all duration-150",
-            collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2",
-            "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
-          )}
-          title={collapsed ? "New chat" : undefined}
-        >
-          <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          {!collapsed && <span>New chat</span>}
-        </Link>
-
+        {/* Search */}
         <button
           onClick={() => {
             document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
           }}
-          className={cn(
-            "flex items-center rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all duration-150 w-full",
-            collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
-          )}
-          title={collapsed ? "Search (\u2318K)" : undefined}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-1"
+          title="Search (\u2318K)"
         >
-          <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
-          {!collapsed && <span>Search</span>}
         </button>
+
+        <div className="h-px bg-border-subtle w-6 my-2" />
+
+        {/* Nav icons */}
+        <nav className="flex flex-col items-center gap-1">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={item.label}
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center transition-colors relative",
+                  isActive
+                    ? "bg-surface-hover text-foreground"
+                    : "text-muted hover:text-foreground hover:bg-surface-hover"
+                )}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-accent" />
+                )}
+                <svg
+                  className="w-[18px] h-[18px]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                </svg>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* User avatar (collapsed UserMenu) */}
+        <UserMenu collapsed={true} />
       </div>
 
-      {/* ── Separator ────────────────────────────────────────────────────── */}
-      <div className="h-px bg-border-subtle mx-3 my-1" />
-
-      {/* ── Navigation ───────────────────────────────────────────────────── */}
-      <nav className={cn("shrink-0 space-y-0.5", collapsed ? "px-2 py-2" : "px-3 py-2")}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={collapsed ? item.label : undefined}
-              className={cn(
-                "flex items-center rounded-lg text-[13px] transition-all duration-150",
-                collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2",
-                isActive
-                  ? "bg-surface-hover text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
-              )}
+      {/* ═══════════════════════════════════════════════════════════════════
+          PANE 2 — Content Panel (hidden when collapsed)
+          ═══════════════════════════════════════════════════════════════════ */}
+      {!collapsed && (
+        <div
+          style={{ width: contentWidth }}
+          className="h-screen flex flex-col bg-background border-r border-border transition-[width] duration-200"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 h-12 shrink-0">
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">Brain OS</span>
+            <button
+              onClick={toggleCollapse}
+              className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors"
+              title="Collapse sidebar (\u2318[)"
             >
-              <svg
-                className={cn("w-[18px] h-[18px] shrink-0", isActive ? "text-foreground" : "text-muted")}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
               </svg>
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+            </button>
+          </div>
 
-      {/* ── Commands Section (scrollable, grouped by category) ──────── */}
-      {!collapsed && pathname.startsWith("/copilot") && (
-        <>
-          <div className="h-px bg-border-subtle mx-3 my-1" />
-          <CommandsSection />
-        </>
+          {/* Service Tab Pills */}
+          <ServiceTabsPills activeService={activeService} onServiceChange={handleServiceChange} />
+
+          <div className="h-px bg-border-subtle mx-3" />
+
+          {/* Commands */}
+          <CommandsSection activeService={activeService} />
+
+          {/* Chat History */}
+          <ChatHistorySection
+            groups={groups}
+            historyLoading={historyLoading}
+            activePath={pathname}
+            activeConversationId={activeConversationId}
+          />
+        </div>
       )}
 
-      {/* ── Chat History Tree (collapsible) ────────────────────────── */}
+      {/* ── Resize Handle ────────────────────────────────────────────────── */}
       {!collapsed && (
-        <ChatHistorySection
-          groups={groups}
-          historyLoading={historyLoading}
-          activePath={pathname}
-          activeConversationId={activeConversationId}
+        <div
+          onMouseDown={handleResizeStart}
+          className={cn(
+            "w-1.5 shrink-0 cursor-col-resize transition-colors h-screen",
+            "bg-transparent hover:bg-accent/30 active:bg-accent/50"
+          )}
+          title="Drag to resize sidebar"
         />
       )}
-      {collapsed && <div className="flex-1" />}
-
-      {/* ── User Profile + Org Switcher (bottom) ─────────────────────────── */}
-      <UserMenu collapsed={collapsed} />
-    </aside>
-
-    {/* ── Resize Handle ────────────────────────────────────────────────── */}
-    {!collapsed && (
-      <div
-        onMouseDown={handleResizeStart}
-        className={cn(
-          "w-1.5 shrink-0 cursor-col-resize transition-colors h-screen",
-          "bg-transparent hover:bg-accent/30 active:bg-accent/50"
-        )}
-        title="Drag to resize sidebar"
-      />
-    )}
     </div>
   );
 }

@@ -50,10 +50,14 @@ export function useTemplates(organizationId?: string): UseTemplatesReturn {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
     setLoading(true);
     setError(null);
 
-    fetch(`/api/templates?orgId=${encodeURIComponent(organizationId)}`)
+    fetch(`/api/templates?orgId=${encodeURIComponent(organizationId)}`, {
+      signal: controller.signal,
+    })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -69,12 +73,16 @@ export function useTemplates(organizationId?: string): UseTemplatesReturn {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err.message);
+        // Silently handle abort/timeout — templates are optional
+        setError(err.name === "AbortError" ? null : err.message);
         setLoading(false);
-      });
+      })
+      .finally(() => clearTimeout(timeout));
 
     return () => {
       cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
     };
   }, [organizationId, fetchCounter]);
 

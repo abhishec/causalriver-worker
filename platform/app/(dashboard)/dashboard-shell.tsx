@@ -15,7 +15,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const width = savedWidth ? Number(savedWidth) : 260;
 
     if (savedCollapsed === "true") {
-      setMarginLeft(64);
+      setMarginLeft(48);
     } else {
       // +6px for the resize handle
       setMarginLeft(width + 6);
@@ -25,7 +25,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail.collapsed) {
-        setMarginLeft(64);
+        setMarginLeft(48);
       } else {
         setMarginLeft((detail.width || 260) + 6);
       }

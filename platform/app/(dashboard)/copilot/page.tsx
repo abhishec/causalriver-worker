@@ -21,29 +21,7 @@ import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
 
 type ServiceMode = "general" | "aas" | "seaas";
 
-const SERVICE_TABS: { id: ServiceMode; label: string; description: string; color: string; alwaysVisible: boolean }[] = [
-  {
-    id: "general",
-    label: "General",
-    description: "Your intelligence co-pilot — every answer grounded in evidence-based analysis",
-    color: "accent",
-    alwaysVisible: true,
-  },
-  {
-    id: "seaas",
-    label: "SE-aaS",
-    description: "Your AI software engineer — branch-scoped code intelligence, PR review, impact analysis, and cross-release risk assessment",
-    color: "blue",
-    alwaysVisible: false, // Only if enabled for this org
-  },
-  {
-    id: "aas",
-    label: "AAAS",
-    description: "Your AI accountant — double-entry bookkeeping, financial statements, and GST compliance powered by financial intelligence",
-    color: "emerald",
-    alwaysVisible: false, // Only if enabled for this org
-  },
-];
+// Service tabs now live in the sidebar (Sidebar.tsx ServiceTabsPills)
 
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
@@ -94,12 +72,7 @@ function CopilotPageInner() {
   const [activeService, setActiveService] = useState<ServiceMode>("seaas");
   const persona = SERVICE_PERSONAS[activeService];
 
-  // For now, enable all service tabs (in future: read from org settings/capabilities)
-  const enabledServices: ServiceMode[] = ["general", "aas", "seaas"];
-
-  const visibleTabs = SERVICE_TABS.filter(
-    (tab) => tab.alwaysVisible || enabledServices.includes(tab.id)
-  );
+  // Service tabs now live in the sidebar — copilot page only shows the active persona
 
   // ── Layout state ──────────────────────────────────────────────────────────
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
@@ -313,11 +286,6 @@ function CopilotPageInner() {
     );
   }, []);
 
-  // ── Broadcast service mode to sidebar commands ──────────────────────────
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: activeService }));
-  }, [activeService]);
-
   // ── Service mode switch ───────────────────────────────────────────────────
   const handleServiceChange = useCallback((svc: ServiceMode) => {
     setActiveService(svc);
@@ -329,10 +297,16 @@ function CopilotPageInner() {
     window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
   }, []);
 
-  // ── Tab click handler ─────────────────────────────────────────────────────
-  const handleTabClick = useCallback((svc: ServiceMode) => {
-    if (svc === activeService) return;
-    handleServiceChange(svc);
+  // ── Listen for service-mode-changed from sidebar tab pills ─────────────
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const svc = (e as CustomEvent).detail as ServiceMode;
+      if (svc && ["general", "aas", "seaas"].includes(svc) && svc !== activeService) {
+        handleServiceChange(svc);
+      }
+    };
+    window.addEventListener("service-mode-changed", handler);
+    return () => window.removeEventListener("service-mode-changed", handler);
   }, [activeService, handleServiceChange]);
 
   // ── Conversation actions ──────────────────────────────────────────────────
@@ -346,6 +320,8 @@ function CopilotPageInner() {
     if (data) {
       if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
         setActiveService(data.service_mode);
+        // Sync sidebar tab pills when loading a saved conversation
+        window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: data.service_mode }));
       }
 
       try {
@@ -440,31 +416,12 @@ function CopilotPageInner() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-0rem)] -mx-6 -mt-6">
-      {/* ── Service Tabs Bar ─────────────────────────────────────────────── */}
+      {/* ── Persona Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between h-12 px-4 border-b border-border-subtle bg-background shrink-0">
-        {/* Left: empty space for balance */}
-        <div className="w-24" />
-
-        {/* Center: Service tabs */}
-        <div className="flex items-center gap-1">
-          {visibleTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
-              className={cn(
-                "px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150",
-                activeService === tab.id
-                  ? "bg-surface-hover text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-surface-hover/50"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">{persona.name}</span>
         </div>
-
-        {/* Right: Theme toggle */}
-        <div className="w-24 flex items-center justify-end gap-2">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
         </div>
       </div>

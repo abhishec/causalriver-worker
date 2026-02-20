@@ -32,13 +32,20 @@ export function useConversations(orgId: string | undefined) {
   const loadList = useCallback(async () => {
     if (!orgId) return;
     setLoading(true);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
     try {
-      const res = await fetch(`/api/copilot/conversations?orgId=${orgId}`);
+      const res = await fetch(`/api/copilot/conversations?orgId=${orgId}`, {
+        signal: controller.signal,
+      });
       if (res.ok) {
         const json = await res.json();
         if (json.conversations) setConversations(json.conversations);
       }
+    } catch {
+      // Silently handle timeout/abort — conversations list is non-blocking
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   }, [orgId]);
