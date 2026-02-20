@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
-import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
+import type { SEaaSDomainData } from "@/components/copilot/types";
 
 // ─── Mermaid diagram renderer ─────────────────────────────────────────────────
 

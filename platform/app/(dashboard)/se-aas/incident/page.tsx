@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
-import type { SEaaSDomainData } from "@/components/copilot/CopilotChat";
+import type { SEaaSDomainData } from "@/components/copilot/types";
 
 interface JobResult {
   jobId: string;

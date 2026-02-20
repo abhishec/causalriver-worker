@@ -18,12 +18,8 @@
 import { useState, useCallback, useRef, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import {
-  consumeSSEStream,
-  type CompositionStep,
-  type CompositionResult,
-  type AgentStep,
-} from "./CopilotChat";
+import { consumeSSEStream } from "./CopilotChat";
+import type { CompositionStep, CompositionResult, AgentStep } from "./types";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

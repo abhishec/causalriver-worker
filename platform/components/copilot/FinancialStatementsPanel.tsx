@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { AccountingDomainData } from "@/components/copilot/CopilotChat";
+import type { AccountingDomainData } from "@/components/copilot/types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -20,102 +20,29 @@ import { COMMAND_GATHERING_MAP } from "./command-gathering";
 import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
+// All shared types live in ./types.ts. Re-export them here for backward compat.
+export type {
+  BrainMeta,
+  CopilotArtifact,
+  AccountingDomainData,
+  SEaaSDomainData,
+  DeliveryIntelligenceData,
+  DomainResult,
+} from "./types";
+
+import type {
+  BrainMeta,
+  CopilotArtifact,
+  DomainResult,
+  DeliveryIntelligenceData,
+  SSECallbacks,
+} from "./types";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
-
-export interface BrainMeta {
-  intent: string;
-  domains: string[];
-  confidence: number;
-  regionsUsed: string[];
-  uncertainAreas: string[];
-}
-
-export interface CopilotArtifact {
-  id: string;
-  type: "code" | "analysis" | "table" | "chart" | "document" | "agent-execution";
-  title: string;
-  language?: string;
-  content: string;
-  createdAt: number;
-  messageIndex?: number;
-  /** Raw structured data for rich rendering (e.g. agent execution data) */
-  rawData?: unknown;
-  /** Source service */
-  service?: "general" | "aas" | "seaas" | "agent";
-}
-
-// ─── Domain Result Types (AAS + SE-aaS structured outputs) ──────────────────
-
-export interface AccountingDomainData {
-  period?: string;
-  profitAndLoss?: {
-    revenue: number;
-    expenses: number;
-    netIncome: number;
-    ebitda?: number;
-    revenueBreakdown?: Array<{ account: string; amount: number }>;
-    expenseBreakdown?: Array<{ account: string; amount: number }>;
-  };
-  balanceSheet?: {
-    totalAssets: number;
-    totalLiabilities: number;
-    totalEquity: number;
-    assets?: Array<{ account: string; balance: number }>;
-    liabilities?: Array<{ account: string; balance: number }>;
-    equity?: Array<{ account: string; balance: number }>;
-  };
-  trialBalance?: {
-    accounts: Array<{ account: string; type: string; debit: number; credit: number; netDebit: number; netCredit: number }>;
-    totalDebits: number;
-    totalCredits: number;
-    balanced: boolean;
-    period: string;
-  };
-  gstF5?: {
-    box1_standardRatedSupplies: number;
-    box2_zeroRatedSupplies: number;
-    box3_exemptSupplies: number;
-    box4_totalSupplies: number;
-    box5_taxableSupplies: number;
-    box6_outputTax: number;
-    box7_inputTax: number;
-    box8_netTaxPayable: number;
-  };
-  transactionSummary?: {
-    totalTransactions: number;
-    period: string;
-    bySource?: Array<{ source: string; count: number; totalAmount: number }>;
-    topTransactions?: Array<{ date: string; account: string; description: string; debit: number; credit: number; classification: string }>;
-  };
-  anomalies?: Array<{ type: string; description: string; severity: string; transactions?: unknown[] }>;
-  narrative?: string;
-}
-
-export interface SEaaSDomainData {
-  analysisType?: string;
-  summary?: string;
-  findings?: Array<{ severity: string; title: string; description: string; file?: string; line?: number }>;
-  recommendations?: Array<{ priority: string; action: string; rationale: string }>;
-  metrics?: Record<string, number | string>;
-  codeSnippets?: Array<{ language: string; code: string; title: string }>;
-}
-
-// DeliveryIntelligenceData matches the shape of GET /api/se-aas/engagement-health
-// and the SEaaSDeliveryPanel's prop type.
-import type { DeliveryIntelligenceData as _DeliveryIntelligenceData } from "@/components/copilot/SEaaSDeliveryPanel";
-export type DeliveryIntelligenceData = _DeliveryIntelligenceData;
-
-export type DomainResult =
-  | { service: "aas"; data: AccountingDomainData; messageIndex?: number }
-  | { service: "seaas"; data: SEaaSDomainData; messageIndex?: number }
-  | { service: "delivery-intelligence"; data: DeliveryIntelligenceData; messageIndex?: number }
-  | { service: "custom"; data: Record<string, unknown>; messageIndex?: number }
-  | { service: "general"; data: Record<string, unknown>; messageIndex?: number };
 
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
@@ -1049,74 +976,16 @@ function MessageActions({
 // Shared SSE parser used by the chat component and exported for reuse
 // in the CopilotOverlay.
 
-// ── Agent Streaming Types ────────────────────────────────────────────────────
-
-export interface AgentStep {
-  stepNumber: number;
-  type: "thinking" | "querying" | "acting" | "observing" | "reflecting";
-  title: string;
-  content?: string;
-  toolName?: string;
-  durationMs?: number;
-  status: "started" | "completed" | "failed";
-}
-
-export interface AgentStatus {
-  taskId: string;
-  status: "starting" | "running" | "completed" | "failed" | "awaiting_approval";
-  agentType?: string;
-  message?: string;
-}
-
-export interface ProgressiveArtifact {
-  id: string;
-  type: string;
-  title: string;
-  content: string;
-  isPartial: boolean;
-  service?: "seaas" | "aas" | "core";
-}
-
-export interface ProactiveInsight {
-  domain: string;
-  content: string;
-  importance: number;
-}
-
-/** Agent Composer: composition progress event */
-export interface CompositionStep {
-  phase: "analyzing" | "selecting-tools" | "building-persona" | "inferring-params" | "planning" | "ready";
-  title: string;
-  detail?: string;
-}
-
-/** Agent Composer: full composition result */
-export interface CompositionResult {
-  name: string;
-  persona: string;
-  selectedTools: Array<{ id: string; name: string; description: string; source: string; category: string }>;
-  inferredGathering: Array<{ id: string; label: string; type: string; required: boolean; description?: string }> | null;
-  executionPrompt: string;
-  executionPlan: string[];
-  complexity: "light" | "medium" | "heavy";
-}
-
-export interface SSECallbacks {
-  onText: (text: string, accumulated: string) => void;
-  onError: (error: string) => void;
-  onBrainMeta: (meta: BrainMeta) => void;
-  onDomainResult: (result: DomainResult) => void;
-  onAgentStep?: (step: AgentStep) => void;
-  onAgentStatus?: (status: AgentStatus) => void;
-  onProgressiveArtifact?: (artifact: ProgressiveArtifact) => void;
-  onProactiveInsights?: (insights: ProactiveInsight[]) => void;
-  onAgentExecutionArtifact?: (artifact: { id: string; type: string; title: string; service: string; rawData: unknown }) => void;
-  /** Agent Composer: composition progress (phase updates) */
-  onCompositionStep?: (step: CompositionStep) => void;
-  /** Agent Composer: full composition result */
-  onCompositionResult?: (result: CompositionResult) => void;
-  onDone: () => void;
-}
+// ── Agent Streaming Types (re-exported from types.ts) ────────────────────────
+export type {
+  AgentStep,
+  AgentStatus,
+  ProgressiveArtifact,
+  ProactiveInsight,
+  CompositionStep,
+  CompositionResult,
+  SSECallbacks,
+} from "./types";
 
 export async function consumeSSEStream(
   response: Response,

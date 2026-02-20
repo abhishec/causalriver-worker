@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import type { CopilotArtifact } from "@/components/copilot/CopilotChat";
+import type { CopilotArtifact } from "@/components/copilot/types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

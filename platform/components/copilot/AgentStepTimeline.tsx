@@ -11,7 +11,7 @@
  */
 
 import { useState } from "react";
-import type { AgentStep, AgentStatus } from "./CopilotChat";
+import type { AgentStep, AgentStatus } from "./types";
 
 // ── Step Type Config ─────────────────────────────────────────────────────────
 

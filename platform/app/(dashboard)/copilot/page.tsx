@@ -3,16 +3,14 @@
 import { useState, useCallback, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
-import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/CopilotChat";
+import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/types";
 import { ArtifactPane } from "@/components/copilot/ArtifactPane";
-import { ConversationSidebar } from "@/components/copilot/ConversationSidebar";
-// ServiceContextPane removed — replaced with simple empty state matching HTML prototype
+// ConversationSidebar removed — chat history now lives in the main Sidebar
 import { useConversations } from "@/lib/use-conversations";
 import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useOrg } from "@/lib/org-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { OpenClawPanel } from "@/components/copilot/OpenClawPanel";
 import { cn } from "@/lib/utils";
 import { useTemplates } from "@/lib/templates/useTemplates";
 import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
@@ -104,7 +102,6 @@ function CopilotPageInner() {
   );
 
   // ── Layout state ──────────────────────────────────────────────────────────
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
 
   // Right pane always visible (artifacts or empty state)
@@ -134,21 +131,12 @@ function CopilotPageInner() {
   // ── Conversation state ────────────────────────────────────────────────────
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const {
-    conversations,
-    loading: conversationsLoading,
     loadList,
     saveConversation,
     loadConversation,
-    deleteConversation,
-    renameConversation,
   } = useConversations(currentOrg?.id);
 
-  // ── Filter conversations by active service ────────────────────────────────
-  const filteredConversations = useMemo(() => {
-    return conversations.filter((c) => c.service_mode === activeService);
-  }, [conversations, activeService]);
-
-  // ── Auto-inject prompt from ?q= or ?service= query params ─────────────────
+  // ── Auto-inject prompt from ?q= or ?service= query params ──────────────────
   useEffect(() => {
     const svc = searchParams.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
@@ -166,11 +154,23 @@ function CopilotPageInner() {
     }
   }, [searchParams]);
 
-  // ── Load conversations on mount ───────────────────────────────────────────
+  // ── Listen for new-conversation from sidebar command clicks ────────────────
   useEffect(() => {
-    if (currentOrg?.id) loadList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentOrg?.id]);
+    const handler = () => {
+      setActiveConversationId(null);
+      setArtifacts([]);
+      setActiveArtifactId(null);
+      setArtifactPaneOpen(false);
+      setMessageArtifactMap(new Map());
+    };
+    window.addEventListener("copilot-new-conversation", handler);
+    return () => window.removeEventListener("copilot-new-conversation", handler);
+  }, []);
+
+  // ── Broadcast active conversation ID to main sidebar ──────────────────────
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("copilot-active-conversation-changed", { detail: activeConversationId }));
+  }, [activeConversationId]);
 
   // ── Handle new code/analysis artifacts from CopilotChat ───────────────────
   const handleArtifact = useCallback((artifact: CopilotArtifact) => {
@@ -379,6 +379,24 @@ function CopilotPageInner() {
     }
   }, [loadConversation]);
 
+  // ── Load conversation from ?c= query param (placed after handleSelectConversation) ──
+  useEffect(() => {
+    const convId = searchParams.get("c");
+    if (convId) {
+      handleSelectConversation(convId);
+    }
+  }, [searchParams, handleSelectConversation]);
+
+  // ── Listen for conversation selection from main sidebar ───────────────────
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent).detail;
+      if (typeof id === "string") handleSelectConversation(id);
+    };
+    window.addEventListener("copilot-select-conversation", handler);
+    return () => window.removeEventListener("copilot-select-conversation", handler);
+  }, [handleSelectConversation]);
+
   const handleNewConversation = useCallback(() => {
     setActiveConversationId(null);
     setArtifacts([]);
@@ -387,31 +405,23 @@ function CopilotPageInner() {
     window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
   }, []);
 
-  const handleDeleteConversation = useCallback(async (id: string) => {
-    await deleteConversation(id);
-    if (activeConversationId === id) {
-      handleNewConversation();
-    }
-  }, [deleteConversation, activeConversationId, handleNewConversation]);
-
-  const handleRenameConversation = useCallback(async (id: string, title: string) => {
-    await renameConversation(id, title);
-  }, [renameConversation]);
-
   // ── Auto-save conversation after stream completes ─────────────────────────
   const handleSave = useCallback(async (opts: { messages: any[]; title: string; serviceMode: string }) => {
     const svcMode = (["general", "aas", "seaas"].includes(opts.serviceMode) ? opts.serviceMode : "general") as "general" | "aas" | "seaas";
-    const id = await saveConversation({
-      conversationId: activeConversationId || undefined,
-      title: opts.title,
-      messages: opts.messages,
-      serviceMode: svcMode,
-    });
-    if (id) {
-      setActiveConversationId(id);
-      await loadList();
+    try {
+      const id = await saveConversation({
+        conversationId: activeConversationId || undefined,
+        title: opts.title,
+        messages: opts.messages,
+        serviceMode: svcMode,
+      });
+      if (id) {
+        setActiveConversationId(id);
+      }
+    } catch (err) {
+      console.error("[CopilotPage] handleSave failed:", err);
     }
-  }, [saveConversation, activeConversationId, loadList]);
+  }, [saveConversation, activeConversationId]);
 
   // ── Keyboard shortcut: Cmd+\ to toggle artifact pane ─────────────────────
   useEffect(() => {
@@ -459,29 +469,8 @@ function CopilotPageInner() {
         </div>
       </div>
 
-      {/* ── Main 3-column layout ─────────────────────────────────────────── */}
+      {/* ── Main 2-column layout (chat + artifact) ────────────────────────── */}
       <div className="flex flex-1 min-h-0">
-        {/* ── Left: Conversation Sidebar + OpenClaw Panel ────────────── */}
-        <div className="flex flex-col" style={{ width: sidebarCollapsed ? 48 : 260, flexShrink: 0 }}>
-          <ConversationSidebar
-            conversations={filteredConversations}
-            activeId={activeConversationId}
-            onSelect={handleSelectConversation}
-            onNew={handleNewConversation}
-            onDelete={handleDeleteConversation}
-            onRename={handleRenameConversation}
-            loading={conversationsLoading}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-          />
-          {/* OpenClaw Reinforcement Dashboard — always visible at bottom of sidebar */}
-          {!sidebarCollapsed && (
-            <div className="border-t border-border-subtle">
-              <OpenClawPanel organizationId={currentOrg?.id} />
-            </div>
-          )}
-        </div>
-
         {/* ── Center: Chat ─────────────────────────────────────────────── */}
         <div className="flex-1 min-w-0 flex flex-col">
           <ErrorBoundary section="Copilot Chat">

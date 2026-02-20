@@ -3,73 +3,22 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-// ─── Data Types ────────────────────────────────────────────────────────────────
+// ─── Data Types (imported from shared types to avoid circular deps) ──────────
+export type {
+  EngagementHealthData,
+  ScopeCreepAlert,
+  PodMatchData,
+  EngineerHealthSummary,
+  DeliveryIntelligenceData,
+} from "./types";
 
-export interface EngagementHealthData {
-  engagement_id: string;
-  engagement_name: string;
-  client_name: string;
-  pod_name?: string;
-  health_score: number;
-  delivery_velocity?: number;
-  jira_resolution_rate?: number;
-  scope_drift?: number;
-  team_concentration?: number;
-  slack_sentiment?: number;
-  story_point_delta_pct?: number;
-  predicted_completion_date?: string;
-  forecast_confidence?: number;
-  forecast_days_remaining?: number;
-  forecast_at_risk?: boolean;
-  target_end_date?: string;
-  days_overdue?: number;
-  status: string;
-  computed_at: string;
-}
-
-export interface ScopeCreepAlert {
-  id: string;
-  engagement_id: string;
-  severity: "warning" | "critical";
-  delta_pct: number;
-  baseline_pts?: number;
-  current_pts?: number;
-  sprint_name?: string;
-  alert_message: string;
-  created_at: string;
-  engagements?: { engagement_name: string; client_name: string };
-}
-
-export interface PodMatchData {
-  engagement_id?: string;
-  recommended_pod_name: string;
-  evidence: {
-    avgCycleTimeHours?: number;
-    weeklyPrCount?: number;
-    techStackMatch?: string[];
-    techStackOverlapScore?: number;
-    pastEngagements?: Array<{ engagementName: string; clientName: string; healthScore: number }>;
-    matchScore?: number;
-  };
-  confidence: number;
-  created_at: string;
-}
-
-export interface EngineerHealthSummary {
-  total_engineers: number;
-  at_risk_count: number;
-  overallocated_count: number;
-  avg_review_burden: number;
-  week_start: string;
-}
-
-export interface DeliveryIntelligenceData {
-  health_scores: EngagementHealthData[];
-  scope_alerts: ScopeCreepAlert[];
-  pod_matches: PodMatchData[];
-  engineer_health_summary?: EngineerHealthSummary | null;
-  generated_at?: string;
-}
+import type {
+  EngagementHealthData,
+  ScopeCreepAlert,
+  PodMatchData,
+  EngineerHealthSummary,
+  DeliveryIntelligenceData,
+} from "./types";
 
 // ─── Sub-components (re-use same design tokens as SEaaSResultPanel) ────────────
 

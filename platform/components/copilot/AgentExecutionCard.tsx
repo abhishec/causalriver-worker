@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback } from "react";
-import type { AgentStep } from "./CopilotChat";
+import type { AgentStep } from "./types";
 
 interface AgentExecutionData {
   taskId: string;

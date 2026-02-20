@@ -1,3 +1,236 @@
+/**
+ * Shared Copilot Types
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Shared types extracted here to break circular module dependencies.
+ * Import domain types from this file, NOT from CopilotChat.tsx.
+ */
+
+// ─── Core Message Types ─────────────────────────────────────────────────────
+
+export interface BrainMeta {
+  intent: string;
+  domains: string[];
+  confidence: number;
+  regionsUsed: string[];
+  uncertainAreas: string[];
+}
+
+export interface CopilotArtifact {
+  id: string;
+  type: "code" | "analysis" | "table" | "chart" | "document" | "agent-execution";
+  title: string;
+  language?: string;
+  content: string;
+  createdAt: number;
+  messageIndex?: number;
+  /** Raw structured data for rich rendering (e.g. agent execution data) */
+  rawData?: unknown;
+  /** Source service */
+  service?: "general" | "aas" | "seaas" | "agent";
+}
+
+// ─── Domain Result Types (AAS + SE-aaS structured outputs) ──────────────────
+
+export interface AccountingDomainData {
+  period?: string;
+  profitAndLoss?: {
+    revenue: number;
+    expenses: number;
+    netIncome: number;
+    ebitda?: number;
+    revenueBreakdown?: Array<{ account: string; amount: number }>;
+    expenseBreakdown?: Array<{ account: string; amount: number }>;
+  };
+  balanceSheet?: {
+    totalAssets: number;
+    totalLiabilities: number;
+    totalEquity: number;
+    assets?: Array<{ account: string; balance: number }>;
+    liabilities?: Array<{ account: string; balance: number }>;
+    equity?: Array<{ account: string; balance: number }>;
+  };
+  trialBalance?: {
+    accounts: Array<{ account: string; type: string; debit: number; credit: number; netDebit: number; netCredit: number }>;
+    totalDebits: number;
+    totalCredits: number;
+    balanced: boolean;
+    period: string;
+  };
+  gstF5?: {
+    box1_standardRatedSupplies: number;
+    box2_zeroRatedSupplies: number;
+    box3_exemptSupplies: number;
+    box4_totalSupplies: number;
+    box5_taxableSupplies: number;
+    box6_outputTax: number;
+    box7_inputTax: number;
+    box8_netTaxPayable: number;
+  };
+  transactionSummary?: {
+    totalTransactions: number;
+    period: string;
+    bySource?: Array<{ source: string; count: number; totalAmount: number }>;
+    topTransactions?: Array<{ date: string; account: string; description: string; debit: number; credit: number; classification: string }>;
+  };
+  anomalies?: Array<{ type: string; description: string; severity: string; transactions?: unknown[] }>;
+  narrative?: string;
+}
+
+export interface SEaaSDomainData {
+  analysisType?: string;
+  summary?: string;
+  findings?: Array<{ severity: string; title: string; description: string; file?: string; line?: number }>;
+  recommendations?: Array<{ priority: string; action: string; rationale: string }>;
+  metrics?: Record<string, number | string>;
+  codeSnippets?: Array<{ language: string; code: string; title: string }>;
+}
+
+// ─── Delivery Intelligence Types ────────────────────────────────────────────
+
+export interface EngagementHealthData {
+  engagement_id: string;
+  engagement_name: string;
+  client_name: string;
+  pod_name?: string;
+  health_score: number;
+  delivery_velocity?: number;
+  jira_resolution_rate?: number;
+  scope_drift?: number;
+  team_concentration?: number;
+  slack_sentiment?: number;
+  story_point_delta_pct?: number;
+  predicted_completion_date?: string;
+  forecast_confidence?: number;
+  forecast_days_remaining?: number;
+  forecast_at_risk?: boolean;
+  target_end_date?: string;
+  days_overdue?: number;
+  status: string;
+  computed_at: string;
+}
+
+export interface ScopeCreepAlert {
+  id: string;
+  engagement_id: string;
+  severity: "warning" | "critical";
+  delta_pct: number;
+  baseline_pts?: number;
+  current_pts?: number;
+  sprint_name?: string;
+  alert_message: string;
+  created_at: string;
+  engagements?: { engagement_name: string; client_name: string };
+}
+
+export interface PodMatchData {
+  engagement_id?: string;
+  recommended_pod_name: string;
+  evidence: {
+    avgCycleTimeHours?: number;
+    weeklyPrCount?: number;
+    techStackMatch?: string[];
+    techStackOverlapScore?: number;
+    pastEngagements?: Array<{ engagementName: string; clientName: string; healthScore: number }>;
+    matchScore?: number;
+  };
+  confidence: number;
+  created_at: string;
+}
+
+export interface EngineerHealthSummary {
+  total_engineers: number;
+  at_risk_count: number;
+  overallocated_count: number;
+  avg_review_burden: number;
+  week_start: string;
+}
+
+export interface DeliveryIntelligenceData {
+  health_scores: EngagementHealthData[];
+  scope_alerts: ScopeCreepAlert[];
+  pod_matches: PodMatchData[];
+  engineer_health_summary?: EngineerHealthSummary | null;
+  generated_at?: string;
+}
+
+// ─── Domain Result Union ────────────────────────────────────────────────────
+
+export type DomainResult =
+  | { service: "aas"; data: AccountingDomainData; messageIndex?: number }
+  | { service: "seaas"; data: SEaaSDomainData; messageIndex?: number }
+  | { service: "delivery-intelligence"; data: DeliveryIntelligenceData; messageIndex?: number }
+  | { service: "custom"; data: Record<string, unknown>; messageIndex?: number }
+  | { service: "general"; data: Record<string, unknown>; messageIndex?: number };
+
+// ─── Agent Streaming Types ──────────────────────────────────────────────────
+
+export interface AgentStep {
+  stepNumber: number;
+  type: "thinking" | "querying" | "acting" | "observing" | "reflecting";
+  title: string;
+  content?: string;
+  toolName?: string;
+  durationMs?: number;
+  status: "started" | "completed" | "failed";
+}
+
+export interface AgentStatus {
+  taskId: string;
+  status: "starting" | "running" | "completed" | "failed" | "awaiting_approval";
+  agentType?: string;
+  message?: string;
+}
+
+export interface ProgressiveArtifact {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  isPartial: boolean;
+  service?: "seaas" | "aas" | "core";
+}
+
+export interface ProactiveInsight {
+  domain: string;
+  content: string;
+  importance: number;
+}
+
+/** Agent Composer: composition progress event */
+export interface CompositionStep {
+  phase: "analyzing" | "selecting-tools" | "building-persona" | "inferring-params" | "planning" | "ready";
+  title: string;
+  detail?: string;
+}
+
+/** Agent Composer: full composition result */
+export interface CompositionResult {
+  name: string;
+  persona: string;
+  selectedTools: Array<{ id: string; name: string; description: string; source: string; category: string }>;
+  inferredGathering: Array<{ id: string; label: string; type: string; required: boolean; description?: string }> | null;
+  executionPrompt: string;
+  executionPlan: string[];
+  complexity: "light" | "medium" | "heavy";
+}
+
+export interface SSECallbacks {
+  onText: (text: string, accumulated: string) => void;
+  onError: (error: string) => void;
+  onBrainMeta: (meta: BrainMeta) => void;
+  onDomainResult: (result: DomainResult) => void;
+  onAgentStep?: (step: AgentStep) => void;
+  onAgentStatus?: (status: AgentStatus) => void;
+  onProgressiveArtifact?: (artifact: ProgressiveArtifact) => void;
+  onProactiveInsights?: (insights: ProactiveInsight[]) => void;
+  onAgentExecutionArtifact?: (artifact: { id: string; type: string; title: string; service: string; rawData: unknown }) => void;
+  /** Agent Composer: composition progress (phase updates) */
+  onCompositionStep?: (step: CompositionStep) => void;
+  /** Agent Composer: full composition result */
+  onCompositionResult?: (result: CompositionResult) => void;
+  onDone: () => void;
+}
+
 // ─── Unified Artifact Type System ────────────────────────────────────────────
 // All service outputs (code, financial statements, engineering analysis, charts)
 // render as artifacts in the same artifact pane — exactly like Claude Cowork.

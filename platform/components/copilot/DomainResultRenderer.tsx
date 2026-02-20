@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
-import type { DomainResult } from "@/components/copilot/CopilotChat";
+import type { DomainResult } from "@/components/copilot/types";
 import { FinancialStatementsPanel, AAS_DOMAIN_TO_TAB } from "@/components/copilot/FinancialStatementsPanel";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
 import { SEaaSDeliveryPanel } from "@/components/copilot/SEaaSDeliveryPanel";
