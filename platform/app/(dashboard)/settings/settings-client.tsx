@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
@@ -23,12 +24,28 @@ interface Connector {
   config: any;
 }
 
+interface Customer {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+}
+
+interface SiblingWorkspace {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+}
+
 interface SettingsClientProps {
-  org: { id: string; name: string; slug: string; plan: string; is_design_partner?: boolean } | null;
+  org: { id: string; name: string; slug: string; plan: string; is_design_partner?: boolean; customer_id?: string } | null;
   orgId: string;
   budget: any;
   apiKeys: any[];
   connectors: Connector[];
+  customer?: Customer | null;
+  siblingWorkspaces?: SiblingWorkspace[];
 }
 
 const AVAILABLE_CONNECTORS = [
@@ -61,8 +78,10 @@ const TAB_ICONS: Record<string, string> = {
   partner:       "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
 };
 
-export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: SettingsClientProps) {
-  const [activeTab, setActiveTab] = useState("general");
+export function SettingsClient({ org, orgId, budget, apiKeys, connectors, customer, siblingWorkspaces = [] }: SettingsClientProps) {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "general";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -188,6 +207,82 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
                 />
               </div>
             </div>
+
+            {/* ── Customer & Workspaces Hierarchy ────────────────────── */}
+            {customer && (
+              <div className="mt-8 pt-6 border-t border-border-subtle">
+                <h2 className="text-sm font-medium mb-1">Customer & Workspaces</h2>
+                <p className="text-xs text-muted mb-4">
+                  Your workspaces are grouped under <span className="font-medium text-foreground">{customer.name}</span>
+                </p>
+
+                {/* Customer card */}
+                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4 mb-3">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                      <svg className="w-4.5 h-4.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{customer.name}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="accent" size="xs">{customer.plan}</Badge>
+                        <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Workspace list */}
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/70 px-1 mb-1.5">
+                      Workspaces ({siblingWorkspaces.length})
+                    </div>
+                    {siblingWorkspaces.map((ws) => (
+                      <div
+                        key={ws.id}
+                        className={cn(
+                          "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
+                          ws.id === orgId
+                            ? "bg-accent/8 border border-accent/15"
+                            : "hover:bg-surface-hover"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          {ws.id === orgId && (
+                            <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                          <span className={cn("truncate text-[13px]", ws.id === orgId ? "font-medium" : "text-muted-foreground")}>
+                            {ws.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge variant="default" size="xs">{ws.plan}</Badge>
+                          {ws.id === orgId && (
+                            <span className="text-[10px] text-accent font-medium">Current</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Create new workspace */}
+                  <button
+                    onClick={() => {
+                      showToast("To create a new workspace, use the org switcher at the bottom of the sidebar or contact your admin.");
+                    }}
+                    className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span className="font-medium">Create Workspace</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
