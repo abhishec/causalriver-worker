@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -57,7 +58,9 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const supabase = createClient();
+  // Memoize the Supabase client so it's created once, not on every render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const supabase = useMemo(() => createClient(), []);
 
   /* Load user's orgs on mount */
   const loadOrgs = useCallback(async () => {

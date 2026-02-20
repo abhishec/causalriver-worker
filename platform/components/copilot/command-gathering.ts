@@ -17,7 +17,7 @@ export interface GatheringParam {
   /** Human-readable label shown in UI */
   label: string;
   /** Input type for rendering */
-  type: "select" | "date" | "date_range" | "number" | "text" | "chips" | "file";
+  type: "select" | "date" | "date_range" | "number" | "text" | "chips" | "file" | "gl_check";
   /** Whether this param must be filled before execution */
   required: boolean;
   /** API endpoint to fetch dynamic options (e.g. "/api/org/list") */
@@ -36,6 +36,8 @@ export interface GatheringParam {
   accept?: string;
   /** For file type: whether multiple files can be uploaded */
   multiple?: boolean;
+  /** For gl_check type: API endpoint to check GL data status */
+  glStatusEndpoint?: string;
 }
 
 export interface CommandGathering {
@@ -222,6 +224,20 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
   },
 ];
 
+// ── AAS: Shared GL Data Param ────────────────────────────────────────────────
+// Every AAS command requires GL data. This param checks for existing uploads
+// and allows the user to upload new GL files directly in the chat flow.
+
+const GL_DATA_PARAM: GatheringParam = {
+  id: "gl_data",
+  label: "General Ledger Data",
+  type: "gl_check",
+  required: true,
+  dependsOn: "org",
+  glStatusEndpoint: "/api/aaas/gl-status",
+  description: "Upload or confirm your General Ledger data",
+};
+
 // ── AAS: Accounting Commands ─────────────────────────────────────────────────
 
 const AAS_GATHERING: CommandGathering[] = [
@@ -236,6 +252,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "fiscal_period",
         label: "Fiscal Period",
@@ -269,6 +286,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Generate P&L statement for **{{fiscal_period}}**{{comparison_period}}?",
     gatheringPrompts: {
       org: "Which organization's P&L do you need?",
+      gl_data: "Let me check if you have General Ledger data available...",
       fiscal_period: "Which fiscal period should I generate the statement for?",
       comparison_period:
         "Want to compare against a prior period? Default is previous quarter.",
@@ -292,6 +310,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "as_of_date",
         label: "As of Date",
@@ -305,6 +324,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Generate balance sheet as of **{{as_of_date}}**?",
     gatheringPrompts: {
       org: "Which organization's balance sheet do you need?",
+      gl_data: "Let me check if you have General Ledger data available...",
       as_of_date:
         "What date should the balance sheet reflect? Default is today.",
     },
@@ -322,6 +342,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "period",
         label: "Period",
@@ -338,6 +359,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage: "Generate trial balance for **{{period}}**?",
     gatheringPrompts: {
       org: "Which organization?",
+      gl_data: "Let me check if you have General Ledger data available...",
       period: "Which period do you need the trial balance for?",
     },
     promptBuilder: (p) =>
@@ -354,6 +376,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "filing_period",
         label: "Filing Period",
@@ -371,6 +394,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Check GST F5 compliance for **{{filing_period}}**?",
     gatheringPrompts: {
       org: "Which organization's GST compliance do you need?",
+      gl_data: "Let me check if you have General Ledger data available...",
       filing_period: "Which filing period should I check?",
     },
     promptBuilder: (p) =>
@@ -387,6 +411,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "sensitivity_level",
         label: "Sensitivity",
@@ -404,6 +429,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Scan for transaction anomalies at **{{sensitivity_level}}** sensitivity?",
     gatheringPrompts: {
       org: "Which organization should I scan for anomalies?",
+      gl_data: "Let me check if you have General Ledger data available...",
       sensitivity_level:
         "How sensitive should the detection be? Default is medium.",
     },
@@ -421,6 +447,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "date_range",
         label: "Date Range",
@@ -441,6 +468,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Show transactions from **{{date_range}}**{{min_amount}}?",
     gatheringPrompts: {
       org: "Which organization's transactions do you want to see?",
+      gl_data: "Let me check if you have General Ledger data available...",
       date_range: "What date range should I pull transactions for?",
       min_amount:
         "Filter by minimum amount? Leave blank to show all transactions.",
@@ -464,6 +492,7 @@ const AAS_GATHERING: CommandGathering[] = [
         optionsEndpoint: "/api/org/list",
         optionsKey: "organizations",
       },
+      GL_DATA_PARAM,
       {
         id: "benchmark_type",
         label: "Benchmark Type",
@@ -481,6 +510,7 @@ const AAS_GATHERING: CommandGathering[] = [
       "Generate **{{benchmark_type}}** benchmark report?",
     gatheringPrompts: {
       org: "Which organization do you want to benchmark?",
+      gl_data: "Let me check if you have General Ledger data available...",
       benchmark_type: "What benchmark type should I compare against?",
     },
     promptBuilder: (p) =>
@@ -503,14 +533,7 @@ const AAS_FULL_REVIEW: CommandGathering = {
       optionsEndpoint: "/api/org/list",
       optionsKey: "organizations",
     },
-    {
-      id: "file",
-      label: "Financial Data",
-      type: "file",
-      required: false,
-      accept: ".csv,.xlsx,.xls,.pdf",
-      description: "Upload a trial balance, bank statement, or ledger file",
-    },
+    GL_DATA_PARAM,
     {
       id: "fiscal_period",
       label: "Fiscal Period",
@@ -527,19 +550,117 @@ const AAS_FULL_REVIEW: CommandGathering = {
     "Run full financial review for **{{fiscal_period}}**? This will generate P&L, Balance Sheet, Trial Balance, GST F5, Anomaly Detection, and Transaction Summary — each as a separate artifact.",
   gatheringPrompts: {
     org: "Which organization should I review?",
-    file: "Want to upload financial data? You can upload a CSV, Excel, or PDF file. Or skip to use existing data.",
+    gl_data: "Let me check if you have General Ledger data available...",
     fiscal_period: "Which fiscal period should I review?",
   },
   promptBuilder: (p) =>
     `Run a full financial review for ${p.fiscal_period}. Generate: P&L statement, Balance Sheet, Trial Balance, GST F5 compliance check, Anomaly detection, and Transaction summary. Create each as a separate artifact.`,
 };
 
+// ── AAS: Financial Intelligence Commands ─────────────────────────────────────
+
+const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
+  {
+    commandId: "aas-cash-forecast",
+    params: [
+      {
+        id: "org",
+        label: "Organization",
+        type: "select",
+        required: true,
+        optionsEndpoint: "/api/org/list",
+        optionsKey: "organizations",
+      },
+      GL_DATA_PARAM,
+      {
+        id: "forecast_weeks",
+        label: "Forecast Period",
+        type: "select",
+        required: false,
+        staticOptions: [
+          { value: "4", label: "4 weeks" },
+          { value: "8", label: "8 weeks" },
+          { value: "13", label: "13 weeks (default)" },
+          { value: "26", label: "26 weeks" },
+        ],
+        defaultValue: "13",
+      },
+    ],
+    confirmationMessage:
+      "Generate **{{forecast_weeks}}-week** causal cash flow forecast?",
+    gatheringPrompts: {
+      org: "Which organization's cash flow should I forecast?",
+      gl_data: "Let me check if you have General Ledger data available...",
+      forecast_weeks: "How far out should the forecast go? Default is 13 weeks.",
+    },
+    promptBuilder: (p) =>
+      `Generate a ${p.forecast_weeks || 13}-week cash flow forecast with causal analysis of risk factors`,
+  },
+  {
+    commandId: "aas-revenue-leakage",
+    params: [
+      {
+        id: "org",
+        label: "Organization",
+        type: "select",
+        required: true,
+        optionsEndpoint: "/api/org/list",
+        optionsKey: "organizations",
+      },
+      GL_DATA_PARAM,
+    ],
+    confirmationMessage:
+      "Scan for revenue leakage — under-billing, missed renewals, and pricing gaps?",
+    gatheringPrompts: {
+      org: "Which organization should I scan for revenue leakage?",
+      gl_data: "Let me check if you have General Ledger data available...",
+    },
+    promptBuilder: () =>
+      `Scan for revenue leakage — find under-billing, missed renewals, and pricing gaps across all contracts`,
+  },
+  {
+    commandId: "aas-causal-pl",
+    params: [
+      {
+        id: "org",
+        label: "Organization",
+        type: "select",
+        required: true,
+        optionsEndpoint: "/api/org/list",
+        optionsKey: "organizations",
+      },
+      GL_DATA_PARAM,
+      {
+        id: "comparison",
+        label: "Compare Against",
+        type: "select",
+        required: false,
+        staticOptions: [
+          { value: "previous_quarter", label: "Previous Quarter" },
+          { value: "same_quarter_ly", label: "Same Quarter Last Year" },
+          { value: "previous_year", label: "Previous Year" },
+        ],
+        defaultValue: "previous_quarter",
+      },
+    ],
+    confirmationMessage:
+      "Generate causal P&L analysis compared to **{{comparison}}**?",
+    gatheringPrompts: {
+      org: "Which organization's P&L should I analyse causally?",
+      gl_data: "Let me check if you have General Ledger data available...",
+      comparison: "Which period should I compare against? Default is previous quarter.",
+    },
+    promptBuilder: (p) =>
+      `Generate a causal P&L analysis showing why each line item changed versus ${p.comparison || "previous quarter"}`,
+  },
+];
+
 // ── Lookup Map ───────────────────────────────────────────────────────────────
 
 /** All gathering definitions keyed by command ID */
 export const COMMAND_GATHERING_MAP: Record<string, CommandGathering> =
   Object.fromEntries(
-    [...SEAAS_P0_GATHERING, ...AAS_GATHERING, AAS_FULL_REVIEW].map((g) => [g.commandId, g])
+    [...SEAAS_P0_GATHERING, ...AAS_GATHERING, ...AAS_INTELLIGENCE_GATHERING, AAS_FULL_REVIEW].map((g) => [g.commandId, g])
   );
 
 /** Set of command IDs that have gathering defined */

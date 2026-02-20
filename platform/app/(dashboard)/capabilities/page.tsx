@@ -18,28 +18,30 @@ export default async function CapabilitiesPage() {
       return { data: null as T | null, error: err };
     });
 
-  // Fetch recent SE-aaS artifacts for this org
-  const { data: recentArtifacts } = await safe(supabase
-    .from("se_aas_artifacts")
-    .select("id, domain_type, created_at, metadata")
-    .eq("organization_id", orgId)
-    .order("created_at", { ascending: false })
-    .limit(10));
-
-  // Fetch agent queue for pending/running jobs
-  const { data: activeJobs } = await safe(supabase
-    .from("agent_queue")
-    .select("id, task_type, status, created_at")
-    .eq("organization_id", orgId)
-    .eq("agent_type", "se-aas")
-    .in("status", ["pending", "running"])
-    .order("created_at", { ascending: false })
-    .limit(5));
-
-  // Count total artifacts per domain
-  const { data: artifactCounts } = await safe(supabase
-    .rpc("count_se_aas_artifacts_by_domain", { org_id: orgId })
-    .select("*"));
+  // Fetch all data in parallel
+  const [
+    { data: recentArtifacts },
+    { data: activeJobs },
+    { data: artifactCounts },
+  ] = await Promise.all([
+    safe(supabase
+      .from("se_aas_artifacts")
+      .select("id, domain_type, created_at, metadata")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(10)),
+    safe(supabase
+      .from("agent_queue")
+      .select("id, task_type, status, created_at")
+      .eq("organization_id", orgId)
+      .eq("agent_type", "se-aas")
+      .in("status", ["pending", "running"])
+      .order("created_at", { ascending: false })
+      .limit(5)),
+    safe(supabase
+      .rpc("count_se_aas_artifacts_by_domain", { org_id: orgId })
+      .select("*")),
+  ]);
 
   // Fallback: count from artifacts directly if RPC doesn't exist
   const domainCounts: Record<string, number> = {};

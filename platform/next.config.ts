@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const nextConfig: NextConfig = {
   // Standalone output for Docker deployment (ECS/Fargate) and Amplify WEB_COMPUTE.
-  output: 'standalone',
-  outputFileTracingRoot: path.join(__dirname, '../'),
+  // Only enable for production builds — causes webpack cache corruption in dev.
+  ...(isDev ? {} : { output: 'standalone', outputFileTracingRoot: path.join(__dirname, '../') }),
   // Disable Next.js compression — CloudFront handles gzip/brotli at the edge.
   // Avoids wasting Lambda CPU on compression for every response.
   compress: false,
@@ -13,11 +15,6 @@ const nextConfig: NextConfig = {
     // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.
     // Types are validated locally and in CI via `tsc --noEmit`.
     ignoreBuildErrors: true,
-  },
-  // ── Turbopack — lock root to the platform dir so stray lockfiles in ~/ don't
-  // confuse Next.js 16 into picking the wrong workspace root.
-  turbopack: {
-    root: __dirname,
   },
   // ── Dev server performance ──────────────────────────────────────────────────
   // Automatically tree-shake + barrel-file-optimize these heavy packages so

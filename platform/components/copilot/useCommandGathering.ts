@@ -66,6 +66,13 @@ export type GatheringInteractive =
       description?: string;
     }
   | {
+      type: "gl_check";
+      paramId: string;
+      glStatusEndpoint: string;
+      orgId: string;
+      description?: string;
+    }
+  | {
       type: "confirm";
       message: string;
       params: Record<string, unknown>;
@@ -184,7 +191,8 @@ export function useCommandGathering(
   const buildInteractive = useCallback(
     (
       param: GatheringParam,
-      options: { value: string; label: string; icon?: string }[]
+      options: { value: string; label: string; icon?: string }[],
+      collectedParams?: Record<string, unknown>
     ): GatheringInteractive | null => {
       switch (param.type) {
         case "select":
@@ -222,6 +230,14 @@ export function useCommandGathering(
             paramId: param.id,
             accept: param.accept,
             multiple: param.multiple,
+            description: param.description,
+          };
+        case "gl_check":
+          return {
+            type: "gl_check",
+            paramId: param.id,
+            glStatusEndpoint: param.glStatusEndpoint || "/api/aaas/gl-status",
+            orgId: String(collectedParams?.["org"] || ""),
             description: param.description,
           };
         case "text":
@@ -296,7 +312,7 @@ export function useCommandGathering(
       // Replace {{count}} with actual count
       prompt = prompt.replace("{{count}}", String(options.length));
 
-      const interactive = buildInteractive(param, options);
+      const interactive = buildInteractive(param, options, params);
 
       setState((s) => ({
         ...s,

@@ -13,14 +13,16 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { securityMiddleware } from "@/lib/ids";
 
 export async function middleware(request: NextRequest) {
-  // 0. Intrusion Detection System (IDS) - First line of defense
-  const securityBlock = await securityMiddleware(request);
+  // Run IDS and Supabase session in parallel — they are independent.
+  // If IDS blocks, we discard the session response.
+  const [securityBlock, response] = await Promise.all([
+    securityMiddleware(request),
+    updateSession(request),
+  ]);
+
   if (securityBlock) {
     return securityBlock; // Block malicious request immediately
   }
-
-  // 1. Update Supabase session
-  const response = await updateSession(request);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 2. Add OWASP Security Headers (10/10 compliance)

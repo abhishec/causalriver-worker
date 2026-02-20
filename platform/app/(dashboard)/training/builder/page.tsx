@@ -12,20 +12,20 @@ export default async function TrainingBuilderPage() {
   const supabase = await createClient();
   const orgId = await getCurrentOrgId();
 
-  // Fetch available entities for autocomplete
-  const { data: entities } = await supabase
-    .from("resolved_entities")
-    .select("id, canonical_name, entity_type, domain")
-    .eq("organization_id", orgId)
-    .order("canonical_name")
-    .limit(200);
-
-  // Fetch unique domains
-  const { data: edges } = await supabase
-    .from("causal_relationships_statistical")
-    .select("domain")
-    .eq("organization_id", orgId)
-    .limit(200);
+  // Fetch entities and domains in parallel
+  const [{ data: entities }, { data: edges }] = await Promise.all([
+    supabase
+      .from("resolved_entities")
+      .select("id, canonical_name, entity_type, domain")
+      .eq("organization_id", orgId)
+      .order("canonical_name")
+      .limit(200),
+    supabase
+      .from("causal_relationships_statistical")
+      .select("domain")
+      .eq("organization_id", orgId)
+      .limit(200),
+  ]);
 
   const domains = [...new Set((edges || []).map((e) => e.domain).filter(Boolean))].sort();
 

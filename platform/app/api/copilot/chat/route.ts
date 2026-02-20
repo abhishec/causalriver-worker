@@ -785,6 +785,14 @@ export async function POST(request: NextRequest) {
             brainAugmented: aasResult.brainMetadata.brainAugmented,
             ...aasResult.result,
           };
+        } else {
+          // No GL data uploaded — surface clear error instead of silent fallthrough
+          accountingResult = {
+            domainType: accountingRoute.domainType,
+            brainAugmented: false,
+            error: "no_gl_data",
+            message: "No General Ledger data found for this organization. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+          };
         }
       } catch (acctErr) {
         console.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);

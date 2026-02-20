@@ -3,7 +3,7 @@ import { getCurrentOrgId } from "@/lib/org-helpers";
 import { formatNumber } from "@/lib/utils";
 import { CodeIntelligenceClient } from "./code-intelligence-client";
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Code Intelligence" };
 
@@ -12,25 +12,25 @@ export default async function CodeIntelligencePage() {
   const orgId = await getCurrentOrgId();
   const service = await createServiceClient();
 
-  // Check if GitHub is connected
-  const { data: connector } = await service
-    .from("org_connectors")
-    .select("id, status, config, last_sync_at, signals_count")
-    .eq("organization_id", orgId)
-    .eq("connector_type", "github")
-    .maybeSingle();
+  // Fetch connector info and signal count in parallel
+  const [{ data: connector }, { count: signalCount }] = await Promise.all([
+    service
+      .from("org_connectors")
+      .select("id, status, config, last_sync_at, signals_count")
+      .eq("organization_id", orgId)
+      .eq("connector_type", "github")
+      .maybeSingle(),
+    supabase
+      .from("cross_domain_signals")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", orgId)
+      .like("source_domain", "engineering%"),
+  ]);
 
   const config = (connector?.config || {}) as Record<string, any>;
   const isConnected = connector?.status === "active";
   const ingestionStats = config?.ingestion_progress?.stats;
   const isIngested = ingestionStats?.filesProcessed > 0;
-
-  // Count engineering signals
-  const { count: signalCount } = await supabase
-    .from("cross_domain_signals")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", orgId)
-    .like("source_domain", "engineering%");
 
   return (
     <div className="space-y-6">

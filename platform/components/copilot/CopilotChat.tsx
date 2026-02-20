@@ -37,6 +37,9 @@ import type {
   DomainResult,
   DeliveryIntelligenceData,
   SSECallbacks,
+  AgentStep,
+  AgentStatus,
+  ProactiveInsight,
 } from "./types";
 
 interface Message {

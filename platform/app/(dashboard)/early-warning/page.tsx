@@ -16,53 +16,53 @@ export default async function EarlyWarningPage() {
   const supabase = await createClient();
   const orgId = await getCurrentOrgId();
 
-  // ── Workspace / Branch context ──────────────────────────────────────────
-  const { data: githubConnector } = await supabase
-    .from("org_connectors")
-    .select("config")
-    .eq("organization_id", orgId)
-    .eq("connector_type", "github")
-    .limit(1)
-    .maybeSingle();
+  // ── Fetch all data in parallel ──────────────────────────────────────────
+  const [
+    { data: githubConnector },
+    { data: velocitySnapshots },
+    { data: bottleneckSnapshots },
+    { data: causalEdges },
+    { data: brainAlerts },
+  ] = await Promise.all([
+    supabase
+      .from("org_connectors")
+      .select("config")
+      .eq("organization_id", orgId)
+      .eq("connector_type", "github")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("velocity_snapshots")
+      .select("*")
+      .eq("organization_id", orgId)
+      .order("snapshot_date", { ascending: false })
+      .limit(30),
+    supabase
+      .from("bottleneck_snapshots")
+      .select("*")
+      .eq("organization_id", orgId)
+      .order("snapshot_date", { ascending: false })
+      .limit(2),
+    supabase
+      .from("causal_relationships_statistical")
+      .select("source_domain, target_domain, source_metric, target_metric, effect_size, confidence, natural_language, optimal_lag_days")
+      .eq("organization_id", orgId)
+      .order("confidence", { ascending: false })
+      .limit(10),
+    supabase
+      .from("ai_memory")
+      .select("content, metadata, created_at")
+      .eq("organization_id", orgId)
+      .eq("memory_type", "alert")
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   const primaryBranch: string | null = githubConnector?.config?.primaryBranch ?? null;
   const releaseVersion: string | null = primaryBranch
     ? (githubConnector?.config?.releaseVersionMap?.[primaryBranch] ?? null)
     : null;
   const githubRepo: string | null = githubConnector?.config?.githubRepo ?? null;
-
-  // Fetch latest 30 days of velocity snapshots
-  const { data: velocitySnapshots } = await supabase
-    .from("velocity_snapshots")
-    .select("*")
-    .eq("organization_id", orgId)
-    .order("snapshot_date", { ascending: false })
-    .limit(30);
-
-  // Fetch latest 2 bottleneck snapshots (for week-over-week BRS trend)
-  const { data: bottleneckSnapshots } = await supabase
-    .from("bottleneck_snapshots")
-    .select("*")
-    .eq("organization_id", orgId)
-    .order("snapshot_date", { ascending: false })
-    .limit(2);
-
-  // Fetch Brain causal edges for root cause explanations
-  const { data: causalEdges } = await supabase
-    .from("causal_relationships_statistical")
-    .select("source_domain, target_domain, source_metric, target_metric, effect_size, confidence, natural_language, optimal_lag_days")
-    .eq("organization_id", orgId)
-    .order("confidence", { ascending: false })
-    .limit(10);
-
-  // Fetch recent Brain early warning alerts from ai_memory
-  const { data: brainAlerts } = await supabase
-    .from("ai_memory")
-    .select("content, metadata, created_at")
-    .eq("organization_id", orgId)
-    .eq("memory_type", "alert")
-    .order("created_at", { ascending: false })
-    .limit(5);
 
   const latestBottleneck = bottleneckSnapshots?.[0];
   const prevBottleneck = bottleneckSnapshots?.[1];

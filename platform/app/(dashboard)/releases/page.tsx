@@ -2,7 +2,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getCurrentOrgId } from "@/lib/org-helpers";
 import ReleaseDashboardClient from "./releases-client";
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function ReleasesPage() {
   const orgId = await getCurrentOrgId();

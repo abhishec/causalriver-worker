@@ -39,13 +39,14 @@ export default async function SeAaSArtifactsPage({
     query = query.eq("domain_type", domainType);
   }
 
-  const { data: artifacts, count } = await query;
-
-  // Fetch domain breakdown counts
-  const { data: domainCounts } = await supabase
-    .from("se_aas_artifacts")
-    .select("domain_type")
-    .eq("organization_id", orgId);
+  // Fetch artifacts and domain counts in parallel
+  const [{ data: artifacts, count }, { data: domainCounts }] = await Promise.all([
+    query,
+    supabase
+      .from("se_aas_artifacts")
+      .select("domain_type")
+      .eq("organization_id", orgId),
+  ]);
 
   const countByDomain = (domainCounts ?? []).reduce<Record<string, number>>((acc, row) => {
     acc[row.domain_type] = (acc[row.domain_type] ?? 0) + 1;

@@ -67,7 +67,6 @@ async function exportPNG(options: ExportOptions): Promise<ExportResult> {
 
   try {
     // html2canvas is an optional peer dependency — lazy-loaded
-    // @ts-expect-error -- optional peer dependency, installed at runtime
     const html2canvas = (await import("html2canvas")).default as (
       element: HTMLElement,
       options?: Record<string, unknown>
@@ -114,9 +113,7 @@ async function exportPDF(options: ExportOptions): Promise<ExportResult> {
 
   try {
     // html2canvas + jspdf are optional peer dependencies — lazy-loaded
-    // @ts-expect-error -- optional peer dependency
     const html2canvasModule = await import("html2canvas");
-    // @ts-expect-error -- optional peer dependency
     const jsPDFModule = await import("jspdf");
     const html2canvas = html2canvasModule.default as (
       element: HTMLElement,

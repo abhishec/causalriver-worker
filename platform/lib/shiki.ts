@@ -10,34 +10,18 @@ import type { Highlighter } from "shiki";
 let _highlighter: Highlighter | null = null;
 let _loadingPromise: Promise<Highlighter> | null = null;
 
+// Only preload the most common languages used in the copilot.
+// Each grammar adds 100-300KB to the client bundle via shiki's WASM grammars.
+// Less common languages are loaded on-demand via loadLanguage() below.
 const PRELOADED_LANGS = [
   "typescript",
   "javascript",
-  "tsx",
-  "jsx",
   "python",
   "sql",
   "json",
-  "yaml",
   "bash",
-  "css",
   "html",
-  "go",
-  "rust",
-  "java",
-  "ruby",
-  "markdown",
-  "graphql",
-  "dockerfile",
-  "toml",
-  "xml",
-  "c",
-  "cpp",
-  "csharp",
-  "swift",
-  "kotlin",
-  "dart",
-  "r",
+  "css",
 ] as const;
 
 // Map short aliases to Shiki-recognized lang IDs
@@ -102,13 +86,22 @@ export function useShikiHighlight(code: string, language: string): string | null
     let cancelled = false;
 
     getHighlighter()
-      .then((hl) => {
+      .then(async (hl) => {
         if (cancelled) return;
         const lang = resolveShikiLang(language);
-        // Check if the resolved lang is loaded; if not, fall back to "text"
         const loadedLangs = hl.getLoadedLanguages();
-        const effectiveLang = loadedLangs.includes(lang as any) ? lang : "text";
+        let effectiveLang = lang;
 
+        // Lazily load grammar if not preloaded
+        if (!loadedLangs.includes(lang as any)) {
+          try {
+            await hl.loadLanguage(lang as any);
+          } catch {
+            effectiveLang = "text";
+          }
+        }
+
+        if (cancelled) return;
         const result = hl.codeToHtml(code, {
           lang: effectiveLang,
           theme: "github-dark-default",
