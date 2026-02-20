@@ -292,7 +292,7 @@ export async function POST(request: NextRequest) {
     //     embed, API callers without org context).
     //   - The membership check below enforces access — a regular user who is
     //     not a member of CORE will receive a 403. This is correct behaviour.
-    const orgId = organizationId || CORE_ORG_ID;
+    let orgId = organizationId || CORE_ORG_ID;
 
     // Authenticate via Supabase
     const supabase = await createClient();
@@ -302,6 +302,25 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Auto-resolve org when frontend didn't provide one ────────────
+    if (!organizationId) {
+      const { data: userOrgs } = await supabase
+        .from("org_members")
+        .select("organization_id, organizations:organization_id(is_core_brain)")
+        .eq("user_id", user.id)
+        .order("joined_at", { ascending: true });
+
+      if (userOrgs && userOrgs.length > 0) {
+        // Prefer first non-core org (actual workspace), fallback to first org
+        const nonCore = userOrgs.find(
+          (m: any) => !(m.organizations as any)?.is_core_brain
+        );
+        orgId = nonCore?.organization_id ?? userOrgs[0].organization_id;
+        console.log("[Chat] Auto-resolved org:", orgId);
+      }
+      // If no memberships found, orgId stays as CORE_ORG_ID → membership check will 403 (correct)
     }
 
     // ── Validate user is a member of the requested org ──────────────────

@@ -1,16 +1,82 @@
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { CORE_ORG_ID } from "@/lib/constants";
 export { CORE_ORG_ID };
 const STORAGE_KEY = "nexus_current_org";
 
+/* ── Types ──────────────────────────────────────────────────────────── */
+
+export interface CurrentCustomer {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  is_design_partner: boolean;
+  primary_org_id: string | null;
+}
+
+/* ── getCurrentCustomer ─────────────────────────────────────────────── */
+
+/**
+ * Cached server-side helper: resolves user → customer_members → customer.
+ *
+ * Uses React cache() for per-request deduplication — multiple server
+ * components / helpers calling getCurrentCustomer() in the same request
+ * share a single Supabase query.
+ *
+ * Resolution: picks the user's first customer (by joined_at).
+ */
+export const getCurrentCustomer = cache(
+  async (): Promise<CurrentCustomer | null> => {
+    try {
+      const supabase = await createClient();
+      const user = await getAuthUser();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from("customer_members")
+        .select(
+          `primary_org_id,
+         customer:customer_id(id, name, slug, plan, is_design_partner)`
+        )
+        .eq("user_id", user.id)
+        .order("joined_at", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (!data) return null;
+
+      const cust = (data as any).customer;
+      return {
+        id: cust.id,
+        name: cust.name,
+        slug: cust.slug,
+        plan: cust.plan,
+        is_design_partner: cust.is_design_partner ?? false,
+        primary_org_id: data.primary_org_id,
+      };
+    } catch {
+      return null;
+    }
+  }
+);
+
+/* ── getCurrentOrgId ────────────────────────────────────────────────── */
+
 /**
  * Server-side helper to resolve the current org ID.
  *
- * Uses cached getAuthUser() so multiple server components calling
- * getCurrentOrgId() in the same request share a single Supabase
- * auth round-trip (saves ~100-300ms per duplicate call).
+ * Resolution order (customer-first):
+ *   1. Cookie override — user explicitly switched orgs (validate via org_members)
+ *   2. Customer chain — primary_org_id from getCurrentCustomer() (cached, no extra query)
+ *   3. Fallback — first non-core org from org_members
+ *   4. Default — CORE_ORG_ID
+ *
+ * Uses cached getAuthUser() + cached getCurrentCustomer() so multiple
+ * server components calling getCurrentOrgId() in the same request share
+ * a single Supabase auth round-trip.
  */
 export async function getCurrentOrgId(): Promise<string> {
   try {
@@ -19,11 +85,12 @@ export async function getCurrentOrgId(): Promise<string> {
 
     if (!user) return CORE_ORG_ID;
 
-    /* 1. Try cookie value */
+    /* 1. Cookie override — user explicitly switched orgs */
     const cookieStore = await cookies();
     const saved = cookieStore.get(STORAGE_KEY)?.value;
 
     if (saved) {
+      // Validate: user must be a member of this org
       const { data: membership } = await supabase
         .from("org_members")
         .select("organization_id")
@@ -33,7 +100,7 @@ export async function getCurrentOrgId(): Promise<string> {
 
       if (membership) return saved;
 
-      /* Platform admins can view any org */
+      // Platform admins can view any org
       const { data: admin } = await supabase
         .from("org_members")
         .select("is_platform_admin")
@@ -45,10 +112,16 @@ export async function getCurrentOrgId(): Promise<string> {
       if (admin) return saved;
     }
 
-    /* 2. Fallback: first non-core org */
+    /* 2. Customer chain — primary_org_id (zero extra queries, uses cached getCurrentCustomer) */
+    const customer = await getCurrentCustomer();
+    if (customer?.primary_org_id) return customer.primary_org_id;
+
+    /* 3. Fallback: first non-core org from org_members */
     const { data: first } = await supabase
       .from("org_members")
-      .select("organization_id, organizations:organization_id(is_core_brain)")
+      .select(
+        "organization_id, organizations:organization_id(is_core_brain)"
+      )
       .eq("user_id", user.id)
       .order("joined_at", { ascending: true });
 
