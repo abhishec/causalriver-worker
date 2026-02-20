@@ -62,9 +62,13 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   /* Load user's orgs on mount */
   const loadOrgs = useCallback(async () => {
     try {
+      // Use getSession() — reads from browser cookie, zero network call.
+      // Middleware already validated the token via getUser() on the server,
+      // so the session is trustworthy. Saves ~100-300ms on every mount.
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) {
         setIsLoading(false);
         return;

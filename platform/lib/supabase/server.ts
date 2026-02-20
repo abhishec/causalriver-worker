@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -26,6 +27,21 @@ export async function createClient() {
     }
   );
 }
+
+/**
+ * Cached getUser — deduplicated within a single server request.
+ *
+ * React's `cache()` memoizes the result per-request (RSC flight), so
+ * multiple server components / helpers calling `getAuthUser()` in the
+ * same request only make ONE Supabase network round-trip (~100-300ms).
+ *
+ * Usage: `const user = await getAuthUser();`
+ */
+export const getAuthUser = cache(async () => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+});
 
 /** Service-role client for admin operations (bypasses RLS) */
 export async function createServiceClient() {

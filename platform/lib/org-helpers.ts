@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
 import { CORE_ORG_ID } from "@/lib/constants";
@@ -8,16 +8,14 @@ const STORAGE_KEY = "nexus_current_org";
 /**
  * Server-side helper to resolve the current org ID.
  *
- * Reads the `nexus_current_org` cookie (set by OrgProvider on the client),
- * validates the user is actually a member of that org, and falls back to
- * the user's first org or the Core Brain org.
+ * Uses cached getAuthUser() so multiple server components calling
+ * getCurrentOrgId() in the same request share a single Supabase
+ * auth round-trip (saves ~100-300ms per duplicate call).
  */
 export async function getCurrentOrgId(): Promise<string> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthUser();
 
     if (!user) return CORE_ORG_ID;
 
