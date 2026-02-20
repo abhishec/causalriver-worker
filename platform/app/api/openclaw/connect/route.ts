@@ -148,6 +148,8 @@ export async function POST(request: NextRequest) {
         {
           organization_id: orgId,
           connector_type: "openclaw",
+          instance_name: "default",
+          display_name: "OpenClaw",
           status: status.connected ? "active" : "pending",
           config: {
             gatewayUrl: config.gatewayUrl,
@@ -158,7 +160,7 @@ export async function POST(request: NextRequest) {
           last_sync_at: status.connected ? new Date().toISOString() : null,
           error_message: status.connected ? null : (status.error || null),
         },
-        { onConflict: "organization_id,connector_type" }
+        { onConflict: "organization_id,connector_type,instance_name" }
       )
       .then(() => {}, () => {});
 

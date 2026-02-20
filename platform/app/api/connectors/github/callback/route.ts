@@ -162,6 +162,8 @@ export async function GET(request: NextRequest) {
       .upsert({
         organization_id: orgId,
         connector_type: 'github',
+        instance_name: githubUser.login || 'default',
+        display_name: githubUser.name || githubUser.login || 'GitHub',
         status: 'active',
         credentials,
         metadata,
@@ -170,7 +172,7 @@ export async function GET(request: NextRequest) {
           github_name: githubUser.name,
         },
       }, {
-        onConflict: 'organization_id,connector_type'
+        onConflict: 'organization_id,connector_type,instance_name'
       });
 
     if (storeError) {

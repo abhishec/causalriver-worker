@@ -12,6 +12,7 @@ import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
 import { PartnerDashboard } from "@/components/settings/PartnerDashboard";
+import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
 
 interface Connector {
   id: string;
@@ -202,80 +203,9 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors }: Sett
         {/* Connections Tab */}
         {activeTab === "connections" && (
           <div>
-            <h2 className="text-sm font-medium mb-1">Connections</h2>
-            <p className="text-xs text-muted mb-6">Connect data sources to feed your brain</p>
-
-            {/* Connected */}
-            {connectors.length > 0 && (
-              <div className="mb-8">
-                <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
-                  Connected ({connectors.length})
-                </div>
-                <div className="space-y-2">
-                  {connectors.map((conn) => {
-                    const isHealthy = conn.status === "active" || conn.status === "connected";
-                    const isSynced = !!conn.last_sync_at;
-                    return (
-                      <div
-                        key={conn.id}
-                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl bg-card border border-border-subtle hover:bg-card-hover transition-colors"
-                      >
-                        <ConnectorIcon type={conn.connector_type} size="lg" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{conn.display_name || conn.connector_type}</span>
-                            <StatusDot type={isHealthy ? "active" : "warning"} size="sm" pulse={isHealthy} />
-                          </div>
-                          <div className="text-[10px] text-muted mt-0.5">
-                            {isSynced
-                              ? `Last sync: ${timeAgo(conn.last_sync_at!)}`
-                              : "Not synced yet"}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => showToast(`Configuration for ${conn.display_name || conn.connector_type} coming soon`)}
-                            className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            Configure
-                          </button>
-                          <Badge variant={isHealthy ? "success" : "warning"} size="xs">
-                            {isHealthy ? "Active" : "Check"}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Available */}
-            <div>
-              <div className="text-[11px] font-medium uppercase tracking-wider text-muted mb-3">
-                Available Connectors
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {AVAILABLE_CONNECTORS.filter((c) => !connectedTypes.has(c.type)).map((conn) => (
-                  <div
-                    key={conn.type}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border-subtle hover:border-accent/20 hover:bg-card-hover transition-all cursor-pointer group"
-                  >
-                    <ConnectorIcon type={conn.type} size="md" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium">{conn.name}</div>
-                      <div className="text-[10px] text-muted mt-0.5 line-clamp-1">{conn.desc}</div>
-                    </div>
-                    <button
-                      onClick={() => showToast(`${conn.name} connector coming soon — join the waitlist`)}
-                      className="shrink-0 px-2.5 py-1 rounded-md bg-accent/10 text-accent text-[11px] font-medium hover:bg-accent/20 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      Connect
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <h2 className="text-sm font-medium mb-1">Integrations</h2>
+            <p className="text-xs text-muted mb-6">Configure your integrations and preferences</p>
+            <IntegrationsSection connectors={connectors as any} orgId={orgId} />
           </div>
         )}
 

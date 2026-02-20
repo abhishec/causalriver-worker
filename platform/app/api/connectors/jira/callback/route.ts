@@ -139,6 +139,8 @@ export async function GET(request: NextRequest) {
       .upsert({
         organization_id: orgId,
         connector_type: 'jira',
+        instance_name: primarySite?.name || 'default',
+        display_name: primarySite?.name || 'Jira',
         status: 'active',
         credentials,
         metadata,
@@ -147,7 +149,7 @@ export async function GET(request: NextRequest) {
           site_url: primarySite?.url,
         },
       }, {
-        onConflict: 'organization_id,connector_type'
+        onConflict: 'organization_id,connector_type,instance_name'
       });
 
     if (storeError) {

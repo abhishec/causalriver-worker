@@ -53,7 +53,7 @@ export default async function ConnectorsPage() {
       .eq("organization_id", orgId)),
     safe(supabase
       .from("org_connectors")
-      .select("id, connector_type, status, config, metadata, last_sync_at, signals_count, error_message, created_at")
+      .select("id, connector_type, instance_name, display_name, status, config, metadata, last_sync_at, signals_count, error_message, created_at")
       .eq("organization_id", orgId)),
     safe(supabase
       .from("connector_checkpoints")
@@ -85,7 +85,9 @@ export default async function ConnectorsPage() {
     domainCounts[domain] = (domainCounts[domain] || 0) + 1;
   });
 
-  // Build connector status map
+  // Build connector status map — keyed by connector_type for backward compat
+  // When multiple instances of same type exist, last one wins in this map.
+  // The connectors-client will also get the raw list for detailed display.
   const connectorStatusMap: Record<string, {
     id: string;
     status: string;
@@ -95,6 +97,8 @@ export default async function ConnectorsPage() {
     signalsCount: number;
     errorMessage: string | null;
     createdAt: string;
+    instanceName?: string;
+    displayName?: string;
   }> = {};
 
   orgConnectors.forEach((c) => {
@@ -107,6 +111,8 @@ export default async function ConnectorsPage() {
       signalsCount: c.signals_count,
       errorMessage: c.error_message,
       createdAt: c.created_at,
+      instanceName: (c as any).instance_name,
+      displayName: (c as any).display_name,
     };
   });
 

@@ -256,6 +256,9 @@ export async function POST(request: NextRequest) {
       persona,
       // Phase 4: branch for SE-aaS code intelligence (from GitHub connector)
       branch,
+      // Phase 7: Custom template command execution
+      commandId,
+      commandParams,
     } = body as {
       message: string;
       organizationId?: string;
@@ -264,6 +267,8 @@ export async function POST(request: NextRequest) {
       useFramework?: boolean;
       persona?: { name: string; description: string };
       branch?: string;
+      commandId?: string;
+      commandParams?: Record<string, unknown>;
     };
 
     if (!message || typeof message !== "string") {
@@ -481,17 +486,22 @@ export async function POST(request: NextRequest) {
         createEmptyDAG,
       } = await import("@nexus-ai/memory-stack");
 
-      // Check if GitHub connector is active with ingested data
-      const { data: ghConnector } = await Promise.resolve(service
+      // Check if any GitHub connector is active with ingested data (supports multi-instance)
+      const { data: ghConnectors } = await Promise.resolve(service
         .from("org_connectors")
         .select("config")
         .eq("organization_id", orgId)
         .eq("connector_type", "github")
-        .eq("status", "active")
-        .maybeSingle())
+        .eq("status", "active"))
         .catch(() => ({ data: null as any }));
 
-      const ingestionStats = (ghConnector?.config as Record<string, any>)?.ingestion_progress?.stats;
+      // Aggregate ingestion stats from all GitHub instances
+      const ingestionStats = (ghConnectors || []).reduce((best: any, c: any) => {
+        const stats = (c.config as Record<string, any>)?.ingestion_progress?.stats;
+        if (!best) return stats;
+        if (stats?.filesProcessed > (best?.filesProcessed || 0)) return stats;
+        return best;
+      }, null);
 
       // Build BrainRegions — ALL available intelligence in one object
       // (variable hoisted above try block so causal reasoning blocks can access it after)
@@ -734,6 +744,9 @@ export async function POST(request: NextRequest) {
           'tax-compliance': 'tax',
           'anomaly-detective': 'anomaly',
           'audit-preparer': 'audit',
+          'cash-flow-prophet': 'cash-forecast',
+          'revenue-leakage-detector': 'revenue-leakage',
+          'causal-pl-narrator': 'causal-pl',
         };
         const aasAction = ACCT_ACTION_MAP[accountingRoute.domainType] || 'causal-analysis';
 
@@ -775,6 +788,141 @@ export async function POST(request: NextRequest) {
         }
       } catch (acctErr) {
         console.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // CUSTOM TEMPLATE COMMAND ROUTING
+    // When commandId starts with "custom-", load the template from DB and
+    // either execute via agent composer (if template has agent_config) or
+    // flow through normal LLM path with the template prompt.
+    // ══════════════════════════════════════════════════════════════════════
+
+    if (commandId && typeof commandId === 'string' && commandId.startsWith('custom-')) {
+      try {
+        // Load the template
+        const { data: template } = await service
+          .from('agent_templates')
+          .select('*')
+          .eq('org_id', orgId)
+          .eq('command_id', commandId)
+          .eq('is_archived', false)
+          .single();
+
+        // Also check public templates if not found in org
+        let resolvedTemplate = template;
+        if (!resolvedTemplate) {
+          const { data: publicTemplate } = await service
+            .from('agent_templates')
+            .select('*')
+            .eq('command_id', commandId)
+            .eq('is_public', true)
+            .eq('is_archived', false)
+            .single();
+          resolvedTemplate = publicTemplate;
+        }
+
+        if (resolvedTemplate) {
+          // Track usage
+          await service
+            .from('agent_templates')
+            .update({
+              usage_count: (resolvedTemplate.usage_count || 0) + 1,
+              last_used_at: new Date().toISOString(),
+            })
+            .eq('id', resolvedTemplate.id)
+            .then(() => {}, () => {});
+
+          // If template has agent_config → execute via agent composer
+          if (resolvedTemplate.agent_config) {
+            const {
+              stream: composerStream, send: composerSend,
+              sendText: composerSendText, sendError: composerSendError,
+              close: composerClose, sendAgentStep, sendProgressiveArtifact,
+            } = createSSEStream();
+
+            (async () => {
+              try {
+                const { executeComposedAgent } = await import("@/lib/agent-composer/executor");
+                const agentConfig = resolvedTemplate.agent_config as {
+                  persona: string; tools: string[]; executionPlan: string[];
+                };
+
+                // Interpolate commandParams into the template prompt
+                let templatePrompt = resolvedTemplate.prompt;
+                if (commandParams) {
+                  for (const [key, value] of Object.entries(commandParams)) {
+                    templatePrompt = templatePrompt.replace(
+                      new RegExp(`\\{\\{${key}\\}\\}`, 'g'),
+                      String(value)
+                    );
+                  }
+                }
+
+                // Build a minimal AgentComposition from the template config
+                const { getToolById } = await import("@/lib/agent-composer/tool-registry");
+                const selectedTools = agentConfig.tools
+                  .map((id: string) => getToolById(id))
+                  .filter(Boolean) as any[];
+
+                const composition = {
+                  name: resolvedTemplate.label,
+                  persona: agentConfig.persona,
+                  selectedTools,
+                  inferredGathering: null,
+                  executionPrompt: templatePrompt,
+                  executionPlan: agentConfig.executionPlan,
+                  complexity: selectedTools.length <= 2 ? 'light' as const
+                    : selectedTools.length <= 5 ? 'medium' as const : 'heavy' as const,
+                };
+
+                const result = await executeComposedAgent(
+                  composition,
+                  {
+                    organizationId: orgId,
+                    userId: user.id,
+                    supabase: service,
+                    anthropicApiKey: process.env.ANTHROPIC_API_KEY!,
+                    params: commandParams as Record<string, unknown> | undefined,
+                    branch: branch as string | undefined,
+                  },
+                  {
+                    onStep: (step) => sendAgentStep(step as any),
+                    onArtifact: (artifact) => sendProgressiveArtifact({
+                      id: artifact.id,
+                      type: artifact.type,
+                      title: artifact.title,
+                      content: artifact.content,
+                      isPartial: false,
+                      service: artifact.service as any,
+                    }),
+                    onText: (text) => composerSendText(text),
+                  }
+                );
+
+                composerSendText(result.narrative);
+              } catch (err) {
+                composerSendError(err instanceof Error ? err.message : 'Custom template execution failed');
+              } finally {
+                composerClose();
+              }
+            })();
+
+            return new Response(composerStream, {
+              status: 200,
+              headers: {
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache, no-transform",
+                Connection: "keep-alive",
+                "X-Accel-Buffering": "no",
+              },
+            });
+          }
+          // Otherwise: template without agent_config → override message with template prompt
+          // (falls through to normal LLM path below, using the template prompt)
+        }
+      } catch (templateErr) {
+        console.warn("[CustomTemplate] Non-fatal: template loading failed:", templateErr);
       }
     }
 
@@ -967,26 +1115,36 @@ export async function POST(request: NextRequest) {
               status: "started",
             });
 
-            // Attempt Jira context via org connector
+            // Attempt Jira context via org connector (supports multi-instance)
             let jiraContext: string | null = null;
             try {
-              const { data: jiraConnector } = await service
+              const { data: jiraConnectors } = await service
                 .from("org_connectors")
-                .select("config")
+                .select("config, credentials")
                 .eq("organization_id", orgId)
                 .eq("connector_type", "jira")
-                .eq("status", "active")
-                .maybeSingle();
+                .eq("status", "active");
 
-              if (jiraConnector?.config) {
+              // Try each Jira instance until we find the ticket
+              const jiraId = agentIntent.extractedParams.jiraId!;
+              const projectPrefix = jiraId.split("-")[0];
+
+              for (const jiraConnector of (jiraConnectors || [])) {
                 const jConf = jiraConnector.config as Record<string, any>;
-                const jiraBaseUrl = jConf.baseUrl || jConf.jira_base_url;
-                const jiraEmail = jConf.email || jConf.jira_email;
-                const jiraToken = jConf.apiToken || jConf.jira_api_token;
+                const jCreds = jiraConnector.credentials as Record<string, any> | null;
+                const jiraBaseUrl = jConf.baseUrl || jConf.jira_base_url || jConf.site_url;
+                const jiraEmail = jCreds?.email || jConf.email || jConf.jira_email;
+                const jiraToken = jCreds?.api_token || jConf.apiToken || jConf.jira_api_token;
 
-                if (jiraBaseUrl && jiraEmail && jiraToken) {
+                if (!jiraBaseUrl || !jiraEmail || !jiraToken) continue;
+
+                // If this instance has projectKeys, check if it matches
+                const keys = jConf.projectKeys as string[] | undefined;
+                if (keys && keys.length > 0 && !keys.includes(projectPrefix)) continue;
+
+                try {
                   const issueRes = await fetch(
-                    `${jiraBaseUrl}/rest/api/3/issue/${agentIntent.extractedParams.jiraId}`,
+                    `${jiraBaseUrl}/rest/api/3/issue/${jiraId}`,
                     {
                       headers: {
                         Authorization: `Basic ${Buffer.from(`${jiraEmail}:${jiraToken}`).toString("base64")}`,
@@ -1006,7 +1164,10 @@ export async function POST(request: NextRequest) {
                         ? issue.fields.description.slice(0, 500)
                         : issue.fields?.description?.content?.[0]?.content?.[0]?.text?.slice(0, 500) || "",
                     });
+                    break; // Found it, stop trying other instances
                   }
+                } catch {
+                  // Try next instance
                 }
               }
             } catch {
@@ -1491,7 +1652,7 @@ export async function POST(request: NextRequest) {
     // ── Build effective system prompt ──────────────────────────────────
     // V4: brainContext.fullPrompt is the COMPLETE system prompt from the SDK.
     // It already includes persona, intent-aware instructions, and ALL brain data.
-    const NO_HALLUCINATION_FALLBACK = `You are the NexusBrain Copilot — an intelligence co-pilot for this organization.
+    const NO_HALLUCINATION_FALLBACK = `You are the Brain OS Copilot — an intelligence co-pilot for this organization.
 
 CRITICAL RULES:
 1. You MUST ONLY answer using data that exists in the brain context below. Do NOT invent, fabricate, or hallucinate any numbers, metrics, KPIs, trends, or statistics.
@@ -1514,7 +1675,7 @@ You have ZERO causal edges, ZERO business rules, ZERO patterns, and ZERO cascade
 DO NOT invent any data. Instead:
 - Tell the user that no data sources have been connected yet
 - Suggest they connect their data sources (Xero, Volopay, GitHub, etc.) from the Settings page
-- You can still answer general questions about NexusBrain's capabilities
+- You can still answer general questions about Brain OS's capabilities
 - NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
     }
 
@@ -1793,7 +1954,7 @@ Result data:
 ${JSON.stringify(resultData, null, 2).slice(0, 3000)}
 
 Artifact ID: ${seaasResult.artifactId || 'N/A'}
-Use this data to give a comprehensive answer. The analysis was performed by NexusBrain's AI ${domainType} engine.`;
+Use this data to give a comprehensive answer. The analysis was performed by Brain OS's AI ${domainType} engine.`;
     }
 
     // ── AaaS domain result injection ──────────────────────────────────

@@ -30,13 +30,22 @@ export async function POST(request: Request) {
     const orgId = await getCurrentOrgId();
 
     // 2. Load connector config + credentials (service client bypasses RLS)
+    // Supports connectorId for multi-instance; falls back to first active instance
     const service = await createServiceClient();
-    const { data: connector } = await service
+    const body = await request.json().catch(() => ({}));
+    const connectorId = body.connectorId as string | undefined;
+
+    let connectorQuery = service
       .from("org_connectors")
       .select("id, config, credentials")
       .eq("organization_id", orgId)
-      .eq("connector_type", "github")
-      .maybeSingle();
+      .eq("connector_type", "github");
+
+    if (connectorId) {
+      connectorQuery = connectorQuery.eq("id", connectorId);
+    }
+
+    const { data: connector } = await connectorQuery.maybeSingle();
 
     if (!connector) {
       return NextResponse.json(
@@ -44,9 +53,6 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-
-    // 3. Get token: body > stored credentials > fail
-    const body = await request.json().catch(() => ({}));
     const credentials = connector.credentials as { access_token?: string; token?: string } | null;
     const token = body.token || credentials?.access_token || credentials?.token;
     if (!token) {

@@ -38,9 +38,9 @@ export default async function SettingsPage() {
 
     safe(supabase
       .from("org_connectors")
-      .select("id, connector_type, display_name, status, last_sync_at, config")
+      .select("id, connector_type, instance_name, display_name, status, last_sync_at, config, metadata, signals_count, error_message")
       .eq("organization_id", orgId)
-      .order("created_at", { ascending: false })),
+      .order("created_at", { ascending: true })),
   ]);
 
   return (

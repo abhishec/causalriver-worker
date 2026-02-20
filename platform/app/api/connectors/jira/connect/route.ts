@@ -159,12 +159,14 @@ export async function POST(request: NextRequest) {
         {
           organization_id: orgId,
           connector_type: "jira",
+          instance_name: siteName,
+          display_name: siteName,
           status: "active",
           credentials,
           metadata,
           config,
         },
-        { onConflict: "organization_id,connector_type" }
+        { onConflict: "organization_id,connector_type,instance_name" }
       )
       .select("id")
       .single();

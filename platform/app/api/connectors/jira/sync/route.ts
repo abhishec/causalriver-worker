@@ -35,13 +35,27 @@ export async function POST(request: Request) {
     const orgId = await getCurrentOrgId();
 
     // 2. Load connector config + credentials
+    // Supports connectorId for multi-instance; falls back to first active instance
     const service = await createServiceClient();
-    const { data: connector } = await service
+    const body = await request.json().catch(() => ({})) as {
+      connectorId?: string;
+      projectKeys?: string[];
+      fixVersionFilter?: string;
+      dataLookback?: string;
+    };
+    const connectorId = body.connectorId;
+
+    let connectorQuery = service
       .from("org_connectors")
       .select("id, config, credentials")
       .eq("organization_id", orgId)
-      .eq("connector_type", "jira")
-      .maybeSingle();
+      .eq("connector_type", "jira");
+
+    if (connectorId) {
+      connectorQuery = connectorQuery.eq("id", connectorId);
+    }
+
+    const { data: connector } = await connectorQuery.maybeSingle();
 
     if (!connector) {
       return NextResponse.json(
@@ -69,12 +83,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { projectKeys, fixVersionFilter, dataLookback } = body as {
-      projectKeys?: string[];
-      fixVersionFilter?: string;   // e.g. "6.3.4" or "5.11.5-enterprise"
-      dataLookback?: string;       // "30d"|"90d"|"6m"|"1y"|"all"
-    };
+    const { projectKeys, fixVersionFilter, dataLookback } = body;
 
     // Persist fixVersionFilter + dataLookback to connector config if provided
     if (fixVersionFilter !== undefined || dataLookback !== undefined) {

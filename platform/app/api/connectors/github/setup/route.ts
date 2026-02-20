@@ -5,11 +5,10 @@ import { getCurrentOrgId } from "@/lib/org-helpers";
 /**
  * POST /api/connectors/github/setup
  *
- * Validates a GitHub PAT + owner/repo, then saves the connector config.
- * Does NOT store the token in the database — it's only used for validation
- * and must be provided again for sync/ingest operations (or stored in env).
+ * Validates a GitHub PAT + owner/repo, then saves the connector config
+ * and persists the PAT in the credentials column for later use by sync/ingest.
  *
- * Body: { token: string, owner: string, repo: string }
+ * Body: { token: string, owner: string, repo: string, instanceName?: string, displayName?: string }
  */
 export async function POST(request: Request) {
   try {
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
 
     // 3. Parse body
     const body = await request.json();
-    const { token, owner, repo } = body;
+    const { token, owner, repo, instanceName: rawInstanceName, displayName } = body;
 
     if (!token || !owner || !repo) {
       return NextResponse.json(
@@ -87,12 +86,17 @@ export async function POST(request: Request) {
       connectedBy: user.id,
     };
 
-    // Check if connector already exists for this org
+    // Derive instance_name from repo full name or explicit param
+    const instanceName = rawInstanceName || repoData.full_name || `${owner}/${repo}`;
+    const connectorCredentials = { token, access_token: token };
+
+    // Check if connector already exists for this org + instance
     const { data: existing } = await service
       .from("org_connectors")
       .select("id")
       .eq("organization_id", orgId)
       .eq("connector_type", "github")
+      .eq("instance_name", instanceName)
       .maybeSingle();
 
     let saveError;
@@ -103,6 +107,8 @@ export async function POST(request: Request) {
         .update({
           status: "active",
           config: connectorConfig,
+          credentials: connectorCredentials,
+          display_name: displayName || instanceName,
           error_message: null,
         })
         .eq("id", existing.id);
@@ -114,8 +120,11 @@ export async function POST(request: Request) {
         .insert({
           organization_id: orgId,
           connector_type: "github",
+          instance_name: instanceName,
+          display_name: displayName || instanceName,
           status: "active",
           config: connectorConfig,
+          credentials: connectorCredentials,
           signals_count: 0,
         });
       saveError = error;

@@ -161,6 +161,8 @@ export async function POST(request: NextRequest) {
         {
           organization_id: orgId,
           connector_type: "s3-storage",
+          instance_name: "default",
+          display_name: "AWS S3",
           status: "active",
           config: { bucket: s3BucketName, region: process.env.AWS_REGION || "ap-southeast-1" },
           metadata: {
@@ -171,7 +173,7 @@ export async function POST(request: NextRequest) {
           },
           last_sync_at: new Date().toISOString(),
         },
-        { onConflict: "organization_id,connector_type" }
+        { onConflict: "organization_id,connector_type,instance_name" }
       );
 
     if (upsertError) {

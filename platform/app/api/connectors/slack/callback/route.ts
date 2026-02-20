@@ -132,6 +132,8 @@ export async function GET(request: NextRequest) {
     };
 
     // Use the store_connector_credentials function
+    const slackInstanceName = tokenData.team?.name || 'default';
+
     const { data: connectorId, error: storeError } = await service.rpc(
       'store_connector_credentials',
       {
@@ -139,6 +141,7 @@ export async function GET(request: NextRequest) {
         p_connector_type: 'slack',
         p_credentials: credentials,
         p_metadata: metadata,
+        p_instance_name: slackInstanceName,
       }
     );
 
@@ -151,6 +154,8 @@ export async function GET(request: NextRequest) {
         .upsert({
           organization_id: orgId,
           connector_type: 'slack',
+          instance_name: slackInstanceName,
+          display_name: tokenData.team?.name || 'Slack',
           status: 'active',
           credentials,
           metadata,
@@ -159,7 +164,7 @@ export async function GET(request: NextRequest) {
             workspace_url: `https://${tokenData.team?.domain}.slack.com`,
           },
         }, {
-          onConflict: 'organization_id,connector_type'
+          onConflict: 'organization_id,connector_type,instance_name'
         });
 
       if (fallbackError) {

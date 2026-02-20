@@ -291,6 +291,8 @@ export async function provisionOrg(
         {
           organization_id: orgId,
           connector_type:  connectorType,
+          instance_name:   "default",
+          display_name:    connectorType,
           status:          "pending",
           config: {
             registeredAt:  new Date().toISOString(),
@@ -298,7 +300,7 @@ export async function provisionOrg(
             needsOAuth:    true,
           },
         },
-        { onConflict: "organization_id,connector_type", ignoreDuplicates: true }
+        { onConflict: "organization_id,connector_type,instance_name", ignoreDuplicates: true }
       );
       result.audit.selected_connectors.push(connectorType);
     } catch (err) {
