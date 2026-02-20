@@ -1,4 +1,4 @@
-import type { SlashCommand } from "./SlashCommandPicker";
+import type { SlashCommand } from "./slash-commands";
 
 /**
  * AAS (Accounting-as-a-Service) slash commands.

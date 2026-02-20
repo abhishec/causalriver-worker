@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
 
     // Import the resolver registry and feedback loop from causality module
     // Note: requires `pnpm --filter @nexus-ai/memory-stack build` after adding new resolvers
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const causality = await import("@nexus-ai/memory-stack/causality") as any;
 
     const registry = causality.createResolverRegistry();

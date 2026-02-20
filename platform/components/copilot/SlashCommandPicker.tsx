@@ -1,50 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
-import { AAS_COMMANDS } from "./aas-commands";
 import { GATHERING_COMMAND_IDS } from "./command-gathering";
 import { cn } from "@/lib/utils";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// Re-export shared types and data so existing consumers don't break
+export type { SlashCommand } from "./slash-commands";
+export { ALL_SLASH_COMMANDS } from "./slash-commands";
 
-export interface SlashCommand {
-  id: string;
-  label: string;
-  description: string;
-  icon: string;
-  prompt: string;
-  service: "general" | "aas" | "seaas" | "custom";
-  category: string;
-}
-
-// ─── General Intelligence commands (4) ──────────────────────────────────────
-
-const GENERAL_COMMANDS: SlashCommand[] = [
-  { id: "causal",       label: "causal-analysis",    icon: "📊", description: "Cross-domain cause-and-effect analysis",     prompt: "Run a causal analysis across the organization",       service: "general", category: "Intelligence" },
-  { id: "anomaly-gen",  label: "anomaly-report",     icon: "⚠️",  description: "Detect unusual patterns across all signals", prompt: "What anomalies were detected today?",                 service: "general", category: "Intelligence" },
-  { id: "intel-report", label: "intelligence-report", icon: "📄", description: "Full organizational intelligence report",    prompt: "Give me the full intelligence report",                service: "general", category: "Intelligence" },
-  { id: "predict",      label: "prediction",         icon: "📈", description: "Forecast key business outcomes",             prompt: "Forecast key business metrics for next quarter",      service: "general", category: "Intelligence" },
-];
-
-// ─── Build unified command list from domain-catalogue + AAS + General ───────
-
-export const ALL_SLASH_COMMANDS: SlashCommand[] = [
-  // SE-aaS domains (20)
-  ...DOMAIN_CATALOGUE.map((d) => ({
-    id: d.id,
-    label: d.label.toLowerCase().replace(/[\s/]+/g, "-"),
-    description: d.description.slice(0, 80),
-    icon: d.icon,
-    prompt: d.copilotPrompt || `Run ${d.label} analysis`,
-    service: "seaas" as const,
-    category: d.category,
-  })),
-  // AAS domains (7)
-  ...AAS_COMMANDS,
-  // General Intelligence (4)
-  ...GENERAL_COMMANDS,
-];
+import type { SlashCommand } from "./slash-commands";
+import { ALL_SLASH_COMMANDS } from "./slash-commands";
 
 // ─── Component ──────────────────────────────────────────────────────────────
 

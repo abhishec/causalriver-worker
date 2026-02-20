@@ -173,7 +173,6 @@ async function createWebSocket(url: string): Promise<WebSocketLike> {
     return new globalThis.WebSocket(url) as unknown as WebSocketLike;
   }
   // Node.js: dynamically import 'ws'
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const wsModule = await import('ws');
   const WS = (wsModule as any).default || (wsModule as any);
   return new WS(url) as unknown as WebSocketLike;
