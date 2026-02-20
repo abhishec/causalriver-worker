@@ -23,7 +23,7 @@ ALTER TABLE org_connectors
 -- 2. Backfill existing rows with meaningful instance_name values
 UPDATE org_connectors
 SET
-  instance_name = COALESCE(config->>'repoFullName', config->>'owner' || '/' || config->>'repo', 'default'),
+  instance_name = COALESCE(config->>'repoFullName', (config->>'owner') || '/' || (config->>'repo'), 'default'),
   display_name  = COALESCE(config->>'repoFullName', 'GitHub')
 WHERE connector_type = 'github' AND instance_name = 'default';
 
