@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient, verifyOrgMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -6,6 +7,9 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/copilot/conversations?orgId=<uuid>
  * List the current user's conversations for the given org.
+ *
+ * Uses admin client for all DB queries — the conversations table has RLS
+ * policies that reference org_members, which has infinite recursion.
  */
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -21,19 +25,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "orgId required" }, { status: 400 });
   }
 
-  // Verify org membership
-  const { data: member } = await supabase
-    .from("org_members")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("user_id", user.id)
-    .single();
-
+  // Verify org membership (uses admin client to bypass RLS recursion)
+  const member = await verifyOrgMembership(user.id, orgId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { data, error } = await supabase
+  const admin = getAdminClient();
+  const { data, error } = await admin
     .from("conversations")
     .select("id, title, service_mode, created_at, updated_at, metadata")
     .eq("org_id", orgId)
@@ -51,10 +50,6 @@ export async function GET(req: NextRequest) {
 /**
  * POST /api/copilot/conversations
  * Create or update a conversation.
- *
- * Body: { orgId, title, serviceMode, messages, conversationId? }
- *   - If conversationId is provided, updates the existing conversation.
- *   - Otherwise, creates a new one.
  */
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -72,21 +67,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "orgId required" }, { status: 400 });
   }
 
-  // Verify org membership
-  const { data: member } = await supabase
-    .from("org_members")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("user_id", user.id)
-    .single();
-
+  // Verify org membership (uses admin client to bypass RLS recursion)
+  const member = await verifyOrgMembership(user.id, orgId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const admin = getAdminClient();
+
   if (conversationId) {
     // Update existing conversation
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("conversations")
       .update({
         title: title || "New conversation",
@@ -106,7 +97,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create new conversation
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from("conversations")
     .insert({
       org_id: orgId,

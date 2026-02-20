@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001 --turbopack",
-    "dev:warm": "next dev --port 3001 --turbopack & sleep 3 && curl -s http://localhost:3001/login http://localhost:3001/copilot http://localhost:3001/overview http://localhost:3001/settings http://localhost:3001/forgot-password http://localhost:3001/reset-password http://localhost:3001/signup -o /dev/null && echo '✓ All pages pre-warmed' && wait",
+    "dev": "node scripts/dev.mjs",
+    "dev:raw": "next dev --port 3001 --turbopack",
+    "dev:clean": "node scripts/dev.mjs --clean",
     "build": "next build",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --max-warnings=50",

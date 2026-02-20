@@ -29,6 +29,7 @@ interface Customer {
   name: string;
   slug: string;
   plan: string;
+  is_design_partner?: boolean;
 }
 
 interface SiblingWorkspace {
@@ -39,7 +40,7 @@ interface SiblingWorkspace {
 }
 
 interface SettingsClientProps {
-  org: { id: string; name: string; slug: string; plan: string; is_design_partner?: boolean; customer_id?: string } | null;
+  org: { id: string; name: string; slug: string; plan: string; is_core_brain?: boolean; customer_id?: string | null } | null;
   orgId: string;
   budget: any;
   apiKeys: any[];
@@ -131,7 +132,7 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
     }
   }, [createName, customer, showToast]);
 
-  const isDesignPartner = org?.is_design_partner ?? false;
+  const isDesignPartner = customer?.is_design_partner ?? false;
 
   const tabs = [
     { id: "general", label: "General" },
@@ -192,16 +193,49 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
         {/* General Tab */}
         {activeTab === "general" && (
           <div>
-            <h2 className="text-sm font-medium mb-1">Organization</h2>
-            <p className="text-xs text-muted mb-6">Basic organization information</p>
+            {/* ── Customer Section (shown at top when linked) ──────── */}
+            {customer && (
+              <div className="mb-8">
+                <h2 className="text-sm font-medium mb-1">Customer</h2>
+                <p className="text-xs text-muted mb-4">Your workspaces are managed under this customer account</p>
+                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">{customer.name}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="accent" size="xs">{customer.plan}</Badge>
+                        <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
+                        {customer.is_design_partner && (
+                          <Badge variant="default" size="xs">Design Partner</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Workspace Details ───────────────────────────────── */}
+            <h2 className="text-sm font-medium mb-1">Workspace Details</h2>
+            <p className="text-xs text-muted mb-6">
+              {customer
+                ? <>Current workspace under <span className="font-medium text-foreground">{customer.name}</span></>
+                : "Basic workspace information"
+              }
+            </p>
             <div className="space-y-5">
               {/* Profile avatar + name */}
               <div className="flex items-center gap-4 pb-5 border-b border-border-subtle">
                 <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <span className="text-xl font-bold text-accent">{org?.name?.charAt(0)?.toUpperCase() || "O"}</span>
+                  <span className="text-xl font-bold text-accent">{org?.name?.charAt(0)?.toUpperCase() || "W"}</span>
                 </div>
                 <div>
-                  <div className="text-sm font-medium">{org?.name || "Organization"}</div>
+                  <div className="text-sm font-medium">{org?.name || "Workspace"}</div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <Badge variant="accent" size="xs">{org?.plan || "starter"}</Badge>
                     <span className="text-[10px] text-muted font-mono">{org?.slug}</span>
@@ -228,7 +262,7 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Organization ID</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Workspace ID</label>
                 <input
                   type="text"
                   defaultValue={orgId}
@@ -238,134 +272,110 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
               </div>
             </div>
 
-            {/* ── Customer & Workspaces Hierarchy ────────────────────── */}
-            <div className="mt-8 pt-6 border-t border-border-subtle">
-              <h2 className="text-sm font-medium mb-1">Customer & Workspaces</h2>
-              <p className="text-xs text-muted mb-4">
-                {customer
-                  ? <>Your workspaces are grouped under <span className="font-medium text-foreground">{customer.name}</span></>
-                  : "Manage your workspaces and create new ones"
-                }
-              </p>
+            {/* ── All Workspaces under Customer ──────────────────── */}
+            {customer && (
+              <div className="mt-8 pt-6 border-t border-border-subtle">
+                <h2 className="text-sm font-medium mb-1">All Workspaces</h2>
+                <p className="text-xs text-muted mb-4">
+                  {siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""} under {customer.name}
+                </p>
 
-              <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
-                {/* Customer header (if linked) */}
-                {customer && (
-                  <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border-subtle">
-                    <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{customer.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="accent" size="xs">{customer.plan}</Badge>
-                        <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Workspace list */}
-                <div className="space-y-1">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/70 px-1 mb-1.5">
-                    {customer ? `Workspaces (${siblingWorkspaces.length})` : "Current Workspace"}
-                  </div>
-                  {siblingWorkspaces.length > 0 ? (
-                    siblingWorkspaces.map((ws) => (
-                      <div
-                        key={ws.id}
-                        className={cn(
-                          "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                          ws.id === orgId
-                            ? "bg-accent/8 border border-accent/15"
-                            : "hover:bg-surface-hover"
-                        )}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          {ws.id === orgId && (
-                            <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
+                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
+                  <div className="space-y-1">
+                    {siblingWorkspaces.length > 0 ? (
+                      siblingWorkspaces.map((ws) => (
+                        <div
+                          key={ws.id}
+                          className={cn(
+                            "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
+                            ws.id === orgId
+                              ? "bg-accent/8 border border-accent/15"
+                              : "hover:bg-surface-hover"
                           )}
-                          <span className={cn("truncate text-[13px]", ws.id === orgId ? "font-medium" : "text-muted-foreground")}>
-                            {ws.name}
-                          </span>
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {ws.id === orgId && (
+                              <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                            <span className={cn("truncate text-[13px]", ws.id === orgId ? "font-medium" : "text-muted-foreground")}>
+                              {ws.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant="default" size="xs">{ws.plan}</Badge>
+                            {ws.id === orgId && (
+                              <span className="text-[10px] text-accent font-medium">Current</span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-accent/8 border border-accent/15">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="truncate text-[13px] font-medium">{org?.name || "Workspace"}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="default" size="xs">{ws.plan}</Badge>
-                          {ws.id === orgId && (
-                            <span className="text-[10px] text-accent font-medium">Current</span>
-                          )}
+                          <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
+                          <span className="text-[10px] text-accent font-medium">Current</span>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    /* Show current org as the only workspace when no siblings */
-                    <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-accent/8 border border-accent/15">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="truncate text-[13px] font-medium">{org?.name || "Organization"}</span>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
-                        <span className="text-[10px] text-accent font-medium">Current</span>
+                    )}
+                  </div>
+
+                  {/* Create new workspace */}
+                  {!showCreateWorkspace && (
+                    <button
+                      onClick={() => setShowCreateWorkspace(true)}
+                      className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <span className="font-medium">Create Workspace</span>
+                    </button>
+                  )}
+
+                  {/* Inline create workspace form */}
+                  {showCreateWorkspace && (
+                    <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
+                      <div className="text-[12px] font-medium">New workspace under {customer.name}</div>
+                      <input
+                        type="text"
+                        value={createName}
+                        onChange={(e) => setCreateName(e.target.value)}
+                        placeholder={`e.g. ${customer.name} 6.x`}
+                        className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-sm placeholder:text-muted/40 focus:outline-none focus:ring-1 focus:ring-accent"
+                        autoFocus
+                        onKeyDown={(e) => { if (e.key === "Enter") handleCreateWorkspace(); }}
+                      />
+                      {createError && <p className="text-[11px] text-destructive">{createError}</p>}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setShowCreateWorkspace(false); setCreateName(""); setCreateError(""); }}
+                          className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCreateWorkspace}
+                          disabled={creating || !createName.trim()}
+                          className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {creating ? "Creating…" : "Create"}
+                        </button>
                       </div>
                     </div>
                   )}
                 </div>
-
-                {/* Create new workspace */}
-                {customer && !showCreateWorkspace && (
-                  <button
-                    onClick={() => setShowCreateWorkspace(true)}
-                    className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span className="font-medium">Create Workspace</span>
-                  </button>
-                )}
-
-                {/* Inline create workspace form */}
-                {showCreateWorkspace && customer && (
-                  <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
-                    <div className="text-[12px] font-medium">New workspace under {customer.name}</div>
-                    <input
-                      type="text"
-                      value={createName}
-                      onChange={(e) => setCreateName(e.target.value)}
-                      placeholder={`e.g. ${customer.name} 6.x`}
-                      className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-sm placeholder:text-muted/40 focus:outline-none focus:ring-1 focus:ring-accent"
-                      autoFocus
-                      onKeyDown={(e) => { if (e.key === "Enter") handleCreateWorkspace(); }}
-                    />
-                    {createError && <p className="text-[11px] text-destructive">{createError}</p>}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => { setShowCreateWorkspace(false); setCreateName(""); setCreateError(""); }}
-                        className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCreateWorkspace}
-                        disabled={creating || !createName.trim()}
-                        className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {creating ? "Creating…" : "Create"}
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
           </div>
         )}
 

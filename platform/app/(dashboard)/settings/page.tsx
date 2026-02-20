@@ -13,14 +13,16 @@ export default async function SettingsPage() {
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Settings] Query failed:", err);
+      console.error("[Settings] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 
+  // ── Query 1: Org data (no FK join — resilient to customer RLS issues) ──
+  // ── Query 2-4: Budget, API keys, Connectors (parallel)
   const [orgResult, budgetResult, apiKeysResult, connectorsResult] = await Promise.all([
     safe(supabase
       .from("organizations")
-      .select("id, name, slug, plan, is_design_partner, customer_id, customer:customer_id(id, name, slug, plan)")
+      .select("id, name, slug, plan, is_core_brain, customer_id")
       .eq("id", orgId)
       .single()),
 
@@ -44,10 +46,30 @@ export default async function SettingsPage() {
       .order("created_at", { ascending: true })),
   ]);
 
-  // Fetch sibling workspaces under the same customer (if customer_id exists)
-  const orgData = orgResult.data as any;
-  const customerId = orgData?.customer_id;
-  const customer = orgData?.customer ?? null;
+  const orgData = orgResult.data as {
+    id: string; name: string; slug: string; plan: string;
+    is_core_brain: boolean; customer_id: string | null;
+  } | null;
+
+  if (!orgData) {
+    console.error("[Settings] Org query returned null for orgId:", orgId, "error:", orgResult.error);
+  }
+
+  // ── Query 5: Customer data (separate query — avoids FK join failures) ──
+  const customerId = orgData?.customer_id ?? null;
+  let customer: { id: string; name: string; slug: string; plan: string; is_design_partner: boolean } | null = null;
+
+  if (customerId) {
+    const { data: cust, error: custErr } = await supabase
+      .from("customers")
+      .select("id, name, slug, plan, is_design_partner")
+      .eq("id", customerId)
+      .single();
+    if (custErr) console.error("[Settings] Customer query failed:", custErr);
+    customer = cust ?? null;
+  }
+
+  // ── Query 6: Sibling workspaces under same customer ──
   let siblingWorkspaces: { id: string; name: string; slug: string; plan: string }[] = [];
 
   if (customerId) {
@@ -55,7 +77,6 @@ export default async function SettingsPage() {
       .from("organizations")
       .select("id, name, slug, plan")
       .eq("customer_id", customerId)
-      .eq("is_core_brain", false)
       .order("created_at", { ascending: true });
     siblingWorkspaces = siblings || [];
   }

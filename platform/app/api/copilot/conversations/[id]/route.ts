@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -6,6 +7,9 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/copilot/conversations/[id]
  * Load a single conversation with full messages.
+ *
+ * Uses admin client — conversations RLS references org_members which
+ * has infinite recursion with the anon/authenticated role.
  */
 export async function GET(
   _req: NextRequest,
@@ -20,7 +24,8 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
+  const admin = getAdminClient();
+  const { data, error } = await admin
     .from("conversations")
     .select("*")
     .eq("id", id)
@@ -61,7 +66,8 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const admin = getAdminClient();
+  const { error } = await admin
     .from("conversations")
     .update(updates)
     .eq("id", id)
@@ -91,7 +97,8 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase
+  const admin = getAdminClient();
+  const { error } = await admin
     .from("conversations")
     .delete()
     .eq("id", id)

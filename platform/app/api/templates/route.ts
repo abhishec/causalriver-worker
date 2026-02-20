@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyOrgMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { ALL_SLASH_COMMANDS } from "@/components/copilot/slash-commands";
 import { labelToCommandId } from "@/lib/templates/types";
@@ -26,14 +27,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "orgId required" }, { status: 400 });
   }
 
-  // Verify org membership
-  const { data: member } = await supabase
-    .from("org_members")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("user_id", user.id)
-    .single();
-
+  // Verify org membership (uses admin client to bypass RLS recursion)
+  const member = await verifyOrgMembership(user.id, orgId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -96,14 +91,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Verify org membership
-  const { data: member } = await supabase
-    .from("org_members")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("user_id", user.id)
-    .single();
-
+  // Verify org membership (uses admin client to bypass RLS recursion)
+  const member = await verifyOrgMembership(user.id, orgId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

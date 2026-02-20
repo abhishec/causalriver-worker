@@ -1269,6 +1269,8 @@ export function CopilotChat({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
+  isLoadingRef.current = isLoading;
   const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
@@ -1421,8 +1423,16 @@ export function CopilotChat({
 
       if (!prompt || typeof prompt !== "string" || !prompt.trim()) return;
 
-      // Switch service mode if the command belongs to a different service
-      if (service && onServiceChangeRef.current && service !== "custom") {
+      // Switch service mode if the command belongs to a different service.
+      // IMPORTANT: only fire onServiceChange when service actually changes —
+      // handleServiceChange dispatches copilot-new-conversation which would
+      // reset gathering state that we're about to start below.
+      if (
+        service &&
+        onServiceChangeRef.current &&
+        service !== "custom" &&
+        service !== activeServiceRef.current
+      ) {
         onServiceChangeRef.current(service);
       }
 
@@ -1444,11 +1454,21 @@ export function CopilotChat({
         }
       }
 
-      // No gathering needed — submit directly
+      // No gathering needed — submit directly.
+      // Use retry loop: if isLoading is still true (e.g. from a reset that hasn't
+      // flushed yet after copilot-new-conversation), wait and retry up to 5 times.
       setInput(prompt);
-      setTimeout(() => {
+      let retries = 0;
+      const maxRetries = 5;
+      const trySubmit = () => {
+        if (isLoadingRef.current && retries < maxRetries) {
+          retries++;
+          setTimeout(trySubmit, 100);
+          return;
+        }
         sendMessageRef.current?.(prompt);
-      }, 50);
+      };
+      setTimeout(trySubmit, 80);
     };
     // "copilot-jump-to-message" scrolls to a specific message in the chat (artifact → message linking)
     const handleJumpToMessage = (event: Event) => {
@@ -1786,7 +1806,7 @@ export function CopilotChat({
 
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
       <div className="flex-1 overflow-y-auto" style={{ padding: "24px 0" }}>
-        {messages.length === 0 ? (
+        {messages.length === 0 && !gathering.isActive ? (
           /* Empty state — matches HTML prototype: .chat-welcome with ✦ spark + service-specific text */
           <div className="flex flex-col items-center justify-center h-full text-center" style={{ padding: "60px 24px" }}>
             <div style={{ color: "#c6613f", fontSize: 28, marginBottom: 16 }}>✦</div>

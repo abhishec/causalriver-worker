@@ -24,7 +24,6 @@ const nextConfig: NextConfig = {
       'recharts',
       'framer-motion',
       'shiki',
-      'lucide-react',
       '@supabase/supabase-js',
       'xlsx',
     ],
@@ -41,6 +40,16 @@ const nextConfig: NextConfig = {
     'tree-sitter-python',
     'tree-sitter-scala',
   ],
+  // Turbopack rule equivalent for .node files (used in `next dev --turbopack`).
+  // Without this, Next.js warns "Webpack is configured while Turbopack is not".
+  turbopack: {
+    rules: {
+      '*.node': {
+        loaders: [path.resolve(__dirname, 'noop-loader.js')],
+        as: '*.js',
+      },
+    },
+  },
   webpack: (config) => {
     // Exclude .node native binary files from webpack compilation.
     // tree-sitter prebuilds contain platform-specific binaries that webpack

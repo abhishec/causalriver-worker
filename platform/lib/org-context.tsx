@@ -6,10 +6,8 @@ import {
   useState,
   useEffect,
   useCallback,
-  useMemo,
   type ReactNode,
 } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -56,52 +54,87 @@ interface OrgContextType {
 const OrgContext = createContext<OrgContextType | null>(null);
 
 const STORAGE_KEY = "nexus_current_org";
+const CACHE_KEY = "nexus_org_memberships";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/* ── localStorage SWR cache helpers ───────────────────────────────── */
+
+interface CachedData {
+  memberships: OrgMembership[];
+  isPlatformAdmin: boolean;
+  timestamp: number;
+}
+
+function readCache(): CachedData | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed: CachedData = JSON.parse(raw);
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(memberships: OrgMembership[], isPlatformAdmin: boolean) {
+  try {
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ memberships, isPlatformAdmin, timestamp: Date.now() })
+    );
+  } catch {
+    /* localStorage full or unavailable */
+  }
+}
 
 /* ── Provider ──────────────────────────────────────────────────────── */
 
 export function OrgProvider({ children }: { children: ReactNode }) {
-  const [memberships, setMemberships] = useState<OrgMembership[]>([]);
-  const [currentOrgId, setCurrentOrgId] = useState<string | null>(null);
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Hydrate from localStorage immediately (synchronous, no loading flash)
+  const [memberships, setMemberships] = useState<OrgMembership[]>(() => {
+    const cached = readCache();
+    return cached?.memberships ?? [];
+  });
+  const [currentOrgId, setCurrentOrgId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(STORAGE_KEY);
+  });
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(() => {
+    const cached = readCache();
+    return cached?.isPlatformAdmin ?? false;
+  });
+  // If we have cached data, skip the loading state entirely (instant UI)
+  const [isLoading, setIsLoading] = useState(() => readCache() === null);
 
-  // Memoize the Supabase client so it's created once, not on every render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const supabase = useMemo(() => createClient(), []);
-
-  /* Load user's orgs on mount */
+  /* Load user's orgs via API route (bypasses RLS recursion issue) */
   const loadOrgs = useCallback(async () => {
     try {
-      // Use getSession() — reads from browser cookie, zero network call.
-      // Middleware already validated the token via getUser() on the server,
-      // so the session is trustworthy. Saves ~100-300ms on every mount.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
+      const res = await fetch("/api/org/memberships", {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        console.warn("[OrgProvider] memberships API returned", res.status);
         setIsLoading(false);
         return;
       }
 
-      const { data: rows } = await supabase
-        .from("org_members")
-        .select(
-          `organization_id, role, is_platform_admin,
-           organizations:organization_id(
-             id, name, slug, plan, is_core_brain, customer_id,
-             customer:customer_id(id, name, slug)
-           )`
-        )
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: true });
+      const json = await res.json();
+      const rows = json.memberships;
 
       if (!rows || rows.length === 0) {
+        console.warn("[OrgProvider] No org memberships found");
         setIsLoading(false);
         return;
       }
 
-      const mapped: OrgMembership[] = (rows as any[]).map((r) => {
+      const mapped: OrgMembership[] = (rows as any[]).map((r: any) => {
         const org   = r.organizations;
         const cust  = org?.customer ?? null;
         return {
@@ -125,11 +158,11 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       setMemberships(mapped);
       setIsPlatformAdmin(isAdmin);
 
+      // Persist to localStorage for instant hydration on next page load
+      writeCache(mapped, isAdmin);
+
       /* Restore saved org or pick first non-core */
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem(STORAGE_KEY)
-          : null;
+      const saved = localStorage.getItem(STORAGE_KEY);
 
       const validSaved = saved
         ? mapped.find((m) => m.organization_id === saved)
@@ -143,11 +176,11 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         setCurrentOrgId(firstNonCore.organization_id);
       }
     } catch {
-      /* silently fail — user not logged in */
+      /* silently fail — user not logged in or network error */
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     loadOrgs();

@@ -1,0 +1,50 @@
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+/**
+ * Direct service-role Supabase client that fully bypasses RLS.
+ *
+ * The SSR `createServiceClient()` from server.ts still injects the user's
+ * JWT from cookies into the Authorization header, causing PostgreSQL to
+ * evaluate RLS policies with the user's role. This results in infinite
+ * recursion on the `org_members` table whose RLS policy references itself.
+ *
+ * This client uses only the service-role key with no cookie injection,
+ * so PostgreSQL treats all queries as the `service_role` (superuser-like).
+ *
+ * NOTE: Typed as SupabaseClient<any,any,any> because this project does not
+ * have generated Supabase Database types. This matches the typing pattern
+ * used by the SSR clients in server.ts and client.ts.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _adminClient: SupabaseClient<any, any, any> | null = null;
+
+export function getAdminClient(): SupabaseClient<any, any, any> {
+  if (!_adminClient) {
+    _adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+  }
+  return _adminClient;
+}
+
+/**
+ * Verify that a user is a member of the given organization.
+ * Uses the admin client to bypass RLS recursion on org_members.
+ *
+ * @returns The membership row if found, or null if not a member.
+ */
+export async function verifyOrgMembership(
+  userId: string,
+  organizationId: string
+): Promise<{ id: string; role: string; is_platform_admin: boolean } | null> {
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("org_members")
+    .select("id, role, is_platform_admin")
+    .eq("organization_id", organizationId)
+    .eq("user_id", userId)
+    .single();
+  return data;
+}

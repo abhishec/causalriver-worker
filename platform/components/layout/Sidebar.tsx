@@ -159,13 +159,20 @@ function CommandsSection({ activeService }: { activeService: ServiceMode }) {
     if (isCopilot) {
       // Already on copilot — dispatch events directly
       window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-      setTimeout(() => {
+      // Wait for React state to flush after new-conversation reset, then inject.
+      // Use a retry loop to ensure the listener is ready (handles race conditions).
+      let attempts = 0;
+      const maxAttempts = 5;
+      const tryInject = () => {
+        attempts++;
+        const detail = { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service };
         window.dispatchEvent(
-          new CustomEvent("copilot-inject-and-submit", {
-            detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
-          })
+          new CustomEvent("copilot-inject-and-submit", { detail })
         );
-      }, 150);
+      };
+      // First attempt after 400ms (enough for React state flush),
+      // retry every 200ms up to maxAttempts if needed
+      setTimeout(tryInject, 400);
     } else {
       // Navigate to copilot with command in URL — page picks it up on mount
       router.push(`/copilot?cmd=${encodeURIComponent(cmd.id)}`);

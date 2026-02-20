@@ -57,11 +57,16 @@ export function useChatHistory() {
   useEffect(() => {
     if (!currentOrg?.id) return;
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/copilot/conversations?orgId=${currentOrg!.id}`);
+        const res = await fetch(
+          `/api/copilot/conversations?orgId=${currentOrg!.id}`,
+          { signal: controller.signal }
+        );
         if (res.ok && !cancelled) {
           const json = await res.json();
           if (json.conversations) {
@@ -78,6 +83,7 @@ export function useChatHistory() {
       } catch {
         // silently fail — sidebar history is non-critical
       } finally {
+        clearTimeout(timeout);
         if (!cancelled) setLoading(false);
       }
     }
@@ -85,10 +91,34 @@ export function useChatHistory() {
     load();
 
     // Listen for conversation updates from copilot
-    const handler = () => load();
+    const handler = () => {
+      // Each reload needs its own timeout
+      const reloadController = new AbortController();
+      const reloadTimeout = setTimeout(() => reloadController.abort(), 5000);
+      fetch(`/api/copilot/conversations?orgId=${currentOrg!.id}`, {
+        signal: reloadController.signal,
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => {
+          if (json?.conversations && !cancelled) {
+            setItems(
+              json.conversations.map((c: any) => ({
+                id: c.id,
+                title: c.title,
+                service_mode: c.service_mode,
+                updated_at: c.updated_at,
+              }))
+            );
+          }
+        })
+        .catch(() => {})
+        .finally(() => clearTimeout(reloadTimeout));
+    };
     window.addEventListener("conversation-updated", handler);
     return () => {
       cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
       window.removeEventListener("conversation-updated", handler);
     };
   }, [currentOrg?.id]);

@@ -21,6 +21,7 @@
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getAdminClient, verifyOrgMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import {
   estimateImpact,
@@ -305,8 +306,10 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Auto-resolve org when frontend didn't provide one ────────────
+    // Uses admin client to bypass RLS recursion on org_members
     if (!organizationId) {
-      const { data: userOrgs } = await supabase
+      const admin = getAdminClient();
+      const { data: userOrgs } = await admin
         .from("org_members")
         .select("organization_id, organizations:organization_id(is_core_brain)")
         .eq("user_id", user.id)
@@ -324,27 +327,22 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Validate user is a member of the requested org ──────────────────
-    // This runs for EVERY request including CORE_ORG_ID — no exemptions.
-    // A user must be an org_member of the target org OR a platform admin.
-    // This prevents any user from querying a different workspace's brain,
-    // regardless of what organizationId they pass in the request body.
-    const { data: membership } = await supabase
-      .from("org_members")
-      .select("organization_id, is_platform_admin")
-      .eq("user_id", user.id)
-      .eq("organization_id", orgId)
-      .single();
+    // Uses admin client to bypass RLS recursion on org_members.
+    const membership = await verifyOrgMembership(user.id, orgId);
 
     // Platform admins can access any org (for support/debugging)
-    const { data: adminCheck } = !membership
-      ? await supabase
-          .from("org_members")
-          .select("is_platform_admin")
-          .eq("user_id", user.id)
-          .eq("is_platform_admin", true)
-          .limit(1)
-          .single()
-      : { data: null };
+    let adminCheck: { is_platform_admin: boolean } | null = null;
+    if (!membership) {
+      const admin = getAdminClient();
+      const { data } = await admin
+        .from("org_members")
+        .select("is_platform_admin")
+        .eq("user_id", user.id)
+        .eq("is_platform_admin", true)
+        .limit(1)
+        .single();
+      adminCheck = data;
+    }
 
     if (!membership && !adminCheck) {
       return NextResponse.json(

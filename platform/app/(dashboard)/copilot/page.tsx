@@ -132,14 +132,15 @@ function CopilotPageInner() {
         setArtifactPaneOpen(false);
         setMessageArtifactMap(new Map());
         window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-        // Inject and submit after component is fully mounted
+        // Inject and submit after component is fully mounted.
+        // 600ms allows CopilotChat to mount and register event listeners.
         const timer = setTimeout(() => {
           window.dispatchEvent(
             new CustomEvent("copilot-inject-and-submit", {
               detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
             })
           );
-        }, 300);
+        }, 600);
         return () => clearTimeout(timer);
       }
     }
@@ -313,6 +314,10 @@ function CopilotPageInner() {
   }, []);
 
   // ── Service mode switch ───────────────────────────────────────────────────
+  // NOTE: This does NOT dispatch copilot-new-conversation — that's handled
+  // separately by the service-mode-changed listener (manual tab switch) and
+  // by the sidebar's handleCommandClick (command click). This prevents
+  // double-reset that would cancel gathering state started by command clicks.
   const handleServiceChange = useCallback((svc: ServiceMode) => {
     setActiveService(svc);
     // Reset conversation selection when switching services
@@ -320,15 +325,18 @@ function CopilotPageInner() {
     setArtifacts([]);
     setActiveArtifactId(null);
     setArtifactPaneOpen(false);
-    window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
   }, []);
 
   // ── Listen for service-mode-changed from sidebar tab pills ─────────────
+  // This fires only on MANUAL tab switches (user clicks General/AAAS/SE-aaS pill).
+  // Command clicks go through handleCommandClick → copilot-inject-and-submit instead.
   useEffect(() => {
     const handler = (e: Event) => {
       const svc = (e as CustomEvent).detail as ServiceMode;
       if (svc && ["general", "aas", "seaas"].includes(svc) && svc !== activeService) {
         handleServiceChange(svc);
+        // Reset chat when manually switching service tabs
+        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
       }
     };
     window.addEventListener("service-mode-changed", handler);
