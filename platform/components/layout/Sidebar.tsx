@@ -143,10 +143,12 @@ function CommandsSection() {
     window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
     // Navigate to copilot and auto-submit the command prompt
     router.push("/copilot");
-    // Use copilot-inject-and-submit event — give time for new-conversation to reset state
+    // Send full command object so CopilotChat can check for gathering flow
     setTimeout(() => {
       window.dispatchEvent(
-        new CustomEvent("copilot-inject-and-submit", { detail: cmd.prompt })
+        new CustomEvent("copilot-inject-and-submit", {
+          detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
+        })
       );
     }, 200);
   }
@@ -216,7 +218,7 @@ function ChatHistorySection({
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-muted-foreground transition-colors shrink-0"
       >
-        <span>Recent Chats</span>
+        <span>Chat History</span>
         <svg
           className={cn("w-3 h-3 transition-transform", open && "rotate-180")}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
