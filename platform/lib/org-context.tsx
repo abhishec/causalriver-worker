@@ -34,8 +34,15 @@ export interface OrgMembership {
   organization: Organization;
 }
 
+export interface CustomerInfo {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface OrgContextType {
   currentOrg: Organization | null;
+  currentCustomer: CustomerInfo | null;
   currentRole: string | null;
   organizations: OrgMembership[];
   isPlatformAdmin: boolean;
@@ -162,17 +169,26 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     [memberships, isPlatformAdmin]
   );
 
-  /* Derive current org + role from state */
+  /* Derive current org + role + customer from state */
   const currentMembership = memberships.find(
     (m) => m.organization_id === currentOrgId
   );
   const currentOrg = currentMembership?.organization ?? null;
   const currentRole = currentMembership?.role ?? null;
+  const currentCustomer: CustomerInfo | null =
+    currentOrg?.customer_id
+      ? {
+          id: currentOrg.customer_id,
+          name: currentOrg.customer_name!,
+          slug: currentOrg.customer_slug!,
+        }
+      : null;
 
   return (
     <OrgContext.Provider
       value={{
         currentOrg,
+        currentCustomer,
         currentRole,
         organizations: memberships,
         isPlatformAdmin,

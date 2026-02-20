@@ -100,6 +100,26 @@ export async function POST(request: Request) {
       .update({ status: "accepted", updated_at: new Date().toISOString() })
       .eq("id", invitation.id);
 
+    // Sync customer_members — ensure the user has a customer-level membership
+    // so the customer→org chain is complete for getCurrentOrgId() resolution.
+    const { data: orgData } = await service
+      .from("organizations")
+      .select("customer_id")
+      .eq("id", invitation.organization_id)
+      .single();
+
+    if (orgData?.customer_id) {
+      await service.from("customer_members").upsert(
+        {
+          customer_id: orgData.customer_id,
+          user_id: user.id,
+          role: invitation.role,
+          primary_org_id: invitation.organization_id,
+        },
+        { onConflict: "customer_id,user_id", ignoreDuplicates: true }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       orgId: invitation.organization_id,

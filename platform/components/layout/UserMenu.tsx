@@ -145,7 +145,14 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
   const planLabel = PLAN_LABELS[currentOrg.plan] || currentOrg.plan;
 
   async function handleSignOut() {
+    // 1. Clear org selection state so stale IDs don't persist across sessions
+    localStorage.removeItem("nexus_current_org");
+    document.cookie = "nexus_current_org=;path=/;max-age=0;SameSite=Lax";
+
+    // 2. Sign out from Supabase (clears auth cookies)
     await supabase.auth.signOut();
+
+    // 3. Hard redirect to login
     window.location.href = "/login";
   }
 
