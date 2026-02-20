@@ -1,7 +1,3 @@
-// Force dynamic rendering - don't pre-render at build time
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
-
 import { AuthLeftPanel } from "./AuthLeftPanel";
 import { CORE_ORG_ID } from "@/lib/org-helpers";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

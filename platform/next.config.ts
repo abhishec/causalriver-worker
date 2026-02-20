@@ -2,16 +2,12 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
-  // Standalone output for Docker deployment (ECS/Fargate)
-  // Bundles server.js + vendored node_modules for minimal container image.
+  // Standalone output for Docker deployment (ECS/Fargate) and Amplify WEB_COMPUTE.
   output: 'standalone',
-  // ── Monorepo standalone fix ───────────────────────────────────────────────────
-  // In a monorepo, Next.js auto-detects the root by walking up to find
-  // pnpm-workspace.yaml. The standalone output mirrors the monorepo layout:
-  //   .next/standalone/{monorepo-root-relative}/platform/server.js
-  // Setting this explicitly ensures consistent behaviour between local and Docker
-  // builds (Docker WORKDIR is /app, monorepo root is /app/..).
   outputFileTracingRoot: path.join(__dirname, '../'),
+  // Disable Next.js compression — CloudFront handles gzip/brotli at the edge.
+  // Avoids wasting Lambda CPU on compression for every response.
+  compress: false,
   typescript: {
     // Skip type checking during build — monorepo workspace links
     // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.

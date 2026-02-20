@@ -1,7 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Routes that never need auth — skip the Supabase network round-trip entirely
+const PUBLIC_ROUTES = ["/login", "/signup", "/callback", "/forgot-password", "/reset-password", "/auth/confirm"];
+
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // ── Fast-path: skip getUser() for public routes & API routes ────────
+  // getUser() makes a network call to Supabase (~100-300ms). Public pages
+  // and API routes (which handle their own auth) don't need it in middleware.
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  const isApiRoute = pathname.startsWith("/api/");
+
+  if (isPublicRoute || isApiRoute) {
+    return NextResponse.next({ request });
+  }
+
+  // ── Auth-required routes: validate session via Supabase ─────────────
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -31,27 +47,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
-  // API routes handle their own auth (API keys, session cookies) — skip middleware redirect
-  const isApiRoute = pathname.startsWith("/api/");
-  if (isApiRoute) {
-    return supabaseResponse;
-  }
-
-  // Public routes that don't require auth
-  const publicRoutes = ["/login", "/signup", "/callback", "/forgot-password", "/reset-password"];
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-
   // Invite pages are semi-public (show info without auth, but accept requires auth)
   const isInvitePage = pathname.startsWith("/invite/");
 
   // Auth-required but not dashboard routes (e.g. onboarding)
   const isOnboarding = pathname.startsWith("/onboarding");
 
-  if (!user && !isPublicRoute && !isInvitePage && !isOnboarding) {
+  if (!user && !isInvitePage && !isOnboarding) {
     // No user and trying to access protected route → redirect to login
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -65,32 +67,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublicRoute) {
-    // Exception: allow authenticated users to stay on reset-password page
-    // (they arrive here via recovery flow with an active session from callback)
-    if (pathname === "/reset-password") {
-      return supabaseResponse;
-    }
-
-    // User is logged in but on login/signup page → redirect to dashboard
-    // Exception: if there's a `next` param (e.g. from invite flow), honor it
-    const nextParam = request.nextUrl.searchParams.get("next");
-    if (nextParam && nextParam.startsWith("/invite/")) {
-      const url = request.nextUrl.clone();
-      url.pathname = nextParam;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-
-    const url = request.nextUrl.clone();
-    url.pathname = "/overview";
-    return NextResponse.redirect(url);
-  }
-
   // Onboarding check: if user is logged in, check if they've completed onboarding
   // Skip for invite pages (they should be able to accept invites without onboarding)
   // Use !onboarding_complete to catch both `false` and `undefined` (new OAuth users)
-  if (user && !isPublicRoute && !isOnboarding && !isInvitePage) {
+  if (user && !isOnboarding && !isInvitePage) {
     const meta = user.user_metadata;
     if (!meta?.onboarding_complete) {
       const url = request.nextUrl.clone();
