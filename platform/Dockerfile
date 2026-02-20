@@ -104,6 +104,19 @@ RUN mkdir -p public
 # Build Next.js (standalone output is set in next.config.ts)
 RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm build
 
+# Diagnostic: verify standalone output structure for debugging.
+# next.config.ts sets outputFileTracingRoot = monorepo root (/app),
+# so standalone mirrors the monorepo layout: platform/server.js sits
+# inside a platform/ sub-dir and its node_modules/next/ is adjacent.
+RUN echo "=== Standalone output structure ===" && \
+    ls -la .next/standalone/ && \
+    echo "--- platform dir ---" && \
+    ls -la .next/standalone/platform/ 2>/dev/null || echo "(no platform/ sub-dir)" && \
+    echo "--- server.js location ---" && \
+    find .next/standalone -name "server.js" -maxdepth 3 && \
+    echo "--- next module location ---" && \
+    find .next/standalone -path "*/node_modules/next/package.json" -maxdepth 5
+
 # ─────────────────────────────────────────────────────────────
 # Stage 3: Production runtime (minimal)
 # ─────────────────────────────────────────────────────────────
@@ -135,6 +148,19 @@ COPY --from=builder --chown=nextjs:nodejs /app/platform/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/platform/.next/static ./platform/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/platform/public ./platform/public
 
+# ── Fix monorepo standalone module resolution ──────────────────────────────
+# Next.js standalone in a monorepo may place server.js at the root but
+# bundles the `next` package under platform/node_modules/.  Node's module
+# resolution from /app/server.js only checks /app/node_modules/ — which
+# won't contain `next`.  Symlink platform/node_modules/next into the root
+# node_modules so require('next') resolves from either location.
+RUN if [ -f server.js ] && [ -d platform/node_modules/next ] && [ ! -d node_modules/next ]; then \
+      mkdir -p node_modules && \
+      ln -s /app/platform/node_modules/next node_modules/next && \
+      chown -h nextjs:nodejs node_modules node_modules/next && \
+      echo "Symlinked node_modules/next → platform/node_modules/next"; \
+    fi
+
 USER nextjs
 
 EXPOSE 3000
@@ -143,6 +169,8 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Next.js standalone in a monorepo places server.js inside the package dir.
-# The standalone output structure is: .next/standalone/{monorepo-root}/platform/server.js
-CMD ["node", "platform/server.js"]
+# Next.js standalone in a pnpm monorepo: server.js may end up at the
+# standalone root or inside platform/ depending on how outputFileTracingRoot
+# is resolved.  Use a shell wrapper that tries both paths so the container
+# always starts regardless of which layout was produced.
+CMD ["sh", "-c", "if [ -f platform/server.js ]; then exec node platform/server.js; else exec node server.js; fi"]
