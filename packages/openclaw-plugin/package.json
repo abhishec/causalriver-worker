@@ -32,6 +32,7 @@
   "dependencies": {
     "@nexus-ai/client": "workspace:*",
     "@nexus-ai/mcp-server": "workspace:*",
+    "@nexus-ai/memory-stack": "workspace:*",
     "@sinclair/typebox": "^0.32.0"
   },
   "devDependencies": {
