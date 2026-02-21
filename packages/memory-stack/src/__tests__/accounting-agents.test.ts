@@ -2,13 +2,16 @@
  * Accounting Agents Test Suite
  * =============================
  *
- * Tests the 6 AaaS agents with realistic Xero GL data:
+ * Tests the 9 AaaS agents with realistic Xero GL data:
  * - brain-bookkeeper: Transaction categorization & journal entry
  * - brain-reconciler: Month-end account reconciliation
  * - brain-statement-generator: Financial statement preparation
  * - brain-tax-compliance: Multi-jurisdiction tax compliance
  * - brain-audit-preparer: Audit readiness assessment
  * - brain-anomaly-detective: Financial anomaly detection
+ * - brain-cash-flow-prophet: Cash flow forecasting
+ * - brain-revenue-leakage-detector: Revenue leakage detection
+ * - brain-causal-pl-narrator: Causal P&L narrative generation
  *
  * Uses sample data modeled on a real Xero General Ledger export
  * (Singapore SaaS company, SGD denominated, SFRS/IRAS jurisdiction).
@@ -623,7 +626,7 @@ describe('Accounting Agents', () => {
   // ========================================================================
 
   describe('Agent Registration', () => {
-    it('should register all 6 accounting agents', () => {
+    it('should register all accounting agents', () => {
       const freshRegistry = createAgentRegistry({ verbose: false });
       registerAccountingAgents(freshRegistry);
 
@@ -631,7 +634,7 @@ describe('Accounting Agents', () => {
       const accountingAgents = agents.filter((a: any) =>
         a.definition?.tags?.includes('accounting')
       );
-      expect(accountingAgents.length).toBe(6);
+      expect(accountingAgents.length).toBe(9);
     });
 
     it('should have correct agent names', () => {
@@ -643,6 +646,9 @@ describe('Accounting Agents', () => {
       expect(names).toContain('brain-tax-compliance');
       expect(names).toContain('brain-audit-preparer');
       expect(names).toContain('brain-anomaly-detective');
+      expect(names).toContain('brain-cash-flow-prophet');
+      expect(names).toContain('brain-revenue-leakage-detector');
+      expect(names).toContain('brain-causal-pl-narrator');
     });
   });
 });
