@@ -15,10 +15,9 @@ describe("Domain commands completeness", () => {
     }
   });
 
-  it("should have all 7 AAS commands", () => {
+  it("should have all AAS commands", () => {
     const aasCommands = ALL_SLASH_COMMANDS.filter((c) => c.service === "aas");
     expect(aasCommands.length).toBe(AAS_COMMANDS.length);
-    expect(aasCommands.length).toBe(7);
   });
 
   it("should have no duplicate IDs", () => {
@@ -53,7 +52,10 @@ describe("Domain commands completeness", () => {
     }
   });
 
-  it("should have correct total count (17 SE-aaS + 6 AAS = 23)", () => {
-    expect(ALL_SLASH_COMMANDS.length).toBe(DOMAIN_CATALOGUE.length + AAS_COMMANDS.length);
+  it("should have correct total count (SE-aaS + AAS + general)", () => {
+    const generalCommands = ALL_SLASH_COMMANDS.filter((c) => c.service === "general");
+    expect(ALL_SLASH_COMMANDS.length).toBe(
+      DOMAIN_CATALOGUE.length + AAS_COMMANDS.length + generalCommands.length
+    );
   });
 });

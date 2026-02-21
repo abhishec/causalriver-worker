@@ -12,6 +12,10 @@ describe("UnifiedArtifact type system", () => {
     "financial-statement",
     "engineering-analysis",
     "mermaid-diagram",
+    "agent-execution",
+    "presentation",
+    "pdf",
+    "infographic",
   ];
 
   it("should have labels for all artifact types", () => {
@@ -28,9 +32,9 @@ describe("UnifiedArtifact type system", () => {
     }
   });
 
-  it("should have 8 total artifact types", () => {
-    expect(Object.keys(ARTIFACT_TYPE_LABELS).length).toBe(8);
-    expect(Object.keys(ARTIFACT_TYPE_ICONS).length).toBe(8);
+  it("should have all artifact types covered", () => {
+    expect(Object.keys(ARTIFACT_TYPE_LABELS).length).toBe(ALL_TYPES.length);
+    expect(Object.keys(ARTIFACT_TYPE_ICONS).length).toBe(ALL_TYPES.length);
   });
 
   it("financial-statement should be labeled correctly", () => {
