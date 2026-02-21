@@ -80,7 +80,7 @@ export async function maybeTriggerBrainCycle(
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      "http://localhost:3000";
+      "http://localhost:3001";
 
     // Use service-level call (no user cookie needed — this is server-to-server)
     const response = await fetch(`${baseUrl}/api/brain/cycle`, {

@@ -185,13 +185,14 @@ export async function detectThreats(request: Request): Promise<ThreatDetection> 
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Accessing common vulnerability paths
+  // NOTE: Do NOT include '/admin' — the app has legitimate /admin/* routes.
+  // Only block paths that indicate probing for known vulnerable software.
   const vulnPaths = [
-    '/admin',
     '/phpmyadmin',
     '/wp-admin',
+    '/wp-login',
     '/.env',
     '/.git',
-    '/config',
     '/.aws',
     '/backup',
   ];

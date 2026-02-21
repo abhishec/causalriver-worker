@@ -1,18 +1,25 @@
 import { AuthLeftPanel } from "./AuthLeftPanel";
 import { CORE_ORG_ID } from "@/lib/constants";
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const HEADERS = {
-  apikey: SERVICE_KEY,
-  Authorization: `Bearer ${SERVICE_KEY}`,
-  "Content-Type": "application/json",
-};
+function getHeaders() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return {
+    url,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+  };
+}
 
 async function supabaseGet<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: HEADERS,
+    const config = getHeaders();
+    if (!config) return null;
+    const res = await fetch(`${config.url}/rest/v1/${path}`, {
+      headers: config.headers,
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;
@@ -24,8 +31,10 @@ async function supabaseGet<T>(path: string): Promise<T | null> {
 
 async function supabaseCount(path: string): Promise<number> {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: { ...HEADERS, Prefer: "count=exact", Range: "0-0" },
+    const config = getHeaders();
+    if (!config) return 0;
+    const res = await fetch(`${config.url}/rest/v1/${path}`, {
+      headers: { ...config.headers, Prefer: "count=exact", Range: "0-0" },
       next: { revalidate: 300 },
     });
     if (!res.ok) return 0;
@@ -53,7 +62,8 @@ interface BrainSnapshot {
 
 async function getBrainStats() {
   // Return defaults if env vars not available (e.g., during build)
-  if (!SUPABASE_URL || !SERVICE_KEY) {
+  const config = getHeaders();
+  if (!config) {
     return {
       accuracy: null,
       connections: null,

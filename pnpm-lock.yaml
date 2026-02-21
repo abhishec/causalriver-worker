@@ -337,6 +337,9 @@ importers:
       '@nexus-ai/memory-stack':
         specifier: workspace:*
         version: link:../packages/memory-stack
+      '@octokit/rest':
+        specifier: ^20.1.2
+        version: 20.1.2
       '@supabase/ssr':
         specifier: ^0.6.1
         version: 0.6.1(@supabase/supabase-js@2.95.3)
@@ -385,6 +388,9 @@ importers:
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
+      zod:
+        specifier: ^3.23.0
+        version: 3.25.76
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         // Determine the sync endpoint for each connector type
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || "http://localhost:3000";
+          || "http://localhost:3001";
 
         let syncUrl: string;
         let syncBody: Record<string, unknown> = {};
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || "http://localhost:3000";
+          || "http://localhost:3001";
 
         const cookieHeader = request.headers.get("cookie") || "";
 

@@ -7,18 +7,27 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
  * Run a what-if simulation on the causal graph.
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const workspaceId = await getCurrentWorkspaceId();
-  const { entity, magnitude, timeHorizon, domain } = await request.json();
-
-  if (!entity || magnitude === undefined)
-    return NextResponse.json({ error: "entity and magnitude are required" }, { status: 400 });
-
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const workspaceId = await getCurrentWorkspaceId();
+
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    const { entity, magnitude: rawMagnitude, timeHorizon: rawTimeHorizon, domain } = body;
+    const magnitude = Number(rawMagnitude) || 0;
+    const timeHorizon = Number(rawTimeHorizon) || 30;
+
+    if (!entity || magnitude === undefined)
+      return NextResponse.json({ error: "entity and magnitude are required" }, { status: 400 });
+
     // Fetch causal edges connected to the entity
     const { data: edges } = await supabase
       .from("causal_relationships_statistical")

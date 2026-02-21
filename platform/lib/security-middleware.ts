@@ -121,15 +121,21 @@ export function checkSessionRateLimit(
   return { allowed: true, remaining: limit - existing.count };
 }
 
-// Cleanup stale session windows every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, window] of sessionWindows) {
-    if (now - window.windowStart > 120_000) {
-      sessionWindows.delete(key);
+// Cleanup stale session windows every 5 minutes.
+// .unref() prevents this timer from keeping the process alive on shutdown.
+if (typeof setInterval !== "undefined") {
+  const cleanupTimer = setInterval(() => {
+    const now = Date.now();
+    for (const [key, window] of sessionWindows) {
+      if (now - window.windowStart > 120_000) {
+        sessionWindows.delete(key);
+      }
     }
+  }, 300_000);
+  if (typeof cleanupTimer === "object" && "unref" in cleanupTimer) {
+    cleanupTimer.unref();
   }
-}, 300_000);
+}
 
 // ── Request Size Validation ───────────────────────────────────────────
 
