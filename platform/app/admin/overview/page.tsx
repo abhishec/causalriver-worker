@@ -14,8 +14,8 @@ export default async function AdminOverviewPage() {
   const supabase = await createServiceClient();
   const today = new Date().toISOString().split("T")[0];
 
-  const [orgsResult, signalsResult, edgesResult, costResult, awsResult, eventsResult, membersResult, agentRunsResult, authUsersResult] = await Promise.all([
-    supabase.from("organizations").select("id, name, slug, plan, is_core_brain, created_at").order("created_at"),
+  const [orgsResult, signalsResult, edgesResult, costResult, awsResult, eventsResult, membersResult, agentRunsResult, authUsersResult, customersResult] = await Promise.all([
+    supabase.from("organizations").select("id, name, slug, plan, is_core_brain, customer_id, created_at").order("created_at"),
     supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }),
     supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }),
     supabase.from("llm_cost_log").select("estimated_cost_usd").gte("created_at", today),
@@ -24,9 +24,11 @@ export default async function AdminOverviewPage() {
     supabase.from("org_members").select("user_id, role, organization_id, organizations(name)").limit(100),
     supabase.from("ai_agent_activity").select("id, agent_type, action, status, created_at").order("created_at", { ascending: false }).limit(10),
     supabase.auth.admin.listUsers({ perPage: 500 }),
+    supabase.from("customers").select("id, name, slug, plan, is_design_partner").order("name"),
   ]);
 
   const orgs = orgsResult.data || [];
+  const customers = customersResult.data || [];
   const totalSignals = signalsResult.count || 0;
   const totalEdges = edgesResult.count || 0;
   const costToday = (costResult.data || []).reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
@@ -75,6 +77,19 @@ export default async function AdminOverviewPage() {
     return hoursSince < 1;
   });
 
+  // Group workspaces by customer for hierarchical display
+  const customerMap = new Map<string, { customer: { id: string; name: string; slug: string; plan: string; is_design_partner: boolean }; workspaces: typeof orgs }>();
+  customers.forEach((c) => customerMap.set(c.id, { customer: c, workspaces: [] }));
+  const unclaimedWorkspaces: typeof orgs = [];
+  orgs.forEach((org) => {
+    if (org.customer_id && customerMap.has(org.customer_id)) {
+      customerMap.get(org.customer_id)!.workspaces.push(org);
+    } else {
+      unclaimedWorkspaces.push(org);
+    }
+  });
+  const customerGroups = [...customerMap.values()].filter(g => g.workspaces.length > 0);
+
   const SYSTEM_SERVICES = [
     { name: "ECS Cluster", status: "active" as const },
     { name: "EventBridge", status: "active" as const },
@@ -94,8 +109,8 @@ export default async function AdminOverviewPage() {
 
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatValue label="Workspaces" value={String(orgs.length)} subtitle={`${orgs.filter(o => o.is_core_brain).length} core`} />
-        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All orgs" />
+        <StatValue label="Workspaces" value={String(orgs.length)} subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
+        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All workspaces" />
         <StatValue label="Online Now" value={String(onlineUsers.length)} pulse={onlineUsers.length > 0} />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} />
         <StatValue label="LLM Cost Today" value={formatUSD(costToday)} />
@@ -104,40 +119,64 @@ export default async function AdminOverviewPage() {
 
       {/* Three-column: Orgs + Active Sessions + Events */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Workspaces */}
+        {/* Customers & Workspaces */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <CardTitle>Workspaces</CardTitle>
+            <CardTitle>Customers &amp; Workspaces</CardTitle>
             <Link href="/admin/workspaces" className="text-xs text-accent hover:text-accent/80">View all</Link>
           </div>
-          <div className="space-y-1.5">
-            {orgs.map((org) => (
-              <Link
-                key={org.id}
-                href={`/admin/workspaces/${org.id}`}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${org.is_core_brain ? 'bg-accent/20' : 'bg-surface'}`}>
-                    <span className={`text-xs font-bold ${org.is_core_brain ? 'text-accent' : 'text-muted'}`}>
-                      {org.name.charAt(0).toUpperCase()}
-                    </span>
+          <div className="space-y-3">
+            {customerGroups.map(({ customer: cust, workspaces }) => (
+              <div key={cust.id}>
+                <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
+                  <div className="w-5 h-5 rounded bg-warning/15 flex items-center justify-center shrink-0">
+                    <span className="text-[9px] font-bold text-warning">{cust.name.charAt(0).toUpperCase()}</span>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium">{org.name}</div>
-                    <div className="text-[10px] text-muted">{org.slug}</div>
-                  </div>
+                  <span className="text-[11px] font-semibold text-muted-foreground truncate">{cust.name}</span>
+                  <Badge variant="default" size="xs">{cust.plan}</Badge>
+                  {cust.is_design_partner && <span className="text-[9px] text-warning font-medium">Partner</span>}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={org.is_core_brain ? "accent" : "default"} size="xs">
-                    {org.is_core_brain ? "Core" : org.plan}
-                  </Badge>
-                  <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
+                <div className="space-y-0.5 ml-3 border-l border-border-subtle pl-3">
+                  {workspaces.map((org) => (
+                    <Link key={org.id} href={`/admin/workspaces/${org.id}`} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-surface-hover transition-colors">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${org.is_core_brain ? "bg-accent/20" : "bg-surface"}`}>
+                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <span className="text-[12px] font-medium truncate">{org.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Badge variant={org.is_core_brain ? "accent" : "default"} size="xs">{org.is_core_brain ? "Core" : org.plan}</Badge>
+                        <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+              </div>
             ))}
+            {unclaimedWorkspaces.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
+                  <span className="text-[11px] font-semibold text-muted/60">Unclaimed</span>
+                </div>
+                <div className="space-y-0.5 ml-3 border-l border-border-subtle/50 pl-3">
+                  {unclaimedWorkspaces.map((org) => (
+                    <Link key={org.id} href={`/admin/workspaces/${org.id}`} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-surface-hover transition-colors">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${org.is_core_brain ? "bg-accent/20" : "bg-surface"}`}>
+                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <span className="text-[12px] font-medium truncate">{org.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Badge variant={org.is_core_brain ? "accent" : "default"} size="xs">{org.is_core_brain ? "Core" : org.plan}</Badge>
+                        <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             {orgs.length === 0 && (
               <p className="text-sm text-muted text-center py-6">No workspaces</p>
             )}
