@@ -70,15 +70,42 @@ jobs:
     steps:
       - name: Evaluate trigger
         id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "Manual trigger — proceeding"
             echo "should_heal=true" >> $GITHUB_OUTPUT
             echo "run_id=${{ github.event.inputs.run_id || '' }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
-            echo "CI failed — triggering self-heal"
+            FAILED_RUN_ID="${{ github.event.workflow_run.id }}"
+
+            # ── Retry cap: max 3 attempts per run ──────────────────────
+            ATTEMPT=$(gh run view "$FAILED_RUN_ID" --json attempt --jq '.attempt' 2>/dev/null || echo "1")
+            if [ "$ATTEMPT" -ge 3 ]; then
+              echo "::warning::Run $FAILED_RUN_ID already at attempt $ATTEMPT (max 3). Skipping heal to prevent retry storm."
+              echo "should_heal=false" >> $GITHUB_OUTPUT
+              echo "run_id=" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # ── Staleness check: skip runs older than 30 minutes ───────
+            RUN_CREATED=$(gh run view "$FAILED_RUN_ID" --json createdAt --jq '.createdAt' 2>/dev/null || echo "")
+            if [ -n "$RUN_CREATED" ]; then
+              RUN_EPOCH=$(date -d "$RUN_CREATED" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$RUN_CREATED" +%s 2>/dev/null || echo "0")
+              NOW_EPOCH=$(date +%s)
+              AGE_MINUTES=$(( (NOW_EPOCH - RUN_EPOCH) / 60 ))
+              if [ "$AGE_MINUTES" -gt 30 ]; then
+                echo "::warning::Run $FAILED_RUN_ID is ${AGE_MINUTES}min old (>30min). Skipping stale failure."
+                echo "should_heal=false" >> $GITHUB_OUTPUT
+                echo "run_id=" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+            fi
+
+            echo "CI failed (attempt $ATTEMPT) — triggering self-heal"
             echo "should_heal=true" >> $GITHUB_OUTPUT
-            echo "run_id=${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
+            echo "run_id=$FAILED_RUN_ID" >> $GITHUB_OUTPUT
           else
             echo "CI passed — no healing needed"
             echo "should_heal=false" >> $GITHUB_OUTPUT
@@ -238,8 +265,14 @@ jobs:
         run: |
           echo "=== Retrying transient failure ==="
           if [ -n "$RUN_ID" ]; then
+            # Safety: check attempt count before re-running
+            ATTEMPT=$(gh run view "$RUN_ID" --json attempt --jq '.attempt' 2>/dev/null || echo "1")
+            if [ "$ATTEMPT" -ge 3 ]; then
+              echo "::warning::Max retry attempts (3) reached. Not re-running."
+              exit 0
+            fi
             gh run rerun "$RUN_ID" --failed
-            echo "✅ Re-triggered failed jobs"
+            echo "✅ Re-triggered failed jobs (attempt $ATTEMPT → $((ATTEMPT+1)))"
           fi
 
       - name: Create diagnosis issue for non-healable failures

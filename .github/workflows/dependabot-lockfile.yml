@@ -1,0 +1,61 @@
+# ============================================================================
+# Dependabot Lockfile Auto-Fix
+# ============================================================================
+#
+# Dependabot updates package.json but does NOT regenerate pnpm-lock.yaml.
+# This causes ERR_PNPM_OUTDATED_LOCKFILE in CI (which uses --frozen-lockfile).
+#
+# This workflow runs on every dependabot PR and:
+#   1. Regenerates pnpm-lock.yaml
+#   2. Commits the updated lockfile back to the PR branch
+#   3. CI then runs on the updated lockfile and passes
+#
+# ============================================================================
+
+name: Dependabot Lockfile Fix
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-lockfile:
+    name: Regenerate pnpm-lock.yaml
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Use default GITHUB_TOKEN — has write access for dependabot PRs
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Regenerate lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Commit updated lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          if git diff --cached --quiet; then
+            echo "Lockfile already in sync — no commit needed"
+          else
+            git commit -m "chore: regenerate pnpm-lock.yaml [dependabot]"
+            git push
+            echo "Lockfile regenerated and pushed"
+          fi
