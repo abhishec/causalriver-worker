@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { MODEL_FAST } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -109,7 +110,7 @@ Please give me 3–4 specific, actionable bullet points.`;
       latencyMs,
     });
   } catch (err: any) {
-    console.error("[claude-baseline] Error:", err);
+    logger.error("[claude-baseline] Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

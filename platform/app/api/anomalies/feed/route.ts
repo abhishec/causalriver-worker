@@ -31,6 +31,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -377,7 +378,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err: any) {
-    console.error("[anomalies/feed] Error:", err);
+    logger.error("[anomalies/feed] Error:", err);
     return NextResponse.json(
       { error: err?.message || "Internal server error" },
       { status: 500 }

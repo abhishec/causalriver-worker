@@ -69,7 +69,7 @@ export default async function AdminUsersPage() {
       <Card className="p-0 overflow-hidden">
         {/* Header row */}
         <div className="grid grid-cols-[1fr_180px_96px_80px_130px_40px] gap-3 items-center px-5 py-3 border-b border-border-subtle bg-surface/40">
-          {["User", "Organization", "Role", "Platform", "Last Active", ""].map((h) => (
+          {["User", "Workspace", "Role", "Platform", "Last Active", ""].map((h) => (
             <div key={h} className="text-[10px] font-semibold uppercase tracking-wider text-muted/60">{h}</div>
           ))}
         </div>

@@ -26,6 +26,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -246,7 +247,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response);
   } catch (err: any) {
-    console.error("[Connector Monitoring] Unexpected error:", err);
+    logger.error("[Connector Monitoring] Unexpected error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

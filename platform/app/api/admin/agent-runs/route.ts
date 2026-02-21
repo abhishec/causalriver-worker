@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -159,7 +160,7 @@ export async function GET(request: NextRequest) {
       timeRange: { since, hours },
     });
   } catch (error: any) {
-    console.error("Admin agent runs API error:", error);
+    logger.error("Admin agent runs API error:", error);
     return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
   }
 }

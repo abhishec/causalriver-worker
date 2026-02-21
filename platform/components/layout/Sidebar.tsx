@@ -117,7 +117,7 @@ function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
 /* ── Commands Section ────────────────────────────────────────────────────── */
 
 const GENERAL_COMMANDS: SlashCommand[] = [
-  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis across the organization", service: "general", category: "Intelligence" },
+  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis across the workspace", service: "general", category: "Intelligence" },
   { id: "anomaly-gen", label: "anomaly-report", description: "Unusual patterns detection", icon: "⚠️", prompt: "What anomalies were detected today?", service: "general", category: "Intelligence" },
   { id: "intel-report", label: "intelligence-report", description: "Full org intelligence report", icon: "📄", prompt: "Give me the full intelligence report", service: "general", category: "Intelligence" },
   { id: "predict", label: "prediction", description: "Forecast business outcomes", icon: "📈", prompt: "Forecast key business metrics for next quarter", service: "general", category: "Intelligence" },

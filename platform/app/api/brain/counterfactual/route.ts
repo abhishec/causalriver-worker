@@ -57,12 +57,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!cfMember) {
-      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
     }
 
     const service = await createServiceClient();
 
-    // Load the Brain's causal graph for this organization
+    // Load the Brain's causal graph for this workspace
     const [causalEdges, velocitySnapshot, bottleneckSnapshot] = await Promise.all([
       service
         .from("causal_relationships_statistical")

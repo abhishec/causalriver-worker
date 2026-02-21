@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/Badge';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
+import { logger } from "@/lib/logger";
 
 const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'nexus_current_org';
@@ -140,7 +141,7 @@ export default function ConnectorsPageV2() {
       if (error) throw error;
       setConnectors(data || []);
     } catch (err: any) {
-      console.error('Failed to load connectors:', err);
+      logger.error('Failed to load connectors:', err);
       setMessage({ type: 'error', text: err.message });
     } finally {
       setLoading(false);
@@ -166,7 +167,7 @@ export default function ConnectorsPageV2() {
         setSyncProgress(progressMap);
       }
     } catch (err) {
-      console.warn('Failed to load sync progress:', err);
+      logger.warn('Failed to load sync progress:', err);
     }
   }
 
@@ -220,7 +221,7 @@ export default function ConnectorsPageV2() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Connectors Config</h1>
           <p className="text-xs text-muted mt-0.5">
-            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'organization'}</span>
+            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'workspace'}</span>
           </p>
         </div>
         <a

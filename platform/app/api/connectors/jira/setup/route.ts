@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/connectors/jira/setup
@@ -184,7 +185,7 @@ export async function POST(request: Request) {
     }
 
     if (saveError) {
-      console.error("[Jira setup] Failed to save connector:", saveError);
+      logger.error("[Jira setup] Failed to save connector:", saveError);
       return NextResponse.json(
         { error: "Failed to save connector configuration" },
         { status: 500 }
@@ -201,7 +202,7 @@ export async function POST(request: Request) {
       projects: projects.slice(0, 10),
     });
   } catch (err: any) {
-    console.error("[Jira setup] Error:", err);
+    logger.error("[Jira setup] Error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

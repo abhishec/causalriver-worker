@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -268,10 +269,10 @@ export async function POST(request: Request) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.info(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+        logger.info(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
       }
     } catch (oracleErr: any) {
-      console.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
+      logger.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
     // 6. Update connector with results (accumulate signals_count)
@@ -305,7 +306,7 @@ export async function POST(request: Request) {
       oracle: oracleResult,
     });
   } catch (err: any) {
-    console.error("Jira sync error:", err);
+    logger.error("Jira sync error:", err);
     return NextResponse.json(
       { error: err.message || "Sync failed" },
       { status: 500 }
@@ -472,5 +473,5 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
     }
   }
 
-  console.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
+  logger.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
 }

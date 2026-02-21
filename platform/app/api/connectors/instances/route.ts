@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ instances: masked });
   } catch (err: any) {
-    console.error("[instances/GET]", err);
+    logger.error("[instances/GET]", err);
     return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
   }
 }
@@ -263,7 +264,7 @@ export async function POST(request: NextRequest) {
       displayName: displayName || instanceName,
     });
   } catch (err: any) {
-    console.error("[instances/POST]", err);
+    logger.error("[instances/POST]", err);
     return NextResponse.json({ error: err.message || "Validation failed" }, { status: 400 });
   }
 }
@@ -301,7 +302,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("[instances/PUT]", err);
+    logger.error("[instances/PUT]", err);
     return NextResponse.json({ error: err.message || "Update failed" }, { status: 500 });
   }
 }
@@ -335,7 +336,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error("[instances/DELETE]", err);
+    logger.error("[instances/DELETE]", err);
     return NextResponse.json({ error: err.message || "Delete failed" }, { status: 500 });
   }
 }

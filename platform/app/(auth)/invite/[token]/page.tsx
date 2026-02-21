@@ -47,7 +47,7 @@ export default function InvitePage() {
       if (invite) {
         const org = (invite as any).organizations;
         setInfo({
-          orgName: org?.name || "Unknown Organization",
+          orgName: org?.name || "Unknown Workspace",
           role: invite.role,
           inviteeEmail: invite.invitee_email,
           expired: new Date(invite.expires_at) < new Date(),

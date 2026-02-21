@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
     }
 
     const service = await createServiceClient();

@@ -17,6 +17,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
         });
       } catch (err) {
         errors++;
-        console.error(
+        logger.error(
           `[verify-predictions] Error processing ${verification.prediction_id}:`,
           err,
         );

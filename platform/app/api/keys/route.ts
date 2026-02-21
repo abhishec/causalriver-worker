@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { generateApiKey } from "@/lib/api-key-auth";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/keys
@@ -31,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json({ keys: keys || [] });
   } catch (err) {
-    console.error("[keys GET] Unhandled error:", err);
+    logger.error("[keys GET] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
         "Save this key now — it will not be shown again.",
     });
   } catch (err) {
-    console.error("[keys POST] Unhandled error:", err);
+    logger.error("[keys POST] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -158,7 +159,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[keys DELETE] Unhandled error:", err);
+    logger.error("[keys DELETE] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

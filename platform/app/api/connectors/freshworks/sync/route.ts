@@ -13,6 +13,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -120,7 +121,7 @@ export async function POST(request: Request) {
           .update({ last_synced_at: new Date().toISOString() })
           .eq("id", connector.id);
       } catch (err: any) {
-        console.error(`[Freshworks sync] ${type} failed:`, err);
+        logger.error(`[Freshworks sync] ${type} failed:`, err);
         results[type] = { success: false, error: err.message };
       }
     }
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
       totalSignalsIngested: totalSignals,
     });
   } catch (err: any) {
-    console.error("[Freshworks sync] Unexpected error:", err);
+    logger.error("[Freshworks sync] Unexpected error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

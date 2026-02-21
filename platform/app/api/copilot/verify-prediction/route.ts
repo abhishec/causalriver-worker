@@ -16,6 +16,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       .eq("organization_id", organizationId);
 
     if (updateError) {
-      console.warn("[verify-prediction] prediction_records update failed:", updateError.message);
+      logger.warn("[verify-prediction] prediction_records update failed:", updateError.message);
     }
 
     // 2. Update scheduled_verifications if a verification ID was provided

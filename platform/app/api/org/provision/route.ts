@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { provisionWorkspace } from "@/lib/workspace-provisioning";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/org/provision
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 
     if (!membership) {
       return NextResponse.json(
-        { error: "You are not a member of this organization" },
+        { error: "You are not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
     // 7. Return result
     return NextResponse.json(result);
   } catch (err: unknown) {
-    console.error("[/api/org/provision] Error:", err);
+    logger.error("[/api/org/provision] Error:", err);
     return NextResponse.json(
       {
         success: false,

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 /**
  * OpenClaw Gateway Connection Manager
  * ====================================
@@ -136,15 +137,15 @@ function log(
 ): void {
   const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
   if (level === 'error') {
-    console.error(`${LOG_PREFIX} ${msg}${metaStr}`);
+    logger.error(`${LOG_PREFIX} ${msg}${metaStr}`);
   } else if (level === 'warn') {
-    console.warn(`${LOG_PREFIX} ${msg}${metaStr}`);
+    logger.warn(`${LOG_PREFIX} ${msg}${metaStr}`);
   } else if (level === 'debug') {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${LOG_PREFIX} [debug] ${msg}${metaStr}`);
+      logger.debug(`${LOG_PREFIX} [debug] ${msg}${metaStr}`);
     }
   } else {
-    console.log(`${LOG_PREFIX} ${msg}${metaStr}`);
+    logger.debug(`${LOG_PREFIX} ${msg}${metaStr}`);
   }
 }
 

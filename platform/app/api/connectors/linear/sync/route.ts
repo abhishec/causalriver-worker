@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -140,11 +141,11 @@ export async function POST(request: Request) {
             predictionsExpired: result.predictionsExpired,
             averageReward: result.banditRewardsGiven ?? 0,
           };
-          console.info(`[Linear sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+          logger.info(`[Linear sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
         }
       } catch (oracleErr: any) {
         // Non-critical: oracle verification errors don't fail the sync
-        console.warn("[Linear sync] Oracle error (non-fatal):", oracleErr.message);
+        logger.warn("[Linear sync] Oracle error (non-fatal):", oracleErr.message);
       }
 
       // 6. Update connector status
@@ -201,7 +202,7 @@ export async function POST(request: Request) {
       );
     }
   } catch (err: any) {
-    console.error("[Linear Sync] Error:", err);
+    logger.error("[Linear Sync] Error:", err);
     return NextResponse.json(
       { error: err.message || "Linear sync failed" },
       { status: 500 }

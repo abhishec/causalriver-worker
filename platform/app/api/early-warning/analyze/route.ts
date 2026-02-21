@@ -26,6 +26,7 @@ import { createServiceClient, createClient } from '@/lib/supabase/server';
 import { analyzeVelocityCollapse, analyzeBottleneckRisk } from '@/lib/p0/velocity-analysis';
 import { resolveTopReviewerEngineerId } from '@/lib/p0/engineer-resolver';
 import { predictVelocity } from '@/lib/p0/velocity-predictor';
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
 
       if (!admin) {
         return NextResponse.json(
-          { error: 'Not a member of this organization' },
+          { error: 'Not a member of this workspace' },
           { status: 403 }
         );
       }
@@ -386,7 +387,7 @@ export async function POST(req: NextRequest) {
           .eq('snapshot_date', new Date().toISOString().split('T')[0]);
       }
     } catch (predErr) {
-      console.warn('[Early Warning] Velocity prediction failed (non-fatal):', predErr);
+      logger.warn('[Early Warning] Velocity prediction failed (non-fatal):', predErr);
     }
 
     // ========================================================================
@@ -447,7 +448,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[Early Warning] Analysis error:', error);
+    logger.error('[Early Warning] Analysis error:', error);
     return NextResponse.json(
       { error: error.message || 'Analysis failed' },
       { status: 500 }
@@ -499,7 +500,7 @@ export async function GET(req: NextRequest) {
 
       if (!getAdmin) {
         return NextResponse.json(
-          { error: 'Not a member of this organization' },
+          { error: 'Not a member of this workspace' },
           { status: 403 }
         );
       }
@@ -541,7 +542,7 @@ export async function GET(req: NextRequest) {
       bottleneckSnapshots: bottleneckSnapshots || [],
     });
   } catch (error: any) {
-    console.error('[Early Warning] GET error:', error);
+    logger.error('[Early Warning] GET error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch snapshots' },
       { status: 500 }

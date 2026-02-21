@@ -70,7 +70,7 @@ interface OverviewClientProps {
   };
   /** Whether this org is a design partner (shows ActivationChecklist instead of OnboardingWizard) */
   isDesignPartner?: boolean;
-  /** Organization display name for checklist header */
+  /** Workspace display name for checklist header */
   orgName?: string;
 }
 
@@ -165,7 +165,7 @@ export function OverviewClient({
   brainLearningEvents = [],
   brainLearningMeta,
   isDesignPartner = false,
-  orgName = "your organization",
+  orgName = "your workspace",
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();

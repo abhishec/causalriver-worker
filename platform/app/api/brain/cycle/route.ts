@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
 
         if (!admin) {
           return NextResponse.json(
-            { error: "Not a member of this organization" },
+            { error: "Not a member of this workspace" },
             { status: 403 }
           );
         }

@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Outcomes Webhook] Missing SUPABASE env vars');
+      logger.error('[Outcomes Webhook] Missing SUPABASE env vars');
       return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 });
     }
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -230,7 +230,7 @@ export async function GET(req: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) {
-      console.error('[Outcomes Webhook] Missing SUPABASE env vars');
+      logger.error('[Outcomes Webhook] Missing SUPABASE env vars');
       return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 });
     }
     const supabase = createClient(supabaseUrl, supabaseKey);

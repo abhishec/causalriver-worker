@@ -15,6 +15,7 @@ import type { HubSpotData } from './types';
 import type { GoogleDocsData } from './types';
 import type { CustomerData } from './types';
 import type { CompanyJarvisAnalysis } from './types';
+import { logger } from "@/lib/logger";
 
 export type { SlackData, HubSpotData, GoogleDocsData, CustomerData, CompanyJarvisAnalysis } from './types';
 export type { CompanyJarvisTrainingPack, CompanyJarvisSignal } from './brain-analyzer';
@@ -53,7 +54,7 @@ export function getCompanyJarvisData(): {
   const startDate = new Date();
   startDate.setFullYear(startDate.getFullYear() - 1);
 
-  console.log('[Company Jarvis] Generating synthetic data...');
+  logger.debug('[Company Jarvis] Generating synthetic data...');
   const t0 = Date.now();
 
   cachedSlack = generateSlackData(startDate);
@@ -64,13 +65,13 @@ export function getCompanyJarvisData(): {
   cacheTimestamp = now;
 
   const elapsed = Date.now() - t0;
-  console.log(`[Company Jarvis] Data generated in ${elapsed}ms:`);
-  console.log(`  Slack: ${cachedSlack.messages.length} messages across ${cachedSlack.channels.length} channels`);
-  console.log(`  HubSpot: ${cachedHubspot.deals.length} deals, ${cachedHubspot.contacts.length} contacts, ${cachedHubspot.companies.length} companies`);
-  console.log(`  Docs: ${cachedDocs.documents.length} documents`);
-  console.log(`  Customers: ${cachedCustomers.accounts.length} accounts, ${cachedCustomers.tickets.length} tickets`);
-  console.log(`  Insights: ${cachedAnalysis.insights.length} insights (${cachedAnalysis.insights.filter(i => i.severity === 'critical').length} critical)`);
-  console.log(`  Reverse prompts: ${cachedAnalysis.reversePrompts.length}`);
+  logger.debug(`[Company Jarvis] Data generated in ${elapsed}ms:`);
+  logger.debug(`  Slack: ${cachedSlack.messages.length} messages across ${cachedSlack.channels.length} channels`);
+  logger.debug(`  HubSpot: ${cachedHubspot.deals.length} deals, ${cachedHubspot.contacts.length} contacts, ${cachedHubspot.companies.length} companies`);
+  logger.debug(`  Docs: ${cachedDocs.documents.length} documents`);
+  logger.debug(`  Customers: ${cachedCustomers.accounts.length} accounts, ${cachedCustomers.tickets.length} tickets`);
+  logger.debug(`  Insights: ${cachedAnalysis.insights.length} insights (${cachedAnalysis.insights.filter(i => i.severity === 'critical').length} critical)`);
+  logger.debug(`  Reverse prompts: ${cachedAnalysis.reversePrompts.length}`);
 
   return { slack: cachedSlack, hubspot: cachedHubspot, docs: cachedDocs, customers: cachedCustomers, analysis: cachedAnalysis };
 }

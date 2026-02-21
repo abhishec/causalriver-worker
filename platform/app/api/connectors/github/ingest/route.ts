@@ -7,6 +7,7 @@ import {
   createExpertiseGraph,
   createCollaborationGraph,
 } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -377,7 +378,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (err: any) {
-    console.error("Code ingestion error:", err);
+    logger.error("Code ingestion error:", err);
 
     // Try to update progress with error
     try {

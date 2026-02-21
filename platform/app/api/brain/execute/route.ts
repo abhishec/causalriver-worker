@@ -32,6 +32,7 @@ import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .single();
         if (!admin) {
-          return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+          return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
         }
       }
     }
@@ -212,7 +213,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal server error";
-    console.error("[BrainExecute] Error:", msg);
+    logger.error("[BrainExecute] Error:", msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

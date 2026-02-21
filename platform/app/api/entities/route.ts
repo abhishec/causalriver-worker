@@ -17,6 +17,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createEntityResolver } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,7 @@ export async function GET(request: Request) {
       offset,
     });
   } catch (err: any) {
-    console.error("[Entities API] GET error:", err);
+    logger.error("[Entities API] GET error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ resolved }, { status: 201 });
   } catch (err: any) {
-    console.error("[Entities API] POST error:", err);
+    logger.error("[Entities API] POST error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }
@@ -240,7 +241,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ entity: updated });
   } catch (err: any) {
-    console.error("[Entities API] PATCH error:", err);
+    logger.error("[Entities API] PATCH error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

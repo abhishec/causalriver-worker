@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/connectors/jira/callback
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok) {
-      console.error('Jira OAuth error:', tokenData);
+      logger.error('Jira OAuth error:', tokenData);
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
       });
 
     if (storeError) {
-      console.error('Failed to store Jira credentials:', storeError);
+      logger.error('Failed to store Jira credentials:', storeError);
       return NextResponse.redirect(
         new URL('/connectors?error=storage_failed', request.url)
       );
@@ -163,7 +164,7 @@ export async function GET(request: NextRequest) {
       new URL('/connectors?success=jira_connected', request.url)
     );
   } catch (error: any) {
-    console.error('Jira callback error:', error);
+    logger.error('Jira callback error:', error);
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

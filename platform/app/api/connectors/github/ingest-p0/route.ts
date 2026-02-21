@@ -23,6 +23,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { Octokit } from '@octokit/rest';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
     let hasMore = true;
     const allPRs: any[] = [];
 
-    console.info(`[P0 Ingest] Fetching PRs for ${owner}/${repo} since ${since.toISOString()}`);
+    logger.info(`[P0 Ingest] Fetching PRs for ${owner}/${repo} since ${since.toISOString()}`);
 
     while (hasMore && page <= 10) { // Max 10 pages = 1000 PRs
       try {
@@ -150,7 +151,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.info(`[P0 Ingest] Found ${allPRs.length} PRs`);
+    logger.info(`[P0 Ingest] Found ${allPRs.length} PRs`);
 
     // ========================================================================
     // Step 3: Process each PR + upsert engineers + reviews
@@ -310,7 +311,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.info(`[P0 Ingest] Complete:`, results);
+    logger.info(`[P0 Ingest] Complete:`, results);
 
     return NextResponse.json({
       success: true,
@@ -318,7 +319,7 @@ export async function POST(req: NextRequest) {
       message: `Ingested ${results.pullRequests} PRs, ${results.reviews} reviews, ${results.engineers} engineers from ${owner}/${repo}`,
     });
   } catch (error: any) {
-    console.error('[P0 Ingest] Fatal error:', error);
+    logger.error('[P0 Ingest] Fatal error:', error);
     return NextResponse.json(
       { error: error.message || 'Unknown error' },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 /**
  * Brain Auto-Trigger — Batch signal accumulation → lightweight brain cycle
  * =========================================================================
@@ -96,19 +97,19 @@ export async function maybeTriggerBrainCycle(
 
     if (response.ok) {
       const data = await response.json();
-      console.log(
+      logger.debug(
         `[brain-trigger] Auto-triggered lightweight cycle for org ${orgId.substring(0, 8)}... (${newSignalCount} signals, ${data.duration_ms}ms)`
       );
       return { triggered: true };
     } else {
-      console.warn(
+      logger.warn(
         `[brain-trigger] Failed for org ${orgId.substring(0, 8)}...: HTTP ${response.status}`
       );
       return { triggered: false, reason: `HTTP ${response.status}` };
     }
   } catch (err: any) {
     // Never throw — this is fire-and-forget
-    console.warn("[brain-trigger] Error:", err.message);
+    logger.warn("[brain-trigger] Error:", err.message);
     return { triggered: false, reason: err.message };
   }
 }

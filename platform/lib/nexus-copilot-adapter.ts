@@ -20,6 +20,7 @@
  *   const copilot = createCopilotInstance({ adapter, provider: 'anthropic', apiKey });
  */
 
+import { logger } from "@/lib/logger";
 import type {
   DomainAdapter,
   CopilotPersona,
@@ -584,7 +585,7 @@ function parseRules(rules: NexusBrainDBData['rules']): ParsedRule[] {
     } catch (err) {
       // Log but don't throw — malformed rules shouldn't crash the adapter
       _parseRuleFailCount++;
-      console.warn(`[nexus-copilot-adapter] Failed to parse rule in domain "${r.domain}":`, err instanceof Error ? err.message : 'Invalid JSON');
+      logger.warn(`[nexus-copilot-adapter] Failed to parse rule in domain "${r.domain}":`, err instanceof Error ? err.message : 'Invalid JSON');
     }
   }
   return parsed;

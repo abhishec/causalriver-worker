@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
       downstreamEdgesCount: downstreamEdges.length,
     });
   } catch (err: any) {
-    console.error("[causal-context] Error:", err);
+    logger.error("[causal-context] Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/partner/feedback
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, id: newEntry.id });
   } catch (err) {
-    console.error("[Partner/feedback] Error:", err);
+    logger.error("[Partner/feedback] Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -108,7 +109,7 @@ export async function GET() {
 
     return NextResponse.json({ feedback: feedbackHistory });
   } catch (err) {
-    console.error("[Partner/feedback] GET Error:", err);
+    logger.error("[Partner/feedback] GET Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

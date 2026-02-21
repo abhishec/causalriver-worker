@@ -149,7 +149,7 @@ export default async function AdminCostsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[11px] text-muted uppercase tracking-wider border-b border-border-subtle">
-                  <th className="text-left py-2.5 px-3 font-medium">Organization</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Workspace</th>
                   <th className="text-right py-2.5 px-3 font-medium">Monthly LLM</th>
                   <th className="text-right py-2.5 px-3 font-medium">Monthly AWS</th>
                   <th className="text-right py-2.5 px-3 font-medium">Daily LLM</th>

@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 /**
  * Intrusion Detection System (IDS)
  * ═══════════════════════════════════════════════════════════════════════════
@@ -209,7 +210,7 @@ export async function detectThreats(request: Request): Promise<ThreatDetection> 
 
   if (threats.length > 0) {
     // Log threat to server console (IDS runs pre-auth in middleware, no org context for audit table FK)
-    console.warn('[IDS] Threat detected:', JSON.stringify({
+    logger.warn('[IDS] Threat detected:', JSON.stringify({
       threats,
       severity,
       url: request.url,

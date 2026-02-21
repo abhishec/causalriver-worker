@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -170,7 +171,7 @@ export async function GET(request: Request) {
       organizationId: orgId,
     });
   } catch (err) {
-    console.error("[gl-status] Error:", err);
+    logger.error("[gl-status] Error:", err);
     return NextResponse.json(
       { exists: false, metadata: null, error: "Internal error" },
       { status: 500 }

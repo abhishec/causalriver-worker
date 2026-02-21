@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentWorkspaceId } from '@/lib/workspace-helpers';
 import { executeUnifiedQuery, type BrainQueryRequest } from '@/lib/brain/orchestrator';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 const BrainQuerySchema = z.object({
   query: z.string().min(1, 'Query is required'),
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
 
         if (!admin) {
           return NextResponse.json(
-            { error: 'Not a member of this organization' },
+            { error: 'Not a member of this workspace' },
             { status: 403 }
           );
         }
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Brain query error:', error);
+    logger.error('Brain query error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

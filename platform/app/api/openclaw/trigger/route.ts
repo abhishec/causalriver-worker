@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager, triggerOpenClawAgent } from "@/lib/openclaw/gateway-client";
 import type { AgentStreamEvent } from "@/lib/openclaw/gateway-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this organization" },
+        { error: "You are not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
     const conn = gatewayManager.getConnection(workspaceId);
     if (!conn) {
       return NextResponse.json(
-        { error: "No OpenClaw gateway configured for this organization. Connect one via /api/openclaw/connect" },
+        { error: "No OpenClaw gateway configured for this workspace. Connect one via /api/openclaw/connect" },
         { status: 404 }
       );
     }
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const errMessage = error instanceof Error ? error.message : "Internal error";
-    console.error("[OpenClaw/Trigger] Error:", errMessage);
+    logger.error("[OpenClaw/Trigger] Error:", errMessage);
     return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }

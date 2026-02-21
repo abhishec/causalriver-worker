@@ -26,6 +26,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager } from "@/lib/openclaw/gateway-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this organization" },
+        { error: "You are not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
         services,
         source: "status_cache",
         message: !conn
-          ? "No OpenClaw gateway configured for this organization"
+          ? "No OpenClaw gateway configured for this workspace"
           : "Gateway not currently connected",
       });
     }
@@ -154,7 +155,7 @@ export async function GET(request: NextRequest) {
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
-    console.error("[OpenClaw/Services] GET Error:", message);
+    logger.error("[OpenClaw/Services] GET Error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -234,7 +235,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this organization" },
+        { error: "You are not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -256,7 +257,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!conn || !conn.isConnected()) {
       return NextResponse.json(
-        { error: "No active OpenClaw gateway connection for this organization" },
+        { error: "No active OpenClaw gateway connection for this workspace" },
         { status: 404 }
       );
     }
@@ -288,7 +289,7 @@ export async function PATCH(request: NextRequest) {
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
-    console.error("[OpenClaw/Services] PATCH Error:", message);
+    logger.error("[OpenClaw/Services] PATCH Error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

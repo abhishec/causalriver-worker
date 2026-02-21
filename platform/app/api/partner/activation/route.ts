@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/partner/activation
@@ -141,7 +142,7 @@ export async function GET() {
       dismissed,
     });
   } catch (err) {
-    console.error("[Partner/activation] Error:", err);
+    logger.error("[Partner/activation] Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -196,7 +197,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (err) {
-    console.error("[Partner/activation] POST Error:", err);
+    logger.error("[Partner/activation] POST Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

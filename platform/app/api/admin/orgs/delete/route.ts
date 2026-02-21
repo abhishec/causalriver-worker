@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[admin/orgs/delete] Unhandled error:", err);
+    logger.error("[admin/orgs/delete] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

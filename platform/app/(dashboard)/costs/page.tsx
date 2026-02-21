@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { CostsClient } from "./costs-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export default async function CostsPage() {
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Costs] Query failed:", err);
+      logger.warn("[Costs] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 

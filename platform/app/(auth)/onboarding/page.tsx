@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 const STEPS = [
-  { id: 1, label: "Organization" },
+  { id: 1, label: "Workspace" },
   { id: 2, label: "Connect Data" },
   { id: 3, label: "Initializing" },
   { id: 4, label: "First Results" },
@@ -156,7 +157,7 @@ export default function OnboardingPage() {
         setGithubRepos(data.repos || []);
       }
     } catch {
-      console.warn("[Onboarding] Failed to fetch repos");
+      logger.warn("[Onboarding] Failed to fetch repos");
     } finally {
       setLoadingRepos(false);
     }
@@ -195,7 +196,7 @@ export default function OnboardingPage() {
         const errorMsg = result.errors?.length > 0
           ? result.errors.join("; ")
           : result.error || "Provisioning failed";
-        console.warn("[Onboarding] Provision partial/failed:", errorMsg);
+        logger.warn("[Onboarding] Provision partial/failed:", errorMsg);
 
         if (result.provisioned?.brain_cortex_state || result.provisioned?.s3_connector) {
           setBrainProgress(100);
@@ -211,14 +212,14 @@ export default function OnboardingPage() {
       setBrainProgress(100);
       setProvisionDone(true);
 
-      console.log("[Onboarding] Provisioning complete:", result.provisioned);
+      logger.debug("[Onboarding] Provisioning complete:", result.provisioned);
     } catch (err) {
       clearInterval(progressInterval);
       const msg = err instanceof Error ? err.message : "Network error";
       setProvisionError(msg);
       setBrainProgress(0);
       provisionStarted.current = false;
-      console.error("[Onboarding] Provision error:", err);
+      logger.error("[Onboarding] Provision error:", err);
     }
   }, [orgId, selectedConnectors, isDesignPartner, selectedRepos]);
 
@@ -290,7 +291,7 @@ export default function OnboardingPage() {
 
   async function handleOrgSubmit() {
     if (!orgName.trim()) {
-      setError("Organization name is required");
+      setError("Workspace name is required");
       return;
     }
     setLoading(true);
@@ -400,7 +401,7 @@ export default function OnboardingPage() {
         <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">{error}</div>
       )}
 
-      {/* ── Step 1: Organization Setup ─────────────────────────────────── */}
+      {/* ── Step 1: Workspace Setup ─────────────────────────────────── */}
       {step === 1 && (
         <div className="space-y-6">
           <div>
@@ -409,7 +410,7 @@ export default function OnboardingPage() {
           </div>
           <div className="space-y-4">
             <div>
-              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
+              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Workspace name</label>
               <input id="org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Acme Inc." className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus transition-colors" required autoFocus />
             </div>
             <div>

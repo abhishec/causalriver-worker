@@ -6,6 +6,7 @@ import {
   createCausalMethodBandit,
   type OracleProcessingResult,
 } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     const { data: signals, error: signalError } = await signalQuery;
 
     if (signalError) {
-      console.error("[Oracle] Signal fetch error:", signalError);
+      logger.error("[Oracle] Signal fetch error:", signalError);
       return NextResponse.json({ error: signalError.message }, { status: 500 });
     }
 
@@ -124,7 +125,7 @@ export async function POST(request: Request) {
     // 6. Persist updated bandit state (arm scores updated from oracle rewards)
     if (bandit && !dryRun) {
       await bandit.persistState().catch((err: any) => {
-        console.warn("[Oracle] Bandit persist error (non-fatal):", err.message);
+        logger.warn("[Oracle] Bandit persist error (non-fatal):", err.message);
       });
     }
 
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
 
     const duration_ms = Date.now() - startMs;
 
-    console.info(
+    logger.info(
       `[Oracle] Processed ${signals.length} signals: ${result.predictionsVerified} verified, ` +
       `${result.predictionsExpired} expired, ${result.predictionsPending} pending, ` +
       `bandit rewards: ${result.banditRewardsGiven ?? 0} (${duration_ms}ms)`
@@ -158,7 +159,7 @@ export async function POST(request: Request) {
       duration_ms,
     });
   } catch (err: any) {
-    console.error("[Oracle] Process error:", err);
+    logger.error("[Oracle] Process error:", err);
     return NextResponse.json(
       { error: err.message || "Oracle processing failed" },
       { status: 500 }
@@ -211,7 +212,7 @@ export async function GET(_request: Request) {
       })),
     });
   } catch (err: any) {
-    console.error("[Oracle] GET error:", err);
+    logger.error("[Oracle] GET error:", err);
     return NextResponse.json(
       { error: err.message || "Oracle stats failed" },
       { status: 500 }

@@ -32,7 +32,7 @@ type ComposerPhase =
   | "error";
 
 interface AgentComposerPanelProps {
-  /** Current organization ID */
+  /** Current workspace ID */
   organizationId?: string;
   /** Close the composer panel */
   onClose: () => void;

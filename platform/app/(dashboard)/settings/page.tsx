@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { SettingsClient } from "./settings-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ export default async function SettingsPage() {
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.error("[Settings] Query failed:", err);
+      logger.error("[Settings] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 
@@ -53,7 +54,7 @@ export default async function SettingsPage() {
   } | null;
 
   if (!orgData) {
-    console.error("[Settings] Org query returned null for workspaceId:", workspaceId, "error:", orgResult.error);
+    logger.error("[Settings] Org query returned null for workspaceId:", workspaceId, "error:", orgResult.error);
   }
 
   // ── Query 5: Customer data (expanded — includes industry, created_at) ──
@@ -69,7 +70,7 @@ export default async function SettingsPage() {
       .select("id, name, slug, plan, is_design_partner, industry, created_at")
       .eq("id", customerId)
       .single();
-    if (custErr) console.error("[Settings] Customer query failed:", custErr);
+    if (custErr) logger.error("[Settings] Customer query failed:", custErr);
     customer = cust ?? null;
   }
 

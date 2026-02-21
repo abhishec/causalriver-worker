@@ -17,6 +17,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -121,13 +122,13 @@ export async function logAuditEvent(params: AuditEventParams): Promise<string | 
     });
 
     if (error) {
-      console.error('[Audit] Failed to log event:', error);
+      logger.error('[Audit] Failed to log event:', error);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('[Audit] Exception while logging event:', error);
+    logger.error('[Audit] Exception while logging event:', error);
     return null;
   }
 }
@@ -253,7 +254,7 @@ export async function getAuditTrail(
   });
 
   if (error) {
-    console.error('[Audit] Failed to get audit trail:', error);
+    logger.error('[Audit] Failed to get audit trail:', error);
     return [];
   }
 
@@ -274,7 +275,7 @@ export async function getUserActivity(limit: number = 50) {
   });
 
   if (error) {
-    console.error('[Audit] Failed to get user activity:', error);
+    logger.error('[Audit] Failed to get user activity:', error);
     return [];
   }
 
@@ -296,7 +297,7 @@ export async function getSecurityEvents(organizationId: string, hours: number = 
   });
 
   if (error) {
-    console.error('[Audit] Failed to get security events:', error);
+    logger.error('[Audit] Failed to get security events:', error);
     return [];
   }
 

@@ -131,7 +131,7 @@ export default async function AdminOrgsPage() {
         <StatValue label="Workspaces"     value={String(tenantOrgs.length)} subtitle="isolated brains" />
         <StatValue label="Enterprise"     value={String(enterpriseCount)} />
         <StatValue label="Total Users"    value={String(totalUsers)} subtitle="via customer_members" />
-        <StatValue label="Core Orgs"      value={String(coreOrgs.length)} subtitle="platform brain" />
+        <StatValue label="Core Workspaces"      value={String(coreOrgs.length)} subtitle="platform brain" />
       </div>
 
       {/* ── Core Brain ──────────────────────────────────────────────────── */}
@@ -349,7 +349,7 @@ function WorkspaceCard({
       {/* Footer */}
       <div className="border-t border-border-subtle mt-auto flex items-center gap-2 px-3 py-2.5">
         <Link
-          href={`/admin/orgs/${org.id}`}
+          href={`/admin/workspaces/${org.id}`}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

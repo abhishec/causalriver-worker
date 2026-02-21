@@ -3,6 +3,8 @@
   "private": true,
   "description": "Open-source causal intelligence and domain agent framework for TypeScript",
   "scripts": {
+    "dev": "pnpm --filter platform dev",
+    "setup": "pnpm install && cp -n platform/.env.example platform/.env.local 2>/dev/null; echo '✅ Created platform/.env.local — fill in your Supabase + Anthropic credentials, then run: pnpm dev'",
     "build": "turbo build",
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
@@ -91,15 +93,23 @@
     "ci:heal:dry": "tsx scripts/run-ci-healer.ts --dry-run",
     "nightly": "tsx scripts/run-all-nightly.ts",
     "nightly:dry": "DRY_RUN=true tsx scripts/run-all-nightly.ts",
-    "nightly:verbose": "VERBOSE=true tsx scripts/run-all-nightly.ts"
+    "nightly:verbose": "VERBOSE=true tsx scripts/run-all-nightly.ts",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/cron": "^2.4.3",
     "cron": "^4.4.0",
     "dotenv": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "tsx": "^4.0.0",
     "turbo": "^2.0.0",
     "typescript": "^5.5.0"
+  },
+  "lint-staged": {
+    "platform/**/*.{ts,tsx}": [
+      "bash -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=50 \"$@\"' --"
+    ]
   },
   "packageManager": "pnpm@9.0.0",
   "pnpm": {
@@ -114,7 +124,10 @@
       "minimatch": "^9.0.5"
     },
     "auditConfig": {
-      "ignoreCves": ["GHSA-2g4f-4pwh-qvx6", "GHSA-3ppc-4f35-3m26"]
+      "ignoreCves": [
+        "GHSA-2g4f-4pwh-qvx6",
+        "GHSA-3ppc-4f35-3m26"
+      ]
     }
   }
 }

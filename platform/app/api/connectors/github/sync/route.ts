@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createGitHubConnector, createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -162,11 +163,11 @@ export async function POST(request: Request) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.info(`[GitHub sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired, bandit rewards: ${result.banditRewardsGiven ?? 0}`);
+        logger.info(`[GitHub sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired, bandit rewards: ${result.banditRewardsGiven ?? 0}`);
       }
     } catch (oracleErr: any) {
       // Non-critical: oracle verification errors don't fail the sync
-      console.warn("[GitHub sync] Oracle error (non-fatal):", oracleErr.message);
+      logger.warn("[GitHub sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
     // 7. Update connector with results (accumulate signals_count)
@@ -207,7 +208,7 @@ export async function POST(request: Request) {
       oracle: oracleResult,
     });
   } catch (err: any) {
-    console.error("GitHub sync error:", err);
+    logger.error("GitHub sync error:", err);
     return NextResponse.json(
       { error: err.message || "Sync failed" },
       { status: 500 }
@@ -409,5 +410,5 @@ async function deriveRealCausalInsights(
     }, { onConflict: "organization_id,memory_type,domain" });
   }
 
-  console.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId}`);
+  logger.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId}`);
 }

@@ -262,7 +262,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                 </>
               )}
 
-              {/* ── Create New Organization ─────────────────────────── */}
+              {/* ── Create New Workspace ── */}
               <div className="h-px bg-border-subtle mx-2 my-1" />
               <Link
                 href="/settings?tab=general&action=create-org"

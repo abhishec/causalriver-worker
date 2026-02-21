@@ -10,10 +10,10 @@ const nextConfig: NextConfig = {
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
   compress: isDev,
   typescript: {
-    // Skip type checking during build — monorepo workspace links
-    // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.
-    // Types are validated locally and in CI via `tsc --noEmit`.
-    ignoreBuildErrors: true,
+    // Types are validated locally via `tsc --noEmit` and in CI.
+    // If Amplify CI has workspace resolution issues, fix the CI config
+    // rather than silently shipping broken types.
+    ignoreBuildErrors: false,
   },
   // ── Dev server performance ──────────────────────────────────────────────────
   // Automatically tree-shake + barrel-file-optimize these heavy packages so

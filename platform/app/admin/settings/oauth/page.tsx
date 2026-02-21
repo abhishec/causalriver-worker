@@ -6,6 +6,7 @@ import { Card, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { cn } from '@/lib/utils';
+import { logger } from "@/lib/logger";
 
 const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'nexus_current_org';
@@ -95,7 +96,7 @@ export default function OAuthSettingsPage() {
         await validateCredentials(connectorType, currentOrgId);
       }
     } catch (error) {
-      console.error('Failed to load OAuth settings:', error);
+      logger.error('Failed to load OAuth settings:', error);
     } finally {
       setLoading(false);
     }
@@ -142,7 +143,7 @@ export default function OAuthSettingsPage() {
       setEditingApp(null);
       setFormData({});
     } catch (error: any) {
-      console.error('Failed to save OAuth app:', error);
+      logger.error('Failed to save OAuth app:', error);
       alert('Failed to save: ' + error.message);
     } finally {
       setSaving(null);
@@ -167,7 +168,7 @@ export default function OAuthSettingsPage() {
 
       await loadOAuthSettings();
     } catch (error: any) {
-      console.error('Failed to remove OAuth app:', error);
+      logger.error('Failed to remove OAuth app:', error);
       alert('Failed to remove: ' + error.message);
     } finally {
       setSaving(null);

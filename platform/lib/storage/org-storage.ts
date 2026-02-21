@@ -23,6 +23,7 @@ import {
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { logger } from "@/lib/logger";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ export class OrgStorageProvider {
     // Invalidate cache for this key
     this.cache.delete(fullKey);
 
-    console.log(`[OrgStorage] Uploaded: s3://${this.bucket}/${fullKey}`);
+    logger.debug(`[OrgStorage] Uploaded: s3://${this.bucket}/${fullKey}`);
     return { key: fullKey, bucket: this.bucket };
   }
 
@@ -198,7 +199,7 @@ export class OrgStorageProvider {
     );
 
     this.cache.delete(fullKey);
-    console.log(`[OrgStorage] Deleted: s3://${this.bucket}/${fullKey}`);
+    logger.debug(`[OrgStorage] Deleted: s3://${this.bucket}/${fullKey}`);
   }
 
   /**

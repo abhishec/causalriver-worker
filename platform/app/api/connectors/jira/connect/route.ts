@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (upsertError) {
-      console.error("[Jira connect] Upsert error:", upsertError);
+      logger.error("[Jira connect] Upsert error:", upsertError);
       return NextResponse.json(
         { error: `Failed to store connector: ${upsertError.message}` },
         { status: 500 }
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest) {
         : "Sync hint: POST /api/connectors/jira/sync (no body needed — config saved to connector row)",
     });
   } catch (err: any) {
-    console.error("[Jira connect] Error:", err);
+    logger.error("[Jira connect] Error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

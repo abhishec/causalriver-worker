@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/org-members?orgId=xxx
@@ -92,7 +93,7 @@ export async function GET(request: Request) {
       myRole: myMembership?.role || "admin",
     });
   } catch (err) {
-    console.error("[org-members GET] Unhandled error:", err);
+    logger.error("[org-members GET] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -140,7 +141,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[org-members PATCH] Unhandled error:", err);
+    logger.error("[org-members PATCH] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -177,7 +178,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[org-members DELETE] Unhandled error:", err);
+    logger.error("[org-members DELETE] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

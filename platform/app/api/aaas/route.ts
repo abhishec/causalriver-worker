@@ -677,6 +677,7 @@ function generateTransactionInterpretations(
 // In-memory cache avoids re-downloading 12MB on every request within the same
 // serverless invocation.
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
+import { logger } from "@/lib/logger";
 
 const glCache = new Map<string, GLTransaction[]>();
 
@@ -689,10 +690,10 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
       const storage = getOrgStorage();
       const transactions = await storage.downloadJSON<GLTransaction[]>(orgId, "gl-data.json");
       glCache.set(orgId, transactions);
-      console.info(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
+      logger.info(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
       return transactions;
     } catch (s3Err: any) {
-      console.warn(`[GL] S3 load failed for org ${orgId}, falling back to Supabase:`, s3Err?.message);
+      logger.warn(`[GL] S3 load failed for org ${orgId}, falling back to Supabase:`, s3Err?.message);
     }
   }
 
@@ -705,14 +706,14 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
     .download(storagePath);
 
   if (error || !data) {
-    console.warn(`[GL] No data in storage for org ${orgId}:`, error?.message);
+    logger.warn(`[GL] No data in storage for org ${orgId}:`, error?.message);
     return [];
   }
 
   const text = await data.text();
   const transactions = JSON.parse(text) as GLTransaction[];
   glCache.set(orgId, transactions);
-  console.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
+  logger.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;
 }
 
@@ -778,7 +779,7 @@ export async function GET(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this organization in storage.",
+        error: "No GL data found for this workspace in storage.",
         analysis: null,
       }, { status: 200 });
     }
@@ -889,7 +890,7 @@ export async function POST(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this organization.",
+        error: "No GL data found for this workspace.",
       }, { status: 400 });
     }
 
@@ -991,11 +992,11 @@ export async function POST(request: Request) {
               },
             });
             if (notifErr) {
-              console.warn("[AAS] Notification insert failed (non-fatal):", notifErr?.message);
+              logger.warn("[AAS] Notification insert failed (non-fatal):", notifErr?.message);
             }
           } catch (artifactErr: any) {
             // Non-fatal — artifact persistence failure should never break the stream
-            console.warn("[AAS] Artifact persistence failed (non-fatal):", artifactErr?.message);
+            logger.warn("[AAS] Artifact persistence failed (non-fatal):", artifactErr?.message);
           }
         })();
 

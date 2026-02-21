@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/notifications
@@ -114,7 +115,7 @@ export async function GET() {
 
     return NextResponse.json({ notifications: notifications.slice(0, 20) });
   } catch (err) {
-    console.error("[notifications GET] Unhandled error:", err);
+    logger.error("[notifications GET] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -175,14 +176,14 @@ export async function PATCH(request: Request) {
 
       if (error) {
         // Table might not exist yet — fail silently
-        console.error("Failed to save notification preferences:", error.message);
+        logger.error("Failed to save notification preferences:", error.message);
       }
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (err) {
-    console.error("[notifications PATCH] Unhandled error:", err);
+    logger.error("[notifications PATCH] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 minutes for multi-connector sync
@@ -222,20 +223,20 @@ export async function POST(request: Request) {
             mode: "full",
             durationMs: brainData.duration_ms,
           };
-          console.info(`[sync-all] Auto-triggered full brain cycle (${brainData.duration_ms}ms)`);
+          logger.info(`[sync-all] Auto-triggered full brain cycle (${brainData.duration_ms}ms)`);
         } else {
           brainCycleResult = {
             triggered: false,
             error: `Brain cycle returned HTTP ${brainResponse.status}`,
           };
-          console.warn(`[sync-all] Brain cycle failed: HTTP ${brainResponse.status}`);
+          logger.warn(`[sync-all] Brain cycle failed: HTTP ${brainResponse.status}`);
         }
       } catch (brainErr: any) {
         brainCycleResult = {
           triggered: false,
           error: brainErr.message || "Brain cycle call failed",
         };
-        console.warn("[sync-all] Brain cycle error:", brainErr.message);
+        logger.warn("[sync-all] Brain cycle error:", brainErr.message);
       }
     } else if (skipBrainCycle) {
       brainCycleResult = { triggered: false, skipped: true, reason: "skipBrainCycle=true — caller will run brain cycle separately" };
@@ -252,7 +253,7 @@ export async function POST(request: Request) {
       summary: `Synced ${successCount}/${syncedCount} connectors, ${totalSignals} signals${brainCycleResult?.triggered ? " → brain cycle triggered" : brainCycleResult?.skipped ? " → brain cycle deferred to caller" : ""}${skippedCount > 0 ? ` (${skippedCount} skipped — no sync route)` : ""}`,
     });
   } catch (err: any) {
-    console.error("Sync-all error:", err);
+    logger.error("Sync-all error:", err);
     return NextResponse.json(
       { error: err.message || "Sync failed" },
       { status: 500 }

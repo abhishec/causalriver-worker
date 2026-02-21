@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -303,7 +304,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (saveError) {
-      console.error("[digest POST] Failed to persist digest:", saveError.message);
+      logger.error("[digest POST] Failed to persist digest:", saveError.message);
     }
 
     // Also write to cascade_alerts for the notification bell
@@ -336,7 +337,7 @@ export async function POST(request: NextRequest) {
       memoryId: saved?.id,
     });
   } catch (err) {
-    console.error("[digest POST] Unhandled error:", err);
+    logger.error("[digest POST] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -371,7 +372,7 @@ export async function GET() {
 
     return NextResponse.json({ digests: digestEntries });
   } catch (err) {
-    console.error("[digest GET] Unhandled error:", err);
+    logger.error("[digest GET] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

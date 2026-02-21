@@ -31,6 +31,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 min for agent execution
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     if (!memberCheck) {
       return NextResponse.json(
-        { error: "Not a member of this organization" },
+        { error: "Not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError || !task) {
-      console.error("[AgentRun] Failed to create task:", insertError?.message);
+      logger.error("[AgentRun] Failed to create task:", insertError?.message);
       return NextResponse.json(
         { error: "Failed to create agent task" },
         { status: 500 }
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
         ),
       ]);
     } catch (err) {
-      console.error(`[AgentRun] Task ${taskId} failed:`, err);
+      logger.error(`[AgentRun] Task ${taskId} failed:`, err);
       // Ensure task reaches terminal state — never orphaned as "running"
       await service
         .from("brain_agent_tasks")
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
-    console.error("[AgentRun] Error:", message);
+    logger.error("[AgentRun] Error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

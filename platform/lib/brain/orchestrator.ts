@@ -11,6 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { MODEL_DEEP } from '@nexus-ai/memory-stack';
+import { logger } from "@/lib/logger";
 
 export interface BrainQueryRequest {
   query: string;
@@ -145,7 +146,7 @@ Return ONLY the JSON array, no other text.`;
       return routes.sort((a: DomainRoute, b: DomainRoute) => b.confidence - a.confidence);
     }
   } catch (error) {
-    console.error('Claude routing failed, falling back to heuristic:', error);
+    logger.error('Claude routing failed, falling back to heuristic:', error);
     return routeQueryHeuristic(query, context);
   }
 
@@ -375,7 +376,7 @@ Keep the response concise (2-4 paragraphs max).`;
       return content.text;
     }
   } catch (error) {
-    console.error('Claude synthesis failed:', error);
+    logger.error('Claude synthesis failed:', error);
   }
 
   // Fallback

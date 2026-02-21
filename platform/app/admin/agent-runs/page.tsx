@@ -174,7 +174,7 @@ function AdminAgentsClient() {
   const failedRuns = runs.filter((r) => r.status === "failed");
 
   const tabs = [
-    { id: "by-org", label: "By Organization" },
+    { id: "by-org", label: "By Workspace" },
     { id: "by-agent", label: "By Agent Type" },
     { id: "timeline", label: "All Runs" },
     { id: "errors", label: "Errors", count: failedRuns.length },
@@ -220,7 +220,7 @@ function AdminAgentsClient() {
           trend={stats.successRate >= 80 ? "up" : "down"}
         />
         <StatValue label="Failed" value={formatNumber(stats.failed)} />
-        <StatValue label="Organizations" value={String(stats.uniqueOrgs)} />
+        <StatValue label="Workspaces" value={String(stats.uniqueOrgs)} />
         <StatValue label="Agent Types" value={String(stats.uniqueAgents)} />
         <StatValue label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
       </div>
@@ -448,7 +448,7 @@ function TimelineView({
     <Card className="overflow-hidden p-0">
       <div className="grid grid-cols-[auto_120px_1fr_100px_100px_100px] gap-3 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle bg-surface/30">
         <div className="w-3" />
-        <div>Organization</div>
+        <div>Workspace</div>
         <div>Agent</div>
         <div>Time</div>
         <div>Duration</div>
@@ -486,7 +486,7 @@ function TimelineView({
                 <div className="px-5 pb-4 bg-surface/20 border-t border-border-subtle/50">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3">
                     <div>
-                      <div className="text-[10px] font-medium text-muted uppercase mb-1">Organization</div>
+                      <div className="text-[10px] font-medium text-muted uppercase mb-1">Workspace</div>
                       <div className="text-xs">{run.orgName} <span className="text-muted">({run.orgSlug})</span></div>
                     </div>
                     <div>

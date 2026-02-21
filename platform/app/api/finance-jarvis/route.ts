@@ -11,6 +11,7 @@ import { getFinanceData } from "@/lib/finance-jarvis";
 import { seedFinanceDataToDb } from "@/lib/finance-jarvis/seed-to-db";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,7 @@ export async function GET() {
         const service = await createServiceClient();
         // Fire-and-forget: seed in background, don't await
         seedFinanceDataToDb(service, membership.organization_id, analysis)
-          .catch((err) => console.warn("[FinanceJarvis] Non-fatal seed error:", err));
+          .catch((err) => logger.warn("[FinanceJarvis] Non-fatal seed error:", err));
       }
     } catch {
       // Seeding failed — non-fatal, finance data still returned

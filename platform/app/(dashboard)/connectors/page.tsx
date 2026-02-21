@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ConnectorsClient } from "./connectors-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ export default async function ConnectorsPage() {
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Connectors] Query failed:", err);
+      logger.warn("[Connectors] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 

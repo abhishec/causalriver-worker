@@ -21,7 +21,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient }       from "@/lib/supabase/server";
-import { provisionOrg }              from "@/lib/org-provisioning";
+import { provisionWorkspace as provisionOrg } from "@/lib/workspace-provisioning";
+import { logger } from "@/lib/logger";
 
 function slugify(name: string, suffix: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + suffix;
@@ -142,7 +143,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (err) {
-    console.error("[create-workspace]", err);
+    logger.error("[create-workspace]", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal error" },
       { status: 500 }

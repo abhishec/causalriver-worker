@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/connectors/slack/callback
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenData.ok) {
-      console.error('Slack OAuth error:', tokenData);
+      logger.error('Slack OAuth error:', tokenData);
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -146,7 +147,7 @@ export async function GET(request: NextRequest) {
     );
 
     if (storeError) {
-      console.error('Failed to store Slack credentials:', storeError);
+      logger.error('Failed to store Slack credentials:', storeError);
 
       // Fallback: direct insert/update if function doesn't exist yet
       const { error: fallbackError } = await service
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest) {
       new URL('/connectors?success=slack_connected', request.url)
     );
   } catch (error: any) {
-    console.error('Slack callback error:', error);
+    logger.error('Slack callback error:', error);
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

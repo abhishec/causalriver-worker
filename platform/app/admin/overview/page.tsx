@@ -89,12 +89,12 @@ export default async function AdminOverviewPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Mission Control</h1>
-        <p className="text-xs text-muted mt-0.5">Platform-wide health, organizations, and system status</p>
+        <p className="text-xs text-muted mt-0.5">Platform-wide health, workspaces, and system status</p>
       </div>
 
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatValue label="Organizations" value={String(orgs.length)} subtitle={`${orgs.filter(o => o.is_core_brain).length} core`} />
+        <StatValue label="Workspaces" value={String(orgs.length)} subtitle={`${orgs.filter(o => o.is_core_brain).length} core`} />
         <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All orgs" />
         <StatValue label="Online Now" value={String(onlineUsers.length)} pulse={onlineUsers.length > 0} />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} />
@@ -104,17 +104,17 @@ export default async function AdminOverviewPage() {
 
       {/* Three-column: Orgs + Active Sessions + Events */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Organizations */}
+        {/* Workspaces */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <CardTitle>Organizations</CardTitle>
-            <Link href="/admin/orgs" className="text-xs text-accent hover:text-accent/80">View all</Link>
+            <CardTitle>Workspaces</CardTitle>
+            <Link href="/admin/workspaces" className="text-xs text-accent hover:text-accent/80">View all</Link>
           </div>
           <div className="space-y-1.5">
             {orgs.map((org) => (
               <Link
                 key={org.id}
-                href={`/admin/orgs/${org.id}`}
+                href={`/admin/workspaces/${org.id}`}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-surface-hover transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -139,7 +139,7 @@ export default async function AdminOverviewPage() {
               </Link>
             ))}
             {orgs.length === 0 && (
-              <p className="text-sm text-muted text-center py-6">No organizations</p>
+              <p className="text-sm text-muted text-center py-6">No workspaces</p>
             )}
           </div>
         </Card>

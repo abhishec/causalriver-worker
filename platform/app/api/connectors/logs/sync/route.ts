@@ -21,6 +21,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Log queries can take time for large windows
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
           .update({ last_synced_at: new Date().toISOString() })
           .eq("id", conn.id);
       } catch (err: any) {
-        console.error(`[Logs sync] ${conn.connector_type} failed:`, err);
+        logger.error(`[Logs sync] ${conn.connector_type} failed:`, err);
         results[conn.connector_type] = { success: false, error: err.message };
       }
     }
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
       totalSignalsIngested: totalSignals,
     });
   } catch (err: any) {
-    console.error("[Logs sync] Unexpected error:", err);
+    logger.error("[Logs sync] Unexpected error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }

@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
 // ── CORS Configuration ────────────────────────────────────────────────
 
@@ -182,11 +183,11 @@ export function createRequestLogger(request: NextRequest) {
     };
     // Structured JSON log — compatible with CloudWatch, Datadog, etc.
     if (level === "error") {
-      console.error(JSON.stringify(entry));
+      logger.error(JSON.stringify(entry));
     } else if (level === "warn") {
-      console.warn(JSON.stringify(entry));
+      logger.warn(JSON.stringify(entry));
     } else {
-      console.log(JSON.stringify(entry));
+      logger.debug(JSON.stringify(entry));
     }
   }
 

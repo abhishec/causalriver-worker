@@ -19,6 +19,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 import {
   brainBookkeeperAgent,
   brainReconcilerAgent,
@@ -257,7 +258,7 @@ export async function executeAccountingAgent(
     connectors: {},
 
     log: (...args: unknown[]) => {
-      console.log('[AAS]', ...args);
+      logger.debug('[AAS]', ...args);
     },
 
     reportProgress: (progress: number, message?: string) => {
@@ -385,7 +386,7 @@ export async function executeAccountingAgent(
           maxPairsPerRun: 20,      // limit CORE updates per agent run
         },
       );
-      console.log(
+      logger.debug(
         `[AAS federation] org=${organizationId.slice(0, 8)} action=${action} ` +
         `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
         `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
@@ -393,7 +394,7 @@ export async function executeAccountingAgent(
       );
     } catch (err: any) {
       // Federation is best-effort — never block agent response
-      console.warn('[AAS federation] Delta promotion failed (non-fatal):', err?.message);
+      logger.warn('[AAS federation] Delta promotion failed (non-fatal):', err?.message);
     }
   })();
 

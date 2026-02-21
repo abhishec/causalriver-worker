@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     // ── Step 2: Verify Slack signature ─────────────────────────────
     const signingSecret = process.env.SLACK_SIGNING_SECRET;
     if (!signingSecret) {
-      console.error('[Slack Webhook] SLACK_SIGNING_SECRET not configured');
+      logger.error('[Slack Webhook] SLACK_SIGNING_SECRET not configured');
       return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
 
     if (sigBuffer.length !== expectedBuffer.length || !timingSafeEqual(sigBuffer, expectedBuffer)) {
-      console.error('[Slack Webhook] Invalid signature');
+      logger.error('[Slack Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!matchedConnector) {
-      console.warn(`[Slack Webhook] No org found for team_id: ${teamId}`);
+      logger.warn(`[Slack Webhook] No org found for team_id: ${teamId}`);
       return NextResponse.json({ ok: true });
     }
 
@@ -236,7 +237,7 @@ export async function POST(req: NextRequest) {
         .insert(signals);
 
       if (insertError) {
-        console.warn('[Slack Webhook] Signal insert error:', insertError.message);
+        logger.warn('[Slack Webhook] Signal insert error:', insertError.message);
       }
     }
 
@@ -248,7 +249,7 @@ export async function POST(req: NextRequest) {
     // Always respond 200 quickly to prevent Slack retries
     return NextResponse.json({ ok: true, signals: signals.length });
   } catch (error: any) {
-    console.error('[Slack Webhook] Error:', error.message);
+    logger.error('[Slack Webhook] Error:', error.message);
     // Always return 200 to prevent Slack from retrying failed events
     return NextResponse.json({ ok: true, error: error.message });
   }

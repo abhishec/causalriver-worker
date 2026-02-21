@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Not a member of this organization" },
+        { error: "Not a member of this workspace" },
         { status: 403 }
       );
     }

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { OverviewClient } from "./overview-client";
 import type { LearningEvent } from "@/app/api/brain/emergence/route";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export default async function OverviewPage() {
   // Wrap each query to prevent a single failure from crashing the whole page
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any; count?: number | null }>): Promise<{ data: T | null; error: any; count?: number | null }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Overview] Query failed:", err);
+      logger.warn("[Overview] Query failed:", err);
       return { data: null as T | null, error: err, count: null };
     });
 
@@ -384,7 +385,7 @@ export default async function OverviewPage() {
 
   const orgMeta = orgMetaResult.data as { name?: string; is_design_partner?: boolean } | null;
   const isDesignPartner = orgMeta?.is_design_partner ?? false;
-  const orgDisplayName = orgMeta?.name ?? "your organization";
+  const orgDisplayName = orgMeta?.name ?? "your workspace";
 
   const connectors = (connectorsResult.data || []).map((c: any) => ({
     type: c.connector_type,

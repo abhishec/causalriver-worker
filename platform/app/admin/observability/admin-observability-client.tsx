@@ -47,7 +47,7 @@ export function AdminObservabilityClient({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Platform Observability</h1>
-          <p className="text-xs text-muted mt-0.5">Cross-organization system monitoring</p>
+          <p className="text-xs text-muted mt-0.5">Cross-workspace system monitoring</p>
         </div>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
@@ -116,7 +116,7 @@ export function AdminObservabilityClient({
                 { key: "title", header: "Title" },
                 {
                   key: "org",
-                  header: "Organization",
+                  header: "Workspace",
                   render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
                 },
                 {
@@ -153,7 +153,7 @@ export function AdminObservabilityClient({
             { key: "connector_type", header: "Connector", sortable: true },
             {
               key: "org",
-              header: "Organization",
+              header: "Workspace",
               render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
             },
             { key: "signal_type", header: "Type", sortable: true },
@@ -192,7 +192,7 @@ export function AdminObservabilityClient({
             { key: "method", header: "Method", sortable: true },
             {
               key: "org",
-              header: "Organization",
+              header: "Workspace",
               render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
             },
             { key: "source_entity", header: "Source" },
@@ -225,7 +225,7 @@ export function AdminObservabilityClient({
             { key: "connector_type", header: "Connector", sortable: true },
             {
               key: "org",
-              header: "Organization",
+              header: "Workspace",
               render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
             },
             { key: "operation", header: "Operation" },
@@ -264,7 +264,7 @@ export function AdminObservabilityClient({
             { key: "agent_type", header: "Agent", sortable: true },
             {
               key: "org",
-              header: "Organization",
+              header: "Workspace",
               render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
             },
             { key: "action", header: "Action" },
@@ -311,7 +311,7 @@ export function AdminObservabilityClient({
             { key: "title", header: "Title" },
             {
               key: "org",
-              header: "Organization",
+              header: "Workspace",
               render: (row) => <span className="text-xs">{row.organizations?.name || "—"}</span>,
             },
             {

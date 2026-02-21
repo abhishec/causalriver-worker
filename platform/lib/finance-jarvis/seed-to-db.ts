@@ -17,6 +17,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FinanceJarvisAnalysis, CausalRelationship } from "./brain-analyzer";
+import { logger } from "@/lib/logger";
 
 // ── Seed check flag (in-memory, per-process) ────────────────────────────────
 const seededOrgs = new Set<string>();
@@ -85,7 +86,7 @@ export async function seedFinanceDataToDb(
       const { error: insightErr } = await supabase
         .from("ai_memory")
         .insert(insightRows);
-      if (insightErr) console.warn("[FinanceSeeder] insight insert error:", insightErr.message);
+      if (insightErr) logger.warn("[FinanceSeeder] insight insert error:", insightErr.message);
       else counts.insights = insightRows.length;
     }
 
@@ -116,7 +117,7 @@ export async function seedFinanceDataToDb(
       const { error: causalErr } = await supabase
         .from("causal_relationships_statistical")
         .insert(causalRows);
-      if (causalErr) console.warn("[FinanceSeeder] causal insert error:", causalErr.message);
+      if (causalErr) logger.warn("[FinanceSeeder] causal insert error:", causalErr.message);
       else {
         counts.causalEdges = causalRows.length;
 
@@ -161,9 +162,9 @@ export async function seedFinanceDataToDb(
             },
           })
         ).then(({ error }: any) => {
-          if (error) console.warn("[FinanceSeeder] Failed to write discovery event:", error.message);
+          if (error) logger.warn("[FinanceSeeder] Failed to write discovery event:", error.message);
         }).catch((err: any) => {
-          console.warn("[FinanceSeeder] Failed to write discovery event:", err.message);
+          logger.warn("[FinanceSeeder] Failed to write discovery event:", err.message);
         });
       }
     }
@@ -241,7 +242,7 @@ export async function seedFinanceDataToDb(
       const { error: ruleErr } = await supabase
         .from("ai_memory")
         .insert(allRules);
-      if (ruleErr) console.warn("[FinanceSeeder] rule insert error:", ruleErr.message);
+      if (ruleErr) logger.warn("[FinanceSeeder] rule insert error:", ruleErr.message);
       else counts.rules = allRules.length;
     }
 
@@ -458,18 +459,18 @@ export async function seedFinanceDataToDb(
       const { error: patternErr } = await supabase
         .from("ai_memory")
         .insert(patternRows);
-      if (patternErr) console.warn("[FinanceSeeder] pattern insert error:", patternErr.message);
+      if (patternErr) logger.warn("[FinanceSeeder] pattern insert error:", patternErr.message);
       else counts.patterns = patternRows.length;
     }
 
     // Mark as seeded for this process
     seededOrgs.add(organizationId);
 
-    console.log(`[FinanceSeeder] Seeded org ${organizationId}: ${counts.insights} insights, ${counts.causalEdges} causal edges, ${counts.rules} rules, ${counts.patterns} patterns`);
+    logger.debug(`[FinanceSeeder] Seeded org ${organizationId}: ${counts.insights} insights, ${counts.causalEdges} causal edges, ${counts.rules} rules, ${counts.patterns} patterns`);
 
     return { seeded: true, counts };
   } catch (err) {
-    console.error("[FinanceSeeder] Failed to seed finance data:", err);
+    logger.error("[FinanceSeeder] Failed to seed finance data:", err);
     return { seeded: false, counts };
   }
 }

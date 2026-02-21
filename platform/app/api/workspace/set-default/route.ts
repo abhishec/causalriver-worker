@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
       .eq("customer_id", workspace.customer_id);
 
     if (updateError) {
-      console.error("[/api/workspace/set-default] update error:", updateError);
+      logger.error("[/api/workspace/set-default] update error:", updateError);
       return NextResponse.json(
         { error: updateError.message },
         { status: 500 }
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, defaultWorkspaceId: workspaceId });
   } catch (err) {
-    console.error("[/api/workspace/set-default] error:", err);
+    logger.error("[/api/workspace/set-default] error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 }

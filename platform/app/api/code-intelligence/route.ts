@@ -6,6 +6,7 @@ import {
   createExpertiseGraph,
   createCollaborationGraph,
 } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -193,7 +194,7 @@ export async function GET() {
       signalDistribution,
     });
   } catch (err: any) {
-    console.error("Code intelligence error:", err);
+    logger.error("Code intelligence error:", err);
     return NextResponse.json(
       { error: err.message || "Failed to load code intelligence" },
       { status: 500 }

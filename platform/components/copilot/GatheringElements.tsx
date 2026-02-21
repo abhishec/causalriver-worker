@@ -16,6 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { GatheringInteractive } from "./useCommandGathering";
+import { logger } from "@/lib/logger";
 
 // ── Shared Animation Variants ───────────────────────────────────────────────
 
@@ -748,7 +749,7 @@ function GLCheckElement({
         }
       } catch (err) {
         if (cancelled) return;
-        console.warn("[GLCheck] Status check failed:", err);
+        logger.warn("[GLCheck] Status check failed:", err);
         setPhase("no_data");
       }
     }
@@ -795,7 +796,7 @@ function GLCheckElement({
           onSelect("uploaded");
         }, 1800);
       } catch (err: unknown) {
-        console.error("[GLCheck] Upload failed:", err);
+        logger.error("[GLCheck] Upload failed:", err);
         setErrorMsg(
           err instanceof Error ? err.message : "Upload failed. Please try again."
         );

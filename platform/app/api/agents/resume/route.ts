@@ -21,6 +21,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
         ),
       ]);
     } catch (err) {
-      console.error(`[AgentResume] Task ${taskId} failed again:`, err);
+      logger.error(`[AgentResume] Task ${taskId} failed again:`, err);
       await service
         .from("brain_agent_tasks")
         .update({
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal error";
-    console.error("[AgentResume] Error:", message);
+    logger.error("[AgentResume] Error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

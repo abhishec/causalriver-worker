@@ -20,6 +20,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
+      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
     }
 
     // ── Anthropic API Key ───────────────────────────────────────────────
@@ -260,7 +261,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("[AgentComposer] Route error:", err);
+    logger.error("[AgentComposer] Route error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 }

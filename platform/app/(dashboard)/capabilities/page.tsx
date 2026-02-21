@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import Link from "next/link";
 import { CapabilitiesClient } from "./capabilities-client";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function CapabilitiesPage() {
   // Wrap queries to prevent a single failure from crashing the page
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Capabilities] Query failed:", err);
+      logger.warn("[Capabilities] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 

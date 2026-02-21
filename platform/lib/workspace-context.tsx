@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/logger";
 import {
   createContext,
   useContext,
@@ -143,7 +144,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeout);
 
       if (!res.ok) {
-        console.warn("[WorkspaceProvider] memberships API returned", res.status);
+        logger.warn("[WorkspaceProvider] memberships API returned", res.status);
         setIsLoading(false);
         return;
       }
@@ -152,7 +153,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const rows = json.memberships;
 
       if (!rows || rows.length === 0) {
-        console.warn("[WorkspaceProvider] No workspace memberships found");
+        logger.warn("[WorkspaceProvider] No workspace memberships found");
         setIsLoading(false);
         return;
       }

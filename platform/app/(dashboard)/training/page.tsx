@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { formatNumber } from "@/lib/utils";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export default async function TrainingPage() {
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
-      console.warn("[Training] Query failed:", err);
+      logger.warn("[Training] Query failed:", err);
       return { data: null as T | null, error: err };
     });
 

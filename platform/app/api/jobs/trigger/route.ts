@@ -32,6 +32,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 // Job types that run well in the Deno Edge Function
 const EDGE_FUNCTION_JOBS = [
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this organization" },
+          { error: "Not a member of this workspace" },
           { status: 403 }
         );
       }
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
       result,
     });
   } catch (error: any) {
-    console.error("[JobsTrigger] Error:", error);
+    logger.error("[JobsTrigger] Error:", error);
     return NextResponse.json(
       { error: error.message || "Internal error" },
       { status: 500 }
@@ -204,7 +205,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("[JobsTrigger] GET error:", error);
+    logger.error("[JobsTrigger] GET error:", error);
     return NextResponse.json(
       { error: error.message || "Internal error" },
       { status: 500 }

@@ -38,7 +38,7 @@ const CHECKLIST_ITEMS: Array<{
 }> = [
   {
     id: "create_org",
-    label: "Create organization",
+    label: "Create workspace",
     description: "Your workspace is set up and ready",
   },
   {

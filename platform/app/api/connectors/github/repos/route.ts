@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/connectors/github/repos
@@ -60,7 +61,7 @@ export async function GET() {
 
     if (!ghResponse.ok) {
       const errorText = await ghResponse.text();
-      console.error("[GitHub/repos] API error:", ghResponse.status, errorText);
+      logger.error("[GitHub/repos] API error:", ghResponse.status, errorText);
       return NextResponse.json(
         { error: "Failed to fetch repositories from GitHub" },
         { status: ghResponse.status }
@@ -84,7 +85,7 @@ export async function GET() {
 
     return NextResponse.json({ repos: cleanRepos });
   } catch (err) {
-    console.error("[GitHub/repos] Error:", err);
+    logger.error("[GitHub/repos] Error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

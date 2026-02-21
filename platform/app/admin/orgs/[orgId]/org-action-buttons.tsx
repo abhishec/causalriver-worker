@@ -130,7 +130,7 @@ export function OrgActionButtons({
                 </svg>
               </div>
               <div>
-                <div className="text-sm font-semibold">Delete Organization</div>
+                <div className="text-sm font-semibold">Delete Workspace</div>
                 <div className="text-xs text-muted">This cannot be undone</div>
               </div>
             </div>

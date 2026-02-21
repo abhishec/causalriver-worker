@@ -25,6 +25,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -178,7 +179,7 @@ export async function ingestPRAsSignals(
   const { error } = await supabase.from('cross_domain_signals').insert(signals);
 
   if (error) {
-    console.error('[P0 Ingest] Error inserting signals:', error);
+    logger.error('[P0 Ingest] Error inserting signals:', error);
     throw error;
   }
 }

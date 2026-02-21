@@ -108,12 +108,12 @@ export default async function AdminFederationPage() {
 
       {/* Per-Org Federation Details */}
       <Card>
-        <CardTitle className="mb-4">Organization Knowledge</CardTitle>
+        <CardTitle className="mb-4">Workspace Knowledge</CardTitle>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-[11px] text-muted uppercase tracking-wider border-b border-border-subtle">
-                <th className="text-left py-2.5 px-3 font-medium">Organization</th>
+                <th className="text-left py-2.5 px-3 font-medium">Workspace</th>
                 <th className="text-right py-2.5 px-3 font-medium">Edges</th>
                 <th className="text-right py-2.5 px-3 font-medium">Patterns</th>
                 <th className="text-left py-2.5 px-3 font-medium">Type</th>

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +38,13 @@ export async function GET() {
       .order("joined_at", { ascending: true });
 
     if (error) {
-      console.error("[/api/workspace/memberships] query error:", error);
+      logger.error("[/api/workspace/memberships] query error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ memberships: rows ?? [] });
   } catch (err) {
-    console.error("[/api/workspace/memberships] error:", err);
+    logger.error("[/api/workspace/memberships] error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal server error" },
       { status: 500 }

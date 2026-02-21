@@ -993,7 +993,7 @@ async function executeAasTool(
 
   if (!transactions?.length) {
     return {
-      error: "No GL transactions found for this organization. Connect Xero via the Connectors page first.",
+      error: "No GL transactions found for this workspace. Connect Xero via the Connectors page first.",
       action,
     };
   }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { StatusDot } from "@/components/ui/StatusDot";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface BrainTrainingSectionProps {
   orgId: string;
@@ -125,7 +126,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
             (analyzeData.patterns?.length ?? 0);
         }
       } catch (p0Err) {
-        console.warn('[BrainTraining] P0 analysis non-fatal:', p0Err);
+        logger.warn('[BrainTraining] P0 analysis non-fatal:', p0Err);
       }
 
       // ── Step 3: Full brain training cycle (all 30 layers) ─────────────
@@ -173,7 +174,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
           body: JSON.stringify({ organizationId: orgId, mode: 'sleep' }),
         });
       } catch (sleepErr) {
-        console.warn('[BrainTraining] Sleep cycle non-fatal:', sleepErr);
+        logger.warn('[BrainTraining] Sleep cycle non-fatal:', sleepErr);
       }
 
       // ── Complete ───────────────────────────────────────────────────────
@@ -186,7 +187,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
 
       setLastTrainingDate(new Date().toISOString());
     } catch (error: any) {
-      console.error('[Brain Training] Error:', error);
+      logger.error('[Brain Training] Error:', error);
       setTrainingStatus({
         status: 'error',
         error: error.message || 'Training failed. Please try again.',

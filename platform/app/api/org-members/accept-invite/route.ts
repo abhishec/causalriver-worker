@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/org-members/accept-invite
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
       orgId: invitation.organization_id,
     });
   } catch (err) {
-    console.error("[org-members/accept-invite] Unhandled error:", err);
+    logger.error("[org-members/accept-invite] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

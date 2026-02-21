@@ -12,6 +12,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (!feedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this organization" },
+        { error: "Not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
       },
     })).catch((err: unknown) => {
-      console.warn("[feedback] Signal emit non-fatal:", err instanceof Error ? err.message : String(err));
+      logger.warn("[feedback] Signal emit non-fatal:", err instanceof Error ? err.message : String(err));
     });
 
     // ── WIRE: UI Feedback → Closed-Loop Learning Engine (Loop 3) ──
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       processed: false,
     })).catch((err: unknown) => {
       // Non-fatal: feedback was already saved to copilot_response_feedback
-      console.warn("[feedback] Queue insert non-fatal:", err instanceof Error ? err.message : String(err));
+      logger.warn("[feedback] Queue insert non-fatal:", err instanceof Error ? err.message : String(err));
     });
 
     return NextResponse.json({
@@ -150,7 +151,7 @@ export async function GET(request: NextRequest) {
 
     if (!getFeedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this organization" },
+        { error: "Not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -233,6 +234,6 @@ async function learnFromCorrection(
     },
   })).catch((err: unknown) => {
     // Non-fatal: correction feedback is enrichment, not critical path
-    console.warn("[feedback] learnFromCorrection non-fatal:", err instanceof Error ? err.message : String(err));
+    logger.warn("[feedback] learnFromCorrection non-fatal:", err instanceof Error ? err.message : String(err));
   });
 }

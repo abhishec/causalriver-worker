@@ -19,6 +19,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
+import { logger } from "@/lib/logger";
 import {
   testDataGeneratorDomain,
   sqlAnalyzerDomain,
@@ -341,7 +342,7 @@ export async function executeDomain(
           maxPairsPerRun: 20,       // Limit CORE updates per domain run
         },
       );
-      console.log(
+      logger.debug(
         `[SE-AAS federation] org=${params.organizationId.slice(0, 8)} domain=${params.domainType} ` +
         `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
         `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
@@ -349,7 +350,7 @@ export async function executeDomain(
       );
     } catch (err: any) {
       // Federation is best-effort — never block domain execution or the response
-      console.warn('[SE-AAS federation] Delta promotion failed (non-fatal):', err?.message);
+      logger.warn('[SE-AAS federation] Delta promotion failed (non-fatal):', err?.message);
     }
   })();
 

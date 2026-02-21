@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateSeAaSRequest, createSeAaSResponse, createSeAaSError } from "@/lib/se-aas/middleware";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const { data: healthScores, error: healthError } = await healthQuery;
 
     if (healthError) {
-      console.warn("[engagement-health] Health scores query error:", healthError);
+      logger.warn("[engagement-health] Health scores query error:", healthError);
     }
 
     // ── 2. Unacknowledged scope creep alerts ────────────────────────────────

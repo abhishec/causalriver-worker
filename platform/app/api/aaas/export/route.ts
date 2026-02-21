@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
 import { generateTransactionInterpretations, type GLTransaction as SharedGLTransaction } from "@/lib/aas/transaction-interpretations";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -488,7 +489,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err: any) {
-    console.error("[AAS Export] Error:", err);
+    logger.error("[AAS Export] Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

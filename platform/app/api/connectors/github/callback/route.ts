@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 /**
  * Returns a minimal HTML page that sends a postMessage to the opener
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (tokenData.error) {
-      console.error('GitHub OAuth error:', tokenData);
+      logger.error('GitHub OAuth error:', tokenData);
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -176,7 +177,7 @@ export async function GET(request: NextRequest) {
       });
 
     if (storeError) {
-      console.error('Failed to store GitHub credentials:', storeError);
+      logger.error('Failed to store GitHub credentials:', storeError);
       const isPopup = parts.length >= 5 && parts[4] === 'popup';
       if (isPopup) {
         return new NextResponse(
@@ -207,7 +208,7 @@ export async function GET(request: NextRequest) {
       new URL('/connectors?success=github_connected', request.url)
     );
   } catch (error: any) {
-    console.error('GitHub callback error:', error);
+    logger.error('GitHub callback error:', error);
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

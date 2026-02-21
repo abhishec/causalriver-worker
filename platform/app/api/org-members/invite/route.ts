@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/org-members/invite
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
       message: `Invitation created. Share this link: ${inviteUrl}`,
     });
   } catch (err) {
-    console.error("[org-members/invite POST] Unhandled error:", err);
+    logger.error("[org-members/invite POST] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -158,7 +159,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[org-members/invite DELETE] Unhandled error:", err);
+    logger.error("[org-members/invite DELETE] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

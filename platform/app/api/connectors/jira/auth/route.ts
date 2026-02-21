@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentWorkspaceId } from '@/lib/workspace-helpers';
 import { randomBytes } from 'crypto';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/connectors/jira/auth
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(authUrl.toString());
   } catch (error: any) {
-    console.error('Jira OAuth init error:', error);
+    logger.error('Jira OAuth init error:', error);
     return NextResponse.json(
       { error: 'Failed to initiate OAuth' },
       { status: 500 }

@@ -21,6 +21,7 @@
 
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
 import { createServiceClient }           from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -362,7 +363,7 @@ export async function provisionWorkspace(
   result.warnings = warnings;
   result.success  = errors.length === 0;
 
-  console.log(
+  logger.debug(
     `[Provision] Workspace ${workspaceId}: ${result.success ? "✓ SUCCESS" : "⚠ PARTIAL"}\n` +
     `  storage_config=${result.audit.storage_config}\n` +
     `  brain_cortex=${result.audit.brain_cortex_state}\n` +

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/training-packs
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error("Failed to save training pack:", error.message);
+      logger.error("Failed to save training pack:", error.message);
       return NextResponse.json(
         { error: `Failed to save training pack: ${error.message}` },
         { status: 500 }
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
       });
     } catch (queueErr) {
       // Non-fatal: pack is saved, execution will be picked up by scheduled job
-      console.warn("Failed to queue training pack (non-fatal):", queueErr);
+      logger.warn("Failed to queue training pack (non-fatal):", queueErr);
     }
 
     return NextResponse.json({

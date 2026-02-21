@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
       // If secret is configured, verify the request
       const authHeader = req.headers.get('authorization');
       if (authHeader !== `Bearer ${webhookSecret}`) {
-        console.error('[Jira Webhook] Invalid authorization');
+        logger.error('[Jira Webhook] Invalid authorization');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
     const payload = JSON.parse(body);
     const webhookEvent = payload.webhookEvent || payload.issue_event_type_name || '';
 
-    console.info(`[Jira Webhook] Received event: ${webhookEvent}`);
+    logger.info(`[Jira Webhook] Received event: ${webhookEvent}`);
 
     // ── Step 2: Resolve organization ────────────────────────────────
     const service = await createServiceClient();
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!matchedConnector) {
-      console.warn(`[Jira Webhook] No org found for Jira instance: ${jiraInstance}`);
+      logger.warn(`[Jira Webhook] No org found for Jira instance: ${jiraInstance}`);
       return NextResponse.json({ ok: true });
     }
 
@@ -200,7 +201,7 @@ export async function POST(req: NextRequest) {
         .insert(signals);
 
       if (insertError) {
-        console.warn('[Jira Webhook] Signal insert error:', insertError.message);
+        logger.warn('[Jira Webhook] Signal insert error:', insertError.message);
       }
     }
 
@@ -211,7 +212,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, signals: signals.length });
   } catch (error: any) {
-    console.error('[Jira Webhook] Error:', error.message);
+    logger.error('[Jira Webhook] Error:', error.message);
     return NextResponse.json({ ok: true, error: error.message });
   }
 }

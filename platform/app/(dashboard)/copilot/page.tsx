@@ -15,6 +15,7 @@ import { useTemplates } from "@/lib/templates/useTemplates";
 import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
 import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
 import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
+import { logger } from "@/lib/logger";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -429,7 +430,7 @@ function CopilotPageInner() {
         setActiveConversationId(id);
       }
     } catch (err) {
-      console.error("[CopilotPage] handleSave failed:", err);
+      logger.error("[CopilotPage] handleSave failed:", err);
     }
   }, [saveConversation, activeConversationId]);
 

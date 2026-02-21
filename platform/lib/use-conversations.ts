@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ export function useConversations(workspaceId: string | undefined) {
           body: JSON.stringify({ workspaceId, ...opts }),
         });
         if (!res.ok) {
-          console.error("[useConversations] save failed:", res.status, await res.text());
+          logger.error("[useConversations] save failed:", res.status, await res.text());
           return opts.conversationId || "";
         }
         const json = await res.json();
@@ -78,7 +79,7 @@ export function useConversations(workspaceId: string | undefined) {
         window.dispatchEvent(new Event("conversation-updated"));
         return json.id;
       } catch (err) {
-        console.error("[useConversations] save error:", err);
+        logger.error("[useConversations] save error:", err);
         return opts.conversationId || "";
       }
     },

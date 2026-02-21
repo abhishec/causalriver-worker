@@ -352,7 +352,7 @@ export async function POST(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this organization" },
+        { error: "You are not a member of this workspace" },
         { status: 403 }
       );
     }
@@ -814,7 +814,7 @@ export async function POST(request: NextRequest) {
             domainType: accountingRoute.domainType,
             brainAugmented: false,
             error: "no_gl_data",
-            message: "No General Ledger data found for this organization. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+            message: "No General Ledger data found for this workspace. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
           };
         }
       } catch (acctErr) {
@@ -1683,7 +1683,7 @@ export async function POST(request: NextRequest) {
     // ── Build effective system prompt ──────────────────────────────────
     // V4: brainContext.fullPrompt is the COMPLETE system prompt from the SDK.
     // It already includes persona, intent-aware instructions, and ALL brain data.
-    const NO_HALLUCINATION_FALLBACK = `You are the Brain OS Copilot — an intelligence co-pilot for this organization.
+    const NO_HALLUCINATION_FALLBACK = `You are the Brain OS Copilot — an intelligence co-pilot for this workspace.
 
 CRITICAL RULES:
 1. You MUST ONLY answer using data that exists in the brain context below. Do NOT invent, fabricate, or hallucinate any numbers, metrics, KPIs, trends, or statistics.
@@ -1692,7 +1692,7 @@ CRITICAL RULES:
 4. If the user asks about something outside the brain's knowledge, acknowledge the gap honestly. Offer to help with what IS available.
 5. When you DO have data, cite it precisely — use the exact numbers from the brain context, not approximations or "typical" values.
 
-You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded for this organization.`;
+You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded for this workspace.`;
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
 
@@ -1801,7 +1801,7 @@ USE THESE LINKS to:
 
       if (leapEntries.length > 0) {
         effectiveSystemPrompt += `\n\n## BRAIN DEEP REASONING (from autonomous cognitive sleep cycles)
-The Brain has been actively reasoning about this organization during its sleep cycles.
+The Brain has been actively reasoning about this workspace during its sleep cycles.
 These insights come from its curiosity engine, imagination layer, and goal-planning system:
 
 ${leapEntries.join('\n\n')}

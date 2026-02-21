@@ -99,7 +99,7 @@ const REGIONS = [
     status: "active" as const,
     icon: "\u{1F3AF}",
     description:
-      "Learns which signals and domains matter most for each organization. Allocates processing budget to high-value signal streams and deprioritizes noise.",
+      "Learns which signals and domains matter most for each workspace. Allocates processing budget to high-value signal streams and deprioritizes noise.",
     color: "border-success/30",
     dotColor: "bg-success",
     badgeClass: "bg-success/10 text-success",

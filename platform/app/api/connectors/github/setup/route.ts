@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/connectors/github/setup
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
     }
 
     if (saveError) {
-      console.error("Failed to save connector:", saveError);
+      logger.error("Failed to save connector:", saveError);
       return NextResponse.json(
         { error: "Failed to save connector configuration" },
         { status: 500 }
@@ -156,7 +157,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (err: any) {
-    console.error("GitHub setup error:", err);
+    logger.error("GitHub setup error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }
