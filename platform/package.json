@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "dev:raw": "next dev --port 3001 --turbopack",
-    "dev:clean": "node scripts/dev.mjs --clean",
+    "dev": "next dev --port 3001 --turbopack",
+    "dev:orchestrator": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --max-warnings=50",
