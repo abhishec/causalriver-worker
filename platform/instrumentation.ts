@@ -14,13 +14,19 @@
 export async function register() {
   // Only run on the Node.js server runtime (skip Edge runtime)
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { validateEnv } = await import("@/lib/env");
+    try {
+      const { validateEnv } = await import("@/lib/env");
 
-    // In dev, scripts/dev.mjs already validates env by reading .env.local directly.
-    // The instrumentation hook may fire before Next.js loads .env.local into process.env,
-    // causing false "missing var" warnings. Only validate in production.
-    if (process.env.NODE_ENV === "production") {
-      validateEnv();
+      // In dev, scripts/dev.mjs already validates env by reading .env.local directly.
+      // The instrumentation hook may fire before Next.js loads .env.local into process.env,
+      // causing false "missing var" warnings. Only validate in production.
+      if (process.env.NODE_ENV === "production") {
+        validateEnv();
+      }
+    } catch (err) {
+      // Never crash the server from the instrumentation hook.
+      // Missing env vars degrade AI features but the UI should still work.
+      console.error("[instrumentation] Env validation error:", err);
     }
   }
 }

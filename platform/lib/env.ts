@@ -73,19 +73,17 @@ export function validateEnv(): void {
     );
   }
 
-  // Handle errors
+  // Handle errors — warn loudly but NEVER crash the server.
+  // A missing API key means AI features won't work, but the app should still
+  // serve pages, handle auth, and show the UI. Crashing the entire process
+  // over a missing env var causes a full-site 500 on Amplify/ECS.
   if (errors.length > 0) {
     const msg =
       `\n❌ Env validation failed (${errors.length} error${errors.length > 1 ? "s" : ""}):\n` +
       errors.map((e) => `   ✗ ${e}`).join("\n") +
       "\n\n   Fix your .env.local file and restart the server.\n";
 
-    if (isProd) {
-      throw new Error(msg);
-    } else {
-      // In dev, warn loudly but don't crash
-      console.error(msg);
-    }
+    console.error(msg);
   } else {
     console.log(
       `✅ Env validated (${RULES.filter((r) => r.required).length} required vars present)`
