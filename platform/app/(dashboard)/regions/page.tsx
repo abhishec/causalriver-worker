@@ -178,7 +178,7 @@ const REGIONS = [
     status: "sleeping" as const,
     icon: "\u{1F578}\u{FE0F}",
     description:
-      "Collective intelligence layer. Shares discovered patterns across organizations (privacy-safe) and merges collective knowledge to accelerate learning for all tenants.",
+      "Collective intelligence layer. Shares discovered patterns across workspaces (privacy-safe) and merges collective knowledge to accelerate learning for all tenants.",
     color: "border-rose-400/30",
     dotColor: "bg-rose-400",
     badgeClass: "bg-rose-400/10 text-rose-400",

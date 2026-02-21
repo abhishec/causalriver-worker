@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     if (!isAdmin && !hasMemberRole) {
       return NextResponse.json(
-        { error: "Only organization owners and admins can register connectors" },
+        { error: "Only workspace owners and admins can register connectors" },
         { status: 403 }
       );
     }

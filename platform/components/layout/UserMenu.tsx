@@ -265,7 +265,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               {/* ── Create New Workspace ── */}
               <div className="h-px bg-border-subtle mx-2 my-1" />
               <Link
-                href="/settings?tab=general&action=create-org"
+                href="/settings?tab=general&action=create-workspace"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] text-accent hover:bg-accent/8 transition-colors"
               >

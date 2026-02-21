@@ -247,7 +247,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!isAdmin && !hasMemberRole) {
       return NextResponse.json(
-        { error: "Only organization owners and admins can manage services" },
+        { error: "Only workspace owners and admins can manage services" },
         { status: 403 }
       );
     }

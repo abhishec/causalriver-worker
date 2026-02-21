@@ -23,9 +23,9 @@ export interface SlashCommand {
 // ─── General Intelligence commands (4) ──────────────────────────────────────
 
 const GENERAL_COMMANDS: SlashCommand[] = [
-  { id: "causal",       label: "causal-analysis",    icon: "📊", description: "Cross-domain cause-and-effect analysis",     prompt: "Run a causal analysis across the organization",       service: "general", category: "Intelligence" },
+  { id: "causal",       label: "causal-analysis",    icon: "📊", description: "Cross-domain cause-and-effect analysis",     prompt: "Run a causal analysis across the workspace",          service: "general", category: "Intelligence" },
   { id: "anomaly-gen",  label: "anomaly-report",     icon: "⚠️",  description: "Detect unusual patterns across all signals", prompt: "What anomalies were detected today?",                 service: "general", category: "Intelligence" },
-  { id: "intel-report", label: "intelligence-report", icon: "📄", description: "Full organizational intelligence report",    prompt: "Give me the full intelligence report",                service: "general", category: "Intelligence" },
+  { id: "intel-report", label: "intelligence-report", icon: "📄", description: "Full workspace intelligence report",    prompt: "Give me the full intelligence report",                service: "general", category: "Intelligence" },
   { id: "predict",      label: "prediction",         icon: "📈", description: "Forecast key business outcomes",             prompt: "Forecast key business metrics for next quarter",      service: "general", category: "Intelligence" },
 ];
 

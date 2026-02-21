@@ -68,7 +68,7 @@ const CONNECTOR_TYPES: ConnectorTypeDef[] = [
     addLabel: "Add GitHub Repo",
     fields: [
       { key: "token", label: "Personal Access Token", placeholder: "ghp_xxxxxxxxxxxx", type: "password", required: true, helpUrl: "https://github.com/settings/tokens?type=beta", helpText: "Create a fine-grained token with repo & workflow permissions." },
-      { key: "owner", label: "Default Owner/Org", placeholder: "your-org", type: "text", required: true, helpText: "Default organization or username" },
+      { key: "owner", label: "Default Owner", placeholder: "your-org", type: "text", required: true, helpText: "Default workspace owner or username" },
       { key: "repo", label: "Default Repository", placeholder: "your-repo", type: "text", required: true, helpText: "Default repository name" },
     ],
   },

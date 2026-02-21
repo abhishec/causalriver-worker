@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
     if (!canProvision) {
       return NextResponse.json(
-        { error: "Only owners and admins can provision an organization" },
+        { error: "Only owners and admins can provision a workspace" },
         { status: 403 }
       );
     }

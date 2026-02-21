@@ -50,7 +50,7 @@ export default async function AdminFederationPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Federation</h1>
-        <p className="text-xs text-muted mt-0.5">How knowledge flows between organizations and the core brain</p>
+        <p className="text-xs text-muted mt-0.5">How knowledge flows between workspaces and the core brain</p>
       </div>
 
       {/* Federation Stats */}
@@ -101,7 +101,7 @@ export default async function AdminFederationPage() {
           </div>
 
           {tenantOrgs.length > 6 && (
-            <p className="text-xs text-muted mt-4">+{tenantOrgs.length - 6} more organizations</p>
+            <p className="text-xs text-muted mt-4">+{tenantOrgs.length - 6} more workspaces</p>
           )}
         </div>
       </Card>
@@ -165,7 +165,7 @@ export default async function AdminFederationPage() {
           <div className="flex items-center justify-between py-2">
             <div>
               <div className="text-sm">Global Federation</div>
-              <div className="text-xs text-muted">Enable knowledge sharing across all organizations</div>
+              <div className="text-xs text-muted">Enable knowledge sharing across all workspaces</div>
             </div>
             <div className="w-10 h-5 rounded-full bg-success/20 flex items-center justify-end px-0.5 cursor-pointer">
               <div className="w-4 h-4 rounded-full bg-success" />

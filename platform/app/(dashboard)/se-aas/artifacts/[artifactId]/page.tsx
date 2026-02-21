@@ -217,7 +217,7 @@ function PRReviewRenderer({ data }: { data: Record<string, any> }) {
             <Badge variant="accent" size="xs" className="ml-auto">Brain Intelligence</Badge>
           </div>
           <p className="text-xs text-muted leading-relaxed">
-            Based on Brain&apos;s analysis of your organisation&apos;s historical patterns,
+            Based on Brain&apos;s analysis of your workspace&apos;s historical patterns,
             merging this PR is likely to have the following downstream business effects:
           </p>
           <div className="space-y-2">

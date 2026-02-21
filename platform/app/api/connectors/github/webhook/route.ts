@@ -148,9 +148,9 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     ) ?? allConnectorConfigs?.[0] ?? null;
 
     if (!connectorConfig) {
-      logger.error('[PR Review] No organization mapping found for repo');
+      logger.error('[PR Review] No workspace mapping found for repo');
       return NextResponse.json(
-        { error: 'Repository not connected to any organization' },
+        { error: 'Repository not connected to any workspace' },
         { status: 404 }
       );
     }
@@ -359,7 +359,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
   ) ?? allReviewConfigs?.[0] ?? null;
 
   if (!connectorConfig) {
-    return NextResponse.json({ message: 'No organization mapping' });
+    return NextResponse.json({ message: 'No workspace mapping' });
   }
 
   // Record outcome for calibration

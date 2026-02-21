@@ -31,7 +31,7 @@ const NEXUS_BRAIN_TOOLS = [
       description:
         "Query the Brain OS causal knowledge graph. Returns causal relationships, " +
         "patterns, impact analysis, and cascade paths for any business domain. " +
-        "Use this to understand WHY things happen in an organization — root causes, " +
+        "Use this to understand WHY things happen in a workspace — root causes, " +
         "downstream effects, and cross-domain cascades.",
       parameters: {
         type: "object",
@@ -151,7 +151,7 @@ export async function GET() {
     name: "Brain OS",
     version: "1.0.0",
     description:
-      "Causal intelligence engine that understands organizations as living systems. " +
+      "Causal intelligence engine that understands workspaces as living systems. " +
       "Trained on cross-domain signals with 3-paradigm causal discovery (APEX + PC/VarLiNGAM + Transfer Entropy). " +
       "Query, forecast, simulate, diagnose, and explain any business question.",
     tools: NEXUS_BRAIN_TOOLS,

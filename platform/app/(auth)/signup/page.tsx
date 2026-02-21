@@ -71,7 +71,7 @@ function SignupForm() {
         </p>
         <p className="text-sm text-muted">
           {isInviteFlow
-            ? "Click the link to activate your account and join the organization."
+            ? "Click the link to activate your account and join the workspace."
             : "Click the link to activate your account and access your causal memory."}
         </p>
       </div>
@@ -94,7 +94,7 @@ function SignupForm() {
       <p className="text-muted mb-8">
         {isInviteFlow
           ? "Sign up to accept your invitation"
-          : "Set up your organization and start learning"}
+          : "Set up your workspace and start learning"}
       </p>
 
       {error && (

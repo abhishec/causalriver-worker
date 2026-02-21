@@ -771,7 +771,7 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       return NextResponse.json({
-        error: "No GL data found. Upload Xero GL data for your organization first.",
+        error: "No GL data found. Upload Xero GL data for your workspace first.",
         analysis: null,
       }, { status: 200 });
     }
@@ -815,7 +815,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       analysis,
-      company: org?.name || "Unknown Organization",
+      company: org?.name || "Unknown Workspace",
       organizationId: orgId,
       brainMetadata,
       summary: {

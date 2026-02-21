@@ -69,7 +69,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -102,7 +102,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Run early warning analysis for **{{workspace}}** over **{{time_range}}**?",
     gatheringPrompts: {
-      org: "Which organization do you want to check for velocity risks?",
+      org: "Which workspace do you want to check for velocity risks?",
       workspace:
         "I found {{count}} workspaces with Git configured. Which one should I analyze?",
       time_range: "What time range should I look at? The default is 30 days.",
@@ -115,7 +115,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -134,7 +134,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Show delivery intelligence dashboard for **{{engagement}}**?",
     gatheringPrompts: {
-      org: "Which organization's delivery health do you want to see?",
+      org: "Which workspace's delivery health do you want to see?",
       engagement:
         "Which engagement should I analyze? Here are the active ones:",
     },
@@ -146,7 +146,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -180,7 +180,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Find the best pod match for **{{engagement}}**{{tech_stack_filter}}?",
     gatheringPrompts: {
-      org: "Which organization needs a pod recommendation?",
+      org: "Which workspace needs a pod recommendation?",
       engagement: "Which engagement are you staffing?",
       tech_stack_filter:
         "Want to filter by specific tech stack? Pick one or more, or skip.",
@@ -197,7 +197,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -216,7 +216,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Check for scope creep in **{{engagement}}**?",
     gatheringPrompts: {
-      org: "Which organization are you checking for scope creep?",
+      org: "Which workspace are you checking for scope creep?",
       engagement: "Which engagement should I audit for scope drift?",
     },
     promptBuilder: (p) =>
@@ -246,7 +246,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -285,7 +285,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Generate P&L statement for **{{fiscal_period}}**{{comparison_period}}?",
     gatheringPrompts: {
-      org: "Which organization's P&L do you need?",
+      org: "Which workspace's P&L do you need?",
       gl_data: "Let me check if you have General Ledger data available...",
       fiscal_period: "Which fiscal period should I generate the statement for?",
       comparison_period:
@@ -304,7 +304,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -323,7 +323,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Generate balance sheet as of **{{as_of_date}}**?",
     gatheringPrompts: {
-      org: "Which organization's balance sheet do you need?",
+      org: "Which workspace's balance sheet do you need?",
       gl_data: "Let me check if you have General Ledger data available...",
       as_of_date:
         "What date should the balance sheet reflect? Default is today.",
@@ -336,7 +336,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -358,7 +358,7 @@ const AAS_GATHERING: CommandGathering[] = [
     ],
     confirmationMessage: "Generate trial balance for **{{period}}**?",
     gatheringPrompts: {
-      org: "Which organization?",
+      org: "Which workspace?",
       gl_data: "Let me check if you have General Ledger data available...",
       period: "Which period do you need the trial balance for?",
     },
@@ -370,7 +370,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -393,7 +393,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Check GST F5 compliance for **{{filing_period}}**?",
     gatheringPrompts: {
-      org: "Which organization's GST compliance do you need?",
+      org: "Which workspace's GST compliance do you need?",
       gl_data: "Let me check if you have General Ledger data available...",
       filing_period: "Which filing period should I check?",
     },
@@ -405,7 +405,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -428,7 +428,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Scan for transaction anomalies at **{{sensitivity_level}}** sensitivity?",
     gatheringPrompts: {
-      org: "Which organization should I scan for anomalies?",
+      org: "Which workspace should I scan for anomalies?",
       gl_data: "Let me check if you have General Ledger data available...",
       sensitivity_level:
         "How sensitive should the detection be? Default is medium.",
@@ -441,7 +441,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -467,7 +467,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Show transactions from **{{date_range}}**{{min_amount}}?",
     gatheringPrompts: {
-      org: "Which organization's transactions do you want to see?",
+      org: "Which workspace's transactions do you want to see?",
       gl_data: "Let me check if you have General Ledger data available...",
       date_range: "What date range should I pull transactions for?",
       min_amount:
@@ -486,7 +486,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -509,7 +509,7 @@ const AAS_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Generate **{{benchmark_type}}** benchmark report?",
     gatheringPrompts: {
-      org: "Which organization do you want to benchmark?",
+      org: "Which workspace do you want to benchmark?",
       gl_data: "Let me check if you have General Ledger data available...",
       benchmark_type: "What benchmark type should I compare against?",
     },
@@ -527,7 +527,7 @@ const AAS_FULL_REVIEW: CommandGathering = {
   params: [
     {
       id: "org",
-      label: "Organization",
+      label: "Workspace",
       type: "select",
       required: true,
       optionsEndpoint: "/api/org/list",
@@ -549,7 +549,7 @@ const AAS_FULL_REVIEW: CommandGathering = {
   confirmationMessage:
     "Run full financial review for **{{fiscal_period}}**? This will generate P&L, Balance Sheet, Trial Balance, GST F5, Anomaly Detection, and Transaction Summary — each as a separate artifact.",
   gatheringPrompts: {
-    org: "Which organization should I review?",
+    org: "Which workspace should I review?",
     gl_data: "Let me check if you have General Ledger data available...",
     fiscal_period: "Which fiscal period should I review?",
   },
@@ -565,7 +565,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -589,7 +589,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Generate **{{forecast_weeks}}-week** causal cash flow forecast?",
     gatheringPrompts: {
-      org: "Which organization's cash flow should I forecast?",
+      org: "Which workspace's cash flow should I forecast?",
       gl_data: "Let me check if you have General Ledger data available...",
       forecast_weeks: "How far out should the forecast go? Default is 13 weeks.",
     },
@@ -601,7 +601,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -612,7 +612,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Scan for revenue leakage — under-billing, missed renewals, and pricing gaps?",
     gatheringPrompts: {
-      org: "Which organization should I scan for revenue leakage?",
+      org: "Which workspace should I scan for revenue leakage?",
       gl_data: "Let me check if you have General Ledger data available...",
     },
     promptBuilder: () =>
@@ -623,7 +623,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Organization",
+        label: "Workspace",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/list",
@@ -646,7 +646,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Generate causal P&L analysis compared to **{{comparison}}**?",
     gatheringPrompts: {
-      org: "Which organization's P&L should I analyse causally?",
+      org: "Which workspace's P&L should I analyse causally?",
       gl_data: "Let me check if you have General Ledger data available...",
       comparison: "Which period should I compare against? Default is previous quarter.",
     },

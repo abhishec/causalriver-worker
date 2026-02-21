@@ -240,7 +240,7 @@ function AdminAgentsClient() {
             onClick={() => { setOrgFilter(null); setAgentFilter(null); }}
             className={cn("px-3 py-1 rounded-full text-xs font-medium transition-colors", !orgFilter ? "bg-amber-500/10 text-amber-400" : "bg-surface text-muted hover:text-foreground")}
           >
-            All Orgs
+            All Workspaces
           </button>
           {data.orgs.map((org) => (
             <button

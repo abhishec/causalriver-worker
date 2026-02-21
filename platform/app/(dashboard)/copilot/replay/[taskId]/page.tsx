@@ -71,7 +71,7 @@ export default function AgentReplayPage() {
           .single();
 
         if (!membership) {
-          setError("No organization found");
+          setError("No workspace found");
           return;
         }
 

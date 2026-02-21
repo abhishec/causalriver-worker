@@ -57,7 +57,7 @@ export default async function AdminCostsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Consolidated Costs</h1>
-        <p className="text-xs text-muted mt-0.5">All costs across all organizations + AWS infrastructure</p>
+        <p className="text-xs text-muted mt-0.5">All costs across all workspaces + AWS infrastructure</p>
       </div>
 
       {/* Top metrics */}
@@ -71,7 +71,7 @@ export default async function AdminCostsPage() {
       {/* By Component + By Model */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardTitle className="mb-4">Cost by Component (All Orgs)</CardTitle>
+          <CardTitle className="mb-4">Cost by Component (All Workspaces)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byComponent).sort((a, b) => b[1].cost - a[1].cost).map(([comp, data]) => (
               <div key={comp} className="flex items-center justify-between">
@@ -90,7 +90,7 @@ export default async function AdminCostsPage() {
         </Card>
 
         <Card>
-          <CardTitle className="mb-4">Cost by Model (All Orgs)</CardTitle>
+          <CardTitle className="mb-4">Cost by Model (All Workspaces)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byModel).sort((a, b) => b[1].cost - a[1].cost).map(([model, data]) => (
               <div key={model} className="flex items-center justify-between">
