@@ -28,8 +28,8 @@ interface SaveTemplateDialogProps {
     domainId?: string;
     rawData?: unknown;
   };
-  /** Current organization ID */
-  organizationId: string;
+  /** Current workspace ID */
+  workspaceId: string;
   /** Close the dialog */
   onClose: () => void;
   /** Called after successful save */
@@ -64,7 +64,7 @@ const ICON_OPTIONS = [
 
 export function SaveTemplateDialog({
   artifact,
-  organizationId,
+  workspaceId,
   onClose,
   onSaved,
   compositionData,
@@ -133,7 +133,7 @@ export function SaveTemplateDialog({
         }
 
         const body: CreateTemplateRequest & { orgId: string } = {
-          orgId: organizationId,
+          orgId: workspaceId,
           label: label.trim(),
           description: description.trim(),
           icon,
@@ -171,7 +171,7 @@ export function SaveTemplateDialog({
     [
       label, description, prompt, icon, category, isPublic,
       enableGathering, gatheringParams, compositionData,
-      organizationId, artifact, onClose, onSaved,
+      workspaceId, artifact, onClose, onSaved,
     ]
   );
 
@@ -358,7 +358,7 @@ export function SaveTemplateDialog({
                 Make public
               </span>
               <span className="text-[10px] text-muted">
-                (visible to all NexusBrain orgs)
+                (visible to all NexusBrain workspaces)
               </span>
             </label>
 

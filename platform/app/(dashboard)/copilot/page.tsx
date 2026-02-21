@@ -557,7 +557,7 @@ function CopilotPageInner() {
       {/* ── Agent Composer Modal ──────────────────────────────────────── */}
       {showComposer && (
         <AgentComposerPanel
-          organizationId={currentWorkspace?.id}
+          workspaceId={currentWorkspace?.id}
           onClose={() => setShowComposer(false)}
           onArtifact={(artifact) => {
             handleArtifact({
@@ -587,7 +587,7 @@ function CopilotPageInner() {
             domainId: saveDialogArtifact.domainId,
             rawData: saveDialogArtifact.rawData,
           }}
-          organizationId={currentWorkspace.id}
+          workspaceId={currentWorkspace.id}
           onClose={() => setSaveDialogArtifact(null)}
           onSaved={() => {
             setSaveDialogArtifact(null);
@@ -604,7 +604,7 @@ function CopilotPageInner() {
             title: compositionForSave.name,
             content: compositionForSave.prompt,
           }}
-          organizationId={currentWorkspace.id}
+          workspaceId={currentWorkspace.id}
           compositionData={compositionForSave}
           onClose={() => setCompositionForSave(null)}
           onSaved={() => {

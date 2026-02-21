@@ -33,7 +33,7 @@ type ComposerPhase =
 
 interface AgentComposerPanelProps {
   /** Current workspace ID */
-  organizationId?: string;
+  workspaceId?: string;
   /** Close the composer panel */
   onClose: () => void;
   /** Called when execution produces an artifact (for ArtifactsPanel) */
@@ -83,7 +83,7 @@ const COMPLEXITY_COLORS: Record<string, string> = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function AgentComposerPanel({
-  organizationId,
+  workspaceId,
   onClose,
   onArtifact,
   onSaved,
@@ -123,7 +123,7 @@ export function AgentComposerPanel({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             description: description.trim(),
-            organizationId,
+            organizationId: workspaceId,
           }),
           signal: controller.signal,
         });
@@ -164,7 +164,7 @@ export function AgentComposerPanel({
         setPhase("error");
       }
     },
-    [description, organizationId, composition]
+    [description, workspaceId, composition]
   );
 
   // ── Execute ──────────────────────────────────────────────────────────────
@@ -186,7 +186,7 @@ export function AgentComposerPanel({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             description: description.trim(),
-            organizationId,
+            organizationId: workspaceId,
             execute: true,
           }),
           signal: controller.signal,
@@ -265,7 +265,7 @@ export function AgentComposerPanel({
         setPhase("error");
       }
     },
-    [composition, description, organizationId, onArtifact, onSaveAsCommand]
+    [composition, description, workspaceId, onArtifact, onSaveAsCommand]
   );
 
   // ── Save only (no execution) ────────────────────────────────────────────
