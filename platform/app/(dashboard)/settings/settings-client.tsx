@@ -14,6 +14,8 @@ import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
 import { PartnerDashboard } from "@/components/settings/PartnerDashboard";
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
+import { useWorkspace } from "@/lib/workspace-context";
+import { createClient } from "@/lib/supabase/client";
 
 interface Connector {
   id: string;
@@ -48,6 +50,12 @@ interface SiblingWorkspace {
   connectors?: WorkspaceConnectorSummary[];
 }
 
+interface CustomerWithWorkspaces extends Customer {
+  role: string;
+  defaultWorkspaceId: string | null;
+  workspaces: (SiblingWorkspace & { customer_id?: string })[];
+}
+
 interface SettingsClientProps {
   org: { id: string; name: string; slug: string; plan: string; is_core_brain?: boolean; customer_id?: string | null } | null;
   orgId: string;
@@ -57,28 +65,13 @@ interface SettingsClientProps {
   customer?: Customer | null;
   siblingWorkspaces?: SiblingWorkspace[];
   defaultWorkspaceId?: string | null;
+  allCustomers?: CustomerWithWorkspaces[];
 }
-
-const AVAILABLE_CONNECTORS = [
-  { type: "s3-storage", name: "AWS S3", icon: "📦", desc: "Workspace-level file storage (CSV, JSON, reports, GL data)" },
-  { type: "stripe", name: "Stripe", icon: "💳", desc: "Payment processing & subscription data" },
-  { type: "hubspot", name: "HubSpot", icon: "🟠", desc: "CRM contacts, deals, and pipeline data" },
-  { type: "github", name: "GitHub", icon: "🐙", desc: "Repositories, PRs, issues, and deployments" },
-  { type: "slack", name: "Slack", icon: "💬", desc: "Team communication and channel messages" },
-  { type: "jira", name: "Jira", icon: "📋", desc: "Project management and issue tracking" },
-  { type: "intercom", name: "Intercom", icon: "💬", desc: "Customer support conversations" },
-  { type: "xero", name: "Xero", icon: "💰", desc: "Accounting and financial data" },
-  { type: "volopay", name: "Volopay", icon: "💳", desc: "Expense management and cards" },
-  { type: "google_analytics", name: "Google Analytics", icon: "📊", desc: "Website traffic and conversion data" },
-  { type: "salesforce", name: "Salesforce", icon: "☁️", desc: "CRM and sales pipeline data" },
-  { type: "notion", name: "Notion", icon: "📝", desc: "Documentation and knowledge base" },
-  { type: "linear", name: "Linear", icon: "🔷", desc: "Issue tracking and project management" },
-  { type: "postgres", name: "PostgreSQL", icon: "🐘", desc: "Direct database connection" },
-];
 
 /* ── SVG icon paths for sidebar nav ─────────────────────────────────────── */
 const TAB_ICONS: Record<string, string> = {
-  general:       "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+  customers:     "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21",
+  workspace:     "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
   members:       "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
   connections:   "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
   brain:         "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
@@ -87,11 +80,19 @@ const TAB_ICONS: Record<string, string> = {
   danger:        "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
   operations:    "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 15.828a5 5 0 010-7.072m5.656 0a5 5 0 010 7.072M13 12a1 1 0 11-2 0 1 1 0 012 0z",
   partner:       "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
+  signout:       "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9",
 };
 
-export function SettingsClient({ org, orgId, budget, apiKeys, connectors, customer, siblingWorkspaces = [], defaultWorkspaceId: initialDefaultWsId }: SettingsClientProps) {
+export function SettingsClient({
+  org, orgId, budget, apiKeys, connectors, customer,
+  siblingWorkspaces = [], defaultWorkspaceId: initialDefaultWsId,
+  allCustomers = [],
+}: SettingsClientProps) {
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") || "general";
+  const { switchWorkspace } = useWorkspace();
+  // Default to "customers" tab, but respect URL param; map legacy "general" to "workspace"
+  const rawTab = searchParams.get("tab") || "customers";
+  const initialTab = rawTab === "general" ? "workspace" : rawTab;
   const initialAction = searchParams.get("action");
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
@@ -100,8 +101,15 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
   const [createName, setCreateName] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [createCustomerId, setCreateCustomerId] = useState<string | null>(null);
   const [defaultWsId, setDefaultWsId] = useState<string | null>(initialDefaultWsId ?? null);
   const [settingDefault, setSettingDefault] = useState<string | null>(null);
+  // Track expanded customers in the Customers tab
+  const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(() => {
+    // Auto-expand the current workspace's customer
+    const currentCustId = org?.customer_id;
+    return currentCustId ? new Set([currentCustId]) : new Set();
+  });
 
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
 
@@ -119,30 +127,29 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
     };
   }, []);
 
-  const handleCreateWorkspace = useCallback(async () => {
+  const handleCreateWorkspace = useCallback(async (custId: string, custName: string) => {
     if (!createName.trim()) { setCreateError("Workspace name is required."); return; }
-    if (!customer?.id) { setCreateError("No customer linked — contact admin."); return; }
     setCreating(true);
     setCreateError("");
     try {
       const res = await fetch("/api/admin/workspaces/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerId: customer.id, workspaceName: createName.trim() }),
+        body: JSON.stringify({ customerId: custId, workspaceName: createName.trim() }),
       });
       const data = await res.json();
       if (!res.ok) { setCreateError(data.error || "Failed to create workspace."); return; }
       showToast(`Workspace "${data.workspace.name}" created!`);
       setShowCreateWorkspace(false);
       setCreateName("");
-      // Reload to get fresh sibling list
+      setCreateCustomerId(null);
       window.location.reload();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Unexpected error.");
     } finally {
       setCreating(false);
     }
-  }, [createName, customer, showToast]);
+  }, [createName, showToast]);
 
   const handleSetDefault = useCallback(async (wsId: string) => {
     setSettingDefault(wsId);
@@ -154,7 +161,10 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
       });
       if (res.ok) {
         setDefaultWsId(wsId);
-        const wsName = siblingWorkspaces.find(w => w.id === wsId)?.name ?? "Workspace";
+        // Find workspace name from allCustomers or siblingWorkspaces
+        const wsName = allCustomers.flatMap(c => c.workspaces).find(w => w.id === wsId)?.name
+          ?? siblingWorkspaces.find(w => w.id === wsId)?.name
+          ?? "Workspace";
         showToast(`"${wsName}" set as default workspace`);
       } else {
         const data = await res.json();
@@ -165,12 +175,32 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
     } finally {
       setSettingDefault(null);
     }
-  }, [siblingWorkspaces, showToast]);
+  }, [allCustomers, siblingWorkspaces, showToast]);
+
+  const handleSignOut = useCallback(async () => {
+    localStorage.removeItem("nexus_current_workspace");
+    localStorage.removeItem("nexus_current_org");
+    document.cookie = "nexus_current_workspace=;path=/;max-age=0;SameSite=Lax";
+    document.cookie = "nexus_current_org=;path=/;max-age=0;SameSite=Lax";
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }, []);
+
+  const toggleCustomerExpand = useCallback((custId: string) => {
+    setExpandedCustomers(prev => {
+      const next = new Set(prev);
+      if (next.has(custId)) next.delete(custId);
+      else next.add(custId);
+      return next;
+    });
+  }, []);
 
   const isDesignPartner = customer?.is_design_partner ?? false;
 
   const tabs = [
-    { id: "general", label: "General" },
+    { id: "customers", label: "Customers" },
+    { id: "workspace", label: "Workspace" },
     { id: "members", label: "Members" },
     { id: "connections", label: "Connections", count: connectors.length },
     { id: "brain", label: "Brain Config" },
@@ -184,10 +214,10 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
   return (
     <div className="flex gap-8 min-h-[calc(100vh-7rem)]">
       {/* ── Sidebar Navigation (Claude-style vertical tabs) ──────────── */}
-      <nav className="w-52 shrink-0 py-1">
+      <nav className="w-52 shrink-0 py-1 flex flex-col">
         <h1 className="text-xl font-semibold tracking-tight px-3 mb-1">Settings</h1>
-        <p className="text-[11px] text-muted px-3 mb-5">Manage your workspace</p>
-        <div className="space-y-0.5">
+        <p className="text-[11px] text-muted px-3 mb-5">Manage your account</p>
+        <div className="space-y-0.5 flex-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -221,100 +251,228 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
             </button>
           ))}
         </div>
+
+        {/* ── Sign Out ─────────────────────────────────────────────── */}
+        <div className="mt-4 pt-4 border-t border-border-subtle">
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-surface-hover/50 transition-colors text-left"
+          >
+            <svg className="w-4 h-4 shrink-0 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d={TAB_ICONS.signout} />
+            </svg>
+            <span>Sign Out</span>
+          </button>
+        </div>
       </nav>
 
       {/* ── Content Area ────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0 max-w-3xl py-1">
-        {/* General Tab */}
-        {activeTab === "general" && (
+
+        {/* ══════════════════════════════════════════════════════════════ */}
+        {/* Customers Tab (NEW — first tab) */}
+        {/* ══════════════════════════════════════════════════════════════ */}
+        {activeTab === "customers" && (
           <div>
-            {/* ── Customer Account Section ───────────────────────── */}
-            {customer && (
-              <div className="mb-8">
-                <h2 className="text-sm font-medium mb-1">Customer Account</h2>
-                <p className="text-xs text-muted mb-4">Your workspaces are managed under this customer account</p>
+            <h2 className="text-sm font-medium mb-1">Customers</h2>
+            <p className="text-xs text-muted mb-6">Your customer accounts and their workspaces</p>
+
+            {allCustomers.length > 0 ? (
+              <div className="space-y-4">
+                {allCustomers.map((cust) => {
+                  const isExpanded = expandedCustomers.has(cust.id);
+                  const totalConnectors = cust.workspaces.reduce((acc, ws) => acc + (ws.connectors?.length ?? 0), 0);
+                  return (
+                    <div key={cust.id} className="rounded-xl border border-border-subtle bg-surface/50 overflow-hidden">
+                      {/* Customer header (clickable to expand) */}
+                      <button
+                        onClick={() => toggleCustomerExpand(cust.id)}
+                        className="w-full flex items-start gap-4 p-5 text-left hover:bg-surface-hover/30 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-sm font-bold text-accent">{cust.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">{cust.name}</span>
+                            <Badge variant="accent" size="xs">{cust.plan}</Badge>
+                            {cust.is_design_partner && (
+                              <Badge variant="default" size="xs">Design Partner</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
+                            <span className="font-mono">{cust.slug}</span>
+                            {cust.industry && <span className="capitalize">{cust.industry}</span>}
+                            <span>{cust.workspaces.length} workspace{cust.workspaces.length !== 1 ? "s" : ""}</span>
+                            {totalConnectors > 0 && <span>{totalConnectors} connector{totalConnectors !== 1 ? "s" : ""}</span>}
+                          </div>
+                        </div>
+                        <svg
+                          className={cn("w-4 h-4 text-muted shrink-0 mt-1 transition-transform", isExpanded && "rotate-180")}
+                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </button>
+
+                      {/* Expanded: workspace list */}
+                      {isExpanded && (
+                        <div className="border-t border-border-subtle px-5 py-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-2">Workspaces</div>
+                          <div className="space-y-1.5">
+                            {cust.workspaces.map((ws) => {
+                              const isCurrent = ws.id === orgId;
+                              const isDefault = ws.id === cust.defaultWorkspaceId;
+                              return (
+                                <div
+                                  key={ws.id}
+                                  className={cn(
+                                    "px-3 py-2.5 rounded-lg text-sm transition-colors",
+                                    isCurrent
+                                      ? "bg-accent/8 border border-accent/15"
+                                      : "hover:bg-surface-hover border border-transparent"
+                                  )}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      {isCurrent && (
+                                        <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      )}
+                                      <button
+                                        onClick={() => {
+                                          if (!isCurrent) switchWorkspace(ws.id);
+                                        }}
+                                        className={cn(
+                                          "truncate text-[13px] text-left",
+                                          isCurrent ? "font-medium cursor-default" : "text-muted-foreground hover:text-foreground cursor-pointer"
+                                        )}
+                                      >
+                                        {ws.name}
+                                      </button>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <Badge variant="default" size="xs">{ws.plan}</Badge>
+                                      {isCurrent && (
+                                        <span className="text-[10px] text-accent font-medium">Current</span>
+                                      )}
+                                      {isDefault ? (
+                                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 rounded bg-surface border border-border-subtle">
+                                          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                          </svg>
+                                          Default
+                                        </span>
+                                      ) : (
+                                        <button
+                                          onClick={() => handleSetDefault(ws.id)}
+                                          disabled={settingDefault !== null}
+                                          className="text-[10px] text-muted hover:text-accent font-medium px-1.5 py-0.5 rounded hover:bg-accent/8 transition-colors disabled:opacity-50"
+                                        >
+                                          {settingDefault === ws.id ? "Setting..." : "Set Default"}
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {ws.connectors && ws.connectors.length > 0 && (
+                                    <div className="mt-1.5 ml-5 flex items-center gap-1 flex-wrap">
+                                      {ws.connectors.map((conn, i) => (
+                                        <span key={conn.type} className="text-[10px] text-muted">
+                                          {i > 0 && <span className="mr-1">&middot;</span>}
+                                          {conn.name} ({conn.count})
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Create workspace under this customer */}
+                          {showCreateWorkspace && createCustomerId === cust.id ? (
+                            <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
+                              <div className="text-[12px] font-medium">New workspace under {cust.name}</div>
+                              <input
+                                type="text"
+                                value={createName}
+                                onChange={(e) => setCreateName(e.target.value)}
+                                placeholder={`e.g. ${cust.name} 6.x`}
+                                className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-sm placeholder:text-muted/40 focus:outline-none focus:ring-1 focus:ring-accent"
+                                autoFocus
+                                onKeyDown={(e) => { if (e.key === "Enter") handleCreateWorkspace(cust.id, cust.name); }}
+                              />
+                              {createError && <p className="text-[11px] text-destructive">{createError}</p>}
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => { setShowCreateWorkspace(false); setCreateName(""); setCreateError(""); setCreateCustomerId(null); }}
+                                  className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCreateWorkspace(cust.id, cust.name)}
+                                  disabled={creating || !createName.trim()}
+                                  className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  {creating ? "Creating..." : "Create"}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setShowCreateWorkspace(true); setCreateCustomerId(cust.id); setCreateName(""); setCreateError(""); }}
+                              className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                              </svg>
+                              <span className="font-medium">Create Workspace</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Fallback: show current workspace's customer if allCustomers is empty */
+              customer ? (
                 <div className="rounded-xl border border-border-subtle bg-surface/50 p-5">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <svg className="w-5.5 h-5.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                      </svg>
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-accent">{customer.name.charAt(0).toUpperCase()}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold">{customer.name}</div>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge variant="accent" size="xs">{customer.plan}</Badge>
                         <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
-                        {customer.is_design_partner && (
-                          <Badge variant="default" size="xs">Design Partner</Badge>
-                        )}
                       </div>
-                      {/* Metadata row */}
-                      <div className="flex items-center gap-4 mt-3 text-[11px] text-muted-foreground">
-                        {customer.industry && (
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
-                            </svg>
-                            <span className="capitalize">{customer.industry}</span>
-                          </div>
-                        )}
-                        {customer.created_at && (
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg>
-                            <span>Onboarded {new Date(customer.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1.5">
-                          <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                          </svg>
-                          <span>{siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""}</span>
-                        </div>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""}
+                      </p>
                     </div>
                   </div>
                 </div>
-
-                {/* ── Plan & Budget Summary ─────────────────────── */}
-                {budget && (
-                  <div className="mt-4 rounded-xl border border-border-subtle bg-surface/30 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                      </svg>
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Plan &amp; Budget</span>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="px-3 py-2 rounded-lg bg-surface/50">
-                        <div className="text-[10px] text-muted mb-0.5">Daily LLM</div>
-                        <div className="text-xs font-semibold font-mono">{formatUSD(budget.daily_llm_budget || 2)}</div>
-                      </div>
-                      <div className="px-3 py-2 rounded-lg bg-surface/50">
-                        <div className="text-[10px] text-muted mb-0.5">Monthly LLM</div>
-                        <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_llm_budget || 50)}</div>
-                      </div>
-                      <div className="px-3 py-2 rounded-lg bg-surface/50">
-                        <div className="text-[10px] text-muted mb-0.5">Monthly AWS</div>
-                        <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_aws_budget || 100)}</div>
-                      </div>
-                      <div className="px-3 py-2 rounded-lg bg-surface/50">
-                        <div className="text-[10px] text-muted mb-0.5">Alert</div>
-                        <div className="text-xs font-semibold font-mono">{budget.alert_threshold_pct || 80}%</div>
-                      </div>
-                    </div>
-                    <div className="mt-2.5 flex items-center gap-1.5">
-                      <StatusDot type="success" size="sm" />
-                      <span className="text-[10px] text-success font-medium">Within budget limits</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="rounded-xl border border-border-subtle bg-surface/50 p-5 text-center">
+                  <p className="text-xs text-muted">No customer accounts found</p>
+                </div>
+              )
             )}
+          </div>
+        )}
 
-            {/* ── Current Workspace Details ──────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════ */}
+        {/* Workspace Tab (renamed from General) */}
+        {/* ══════════════════════════════════════════════════════════════ */}
+        {activeTab === "workspace" && (
+          <div>
             <h2 className="text-sm font-medium mb-1">Current Workspace</h2>
             <p className="text-xs text-muted mb-6">
               {customer
@@ -369,142 +527,36 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
               </div>
             </div>
 
-            {/* ── All Workspaces under Customer ──────────────────── */}
-            {customer && (
+            {/* ── Plan & Budget Summary ─────────────────────── */}
+            {budget && (
               <div className="mt-8 pt-6 border-t border-border-subtle">
-                <h2 className="text-sm font-medium mb-1">All Workspaces ({siblingWorkspaces.length})</h2>
-                <p className="text-xs text-muted mb-4">
-                  Workspaces under {customer.name} &middot; Set your default landing workspace
-                </p>
-
-                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
-                  <div className="space-y-2">
-                    {siblingWorkspaces.length > 0 ? (
-                      siblingWorkspaces.map((ws) => {
-                        const isCurrent = ws.id === orgId;
-                        const isDefault = ws.id === defaultWsId;
-                        return (
-                          <div
-                            key={ws.id}
-                            className={cn(
-                              "px-3 py-2.5 rounded-lg text-sm transition-colors",
-                              isCurrent
-                                ? "bg-accent/8 border border-accent/15"
-                                : "hover:bg-surface-hover border border-transparent"
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 min-w-0">
-                                {isCurrent && (
-                                  <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                                <span className={cn("truncate text-[13px]", isCurrent ? "font-medium" : "text-muted-foreground")}>
-                                  {ws.name}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <Badge variant="default" size="xs">{ws.plan}</Badge>
-                                {isCurrent && (
-                                  <span className="text-[10px] text-accent font-medium">Current</span>
-                                )}
-                                {isDefault ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 rounded bg-surface border border-border-subtle">
-                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                    Default
-                                  </span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleSetDefault(ws.id)}
-                                    disabled={settingDefault !== null}
-                                    className="text-[10px] text-muted hover:text-accent font-medium px-1.5 py-0.5 rounded hover:bg-accent/8 transition-colors disabled:opacity-50"
-                                  >
-                                    {settingDefault === ws.id ? "Setting…" : "Set Default"}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            {/* Connected services row */}
-                            {ws.connectors && ws.connectors.length > 0 && (
-                              <div className="mt-1.5 ml-5 flex items-center gap-1 flex-wrap">
-                                {ws.connectors.map((conn, i) => (
-                                  <span key={conn.type} className="text-[10px] text-muted">
-                                    {i > 0 && <span className="mr-1">&middot;</span>}
-                                    {conn.name} ({conn.count})
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="px-3 py-2.5 rounded-lg bg-accent/8 border border-accent/15">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="truncate text-[13px] font-medium">{org?.name || "Workspace"}</span>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
-                            <span className="text-[10px] text-accent font-medium">Current</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                  </svg>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Plan &amp; Budget</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="px-3 py-2 rounded-lg bg-surface/50">
+                    <div className="text-[10px] text-muted mb-0.5">Daily LLM</div>
+                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.daily_llm_budget || 2)}</div>
                   </div>
-
-                  {/* Create new workspace */}
-                  {!showCreateWorkspace && (
-                    <button
-                      onClick={() => setShowCreateWorkspace(true)}
-                      className="flex items-center gap-2 w-full mt-3 px-3 py-2 rounded-lg text-[12px] text-accent hover:bg-accent/8 transition-colors border border-dashed border-accent/20"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
-                      <span className="font-medium">Create Workspace</span>
-                    </button>
-                  )}
-
-                  {/* Inline create workspace form */}
-                  {showCreateWorkspace && (
-                    <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
-                      <div className="text-[12px] font-medium">New workspace under {customer.name}</div>
-                      <input
-                        type="text"
-                        value={createName}
-                        onChange={(e) => setCreateName(e.target.value)}
-                        placeholder={`e.g. ${customer.name} 6.x`}
-                        className="w-full px-3 py-2 rounded-lg bg-input border border-input-border text-sm placeholder:text-muted/40 focus:outline-none focus:ring-1 focus:ring-accent"
-                        autoFocus
-                        onKeyDown={(e) => { if (e.key === "Enter") handleCreateWorkspace(); }}
-                      />
-                      {createError && <p className="text-[11px] text-destructive">{createError}</p>}
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => { setShowCreateWorkspace(false); setCreateName(""); setCreateError(""); }}
-                          className="flex-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface hover:bg-surface-hover border border-border transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCreateWorkspace}
-                          disabled={creating || !createName.trim()}
-                          className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          {creating ? "Creating…" : "Create"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="px-3 py-2 rounded-lg bg-surface/50">
+                    <div className="text-[10px] text-muted mb-0.5">Monthly LLM</div>
+                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_llm_budget || 50)}</div>
+                  </div>
+                  <div className="px-3 py-2 rounded-lg bg-surface/50">
+                    <div className="text-[10px] text-muted mb-0.5">Monthly AWS</div>
+                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_aws_budget || 100)}</div>
+                  </div>
+                  <div className="px-3 py-2 rounded-lg bg-surface/50">
+                    <div className="text-[10px] text-muted mb-0.5">Alert</div>
+                    <div className="text-xs font-semibold font-mono">{budget.alert_threshold_pct || 80}%</div>
+                  </div>
+                </div>
+                <div className="mt-2.5 flex items-center gap-1.5">
+                  <StatusDot type="success" size="sm" />
+                  <span className="text-[10px] text-success font-medium">Within budget limits</span>
                 </div>
               </div>
             )}

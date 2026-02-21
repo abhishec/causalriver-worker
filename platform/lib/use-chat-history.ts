@@ -56,6 +56,7 @@ export function useChatHistory() {
 
   useEffect(() => {
     if (!currentWorkspace?.id) return;
+    const wsId = currentWorkspace.id;
     let cancelled = false;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
@@ -64,7 +65,7 @@ export function useChatHistory() {
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/copilot/conversations?workspaceId=${currentWorkspace!.id}`,
+          `/api/copilot/conversations?workspaceId=${wsId}`,
           { signal: controller.signal }
         );
         if (res.ok && !cancelled) {
@@ -95,7 +96,7 @@ export function useChatHistory() {
       // Each reload needs its own timeout
       const reloadController = new AbortController();
       const reloadTimeout = setTimeout(() => reloadController.abort(), 5000);
-      fetch(`/api/copilot/conversations?workspaceId=${currentWorkspace!.id}`, {
+      fetch(`/api/copilot/conversations?workspaceId=${wsId}`, {
         signal: reloadController.signal,
       })
         .then((res) => (res.ok ? res.json() : null))

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { logger } from "@/lib/logger";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -23,11 +23,28 @@ export interface ConversationFull extends ConversationSummary {
   messages: ConversationMessage[];
 }
 
+// ─── Save error event ───────────────────────────────────────────────────────
+// Dispatched when a conversation save fails so the UI can show feedback.
+export const CONVERSATION_SAVE_ERROR_EVENT = "conversation-save-error";
+
+function dispatchSaveError(message: string) {
+  window.dispatchEvent(
+    new CustomEvent(CONVERSATION_SAVE_ERROR_EVENT, { detail: message })
+  );
+}
+
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useConversations(workspaceId: string | undefined) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(false);
+  // Track pending saves that arrived before workspace was ready
+  const pendingSaveRef = useRef<{
+    conversationId?: string;
+    title: string;
+    serviceMode: "general" | "aas" | "seaas";
+    messages: ConversationMessage[];
+  } | null>(null);
 
   // ── Load list ──────────────────────────────────────────────────────────
   const loadList = useCallback(async () => {
@@ -63,14 +80,35 @@ export function useConversations(workspaceId: string | undefined) {
       serviceMode: "general" | "aas" | "seaas";
       messages: ConversationMessage[];
     }): Promise<string> => {
-      try {
-        const res = await fetch("/api/copilot/conversations", {
+      // Guard: don't send request if workspaceId is undefined
+      if (!workspaceId) {
+        logger.warn("[useConversations] save skipped — workspaceId not ready, queuing");
+        pendingSaveRef.current = opts;
+        return opts.conversationId || "";
+      }
+
+      const attempt = async (): Promise<Response> => {
+        return fetch("/api/copilot/conversations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ workspaceId, ...opts }),
         });
+      };
+
+      try {
+        let res = await attempt();
+
+        // Retry once on 5xx after 1s
+        if (res.status >= 500) {
+          logger.warn("[useConversations] save returned 5xx, retrying in 1s…");
+          await new Promise((r) => setTimeout(r, 1000));
+          res = await attempt();
+        }
+
         if (!res.ok) {
-          logger.error("[useConversations] save failed:", res.status, await res.text());
+          const errText = await res.text().catch(() => "unknown error");
+          logger.error("[useConversations] save failed:", res.status, errText);
+          dispatchSaveError("Failed to save conversation. Please try again.");
           return opts.conversationId || "";
         }
         const json = await res.json();
@@ -80,11 +118,22 @@ export function useConversations(workspaceId: string | undefined) {
         return json.id;
       } catch (err) {
         logger.error("[useConversations] save error:", err);
+        dispatchSaveError("Failed to save conversation — network error.");
         return opts.conversationId || "";
       }
     },
     [workspaceId, loadList]
   );
+
+  // ── Flush pending save when workspaceId becomes available ─────────────
+  useEffect(() => {
+    if (workspaceId && pendingSaveRef.current) {
+      const pending = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      logger.info("[useConversations] flushing pending save now that workspaceId is ready");
+      saveConversation(pending);
+    }
+  }, [workspaceId, saveConversation]);
 
   // ── Load single conversation ───────────────────────────────────────────
   const loadConversation = useCallback(
