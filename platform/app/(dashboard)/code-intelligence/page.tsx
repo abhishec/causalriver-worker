@@ -3,7 +3,6 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { formatNumber } from "@/lib/utils";
 import { CodeIntelligenceClient } from "./code-intelligence-client";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Code Intelligence" };
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { CapabilitiesClient } from "./capabilities-client";
 import { logger } from "@/lib/logger";
 
-export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Services" };
 

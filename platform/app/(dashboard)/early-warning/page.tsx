@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Early Warning System" };
 

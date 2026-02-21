@@ -90,19 +90,24 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Production: Run IDS and Supabase session in parallel — they are independent.
-  // IDS is wrapped in try/catch so a crash in the security layer never takes down
-  // the entire app. A broken IDS degrades security; a broken middleware = site down.
-  let securityBlock: Response | null = null;
-  try {
-    securityBlock = await securityMiddleware(request);
-  } catch {
-    // IDS failure → log and continue without blocking.
-    // Better to serve the page insecurely than to return 500 to every user.
-  }
+  // Production: Run IDS on API routes only — page navigations use file-system routing
+  // (no attack surface for SQL injection/XSS in route paths). Only /api/* endpoints
+  // accept user input via request bodies and need IDS scanning.
+  // Security headers (CSP, HSTS, etc.) still apply to ALL routes below.
+  const isApiRoute = request.nextUrl.pathname.startsWith("/api/");
 
-  if (securityBlock) {
-    return securityBlock; // Block malicious request immediately
+  if (isApiRoute) {
+    let securityBlock: Response | null = null;
+    try {
+      securityBlock = await securityMiddleware(request);
+    } catch {
+      // IDS failure → log and continue without blocking.
+      // Better to serve the page insecurely than to return 500 to every user.
+    }
+
+    if (securityBlock) {
+      return securityBlock; // Block malicious request immediately
+    }
   }
 
   const response = await updateSession(request);

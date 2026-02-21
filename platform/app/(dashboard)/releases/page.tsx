@@ -2,7 +2,6 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import ReleaseDashboardClient from "./releases-client";
 
-export const dynamic = 'force-dynamic';
 
 export default async function ReleasesPage() {
   const workspaceId = await getCurrentWorkspaceId();

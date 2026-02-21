@@ -7,6 +7,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 
@@ -46,6 +47,7 @@ interface WorkspaceContextType {
   workspaces: WorkspaceMembership[];
   isPlatformAdmin: boolean;
   isLoading: boolean;
+  fetchError: string | null;
   switchWorkspace: (workspaceId: string) => void;
   refreshWorkspaces: () => Promise<void>;
 }
@@ -131,6 +133,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   });
   // If we have cached data, skip the loading state entirely (instant UI)
   const [isLoading, setIsLoading] = useState(() => readCache() === null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const retryCountRef = useRef(0);
 
   /* Load user's workspaces via API route (bypasses RLS recursion issue) */
   const loadWorkspaces = useCallback(async () => {
@@ -138,7 +142,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
 
-      const res = await fetch("/api/org/memberships", {
+      const res = await fetch("/api/workspace/memberships", {
         signal: controller.signal,
       });
       clearTimeout(timeout);
@@ -199,15 +203,32 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           mapped.find((m) => !m.workspace.is_core_brain) ?? mapped[0];
         setCurrentWorkspaceId(firstNonCore.organization_id);
       }
-    } catch {
-      /* silently fail — user not logged in or network error */
-    } finally {
+      // Success — reset retry state
+      retryCountRef.current = 0;
+      setFetchError(null);
+      setIsLoading(false);
+    } catch (err) {
+      if (retryCountRef.current < 2) {
+        retryCountRef.current++;
+        const delay = 1000 * retryCountRef.current; // 1s, 2s backoff
+        logger.warn(
+          `[WorkspaceProvider] fetch failed, retry ${retryCountRef.current}/2 in ${delay}ms`
+        );
+        setTimeout(loadWorkspaces, delay);
+        return; // don't setIsLoading(false) yet — retrying
+      }
+      logger.error("[WorkspaceProvider] fetch failed after 2 retries", err);
+      setFetchError("Failed to load workspaces. Please refresh the page.");
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadWorkspaces();
+    // Skip background fetch if localStorage cache is very fresh (< 60s).
+    // Prevents redundant /api/workspace/memberships calls on rapid navigations.
+    const cached = readCache();
+    const isFresh = cached && (Date.now() - cached.timestamp < 60_000);
+    if (!isFresh) loadWorkspaces();
   }, [loadWorkspaces]);
 
   /* Switch workspace: persist in localStorage + cookie (for server components) */
@@ -252,6 +273,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         workspaces: memberships,
         isPlatformAdmin,
         isLoading,
+        fetchError,
         switchWorkspace,
         refreshWorkspaces: loadWorkspaces,
       }}

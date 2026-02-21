@@ -12,7 +12,6 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DOMAIN_LABELS } from "@/lib/se-aas/domain-catalogue";
 
-export const dynamic = "force-dynamic";
 export const metadata = { title: "SE-AAS Artifacts" };
 
 export default async function SeAaSArtifactsPage({

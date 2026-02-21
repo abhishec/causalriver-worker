@@ -9,6 +9,22 @@ const nextConfig: NextConfig = {
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
   compress: isDev,
+
+  // ── Cache headers for static assets ────────────────────────────────────────
+  // _next/static/ files use content-hashed filenames → safe to cache forever.
+  // CloudFront caches these at edge; browsers cache locally for 1 year.
+  async headers() {
+    return [
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
   typescript: {
     // Types are validated locally via `tsc --noEmit` and in CI.
     // If Amplify CI has workspace resolution issues, fix the CI config

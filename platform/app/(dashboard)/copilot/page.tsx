@@ -6,7 +6,7 @@ import { CopilotChat } from "@/components/copilot/CopilotChat";
 import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/types";
 import { ArtifactPane } from "@/components/copilot/ArtifactPane";
 // ConversationSidebar removed — chat history now lives in the main Sidebar
-import { useConversations } from "@/lib/use-conversations";
+import { useConversations, CONVERSATION_SAVE_ERROR_EVENT } from "@/lib/use-conversations";
 import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -472,6 +472,24 @@ function CopilotPageInner() {
     controller.startNewConversation();
   }, [controller]);
 
+  // ── Save-error toast state ──────────────────────────────────────────────────
+  const [saveErrorToast, setSaveErrorToast] = useState<string | null>(null);
+  const saveErrorTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const msg = (e as CustomEvent).detail;
+      if (saveErrorTimerRef.current) clearTimeout(saveErrorTimerRef.current);
+      setSaveErrorToast(typeof msg === "string" ? msg : "Failed to save conversation");
+      saveErrorTimerRef.current = setTimeout(() => setSaveErrorToast(null), 5000);
+    };
+    window.addEventListener(CONVERSATION_SAVE_ERROR_EVENT, handler);
+    return () => {
+      window.removeEventListener(CONVERSATION_SAVE_ERROR_EVENT, handler);
+      if (saveErrorTimerRef.current) clearTimeout(saveErrorTimerRef.current);
+    };
+  }, []);
+
   // ── Auto-save conversation after stream completes ─────────────────────────
   const handleSave = useCallback(async (opts: { messages: any[]; title: string; serviceMode: string }) => {
     const svcMode = (["general", "aas", "seaas"].includes(opts.serviceMode) ? opts.serviceMode : "general") as "general" | "aas" | "seaas";
@@ -670,6 +688,23 @@ function CopilotPageInner() {
             refetchTemplates();
           }}
         />
+      )}
+
+      {/* ── Save-error toast ──────────────────────────────────────────── */}
+      {saveErrorToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 shadow-lg">
+            <svg className="w-4 h-4 text-destructive shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <span className="text-xs text-destructive">{saveErrorToast}</span>
+            <button onClick={() => setSaveErrorToast(null)} className="ml-2 text-destructive/60 hover:text-destructive">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
       )}
     </div>
     </CopilotControllerContext.Provider>

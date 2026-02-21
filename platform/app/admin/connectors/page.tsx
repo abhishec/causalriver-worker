@@ -16,12 +16,15 @@ import { cn } from '@/lib/utils';
 import { logger } from "@/lib/logger";
 
 const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
-const STORAGE_KEY = 'nexus_current_org';
+const STORAGE_KEY = 'nexus_current_workspace';
+const OLD_STORAGE_KEY = 'nexus_current_org';
 
 function getClientOrgId(): string {
   if (typeof document === 'undefined') return CORE_ORG_ID;
   const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${STORAGE_KEY}=([^;]*)`));
-  return match?.[1] || CORE_ORG_ID;
+  if (match?.[1]) return match[1];
+  const old = document.cookie.match(new RegExp(`(?:^|;\\s*)${OLD_STORAGE_KEY}=([^;]*)`));
+  return old?.[1] || CORE_ORG_ID;
 }
 
 interface Connector {

@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { PredictionsClient } from "./predictions-client";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: "Prediction Tracker",

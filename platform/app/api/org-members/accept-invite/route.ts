@@ -110,15 +110,24 @@ export async function POST(request: Request) {
       .single();
 
     if (orgData?.customer_id) {
-      await service.from("customer_members").upsert(
-        {
+      // Only insert customer_members if user doesn't already have a row for this customer.
+      // This prevents overwriting an existing primary_org_id when a user is invited
+      // to a second workspace under the same customer.
+      const { data: existingCustMember } = await service
+        .from("customer_members")
+        .select("id")
+        .eq("customer_id", orgData.customer_id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!existingCustMember) {
+        await service.from("customer_members").insert({
           customer_id: orgData.customer_id,
           user_id: user.id,
           role: invitation.role,
           primary_org_id: invitation.organization_id,
-        },
-        { onConflict: "customer_id,user_id", ignoreDuplicates: true }
-      );
+        });
+      }
     }
 
     return NextResponse.json({

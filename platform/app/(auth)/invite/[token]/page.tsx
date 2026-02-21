@@ -81,9 +81,11 @@ export default function InvitePage() {
 
       setSuccess(true);
 
-      // Set the org in localStorage + cookie and redirect
+      // Set the workspace in localStorage + cookie and redirect (new + old keys for compat)
       if (data.orgId) {
+        localStorage.setItem("nexus_current_workspace", data.orgId);
         localStorage.setItem("nexus_current_org", data.orgId);
+        document.cookie = `nexus_current_workspace=${data.orgId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
         document.cookie = `nexus_current_org=${data.orgId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
       }
 

@@ -5,8 +5,7 @@ import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
 import Link from "next/link";
-
-export const dynamic = 'force-dynamic';
+import { logger } from "@/lib/logger";
 
 export const metadata = { title: "Mission Control" };
 
@@ -14,32 +13,39 @@ export default async function AdminOverviewPage() {
   const supabase = await createServiceClient();
   const today = new Date().toISOString().split("T")[0];
 
+  // Wrap each query to prevent a single failure from crashing the whole page
+  const safe = <T,>(p: PromiseLike<T>): Promise<T | null> =>
+    Promise.resolve(p).catch((err) => {
+      logger.warn("[AdminOverview] Query failed:", err);
+      return null;
+    });
+
   const [orgsResult, signalsResult, edgesResult, costResult, awsResult, eventsResult, membersResult, agentRunsResult, authUsersResult, customersResult] = await Promise.all([
-    supabase.from("organizations").select("id, name, slug, plan, is_core_brain, customer_id, created_at").order("created_at"),
-    supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }),
-    supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }),
-    supabase.from("llm_cost_log").select("estimated_cost_usd").gte("created_at", today),
-    supabase.from("aws_cost_snapshots").select("total_aws_cost").order("period_start", { ascending: false }).limit(1),
-    supabase.from("platform_events").select("id, event_type, source, title, created_at, event_data").order("created_at", { ascending: false }).limit(15),
-    supabase.from("org_members").select("user_id, role, organization_id, organizations(name)").limit(100),
-    supabase.from("ai_agent_activity").select("id, agent_type, action, status, created_at").order("created_at", { ascending: false }).limit(10),
-    supabase.auth.admin.listUsers({ perPage: 500 }),
-    supabase.from("customers").select("id, name, slug, plan, is_design_partner").order("name"),
+    safe(supabase.from("organizations").select("id, name, slug, plan, is_core_brain, customer_id, created_at").order("created_at")),
+    safe(supabase.from("cross_domain_signals").select("id", { count: "exact", head: true })),
+    safe(supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true })),
+    safe(supabase.from("llm_cost_log").select("estimated_cost_usd").gte("created_at", today)),
+    safe(supabase.from("aws_cost_snapshots").select("total_aws_cost").order("period_start", { ascending: false }).limit(1)),
+    safe(supabase.from("platform_events").select("id, event_type, source, title, created_at, event_data").order("created_at", { ascending: false }).limit(15)),
+    safe(supabase.from("org_members").select("user_id, role, organization_id, organizations(name)").limit(100)),
+    safe(supabase.from("ai_agent_activity").select("id, agent_type, action, status, created_at").order("created_at", { ascending: false }).limit(10)),
+    safe(supabase.auth.admin.listUsers({ perPage: 500 })),
+    safe(supabase.from("customers").select("id, name, slug, plan, is_design_partner").order("name")),
   ]);
 
-  const orgs = orgsResult.data || [];
-  const customers = customersResult.data || [];
-  const totalSignals = signalsResult.count || 0;
-  const totalEdges = edgesResult.count || 0;
-  const costToday = (costResult.data || []).reduce((sum, r) => sum + (r.estimated_cost_usd || 0), 0);
-  const latestAWS = awsResult.data?.[0]?.total_aws_cost || 0;
-  const events = eventsResult.data || [];
-  const members = membersResult.data || [];
-  const agentRuns = agentRunsResult.data || [];
+  const orgs: any[] = (orgsResult as any)?.data || [];
+  const customers: any[] = (customersResult as any)?.data || [];
+  const totalSignals = (signalsResult as any)?.count || 0;
+  const totalEdges = (edgesResult as any)?.count || 0;
+  const costToday = ((costResult as any)?.data || []).reduce((sum: number, r: any) => sum + (r.estimated_cost_usd || 0), 0);
+  const latestAWS = (awsResult as any)?.data?.[0]?.total_aws_cost || 0;
+  const events: any[] = (eventsResult as any)?.data || [];
+  const members: any[] = (membersResult as any)?.data || [];
+  const agentRuns: any[] = (agentRunsResult as any)?.data || [];
 
   // Build user lookup map from auth users
   const userMap = new Map<string, { email: string; name: string; lastSignIn: string | null; createdAt: string }>();
-  authUsersResult.data?.users?.forEach((u) => {
+  (authUsersResult as any)?.data?.users?.forEach((u: any) => {
     userMap.set(u.id, {
       email: u.email || "",
       name: u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split("@")[0] || "Unknown",
@@ -49,8 +55,8 @@ export default async function AdminOverviewPage() {
   });
 
   // Deduplicate users and enrich with auth data
-  const uniqueUserIds = [...new Set(members.map((m) => m.user_id))];
-  const enrichedUsers = uniqueUserIds.map((userId) => {
+  const uniqueUserIds = [...new Set<string>(members.map((m) => m.user_id))];
+  const enrichedUsers = uniqueUserIds.map((userId: string) => {
     const authUser = userMap.get(userId);
     const membership = members.find((m) => m.user_id === userId);
     return {

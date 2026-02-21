@@ -4,7 +4,6 @@ import { formatNumber } from "@/lib/utils";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = { title: "Training" };
 

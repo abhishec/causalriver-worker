@@ -4,7 +4,6 @@ import { OverviewClient } from "./overview-client";
 import type { LearningEvent } from "@/app/api/brain/emergence/route";
 import { logger } from "@/lib/logger";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: "Command Center",
@@ -113,12 +112,13 @@ export default async function OverviewPage() {
       .order("created_at", { ascending: false })
       .limit(5)),
 
-    // Active connectors for data flow section
+    // Active connectors for data flow section (capped at 20 — no workspace has more)
     safe(supabase
       .from("org_connectors")
       .select("id, connector_type, display_name, status, last_sync_at")
       .eq("organization_id", workspaceId)
-      .order("last_sync_at", { ascending: false })),
+      .order("last_sync_at", { ascending: false })
+      .limit(20)),
 
     // Recent SE-aaS artifacts
     safe(supabase

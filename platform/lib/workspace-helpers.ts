@@ -81,7 +81,7 @@ export const getCurrentCustomer = cache(
  *
  * Reads both new and old cookie names for backward compat.
  */
-export async function getCurrentWorkspaceId(): Promise<string> {
+export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
   try {
     const supabase = await createClient();
     const user = await getAuthUser();
@@ -141,7 +141,7 @@ export async function getCurrentWorkspaceId(): Promise<string> {
   } catch {
     return CORE_WORKSPACE_ID;
   }
-}
+});
 
 /* ── Backward compat alias ───────────────────────────────────────────── */
 

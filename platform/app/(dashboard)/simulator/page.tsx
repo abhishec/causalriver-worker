@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { SimulatorClient } from "./simulator-client";
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: "What-If Simulator",

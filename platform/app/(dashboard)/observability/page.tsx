@@ -3,7 +3,6 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ObservabilityClient } from "./observability-client";
 import { logger } from "@/lib/logger";
 
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Observability",
