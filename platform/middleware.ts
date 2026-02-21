@@ -29,7 +29,9 @@ function addSecurityHeaders(response: NextResponse) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://github.com",
+    isDev
+      ? "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.co wss://*.supabase.co"
+      : "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://github.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self' https://*.supabase.co https://accounts.google.com https://github.com",

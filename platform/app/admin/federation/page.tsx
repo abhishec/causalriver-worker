@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { formatNumber } from "@/lib/utils";
 import { StatValue } from "@/components/ui/StatValue";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -18,7 +18,7 @@ export default async function AdminFederationPage() {
     supabase.from("causal_relationships_statistical").select("id, organization_id", { count: "exact" }).limit(500),
     supabase.from("cascade_alerts").select("id", { count: "exact", head: true }),
     supabase.from("brain_grammar_rules").select("id, organization_id", { count: "exact" }).limit(500),
-    supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", CORE_ORG_ID),
+    supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", CORE_WORKSPACE_ID),
   ]);
 
   const orgs = orgsResult.data || [];

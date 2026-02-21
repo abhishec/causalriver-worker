@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { formatNumber } from "@/lib/utils";
 import Link from "next/link";
 
@@ -33,7 +33,7 @@ const SCHEDULE = [
 
 export default async function TrainingPage() {
   const supabase = await createClient();
-  const CORE_ORG_ID = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
 
@@ -47,7 +47,7 @@ export default async function TrainingPage() {
     safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .gte("snapshot_date", thirtyDaysAgo)
       .order("snapshot_date", { ascending: false })
       .limit(30)),
@@ -55,7 +55,7 @@ export default async function TrainingPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
-      .eq("organization_id", CORE_ORG_ID)),
+      .eq("organization_id", workspaceId)),
   ]);
 
   const snapshots = snapshotsResult.data || [];

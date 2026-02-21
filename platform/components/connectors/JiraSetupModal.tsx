@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 
 interface JiraProjectInfo {
   key: string;
@@ -53,7 +53,7 @@ export function JiraSetupModal({
   onClose,
   onConnected,
 }: JiraSetupModalProps) {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
 
   // Step 1 — credentials
   const [step, setStep] = useState<Step>("credentials");

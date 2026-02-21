@@ -7,9 +7,8 @@ const nextConfig: NextConfig = {
   // Standalone output for Docker deployment (ECS/Fargate) and Amplify WEB_COMPUTE.
   // Only enable for production builds — causes webpack cache corruption in dev.
   ...(isDev ? {} : { output: 'standalone', outputFileTracingRoot: path.join(__dirname, '../') }),
-  // Disable Next.js compression — CloudFront handles gzip/brotli at the edge.
-  // Avoids wasting Lambda CPU on compression for every response.
-  compress: false,
+  // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
+  compress: isDev,
   typescript: {
     // Skip type checking during build — monorepo workspace links
     // (e.g. @nexus-ai/memory-stack) don't resolve in Amplify CI.

@@ -50,7 +50,7 @@ interface Message {
 export interface CopilotChatProps {
   /** API endpoint to POST messages to (default: '/api/copilot/chat') */
   endpoint?: string;
-  /** Extra params to include in every POST body (e.g. { organizationId }) */
+  /** Extra params to include in every POST body (e.g. { workspaceId }) */
   extraParams?: Record<string, unknown>;
   /** Example prompts shown in the empty state */
   examplePrompts?: string[];
@@ -1333,7 +1333,7 @@ export function CopilotChat({
   }, [trackedBranchesProp]);
 
   // ── Fetch pending verifications on mount (reinforcement learning ground truth) ──
-  const organizationId = extraParams?.organizationId as string | undefined;
+  const organizationId = extraParams?.workspaceId as string | undefined;
   useEffect(() => {
     if (!organizationId) return;
     let cancelled = false;

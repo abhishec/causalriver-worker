@@ -10,6 +10,8 @@ import crypto from "crypto";
 export async function validateApiKey(
   authHeader: string | null
 ): Promise<{
+  workspaceId: string;
+  /** @deprecated Use workspaceId instead */
   organizationId: string;
   permissions: string[];
   rateLimitPerMinute: number;
@@ -33,7 +35,8 @@ export async function validateApiKey(
 
     const row = Array.isArray(data) ? data[0] : data;
     return {
-      organizationId: row.organization_id,
+      workspaceId: row.organization_id,
+      organizationId: row.organization_id,  // backward compat
       permissions: row.permissions || ["read"],
       rateLimitPerMinute: row.rate_limit_per_minute || 60,
     };

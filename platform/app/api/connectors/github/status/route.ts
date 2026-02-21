@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * GET /api/connectors/github/status
@@ -18,7 +18,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // Fetch connector + signal counts in parallel
     const [connectorResult, signalCountResult, codeFileCountResult] =
@@ -26,18 +26,18 @@ export async function GET() {
         supabase
           .from("org_connectors")
           .select("id, status, config, last_sync_at, signals_count, error_message")
-          .eq("organization_id", orgId)
+          .eq("organization_id", workspaceId)
           .eq("connector_type", "github")
           .maybeSingle(),
         supabase
           .from("cross_domain_signals")
           .select("signal_type", { count: "exact" })
-          .eq("organization_id", orgId)
+          .eq("organization_id", workspaceId)
           .like("source_domain", "engineering%"),
         supabase
           .from("cross_domain_signals")
           .select("id", { count: "exact" })
-          .eq("organization_id", orgId)
+          .eq("organization_id", workspaceId)
           .eq("signal_type", "code_file_indexed"),
       ]);
 

@@ -11,10 +11,12 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { CORE_ORG_ID, getCurrentOrgId } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID, getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export interface SeAaSAuthResult {
   userId: string;
+  workspaceId: string;
+  /** @deprecated Use workspaceId instead */
   organizationId: string;
   supabase: SupabaseClient;
   anthropicApiKey?: string;
@@ -28,7 +30,7 @@ export interface SeAaSAuthResult {
 export async function authenticateSeAaSRequest(
   request: NextRequest
 ): Promise<SeAaSAuthResult> {
-  let orgId: string | null = null;
+  let workspaceId: string | null = null;
   let userId: string | null = null;
 
   const supabase = await createClient();
@@ -43,8 +45,8 @@ export async function authenticateSeAaSRequest(
       throw { status: 429, error: "Too many requests. Please slow down." };
     }
 
-    // Resolve org from user's currently selected org (cookie-based)
-    orgId = await getCurrentOrgId();
+    // Resolve workspace from user's currently selected workspace (cookie-based)
+    workspaceId = await getCurrentWorkspaceId();
   } else {
     // Try API key
     const authHeader = request.headers.get("authorization");
@@ -54,7 +56,7 @@ export async function authenticateSeAaSRequest(
       throw { status: 401, error: "Unauthorized. Provide session cookie or API key (Bearer nxb_...)" };
     }
 
-    orgId = apiKeyResult.organizationId;
+    workspaceId = apiKeyResult.organizationId;
 
     if (!apiKeyResult.permissions.includes("read")) {
       throw { status: 403, error: "API key lacks read permission" };
@@ -69,12 +71,13 @@ export async function authenticateSeAaSRequest(
     }
 
     // API key users get a synthetic userId
-    userId = `api-key:${orgId}`;
+    userId = `api-key:${workspaceId}`;
   }
 
   return {
     userId: userId!,
-    organizationId: orgId!,
+    workspaceId: workspaceId!,
+    organizationId: workspaceId!,  // backward compat
     supabase,
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   };

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * GET /api/connectors/github/repos
@@ -19,14 +19,14 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // Load GitHub connector credentials
     const { data: connector } = await service
       .from("org_connectors")
       .select("credentials, config, status")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .maybeSingle();
 

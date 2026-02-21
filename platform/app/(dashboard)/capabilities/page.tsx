@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import Link from "next/link";
 import { CapabilitiesClient } from "./capabilities-client";
 
@@ -9,7 +9,7 @@ export const metadata = { title: "Services" };
 
 export default async function CapabilitiesPage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   // Wrap queries to prevent a single failure from crashing the page
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
@@ -27,19 +27,19 @@ export default async function CapabilitiesPage() {
     safe(supabase
       .from("se_aas_artifacts")
       .select("id, domain_type, created_at, metadata")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(10)),
     safe(supabase
       .from("agent_queue")
       .select("id, task_type, status, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("agent_type", "se-aas")
       .in("status", ["pending", "running"])
       .order("created_at", { ascending: false })
       .limit(5)),
     safe(supabase
-      .rpc("count_se_aas_artifacts_by_domain", { org_id: orgId })
+      .rpc("count_se_aas_artifacts_by_domain", { org_id: workspaceId })
       .select("*")),
   ]);
 

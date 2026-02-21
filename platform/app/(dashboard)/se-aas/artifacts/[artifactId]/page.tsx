@@ -13,7 +13,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/Card";
@@ -2365,14 +2365,14 @@ export default async function ArtifactDetailPage({
   params: Promise<{ artifactId: string }>;
 }) {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const { artifactId } = await params;
 
   const { data: artifact } = await supabase
     .from("se_aas_artifacts")
     .select("*")
     .eq("id", artifactId)
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .single();
 
   if (!artifact) notFound();

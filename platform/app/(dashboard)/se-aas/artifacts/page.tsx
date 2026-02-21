@@ -7,7 +7,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DOMAIN_LABELS } from "@/lib/se-aas/domain-catalogue";
@@ -21,7 +21,7 @@ export default async function SeAaSArtifactsPage({
   searchParams: Promise<{ domainType?: string; page?: string }>;
 }) {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const { domainType, page: pageStr } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
   const limit = 20;
@@ -31,7 +31,7 @@ export default async function SeAaSArtifactsPage({
   let query = supabase
     .from("se_aas_artifacts")
     .select("id, domain_type, created_at, artifact_data, metadata", { count: "exact" })
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -45,7 +45,7 @@ export default async function SeAaSArtifactsPage({
     supabase
       .from("se_aas_artifacts")
       .select("domain_type")
-      .eq("organization_id", orgId),
+      .eq("organization_id", workspaceId),
   ]);
 
   const countByDomain = (domainCounts ?? []).reduce<Record<string, number>>((acc, row) => {

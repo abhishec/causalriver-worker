@@ -1,139 +1,15 @@
-import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
-import { cache } from "react";
-
-import { CORE_ORG_ID } from "@/lib/constants";
-export { CORE_ORG_ID };
-const STORAGE_KEY = "nexus_current_org";
-
-/* ── Types ──────────────────────────────────────────────────────────── */
-
-export interface CurrentCustomer {
-  id: string;
-  name: string;
-  slug: string;
-  plan: string;
-  is_design_partner: boolean;
-  primary_org_id: string | null;
-}
-
-/* ── getCurrentCustomer ─────────────────────────────────────────────── */
-
 /**
- * Cached server-side helper: resolves user → customer_members → customer.
+ * @deprecated — This file is a backward-compat shim.
+ * Import from "@/lib/workspace-helpers" instead.
  *
- * Uses React cache() for per-request deduplication — multiple server
- * components / helpers calling getCurrentCustomer() in the same request
- * share a single Supabase query.
- *
- * Resolution: picks the user's first customer (by joined_at).
+ * All exports are re-exported here so existing imports continue to work.
  */
-export const getCurrentCustomer = cache(
-  async (): Promise<CurrentCustomer | null> => {
-    try {
-      const supabase = await createClient();
-      const user = await getAuthUser();
-      if (!user) return null;
 
-      const { data } = await supabase
-        .from("customer_members")
-        .select(
-          `primary_org_id,
-         customer:customer_id(id, name, slug, plan, is_design_partner)`
-        )
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: true })
-        .limit(1)
-        .single();
-
-      if (!data) return null;
-
-      const cust = (data as any).customer;
-      return {
-        id: cust.id,
-        name: cust.name,
-        slug: cust.slug,
-        plan: cust.plan,
-        is_design_partner: cust.is_design_partner ?? false,
-        primary_org_id: data.primary_org_id,
-      };
-    } catch {
-      return null;
-    }
-  }
-);
-
-/* ── getCurrentOrgId ────────────────────────────────────────────────── */
-
-/**
- * Server-side helper to resolve the current org ID.
- *
- * Resolution order (customer-first):
- *   1. Cookie override — user explicitly switched orgs (validate via org_members)
- *   2. Customer chain — primary_org_id from getCurrentCustomer() (cached, no extra query)
- *   3. Fallback — first non-core org from org_members
- *   4. Default — CORE_ORG_ID
- *
- * Uses cached getAuthUser() + cached getCurrentCustomer() so multiple
- * server components calling getCurrentOrgId() in the same request share
- * a single Supabase auth round-trip.
- */
-export async function getCurrentOrgId(): Promise<string> {
-  try {
-    const supabase = await createClient();
-    const user = await getAuthUser();
-
-    if (!user) return CORE_ORG_ID;
-
-    /* 1. Cookie override — user explicitly switched orgs */
-    const cookieStore = await cookies();
-    const saved = cookieStore.get(STORAGE_KEY)?.value;
-
-    if (saved) {
-      // Validate: user must be a member of this org
-      const { data: membership } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .eq("organization_id", saved)
-        .single();
-
-      if (membership) return saved;
-
-      // Platform admins can view any org
-      const { data: admin } = await supabase
-        .from("org_members")
-        .select("is_platform_admin")
-        .eq("user_id", user.id)
-        .eq("is_platform_admin", true)
-        .limit(1)
-        .single();
-
-      if (admin) return saved;
-    }
-
-    /* 2. Customer chain — primary_org_id (zero extra queries, uses cached getCurrentCustomer) */
-    const customer = await getCurrentCustomer();
-    if (customer?.primary_org_id) return customer.primary_org_id;
-
-    /* 3. Fallback: first non-core org from org_members */
-    const { data: first } = await supabase
-      .from("org_members")
-      .select(
-        "organization_id, organizations:organization_id(is_core_brain)"
-      )
-      .eq("user_id", user.id)
-      .order("joined_at", { ascending: true });
-
-    if (first && first.length > 0) {
-      const nonCore = (first as any[]).find(
-        (m) => !(m.organizations as any)?.is_core_brain
-      );
-      return nonCore?.organization_id ?? first[0].organization_id;
-    }
-
-    return CORE_ORG_ID;
-  } catch {
-    return CORE_ORG_ID;
-  }
-}
+export {
+  getCurrentWorkspaceId as getCurrentOrgId,
+  getCurrentWorkspaceId,
+  getCurrentCustomer,
+  CORE_WORKSPACE_ID,
+  CORE_ORG_ID,
+  type CurrentCustomer,
+} from "@/lib/workspace-helpers";

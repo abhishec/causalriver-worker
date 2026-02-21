@@ -24,7 +24,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useOrg, type OrgMembership } from "@/lib/org-context";
+import { useWorkspace, type WorkspaceMembership } from "@/lib/workspace-context";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
@@ -37,18 +37,18 @@ const PLAN_LABELS: Record<string, string> = {
   team: "Team plan",
 };
 
-// ── Org Row ─────────────────────────────────────────────────────────────────
+// ── Workspace Row ───────────────────────────────────────────────────────────
 
-function OrgRow({
+function WorkspaceRow({
   membership,
   isActive,
   onSelect,
 }: {
-  membership: OrgMembership;
+  membership: WorkspaceMembership;
   isActive: boolean;
   onSelect: () => void;
 }) {
-  const org = membership.organization;
+  const ws = membership.workspace;
   return (
     <button
       onClick={onSelect}
@@ -59,28 +59,28 @@ function OrgRow({
           : "hover:bg-surface-hover"
       )}
     >
-      {/* Org icon */}
+      {/* Workspace icon */}
       <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center shrink-0">
-        {org.customer_name ? (
+        {ws.customer_name ? (
           <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
           </svg>
         ) : (
           <span className="text-xs font-semibold text-muted-foreground">
-            {org.name.slice(0, 2).toUpperCase()}
+            {ws.name.slice(0, 2).toUpperCase()}
           </span>
         )}
       </div>
-      {/* Org details */}
+      {/* Workspace details */}
       <div className="flex-1 min-w-0">
         <div className="text-[13px] font-medium truncate text-foreground">
-          {org.customer_name || org.name}
+          {ws.customer_name || ws.name}
         </div>
-        {org.customer_name && (
-          <div className="text-[11px] text-muted truncate">{org.name}</div>
+        {ws.customer_name && (
+          <div className="text-[11px] text-muted truncate">{ws.name}</div>
         )}
         <div className="text-[11px] text-muted">
-          {PLAN_LABELS[org.plan] || org.plan}
+          {PLAN_LABELS[ws.plan] || ws.plan}
         </div>
       </div>
       {/* Active check */}
@@ -96,7 +96,7 @@ function OrgRow({
 // ── Main Component ──────────────────────────────────────────────────────────
 
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
-  const { currentOrg, organizations, switchOrg, isPlatformAdmin, isLoading } = useOrg();
+  const { currentWorkspace, workspaces, switchWorkspace, isPlatformAdmin, isLoading } = useWorkspace();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -106,25 +106,25 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, [supabase.auth]);
 
-  // Group orgs by customer
-  const { customerGroups, coreOrgs } = useMemo(() => {
-    const groups = new Map<string, OrgMembership[]>();
-    const core: OrgMembership[] = [];
+  // Group workspaces by customer
+  const { customerGroups, coreWorkspaces } = useMemo(() => {
+    const groups = new Map<string, WorkspaceMembership[]>();
+    const core: WorkspaceMembership[] = [];
 
-    for (const m of organizations) {
-      if (m.organization.is_core_brain) {
+    for (const m of workspaces) {
+      if (m.workspace.is_core_brain) {
         core.push(m);
         continue;
       }
-      const key = m.organization.customer_name ?? "My Workspaces";
+      const key = m.workspace.customer_name ?? "My Workspaces";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
 
-    return { customerGroups: groups, coreOrgs: core };
-  }, [organizations]);
+    return { customerGroups: groups, coreWorkspaces: core };
+  }, [workspaces]);
 
-  if (isLoading || !currentOrg) {
+  if (isLoading || !currentWorkspace) {
     return (
       <div className={cn("shrink-0 border-t border-border-subtle", collapsed ? "px-2 py-3" : "px-3 py-3")}>
         <div className={cn("flex items-center", collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5")}>
@@ -142,11 +142,13 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const initials = displayName.slice(0, 2).toUpperCase();
-  const planLabel = PLAN_LABELS[currentOrg.plan] || currentOrg.plan;
+  const planLabel = PLAN_LABELS[currentWorkspace.plan] || currentWorkspace.plan;
 
   async function handleSignOut() {
-    // 1. Clear org selection state so stale IDs don't persist across sessions
-    localStorage.removeItem("nexus_current_org");
+    // 1. Clear workspace selection state so stale IDs don't persist across sessions
+    localStorage.removeItem("nexus_current_workspace");
+    localStorage.removeItem("nexus_current_org");  // clean up old key too
+    document.cookie = "nexus_current_workspace=;path=/;max-age=0;SameSite=Lax";
     document.cookie = "nexus_current_org=;path=/;max-age=0;SameSite=Lax";
 
     // 2. Sign out from Supabase (clears auth cookies)
@@ -175,12 +177,12 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           <>
             <div className="flex-1 min-w-0 text-left">
               <div className="text-[13px] font-medium truncate text-foreground">{displayName}</div>
-              {currentOrg.customer_name ? (
+              {currentWorkspace.customer_name ? (
                 <div className="text-[11px] text-muted truncate">
-                  {currentOrg.customer_name} › {currentOrg.name}
+                  {currentWorkspace.customer_name} › {currentWorkspace.name}
                 </div>
               ) : (
-                <div className="text-[11px] text-muted truncate">{currentOrg.name}</div>
+                <div className="text-[11px] text-muted truncate">{currentWorkspace.name}</div>
               )}
             </div>
             {/* Chevron up/down */}
@@ -222,14 +224,14 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                     {customerName}
                   </div>
                   {memberships.map((m) => (
-                    <OrgRow
+                    <WorkspaceRow
                       key={m.organization_id}
                       membership={m}
-                      isActive={m.organization_id === currentOrg.id}
+                      isActive={m.organization_id === currentWorkspace.id}
                       onSelect={() => {
                         setOpen(false);
-                        if (m.organization_id !== currentOrg.id) {
-                          switchOrg(m.organization_id);
+                        if (m.organization_id !== currentWorkspace.id) {
+                          switchWorkspace(m.organization_id);
                         }
                       }}
                     />
@@ -238,21 +240,21 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               ))}
 
               {/* Core brain (platform admins) */}
-              {coreOrgs.length > 0 && (
+              {coreWorkspaces.length > 0 && (
                 <>
                   <div className="h-px bg-border-subtle mx-2 my-1" />
                   <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
                     Core Brain
                   </div>
-                  {coreOrgs.map((m) => (
-                    <OrgRow
+                  {coreWorkspaces.map((m) => (
+                    <WorkspaceRow
                       key={m.organization_id}
                       membership={m}
-                      isActive={m.organization_id === currentOrg.id}
+                      isActive={m.organization_id === currentWorkspace.id}
                       onSelect={() => {
                         setOpen(false);
-                        if (m.organization_id !== currentOrg.id) {
-                          switchOrg(m.organization_id);
+                        if (m.organization_id !== currentWorkspace.id) {
+                          switchWorkspace(m.organization_id);
                         }
                       }}
                     />
@@ -282,7 +284,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                   </svg>
-                  <span>Manage All Organizations</span>
+                  <span>Manage All Workspaces</span>
                 </Link>
               )}
             </div>

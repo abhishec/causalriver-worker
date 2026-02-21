@@ -9,7 +9,7 @@ import { ArtifactPane } from "@/components/copilot/ArtifactPane";
 import { useConversations } from "@/lib/use-conversations";
 import type { UnifiedArtifact } from "@/components/copilot/types";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTemplates } from "@/lib/templates/useTemplates";
 import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
@@ -64,7 +64,7 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
 function CopilotPageInner() {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
 
   // ── Service mode ──────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ function CopilotPageInner() {
     customCommands,
     customGatheringMap,
     refetch: refetchTemplates,
-  } = useTemplates(currentOrg?.id);
+  } = useTemplates(currentWorkspace?.id);
 
   // ── Conversation state ────────────────────────────────────────────────────
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -106,7 +106,7 @@ function CopilotPageInner() {
     loadList,
     saveConversation,
     loadConversation,
-  } = useConversations(currentOrg?.id);
+  } = useConversations(currentWorkspace?.id);
 
   // ── Auto-inject from ?q=, ?service=, or ?cmd= query params ──────────────────
   useEffect(() => {
@@ -286,12 +286,12 @@ function CopilotPageInner() {
 
     // Persist artifact with the specific domain type
     const persistDomainType = resolvedDomainId || (isAAS ? "aas-financial" : (result.data as any)?.domainType || "seaas-analysis");
-    if (activeConversationId && currentOrg?.id) {
+    if (activeConversationId && currentWorkspace?.id) {
       fetch("/api/se-aas/artifacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organizationId: currentOrg.id,
+          workspaceId: currentWorkspace.id,
           conversationId: activeConversationId,
           domainType: persistDomainType,
           title: newArtifact.title,
@@ -299,7 +299,7 @@ function CopilotPageInner() {
         }),
       }).catch(() => {});
     }
-  }, [activeConversationId, currentOrg?.id]);
+  }, [activeConversationId, currentWorkspace?.id]);
 
   // ── Handle brain meta ─────────────────────────────────────────────────────
   const handleBrainMeta = useCallback((_meta: BrainMeta) => {
@@ -467,7 +467,7 @@ function CopilotPageInner() {
           <ErrorBoundary section="Copilot Chat">
             <CopilotChat
               endpoint="/api/copilot/chat"
-              extraParams={{ organizationId: currentOrg?.id }}
+              extraParams={{ workspaceId: currentWorkspace?.id }}
               activeService={activeService}
               persona={{
                 name: persona.name,
@@ -556,7 +556,7 @@ function CopilotPageInner() {
       {/* ── Agent Composer Modal ──────────────────────────────────────── */}
       {showComposer && (
         <AgentComposerPanel
-          organizationId={currentOrg?.id}
+          organizationId={currentWorkspace?.id}
           onClose={() => setShowComposer(false)}
           onArtifact={(artifact) => {
             handleArtifact({
@@ -576,7 +576,7 @@ function CopilotPageInner() {
       )}
 
       {/* ── Save Template Dialog (from artifact) ──────────────────────── */}
-      {saveDialogArtifact && currentOrg?.id && (
+      {saveDialogArtifact && currentWorkspace?.id && (
         <SaveTemplateDialog
           artifact={{
             id: saveDialogArtifact.id,
@@ -586,7 +586,7 @@ function CopilotPageInner() {
             domainId: saveDialogArtifact.domainId,
             rawData: saveDialogArtifact.rawData,
           }}
-          organizationId={currentOrg.id}
+          organizationId={currentWorkspace.id}
           onClose={() => setSaveDialogArtifact(null)}
           onSaved={() => {
             setSaveDialogArtifact(null);
@@ -596,14 +596,14 @@ function CopilotPageInner() {
       )}
 
       {/* ── Save Template Dialog (from composer) ──────────────────────── */}
-      {compositionForSave && currentOrg?.id && (
+      {compositionForSave && currentWorkspace?.id && (
         <SaveTemplateDialog
           artifact={{
             id: `composer-${Date.now()}`,
             title: compositionForSave.name,
             content: compositionForSave.prompt,
           }}
-          organizationId={currentOrg.id}
+          organizationId={currentWorkspace.id}
           compositionData={compositionForSave}
           onClose={() => setCompositionForSave(null)}
           onSaved={() => {

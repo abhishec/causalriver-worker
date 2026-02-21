@@ -20,7 +20,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -200,7 +200,7 @@ async function resumeAgentExecution(
 ): Promise<void> {
   const startTime = Date.now();
   const taskId = task.id;
-  const orgId = task.organization_id;
+  const workspaceId = task.organization_id;
   const state = checkpoint.agent_state as Record<string, unknown>;
   const phase = (state.phase as string) || "";
 
@@ -231,15 +231,15 @@ async function resumeAgentExecution(
 
     const dt = createDomainTaxonomy();
     const eg = createCrossSystemEntityGraph();
-    const cs = createCognitiveStack({ organizationId: orgId, anthropicApiKey: apiKey });
-    const dl = createDeepLayers({ organizationId: orgId, domainTaxonomy: dt, entityGraph: eg });
-    const dp = createDeepPipeline({ organizationId: orgId, supabase, cognitiveStack: cs, deepLayers: dl, domainTaxonomy: dt, entityGraph: eg });
-    const cortex = createNeuralCortexController({ organizationId: orgId, supabase, pipeline: dp, cognitiveStack: cs, deepLayers: dl });
+    const cs = createCognitiveStack({ organizationId: workspaceId, anthropicApiKey: apiKey });
+    const dl = createDeepLayers({ organizationId: workspaceId, domainTaxonomy: dt, entityGraph: eg });
+    const dp = createDeepPipeline({ organizationId: workspaceId, supabase, cognitiveStack: cs, deepLayers: dl, domainTaxonomy: dt, entityGraph: eg });
+    const cortex = createNeuralCortexController({ organizationId: workspaceId, supabase, pipeline: dp, cognitiveStack: cs, deepLayers: dl });
     const closedLoop = cortex.getClosedLoopEngine();
 
     const brainRuntime = createBrainAgentRuntime({
       supabase,
-      organizationId: orgId,
+      organizationId: workspaceId,
       cortex,
       closedLoop: closedLoop ?? undefined,
       defaultAnthropicApiKey: apiKey,
@@ -335,11 +335,11 @@ async function resumeAgentExecution(
       .eq("id", taskId);
 
     // Store episodic memory for future runs
-    await storeEpisodicMemory(supabase, orgId, task.agent_type, taskId, task.prompt, responseText, brainResult.confidence);
+    await storeEpisodicMemory(supabase, workspaceId, task.agent_type, taskId, task.prompt, responseText, brainResult.confidence);
 
     // Learning signal
     await supabase.from("cross_domain_signals").insert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       source_domain: "brain.agents",
       signal_type: `agent_${task.agent_type}_resumed_completed`,
       signal_value: brainResult.confidence,
@@ -376,7 +376,7 @@ async function resumeAgentExecution(
 
 async function storeEpisodicMemory(
   supabase: import("@supabase/supabase-js").SupabaseClient,
-  orgId: string,
+  workspaceId: string,
   agentType: string,
   taskId: string,
   prompt: string,
@@ -390,7 +390,7 @@ async function storeEpisodicMemory(
     `Key findings: ${responseText.slice(0, 300)}`;
 
   await supabase.from("agent_episodic_memory").insert({
-    organization_id: orgId,
+    organization_id: workspaceId,
     agent_type: agentType,
     episode_type: "run_summary",
     content: summary,

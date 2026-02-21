@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * GET /api/partner/activation
@@ -19,7 +19,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // Run all checks in parallel
@@ -35,7 +35,7 @@ export async function GET() {
       service
         .from("org_connectors")
         .select("status, config")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("connector_type", "github")
         .maybeSingle(),
 
@@ -43,32 +43,32 @@ export async function GET() {
       service
         .from("se_aas_artifacts")
         .select("domain_type")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .limit(50),
 
       // Velocity snapshots (for early warning check)
       service
         .from("velocity_snapshots")
         .select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId),
+        .eq("organization_id", workspaceId),
 
       // Org members count
       service
         .from("org_members")
         .select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId),
+        .eq("organization_id", workspaceId),
 
       // Org invitations count
       service
         .from("org_invitations")
         .select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId),
+        .eq("organization_id", workspaceId),
 
       // Org settings (for notification config + dismissed state)
       service
         .from("org_settings")
         .select("partner_activation, config")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .maybeSingle(),
     ]);
 
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
     const body = await request.json();
 
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
       const { data: current } = await service
         .from("org_settings")
         .select("partner_activation")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .maybeSingle();
 
       const existing = (current?.partner_activation as Record<string, any>) || {};
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
       await service
         .from("org_settings")
         .upsert({
-          organization_id: orgId,
+          organization_id: workspaceId,
           partner_activation: {
             ...existing,
             checklist_dismissed: true,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * POST /api/training-packs
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const body = await request.json();
 
   const { name, description, chains, rules } = body;
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("custom_training_packs")
       .insert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         created_by: user.id,
         name,
         description: description || null,
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     // Trigger async execution: queue the pack for the next consolidation cycle
     try {
       await supabase.from("agent_queue").insert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         agent_type: "training-pack",
         status: "pending",
         payload: {
@@ -91,12 +91,12 @@ export async function GET() {
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   const { data: packs } = await supabase
     .from("custom_training_packs")
     .select("id, name, description, chain_count, rule_count, status, created_at")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .order("created_at", { ascending: false })
     .limit(50);
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 minutes for multi-connector sync
@@ -38,14 +38,14 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const skipBrainCycle: boolean = body.skipBrainCycle === true;
 
-    const orgId = body.organizationId || await getCurrentOrgId();
+    const workspaceId = body.organizationId || await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // Find all active connectors for this org
     const { data: connectors } = await service
       .from("org_connectors")
       .select("id, connector_type, config, credentials, status")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .in("status", ["active", "connected"]);
 
     if (!connectors || connectors.length === 0) {
@@ -74,41 +74,41 @@ export async function POST(request: Request) {
         switch (type) {
           case "github":
             syncUrl = `${baseUrl}/api/connectors/github/sync`;
-            syncBody = { organizationId: orgId };
+            syncBody = { organizationId: workspaceId };
             break;
           case "jira":
             syncUrl = `${baseUrl}/api/connectors/jira/sync`;
-            syncBody = { organizationId: orgId };
+            syncBody = { organizationId: workspaceId };
             break;
           case "slack":
             syncUrl = `${baseUrl}/api/connectors/slack/sync`;
-            syncBody = { organizationId: orgId, lookbackDays: 30 };
+            syncBody = { organizationId: workspaceId, lookbackDays: 30 };
             break;
           case "linear":
             syncUrl = `${baseUrl}/api/connectors/linear/sync`;
-            syncBody = { organizationId: orgId };
+            syncBody = { organizationId: workspaceId };
             break;
           case "xero":
             syncUrl = `${baseUrl}/api/connectors/xero/sync`;
-            syncBody = { organizationId: orgId };
+            syncBody = { organizationId: workspaceId };
             break;
           // NB-020: Freshworks suite (Freshdesk, Freshsales, Freshchat)
           case "freshdesk":
             syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
-            syncBody = { organizationId: orgId, product: "freshdesk", mode: "incremental" };
+            syncBody = { organizationId: workspaceId, product: "freshdesk", mode: "incremental" };
             break;
           case "freshsales":
             syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
-            syncBody = { organizationId: orgId, product: "freshsales", mode: "incremental" };
+            syncBody = { organizationId: workspaceId, product: "freshsales", mode: "incremental" };
             break;
           case "freshchat":
             syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
-            syncBody = { organizationId: orgId, product: "freshchat", mode: "incremental" };
+            syncBody = { organizationId: workspaceId, product: "freshchat", mode: "incremental" };
             break;
           case "freshworks":
             // Umbrella case: syncs all 3 Freshworks products at once
             syncUrl = `${baseUrl}/api/connectors/freshworks/sync`;
-            syncBody = { organizationId: orgId, product: "all", mode: "incremental" };
+            syncBody = { organizationId: workspaceId, product: "all", mode: "incremental" };
             break;
           // NB-019: Log ingestion (CloudWatch, Datadog, ELK, Generic)
           case "logs":
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
           case "datadog":
           case "elk":
             syncUrl = `${baseUrl}/api/connectors/logs/sync`;
-            syncBody = { organizationId: orgId, mode: "incremental" };
+            syncBody = { organizationId: workspaceId, mode: "incremental" };
             break;
           default:
             // Skip connector types without a sync route (e.g. hubspot, asana)
@@ -212,7 +212,7 @@ export async function POST(request: Request) {
             "Content-Type": "application/json",
             Cookie: cookieHeader,
           },
-          body: JSON.stringify({ organizationId: orgId, mode: "full" }),
+          body: JSON.stringify({ organizationId: workspaceId, mode: "full" }),
         });
 
         if (brainResponse.ok) {

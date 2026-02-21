@@ -20,7 +20,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Log queries can take time for large windows
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // 2. Parse body
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const { data: connectors, error: connErr } = await service
       .from("org_connectors")
       .select("id, connector_type, config, credentials")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .in("connector_type", LOG_CONNECTOR_TYPES);
 
     if (connErr) {
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       };
 
       try {
-        const instance = new LogConnector(orgId, logCreds, service);
+        const instance = new LogConnector(workspaceId, logCreds, service);
         const result = await instance.ingest({ mode });
 
         results[conn.connector_type] = result;

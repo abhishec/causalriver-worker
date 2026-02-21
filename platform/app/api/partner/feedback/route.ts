@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * POST /api/partner/feedback
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
     const body = await request.json();
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const { data: current } = await service
       .from("org_settings")
       .select("partner_activation")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .maybeSingle();
 
     const existing = (current?.partner_activation as Record<string, any>) || {};
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     await service
       .from("org_settings")
       .upsert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         partner_activation: {
           ...existing,
           feedback_history: feedbackHistory,
@@ -92,13 +92,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const { data } = await service
       .from("org_settings")
       .select("partner_activation")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .maybeSingle();
 
     const activation = (data?.partner_activation as Record<string, any>) || {};

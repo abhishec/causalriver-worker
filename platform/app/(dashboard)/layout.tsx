@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
-import { OrgProvider } from "@/lib/org-context";
+import { WorkspaceProvider } from "@/lib/workspace-context";
 import { DashboardShell } from "./dashboard-shell";
 import { CopilotLazy } from "./copilot-lazy";
 
@@ -14,7 +14,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <OrgProvider>
+    <WorkspaceProvider>
       <div className="flex min-h-screen">
         <Sidebar />
         <DashboardShell>
@@ -27,6 +27,6 @@ export default function DashboardLayout({
         </DashboardShell>
         <CopilotLazy />
       </div>
-    </OrgProvider>
+    </WorkspaceProvider>
   );
 }

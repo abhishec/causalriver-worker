@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ObservabilityClient } from "./observability-client";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const metadata = {
 
 export default async function ObservabilityPage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 3600000).toISOString();
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -36,7 +36,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_signal_ingestion")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(200)),
@@ -45,7 +45,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_causal_calculations")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(100)),
@@ -54,7 +54,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_entity_resolution")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(100)),
@@ -63,7 +63,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_connector_operations")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(100)),
@@ -72,7 +72,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_agent_executions")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(100)),
@@ -81,7 +81,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("obs_layer_health")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(15)),
 
@@ -89,7 +89,7 @@ export default async function ObservabilityPage() {
     safe(supabase
       .from("cascade_alerts")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(50)),
   ]);

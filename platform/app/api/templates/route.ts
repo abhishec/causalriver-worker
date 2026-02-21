@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { verifyOrgMembership } from "@/lib/supabase/admin";
+import { verifyWorkspaceMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { ALL_SLASH_COMMANDS } from "@/components/copilot/slash-commands";
 import { labelToCommandId } from "@/lib/templates/types";
@@ -22,13 +22,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const orgId = req.nextUrl.searchParams.get("orgId");
-  if (!orgId) {
-    return NextResponse.json({ error: "orgId required" }, { status: 400 });
+  const workspaceId = req.nextUrl.searchParams.get("workspaceId") || req.nextUrl.searchParams.get("orgId");
+  if (!workspaceId) {
+    return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
   }
 
-  // Verify org membership (uses admin client to bypass RLS recursion)
-  const member = await verifyOrgMembership(user.id, orgId);
+  // Verify workspace membership (uses admin client to bypass RLS recursion)
+  const member = await verifyWorkspaceMembership(user.id, workspaceId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   const { data: templates, error: orgError } = await supabase
     .from("agent_templates")
     .select("*")
-    .eq("org_id", orgId)
+    .eq("org_id", workspaceId)
     .eq("is_archived", false)
     .order("usage_count", { ascending: false });
 
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     .select("*")
     .eq("is_public", true)
     .eq("is_archived", false)
-    .neq("org_id", orgId)
+    .neq("org_id", workspaceId)
     .order("usage_count", { ascending: false })
     .limit(50);
 
@@ -82,17 +82,18 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { orgId, label, description, prompt } = body;
+  const workspaceId = body.workspaceId || body.orgId;
+  const { label, description, prompt } = body;
 
-  if (!orgId || !label || !description || !prompt) {
+  if (!workspaceId || !label || !description || !prompt) {
     return NextResponse.json(
-      { error: "orgId, label, description, and prompt are required" },
+      { error: "workspaceId, label, description, and prompt are required" },
       { status: 400 }
     );
   }
 
-  // Verify org membership (uses admin client to bypass RLS recursion)
-  const member = await verifyOrgMembership(user.id, orgId);
+  // Verify workspace membership (uses admin client to bypass RLS recursion)
+  const member = await verifyWorkspaceMembership(user.id, workspaceId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from("agent_templates")
     .insert({
-      org_id: orgId,
+      org_id: workspaceId,
       created_by: user.id,
       command_id: commandId,
       label: label.trim(),

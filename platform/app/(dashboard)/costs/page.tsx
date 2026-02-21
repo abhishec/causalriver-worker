@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { CostsClient } from "./costs-client";
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +8,7 @@ export const metadata = { title: "Costs" };
 
 export default async function CostsPage() {
   const supabase = await createClient();
-  const CORE_ORG_ID = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
@@ -21,7 +21,7 @@ export default async function CostsPage() {
     safe(supabase
       .from("llm_cost_log")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .gte("created_at", new Date(Date.now() - 30 * 86400000).toISOString())
       .order("created_at", { ascending: false })
       .limit(500)),
@@ -30,7 +30,7 @@ export default async function CostsPage() {
     safe(supabase
       .from("aws_cost_snapshots")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .gte("period_start", new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0])
       .order("period_start", { ascending: false })
       .limit(30)),
@@ -39,7 +39,7 @@ export default async function CostsPage() {
     safe(supabase
       .from("cost_budget_config")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .single()),
   ]);
 

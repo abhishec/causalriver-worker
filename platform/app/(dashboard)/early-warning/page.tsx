@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import Link from "next/link";
 import { EarlyWarningActions } from "./actions";
 import { ReviewerDistributionChart, BRSBreakdown } from "./bottleneck-charts";
@@ -14,7 +14,7 @@ export const metadata = { title: "Early Warning System" };
 
 export default async function EarlyWarningPage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   // ── Fetch all data in parallel ──────────────────────────────────────────
   const [
@@ -27,32 +27,32 @@ export default async function EarlyWarningPage() {
     supabase
       .from("org_connectors")
       .select("config")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .limit(1)
       .maybeSingle(),
     supabase
       .from("velocity_snapshots")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("snapshot_date", { ascending: false })
       .limit(30),
     supabase
       .from("bottleneck_snapshots")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("snapshot_date", { ascending: false })
       .limit(2),
     supabase
       .from("causal_relationships_statistical")
       .select("source_domain, target_domain, source_metric, target_metric, effect_size, confidence, natural_language, optimal_lag_days")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("confidence", { ascending: false })
       .limit(10),
     supabase
       .from("ai_memory")
       .select("content, metadata, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("memory_type", "alert")
       .order("created_at", { ascending: false })
       .limit(5),
@@ -808,7 +808,7 @@ export default async function EarlyWarningPage() {
       </div>
 
       {/* ── Quick Actions ─────────────────────────────────────────────────── */}
-      <EarlyWarningActions orgId={orgId} />
+      <EarlyWarningActions orgId={workspaceId} />
     </div>
   );
 }

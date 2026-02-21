@@ -12,7 +12,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // 2. Parse body
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const { data: connectors, error: connErr } = await service
       .from("org_connectors")
       .select("id, connector_type, config, credentials")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .in(
         "connector_type",
         product === "all"
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
         if (type === "freshdesk" && FreshdeskConnector) {
           instance = new FreshdeskConnector(
-            orgId,
+            workspaceId,
             {
               apiKey: creds.api_key || creds.apiKey,
               domain: cfg.domain || creds.domain,
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
           );
         } else if (type === "freshsales" && FreshsalesConnector) {
           instance = new FreshsalesConnector(
-            orgId,
+            workspaceId,
             {
               apiKey: creds.api_key || creds.apiKey,
               domain: cfg.domain || creds.domain,
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
           );
         } else if (type === "freshchat" && FreshchatConnector) {
           instance = new FreshchatConnector(
-            orgId,
+            workspaceId,
             {
               apiKey: creds.api_key || creds.apiKey,
               domain: cfg.domain || creds.domain,

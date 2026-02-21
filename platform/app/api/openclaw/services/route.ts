@@ -24,7 +24,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager } from "@/lib/openclaw/gateway-client";
 
 export const dynamic = "force-dynamic";
@@ -62,14 +62,14 @@ export async function GET(request: NextRequest) {
 
     // ── Resolve org ──────────────────────────────────────────────
     const params = request.nextUrl.searchParams;
-    const orgId = params.get("organizationId") || CORE_ORG_ID;
+    const workspaceId = params.get("organizationId") || CORE_WORKSPACE_ID;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     // Platform admins can access any org
@@ -91,11 +91,11 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Get connection ────────────────────────────────────────────
-    const conn = gatewayManager.getConnection(orgId);
+    const conn = gatewayManager.getConnection(workspaceId);
 
     if (!conn || !conn.isConnected()) {
       // Return service IDs from the status (if any are known)
-      const status = gatewayManager.getStatus(orgId);
+      const status = gatewayManager.getStatus(workspaceId);
       const services = status.servicesRunning.map((id: string) => ({
         id,
         name: SERVICE_NAMES[id] || id,
@@ -211,14 +211,14 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const orgId = organizationId || CORE_ORG_ID;
+    const workspaceId = organizationId || CORE_WORKSPACE_ID;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("organization_id, role, is_platform_admin")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     // Platform admins can manage any org
@@ -252,7 +252,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // ── Get connection ────────────────────────────────────────────
-    const conn = gatewayManager.getConnection(orgId);
+    const conn = gatewayManager.getConnection(workspaceId);
 
     if (!conn || !conn.isConnected()) {
       return NextResponse.json(

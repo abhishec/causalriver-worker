@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * POST /api/connectors/github/setup
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Get current org
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // 3. Parse body
     const body = await request.json();
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     const { data: existing } = await service
       .from("org_connectors")
       .select("id")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .eq("instance_name", instanceName)
       .maybeSingle();
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       const { error } = await service
         .from("org_connectors")
         .insert({
-          organization_id: orgId,
+          organization_id: workspaceId,
           connector_type: "github",
           instance_name: instanceName,
           display_name: displayName || instanceName,

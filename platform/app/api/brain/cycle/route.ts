@@ -34,9 +34,10 @@
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 // In-memory controller cache (one per org, lazy-initialized)
 // This keeps the controller alive between requests for state continuity
@@ -65,7 +66,7 @@ function startProactiveEviction(): void {
       }
     }
     if (evicted > 0) {
-      console.info(`[BrainCycle] Proactive eviction: removed ${evicted} stale controller(s), ${controllerCache.size} remaining`);
+      logger.debug(`[BrainCycle] Proactive eviction: removed ${evicted} stale controller(s), ${controllerCache.size} remaining`);
     }
   }, EVICTION_INTERVAL_MS);
   // Don't prevent process exit
@@ -74,8 +75,10 @@ function startProactiveEviction(): void {
   }
 }
 
-// Start eviction on module load
-startProactiveEviction();
+// Start eviction on module load — only in production to avoid background noise in dev
+if (process.env.NODE_ENV === "production") {
+  startProactiveEviction();
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -113,7 +116,7 @@ export async function POST(request: NextRequest) {
       input?: { signals?: any[]; query?: string };
     };
 
-    const orgId = organizationId || await getCurrentOrgId();
+    const workspaceId = organizationId || await getCurrentWorkspaceId();
 
     // ── Verify membership (skip for internal cron) ────────────────
     if (!isInternalCron) {
@@ -121,7 +124,7 @@ export async function POST(request: NextRequest) {
         .from("org_members")
         .select("role")
         .eq("user_id", user!.id)
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .single();
 
       if (!membership) {
@@ -144,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     // ── Get or create controller ─────────────────────────────────
     const service = await createServiceClient();
-    const controller = await getOrCreateController(orgId, service);
+    const controller = await getOrCreateController(workspaceId, service);
 
     const startTime = Date.now();
     let result: any;
@@ -174,7 +177,7 @@ export async function POST(request: NextRequest) {
           const { data: edges } = await service
             .from("causal_relationships")
             .select("source_domain, target_domain, correlation_strength, p_value, confidence, effect_size")
-            .eq("organization_id", orgId)
+            .eq("organization_id", workspaceId)
             .gte("confidence", 0.3)
             .order("confidence", { ascending: false })
             .limit(2000); // Ranked by confidence, 4GB ECS handles 2K edges fine
@@ -196,7 +199,7 @@ export async function POST(request: NextRequest) {
           const { data: memories } = await service
             .from("ai_memory")
             .select("content")
-            .eq("organization_id", orgId)
+            .eq("organization_id", workspaceId)
             .eq("memory_type", "pattern")
             .order("importance", { ascending: false })
             .limit(500);
@@ -237,7 +240,7 @@ export async function POST(request: NextRequest) {
             const { data: page } = await service
               .from("cross_domain_signals")
               .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
-              .eq("organization_id", orgId)
+              .eq("organization_id", workspaceId)
               .order("signal_timestamp", { ascending: false })
               .range(offset, offset + SIGNAL_PAGE_SIZE - 1);
 
@@ -263,13 +266,13 @@ export async function POST(request: NextRequest) {
             offset += SIGNAL_PAGE_SIZE;
 
             if (totalStreamed % 10000 === 0) {
-              console.info(`[BrainCycle] Streaming: ${totalStreamed} signals processed...`);
+              logger.debug(`[BrainCycle] Streaming: ${totalStreamed} signals processed...`);
             }
 
             if (page.length < SIGNAL_PAGE_SIZE) break; // Last page
           }
 
-          console.info(`[BrainCycle] Stream complete: ${totalStreamed} signals in ${Math.ceil(totalStreamed / SIGNAL_PAGE_SIZE)} batches`);
+          logger.debug(`[BrainCycle] Stream complete: ${totalStreamed} signals in ${Math.ceil(totalStreamed / SIGNAL_PAGE_SIZE)} batches`);
 
           // Finalize: run L14 (full DAG) + L15 (narrative) once, build result
           if (streamHandle) {
@@ -277,7 +280,7 @@ export async function POST(request: NextRequest) {
           } else {
             // Fallback: controller doesn't support streaming yet — run managed cycle
             // with all signals collected (should not happen once deployed)
-            console.warn('[BrainCycle] Controller does not support beginStreamingCycle — falling back to managed cycle');
+            logger.warn('[BrainCycle] Controller does not support beginStreamingCycle — falling back to managed cycle');
             result = await controller.runManagedCycle({ ...streamInput, signals: [] });
           }
 
@@ -291,7 +294,7 @@ export async function POST(request: NextRequest) {
             const { data: dbSignals } = await service
               .from("cross_domain_signals")
               .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
-              .eq("organization_id", orgId)
+              .eq("organization_id", workspaceId)
               .gte("signal_timestamp", since)
               .order("signal_timestamp", { ascending: false })
               .limit(2000);
@@ -308,7 +311,7 @@ export async function POST(request: NextRequest) {
                 metadata: {},
               }));
             }
-            console.info(`[BrainCycle] Lightweight: ${cycleSignals.length} signals (30-day window)`);
+            logger.debug(`[BrainCycle] Lightweight: ${cycleSignals.length} signals (30-day window)`);
           }
 
           result = await controller.runManagedCycle({
@@ -326,8 +329,8 @@ export async function POST(request: NextRequest) {
         // so we bust the cache so the next copilot query sees fresh data immediately.
         try {
           const { invalidateBrainCache } = await import("@nexus-ai/memory-stack");
-          invalidateBrainCache(orgId);
-          console.info(`[BrainCycle] Brain intelligence cache invalidated for org ${orgId}`);
+          invalidateBrainCache(workspaceId);
+          logger.debug(`[BrainCycle] Brain intelligence cache invalidated for org ${workspaceId}`);
         } catch {
           // Non-critical: cache will naturally expire after 5 minutes
         }
@@ -345,7 +348,7 @@ export async function POST(request: NextRequest) {
 
     // ── Log execution ────────────────────────────────────────────
     await service.from("scheduled_job_runs").insert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       job_name: `brain-cycle-${mode}`,
       job_type: `brain_cycle_${mode}`,
       started_at: new Date(startTime).toISOString(),
@@ -362,13 +365,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       mode,
-      organization_id: orgId,
+      organization_id: workspaceId,
       duration_ms: durationMs,
       result,
       snapshot: controller.getSnapshot?.() || null,
     });
   } catch (error: any) {
-    console.error("[BrainCycle] Error:", error);
+    logger.error("[BrainCycle] Error:", error);
     return NextResponse.json(
       { error: error.message || "Brain cycle failed" },
       { status: 500 }
@@ -385,17 +388,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = request.nextUrl.searchParams.get("organizationId") || await getCurrentOrgId();
+    const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
     // Check if controller exists in cache
-    const cached = controllerCache.get(orgId);
+    const cached = controllerCache.get(workspaceId);
 
     if (cached && Date.now() - cached.createdAt < CONTROLLER_TTL_MS) {
       const snapshot = cached.controller.getSnapshot?.();
       return NextResponse.json({
         status: "active",
         controller_alive: true,
-        organization_id: orgId,
+        organization_id: workspaceId,
         snapshot,
         cache_age_ms: Date.now() - cached.createdAt,
       });
@@ -408,7 +411,7 @@ export async function GET(request: NextRequest) {
     const { data: recentCycles } = await service
       .from("scheduled_job_runs")
       .select("job_type, status, started_at, completed_at, duration_ms")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .like("job_type", "brain_cycle_%")
       .order("started_at", { ascending: false })
       .limit(10);
@@ -417,7 +420,7 @@ export async function GET(request: NextRequest) {
     const { data: healthSnapshot } = await service
       .from("brain_health_history")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -425,7 +428,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: "idle",
       controller_alive: false,
-      organization_id: orgId,
+      organization_id: workspaceId,
       recent_cycles: recentCycles || [],
       last_health_snapshot: healthSnapshot || null,
       modes: {
@@ -436,7 +439,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error("[BrainCycle] GET error:", error);
+    logger.error("[BrainCycle] GET error:", error);
     return NextResponse.json(
       { error: error.message || "Internal error" },
       { status: 500 }
@@ -542,7 +545,7 @@ async function getOrCreateController(
     }
     if (oldestKey) {
       controllerCache.delete(oldestKey);
-      console.info(`[BrainCycle] LRU eviction: removed controller for org ${oldestKey}, cache at max (${MAX_CACHED_CONTROLLERS})`);
+      logger.debug(`[BrainCycle] LRU eviction: removed controller for org ${oldestKey}, cache at max (${MAX_CACHED_CONTROLLERS})`);
     }
   }
 

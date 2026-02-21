@@ -29,7 +29,7 @@
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -95,14 +95,14 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Resolve org ──────────────────────────────────────────────
-    const orgId = organization_id || await getCurrentOrgId();
+    const workspaceId = organization_id || await getCurrentWorkspaceId();
 
     // ── Verify membership ────────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("role, is_platform_admin")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!membership) {
@@ -133,10 +133,10 @@ export async function POST(request: NextRequest) {
 
     if (executionMode === 'edge' && (EDGE_FUNCTION_JOBS as readonly string[]).includes(job_type)) {
       // ── Execute via Edge Function ────────────────────────────
-      result = await executeViaEdgeFunction(job_type as EdgeJobType, orgId);
+      result = await executeViaEdgeFunction(job_type as EdgeJobType, workspaceId);
     } else {
       // ── Execute via Node.js (memory-stack) ───────────────────
-      result = await executeViaNodeJs(job_type, orgId);
+      result = await executeViaNodeJs(job_type, workspaceId);
     }
 
     const durationMs = Date.now() - startTime;
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     // ── Log the job run ──────────────────────────────────────────
     const service = await createServiceClient();
     await service.from("scheduled_job_runs").insert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       job_name: `api-trigger-${job_type}`,
       job_type,
       started_at: new Date(startTime).toISOString(),
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: !result.error,
       job_type,
-      organization_id: orgId,
+      organization_id: workspaceId,
       execution_mode: executionMode,
       duration_ms: durationMs,
       result,
@@ -181,14 +181,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = request.nextUrl.searchParams.get("organizationId") || await getCurrentOrgId();
+    const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
     // Get recent job runs
     const service = await createServiceClient();
     const { data: recentRuns } = await service
       .from("scheduled_job_runs")
       .select("job_name, job_type, status, started_at, completed_at, duration_ms, error_message")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("started_at", { ascending: false })
       .limit(20);
 

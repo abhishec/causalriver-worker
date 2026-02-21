@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -76,14 +76,14 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const type = request.nextUrl.searchParams.get("type");
 
     const service = await createServiceClient();
     let query = service
       .from("org_connectors")
       .select("id, connector_type, instance_name, display_name, status, last_sync_at, config, metadata, signals_count, error_message, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: true });
 
     if (type) query = query.eq("connector_type", type);
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const body = await request.json();
     const { connectorType, displayName } = body;
 
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await service
       .from("org_connectors")
       .select("id")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", connectorType)
       .eq("instance_name", instanceName)
       .maybeSingle();
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
       const { data: inserted, error } = await service
         .from("org_connectors")
         .insert({
-          organization_id: orgId,
+          organization_id: workspaceId,
           connector_type: connectorType,
           instance_name: instanceName,
           display_name: displayName || instanceName,
@@ -279,7 +279,7 @@ export async function PUT(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const body = await request.json();
     const { id, displayName, config: configUpdates } = body;
 
@@ -295,7 +295,7 @@ export async function PUT(request: NextRequest) {
       .from("org_connectors")
       .update(updates)
       .eq("id", id)
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     if (error) throw error;
 
@@ -317,7 +317,7 @@ export async function DELETE(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const body = await request.json();
     const { id } = body;
 
@@ -329,7 +329,7 @@ export async function DELETE(request: NextRequest) {
       .from("org_connectors")
       .delete()
       .eq("id", id)
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     if (error) throw error;
 

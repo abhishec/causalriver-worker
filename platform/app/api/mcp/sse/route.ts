@@ -26,7 +26,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { createServiceClient } from "@/lib/supabase/server";
-import { checkOrgResources, incrementResource, decrementResource } from "@/lib/org-resource-guard";
+import { checkWorkspaceResources, incrementResource, decrementResource } from "@/lib/workspace-resource-guard";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes for long-running tools
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
   // Week 7: Check org resource limits before allowing new connection
   try {
     const service = await createServiceClient();
-    const resourceCheck = await checkOrgResources(service, auth.organizationId, "mcp_connection");
+    const resourceCheck = await checkWorkspaceResources(service, auth.organizationId, "mcp_connection");
     if (!resourceCheck.ok) {
       return NextResponse.json(
         { error: resourceCheck.reason },
@@ -220,13 +220,13 @@ export async function POST(request: NextRequest) {
   const sessionId = request.nextUrl.searchParams.get("sessionId");
 
   // If no session, authenticate directly (stateless mode)
-  let orgId: string;
+  let workspaceId: string;
   let permissions: string[];
   let controller: ReadableStreamDefaultController | null = null;
 
   if (sessionId && sessions.has(sessionId)) {
     const session = sessions.get(sessionId)!;
-    orgId = session.organizationId;
+    workspaceId = session.organizationId;
     permissions = session.permissions;
     controller = (session as any)._controller || null;
   } else {
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
     if ("error" in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
-    orgId = auth.organizationId;
+    workspaceId = auth.organizationId;
     permissions = auth.permissions;
   }
 
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
         // Week 7: Check daily tool call limit
         try {
           const svc = await createServiceClient();
-          const toolCheck = await checkOrgResources(svc, orgId, "tool_call");
+          const toolCheck = await checkWorkspaceResources(svc, workspaceId, "tool_call");
           if (!toolCheck.ok) {
             response = {
               jsonrpc: "2.0",
@@ -275,11 +275,11 @@ export async function POST(request: NextRequest) {
             };
             break;
           }
-          await incrementResource(svc, orgId, "tool_call");
+          await incrementResource(svc, workspaceId, "tool_call");
         } catch {
           // Non-fatal: resource guard not available
         }
-        response = await handleToolCall(id, params, orgId, permissions);
+        response = await handleToolCall(id, params, workspaceId, permissions);
         break;
       case "ping":
         response = { jsonrpc: "2.0", result: {}, id };

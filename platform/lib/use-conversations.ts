@@ -24,18 +24,18 @@ export interface ConversationFull extends ConversationSummary {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
-export function useConversations(orgId: string | undefined) {
+export function useConversations(workspaceId: string | undefined) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
   // ── Load list ──────────────────────────────────────────────────────────
   const loadList = useCallback(async () => {
-    if (!orgId) return;
+    if (!workspaceId) return;
     setLoading(true);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
     try {
-      const res = await fetch(`/api/copilot/conversations?orgId=${orgId}`, {
+      const res = await fetch(`/api/copilot/conversations?workspaceId=${workspaceId}`, {
         signal: controller.signal,
       });
       if (res.ok) {
@@ -48,7 +48,7 @@ export function useConversations(orgId: string | undefined) {
       clearTimeout(timeout);
       setLoading(false);
     }
-  }, [orgId]);
+  }, [workspaceId]);
 
   useEffect(() => {
     loadList();
@@ -66,7 +66,7 @@ export function useConversations(orgId: string | undefined) {
         const res = await fetch("/api/copilot/conversations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orgId, ...opts }),
+          body: JSON.stringify({ workspaceId, ...opts }),
         });
         if (!res.ok) {
           console.error("[useConversations] save failed:", res.status, await res.text());
@@ -82,7 +82,7 @@ export function useConversations(orgId: string | undefined) {
         return opts.conversationId || "";
       }
     },
-    [orgId, loadList]
+    [workspaceId, loadList]
   );
 
   // ── Load single conversation ───────────────────────────────────────────

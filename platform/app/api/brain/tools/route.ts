@@ -19,7 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 
 export const dynamic = 'force-dynamic';
 
@@ -186,7 +186,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // ── Auth ──────────────────────────────────────────────────────────
-    let orgId: string | null = null;
+    let workspaceId: string | null = null;
     let userId: string | null = null;
 
     const supabase = await createClient();
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
         if (!apiKeyResult.permissions.includes("read")) {
           return NextResponse.json({ error: "API key lacks read permission" }, { status: 403 });
         }
-        orgId = apiKeyResult.organizationId;
+        workspaceId = apiKeyResult.organizationId;
 
         const rawKey = authHeader!.replace("Bearer ", "");
         const rateLimitResult = await checkRateLimit(
@@ -245,9 +245,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve org
-    if (!orgId) {
-      orgId = organizationId || null;
-      if (!orgId && userId) {
+    if (!workspaceId) {
+      workspaceId = organizationId || null;
+      if (!workspaceId && userId) {
         const { data: membership } = await supabase
           .from("org_members")
           .select("organization_id")
@@ -255,11 +255,11 @@ export async function POST(request: NextRequest) {
           .order("joined_at", { ascending: true })
           .limit(1)
           .single();
-        orgId = membership?.organization_id || CORE_ORG_ID;
+        workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
       }
     }
 
-    if (!orgId) {
+    if (!workspaceId) {
       return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
     }
 
@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
         .from("org_members")
         .select("role")
         .eq("user_id", userId)
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .single();
 
       if (!toolsMembership) {
@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
     const { createNexusMcpServer } = await import("@nexus-ai/memory-stack");
     const mcpServer = createNexusMcpServer({
       supabase,
-      organizationId: orgId,
+      organizationId: workspaceId,
     });
 
     const result = await mcpServer.callTool(toolName, (toolArgs || {}) as Record<string, string>);
@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       toolName,
       result,
-      organizationId: orgId,
+      organizationId: workspaceId,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Internal server error";

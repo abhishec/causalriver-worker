@@ -29,6 +29,7 @@ import { createHmac } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { ingestPRAsSignals } from '@/lib/p0/ingest-pr-signals';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // WEBHOOK HANDLER
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
-      console.error('[GitHub Webhook] GITHUB_WEBHOOK_SECRET not configured');
+      logger.error('[GitHub Webhook] GITHUB_WEBHOOK_SECRET not configured');
       return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       .digest('hex')}`;
 
     if (signature !== expectedSignature) {
-      console.error('[GitHub Webhook] Invalid signature');
+      logger.error('[GitHub Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
     const event = req.headers.get('x-github-event');
     const payload = JSON.parse(body);
 
-    console.info(`[GitHub Webhook] Received ${event} event`);
+    logger.debug(`[GitHub Webhook] Received ${event} event`);
 
     // 3. Handle PR events
     if (event === 'pull_request') {
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
     if (event === 'push') {
       // Fire-and-forget — architecture sync is non-blocking best effort
       handlePushEvent(payload, supabase).catch((err) => {
-        console.warn('[GitHub Webhook] push/architecture-sync failed (non-fatal):', err?.message);
+        logger.warn('[GitHub Webhook] push/architecture-sync failed (non-fatal):', err?.message);
       });
       return NextResponse.json({ message: 'push event received — architecture sync queued' });
     }
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       message: `Event ${event} received but not processed`,
     });
   } catch (error) {
-    console.error('[GitHub Webhook] Error:', error);
+    logger.error('[GitHub Webhook] Error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -113,7 +114,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Action ${action} ignored` });
   }
 
-  console.info(
+  logger.debug(
     `[PR Review] Processing PR #${pull_request.number} in ${repository.full_name}`
   );
 
@@ -121,7 +122,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     // 1. Get GitHub installation token
     const installationId = installation?.id;
     if (!installationId) {
-      console.error('[PR Review] No installation ID found');
+      logger.error('[PR Review] No installation ID found');
       return NextResponse.json({ error: 'No installation found' }, { status: 400 });
     }
 
@@ -147,7 +148,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     ) ?? allConnectorConfigs?.[0] ?? null;
 
     if (!connectorConfig) {
-      console.error('[PR Review] No organization mapping found for repo');
+      logger.error('[PR Review] No organization mapping found for repo');
       return NextResponse.json(
         { error: 'Repository not connected to any organization' },
         { status: 404 }
@@ -188,7 +189,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     // 5. Run PR analysis through cognitive stack
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     if (!anthropicApiKey) {
-      console.warn('[PR Review] ANTHROPIC_API_KEY not set — skipping AI analysis');
+      logger.warn('[PR Review] ANTHROPIC_API_KEY not set — skipping AI analysis');
       return NextResponse.json({ ok: true, analysis: 'skipped_no_key' });
     }
     const analyzer = createPRAnalyzer({
@@ -199,7 +200,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
 
     const analysis = await analyzer.analyzePR(prMetadata);
 
-    console.info(
+    logger.debug(
       `[PR Review] Analysis complete: ${analysis.riskLevel} risk, ${analysis.reviewers.length} suggested reviewers`
     );
 
@@ -211,7 +212,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
       body: analysis.reviewComment,
     });
 
-    console.info(`[PR Review] Posted review comment on PR #${pull_request.number}`);
+    logger.debug(`[PR Review] Posted review comment on PR #${pull_request.number}`);
 
     // 6b. P0: Ingest PR as Brain signals (for velocity/bottleneck tracking)
     try {
@@ -246,10 +247,10 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
         (reviews || []).filter((r): r is typeof r & { user: NonNullable<typeof r.user> } => r.user !== null) as any[]
       );
 
-      console.info(`[P0] Ingested PR #${pull_request.number} signals to Brain`);
+      logger.debug(`[P0] Ingested PR #${pull_request.number} signals to Brain`);
     } catch (p0Error) {
       // Don't fail webhook on P0 error
-      console.error('[P0] Error ingesting PR signals:', p0Error);
+      logger.error('[P0] Error ingesting PR signals:', p0Error);
     }
 
     // 7. Record prediction for calibration loop
@@ -287,7 +288,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
       const serviceSupabase2 = await createServiceClient();
       await maybeTriggerBrainCycle(organizationId, serviceSupabase2);
     } catch (triggerErr) {
-      console.warn('[PR Review] Brain auto-trigger error:', triggerErr);
+      logger.warn('[PR Review] Brain auto-trigger error:', triggerErr);
     }
 
     // Auto-trigger SE-AAS PR Review on PR open/sync
@@ -325,7 +326,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
       issuesCount: analysis.issues.length,
     });
   } catch (error) {
-    console.error('[PR Review] Error analyzing PR:', error);
+    logger.error('[PR Review] Error analyzing PR:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Analysis failed' },
       { status: 500 }
@@ -340,7 +341,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Review action ${action} ignored` });
   }
 
-  console.info(
+  logger.debug(
     `[PR Review Outcome] Recording review outcome for PR #${pull_request.number}`
   );
 
@@ -371,7 +372,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
     recorded_at: new Date().toISOString(),
   });
 
-  console.info(`[PR Review Outcome] Recorded outcome: ${outcome}`);
+  logger.debug(`[PR Review Outcome] Recorded outcome: ${outcome}`);
 
   return NextResponse.json({ success: true, outcome });
 }
@@ -383,7 +384,7 @@ async function handleIssuesEvent(payload: any, supabase: any) {
     return NextResponse.json({ message: `Issue action ${action} ignored` });
   }
 
-  console.info(`[Issue Outcome] Issue #${issue.number} closed`);
+  logger.debug(`[Issue Outcome] Issue #${issue.number} closed`);
 
   // Record for metrics — look up from org_connectors (canonical table).
   const { data: issueConnectors } = await supabase
@@ -435,7 +436,7 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
   ) ?? (connectorConfigs ?? [])[0] ?? null;
 
   if (!matchingConnector) {
-    console.info(`[Architecture Sync] No org connector found for ${repoFullName}@${pushedBranch}`);
+    logger.debug(`[Architecture Sync] No org connector found for ${repoFullName}@${pushedBranch}`);
     return;
   }
 
@@ -444,7 +445,7 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
 
   // Only auto-trigger if the push is to the primary/configured branch
   if (pushedBranch !== primaryBranch) {
-    console.info(`[Architecture Sync] Push to ${pushedBranch} is not primaryBranch (${primaryBranch}), skipping`);
+    logger.debug(`[Architecture Sync] Push to ${pushedBranch} is not primaryBranch (${primaryBranch}), skipping`);
     return;
   }
 
@@ -460,7 +461,7 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
     .maybeSingle();
 
   if (recentJob) {
-    console.info(`[Architecture Sync] Already ran architecture extract in last 24h (jobId=${recentJob.id}), skipping`);
+    logger.debug(`[Architecture Sync] Already ran architecture extract in last 24h (jobId=${recentJob.id}), skipping`);
     return;
   }
 
@@ -491,11 +492,11 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
     .single();
 
   if (error) {
-    console.error('[Architecture Sync] Failed to queue job:', error.message);
+    logger.error('[Architecture Sync] Failed to queue job:', error.message);
     return;
   }
 
-  console.info(`[Architecture Sync] Queued architecture-extractor job ${job?.id} for org ${organizationId} (push to ${primaryBranch})`);
+  logger.debug(`[Architecture Sync] Queued architecture-extractor job ${job?.id} for org ${organizationId} (push to ${primaryBranch})`);
 
   // Log activity
   await supabase.from('agent_activity_log').insert({

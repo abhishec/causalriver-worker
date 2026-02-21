@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 import { InviteMemberModal } from "./InviteMemberModal";
 
 /* ── Types ───────────────────────────────────────────────────────── */
@@ -42,7 +42,7 @@ const ROLE_OPTIONS: Array<{ value: string; label: string }> = [
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function MembersTab({ orgId }: { orgId: string }) {
-  const { currentRole, isPlatformAdmin } = useOrg();
+  const { currentRole, isPlatformAdmin } = useWorkspace();
 
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<PendingInvite[]>([]);

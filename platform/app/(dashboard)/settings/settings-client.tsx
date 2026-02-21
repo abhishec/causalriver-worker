@@ -30,6 +30,14 @@ interface Customer {
   slug: string;
   plan: string;
   is_design_partner?: boolean;
+  industry?: string | null;
+  created_at?: string | null;
+}
+
+interface WorkspaceConnectorSummary {
+  type: string;
+  name: string;
+  count: number;
 }
 
 interface SiblingWorkspace {
@@ -37,6 +45,7 @@ interface SiblingWorkspace {
   name: string;
   slug: string;
   plan: string;
+  connectors?: WorkspaceConnectorSummary[];
 }
 
 interface SettingsClientProps {
@@ -47,6 +56,7 @@ interface SettingsClientProps {
   connectors: Connector[];
   customer?: Customer | null;
   siblingWorkspaces?: SiblingWorkspace[];
+  defaultWorkspaceId?: string | null;
 }
 
 const AVAILABLE_CONNECTORS = [
@@ -79,7 +89,7 @@ const TAB_ICONS: Record<string, string> = {
   partner:       "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
 };
 
-export function SettingsClient({ org, orgId, budget, apiKeys, connectors, customer, siblingWorkspaces = [] }: SettingsClientProps) {
+export function SettingsClient({ org, orgId, budget, apiKeys, connectors, customer, siblingWorkspaces = [], defaultWorkspaceId: initialDefaultWsId }: SettingsClientProps) {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "general";
   const initialAction = searchParams.get("action");
@@ -90,6 +100,8 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
   const [createName, setCreateName] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [defaultWsId, setDefaultWsId] = useState<string | null>(initialDefaultWsId ?? null);
+  const [settingDefault, setSettingDefault] = useState<string | null>(null);
 
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
 
@@ -131,6 +143,29 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
       setCreating(false);
     }
   }, [createName, customer, showToast]);
+
+  const handleSetDefault = useCallback(async (wsId: string) => {
+    setSettingDefault(wsId);
+    try {
+      const res = await fetch("/api/workspace/set-default", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wsId }),
+      });
+      if (res.ok) {
+        setDefaultWsId(wsId);
+        const wsName = siblingWorkspaces.find(w => w.id === wsId)?.name ?? "Workspace";
+        showToast(`"${wsName}" set as default workspace`);
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to set default");
+      }
+    } catch {
+      showToast("Failed to set default workspace");
+    } finally {
+      setSettingDefault(null);
+    }
+  }, [siblingWorkspaces, showToast]);
 
   const isDesignPartner = customer?.is_design_partner ?? false;
 
@@ -193,26 +228,51 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
         {/* General Tab */}
         {activeTab === "general" && (
           <div>
-            {/* ── Customer Section (shown at top when linked) ──────── */}
+            {/* ── Customer Account Section ───────────────────────── */}
             {customer && (
               <div className="mb-8">
-                <h2 className="text-sm font-medium mb-1">Customer</h2>
+                <h2 className="text-sm font-medium mb-1">Customer Account</h2>
                 <p className="text-xs text-muted mb-4">Your workspaces are managed under this customer account</p>
-                <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <div className="rounded-xl border border-border-subtle bg-surface/50 p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <svg className="w-5.5 h-5.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                       </svg>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{customer.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold">{customer.name}</div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge variant="accent" size="xs">{customer.plan}</Badge>
                         <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
                         {customer.is_design_partner && (
                           <Badge variant="default" size="xs">Design Partner</Badge>
                         )}
+                      </div>
+                      {/* Metadata row */}
+                      <div className="flex items-center gap-4 mt-3 text-[11px] text-muted-foreground">
+                        {customer.industry && (
+                          <div className="flex items-center gap-1.5">
+                            <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21" />
+                            </svg>
+                            <span className="capitalize">{customer.industry}</span>
+                          </div>
+                        )}
+                        {customer.created_at && (
+                          <div className="flex items-center gap-1.5">
+                            <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            <span>Onboarded {new Date(customer.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                          </svg>
+                          <span>{siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -220,11 +280,11 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
               </div>
             )}
 
-            {/* ── Workspace Details ───────────────────────────────── */}
-            <h2 className="text-sm font-medium mb-1">Workspace Details</h2>
+            {/* ── Current Workspace Details ──────────────────────── */}
+            <h2 className="text-sm font-medium mb-1">Current Workspace</h2>
             <p className="text-xs text-muted mb-6">
               {customer
-                ? <>Current workspace under <span className="font-medium text-foreground">{customer.name}</span></>
+                ? <>Active workspace under <span className="font-medium text-foreground">{customer.name}</span></>
                 : "Basic workspace information"
               }
             </p>
@@ -239,6 +299,9 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
                   <div className="flex items-center gap-2 mt-0.5">
                     <Badge variant="accent" size="xs">{org?.plan || "starter"}</Badge>
                     <span className="text-[10px] text-muted font-mono">{org?.slug}</span>
+                    {defaultWsId === orgId && (
+                      <Badge variant="default" size="xs">Default</Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -275,53 +338,88 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
             {/* ── All Workspaces under Customer ──────────────────── */}
             {customer && (
               <div className="mt-8 pt-6 border-t border-border-subtle">
-                <h2 className="text-sm font-medium mb-1">All Workspaces</h2>
+                <h2 className="text-sm font-medium mb-1">All Workspaces ({siblingWorkspaces.length})</h2>
                 <p className="text-xs text-muted mb-4">
-                  {siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""} under {customer.name}
+                  Workspaces under {customer.name} &middot; Set your default landing workspace
                 </p>
 
                 <div className="rounded-xl border border-border-subtle bg-surface/50 p-4">
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {siblingWorkspaces.length > 0 ? (
-                      siblingWorkspaces.map((ws) => (
-                        <div
-                          key={ws.id}
-                          className={cn(
-                            "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
-                            ws.id === orgId
-                              ? "bg-accent/8 border border-accent/15"
-                              : "hover:bg-surface-hover"
-                          )}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            {ws.id === orgId && (
-                              <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
+                      siblingWorkspaces.map((ws) => {
+                        const isCurrent = ws.id === orgId;
+                        const isDefault = ws.id === defaultWsId;
+                        return (
+                          <div
+                            key={ws.id}
+                            className={cn(
+                              "px-3 py-2.5 rounded-lg text-sm transition-colors",
+                              isCurrent
+                                ? "bg-accent/8 border border-accent/15"
+                                : "hover:bg-surface-hover border border-transparent"
                             )}
-                            <span className={cn("truncate text-[13px]", ws.id === orgId ? "font-medium" : "text-muted-foreground")}>
-                              {ws.name}
-                            </span>
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                {isCurrent && (
+                                  <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                                <span className={cn("truncate text-[13px]", isCurrent ? "font-medium" : "text-muted-foreground")}>
+                                  {ws.name}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Badge variant="default" size="xs">{ws.plan}</Badge>
+                                {isCurrent && (
+                                  <span className="text-[10px] text-accent font-medium">Current</span>
+                                )}
+                                {isDefault ? (
+                                  <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 rounded bg-surface border border-border-subtle">
+                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                    Default
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleSetDefault(ws.id)}
+                                    disabled={settingDefault !== null}
+                                    className="text-[10px] text-muted hover:text-accent font-medium px-1.5 py-0.5 rounded hover:bg-accent/8 transition-colors disabled:opacity-50"
+                                  >
+                                    {settingDefault === ws.id ? "Setting…" : "Set Default"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            {/* Connected services row */}
+                            {ws.connectors && ws.connectors.length > 0 && (
+                              <div className="mt-1.5 ml-5 flex items-center gap-1 flex-wrap">
+                                {ws.connectors.map((conn, i) => (
+                                  <span key={conn.type} className="text-[10px] text-muted">
+                                    {i > 0 && <span className="mr-1">&middot;</span>}
+                                    {conn.name} ({conn.count})
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="px-3 py-2.5 rounded-lg bg-accent/8 border border-accent/15">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="truncate text-[13px] font-medium">{org?.name || "Workspace"}</span>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
-                            <Badge variant="default" size="xs">{ws.plan}</Badge>
-                            {ws.id === orgId && (
-                              <span className="text-[10px] text-accent font-medium">Current</span>
-                            )}
+                            <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
+                            <span className="text-[10px] text-accent font-medium">Current</span>
                           </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-accent/8 border border-accent/15">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <svg className="w-3.5 h-3.5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="truncate text-[13px] font-medium">{org?.name || "Workspace"}</span>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="default" size="xs">{org?.plan || "free"}</Badge>
-                          <span className="text-[10px] text-accent font-medium">Current</span>
                         </div>
                       </div>
                     )}
@@ -491,7 +589,7 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
         {activeTab === "partner" && isDesignPartner && (
           <PartnerDashboard
             orgId={orgId}
-            orgName={org?.name ?? "Organization"}
+            orgName={org?.name ?? "Workspace"}
           />
         )}
 
@@ -515,8 +613,8 @@ export function SettingsClient({ org, orgId, budget, apiKeys, connectors, custom
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl border border-danger/10 bg-danger/5">
                 <div>
-                  <div className="text-sm font-medium">Delete Organization</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Permanently delete this organization and all data</div>
+                  <div className="text-sm font-medium">Delete Workspace</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Permanently delete this workspace and all data</div>
                 </div>
                 <button
                   disabled

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ReleaseTracker, listActiveReleases } from "@nexus-ai/memory-stack";
 import type { ReleaseConfig } from "@nexus-ai/memory-stack";
 
@@ -17,10 +17,10 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
-    const releases = await listActiveReleases(service, orgId);
+    const releases = await listActiveReleases(service, workspaceId);
     return NextResponse.json({ releases });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const body = await request.json();
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     }
 
     // Always use the authenticated org's ID (never trust client-supplied orgId)
-    const config: ReleaseConfig = { ...releaseConfig, organizationId: orgId };
+    const config: ReleaseConfig = { ...releaseConfig, organizationId: workspaceId };
 
     const tracker = new ReleaseTracker(service, config);
 

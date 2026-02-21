@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export type Role = "owner" | "admin" | "analyst" | "viewer";
 
@@ -42,7 +42,8 @@ export const PERMISSIONS: Record<Role, string[]> = {
     "notifications:manage",
   ],
   owner: [
-    "org:delete",
+    "workspace:delete",
+    "org:delete",  // backward compat alias
     "billing:manage",
     "roles:manage",
   ],
@@ -88,12 +89,12 @@ export async function getCurrentRole(): Promise<Role> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return "viewer";
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     const { data: member } = await supabase
       .from("org_members")
       .select("role")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("user_id", user.id)
       .single();
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentOrgId } from '@/lib/org-helpers';
+import { getCurrentWorkspaceId } from '@/lib/workspace-helpers';
 import { randomBytes } from 'crypto';
 
 /**
@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    const orgId = await getCurrentOrgId();
-    if (!orgId) {
+    const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
       return NextResponse.json(
         { error: 'No organization found' },
         { status: 400 }
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     // Get OAuth credentials (org-level or platform-level)
     const { data: orgOAuthData } = await supabase.rpc('get_org_oauth_credentials', {
-      p_organization_id: orgId,
+      p_organization_id: workspaceId,
       p_connector_type: 'github',
     });
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     // If returnMode=popup is set, append 'popup' to state so the callback
     // returns HTML with postMessage instead of a redirect (for onboarding inline flow)
     const returnMode = request.nextUrl.searchParams.get('returnMode');
-    const state = `${orgId}:${user.id}:${Date.now()}:${nonce}${returnMode === 'popup' ? ':popup' : ''}`;
+    const state = `${workspaceId}:${user.id}:${Date.now()}:${nonce}${returnMode === 'popup' ? ':popup' : ''}`;
 
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id', clientId);

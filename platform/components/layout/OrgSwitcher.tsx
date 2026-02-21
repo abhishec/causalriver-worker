@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * OrgSwitcher — Customer → Workspace aware
+ * WorkspaceSwitcher — Customer → Workspace aware
  * ==========================================
  * Renders the sidebar workspace switcher.
  *
@@ -22,19 +22,19 @@
  *   │  PLATFORM (admin only)       │
  *   │    NexusBrain Core           │
  *   │  ──────────────────────────  │
- *   │  Manage All Organizations →  │
+ *   │  Manage All Workspaces →     │
  *   └──────────────────────────────┘
  *
  * KEY GUARANTEES:
  * - customer_name is ONLY used for display grouping — never in brain paths
  * - Switching workspaces = full page reload (server components refresh)
  * - CORE brain hidden from non-admin users
- * - Orgs without a customer (internal/test) shown under "My Workspaces"
+ * - Workspaces without a customer (internal/test) shown under "My Workspaces"
  */
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { useOrg, type OrgMembership } from "@/lib/org-context";
+import { useWorkspace, type WorkspaceMembership } from "@/lib/workspace-context";
 import { cn } from "@/lib/utils";
 
 const PLAN_COLORS: Record<string, string> = {
@@ -71,11 +71,11 @@ function WorkspaceRow({
   isActive,
   onSelect,
 }: {
-  membership: OrgMembership;
+  membership: WorkspaceMembership;
   isActive: boolean;
   onSelect: () => void;
 }) {
-  const org = membership.organization;
+  const ws = membership.workspace;
   return (
     <button
       onClick={onSelect}
@@ -88,9 +88,9 @@ function WorkspaceRow({
     >
       {/* indent marker */}
       <span className="w-1 h-1 rounded-full bg-current shrink-0 opacity-40" />
-      <span className="truncate flex-1">{org.name}</span>
-      <span className={cn("text-[10px] capitalize shrink-0", PLAN_COLORS[org.plan] ?? "text-muted")}>
-        {org.plan}
+      <span className="truncate flex-1">{ws.name}</span>
+      <span className={cn("text-[10px] capitalize shrink-0", PLAN_COLORS[ws.plan] ?? "text-muted")}>
+        {ws.plan}
       </span>
       {isActive && <CheckIcon />}
     </button>
@@ -108,53 +108,45 @@ function CustomerGroupHeader({ label }: { label: string }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function OrgSwitcher() {
-  const { currentOrg, organizations, switchOrg, isPlatformAdmin, isLoading } = useOrg();
+export function WorkspaceSwitcher() {
+  const { currentWorkspace, workspaces, switchWorkspace, isPlatformAdmin, isLoading } = useWorkspace();
   const [open, setOpen] = useState(false);
 
   // ── Group memberships by customer ─────────────────────────────────────────
-  //
-  // customerGroups: Map<customerLabel, OrgMembership[]>
-  //   - keyed by customer_name (e.g. "Tookitaki") or "__none__" for unclaimed
-  // coreOrgs: memberships for CORE brain (admin only)
-  //
-  // Must be declared BEFORE the early return so hooks are always called in
-  // the same order (React rules-of-hooks).
-  const { customerGroups, coreOrgs } = useMemo(() => {
-    const groups = new Map<string, OrgMembership[]>();
-    const core: OrgMembership[] = [];
+  const { customerGroups, coreWorkspaces } = useMemo(() => {
+    const groups = new Map<string, WorkspaceMembership[]>();
+    const core: WorkspaceMembership[] = [];
 
-    for (const m of organizations) {
-      if (m.organization.is_core_brain) {
+    for (const m of workspaces) {
+      if (m.workspace.is_core_brain) {
         core.push(m);
         continue;
       }
-      // Group key: customer name if present, else "My Workspaces"
-      const key = m.organization.customer_name ?? "My Workspaces";
+      const key = m.workspace.customer_name ?? "My Workspaces";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
 
-    return { customerGroups: groups, coreOrgs: core };
-  }, [organizations]);
+    return { customerGroups: groups, coreWorkspaces: core };
+  }, [workspaces]);
 
-  if (isLoading || !currentOrg) return null;
+  if (isLoading || !currentWorkspace) return null;
 
-  const totalUserOrgs = organizations.filter(m => !m.organization.is_core_brain).length;
+  const totalUserWorkspaces = workspaces.filter(m => !m.workspace.is_core_brain).length;
 
   // ── Single-workspace users: no dropdown needed ───────────────────────────
-  if (totalUserOrgs <= 1 && !isPlatformAdmin) {
+  if (totalUserWorkspaces <= 1 && !isPlatformAdmin) {
     return (
       <div className="px-3 py-2">
         <div className="px-3 py-2 rounded-lg bg-surface/50">
-          {currentOrg.customer_name && (
+          {currentWorkspace.customer_name && (
             <div className="text-[10px] uppercase tracking-wider text-muted mb-0.5">
-              {currentOrg.customer_name}
+              {currentWorkspace.customer_name}
             </div>
           )}
-          <div className="text-xs font-medium truncate">{currentOrg.name}</div>
-          <div className={cn("text-[10px] capitalize", PLAN_COLORS[currentOrg.plan] ?? "text-muted")}>
-            {currentOrg.plan}
+          <div className="text-xs font-medium truncate">{currentWorkspace.name}</div>
+          <div className={cn("text-[10px] capitalize", PLAN_COLORS[currentWorkspace.plan] ?? "text-muted")}>
+            {currentWorkspace.plan}
           </div>
         </div>
       </div>
@@ -162,9 +154,9 @@ export function OrgSwitcher() {
   }
 
   // ── Dropdown label: show customer prefix if workspace has a customer ──────
-  const currentLabel = currentOrg.customer_name
-    ? `${currentOrg.customer_name} — ${currentOrg.name}`
-    : currentOrg.name;
+  const currentLabel = currentWorkspace.customer_name
+    ? `${currentWorkspace.customer_name} — ${currentWorkspace.name}`
+    : currentWorkspace.name;
 
   return (
     <div className="px-3 py-2 relative">
@@ -176,14 +168,14 @@ export function OrgSwitcher() {
         aria-expanded={open}
       >
         <div className="min-w-0">
-          {currentOrg.customer_name && (
+          {currentWorkspace.customer_name && (
             <div className="text-[10px] uppercase tracking-wider text-muted leading-none mb-0.5">
-              {currentOrg.customer_name}
+              {currentWorkspace.customer_name}
             </div>
           )}
-          <div className="text-xs font-medium truncate">{currentOrg.name}</div>
-          <div className={cn("text-[10px] capitalize", PLAN_COLORS[currentOrg.plan] ?? "text-muted")}>
-            {currentOrg.plan} workspace
+          <div className="text-xs font-medium truncate">{currentWorkspace.name}</div>
+          <div className={cn("text-[10px] capitalize", PLAN_COLORS[currentWorkspace.plan] ?? "text-muted")}>
+            {currentWorkspace.plan} workspace
           </div>
         </div>
         <ChevronIcon open={open} />
@@ -215,11 +207,11 @@ export function OrgSwitcher() {
                   <WorkspaceRow
                     key={m.organization_id}
                     membership={m}
-                    isActive={m.organization_id === currentOrg.id}
+                    isActive={m.organization_id === currentWorkspace.id}
                     onSelect={() => {
                       setOpen(false);
-                      if (m.organization_id !== currentOrg.id) {
-                        switchOrg(m.organization_id);
+                      if (m.organization_id !== currentWorkspace.id) {
+                        switchWorkspace(m.organization_id);
                       }
                     }}
                   />
@@ -228,19 +220,19 @@ export function OrgSwitcher() {
             ))}
 
             {/* ── Core brain (platform admins only) ───────────────────── */}
-            {coreOrgs.length > 0 && (
+            {coreWorkspaces.length > 0 && (
               <>
                 <div className="border-t border-border-subtle my-1" />
                 <CustomerGroupHeader label="Platform" />
-                {coreOrgs.map((m) => (
+                {coreWorkspaces.map((m) => (
                   <WorkspaceRow
                     key={m.organization_id}
                     membership={m}
-                    isActive={m.organization_id === currentOrg.id}
+                    isActive={m.organization_id === currentWorkspace.id}
                     onSelect={() => {
                       setOpen(false);
-                      if (m.organization_id !== currentOrg.id) {
-                        switchOrg(m.organization_id);
+                      if (m.organization_id !== currentWorkspace.id) {
+                        switchWorkspace(m.organization_id);
                       }
                     }}
                   />
@@ -253,11 +245,11 @@ export function OrgSwitcher() {
               <>
                 <div className="border-t border-border-subtle my-1" />
                 <Link
-                  href="/admin/orgs"
+                  href="/admin/workspaces"
                   onClick={() => setOpen(false)}
                   className="block px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
                 >
-                  Manage All Organizations →
+                  Manage All Workspaces →
                 </Link>
               </>
             )}
@@ -267,3 +259,6 @@ export function OrgSwitcher() {
     </div>
   );
 }
+
+/** @deprecated Use WorkspaceSwitcher instead */
+export const OrgSwitcher = WorkspaceSwitcher;

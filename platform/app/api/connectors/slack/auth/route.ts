@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentOrgId } from '@/lib/org-helpers';
+import { getCurrentWorkspaceId } from '@/lib/workspace-helpers';
 import { randomBytes } from 'crypto';
 
 /**
@@ -21,8 +21,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Get current organization
-    const orgId = await getCurrentOrgId();
-    if (!orgId) {
+    const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
       return NextResponse.json(
         { error: 'No organization found' },
         { status: 400 }
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     // 3. Get OAuth credentials (org-level or platform-level)
     const { data: orgOAuthData } = await supabase.rpc('get_org_oauth_credentials', {
-      p_organization_id: orgId,
+      p_organization_id: workspaceId,
       p_connector_type: 'slack',
     });
 
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     // Store state to verify callback
     const nonce = randomBytes(16).toString('hex');
-    const state = `${orgId}:${user.id}:${Date.now()}:${nonce}`;
+    const state = `${workspaceId}:${user.id}:${Date.now()}:${nonce}`;
 
     const authUrl = new URL('https://slack.com/oauth/v2/authorize');
     authUrl.searchParams.set('client_id', clientId);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const service = await createServiceClient();
   const body = await request.json().catch(() => ({}));
   const { packId } = body as { packId?: string };
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     let query = service
       .from("custom_training_packs")
       .select("id, pack_data, created_by")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("status", "pending")
       .order("created_at", { ascending: true })
       .limit(20);
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
         // Apply causal chains — batch upsert
         if (packData.chains && packData.chains.length > 0) {
           const chainRows = packData.chains.map((chain) => ({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: chain.source_domain || chain.source || "unknown",
             target_domain: chain.target_domain || chain.target || "unknown",
             effect_size: chain.effect_size || chain.strength || 0.5,
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
         // Apply business rules — batch insert
         if (packData.rules && packData.rules.length > 0) {
           const ruleRows = packData.rules.map((rule) => ({
-            organization_id: orgId,
+            organization_id: workspaceId,
             memory_type: "business_rule",
             domain: (rule.domain as string) || "general",
             content:

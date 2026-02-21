@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * GET /api/notifications
@@ -15,7 +15,7 @@ export async function GET() {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // Fetch from multiple tables in parallel to build notifications
     const [cascadeResult, snapshotResult, costResult] = await Promise.all([
@@ -23,7 +23,7 @@ export async function GET() {
       supabase
         .from("cascade_alerts")
         .select("id, alert_type, severity, message, created_at, is_read")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .order("created_at", { ascending: false })
         .limit(20),
 
@@ -31,7 +31,7 @@ export async function GET() {
       supabase
         .from("brain_daily_snapshots")
         .select("id, snapshot_date, brain_health_score, prediction_accuracy, top_discoveries")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .order("snapshot_date", { ascending: false })
         .limit(5),
 
@@ -39,7 +39,7 @@ export async function GET() {
       supabase
         .from("cost_budget_config")
         .select("daily_llm_budget, alert_threshold_pct")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .single(),
     ]);
 
@@ -138,34 +138,34 @@ export async function PATCH(request: Request) {
       // If it's a cascade alert, mark it as read in the DB (scoped to user's org)
       const alertId = body.notificationId.replace("cascade-", "");
       if (body.notificationId.startsWith("cascade-")) {
-        const orgId = await getCurrentOrgId();
+        const workspaceId = await getCurrentWorkspaceId();
         await supabase
           .from("cascade_alerts")
           .update({ is_read: true })
           .eq("id", alertId)
-          .eq("organization_id", orgId);
+          .eq("organization_id", workspaceId);
       }
       return NextResponse.json({ success: true });
     }
 
     if (body.action === "mark_all_read") {
-      const orgId = await getCurrentOrgId();
+      const workspaceId = await getCurrentWorkspaceId();
       await supabase
         .from("cascade_alerts")
         .update({ is_read: true })
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("is_read", false);
       return NextResponse.json({ success: true });
     }
 
     if (body.action === "save_preferences" && body.preferences) {
-      const orgId = await getCurrentOrgId();
+      const workspaceId = await getCurrentWorkspaceId();
       // Upsert notification preferences
       const { error } = await supabase
         .from("notification_preferences")
         .upsert(
           {
-            organization_id: orgId,
+            organization_id: workspaceId,
             user_id: user.id,
             ...body.preferences,
             updated_at: new Date().toISOString(),

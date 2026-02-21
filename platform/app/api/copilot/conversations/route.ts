@@ -1,12 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
-import { getAdminClient, verifyOrgMembership } from "@/lib/supabase/admin";
+import { getAdminClient, verifyWorkspaceMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/copilot/conversations?orgId=<uuid>
- * List the current user's conversations for the given org.
+ * GET /api/copilot/conversations?workspaceId=<uuid>
+ * List the current user's conversations for the given workspace.
+ *
+ * Also accepts legacy ?orgId=<uuid> query param for backward compat.
  *
  * Uses admin client for all DB queries — the conversations table has RLS
  * policies that reference org_members, which has infinite recursion.
@@ -20,13 +22,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const orgId = req.nextUrl.searchParams.get("orgId");
-  if (!orgId) {
-    return NextResponse.json({ error: "orgId required" }, { status: 400 });
+  // Accept both workspaceId (new) and orgId (legacy)
+  const workspaceId = req.nextUrl.searchParams.get("workspaceId") || req.nextUrl.searchParams.get("orgId");
+  if (!workspaceId) {
+    return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
   }
 
-  // Verify org membership (uses admin client to bypass RLS recursion)
-  const member = await verifyOrgMembership(user.id, orgId);
+  // Verify workspace membership (uses admin client to bypass RLS recursion)
+  const member = await verifyWorkspaceMembership(user.id, workspaceId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -35,7 +38,7 @@ export async function GET(req: NextRequest) {
   const { data, error } = await admin
     .from("conversations")
     .select("id, title, service_mode, created_at, updated_at, metadata")
-    .eq("org_id", orgId)
+    .eq("org_id", workspaceId)
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
     .limit(50);
@@ -61,14 +64,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { orgId, title, serviceMode, messages, conversationId } = body;
+  // Accept both workspaceId (new) and orgId (legacy)
+  const workspaceId = body.workspaceId || body.orgId;
+  const { title, serviceMode, messages, conversationId } = body;
 
-  if (!orgId) {
-    return NextResponse.json({ error: "orgId required" }, { status: 400 });
+  if (!workspaceId) {
+    return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
   }
 
-  // Verify org membership (uses admin client to bypass RLS recursion)
-  const member = await verifyOrgMembership(user.id, orgId);
+  // Verify workspace membership (uses admin client to bypass RLS recursion)
+  const member = await verifyWorkspaceMembership(user.id, workspaceId);
   if (!member) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -100,7 +105,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await admin
     .from("conversations")
     .insert({
-      org_id: orgId,
+      org_id: workspaceId,
       user_id: user.id,
       title: title || "New conversation",
       service_mode: serviceMode || "general",

@@ -20,8 +20,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // ── Load Slack credentials ──────────────────────────────────────────
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     let connectorQuery = service
       .from("org_connectors")
       .select("id, credentials, config, metadata, signals_count")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "slack")
       .eq("status", "active");
 
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
         // ── Emit signals per day ────────────────────────────────────
         for (const [day, count] of dailyVolume) {
           signals.push({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "channel_message_volume",
             signal_value: count,
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
         // ── Thread engagement signal ────────────────────────────────
         if (threadCount > 0) {
           signals.push({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "thread_engagement",
             signal_value: threadCount / messages.length, // engagement ratio
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
         // ── Reaction sentiment signal ───────────────────────────────
         if (reactionCount > 0) {
           signals.push({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "reaction_sentiment",
             signal_value: reactionCount / messages.length,
@@ -213,7 +214,7 @@ export async function POST(request: NextRequest) {
         // ── After-hours activity signal ─────────────────────────────
         if (afterHoursCount > 0) {
           signals.push({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "after_hours_activity",
             signal_value: afterHoursCount / messages.length,
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (channelErr) {
-        console.warn(
+        logger.warn(
           `[Slack Sync] Failed to fetch channel ${channel.name}:`,
           channelErr
         );
@@ -245,12 +246,12 @@ export async function POST(request: NextRequest) {
       if (!insertError) {
         signalsInserted += batch.length;
       } else {
-        console.warn("[Slack Sync] Signal insert error:", insertError.message);
+        logger.warn("[Slack Sync] Signal insert error:", insertError.message);
       }
     }
 
     // ── Step 4: Derive REAL communication insights from actual signals ────
-    await deriveRealSlackInsights(service, orgId);
+    await deriveRealSlackInsights(service, workspaceId);
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;
@@ -258,26 +259,26 @@ export async function POST(request: NextRequest) {
       const { data: recentSignals } = await service
         .from("cross_domain_signals")
         .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .in("source_domain", ["communication", "hr", "culture"])
         .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("signal_timestamp", { ascending: false })
         .limit(500);
 
       if (recentSignals && recentSignals.length > 0) {
-        const bandit = createCausalMethodBandit({ supabase: service, organizationId: orgId });
+        const bandit = createCausalMethodBandit({ supabase: service, organizationId: workspaceId });
         const oracle = createOutcomeOracle({ supabase: service, bandit });
-        await oracle.loadFromSupabase(orgId);
+        await oracle.loadFromSupabase(workspaceId);
         const result = await oracle.processBatch(recentSignals);
         oracleResult = {
           predictionsVerified: result.predictionsVerified,
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        console.info(`[Slack sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+        logger.debug(`[Slack sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
       }
     } catch (oracleErr: any) {
-      console.warn("[Slack sync] Oracle error (non-fatal):", oracleErr.message);
+      logger.warn("[Slack sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
     // ── Step 5: Update connector status ─────────────────────────────────
@@ -306,7 +307,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Sync failed";
-    console.error("[Slack Sync] Error:", msg);
+    logger.error("[Slack Sync] Error:", msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
@@ -324,13 +325,13 @@ export async function POST(request: NextRequest) {
  */
 async function deriveRealSlackInsights(
   service: any,
-  orgId: string
+  workspaceId: string
 ): Promise<void> {
   // Pull recent Slack signals (last 30 days)
   const { data: signals } = await service
     .from("cross_domain_signals")
     .select("signal_type, signal_value, signal_metadata, created_at")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .like("source_domain", "communication%")
     .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
     .order("created_at", { ascending: true })
@@ -352,7 +353,7 @@ async function deriveRealSlackInsights(
   if (topChannels.length > 0) {
     const totalMessages = Object.values(channelVolume).reduce((a, b) => a + b, 0);
     await service.from("ai_memory").upsert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       memory_type: "pattern",
       domain: "communication.channels",
       content: JSON.stringify({
@@ -378,7 +379,7 @@ async function deriveRealSlackInsights(
 
     if (avgAfterHoursRatio > 0.1) {
       await service.from("ai_memory").upsert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         memory_type: "pattern",
         domain: "communication.after_hours",
         content: JSON.stringify({
@@ -404,7 +405,7 @@ async function deriveRealSlackInsights(
       .filter(Boolean);
 
     await service.from("ai_memory").upsert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       memory_type: "pattern",
       domain: "communication.engagement",
       content: JSON.stringify({
@@ -419,5 +420,5 @@ async function deriveRealSlackInsights(
     }, { onConflict: "organization_id,memory_type,domain" });
   }
 
-  console.info(`[Brain] Derived real Slack insights from ${signals.length} signals for org ${orgId}`);
+  logger.debug(`[Brain] Derived real Slack insights from ${signals.length} signals for org ${workspaceId}`);
 }

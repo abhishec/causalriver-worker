@@ -30,7 +30,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 min for agent execution
@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Resolve org ──────────────────────────────────────────────
-    let orgId = organizationId;
-    if (!orgId) {
+    let workspaceId = organizationId;
+    if (!workspaceId) {
       const { data: membership } = await supabase
         .from("org_members")
         .select("organization_id")
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         .order("joined_at", { ascending: true })
         .limit(1)
         .single();
-      orgId = membership?.organization_id || CORE_ORG_ID;
+      workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
     }
 
     // Verify membership
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!memberCheck) {
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     const { data: task, error: insertError } = await service
       .from("brain_agent_tasks")
       .insert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         created_by: user.id,
         prompt: prompt.trim(),
         agent_type: agentType,
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     try {
       await Promise.race([
-        executeAgentWithBrainRuntime(service, taskId, orgId, prompt, agentType, autoExecuteThreshold, user.id),
+        executeAgentWithBrainRuntime(service, taskId, workspaceId, prompt, agentType, autoExecuteThreshold, user.id),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("Agent execution timed out (90s)")), AGENT_TIMEOUT_MS)
         ),
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
 async function executeAgentWithBrainRuntime(
   supabase: import("@supabase/supabase-js").SupabaseClient,
   taskId: string,
-  orgId: string,
+  workspaceId: string,
   prompt: string,
   agentType: string,
   autoExecuteThreshold: number,
@@ -259,18 +259,18 @@ async function executeAgentWithBrainRuntime(
   const entityGraph = createCrossSystemEntityGraph();
 
   const cognitiveStack = createCognitiveStack({
-    organizationId: orgId,
+    organizationId: workspaceId,
     anthropicApiKey: apiKey,
   });
 
   const deepLayers = createDeepLayers({
-    organizationId: orgId,
+    organizationId: workspaceId,
     domainTaxonomy,
     entityGraph,
   });
 
   const pipeline = createDeepPipeline({
-    organizationId: orgId,
+    organizationId: workspaceId,
     supabase,
     cognitiveStack,
     deepLayers,
@@ -279,7 +279,7 @@ async function executeAgentWithBrainRuntime(
   });
 
   const cortex = createNeuralCortexController({
-    organizationId: orgId,
+    organizationId: workspaceId,
     supabase,
     pipeline,
     cognitiveStack,
@@ -292,7 +292,7 @@ async function executeAgentWithBrainRuntime(
 
   const brainRuntime = createBrainAgentRuntime({
     supabase,
-    organizationId: orgId,
+    organizationId: workspaceId,
     cortex,
     closedLoop: closedLoop ?? undefined,
     defaultAnthropicApiKey: apiKey,
@@ -311,7 +311,7 @@ async function executeAgentWithBrainRuntime(
     const { data: memories } = await supabase
       .from("agent_episodic_memory")
       .select("content, episode_type, importance, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("agent_type", agentType)
       .order("importance", { ascending: false })
       .limit(5);
@@ -517,7 +517,7 @@ async function executeAgentWithBrainRuntime(
 
   // ── Step 7: Emit learning signal ───────────────────────────────
   await supabase.from("cross_domain_signals").insert({
-    organization_id: orgId,
+    organization_id: workspaceId,
     source_domain: "brain.agents",
     signal_type: `agent_${agentType}_completed`,
     signal_value: confidence,
@@ -547,7 +547,7 @@ async function executeAgentWithBrainRuntime(
     `Key findings: ${responseText.slice(0, 300)}`;
 
   await supabase.from("agent_episodic_memory").insert({
-    organization_id: orgId,
+    organization_id: workspaceId,
     agent_type: agentType,
     episode_type: "run_summary",
     content: runSummary,

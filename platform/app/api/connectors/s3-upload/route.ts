@@ -9,7 +9,7 @@
  *
  *   Flow:
  *     1. Validate auth + org membership
- *     2. Upload file to S3 at {orgId}/{filename}
+ *     2. Upload file to S3 at {workspaceId}/{filename}
  *     3. Record in org_connectors as s3-storage connector
  *     4. Auto-trigger brain ingestion for GL data
  *     5. Return upload result + brain trigger status
@@ -19,10 +19,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
 import { maybeTriggerBrainCycle } from "@/lib/brain-trigger";
 import { parseGLFile } from "@/lib/parsers/gl-file-parser";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -47,14 +48,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // ── Verify membership ──────────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!membership) {
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
     if (useS3) {
       const storage = getOrgStorage();
       s3BucketName = storage.bucketName;
-      uploadResult = await storage.upload(orgId, s3Key, buffer, {
+      uploadResult = await storage.upload(workspaceId, s3Key, buffer, {
         contentType: file.type || "application/octet-stream",
         metadata: {
           uploadedBy: user.id,
@@ -135,10 +136,10 @@ export async function POST(request: NextRequest) {
           uploadedAt: new Date().toISOString(),
         },
       });
-      console.info(`[Upload] S3: ${s3Key} for org ${orgId} (${buffer.length} bytes)`);
+      logger.debug(`[Upload] S3: ${s3Key} for org ${workspaceId} (${buffer.length} bytes)`);
     } else {
       // Fallback: Supabase Storage (bucket: org-data)
-      const storagePath = `${orgId}/${s3Key}`;
+      const storagePath = `${workspaceId}/${s3Key}`;
       const { error: storageErr } = await service.storage
         .from("org-data")
         .upload(storagePath, buffer, {
@@ -149,17 +150,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Storage upload failed: ${storageErr.message}` }, { status: 500 });
       }
       uploadResult = { key: storagePath, bucket: "org-data (Supabase)" };
-      console.info(`[Upload] Supabase Storage: ${storagePath} for org ${orgId} (${buffer.length} bytes)`);
+      logger.debug(`[Upload] Supabase Storage: ${storagePath} for org ${workspaceId} (${buffer.length} bytes)`);
     }
 
-    console.info(`[Upload] Complete: ${s3Key} for org ${orgId}`);
+    logger.debug(`[Upload] Complete: ${s3Key} for org ${workspaceId}`);
 
     // ── Upsert org_connectors record ───────────────────────────────
     const { error: upsertError } = await service
       .from("org_connectors")
       .upsert(
         {
-          organization_id: orgId,
+          organization_id: workspaceId,
           connector_type: "s3-storage",
           instance_name: "default",
           display_name: "AWS S3",
@@ -177,7 +178,7 @@ export async function POST(request: NextRequest) {
       );
 
     if (upsertError) {
-      console.warn("[S3Upload] Failed to update org_connectors:", upsertError.message);
+      logger.warn("[S3Upload] Failed to update org_connectors:", upsertError.message);
     }
 
     // ── Auto-trigger brain ingestion for GL data ───────────────────
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
       try {
         // Dynamic file parsing — supports Excel (.xlsx), CSV, and JSON
         const { transactions, metadata: parseMeta } = parseGLFile(buffer, file.name);
-        console.info(`[S3Upload] Parsed ${file.name}: format=${parseMeta.format}, ${transactions.length} transactions, ${parseMeta.accountCount} accounts, balanced=${parseMeta.balanced}`);
+        logger.debug(`[S3Upload] Parsed ${file.name}: format=${parseMeta.format}, ${transactions.length} transactions, ${parseMeta.accountCount} accounts, balanced=${parseMeta.balanced}`);
 
         if (transactions.length === 0) {
           return NextResponse.json({
@@ -202,22 +203,22 @@ export async function POST(request: NextRequest) {
         const parsedJsonBuffer = Buffer.from(JSON.stringify(transactions), "utf-8");
         if (useS3) {
           const storage = getOrgStorage();
-          await storage.upload(orgId, "gl-data.json", parsedJsonBuffer, {
+          await storage.upload(workspaceId, "gl-data.json", parsedJsonBuffer, {
             contentType: "application/json",
             metadata: { parsedFrom: file.name, format: parseMeta.format, parsedAt: new Date().toISOString() },
           });
         } else {
           await service.storage
             .from("org-data")
-            .upload(`${orgId}/gl-data.json`, parsedJsonBuffer, {
+            .upload(`${workspaceId}/gl-data.json`, parsedJsonBuffer, {
               contentType: "application/json",
               upsert: true,
             });
         }
-        console.info(`[S3Upload] Stored parsed gl-data.json (${parsedJsonBuffer.length} bytes) for org ${orgId}`);
+        logger.debug(`[S3Upload] Stored parsed gl-data.json (${parsedJsonBuffer.length} bytes) for org ${workspaceId}`);
 
         // Ingest GL signals into cross_domain_signals
-        const signals = generateGLSignals(transactions, orgId);
+        const signals = generateGLSignals(transactions, workspaceId);
 
         if (signals.length > 0) {
           const { error: signalError } = await service
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
             .insert(signals);
 
           if (signalError) {
-            console.warn("[S3Upload] Signal insertion error:", signalError.message);
+            logger.warn("[S3Upload] Signal insertion error:", signalError.message);
           }
         }
 
@@ -235,8 +236,8 @@ export async function POST(request: NextRequest) {
         // day-1 causal intelligence even before it has run a learning cycle.
         // These are domain-expert priors, not learned — they represent the
         // accounting relationships every accountant knows.
-        const causalSeedResult = await bootstrapAccountingCausalGraph(service, orgId, transactions);
-        console.info(`[S3Upload] Causal bootstrap: ${causalSeedResult.seeded} edges seeded (${causalSeedResult.status})`);
+        const causalSeedResult = await bootstrapAccountingCausalGraph(service, workspaceId, transactions);
+        logger.debug(`[S3Upload] Causal bootstrap: ${causalSeedResult.seeded} edges seeded (${causalSeedResult.status})`);
 
         // Update connector signals count
         await service
@@ -245,7 +246,7 @@ export async function POST(request: NextRequest) {
             signals_count: signals.length,
             last_sync_at: new Date().toISOString(),
           })
-          .eq("organization_id", orgId)
+          .eq("organization_id", workspaceId)
           .eq("connector_type", "s3-storage");
 
         brainTriggerResult = {
@@ -280,7 +281,7 @@ export async function POST(request: NextRequest) {
 
           Promise.resolve(
             service.from("platform_events").insert({
-              organization_id: orgId,
+              organization_id: workspaceId,
               event_type: "brain.discovery",
               source: "gl_bootstrap",
               title: discoveryTitle,
@@ -295,15 +296,15 @@ export async function POST(request: NextRequest) {
               },
             })
           ).then(({ error }: any) => {
-            if (error) console.warn("[S3Upload] Failed to write discovery event:", error.message);
+            if (error) logger.warn("[S3Upload] Failed to write discovery event:", error.message);
           }).catch((err: any) => {
-            console.warn("[S3Upload] Failed to write discovery event:", err.message);
+            logger.warn("[S3Upload] Failed to write discovery event:", err.message);
           });
         }
 
-        console.info(`[S3Upload] GL brain ingestion: ${signals.length} signals from ${transactions.length} txns`);
+        logger.debug(`[S3Upload] GL brain ingestion: ${signals.length} signals from ${transactions.length} txns`);
       } catch (parseErr: any) {
-        console.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);
+        logger.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);
         brainTriggerResult = {
           triggered: false,
           error: "File uploaded but could not parse as GL data: " + parseErr.message,
@@ -313,7 +314,7 @@ export async function POST(request: NextRequest) {
 
     // ── Auto-trigger brain cycle after signal ingestion ─────────
     if (brainTriggerResult?.triggered && brainTriggerResult.signalsIngested > 0) {
-      maybeTriggerBrainCycle(orgId, service).catch(() => {});
+      maybeTriggerBrainCycle(workspaceId, service).catch(() => {});
     }
 
     return NextResponse.json({
@@ -325,11 +326,11 @@ export async function POST(request: NextRequest) {
         fileType,
         fileName: file.name,
       },
-      organizationId: orgId,
+      organizationId: workspaceId,
       brainIngestion: brainTriggerResult,
     });
   } catch (error: any) {
-    console.error("[S3Upload] Error:", error);
+    logger.error("[S3Upload] Error:", error);
     return NextResponse.json(
       { error: error.message || "Upload failed" },
       { status: 500 }
@@ -341,7 +342,7 @@ export async function POST(request: NextRequest) {
 
 function generateGLSignals(
   transactions: any[],
-  orgId: string
+  workspaceId: string
 ): Array<{
   organization_id: string;
   source_domain: string;
@@ -374,7 +375,7 @@ function generateGLSignals(
 
     if (data.revenue !== 0) {
       signals.push({
-        organization_id: orgId,
+        organization_id: workspaceId,
         source_domain: "finance",
         signal_type: "monthly_revenue",
         signal_value: data.revenue,
@@ -385,7 +386,7 @@ function generateGLSignals(
 
     if (data.expenses !== 0) {
       signals.push({
-        organization_id: orgId,
+        organization_id: workspaceId,
         source_domain: "finance",
         signal_type: "monthly_expenses",
         signal_value: data.expenses,
@@ -395,7 +396,7 @@ function generateGLSignals(
     }
 
     signals.push({
-      organization_id: orgId,
+      organization_id: workspaceId,
       source_domain: "finance",
       signal_type: "monthly_net_income",
       signal_value: data.revenue - data.expenses,
@@ -406,7 +407,7 @@ function generateGLSignals(
 
   // Transaction volume signal
   signals.push({
-    organization_id: orgId,
+    organization_id: workspaceId,
     source_domain: "finance",
     signal_type: "gl_transaction_volume",
     signal_value: transactions.length,
@@ -429,7 +430,7 @@ function generateGLSignals(
 
 async function bootstrapAccountingCausalGraph(
   service: any,
-  orgId: string,
+  workspaceId: string,
   transactions: any[]
 ): Promise<{ seeded: number; status: "new" | "refreshed" | "skipped"; edges: string[] }> {
   try {
@@ -437,7 +438,7 @@ async function bootstrapAccountingCausalGraph(
     const { count: existingCount } = await service
       .from("causal_relationships_statistical")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .like("source_signal", "finance.%");
 
     const status: "new" | "refreshed" | "skipped" = existingCount === 0 ? "new" : "refreshed";
@@ -565,7 +566,7 @@ async function bootstrapAccountingCausalGraph(
 
     // Upsert edges (idempotent — safe to call on every upload)
     const edgesToInsert = fundamentalEdges.map((edge: any) => ({
-      organization_id: orgId,
+      organization_id: workspaceId,
       source_signal: edge.source_signal,
       target_signal: edge.target_signal,
       effect_size: edge.effect_size,
@@ -591,23 +592,23 @@ async function bootstrapAccountingCausalGraph(
       });
 
     if (upsertError) {
-      console.warn("[S3Upload] Causal bootstrap upsert error:", upsertError.message);
+      logger.warn("[S3Upload] Causal bootstrap upsert error:", upsertError.message);
       // Try insert instead (table may not have the upsert conflict key)
       const { error: insertError } = await service
         .from("causal_relationships_statistical")
         .insert(edgesToInsert);
       if (insertError) {
-        console.warn("[S3Upload] Causal bootstrap insert error:", insertError.message);
+        logger.warn("[S3Upload] Causal bootstrap insert error:", insertError.message);
         return { seeded: 0, status: "skipped", edges: [] };
       }
     }
 
     const edgeNames = fundamentalEdges.map((e: any) => `${e.source_signal} → ${e.target_signal}`);
-    console.info(`[S3Upload] Bootstrapped ${edgesToInsert.length} accounting causal edges for org ${orgId} (${status})`);
+    logger.debug(`[S3Upload] Bootstrapped ${edgesToInsert.length} accounting causal edges for org ${workspaceId} (${status})`);
 
     return { seeded: edgesToInsert.length, status, edges: edgeNames };
   } catch (err: any) {
-    console.warn("[S3Upload] Causal bootstrap error:", err.message);
+    logger.warn("[S3Upload] Causal bootstrap error:", err.message);
     return { seeded: 0, status: "skipped", edges: [] };
   }
 }
@@ -622,30 +623,30 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     if (!isS3Configured()) {
       // List from Supabase Storage fallback
       const svc = await createServiceClient();
-      const { data: sbFiles } = await svc.storage.from("org-data").list(orgId);
+      const { data: sbFiles } = await svc.storage.from("org-data").list(workspaceId);
       return NextResponse.json({
-        files: (sbFiles || []).map(f => ({ key: f.name, fullKey: `${orgId}/${f.name}`, size: f.metadata?.size || 0, lastModified: f.updated_at ? new Date(f.updated_at) : null })),
+        files: (sbFiles || []).map(f => ({ key: f.name, fullKey: `${workspaceId}/${f.name}`, size: f.metadata?.size || 0, lastModified: f.updated_at ? new Date(f.updated_at) : null })),
         configured: true,
         storageMode: "supabase",
-        organizationId: orgId,
+        organizationId: workspaceId,
       });
     }
 
     const storage = getOrgStorage();
-    const files = await storage.list(orgId);
+    const files = await storage.list(workspaceId);
 
     return NextResponse.json({
       files,
       configured: true,
-      organizationId: orgId,
+      organizationId: workspaceId,
     });
   } catch (error: any) {
-    console.error("[S3Upload] GET error:", error);
+    logger.error("[S3Upload] GET error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

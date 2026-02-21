@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { provisionOrg } from "@/lib/org-provisioning";
+import { provisionWorkspace } from "@/lib/workspace-provisioning";
 
 /**
  * POST /api/org/provision
@@ -29,11 +29,13 @@ export async function POST(request: Request) {
 
     // 2. Parse body
     const body = await request.json();
-    const { orgId, selectedConnectors, isDesignPartner, selectedRepos } = body;
+    const { orgId, workspaceId: bodyWorkspaceId, selectedConnectors, isDesignPartner, selectedRepos } = body;
+    // Accept both workspaceId (new) and orgId (legacy)
+    const workspaceId = bodyWorkspaceId || orgId;
 
-    if (!orgId) {
+    if (!workspaceId) {
       return NextResponse.json(
-        { error: "orgId is required" },
+        { error: "workspaceId is required" },
         { status: 400 }
       );
     }
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
     const { data: membership } = await service
       .from("org_members")
       .select("id, role, is_platform_admin")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -72,13 +74,13 @@ export async function POST(request: Request) {
       await service
         .from("organizations")
         .update({ is_design_partner: true })
-        .eq("id", orgId);
+        .eq("id", workspaceId);
 
       // Also sync to parent customer if one exists
       const { data: org } = await service
         .from("organizations")
         .select("customer_id")
-        .eq("id", orgId)
+        .eq("id", workspaceId)
         .maybeSingle();
 
       if (org?.customer_id) {
@@ -98,12 +100,12 @@ export async function POST(request: Request) {
             tracked_repos: selectedRepos,
           },
         })
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("connector_type", "github");
     }
 
     // 6. Run provisioning
-    const result = await provisionOrg(orgId, {
+    const result = await provisionWorkspace(workspaceId, {
       selectedConnectors: Array.isArray(selectedConnectors)
         ? selectedConnectors
         : undefined,

@@ -25,7 +25,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
     const now = new Date();
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
@@ -113,7 +113,7 @@ export async function GET(request: Request) {
     const { data: orgConnectors, error: connErr } = await service
       .from("org_connectors")
       .select("id, connector_type, config, last_synced_at, status, error_message")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("connector_type");
 
     if (connErr) {
@@ -126,7 +126,7 @@ export async function GET(request: Request) {
       .select(
         "connector_type, status, progress_pct, signals_ingested, updated_at, state, error_message"
       )
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     const checkpointByType: Record<string, any> = {};
     for (const cp of checkpoints || []) {
@@ -137,7 +137,7 @@ export async function GET(request: Request) {
     const { data: signalCounts } = await service
       .from("cross_domain_signals")
       .select("source_domain, signal_type")
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     // Aggregate by connector type (source_domain prefix maps to connector)
     const allTimeByConnector: Record<string, number> = {};
@@ -155,7 +155,7 @@ export async function GET(request: Request) {
     const { data: recentSignals } = await service
       .from("cross_domain_signals")
       .select("source_domain, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", fiveMinutesAgo);
 
     const recentByConnector: Record<string, number> = {};
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
     const { data: errorCheckpoints } = await service
       .from("connector_checkpoints")
       .select("connector_type, updated_at, status")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("status", "failed")
       .gte("updated_at", twentyFourHoursAgo);
 

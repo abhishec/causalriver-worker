@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 
 /**
  * ArtifactFeedback — Thumbs up/down + correction on every domain artifact.
@@ -29,8 +29,8 @@ export function ArtifactFeedback({
   service,
   className,
 }: ArtifactFeedbackProps) {
-  const { currentOrg } = useOrg();
-  const organizationId = orgIdProp || currentOrg?.id;
+  const { currentWorkspace } = useWorkspace();
+  const organizationId = orgIdProp || currentWorkspace?.id;
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [showCorrection, setShowCorrection] = useState(false);
   const [correction, setCorrection] = useState("");

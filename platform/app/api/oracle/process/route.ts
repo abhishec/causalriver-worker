@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import {
   createOutcomeOracle,
   createCausalMethodBandit,
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const body = await request.json().catch(() => ({}));
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       .select(
         "source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id"
       )
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("signal_timestamp", since)
       .order("signal_timestamp", { ascending: false })
       .limit(2000);
@@ -92,16 +92,16 @@ export async function POST(request: Request) {
     // 3. Create bandit + oracle
     const bandit = dryRun
       ? undefined // Don't update bandit state in dry-run mode
-      : createCausalMethodBandit({ supabase: service, organizationId: orgId });
+      : createCausalMethodBandit({ supabase: service, organizationId: workspaceId });
 
     const oracle = createOutcomeOracle({
       supabase: service,
       bandit,
-      organizationId: orgId,
+      organizationId: workspaceId,
     });
 
     // 4. Load pending predictions from DB
-    await oracle.loadFromSupabase(orgId);
+    await oracle.loadFromSupabase(workspaceId);
     const pendingBefore = oracle.getPendingPredictions().length;
 
     if (pendingBefore === 0) {
@@ -182,13 +182,13 @@ export async function GET(_request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
-    const bandit = createCausalMethodBandit({ supabase: service, organizationId: orgId });
-    const oracle = createOutcomeOracle({ supabase: service, bandit, organizationId: orgId });
+    const bandit = createCausalMethodBandit({ supabase: service, organizationId: workspaceId });
+    const oracle = createOutcomeOracle({ supabase: service, bandit, organizationId: workspaceId });
 
-    await oracle.loadFromSupabase(orgId);
+    await oracle.loadFromSupabase(workspaceId);
 
     const stats = oracle.getAccuracyStats();
     const pending = oracle.getPendingPredictions();

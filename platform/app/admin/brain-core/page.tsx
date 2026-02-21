@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { formatNumber, formatUSD } from "@/lib/utils";
 import { StatValue } from "@/components/ui/StatValue";
 import { Badge } from "@/components/ui/Badge";
@@ -12,11 +12,11 @@ export default async function AdminBrainCorePage() {
   const supabase = await createServiceClient();
 
   const [snapshotsResult, signalsResult, edgesResult, memoriesResult, patternsResult] = await Promise.all([
-    supabase.from("brain_daily_snapshots").select("*").eq("organization_id", CORE_ORG_ID).order("snapshot_date", { ascending: false }).limit(14),
-    supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", CORE_ORG_ID),
-    supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", CORE_ORG_ID),
-    supabase.from("ai_memory").select("id", { count: "exact", head: true }).eq("organization_id", CORE_ORG_ID),
-    supabase.from("brain_grammar_rules").select("id", { count: "exact", head: true }).eq("organization_id", CORE_ORG_ID),
+    supabase.from("brain_daily_snapshots").select("*").eq("organization_id", CORE_WORKSPACE_ID).order("snapshot_date", { ascending: false }).limit(14),
+    supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", CORE_WORKSPACE_ID),
+    supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", CORE_WORKSPACE_ID),
+    supabase.from("ai_memory").select("id", { count: "exact", head: true }).eq("organization_id", CORE_WORKSPACE_ID),
+    supabase.from("brain_grammar_rules").select("id", { count: "exact", head: true }).eq("organization_id", CORE_WORKSPACE_ID),
   ]);
 
   const snapshots = snapshotsResult.data || [];

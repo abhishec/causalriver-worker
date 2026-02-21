@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ConnectorsClient } from "./connectors-client";
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +37,7 @@ const CONNECTORS = [
 
 export default async function ConnectorsPage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
@@ -50,21 +50,21 @@ export default async function ConnectorsPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
-      .eq("organization_id", orgId)),
+      .eq("organization_id", workspaceId)),
     safe(supabase
       .from("org_connectors")
       .select("id, connector_type, instance_name, display_name, status, config, metadata, last_sync_at, signals_count, error_message, created_at")
-      .eq("organization_id", orgId)),
+      .eq("organization_id", workspaceId)),
     safe(supabase
       .from("connector_checkpoints")
       .select("connector_type, progress_pct, signals_ingested, status, state")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("status", "in_progress")),
     // Last successful full brain cycle — used to show "Brain last trained X ago" on connector cards
     safe(supabase
       .from("scheduled_job_runs")
       .select("completed_at, job_type")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("status", "success")
       .in("job_type", ["brain_cycle_full", "brain_cycle_sleep"])
       .order("completed_at", { ascending: false })

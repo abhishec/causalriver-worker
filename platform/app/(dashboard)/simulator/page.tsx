@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { SimulatorClient } from "./simulator-client";
 
 export const dynamic = 'force-dynamic';
@@ -10,20 +10,20 @@ export const metadata = {
 
 export default async function SimulatorPage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   // Fetch entities and domains in parallel
   const [{ data: entities }, { data: edges }] = await Promise.all([
     supabase
       .from("resolved_entities")
       .select("id, canonical_name, entity_type, domain")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("canonical_name")
       .limit(100),
     supabase
       .from("causal_relationships_statistical")
       .select("domain")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .limit(200),
   ]);
 

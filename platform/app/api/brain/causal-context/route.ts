@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const domain = request.nextUrl.searchParams.get("domain") || "finance";
 
     // Run in parallel: upstream causes, downstream effects, recent anomaly history, data age
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("causal_relationships_statistical")
         .select("source_domain, target_domain, lag_days, effect_size, confidence, natural_language, metadata")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .ilike("target_domain", `%${domain}%`)
         .order("effect_size", { ascending: false })
         .limit(3),
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("causal_relationships_statistical")
         .select("source_domain, target_domain, lag_days, effect_size")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .ilike("source_domain", `%${domain}%`)
         .order("effect_size", { ascending: false })
         .limit(5),
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("platform_events")
         .select("title, event_data, created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("event_type", "anomaly.detected")
         .ilike("event_data->>domain", `%${domain}%`)
         .order("created_at", { ascending: false })
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("causal_relationships_statistical")
         .select("created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .order("created_at", { ascending: true })
         .limit(1),
     ]);

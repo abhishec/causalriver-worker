@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import {
   createKnowledgeDependencyGraph,
   createExpertiseGraph,
@@ -25,14 +25,14 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     // 1. Load connector info
     const { data: connector } = await service
       .from("org_connectors")
       .select("id, status, config, last_sync_at, signals_count")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .maybeSingle();
 
@@ -52,9 +52,9 @@ export async function GET() {
     const collabGraph = createCollaborationGraph();
 
     await Promise.all([
-      depGraph.load(service, orgId),
-      expertiseGraph.load(service, orgId),
-      collabGraph.load(service, orgId),
+      depGraph.load(service, workspaceId),
+      expertiseGraph.load(service, workspaceId),
+      collabGraph.load(service, workspaceId),
     ]);
 
     // 3. Compute dependency hotspots
@@ -121,7 +121,7 @@ export async function GET() {
     const { data: cascadeEdges } = await service
       .from("causal_relationships_statistical")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .in("source_domain", ["engineering", "engineering.github", "engineering.jira", "support", "cs"])
       .order("lag_days", { ascending: true });
 
@@ -129,7 +129,7 @@ export async function GET() {
     const { data: recentSignals } = await service
       .from("cross_domain_signals")
       .select("signal_type, signal_value, signal_metadata, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .like("source_domain", "engineering%")
       .neq("signal_type", "code_file_indexed")
       .order("created_at", { ascending: false })
@@ -141,7 +141,7 @@ export async function GET() {
     const { data: recentCounts } = await service
       .from("cross_domain_signals")
       .select("signal_type")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .like("source_domain", "engineering%")
       .gte("created_at", sevenDaysAgo.toISOString());
 

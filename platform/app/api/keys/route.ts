@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { generateApiKey } from "@/lib/api-key-auth";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * GET /api/keys
@@ -16,14 +16,14 @@ export async function GET() {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     const { data: keys, error } = await supabase
       .from("api_keys")
       .select(
         "id, key_prefix, name, permissions, rate_limit_per_minute, last_used_at, created_at, is_active"
       )
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false });
 
     if (error)
@@ -50,14 +50,14 @@ export async function POST(request: Request) {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // Verify caller is owner/admin
     const { data: membership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     // Insert into api_keys table using service client (bypasses RLS for insert)
     const service = await createServiceClient();
     const { error } = await service.from("api_keys").insert({
-      organization_id: orgId,
+      organization_id: workspaceId,
       key_hash: keyHash,
       key_prefix: keyPrefix,
       name: name.trim(),
@@ -122,14 +122,14 @@ export async function DELETE(request: Request) {
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // Verify caller is owner/admin
     const { data: membership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
@@ -151,7 +151,7 @@ export async function DELETE(request: Request) {
       .from("api_keys")
       .update({ is_active: false })
       .eq("id", keyId)
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     if (error)
       return NextResponse.json({ error: error.message }, { status: 500 });

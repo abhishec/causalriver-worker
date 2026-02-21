@@ -31,12 +31,12 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 
 export async function POST(request: NextRequest) {
   try {
     // ── Auth ──────────────────────────────────────────────────────────
-    let orgId: string | null = null;
+    let workspaceId: string | null = null;
     let userId: string | null = null;
 
     const supabase = await createClient();
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         if (!apiKeyResult.permissions.includes("execute")) {
           return NextResponse.json({ error: "API key lacks execute permission" }, { status: 403 });
         }
-        orgId = apiKeyResult.organizationId;
+        workspaceId = apiKeyResult.organizationId;
 
         // ── Enforce rate limit ──────────────────────────────────────
         const rawKey = authHeader!.replace("Bearer ", "");
@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    orgId = orgId || organizationId || null;
+    workspaceId = workspaceId || organizationId || null;
 
     // Resolve org if not provided
-    if (!orgId && userId) {
+    if (!workspaceId && userId) {
       const { data: membership } = await supabase
         .from("org_members")
         .select("organization_id")
@@ -112,10 +112,10 @@ export async function POST(request: NextRequest) {
         .order("joined_at", { ascending: true })
         .limit(1)
         .single();
-      orgId = membership?.organization_id || CORE_ORG_ID;
+      workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
     }
 
-    if (!orgId) {
+    if (!workspaceId) {
       return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
     }
 
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         .from("org_members")
         .select("role")
         .eq("user_id", userId)
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .single();
 
       if (!membership) {
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     const { createBrainCommander } = await import("@nexus-ai/memory-stack");
     const commander = createBrainCommander({
       supabase,
-      organizationId: orgId,
+      organizationId: workspaceId,
       anthropicApiKey,
       enableActions: true,
       enableMotorCommands: true, // KEY: Enable motor command execution
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
     // ── Build response ────────────────────────────────────────────────
     const response: Record<string, unknown> = {
       success: true,
-      organizationId: orgId,
+      organizationId: workspaceId,
       dispatch: {
         route: result.dispatch.route,
         intent: result.dispatch.intent,

@@ -11,7 +11,7 @@
  *   Body: {
  *     gatewayUrl: string,       // e.g. "wss://openclaw.mycompany.dev:18789"
  *     authToken: string,        // Bearer token for gateway auth
- *     organizationId?: string,  // defaults to CORE_ORG_ID
+ *     organizationId?: string,  // defaults to CORE_WORKSPACE_ID
  *     webhookUrl?: string,      // optional callback URL for async events
  *     webhookToken?: string,    // optional token for webhook auth
  *   }
@@ -21,7 +21,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager } from "@/lib/openclaw/gateway-client";
 import type { GatewayConfig } from "@/lib/openclaw/gateway-client";
 
@@ -88,14 +88,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const orgId = organizationId || CORE_ORG_ID;
+    const workspaceId = organizationId || CORE_WORKSPACE_ID;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("organization_id, role, is_platform_admin")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     // Platform admins can connect for any org
@@ -132,12 +132,12 @@ export async function POST(request: NextRequest) {
     const config: GatewayConfig = {
       gatewayUrl: gatewayUrl.replace(/\/+$/, ""), // strip trailing slashes
       authToken,
-      orgId,
+      orgId: workspaceId,
       ...(webhookUrl ? { webhookUrl } : {}),
       ...(webhookToken ? { webhookToken } : {}),
     };
 
-    const conn = await gatewayManager.registerGateway(orgId, config);
+    const conn = await gatewayManager.registerGateway(workspaceId, config);
     const status = conn.getStatus();
 
     // ── Persist in org_connectors (fire-and-forget) ───────────────
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       .from("org_connectors")
       .upsert(
         {
-          organization_id: orgId,
+          organization_id: workspaceId,
           connector_type: "openclaw",
           instance_name: "default",
           display_name: "OpenClaw",
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     service
       .from("platform_events")
       .insert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         user_id: user.id,
         event_type: "openclaw_gateway_connected",
         details: {

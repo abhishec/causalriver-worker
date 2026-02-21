@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       .eq("id", invitation.id);
 
     // Sync customer_members — ensure the user has a customer-level membership
-    // so the customer→org chain is complete for getCurrentOrgId() resolution.
+    // so the customer→org chain is complete for getCurrentWorkspaceId() resolution.
     const { data: orgData } = await service
       .from("organizations")
       .select("customer_id")

@@ -21,7 +21,7 @@
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -138,14 +138,14 @@ async function handleLearningHealth(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = request.nextUrl.searchParams.get("organizationId") || await getCurrentOrgId();
+    const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
     // Verify membership
     const { data: membership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (!membership) {
@@ -176,12 +176,12 @@ async function handleLearningHealth(request: NextRequest) {
       jobHealth,
       evolutionState,
     ] = await Promise.all([
-      checkPredictionHealth(service, orgId),
-      checkCausalGraphHealth(service, orgId),
-      checkSignalHealth(service, orgId),
-      checkConnectorHealth(service, orgId),
-      checkJobHealth(service, orgId),
-      checkEvolutionState(service, orgId),
+      checkPredictionHealth(service, workspaceId),
+      checkCausalGraphHealth(service, workspaceId),
+      checkSignalHealth(service, workspaceId),
+      checkConnectorHealth(service, workspaceId),
+      checkJobHealth(service, workspaceId),
+      checkEvolutionState(service, workspaceId),
     ]);
 
     // Compute overall learning score (0-100)
@@ -203,7 +203,7 @@ async function handleLearningHealth(request: NextRequest) {
     return NextResponse.json({
       status,
       overall_score: overallScore,
-      organization_id: orgId,
+      organization_id: workspaceId,
       dimensions: {
         predictions: predictionHealth,
         causal_graph: causalGraphHealth,
@@ -240,13 +240,13 @@ interface HealthDimension {
   details: Record<string, any>;
 }
 
-async function checkPredictionHealth(supabase: any, orgId: string): Promise<HealthDimension> {
+async function checkPredictionHealth(supabase: any, workspaceId: string): Promise<HealthDimension> {
   try {
     // Count total and verified predictions
     const [totalResult, verifiedResult, correctResult] = await Promise.all([
-      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
-      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", orgId).not("verified_at", "is", null),
-      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("was_correct", true),
+      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId),
+      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId).not("verified_at", "is", null),
+      supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId).eq("was_correct", true),
     ]);
 
     const total = totalResult.count || 0;
@@ -275,13 +275,13 @@ async function checkPredictionHealth(supabase: any, orgId: string): Promise<Heal
   }
 }
 
-async function checkCausalGraphHealth(supabase: any, orgId: string): Promise<HealthDimension> {
+async function checkCausalGraphHealth(supabase: any, workspaceId: string): Promise<HealthDimension> {
   try {
     const [totalResult, significantResult, recentResult] = await Promise.all([
-      supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
-      supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_significant", true),
+      supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId),
+      supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId).eq("is_significant", true),
       supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("last_computed_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
     ]);
 
@@ -310,14 +310,14 @@ async function checkCausalGraphHealth(supabase: any, orgId: string): Promise<Hea
   }
 }
 
-async function checkSignalHealth(supabase: any, orgId: string): Promise<HealthDimension> {
+async function checkSignalHealth(supabase: any, workspaceId: string): Promise<HealthDimension> {
   try {
     const [totalResult, recentResult, domainResult] = await Promise.all([
-      supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
+      supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", workspaceId),
       supabase.from("cross_domain_signals").select("id", { count: "exact", head: true })
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
-      supabase.from("cross_domain_signals").select("source_domain").eq("organization_id", orgId).limit(1000),
+      supabase.from("cross_domain_signals").select("source_domain").eq("organization_id", workspaceId).limit(1000),
     ]);
 
     const total = totalResult.count || 0;
@@ -344,12 +344,12 @@ async function checkSignalHealth(supabase: any, orgId: string): Promise<HealthDi
   }
 }
 
-async function checkConnectorHealth(supabase: any, orgId: string): Promise<HealthDimension> {
+async function checkConnectorHealth(supabase: any, workspaceId: string): Promise<HealthDimension> {
   try {
     const { data: connectors } = await supabase
       .from("org_connectors")
       .select("connector_type, status, last_synced_at, credentials")
-      .eq("organization_id", orgId);
+      .eq("organization_id", workspaceId);
 
     if (!connectors || connectors.length === 0) {
       return { score: 0, status: "no_connectors", details: { connected_count: 0 } };
@@ -385,12 +385,12 @@ async function checkConnectorHealth(supabase: any, orgId: string): Promise<Healt
   }
 }
 
-async function checkJobHealth(supabase: any, orgId: string): Promise<HealthDimension> {
+async function checkJobHealth(supabase: any, workspaceId: string): Promise<HealthDimension> {
   try {
     const { data: recentJobs } = await supabase
       .from("scheduled_job_runs")
       .select("job_type, status, started_at, duration_ms, error_message")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("started_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
       .order("started_at", { ascending: false })
       .limit(50);
@@ -431,12 +431,12 @@ async function checkJobHealth(supabase: any, orgId: string): Promise<HealthDimen
   }
 }
 
-async function checkEvolutionState(supabase: any, orgId: string): Promise<Record<string, any>> {
+async function checkEvolutionState(supabase: any, workspaceId: string): Promise<Record<string, any>> {
   try {
     const { data: snapshot } = await supabase
       .from("brain_health_history")
       .select("*")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();

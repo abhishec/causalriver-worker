@@ -14,7 +14,7 @@
  *
  *   Body: {
  *     message: string,            // The user's message / command
- *     organizationId?: string,    // defaults to CORE_ORG_ID
+ *     organizationId?: string,    // defaults to CORE_WORKSPACE_ID
  *     sessionKey?: string,        // optional session key for conversation continuity
  *     agentId?: string,           // optional: target a specific agent
  *   }
@@ -22,7 +22,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager, triggerOpenClawAgent } from "@/lib/openclaw/gateway-client";
 import type { AgentStreamEvent } from "@/lib/openclaw/gateway-client";
 
@@ -71,14 +71,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const orgId = organizationId || CORE_ORG_ID;
+    const workspaceId = organizationId || CORE_WORKSPACE_ID;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase
       .from("org_members")
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     // Platform admins can access any org
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Check gateway exists ──────────────────────────────────────
-    const conn = gatewayManager.getConnection(orgId);
+    const conn = gatewayManager.getConnection(workspaceId);
     if (!conn) {
       return NextResponse.json(
         { error: "No OpenClaw gateway configured for this organization. Connect one via /api/openclaw/connect" },
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         try {
           const agentStream = triggerOpenClawAgent({
-            orgId,
+            orgId: workspaceId,
             message: message.trim(),
             sessionKey,
             agentId,

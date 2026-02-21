@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentOrgId } from '@/lib/org-helpers';
+import { getCurrentWorkspaceId } from '@/lib/workspace-helpers';
 import { executeUnifiedQuery, type BrainQueryRequest } from '@/lib/brain/orchestrator';
 import { z } from 'zod';
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Resolve org ID: use provided or fall back to user's current org
     const requestedOrgId = validated.context?.organizationId;
-    const resolvedOrgId = requestedOrgId || await getCurrentOrgId();
+    const resolvedOrgId = requestedOrgId || await getCurrentWorkspaceId();
 
     // Verify user is a member of the target organization
     if (requestedOrgId) {

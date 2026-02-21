@@ -49,12 +49,17 @@ export const TOOKITAKI_CUSTOMER_ID = 'a1000000-0000-4000-a000-000000000001';
  * Inlined here to avoid pulling memory-stack (tree-sitter native modules) into client bundles.
  */
 export const CORE_ORG_ID = '00000000-0000-4000-a000-000000000001';
+/** Alias for clarity — same UUID, workspace naming */
+export const CORE_WORKSPACE_ID = CORE_ORG_ID;
 
 /** Company Jarvis workspace — AML compliance SaaS (synthetic data). Belongs to: COMPANY_JARVIS_CUSTOMER_ID */
 export const COMPANY_JARVIS_ORG_ID = '22222222-2222-4000-a000-222222222222';
+export const COMPANY_JARVIS_WORKSPACE_ID = COMPANY_JARVIS_ORG_ID;
 
 /** Finance Jarvis workspace — SEC EDGAR + startup financial intelligence. Belongs to: FINANCE_JARVIS_CUSTOMER_ID */
 export const FINANCE_JARVIS_ORG_ID = '11111111-1111-4000-a000-111111111111';
+export const FINANCE_JARVIS_WORKSPACE_ID = FINANCE_JARVIS_ORG_ID;
 
 /** Demo workspace — competition & demo environment. Belongs to: DEMO_CUSTOMER_ID */
 export const DEMO_ORG_ID = '00000000-0000-4000-b000-000000000001';
+export const DEMO_WORKSPACE_ID = DEMO_ORG_ID;

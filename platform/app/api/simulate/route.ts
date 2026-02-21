@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 /**
  * POST /api/simulate
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const { entity, magnitude, timeHorizon, domain } = await request.json();
 
   if (!entity || magnitude === undefined)
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const { data: edges } = await supabase
       .from("causal_relationships_statistical")
       .select("source_entity, target_entity, strength, lag_periods, domain")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .or(`source_entity.eq.${entity},target_entity.eq.${entity}`)
       .order("strength", { ascending: false })
       .limit(20);

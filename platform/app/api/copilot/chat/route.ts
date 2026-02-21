@@ -21,7 +21,7 @@
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getAdminClient, verifyOrgMembership } from "@/lib/supabase/admin";
+import { getAdminClient, verifyWorkspaceMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import {
   estimateImpact,
@@ -37,7 +37,8 @@ import type {
 import { createBrainContextMesh, createBrainFeedbackBus, createLLMQueryInterpreter } from "@nexus-ai/memory-stack";
 import type { QueryInterpretation } from "@nexus-ai/memory-stack";
 
-import { CORE_ORG_ID } from "@/lib/org-helpers";
+import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Vercel serverless: allow up to 120s for long Claude SSE streams
@@ -250,6 +251,7 @@ export async function POST(request: NextRequest) {
     const {
       message,
       organizationId,
+      workspaceId: bodyWorkspaceId,
       entityState,
       conversationHistory,
       useFramework,
@@ -263,6 +265,7 @@ export async function POST(request: NextRequest) {
     } = body as {
       message: string;
       organizationId?: string;
+      workspaceId?: string;
       entityState?: Record<string, unknown>;
       conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
       useFramework?: boolean;
@@ -272,6 +275,9 @@ export async function POST(request: NextRequest) {
       commandParams?: Record<string, unknown>;
     };
 
+    // Accept both workspaceId (new) and organizationId (legacy) from request body
+    const requestedWorkspaceId = bodyWorkspaceId || organizationId;
+
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { error: "Message is required" },
@@ -279,21 +285,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Org resolution ──────────────────────────────────────────────────
-    // organizationId comes from the frontend (OrgProvider cookie / context).
-    // It is ALWAYS the workspace-org the user is currently viewing.
+    // ── Workspace resolution ────────────────────────────────────────────
+    // workspaceId comes from the frontend (WorkspaceProvider cookie / context).
+    // It is ALWAYS the workspace the user is currently viewing.
     //
     // Workspace isolation guarantee:
-    //   - Each org has its own causal graph, signals, memory, predictions.
-    //   - customer_id (billing parent) is NEVER used here — org_id is the
+    //   - Each workspace has its own causal graph, signals, memory, predictions.
+    //   - customer_id (billing parent) is NEVER used here — organization_id is the
     //     sole isolation boundary for all brain/SE-AAS/copilot paths.
     //
-    // CORE_ORG_ID fallback:
-    //   - Only hit when organizationId is not provided (e.g. unauthenticated
-    //     embed, API callers without org context).
+    // CORE_WORKSPACE_ID fallback:
+    //   - Only hit when workspaceId is not provided (e.g. unauthenticated
+    //     embed, API callers without workspace context).
     //   - The membership check below enforces access — a regular user who is
     //     not a member of CORE will receive a 403. This is correct behaviour.
-    let orgId = organizationId || CORE_ORG_ID;
+    let workspaceId = requestedWorkspaceId || CORE_WORKSPACE_ID;
 
     // Authenticate via Supabase
     const supabase = await createClient();
@@ -305,9 +311,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ── Auto-resolve org when frontend didn't provide one ────────────
+    // ── Auto-resolve workspace when frontend didn't provide one ──────
     // Uses admin client to bypass RLS recursion on org_members
-    if (!organizationId) {
+    if (!requestedWorkspaceId) {
       const admin = getAdminClient();
       const { data: userOrgs } = await admin
         .from("org_members")
@@ -320,15 +326,15 @@ export async function POST(request: NextRequest) {
         const nonCore = userOrgs.find(
           (m: any) => !(m.organizations as any)?.is_core_brain
         );
-        orgId = nonCore?.organization_id ?? userOrgs[0].organization_id;
-        console.log("[Chat] Auto-resolved org:", orgId);
+        workspaceId = nonCore?.organization_id ?? userOrgs[0].organization_id;
+        logger.debug("[Chat] Auto-resolved workspace:", workspaceId);
       }
-      // If no memberships found, orgId stays as CORE_ORG_ID → membership check will 403 (correct)
+      // If no memberships found, workspaceId stays as CORE_WORKSPACE_ID → membership check will 403 (correct)
     }
 
     // ── Validate user is a member of the requested org ──────────────────
     // Uses admin client to bypass RLS recursion on org_members.
-    const membership = await verifyOrgMembership(user.id, orgId);
+    const membership = await verifyWorkspaceMembership(user.id, workspaceId);
 
     // Platform admins can access any org (for support/debugging)
     let adminCheck: { is_platform_admin: boolean } | null = null;
@@ -369,7 +375,7 @@ export async function POST(request: NextRequest) {
     const { createBrainCommander } = await import("@nexus-ai/memory-stack");
     const commander = createBrainCommander({
       supabase,
-      organizationId: orgId,
+      organizationId: workspaceId,
       anthropicApiKey,
       enableActions: false, // We handle action engine separately below for copilot
       enableMotorCommands: false,
@@ -387,7 +393,7 @@ export async function POST(request: NextRequest) {
     try {
       interpretation = await interpreter.interpret(message);
     } catch (interpErr) {
-      console.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
+      logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
     }
 
     const commandResult = await commander.command(message, {
@@ -469,7 +475,7 @@ export async function POST(request: NextRequest) {
 
         return new Response(stream, { headers });
       } catch (frameworkErr) {
-        console.warn(
+        logger.warn(
           "[CopilotFramework] Non-fatal: framework path failed, falling back to V4:",
           frameworkErr
         );
@@ -507,7 +513,7 @@ export async function POST(request: NextRequest) {
       const { data: ghConnectors } = await Promise.resolve(service
         .from("org_connectors")
         .select("config")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("connector_type", "github")
         .eq("status", "active"))
         .catch(() => ({ data: null as any }));
@@ -531,9 +537,9 @@ export async function POST(request: NextRequest) {
         const collabGraph = createCollaborationGraph();
 
         await Promise.all([
-          depGraph.load(service, orgId),
-          expertiseGraph.load(service, orgId),
-          collabGraph.load(service, orgId),
+          depGraph.load(service, workspaceId),
+          expertiseGraph.load(service, workspaceId),
+          collabGraph.load(service, workspaceId),
         ]);
 
         brainRegions.dependencyGraph = depGraph;
@@ -569,7 +575,7 @@ export async function POST(request: NextRequest) {
       // ── Live Engineering Metrics via Brain Context Mesh ──────────────
       // The Mesh handles velocity, bottleneck, signals, and entity links
       // in a single call with caching and resilience built in.
-      const mesh = createBrainContextMesh({ supabase: service, organizationId: orgId });
+      const mesh = createBrainContextMesh({ supabase: service, organizationId: workspaceId });
       const copilotDomainCtx = await mesh.getDomainContext('copilot') as any;
       // BRAIN NUTRITION: Also get universal context for LEAP (deep brain reasoning)
       universalCtx = await mesh.getUniversalContext();
@@ -646,7 +652,7 @@ export async function POST(request: NextRequest) {
       // Session Memory — per-user context accumulation
       brainRegions.sessionMemory = createSessionMemory({
         userId: user.id,
-        organizationId: orgId,
+        organizationId: workspaceId,
       });
 
       // Reasoning Chain — chain-of-thought surfacing
@@ -665,7 +671,7 @@ export async function POST(request: NextRequest) {
       brainContext = builder.buildContext(message);
 
     } catch (brainErr) {
-      console.warn("[BrainContext] Non-fatal: could not load brain intelligence:", brainErr);
+      logger.warn("[BrainContext] Non-fatal: could not load brain intelligence:", brainErr);
     }
 
     // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
@@ -698,7 +704,7 @@ export async function POST(request: NextRequest) {
           // Phase 4: merge branch into domain request so domain-executor's
           // createBrainContextMesh({ branch }) picks it up for code intelligence.
           request: { ...seaasRoute.extractedInput, ...(branch ? { branch } : {}) },
-          organizationId: orgId,
+          organizationId: workspaceId,
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
           interpretation, // Phase 3: pass interpretation for targeted context
@@ -746,7 +752,7 @@ export async function POST(request: NextRequest) {
           };
         }
       } catch (seaasErr) {
-        console.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
+        logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
       }
     }
 
@@ -770,7 +776,7 @@ export async function POST(request: NextRequest) {
         // Load GL data from Supabase Storage (org-scoped)
         let glData: Array<Record<string, unknown>> = [];
         try {
-          const storagePath = `${orgId}/gl-data.json`;
+          const storagePath = `${workspaceId}/gl-data.json`;
           const { data: fileData } = await service.storage
             .from("org-data")
             .download(storagePath);
@@ -779,7 +785,7 @@ export async function POST(request: NextRequest) {
             try {
               glData = JSON.parse(text);
             } catch {
-              console.warn("[AaaS] GL data is malformed JSON, skipping");
+              logger.warn("[AaaS] GL data is malformed JSON, skipping");
             }
           }
         } catch {
@@ -790,7 +796,7 @@ export async function POST(request: NextRequest) {
           const { executeAccountingAgent } = await import("@/lib/aas/domain-executor");
           const aasResult = await executeAccountingAgent(service, {
             action: aasAction as any,
-            organizationId: orgId,
+            organizationId: workspaceId,
             userId: user.id,
             transactions: glData,
             jurisdiction: 'SG',
@@ -812,7 +818,7 @@ export async function POST(request: NextRequest) {
           };
         }
       } catch (acctErr) {
-        console.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+        logger.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
       }
     }
 
@@ -829,7 +835,7 @@ export async function POST(request: NextRequest) {
         const { data: template } = await service
           .from('agent_templates')
           .select('*')
-          .eq('org_id', orgId)
+          .eq('org_id', workspaceId)
           .eq('command_id', commandId)
           .eq('is_archived', false)
           .single();
@@ -904,7 +910,7 @@ export async function POST(request: NextRequest) {
                 const result = await executeComposedAgent(
                   composition,
                   {
-                    organizationId: orgId,
+                    organizationId: workspaceId,
                     userId: user.id,
                     supabase: service,
                     anthropicApiKey: process.env.ANTHROPIC_API_KEY!,
@@ -947,7 +953,7 @@ export async function POST(request: NextRequest) {
           // (falls through to normal LLM path below, using the template prompt)
         }
       } catch (templateErr) {
-        console.warn("[CustomTemplate] Non-fatal: template loading failed:", templateErr);
+        logger.warn("[CustomTemplate] Non-fatal: template loading failed:", templateErr);
       }
     }
 
@@ -969,7 +975,7 @@ export async function POST(request: NextRequest) {
       // request through the daemon instead of running locally. The daemon
       // has direct codebase access, runs tools locally, and the
       // reinforcement loop operates there.
-      const openClawConn = (await import("@/lib/openclaw/gateway-client")).gatewayManager.getConnection(orgId);
+      const openClawConn = (await import("@/lib/openclaw/gateway-client")).gatewayManager.getConnection(workspaceId);
 
       if (openClawConn && openClawConn.isConnected()) {
         const { triggerOpenClawAgent } = await import("@/lib/openclaw/gateway-client");
@@ -990,9 +996,9 @@ export async function POST(request: NextRequest) {
             });
 
             const agentStream = triggerOpenClawAgent({
-              orgId,
+              orgId: workspaceId,
               message: message.trim(),
-              sessionKey: `copilot-${orgId}-${Date.now()}`,
+              sessionKey: `copilot-${workspaceId}-${Date.now()}`,
               agentId: agentIntent.agentType,
             });
 
@@ -1054,7 +1060,7 @@ export async function POST(request: NextRequest) {
           const { data: agentTask, error: taskErr } = await service
             .from("brain_agent_tasks")
             .insert({
-              organization_id: orgId,
+              organization_id: workspaceId,
               created_by: user.id,
               prompt: message.trim(),
               agent_type: agentIntent.agentType,
@@ -1146,7 +1152,7 @@ export async function POST(request: NextRequest) {
               const { data: jiraConnectors } = await service
                 .from("org_connectors")
                 .select("config, credentials")
-                .eq("organization_id", orgId)
+                .eq("organization_id", workspaceId)
                 .eq("connector_type", "jira")
                 .eq("status", "active");
 
@@ -1247,7 +1253,7 @@ export async function POST(request: NextRequest) {
             const { data: memories } = await service
               .from("agent_episodic_memory")
               .select("content, episode_type, importance, created_at")
-              .eq("organization_id", orgId)
+              .eq("organization_id", workspaceId)
               .eq("agent_type", agentIntent.agentType)
               .order("importance", { ascending: false })
               .limit(5);
@@ -1293,15 +1299,15 @@ export async function POST(request: NextRequest) {
 
           const dt = createDT();
           const eg = createCSEG();
-          const cs = createCS({ organizationId: orgId, anthropicApiKey: anthropicApiKey! });
-          const dl = createDL({ organizationId: orgId, domainTaxonomy: dt, entityGraph: eg });
-          const dp = createDP({ organizationId: orgId, supabase: service, cognitiveStack: cs, deepLayers: dl, domainTaxonomy: dt, entityGraph: eg });
-          const cortex = createNCC({ organizationId: orgId, supabase: service, pipeline: dp, cognitiveStack: cs, deepLayers: dl });
+          const cs = createCS({ organizationId: workspaceId, anthropicApiKey: anthropicApiKey! });
+          const dl = createDL({ organizationId: workspaceId, domainTaxonomy: dt, entityGraph: eg });
+          const dp = createDP({ organizationId: workspaceId, supabase: service, cognitiveStack: cs, deepLayers: dl, domainTaxonomy: dt, entityGraph: eg });
+          const cortex = createNCC({ organizationId: workspaceId, supabase: service, pipeline: dp, cognitiveStack: cs, deepLayers: dl });
           const closedLoop = cortex.getClosedLoopEngine();
 
           const brainRuntime = createBAR({
             supabase: service,
-            organizationId: orgId,
+            organizationId: workspaceId,
             cortex,
             closedLoop: closedLoop ?? undefined,
             defaultAnthropicApiKey: anthropicApiKey!,
@@ -1506,7 +1512,7 @@ export async function POST(request: NextRequest) {
 
           // ── 8. Emit learning signal ────────────────────────────
           await service.from("cross_domain_signals").insert({
-            organization_id: orgId,
+            organization_id: workspaceId,
             source_domain: "brain.agents",
             signal_type: `copilot_agent_${agentIntent.agentType}_completed`,
             signal_value: brainResult.confidence,
@@ -1527,7 +1533,7 @@ export async function POST(request: NextRequest) {
             `Key findings: ${responseText.slice(0, 300)}`;
 
           await service.from("agent_episodic_memory").insert({
-            organization_id: orgId,
+            organization_id: workspaceId,
             agent_type: agentIntent.agentType,
             episode_type: "run_summary",
             content: runSummary,
@@ -1542,7 +1548,7 @@ export async function POST(request: NextRequest) {
 
         } catch (err) {
           const errMsg = err instanceof Error ? err.message : "Agent execution failed";
-          console.error("[AgentMode] Error:", errMsg);
+          logger.error("[AgentMode] Error:", errMsg);
 
           if (taskId) {
             sendAgentStatus({ taskId, status: "failed", message: errMsg });
@@ -1591,7 +1597,7 @@ export async function POST(request: NextRequest) {
         );
         const engine = createDomainActionEngine({
           supabase,
-          organizationId: orgId,
+          organizationId: workspaceId,
           amplifierConfig: process.env.ANTHROPIC_API_KEY
             ? { provider: "anthropic" as const, apiKey: process.env.ANTHROPIC_API_KEY }
             : undefined,
@@ -1614,7 +1620,7 @@ export async function POST(request: NextRequest) {
         (actionArtifact as Record<string, unknown>).__promptText =
           formatArtifactForPrompt(artifact);
       } catch (err) {
-        console.warn(
+        logger.warn(
           "[ActionEngine] Non-fatal failure, falling back to LLM-only:",
           err
         );
@@ -1886,7 +1892,7 @@ Use this causal chain in your answer. Don't just say "X affects Y" — explain t
         }
       } catch (diagErr) {
         // Non-fatal: degrade to edge-count reasoning
-        console.warn('[Copilot] Causal diagnosis non-fatal:', (diagErr as Error).message);
+        logger.warn('[Copilot] Causal diagnosis non-fatal:', (diagErr as Error).message);
       }
     }
 
@@ -1913,7 +1919,7 @@ When answering what-if questions, base your answer on these leverage points and 
         }
       } catch (cfErr) {
         // Non-fatal: degrade to semantic reasoning
-        console.warn('[Copilot] Counterfactual simulation non-fatal:', (cfErr as Error).message);
+        logger.warn('[Copilot] Counterfactual simulation non-fatal:', (cfErr as Error).message);
       }
     }
 
@@ -1939,7 +1945,7 @@ When answering cascade/ripple questions, use this chain. Show the path and confi
           }
         }
       } catch (cascadeErr) {
-        console.warn('[Copilot] Cascade chain non-fatal:', (cascadeErr as Error).message);
+        logger.warn('[Copilot] Cascade chain non-fatal:', (cascadeErr as Error).message);
       }
     }
 
@@ -2004,7 +2010,7 @@ Use this data to answer the user's accounting question with precision. Cite spec
       const { data: corrections } = await Promise.resolve(service
         .from("ai_memory")
         .select("content, importance, domain, created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("memory_type", "correction")
         .order("importance", { ascending: false })
         .order("created_at", { ascending: false })
@@ -2060,7 +2066,7 @@ RULES FOR CORRECTIONS:
             const { data: recentInsights } = await service
               .from("ai_memory")
               .select("content, domain, importance")
-              .eq("organization_id", orgId)
+              .eq("organization_id", workspaceId)
               .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
               .in("memory_type", ["insight", "alert", "pattern"])
               .order("importance", { ascending: false })
@@ -2189,7 +2195,7 @@ RULES FOR CORRECTIONS:
         clearTimeout(streamTimeout);
 
         // ── Brain Feedback: teach the Brain from Copilot interaction ──
-        const bus = createBrainFeedbackBus({ supabase: service, organizationId: orgId });
+        const bus = createBrainFeedbackBus({ supabase: service, organizationId: workspaceId });
         await Promise.all([
           bus.emitSignal({
             sourceDomain: 'copilot.chat',
@@ -2227,13 +2233,13 @@ RULES FOR CORRECTIONS:
         // causal signals, prediction outcomes, and implicit feedback.
         try {
           const { gatewayManager: gm } = await import("@/lib/openclaw/gateway-client");
-          const gwConn = gm.getConnection(orgId);
+          const gwConn = gm.getConnection(workspaceId);
           if (gwConn && gwConn.isConnected()) {
             gwConn.send("nexusbrain.ingest", {
               signals: [{
                 type: "conversation_completed",
                 source: "copilot",
-                orgId,
+                orgId: workspaceId,
                 userId: user.id,
                 query: message.trim().slice(0, 500),
                 domain: detectedIntent || "general",

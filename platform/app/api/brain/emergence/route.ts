@@ -21,7 +21,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const orgId   = url.searchParams.get("org_id") || await getCurrentOrgId();
+    const workspaceId   = url.searchParams.get("org_id") || await getCurrentWorkspaceId();
     const limit   = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
     const service = url.searchParams.get("service"); // "aas" | "seaas" | null (all)
 
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
     const { data: emergenceRows } = await supabase
       .from("brain_emergence_log")
       .select("id, event_type, summary, metrics, intelligence_score, duration_ms, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
       const { data: platformRows } = await supabase
         .from("platform_events")
         .select("id, event_type, source, title, event_data, created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .in("event_type", [
           "consolidation.complete",
           "training_complete",
@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
     const { data: snapshotRow } = await supabase
       .from("brain_daily_snapshots")
       .select("snapshot_date, intelligence_score, prediction_accuracy, autonomous_cycles_run, dream_insights_surfaced, anomalies_detected")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("snapshot_date", { ascending: false })
       .limit(1)
       .single();
@@ -240,7 +240,7 @@ export async function GET(request: NextRequest) {
       events: allEvents,
       meta: {
         total:             allEvents.length,
-        org_id:            orgId,
+        org_id:            workspaceId,
         service:           service || "all",
         latest_score:      snapshotRow?.intelligence_score ?? null,
         prediction_accuracy: snapshotRow?.prediction_accuracy ?? null,

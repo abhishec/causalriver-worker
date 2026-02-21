@@ -11,7 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 import { consumeSSEStream } from "@/components/copilot/CopilotChat";
 
 /* ── Lightweight inline markdown for overlay responses ─────────────────────── */
@@ -124,7 +124,7 @@ const QUICK_PROMPTS = [
 ];
 
 export function CopilotOverlay() {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
@@ -211,7 +211,7 @@ export function CopilotOverlay() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: trimmed,
-          organizationId: currentOrg?.id,
+          workspaceId: currentWorkspace?.id,
         }),
         signal: controller.signal,
       });

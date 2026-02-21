@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,13 +44,13 @@ function ArtifactTypeIcon({ domainType }: { domainType: string }) {
 }
 
 export default function ArtifactsPage() {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
   const [artifacts, setArtifacts] = useState<ArtifactItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    if (!currentOrg?.id) {
+    if (!currentWorkspace?.id) {
       setLoading(false);
       return;
     }
@@ -60,7 +60,7 @@ export default function ArtifactsPage() {
     async function loadArtifacts() {
       try {
         const res = await fetch(
-          `/api/se-aas/artifacts?organizationId=${currentOrg!.id}&limit=50`,
+          `/api/se-aas/artifacts?organizationId=${currentWorkspace!.id}&limit=50`,
           { signal: controller.signal }
         );
         if (res.ok) {
@@ -80,7 +80,7 @@ export default function ArtifactsPage() {
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [currentOrg?.id]);
+  }, [currentWorkspace?.id]);
 
   const filtered = filter === "all"
     ? artifacts

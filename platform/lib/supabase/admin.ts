@@ -15,7 +15,6 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * have generated Supabase Database types. This matches the typing pattern
  * used by the SSR clients in server.ts and client.ts.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _adminClient: SupabaseClient<any, any, any> | null = null;
 
 export function getAdminClient(): SupabaseClient<any, any, any> {
@@ -30,21 +29,24 @@ export function getAdminClient(): SupabaseClient<any, any, any> {
 }
 
 /**
- * Verify that a user is a member of the given organization.
+ * Verify that a user is a member of the given workspace.
  * Uses the admin client to bypass RLS recursion on org_members.
  *
  * @returns The membership row if found, or null if not a member.
  */
-export async function verifyOrgMembership(
+export async function verifyWorkspaceMembership(
   userId: string,
-  organizationId: string
+  workspaceId: string
 ): Promise<{ id: string; role: string; is_platform_admin: boolean } | null> {
   const admin = getAdminClient();
   const { data } = await admin
     .from("org_members")
     .select("id, role, is_platform_admin")
-    .eq("organization_id", organizationId)
+    .eq("organization_id", workspaceId)
     .eq("user_id", userId)
     .single();
   return data;
 }
+
+/** @deprecated Use verifyWorkspaceMembership() instead */
+export const verifyOrgMembership = verifyWorkspaceMembership;

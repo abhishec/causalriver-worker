@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 
 interface RepoInfo {
   fullName: string;
@@ -50,7 +50,7 @@ export function GitHubSetupModal({
   onClose,
   onConnected,
 }: GitHubSetupModalProps) {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
   const [step, setStep] = useState<Step>("token");
   const [token, setToken] = useState("");
   const [repoUrl, setRepoUrl] = useState("");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import {
   createCodeParser,
   createKnowledgeDependencyGraph,
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // 2. Get token
     const body = await request.json();
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const { data: connector } = await service
       .from("org_connectors")
       .select("id, config")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .maybeSingle();
 
@@ -238,7 +238,7 @@ export async function POST(request: Request) {
     const { data: prSignals } = await service
       .from("cross_domain_signals")
       .select("signal_metadata, signal_type")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("source_domain", "engineering.github")
       .in("signal_type", ["pr_merged", "pr_opened", "pr_reviewed"])
       .limit(5000);
@@ -317,13 +317,13 @@ export async function POST(request: Request) {
       message: "Persisting graphs to database...",
     });
 
-    await depGraph.persist(service, orgId);
-    await expertiseGraph.persist(service, orgId);
-    await collabGraph.persist(service, orgId);
+    await depGraph.persist(service, workspaceId);
+    await expertiseGraph.persist(service, workspaceId);
+    await collabGraph.persist(service, workspaceId);
 
     // ── Step 7: Store file index metadata as signals ─────────────────
     const codeSignals = fileIndexes.map((fi) => ({
-      organization_id: orgId,
+      organization_id: workspaceId,
       source_domain: "engineering",
       signal_type: "code_file_indexed",
       signal_value: (fi.symbols?.length || 0) / 100, // normalized
@@ -382,11 +382,11 @@ export async function POST(request: Request) {
     // Try to update progress with error
     try {
       const service = await createServiceClient();
-      const orgId = await getCurrentOrgId();
+      const workspaceId = await getCurrentWorkspaceId();
       const { data: connector } = await service
         .from("org_connectors")
         .select("id, config")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("connector_type", "github")
         .maybeSingle();
 

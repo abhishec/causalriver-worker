@@ -1,5 +1,5 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { formatNumber } from "@/lib/utils";
 import { CodeIntelligenceClient } from "./code-intelligence-client";
 
@@ -9,7 +9,7 @@ export const metadata = { title: "Code Intelligence" };
 
 export default async function CodeIntelligencePage() {
   const supabase = await createClient();
-  const orgId = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
   const service = await createServiceClient();
 
   // Fetch connector info and signal count in parallel
@@ -17,13 +17,13 @@ export default async function CodeIntelligencePage() {
     service
       .from("org_connectors")
       .select("id, status, config, last_sync_at, signals_count")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "github")
       .maybeSingle(),
     supabase
       .from("cross_domain_signals")
       .select("id", { count: "exact", head: true })
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .like("source_domain", "engineering%"),
   ]);
 

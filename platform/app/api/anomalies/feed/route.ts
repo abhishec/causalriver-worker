@@ -30,7 +30,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const orgId   = url.searchParams.get("org_id") || await getCurrentOrgId();
+    const workspaceId   = url.searchParams.get("org_id") || await getCurrentWorkspaceId();
     const service = url.searchParams.get("service");   // "aas" | "seaas" | null
     const domainFilter = url.searchParams.get("domain");
     const limit   = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     let signalQuery = supabase
       .from("cross_domain_signals")
       .select("id, source_domain, signal_type, signal_value, signal_metadata, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(limit * 2); // fetch extra, filter below
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("cross_domain_signals")
         .select("id, source_domain, signal_type, signal_value, signal_metadata, created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(limit),
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
       supabase
         .from("platform_events")
         .select("id, event_type, source, title, event_data, created_at")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .eq("event_type", "anomaly.detected")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
     const { data: causalEdges } = await supabase
       .from("causal_relationships_statistical")
       .select("source_domain, target_domain, effect_size, optimal_lag_days, confidence_score, statistical_method")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .gte("confidence_score", 0.3)
       .order("confidence_score", { ascending: false })
       .limit(200);
@@ -368,7 +368,7 @@ export async function GET(request: NextRequest) {
       anomalies: allAnomalies,
       meta: {
         total:        allAnomalies.length,
-        org_id:       orgId,
+        org_id:       workspaceId,
         service:      service || "all",
         domain:       domainFilter || (service ? SERVICE_DOMAIN_MAP[service]?.join(",") : "all"),
         since,

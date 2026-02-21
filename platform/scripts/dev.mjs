@@ -122,7 +122,8 @@ function validateEnv() {
   const envPath = resolve(ROOT, ".env.local");
   if (!existsSync(envPath)) {
     err(".env.local not found!");
-    err("Create it with your Supabase + Anthropic credentials");
+    err("Copy .env.example to .env.local and fill in your credentials:")
+    err("  cp .env.example .env.local");
     process.exit(1);
   }
 
@@ -160,10 +161,29 @@ function validateEnv() {
   ok(`Env validated (${REQUIRED.length} required vars present)`);
 }
 
-/* ── Step 4: Pre-warm routes ──────────────────────────────────────── */
+/* ── Step 4: Readiness check + Pre-warm routes ───────────────────── */
+
+async function waitForReady(maxWaitMs = 30_000) {
+  const start = Date.now();
+  info("Waiting for server to be ready...");
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      const res = await fetch(`http://localhost:${PORT}/api/health`, {
+        signal: AbortSignal.timeout(2000),
+        redirect: "manual",
+      });
+      if (res.ok || res.status === 307) return true;
+    } catch {
+      // Not ready yet
+    }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  warn("Server did not become ready within 30s — skipping pre-warm");
+  return false;
+}
 
 async function prewarm() {
-  const routes = ["/login", "/api/health", "/copilot", "/overview"];
+  const routes = ["/login", "/copilot", "/overview"];
   info("Pre-warming critical routes...");
   for (const route of routes) {
     try {
@@ -172,7 +192,7 @@ async function prewarm() {
       });
       ok(`Warmed ${route} (${res.status})`);
     } catch {
-      // Server may still be compiling, that's fine
+      // Route may still be compiling, that's fine
     }
   }
 }
@@ -230,8 +250,8 @@ function startDev() {
       setTimeout(launch, 2000);
     });
 
-    // Pre-warm after server is likely ready
-    setTimeout(() => prewarm(), 10_000);
+    // Wait for server readiness, then pre-warm (replaces blind 10s timeout)
+    waitForReady().then((ready) => ready && prewarm());
   }
 
   // Forward signals for clean shutdown

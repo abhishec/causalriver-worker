@@ -17,7 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,7 @@ interface DigestSection {
 }
 
 interface WeeklyDigest {
-  orgId: string;
+  workspaceId: string;
   digestType: "weekly_monday" | "mid_sprint_urgent";
   generatedAt: string;
   sprintWindow: { from: string; to: string };
@@ -46,7 +46,7 @@ interface WeeklyDigest {
 // ── Helper: build digest from velocity + bottleneck snapshots ──────────────
 
 async function buildDigest(
-  orgId: string,
+  workspaceId: string,
   supabase: Awaited<ReturnType<typeof createClient>>,
   digestType: "weekly_monday" | "mid_sprint_urgent" = "weekly_monday"
 ): Promise<WeeklyDigest> {
@@ -58,7 +58,7 @@ async function buildDigest(
   const { data: velocitySnaps } = await supabase
     .from("velocity_snapshots")
     .select("*")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .gte("snapshot_date", sprintStart)
     .order("snapshot_date", { ascending: false })
     .limit(14);
@@ -67,7 +67,7 @@ async function buildDigest(
   const { data: bottleneckSnaps } = await supabase
     .from("bottleneck_snapshots")
     .select("*")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .order("snapshot_date", { ascending: false })
     .limit(2);
 
@@ -76,7 +76,7 @@ async function buildDigest(
   const { data: recentArtifacts } = await supabase
     .from("se_aas_artifacts")
     .select("domain_type, created_at")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .gte("created_at", sevenDaysAgo)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -85,7 +85,7 @@ async function buildDigest(
   const { data: ghConnector } = await supabase
     .from("org_connectors")
     .select("config")
-    .eq("organization_id", orgId)
+    .eq("organization_id", workspaceId)
     .eq("connector_type", "github")
     .maybeSingle();
 
@@ -247,7 +247,7 @@ async function buildDigest(
     .slice(0, 5);
 
   return {
-    orgId,
+    workspaceId,
     digestType,
     generatedAt: now.toISOString(),
     sprintWindow: { from: sprintStart, to: sprintEnd },
@@ -269,18 +269,18 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const body = await request.json().catch(() => ({}));
     const digestType: "weekly_monday" | "mid_sprint_urgent" =
       body.digestType === "mid_sprint_urgent" ? "mid_sprint_urgent" : "weekly_monday";
 
-    const digest = await buildDigest(orgId, supabase, digestType);
+    const digest = await buildDigest(workspaceId, supabase, digestType);
 
     // Persist the digest as an ai_memory entry so it shows in notifications
     const { data: saved, error: saveError } = await supabase
       .from("ai_memory")
       .insert({
-        organization_id: orgId,
+        organization_id: workspaceId,
         memory_type: "alert",
         content: digest.headline,
         metadata: {
@@ -311,7 +311,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from("cascade_alerts")
         .insert({
-          organization_id: orgId,
+          organization_id: workspaceId,
           alert_type: digestType === "weekly_monday" ? "weekly_digest" : "mid_sprint_alert",
           severity:
             digest.overallStatus === "critical"
@@ -351,13 +351,13 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // Fetch digest-type ai_memory entries
     const { data: digests } = await supabase
       .from("ai_memory")
       .select("id, content, metadata, created_at")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("memory_type", "alert")
       .order("created_at", { ascending: false })
       .limit(8);

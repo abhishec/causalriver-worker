@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { BrainClient } from "./brain-client";
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export const metadata = {
 
 export default async function BrainPage() {
   const supabase = await createClient();
-  const CORE_ORG_ID = await getCurrentOrgId();
+  const workspaceId = await getCurrentWorkspaceId();
 
   // Wrap each query to prevent a single failure from crashing the whole page
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
@@ -26,7 +26,7 @@ export default async function BrainPage() {
       .select(
         "id, source_entity, target_entity, strength, p_value, lag_periods, method, domain, natural_language, created_at"
       )
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .order("strength", { ascending: false })
       .limit(50)),
 
@@ -34,7 +34,7 @@ export default async function BrainPage() {
     safe(supabase
       .from("resolved_entities")
       .select("id, canonical_name, entity_type, domain, aliases, confidence, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(30)),
 
@@ -42,7 +42,7 @@ export default async function BrainPage() {
     safe(supabase
       .from("brain_daily_snapshots")
       .select("*")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .order("snapshot_date", { ascending: false })
       .limit(1)),
 
@@ -50,7 +50,7 @@ export default async function BrainPage() {
     safe(supabase
       .from("causal_relationships_statistical")
       .select("id, source_entity, target_entity, strength, p_value, statistical_method, confidence_score, lag_days, source_domain, target_domain, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(20)),
 
@@ -58,7 +58,7 @@ export default async function BrainPage() {
     safe(supabase
       .from("obs_layer_health")
       .select("layer_id, layer_name, health_score, requests_processed, errors, latency_p50, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(15)),
 
@@ -67,7 +67,7 @@ export default async function BrainPage() {
     safe(supabase
       .from("cross_domain_signals")
       .select("id, domain, source_type, created_at")
-      .eq("organization_id", CORE_ORG_ID)
+      .eq("organization_id", workspaceId)
       .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false })
       .limit(200)),

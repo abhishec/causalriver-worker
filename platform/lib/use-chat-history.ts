@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useOrg } from "@/lib/org-context";
+import { useWorkspace } from "@/lib/workspace-context";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -50,12 +50,12 @@ function groupByDate(items: ChatHistoryItem[]): ChatHistoryGroup[] {
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export function useChatHistory() {
-  const { currentOrg } = useOrg();
+  const { currentWorkspace } = useWorkspace();
   const [items, setItems] = useState<ChatHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentOrg?.id) return;
+    if (!currentWorkspace?.id) return;
     let cancelled = false;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
@@ -64,7 +64,7 @@ export function useChatHistory() {
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/copilot/conversations?orgId=${currentOrg!.id}`,
+          `/api/copilot/conversations?workspaceId=${currentWorkspace!.id}`,
           { signal: controller.signal }
         );
         if (res.ok && !cancelled) {
@@ -95,7 +95,7 @@ export function useChatHistory() {
       // Each reload needs its own timeout
       const reloadController = new AbortController();
       const reloadTimeout = setTimeout(() => reloadController.abort(), 5000);
-      fetch(`/api/copilot/conversations?orgId=${currentOrg!.id}`, {
+      fetch(`/api/copilot/conversations?workspaceId=${currentWorkspace!.id}`, {
         signal: reloadController.signal,
       })
         .then((res) => (res.ok ? res.json() : null))
@@ -121,7 +121,7 @@ export function useChatHistory() {
       clearTimeout(timeout);
       window.removeEventListener("conversation-updated", handler);
     };
-  }, [currentOrg?.id]);
+  }, [currentWorkspace?.id]);
 
   const groups = useMemo(() => groupByDate(items), [items]);
 

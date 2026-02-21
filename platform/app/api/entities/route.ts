@@ -15,7 +15,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createEntityResolver } from "@nexus-ai/memory-stack";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const url = new URL(request.url);
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     if (id) {
       const resolver = createEntityResolver({
         supabase: service,
-        organizationId: orgId,
+        organizationId: workspaceId,
       });
 
       const view = await resolver.getUnifiedView(id);
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
         "id, canonical_name, entity_type, external_ids, email_domains, aliases, confidence, metadata, created_at, updated_at",
         { count: "exact" }
       )
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .order("updated_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const body = await request.json().catch(() => ({}));
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
 
     const resolver = createEntityResolver({
       supabase: service,
-      organizationId: orgId,
+      organizationId: workspaceId,
     });
 
     const resolved = await resolver.resolve({
@@ -191,7 +191,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
 
     const body = await request.json().catch(() => ({}));
@@ -206,7 +206,7 @@ export async function PATCH(request: Request) {
       .from("resolved_entities")
       .select("id, metadata")
       .eq("id", id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .single();
 
     if (fetchErr || !existing) {
@@ -230,7 +230,7 @@ export async function PATCH(request: Request) {
       .from("resolved_entities")
       .update(updates)
       .eq("id", id)
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .select()
       .single();
 

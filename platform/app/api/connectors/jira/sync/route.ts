@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from "@nexus-ai/memory-stack";
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
 
     // 2. Load connector config + credentials
     // Supports connectorId for multi-instance; falls back to first active instance
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     let connectorQuery = service
       .from("org_connectors")
       .select("id, config, credentials, signals_count")
-      .eq("organization_id", orgId)
+      .eq("organization_id", workspaceId)
       .eq("connector_type", "jira");
 
     if (connectorId) {
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
               : null;
 
             return {
-              organization_id: orgId,
+              organization_id: workspaceId,
               source_domain: 'product.jira',
               signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
               signal_value: cycleTimeHours || 1,
@@ -221,7 +221,7 @@ export async function POST(request: Request) {
               const commentTexts: string[] = (fields.comment?.comments || []).map(
                 (c: any) => (typeof c.body === 'string' ? c.body : JSON.stringify(c.body ?? ''))
               );
-              await linkJiraToGitHub(service, orgId, {
+              await linkJiraToGitHub(service, workspaceId, {
                 key: issue.key,
                 summary: fields.summary || '',
                 description: typeof fields.description === 'string'
@@ -244,7 +244,7 @@ export async function POST(request: Request) {
     const duration_ms = Date.now() - startMs;
 
     // 5. Derive REAL Jira insights from actual ingested signals
-    await deriveRealJiraInsights(service, orgId);
+    await deriveRealJiraInsights(service, workspaceId);
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;
@@ -252,16 +252,16 @@ export async function POST(request: Request) {
       const { data: recentSignals } = await service
         .from("cross_domain_signals")
         .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .in("source_domain", ["product", "engineering", "support"])
         .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("signal_timestamp", { ascending: false })
         .limit(500);
 
       if (recentSignals && recentSignals.length > 0) {
-        const bandit = createCausalMethodBandit({ supabase: service, organizationId: orgId });
+        const bandit = createCausalMethodBandit({ supabase: service, organizationId: workspaceId });
         const oracle = createOutcomeOracle({ supabase: service, bandit });
-        await oracle.loadFromSupabase(orgId);
+        await oracle.loadFromSupabase(workspaceId);
         const result = await oracle.processBatch(recentSignals);
         oracleResult = {
           predictionsVerified: result.predictionsVerified,

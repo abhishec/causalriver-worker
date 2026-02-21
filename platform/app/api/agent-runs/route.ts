@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentOrgId } from "@/lib/org-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const orgId = await getCurrentOrgId();
+    const workspaceId = await getCurrentWorkspaceId();
     const { searchParams } = new URL(request.url);
     const hours = parseInt(searchParams.get("hours") || "72");
     const agentFilter = searchParams.get("agent") || null;
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, agent_type, run_id, action_type, input_summary, output_summary, tokens_used, duration_ms, status, metadata, created_at"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(200),
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, agent_name, agent_version, status, signals_stored, packs_processed, discoveries, run_mode, completed_at, created_at"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("completed_at", { ascending: false })
         .limit(100),
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, job_name, job_type, schedule, enabled, last_run_at, next_run_at, run_count, error_count, last_error, config"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .order("job_name"),
 
       // 4. agent_queue — pending/running tasks
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, agent_type, task_type, priority, status, error_message, started_at, completed_at, created_at"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(50),
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, is_core_brain, started_at, completed_at, total_duration_ms, status, report, errors"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(20),
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         .select(
           "id, agent_type, agent_level, agent_run_id, trigger_type, causal_edges_used, patterns_used, memories_retrieved, actions_generated, motor_commands_issued, predictions_made, status, output_summary, error_message, execution_latency_ms, tokens_consumed, llm_calls_made, cost_usd, started_at, completed_at"
         )
-        .eq("organization_id", orgId)
+        .eq("organization_id", workspaceId)
         .gte("created_at", since)
         .order("started_at", { ascending: false })
         .limit(200),
