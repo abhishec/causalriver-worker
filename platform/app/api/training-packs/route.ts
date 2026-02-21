@@ -8,24 +8,34 @@ import { logger } from "@/lib/logger";
  * Save a custom training pack.
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const workspaceId = await getCurrentWorkspaceId();
-  const body = await request.json();
-
-  const { name, description, chains, rules } = body;
-
-  if (!name || (!chains?.length && !rules?.length)) {
-    return NextResponse.json(
-      { error: "Pack must have a name and at least one chain or rule" },
-      { status: 400 }
-    );
-  }
-
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const workspaceId = await getCurrentWorkspaceId();
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const { name, description, chains, rules } = body as {
+      name?: string;
+      description?: string;
+      chains?: unknown[];
+      rules?: unknown[];
+    };
+
+    if (!name || (!chains?.length && !rules?.length)) {
+      return NextResponse.json(
+        { error: "Pack must have a name and at least one chain or rule" },
+        { status: 400 }
+      );
+    }
+
     // Store as a training pack record
     const { data, error } = await supabase
       .from("custom_training_packs")
@@ -87,19 +97,26 @@ export async function POST(request: Request) {
  * List training packs for the org.
  */
 export async function GET() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const workspaceId = await getCurrentWorkspaceId();
+    const workspaceId = await getCurrentWorkspaceId();
 
-  const { data: packs } = await supabase
-    .from("custom_training_packs")
-    .select("id, name, description, chain_count, rule_count, status, created_at")
-    .eq("organization_id", workspaceId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    const { data: packs } = await supabase
+      .from("custom_training_packs")
+      .select("id, name, description, chain_count, rule_count, status, created_at")
+      .eq("organization_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(50);
 
-  return NextResponse.json({ packs: packs || [] });
+    return NextResponse.json({ packs: packs || [] });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to list training packs" },
+      { status: 500 }
+    );
+  }
 }

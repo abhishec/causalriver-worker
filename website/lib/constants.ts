@@ -17,7 +17,7 @@ export const NAV_LINKS = [
   { label: "Benchmarks", href: "/#benchmarks" },
   { label: "Competition", href: "/#competition" },
   { label: "Use Cases", href: "/#use-cases" },
-  { label: "Demo", href: "http://localhost:3001", external: true },
+  { label: "Demo", href: "https://platform.usebrainos.com", external: true },
   { label: "Docs", href: "/docs" },
   { label: "GitHub", href: SITE.github, external: true },
 ] as const;

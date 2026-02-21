@@ -60,6 +60,9 @@ function cleanupSessions() {
   }
 }
 
+const _cleanupTimer = setInterval(cleanupSessions, 5 * 60 * 1000);
+if (typeof _cleanupTimer === "object" && "unref" in _cleanupTimer) { (_cleanupTimer as NodeJS.Timeout).unref(); }
+
 // ============================================================================
 // AUTH HELPER
 // ============================================================================

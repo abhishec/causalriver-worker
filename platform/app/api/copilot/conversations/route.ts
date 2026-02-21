@@ -14,40 +14,47 @@ export const dynamic = "force-dynamic";
  * policies that reference org_members, which has infinite recursion.
  */
 export async function GET(req: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Accept both workspaceId (new) and orgId (legacy)
+    const workspaceId = req.nextUrl.searchParams.get("workspaceId") || req.nextUrl.searchParams.get("orgId");
+    if (!workspaceId) {
+      return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
+    }
+
+    // Verify workspace membership (uses admin client to bypass RLS recursion)
+    const member = await verifyWorkspaceMembership(user.id, workspaceId);
+    if (!member) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const admin = getAdminClient();
+    const { data, error } = await admin
+      .from("conversations")
+      .select("id, title, service_mode, created_at, updated_at, metadata")
+      .eq("org_id", workspaceId)
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ conversations: data });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to list conversations" },
+      { status: 500 }
+    );
   }
-
-  // Accept both workspaceId (new) and orgId (legacy)
-  const workspaceId = req.nextUrl.searchParams.get("workspaceId") || req.nextUrl.searchParams.get("orgId");
-  if (!workspaceId) {
-    return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
-  }
-
-  // Verify workspace membership (uses admin client to bypass RLS recursion)
-  const member = await verifyWorkspaceMembership(user.id, workspaceId);
-  if (!member) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  const admin = getAdminClient();
-  const { data, error } = await admin
-    .from("conversations")
-    .select("id, title, service_mode, created_at, updated_at, metadata")
-    .eq("org_id", workspaceId)
-    .eq("user_id", user.id)
-    .order("updated_at", { ascending: false })
-    .limit(50);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ conversations: data });
 }
 
 /**
@@ -55,68 +62,85 @@ export async function GET(req: NextRequest) {
  * Create or update a conversation.
  */
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const body = await req.json();
-  // Accept both workspaceId (new) and orgId (legacy)
-  const workspaceId = body.workspaceId || body.orgId;
-  const { title, serviceMode, messages, conversationId } = body;
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    // Accept both workspaceId (new) and orgId (legacy)
+    const workspaceId = body.workspaceId || body.orgId;
+    const { title, serviceMode, messages, conversationId } = body as {
+      title?: string;
+      serviceMode?: string;
+      messages?: unknown[];
+      conversationId?: string;
+    };
 
-  if (!workspaceId) {
-    return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
-  }
+    if (!workspaceId) {
+      return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
+    }
 
-  // Verify workspace membership (uses admin client to bypass RLS recursion)
-  const member = await verifyWorkspaceMembership(user.id, workspaceId);
-  if (!member) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+    // Verify workspace membership (uses admin client to bypass RLS recursion)
+    const member = await verifyWorkspaceMembership(user.id, workspaceId as string);
+    if (!member) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-  const admin = getAdminClient();
+    const admin = getAdminClient();
 
-  if (conversationId) {
-    // Update existing conversation
+    if (conversationId) {
+      // Update existing conversation
+      const { data, error } = await admin
+        .from("conversations")
+        .update({
+          title: title || "New conversation",
+          service_mode: serviceMode || "general",
+          messages: messages || [],
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", conversationId)
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ id: data.id });
+    }
+
+    // Create new conversation
     const { data, error } = await admin
       .from("conversations")
-      .update({
+      .insert({
+        org_id: workspaceId,
+        user_id: user.id,
         title: title || "New conversation",
         service_mode: serviceMode || "general",
         messages: messages || [],
-        updated_at: new Date().toISOString(),
       })
-      .eq("id", conversationId)
-      .eq("user_id", user.id)
       .select("id")
       .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
     return NextResponse.json({ id: data.id });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to save conversation" },
+      { status: 500 }
+    );
   }
-
-  // Create new conversation
-  const { data, error } = await admin
-    .from("conversations")
-    .insert({
-      org_id: workspaceId,
-      user_id: user.id,
-      title: title || "New conversation",
-      service_mode: serviceMode || "general",
-      messages: messages || [],
-    })
-    .select("id")
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ id: data.id });
 }

@@ -913,7 +913,7 @@ export async function POST(request: NextRequest) {
                     organizationId: workspaceId,
                     userId: user.id,
                     supabase: service,
-                    anthropicApiKey: process.env.ANTHROPIC_API_KEY!,
+                    anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
                     params: commandParams as Record<string, unknown> | undefined,
                     branch: branch as string | undefined,
                   },
