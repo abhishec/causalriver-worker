@@ -40,6 +40,18 @@ import type { QueryInterpretation } from "@nexus-ai/memory-stack";
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
+// ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
+const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
+const MAX_SYSTEM_PROMPT_TOKENS = 100_000; // Reserve 80K for system prompt
+const MAX_OUTPUT_TOKENS = 8_192;
+const RESERVED_TOKENS = MAX_OUTPUT_TOKENS + 5_000; // output + safety margin
+const MAX_HISTORY_TOKENS = MAX_CONTEXT_TOKENS - MAX_SYSTEM_PROMPT_TOKENS - RESERVED_TOKENS;
+
+/** Rough token estimate: ~4 chars per token for English text */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Vercel serverless: allow up to 120s for long Claude SSE streams
 
@@ -278,9 +290,18 @@ export async function POST(request: NextRequest) {
     // Accept both workspaceId (new) and organizationId (legacy) from request body
     const requestedWorkspaceId = bodyWorkspaceId || organizationId;
 
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json(
         { error: "Message is required" },
+        { status: 400 }
+      );
+    }
+
+    // ── Validate workspace ID format (prevent path traversal) ──────────
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (requestedWorkspaceId && !UUID_RE.test(requestedWorkspaceId)) {
+      return NextResponse.json(
+        { error: "Invalid workspace ID format" },
         { status: 400 }
       );
     }
@@ -880,12 +901,20 @@ export async function POST(request: NextRequest) {
                 };
 
                 // Interpolate commandParams into the template prompt
+                // Security: sanitize values to prevent prompt injection via template params
                 let templatePrompt = resolvedTemplate.prompt;
                 if (commandParams) {
                   for (const [key, value] of Object.entries(commandParams)) {
+                    // Sanitize: strip control chars, limit length, escape injection patterns
+                    const raw = String(value);
+                    const sanitized = raw
+                      .replace(/[\x00-\x1f\x7f]/g, "")      // strip control chars
+                      .replace(/\{\{/g, "{ {")                // prevent nested template injection
+                      .replace(/\}\}/g, "} }")
+                      .slice(0, 5000);                         // hard limit per param
                     templatePrompt = templatePrompt.replace(
-                      new RegExp(`\\{\\{${key}\\}\\}`, 'g'),
-                      String(value)
+                      new RegExp(`\\{\\{${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}\\}`, 'g'),
+                      sanitized
                     );
                   }
                 }
@@ -1174,6 +1203,9 @@ export async function POST(request: NextRequest) {
                 if (keys && keys.length > 0 && !keys.includes(projectPrefix)) continue;
 
                 try {
+                  // Phase 4: Circuit breaker — abort Jira fetch after 8 seconds
+                  const jiraAbort = new AbortController();
+                  const jiraTimeout = setTimeout(() => jiraAbort.abort(), 8_000);
                   const issueRes = await fetch(
                     `${jiraBaseUrl}/rest/api/3/issue/${jiraId}`,
                     {
@@ -1181,8 +1213,10 @@ export async function POST(request: NextRequest) {
                         Authorization: `Basic ${Buffer.from(`${jiraEmail}:${jiraToken}`).toString("base64")}`,
                         Accept: "application/json",
                       },
+                      signal: jiraAbort.signal,
                     }
                   );
+                  clearTimeout(jiraTimeout);
                   if (issueRes.ok) {
                     const issue = await issueRes.json();
                     jiraContext = JSON.stringify({
@@ -1661,20 +1695,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ── Build messages array with conversation history ──────────────────
+    // ── Build messages array with token-aware conversation history (Phase 4) ──
     const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
 
     if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
-      // Include last 4 exchanges for context
-      const recent = conversationHistory.slice(-8);
-      for (const msg of recent) {
-        if (msg && (msg.role === "user" || msg.role === "assistant") && typeof msg.content === "string") {
-          messages.push({
-            role: msg.role,
-            content: msg.content.slice(0, 50000), // Cap individual message length
-          });
-        }
+      // Token-aware history capping: include as many recent messages as fit in budget
+      const recent = conversationHistory.slice(-20); // Hard cap: max 20 messages
+      let historyTokens = 0;
+      const budgetedHistory: typeof messages = [];
+
+      // Walk backwards (most recent first) to prioritize recent context
+      for (let i = recent.length - 1; i >= 0; i--) {
+        const msg = recent[i];
+        if (!msg || (msg.role !== "user" && msg.role !== "assistant") || typeof msg.content !== "string") continue;
+        const capped = msg.content.slice(0, 50_000); // Cap individual message length
+        const tokens = estimateTokens(capped);
+        if (historyTokens + tokens > MAX_HISTORY_TOKENS) break; // Budget exhausted
+        historyTokens += tokens;
+        budgetedHistory.unshift({ role: msg.role, content: capped });
       }
+      messages.push(...budgetedHistory);
     }
 
     // Add current message
@@ -2166,6 +2206,14 @@ RULES FOR CORRECTIONS:
           }));
         }
 
+        // Phase 4: Guard against system prompt exceeding token budget
+        const systemTokens = estimateTokens(effectiveSystemPrompt);
+        if (systemTokens > MAX_SYSTEM_PROMPT_TOKENS) {
+          logger.warn(`[TokenBudget] System prompt ${systemTokens} tokens exceeds budget ${MAX_SYSTEM_PROMPT_TOKENS}, truncating`);
+          // Truncate from the end (preserves persona + core instructions, trims entity links/LEAP)
+          effectiveSystemPrompt = effectiveSystemPrompt.slice(0, MAX_SYSTEM_PROMPT_TOKENS * 4);
+        }
+
         const anthropicStream = anthropic.messages.stream({
           model: v4SmartModel,
           max_tokens: 8192,
@@ -2194,38 +2242,42 @@ RULES FOR CORRECTIONS:
 
         clearTimeout(streamTimeout);
 
-        // ── Brain Feedback: teach the Brain from Copilot interaction ──
+        // ── Brain Feedback: teach the Brain from Copilot interaction (Phase 4: 5s timeout) ──
         const bus = createBrainFeedbackBus({ supabase: service, organizationId: workspaceId });
-        await Promise.all([
-          bus.emitSignal({
-            sourceDomain: 'copilot.chat',
-            signalType: 'copilot_interaction',
-            signalValue: brainContext?.confidence ?? 0.5,
-            entityType: 'copilot_chat',
-            entityId: `copilot_${Date.now()}`,
-            metadata: {
-              intent: detectedIntent,
-              domains: detectedDomains,
-              model: v4SmartModel,
-              hadBrainContext: !!brainContext,
-              hadActionArtifact: !!actionArtifact,
-              hadSeaasResult: !!seaasResult,
-              hadAccountingResult: !!accountingResult,
-              userId: user.id,
-            },
-          }),
-          bus.recordExecution({
-            service: 'copilot',
-            domainType: detectedIntent,
-            durationMs: Date.now() - Date.now(), // approximate
-            claudePowered: true,
-            brainAugmented: !!brainContext,
-            causalEdgesUsed: causalEdges.length,
-            patternsUsed: patterns.length,
-          }),
-          bus.triggerEvolution(),
+        const feedbackTimeout = new Promise<void>((resolve) => setTimeout(resolve, 5_000));
+        await Promise.race([
+          Promise.all([
+            bus.emitSignal({
+              sourceDomain: 'copilot.chat',
+              signalType: 'copilot_interaction',
+              signalValue: brainContext?.confidence ?? 0.5,
+              entityType: 'copilot_chat',
+              entityId: `copilot_${Date.now()}`,
+              metadata: {
+                intent: detectedIntent,
+                domains: detectedDomains,
+                model: v4SmartModel,
+                hadBrainContext: !!brainContext,
+                hadActionArtifact: !!actionArtifact,
+                hadSeaasResult: !!seaasResult,
+                hadAccountingResult: !!accountingResult,
+                userId: user.id,
+              },
+            }),
+            bus.recordExecution({
+              service: 'copilot',
+              domainType: detectedIntent,
+              durationMs: Date.now() - Date.now(), // approximate
+              claudePowered: true,
+              brainAugmented: !!brainContext,
+              causalEdgesUsed: causalEdges.length,
+              patternsUsed: patterns.length,
+            }),
+            bus.triggerEvolution(),
+          ]),
+          feedbackTimeout,
         ]).catch(() => {
-          // Non-blocking
+          // Non-blocking: feedback is best-effort
         });
 
         // ── Notify OpenClaw gateway of conversation completion ──────
@@ -2268,8 +2320,9 @@ RULES FOR CORRECTIONS:
     return new Response(stream, {
       headers: {
         "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
+        "Cache-Control": "no-cache, no-transform",
         Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (err) {

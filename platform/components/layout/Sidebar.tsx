@@ -8,6 +8,7 @@ import { UserMenu } from "./UserMenu";
 import { useChatHistory, type ChatHistoryItem } from "@/lib/use-chat-history";
 import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/SlashCommandPicker";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
+import { useCopilotController } from "@/lib/copilot-controller";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -126,6 +127,7 @@ const GENERAL_COMMANDS: SlashCommand[] = [
 function CommandsSection({ activeService }: { activeService: ServiceMode }) {
   const [selectedCmd, setSelectedCmd] = useState<string | null>(null);
   const router = useRouter();
+  const copilotController = useCopilotController();
 
   const displayNames = useMemo(() => {
     const map: Record<string, string> = {};
@@ -156,23 +158,20 @@ function CommandsSection({ activeService }: { activeService: ServiceMode }) {
 
     const isCopilot = window.location.pathname.startsWith("/copilot");
 
-    if (isCopilot) {
-      // Already on copilot — dispatch events directly
+    if (isCopilot && copilotController) {
+      // Direct controller call — no setTimeout, no events, no race conditions
+      copilotController.executeCommand({
+        id: cmd.id,
+        prompt: cmd.prompt,
+        service: cmd.service,
+      });
+    } else if (isCopilot) {
+      // Legacy fallback: controller not available (shouldn't happen, but safe)
       window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-      // Wait for React state to flush after new-conversation reset, then inject.
-      // Use a retry loop to ensure the listener is ready (handles race conditions).
-      let attempts = 0;
-      const maxAttempts = 5;
-      const tryInject = () => {
-        attempts++;
-        const detail = { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service };
-        window.dispatchEvent(
-          new CustomEvent("copilot-inject-and-submit", { detail })
-        );
-      };
-      // First attempt after 400ms (enough for React state flush),
-      // retry every 200ms up to maxAttempts if needed
-      setTimeout(tryInject, 400);
+      const detail = { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service };
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("copilot-inject-and-submit", { detail }));
+      }, 400);
     } else {
       // Navigate to copilot with command in URL — page picks it up on mount
       router.push(`/copilot?cmd=${encodeURIComponent(cmd.id)}`);

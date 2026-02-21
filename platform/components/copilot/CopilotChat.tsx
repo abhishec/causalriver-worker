@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useId, FormEvent } from "react";
+import { useState, useRef, useEffect, useCallback, useId, useImperativeHandle, forwardRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
@@ -19,6 +19,7 @@ import { useCommandGathering } from "./useCommandGathering";
 import { COMMAND_GATHERING_MAP } from "./command-gathering";
 import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
+import type { CopilotChatHandle } from "@/lib/copilot-controller";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
 // All shared types live in ./types.ts. Re-export them here for backward compat.
@@ -773,27 +774,46 @@ function generateFollowUps(lastUserMessage: string, lastAssistantMessage: string
   const suggestions: string[] = [];
   const lower = (lastUserMessage + " " + lastAssistantMessage).toLowerCase();
 
-  // Context-aware suggestions based on content
-  if (lower.includes("churn") || lower.includes("retention")) {
-    suggestions.push("What's causing the churn increase?", "Show me churn by cohort", "Compare churn vs last quarter");
-  } else if (lower.includes("velocity") || lower.includes("deploy") || lower.includes("pr")) {
-    suggestions.push("Show velocity trend over 30 days", "Who are the top bottleneck reviewers?", "Predict next sprint velocity");
-  } else if (lower.includes("sql") || lower.includes("query") || lower.includes("database")) {
-    suggestions.push("Find other slow queries", "Check for missing indexes", "Optimize the top 5 queries");
-  } else if (lower.includes("test") || lower.includes("tdd") || lower.includes("coverage")) {
-    suggestions.push("Generate integration tests too", "Show current test coverage", "Create edge case tests");
-  } else if (lower.includes("incident") || lower.includes("error") || lower.includes("production")) {
-    suggestions.push("Show related past incidents", "What services are affected?", "Generate a runbook for this");
-  } else if (lower.includes("cost") || lower.includes("budget") || lower.includes("spend")) {
-    suggestions.push("Break down costs by model", "Project end-of-month spend", "Which agents cost the most?");
-  } else if (lower.includes("causal") || lower.includes("relationship") || lower.includes("edge")) {
-    suggestions.push("Show cross-domain relationships", "Which edges have highest confidence?", "What was discovered this week?");
-  } else {
-    // Generic follow-ups
-    suggestions.push("Tell me more", "What actions should we take?", "Show me the underlying data");
+  // ── Domain-specific follow-ups (Phase 5: richer intelligence) ──────
+  const DOMAIN_PATTERNS: Array<{ keywords: string[]; followUps: string[] }> = [
+    { keywords: ["churn", "retention", "attrition"], followUps: ["What's causing the churn increase?", "Show me churn by cohort", "Compare churn vs last quarter", "Predict next month's churn rate"] },
+    { keywords: ["velocity", "deploy", "pr", "pull request", "merge"], followUps: ["Show velocity trend over 30 days", "Who are the top bottleneck reviewers?", "Predict next sprint velocity", "Which PRs are blocking?"] },
+    { keywords: ["sql", "query", "database", "index"], followUps: ["Find other slow queries", "Check for missing indexes", "Optimize the top 5 queries", "Show query execution plans"] },
+    { keywords: ["test", "tdd", "coverage", "spec"], followUps: ["Generate integration tests too", "Show current test coverage", "Create edge case tests", "What's untested?"] },
+    { keywords: ["incident", "error", "production", "outage", "alert"], followUps: ["Show related past incidents", "What services are affected?", "Generate a runbook for this", "What's the blast radius?"] },
+    { keywords: ["cost", "budget", "spend", "expense", "burn"], followUps: ["Break down costs by category", "Project end-of-month spend", "Where can we cut costs?", "Show burn rate trend"] },
+    { keywords: ["causal", "relationship", "edge", "correlation"], followUps: ["Show cross-domain relationships", "Which edges have highest confidence?", "What was discovered this week?", "Run a what-if simulation"] },
+    { keywords: ["revenue", "sales", "mrr", "arr", "growth"], followUps: ["Show revenue by segment", "What's driving growth?", "Forecast next quarter's revenue", "Which accounts are at risk?"] },
+    { keywords: ["architecture", "system", "design", "hld", "lld"], followUps: ["Show the dependency graph", "What are the coupling hotspots?", "Generate a sequence diagram", "Review for scalability issues"] },
+    { keywords: ["security", "vulnerability", "cve", "audit"], followUps: ["Show all open vulnerabilities", "Prioritize by risk score", "Check dependency versions", "Generate a security report"] },
+    { keywords: ["performance", "latency", "throughput", "p99", "slow"], followUps: ["Show performance trends", "What's the P99 latency?", "Find bottleneck endpoints", "Compare against baseline"] },
+    { keywords: ["jira", "ticket", "sprint", "backlog", "story"], followUps: ["Show sprint progress", "What's blocking this sprint?", "Predict sprint completion", "Which tickets are stale?"] },
+    { keywords: ["balance sheet", "p&l", "financial statement", "ledger"], followUps: ["Show P&L trend", "Any anomalies in the ledger?", "Compare vs last period", "What's the cash position?"] },
+    { keywords: ["scope creep", "deadline", "delivery", "milestone"], followUps: ["Show scope change history", "What's at risk for deadline?", "Compare actual vs planned", "Which tasks slipped?"] },
+  ];
+
+  for (const pattern of DOMAIN_PATTERNS) {
+    if (pattern.keywords.some(kw => lower.includes(kw))) {
+      suggestions.push(...pattern.followUps);
+      break;
+    }
   }
 
-  return suggestions.slice(0, 3);
+  // ── Action-oriented fallbacks if no domain matched ──────────────────
+  if (suggestions.length === 0) {
+    // Check for response characteristics
+    if (lastAssistantMessage.includes("```")) {
+      suggestions.push("Explain this code", "Add error handling", "Write tests for this");
+    } else if (lastAssistantMessage.length > 1000) {
+      suggestions.push("Summarize the key points", "What actions should we take?", "Create a visual chart");
+    } else {
+      suggestions.push("Tell me more", "What actions should we take?", "Show me the underlying data");
+    }
+  }
+
+  // ── Shuffle and return top 3 (avoid stale-feeling repetitive suggestions) ──
+  const shuffled = suggestions.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 3);
 }
 
 // ─── Message action bar ─────────────────────────────────────────────────────
@@ -1243,7 +1263,7 @@ function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta | null; isLoad
 
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
-export function CopilotChat({
+export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(function CopilotChat({
   endpoint = "/api/copilot/chat",
   extraParams,
   examplePrompts = DEFAULT_PROMPTS,
@@ -1265,7 +1285,7 @@ export function CopilotChat({
   customCommands,
   customGatheringMap,
   onCreateAgent,
-}: CopilotChatProps) {
+}, ref) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -1275,7 +1295,7 @@ export function CopilotChat({
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
@@ -1290,6 +1310,11 @@ export function CopilotChat({
   // ── Proactive insights state (Week 6: "While you were away") ──────────
   const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
   const [insightsDismissed, setInsightsDismissed] = useState(false);
+
+  // ── File attachment state (Phase 2: Claude-level attachments) ──────────
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // ── Pending verification prompts (reinforcement learning ground truth) ──
   const [pendingVerifications, setPendingVerifications] = useState<Array<{
@@ -1383,6 +1408,44 @@ export function CopilotChat({
   onArtifactPaneOpenRef.current = onArtifactPaneOpen;
   // Ref for sendMessage so event handlers can call it without stale closures
   const sendMessageRef = useRef<((msg: string) => void) | null>(null);
+
+  // ── Expose imperative methods to parent via ref (Phase 1: CopilotController) ──
+  useImperativeHandle(ref, () => ({
+    resetChat() {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setMessages([]);
+      setInput("");
+      setIsLoading(false);
+      setBrainMeta(null);
+      setFollowUps([]);
+      setBrainMetaPerMessage(new Map());
+      setShowSlashPicker(false);
+      setSlashQuery("");
+      setAgentSteps([]);
+      setAgentStatus(null);
+      setProactiveInsights([]);
+      setInsightsDismissed(false);
+      setAttachments([]);
+      gatheringRef.current.cancel();
+      inputRef.current?.focus();
+    },
+    submitMessage(prompt: string) {
+      sendMessageRef.current?.(prompt);
+    },
+    setInputText(text: string) {
+      setInput(text);
+      inputRef.current?.focus();
+    },
+    startGathering(cmd) {
+      onArtifactPaneOpenRef.current?.();
+      gatheringRef.current.startGathering(cmd as any);
+      setInput("");
+    },
+    isReady() {
+      return !!sendMessageRef.current && !isLoadingRef.current;
+    },
+  }));
 
   const color = persona.color || "accent";
 
@@ -1511,6 +1574,7 @@ export function CopilotChat({
       setBrainMetaPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
+      setAttachments([]);
       inputRef.current?.focus();
     };
     window.addEventListener("copilot-new-conversation", handleNewConversation);
@@ -1534,6 +1598,7 @@ export function CopilotChat({
       setBrainMetaPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
+      setAttachments([]);
       // Cancel any active gathering when loading a saved conversation
       gatheringRef.current.cancel();
       // Scroll to bottom after render
@@ -1544,6 +1609,34 @@ export function CopilotChat({
     window.addEventListener("copilot-load-conversation", handleLoadConversation);
     return () => window.removeEventListener("copilot-load-conversation", handleLoadConversation);
   }, []);
+
+  // ── Keyboard shortcuts (Phase 2: Cmd+N new chat, Cmd+K focus input, Escape) ──
+  useEffect(() => {
+    const handleKeyboard = (e: KeyboardEvent) => {
+      const isMeta = e.metaKey || e.ctrlKey;
+      // Cmd+N → new conversation
+      if (isMeta && e.key === "n") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+      }
+      // Cmd+K → focus input
+      if (isMeta && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      // Escape → dismiss slash picker or stop generation
+      if (e.key === "Escape") {
+        if (showSlashPicker) {
+          setShowSlashPicker(false);
+          setSlashQuery("");
+        } else if (isLoading) {
+          handleStop();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyboard);
+    return () => window.removeEventListener("keydown", handleKeyboard);
+  }, [showSlashPicker, isLoading]);
 
   // ── SSE stream consumer ─────────────────────────────────────────────────
 
@@ -1559,6 +1652,7 @@ export function CopilotChat({
     const userMessage: Message = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setAttachments([]);
     setIsLoading(true);
     setBrainMeta(null);
     setFollowUps([]);
@@ -1787,11 +1881,12 @@ export function CopilotChat({
     setTimeout(() => sendMessage(lastUserMsg.content), 50);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as unknown as FormEvent);
     }
+    // Shift+Enter allows new line naturally (no preventDefault needed)
   };
 
   const handleStop = () => {
@@ -1799,23 +1894,71 @@ export function CopilotChat({
     setIsLoading(false);
   };
 
+  // ── File attachment handlers (Phase 2) ─────────────────────────────────
+  const handleFileSelect = useCallback((files: FileList | null) => {
+    if (!files) return;
+    const maxSize = 10 * 1024 * 1024; // 10MB limit
+    const validFiles = Array.from(files).filter(f => {
+      if (f.size > maxSize) {
+        console.warn(`File "${f.name}" exceeds 10MB limit`);
+        return false;
+      }
+      return true;
+    });
+    setAttachments(prev => [...prev, ...validFiles].slice(0, 5)); // Max 5 files
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    handleFileSelect(e.dataTransfer.files);
+  }, [handleFileSelect]);
+
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "#faf9f5" }}>
+    <div className="flex flex-col h-full relative bg-background" role="main" aria-label="Copilot chat">
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm border-2 border-dashed border-accent/40 rounded-xl pointer-events-none">
+          <div className="flex flex-col items-center gap-2 text-accent">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            <span className="text-sm font-medium">Drop files to attach</span>
+          </div>
+        </div>
+      )}
 
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
-      <div className="flex-1 overflow-y-auto" style={{ padding: "24px 0" }}>
+      <div className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.length === 0 && !gathering.isActive ? (
           /* Empty state — matches HTML prototype: .chat-welcome with ✦ spark + service-specific text */
-          <div className="flex flex-col items-center justify-center h-full text-center" style={{ padding: "60px 24px" }}>
-            <div style={{ color: "#c6613f", fontSize: 28, marginBottom: 16 }}>✦</div>
-            <h4 style={{ fontSize: 16, fontWeight: 500, color: "#73726c" }}>
+          <div className="flex flex-col items-center justify-center h-full text-center px-6 py-16">
+            <div className="text-accent text-[28px] mb-4">✦</div>
+            <h4 className="text-base font-medium text-muted-foreground">
               {activeService === "seaas" ? "How can I help with your engineering?" :
                activeService === "aas" ? "How can I help with your finances?" :
                "How can I help you today?"}
             </h4>
-            <p style={{ fontSize: 12, color: "#a3a39e", marginTop: 6 }}>
+            <p className="text-xs text-muted mt-1.5">
               {activeService === "seaas" ? "Type / to browse SE-aaS commands" :
                activeService === "aas" ? "Type / to browse accounting commands" :
                "Type / to browse all intelligence commands"}
@@ -1823,10 +1966,10 @@ export function CopilotChat({
           </div>
         ) : (
           /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */
-          <div style={{ maxWidth: 680, width: "100%", margin: "0 auto", padding: "0 24px", display: "flex", flexDirection: "column", gap: 4 }}>
+          <div className="max-w-[680px] w-full mx-auto px-4 sm:px-6 flex flex-col gap-1">
             {/* New conversation badge — matches HTML .new-chat-badge */}
-            <div style={{ textAlign: "center", padding: "4px 0 12px" }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 12, background: "rgba(198,97,63,.06)", border: "1px solid rgba(198,97,63,.1)", fontSize: 11, color: "#c6613f", fontWeight: 500 }}>
+            <div className="text-center py-1 pb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-accent/[.06] border border-accent/10 text-[11px] text-accent font-medium">
                 ✦ New conversation
               </span>
             </div>
@@ -1884,29 +2027,29 @@ export function CopilotChat({
                 >
                   {msg.role === "user" ? (
                     /* ── User message — matches HTML .msg-user ── */
-                    <div style={{ padding: "12px 0" }}>
-                      <div style={{ fontSize: 15, color: "#141413", lineHeight: 1.6, fontWeight: 400 }}>
+                    <div className="py-3">
+                      <div className="text-[15px] text-foreground leading-relaxed">
                         {msg.content}
                       </div>
                     </div>
                   ) : (
                     /* ── Assistant message — matches HTML .msg-asst ── */
-                    <div style={{ padding: "12px 0" }}>
+                    <div className="py-3 group">
                       {/* Agent step timeline — shows live when agent is executing */}
                       {isLastAssistant && agentSteps.length > 0 && (
                         <div style={{ marginBottom: 12 }}>
                           <AgentStepTimeline steps={agentSteps} agentStatus={agentStatus} />
                         </div>
                       )}
-                      <div className="text-sm leading-relaxed" style={{ fontSize: 15, color: "#3d3d3a", lineHeight: 1.7 }}>
+                      <div className="text-[15px] leading-[1.7] text-foreground/90">
                         {msg.content?.startsWith("__ERROR__") ? (
                           /* ── Error state with retry button ── */
-                          <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(220,38,38,.05)", border: "1px solid rgba(220,38,38,.12)" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                              <span style={{ fontSize: 14 }}>⚠️</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#dc2626" }}>Something went wrong</span>
+                          <div className="px-3.5 py-2.5 rounded-xl bg-danger/5 border border-danger/10">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className="text-sm">⚠️</span>
+                              <span className="text-[13px] font-semibold text-danger">Something went wrong</span>
                             </div>
-                            <div style={{ fontSize: 12, color: "#73726c", marginBottom: 10 }}>
+                            <div className="text-xs text-muted-foreground mb-2.5">
                               {msg.content.replace("__ERROR__", "")}
                             </div>
                             {lastFailedPrompt && (
@@ -1919,7 +2062,7 @@ export function CopilotChat({
                                   setMessages((prev) => prev.slice(0, -1));
                                   setTimeout(() => sendMessageRef.current?.(prompt), 50);
                                 }}
-                                style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8, background: "#141413", color: "#faf9f5", fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer" }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground text-background text-xs font-medium cursor-pointer border-none hover:opacity-90 transition-opacity"
                               >
                                 ↻ Retry
                               </button>
@@ -2077,8 +2220,8 @@ export function CopilotChat({
       </div>
 
       {/* Input bar — matches HTML .chat-input-area */}
-      <div style={{ padding: "12px 24px 20px", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <form onSubmit={handleSubmit} className="relative" style={{ maxWidth: 680, width: "100%" }}>
+      <div className="shrink-0 flex flex-col items-center px-4 sm:px-6 pt-3 pb-5">
+        <form onSubmit={handleSubmit} className="relative max-w-[680px] w-full" role="search" aria-label="Chat input">
 
           {/* Slash command picker — floating above the input */}
           {showSlashPicker && (
@@ -2121,83 +2264,118 @@ export function CopilotChat({
             </div>
           )}
 
-          {/* Input box — matches HTML .chat-input-box */}
+          {/* Input box — matches HTML .chat-input-box (Phase 2: textarea + attachments) */}
           <div
-            style={{
-              background: "#fff",
-              borderRadius: 20,
-              boxShadow: "rgba(0,0,0,.035) 0 4px 20px, rgba(31,30,29,.15) 0 0 0 .5px",
-              padding: "12px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              "bg-card rounded-[20px] p-3 sm:p-4 flex flex-col gap-2 transition-shadow",
+              isDragOver
+                ? "ring-2 ring-accent/20 shadow-lg"
+                : "shadow-[rgba(0,0,0,.035)_0_4px_20px] ring-1 ring-border-subtle"
+            )}
           >
-            <input
-              ref={inputRef as React.RefObject<HTMLInputElement>}
-              type="text"
-              value={input}
-              onChange={(e) => {
-                const val = e.target.value;
-                setInput(val);
-                if (val === "/") {
-                  setShowSlashPicker(true);
-                  setSlashQuery("");
-                } else if (val.startsWith("/") && !val.includes(" ")) {
-                  setShowSlashPicker(true);
-                  setSlashQuery(val.slice(1));
-                } else if (showSlashPicker) {
-                  setShowSlashPicker(false);
-                  setSlashQuery("");
+            {/* Attachment pills */}
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {attachments.map((file, i) => (
+                  <span
+                    key={`${file.name}-${i}`}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface text-[11px] text-foreground/70 border border-border-subtle"
+                  >
+                    <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                    </svg>
+                    <span className="max-w-[120px] truncate">{file.name}</span>
+                    <button
+                      onClick={() => removeAttachment(i)}
+                      className="ml-0.5 text-muted hover:text-foreground transition-colors"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  handleFileSelect(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+              {/* Paperclip button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="shrink-0 text-muted hover:text-foreground transition-colors p-0.5"
+                title="Attach files (max 10MB each)"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                </svg>
+              </button>
+              {/* Auto-growing textarea */}
+              <textarea
+                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                value={input}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setInput(val);
+                  // Auto-resize textarea
+                  const el = e.target;
+                  el.style.height = "auto";
+                  el.style.height = Math.min(el.scrollHeight, 200) + "px";
+                  // Slash command detection
+                  if (val === "/") {
+                    setShowSlashPicker(true);
+                    setSlashQuery("");
+                  } else if (val.startsWith("/") && !val.includes(" ")) {
+                    setShowSlashPicker(true);
+                    setSlashQuery(val.slice(1));
+                  } else if (showSlashPicker) {
+                    setShowSlashPicker(false);
+                    setSlashQuery("");
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && showSlashPicker) {
+                    e.preventDefault();
+                    setShowSlashPicker(false);
+                    setSlashQuery("");
+                    return;
+                  }
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e as unknown as FormEvent);
+                  }
+                  // Shift+Enter = new line (default behavior)
+                }}
+                placeholder={
+                  activeService === "seaas" ? "Ask about engineering, or type / for commands…" :
+                  activeService === "aas" ? "Ask about finances, or type / for commands…" :
+                  "Ask anything, or type / for commands…"
                 }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape" && showSlashPicker) {
-                  e.preventDefault();
-                  setShowSlashPicker(false);
-                  setSlashQuery("");
-                  return;
-                }
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSubmit(e as unknown as FormEvent);
-                }
-              }}
-              placeholder={
-                activeService === "seaas" ? "Ask about engineering, or type / for commands…" :
-                activeService === "aas" ? "Ask about finances, or type / for commands…" :
-                "Ask anything, or type / for commands…"
-              }
-              disabled={isLoading}
-              style={{
-                flex: 1,
-                border: "none",
-                outline: "none",
-                fontSize: 14,
-                color: "#141413",
-                background: "transparent",
-                fontFamily: "inherit",
-              }}
-            />
+                disabled={isLoading}
+                rows={1}
+                className="flex-1 border-none outline-none text-sm text-foreground bg-transparent font-[inherit] resize-none leading-relaxed"
+                style={{ maxHeight: 200, overflow: "auto" }}
+              />
             {isLoading ? (
               <button
                 type="button"
                 onClick={handleStop}
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "#dc2626",
-                  border: "none",
-                  color: "#faf9f5",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                className="w-7 h-7 rounded-full bg-danger border-none text-background text-[13px] font-bold cursor-pointer flex items-center justify-center"
                 title="Stop generation"
+                aria-label="Stop generation"
               >
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="6" y="6" width="12" height="12" rx="2" />
@@ -2208,29 +2386,19 @@ export function CopilotChat({
               <button
                 type="submit"
                 disabled={!input.trim()}
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "#141413",
-                  border: "none",
-                  color: "#faf9f5",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: input.trim() ? "pointer" : "not-allowed",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: input.trim() ? 1 : 0.3,
-                  transition: "opacity .15s",
-                }}
+                className={cn(
+                    "w-7 h-7 rounded-full bg-foreground border-none text-background text-[13px] font-bold flex items-center justify-center transition-opacity",
+                    input.trim() ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-30"
+                )}
+                aria-label="Send message"
               >
                 ↑
               </button>
             )}
+            </div>
           </div>
         </form>
       </div>
     </div>
   );
-}
+});

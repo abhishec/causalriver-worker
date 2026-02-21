@@ -10,7 +10,7 @@
  * step events back through the copilot SSE connection.
  */
 
-import { useState } from "react";
+import React, { useState } from "react";
 import type { AgentStep, AgentStatus } from "./types";
 
 // ── Step Type Config ─────────────────────────────────────────────────────────
@@ -68,6 +68,20 @@ interface AgentStepTimelineProps {
 export function AgentStepTimeline({ steps, agentStatus, className = "" }: AgentStepTimelineProps) {
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
 
+  // Phase 5: Elapsed timer for running agents
+  const [elapsed, setElapsed] = useState(0);
+  const isRunning = agentStatus?.status === "running" || agentStatus?.status === "starting";
+
+  React.useEffect(() => {
+    if (!isRunning) {
+      setElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    const interval = setInterval(() => setElapsed(Date.now() - start), 1000);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
   if (!agentStatus && steps.length === 0) return null;
 
   const toggleStep = (stepNumber: number) => {
@@ -108,11 +122,25 @@ export function AgentStepTimeline({ steps, agentStatus, className = "" }: AgentS
             "bg-accent/10 text-accent"
           }`}>
             {agentStatus.status}
+            {isRunning && elapsed > 0 && ` · ${Math.floor(elapsed / 1000)}s`}
           </span>
         )}
-        <span className="ml-auto text-[10px] text-muted-foreground/60 font-mono">
-          {steps.length} step{steps.length !== 1 ? "s" : ""}
-        </span>
+        {/* Progress indicator (Phase 5: visual progress) */}
+        <div className="ml-auto flex items-center gap-2">
+          {(agentStatus?.status === "running" || agentStatus?.status === "starting") && steps.length > 0 && (
+            <div className="w-16 h-1 rounded-full bg-accent/10 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-accent transition-all duration-500"
+                style={{
+                  width: `${Math.min(((steps.filter(s => s.status === "completed").length) / Math.max(steps.length, 1)) * 100, 95)}%`,
+                }}
+              />
+            </div>
+          )}
+          <span className="text-[10px] text-muted-foreground/60 font-mono">
+            {steps.filter(s => s.status === "completed").length}/{steps.length} step{steps.length !== 1 ? "s" : ""}
+          </span>
+        </div>
       </div>
 
       {/* Steps */}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
 import dynamic from "next/dynamic";
@@ -14,6 +15,9 @@ import { DomainResultRenderer } from "@/components/copilot/DomainResultRenderer"
 import { AgentExecutionCard } from "@/components/copilot/AgentExecutionCard";
 import { useTheme } from "@/lib/theme-context";
 import { exportArtifact, getAvailableFormats, type ExportFormat } from "@/lib/export-engine";
+import DOMPurify from "dompurify";
+import { ArtifactErrorBoundary } from "./ArtifactErrorBoundary";
+import { safeJsonParse } from "@/lib/safe-json";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -302,17 +306,21 @@ function MermaidViewer({ code }: { code: string }) {
         mermaid.initialize({
           startOnLoad: false,
           theme: resolvedTheme === "dark" ? "dark" : "default",
-          securityLevel: "loose",
+          securityLevel: "strict",
         });
         if (cancelled || !containerRef.current) return;
         const id = `mermaid-artifact-${Date.now()}`;
         const { svg } = await mermaid.render(id, code);
         if (!cancelled && containerRef.current) {
-          containerRef.current.innerHTML = svg;
+          containerRef.current.innerHTML = DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ["foreignObject"] });
         }
       } catch {
         if (!cancelled && containerRef.current) {
-          containerRef.current.innerHTML = `<pre class="text-sm text-muted p-4">${code}</pre>`;
+          const pre = document.createElement("pre");
+          pre.className = "text-sm text-muted p-4";
+          pre.textContent = code;
+          containerRef.current.innerHTML = "";
+          containerRef.current.appendChild(pre);
         }
       }
     })();
@@ -659,51 +667,61 @@ export function ArtifactsPanel({
           </div>
 
           {/* Code / Chart / Domain / Content viewer */}
-          <div ref={viewerContentRef} className="flex-1 overflow-auto">
+          <AnimatePresence mode="wait">
+          <motion.div
+            key={activeArtifact.id}
+            ref={viewerContentRef}
+            className="flex-1 overflow-auto"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+          >
             {activeArtifact.type === "agent-execution" ? (
-              <div className="p-4 overflow-auto h-full">
-                <AgentExecutionCard
-                  data={(() => {
-                    try {
-                      return typeof activeArtifact.rawData === "object" && activeArtifact.rawData
-                        ? activeArtifact.rawData as any
-                        : JSON.parse(activeArtifact.content);
-                    } catch {
-                      return {
-                        taskId: activeArtifact.id,
-                        agentType: "Agent",
-                        status: "completed" as const,
-                        steps: [],
-                        summary: activeArtifact.content,
-                      };
+              <ArtifactErrorBoundary fallbackTitle="Failed to render agent execution">
+                <div className="p-4 overflow-auto h-full">
+                  <AgentExecutionCard
+                    data={typeof activeArtifact.rawData === "object" && activeArtifact.rawData
+                      ? activeArtifact.rawData as any
+                      : safeJsonParse(activeArtifact.content, {
+                          taskId: activeArtifact.id,
+                          agentType: "Agent",
+                          status: "completed" as const,
+                          steps: [],
+                          summary: activeArtifact.content,
+                        })
                     }
-                  })()}
-                />
-              </div>
+                  />
+                </div>
+              </ArtifactErrorBoundary>
             ) : activeArtifact.type === "chart" ? (
-              (() => {
-                const spec = parseChartSpec(activeArtifact.content);
-                return spec ? (
-                  <div className="p-4">
-                    <InlineChart spec={spec} />
-                  </div>
-                ) : (
-                  <div className="px-4 py-3 text-sm text-muted">Could not render chart data</div>
-                );
-              })()
+              <ArtifactErrorBoundary fallbackTitle="Failed to render chart">
+                {(() => {
+                  const spec = parseChartSpec(activeArtifact.content);
+                  return spec ? (
+                    <div className="p-4">
+                      <InlineChart spec={spec} />
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-muted">Could not render chart data</div>
+                  );
+                })()}
+              </ArtifactErrorBoundary>
             ) : activeArtifact.type === "financial-statement" || activeArtifact.type === "engineering-analysis" ? (
-              <div className="h-full overflow-hidden">
-                <DomainResultRenderer
-                  domainId={activeArtifact.domainId}
-                  result={
-                    activeArtifact.service === "aas"
-                      ? { service: "aas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
-                      : activeArtifact.domainId
-                        ? { service: "delivery-intelligence" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
-                        : { service: "seaas" as const, data: (activeArtifact.rawData || JSON.parse(activeArtifact.content || "{}")) as any }
-                  }
-                />
-              </div>
+              <ArtifactErrorBoundary fallbackTitle="Failed to render domain result">
+                <div className="h-full overflow-hidden">
+                  <DomainResultRenderer
+                    domainId={activeArtifact.domainId}
+                    result={
+                      activeArtifact.service === "aas"
+                        ? { service: "aas" as const, data: (activeArtifact.rawData || safeJsonParse(activeArtifact.content, {})) as any }
+                        : activeArtifact.domainId
+                          ? { service: "delivery-intelligence" as const, data: (activeArtifact.rawData || safeJsonParse(activeArtifact.content, {})) as any }
+                          : { service: "seaas" as const, data: (activeArtifact.rawData || safeJsonParse(activeArtifact.content, {})) as any }
+                    }
+                  />
+                </div>
+              </ArtifactErrorBoundary>
             ) : activeArtifact.type === "mermaid-diagram" ? (
               <MermaidViewer code={activeArtifact.content} />
             ) : activeArtifact.type === "code" ? (
@@ -739,7 +757,8 @@ export function ArtifactsPanel({
                 })}
               </div>
             )}
-          </div>
+          </motion.div>
+          </AnimatePresence>
 
           {/* Footer stats */}
           <div className="flex items-center justify-between px-4 py-2 border-t border-border-subtle text-[10px] text-muted">

@@ -145,7 +145,7 @@ export function useCommandGathering(
   const resolveEndpoint = useCallback(
     (endpoint: string, params: Record<string, unknown>): string => {
       return endpoint.replace(/\{\{(\w+)\}\}/g, (_, key) =>
-        String(params[key] ?? "")
+        encodeURIComponent(String(params[key] ?? ""))
       );
     },
     []

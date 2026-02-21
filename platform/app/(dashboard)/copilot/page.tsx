@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, Suspense } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
 import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/types";
@@ -16,6 +16,8 @@ import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
 import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
 import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
 import { logger } from "@/lib/logger";
+import { CopilotControllerContext, type CopilotChatHandle, type CopilotController } from "@/lib/copilot-controller";
+import { COMMAND_GATHERING_MAP } from "@/components/copilot/command-gathering";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -109,6 +111,77 @@ function CopilotPageInner() {
     loadConversation,
   } = useConversations(currentWorkspace?.id);
 
+  // ── CopilotController: reliable command execution via direct ref ────────────
+  const chatRef = useRef<CopilotChatHandle>(null);
+
+  const resetAllState = useCallback(() => {
+    setActiveConversationId(null);
+    setArtifacts([]);
+    setActiveArtifactId(null);
+    setArtifactPaneOpen(false);
+    setMessageArtifactMap(new Map());
+    chatRef.current?.resetChat();
+  }, []);
+
+  const controller: CopilotController = useMemo(() => ({
+    startNewConversation() {
+      resetAllState();
+      // Also fire event for any legacy listeners (conversation sidebar, etc.)
+      window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+    },
+
+    executeCommand(cmd) {
+      // 1. Reset everything
+      resetAllState();
+      // Fire legacy event for non-controller listeners
+      window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+
+      // 2. Switch service if needed
+      if (cmd.service && cmd.service !== "custom" && cmd.service !== activeService) {
+        setActiveService(cmd.service as ServiceMode);
+      }
+
+      // 3. Check if command has interactive gathering params
+      const systemGathering = COMMAND_GATHERING_MAP[cmd.id];
+      const customG = customGatheringMap?.[cmd.id];
+      const gatheringConfig = systemGathering || customG;
+
+      if (gatheringConfig && gatheringConfig.params.length > 0) {
+        const allCmds = [...ALL_SLASH_COMMANDS, ...(customCommands || [])];
+        const fullCmd = allCmds.find(c => c.id === cmd.id);
+        if (fullCmd) {
+          setArtifactPaneOpen(true);
+          // Wait one frame for reset to flush, then start gathering
+          requestAnimationFrame(() => {
+            chatRef.current?.startGathering(fullCmd);
+          });
+          return;
+        }
+      }
+
+      // 4. Direct submit with frame-based retry (replaces setTimeout guessing)
+      const trySubmit = (attempt: number) => {
+        if (chatRef.current?.isReady()) {
+          chatRef.current.submitMessage(cmd.prompt);
+        } else if (attempt < 30) {
+          // requestAnimationFrame fires after React render — much more reliable than setTimeout
+          requestAnimationFrame(() => trySubmit(attempt + 1));
+        } else {
+          logger.error("[CopilotController] Chat not ready after 30 frames — command dropped");
+        }
+      };
+      requestAnimationFrame(() => trySubmit(0));
+    },
+
+    injectPrompt(text) {
+      chatRef.current?.setInputText(text);
+    },
+
+    cancelGeneration() {
+      chatRef.current?.resetChat();
+    },
+  }), [activeService, customGatheringMap, customCommands, resetAllState]);
+
   // ── Auto-inject from ?q=, ?service=, or ?cmd= query params ──────────────────
   useEffect(() => {
     const svc = searchParams.get("service") as ServiceMode | null;
@@ -122,38 +195,25 @@ function CopilotPageInner() {
     // ?cmd=<commandId> — from sidebar command click on non-copilot page
     const cmdId = searchParams.get("cmd");
     if (cmdId) {
-      // Look up command from ALL_SLASH_COMMANDS or GENERAL_COMMANDS
-      const allCmds = [...ALL_SLASH_COMMANDS];
+      const allCmds = [...ALL_SLASH_COMMANDS, ...(customCommands || [])];
       const cmd = allCmds.find((c) => c.id === cmdId);
       if (cmd) {
-        // Reset state for new conversation
-        setActiveConversationId(null);
-        setArtifacts([]);
-        setActiveArtifactId(null);
-        setArtifactPaneOpen(false);
-        setMessageArtifactMap(new Map());
-        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-        // Inject and submit after component is fully mounted.
-        // 600ms allows CopilotChat to mount and register event listeners.
-        const timer = setTimeout(() => {
-          window.dispatchEvent(
-            new CustomEvent("copilot-inject-and-submit", {
-              detail: { commandId: cmd.id, prompt: cmd.prompt, service: cmd.service },
-            })
-          );
-        }, 600);
-        return () => clearTimeout(timer);
+        // Use controller for reliable command execution (replaces setTimeout + events)
+        controller.executeCommand({ id: cmd.id, prompt: cmd.prompt, service: cmd.service });
+        // Clean URL param to prevent re-execution on re-render
+        window.history.replaceState({}, "", "/copilot");
       }
     }
 
     const q = searchParams.get("q");
     if (q) {
-      const timer = setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("copilot-inject-prompt", { detail: q }));
-      }, 150);
-      return () => clearTimeout(timer);
+      // Use controller instead of setTimeout + event
+      requestAnimationFrame(() => {
+        controller.injectPrompt(q);
+      });
+      window.history.replaceState({}, "", "/copilot");
     }
-  }, [searchParams]);
+  }, [searchParams, controller, customCommands]);
 
   // ── Listen for new-conversation from sidebar command clicks ────────────────
   useEffect(() => {
@@ -409,12 +469,8 @@ function CopilotPageInner() {
   }, [handleSelectConversation]);
 
   const handleNewConversation = useCallback(() => {
-    setActiveConversationId(null);
-    setArtifacts([]);
-    setActiveArtifactId(null);
-    setArtifactPaneOpen(false);
-    window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-  }, []);
+    controller.startNewConversation();
+  }, [controller]);
 
   // ── Auto-save conversation after stream completes ─────────────────────────
   const handleSave = useCallback(async (opts: { messages: any[]; title: string; serviceMode: string }) => {
@@ -450,6 +506,7 @@ function CopilotPageInner() {
   const serviceArtifacts = artifacts.filter((a) => a.service === activeService);
 
   return (
+    <CopilotControllerContext.Provider value={controller}>
     <div className="flex flex-col h-[calc(100vh-0rem)] -mx-6 -mt-6">
       {/* ── Persona Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between h-12 px-4 border-b border-border-subtle bg-background shrink-0">
@@ -467,6 +524,7 @@ function CopilotPageInner() {
         <div className="flex-1 min-w-0 flex flex-col">
           <ErrorBoundary section="Copilot Chat">
             <CopilotChat
+              ref={chatRef}
               endpoint="/api/copilot/chat"
               extraParams={{ workspaceId: currentWorkspace?.id }}
               activeService={activeService}
@@ -614,6 +672,7 @@ function CopilotPageInner() {
         />
       )}
     </div>
+    </CopilotControllerContext.Provider>
   );
 }
 
