@@ -4,6 +4,7 @@
   "description": "Open-source causal intelligence and domain agent framework for TypeScript",
   "scripts": {
     "dev": "pnpm --filter platform dev",
+    "doctor": "node platform/scripts/doctor.mjs",
     "setup": "pnpm install && cp -n platform/.env.example platform/.env.local 2>/dev/null; echo '✅ Created platform/.env.local — fill in your Supabase + Anthropic credentials, then run: pnpm dev'",
     "build": "turbo build",
     "test": "turbo test",
@@ -108,7 +109,8 @@
   },
   "lint-staged": {
     "platform/**/*.{ts,tsx}": [
-      "bash -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=50 \"$@\"' --"
+      "bash -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=50 \"$@\"' --",
+      "bash -c 'cd platform && pnpm exec tsc --noEmit'"
     ]
   },
   "packageManager": "pnpm@9.0.0",

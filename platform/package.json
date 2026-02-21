@@ -10,7 +10,8 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --max-warnings=200",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",

@@ -16,7 +16,7 @@
  */
 
 import { spawn, execSync } from "child_process";
-import { rmSync, existsSync } from "fs";
+import { rmSync, existsSync, readFileSync } from "fs";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -276,5 +276,116 @@ function shutdown() {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
+// ─── Preflight checks ──────────────────────────────────────────────────────
+// Validate environment BEFORE starting the server. Catches misconfig early
+// instead of letting you wait 30s for a cryptic runtime error.
+
+const REQUIRED_ENV_VARS = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "ANTHROPIC_API_KEY",
+];
+
+const PLACEHOLDER_PATTERNS = [/^your-/i, /^xxx/i, /^\.\.\./, /^todo/i, /^replace/i, /^changeme/i];
+
+function preflight() {
+  const checks = [];
+
+  // 1. Node version
+  const nodeVersion = parseInt(process.versions.node.split(".")[0], 10);
+  if (nodeVersion < 20) {
+    checks.push({ ok: false, label: `Node.js v${process.versions.node} (need >= 20)` });
+  } else {
+    checks.push({ ok: true, label: `Node.js v${process.versions.node}` });
+  }
+
+  // 2. .env.local exists
+  const envPath = path.join(PLATFORM_DIR, ".env.local");
+  if (!existsSync(envPath)) {
+    console.log("");
+    logError(".env.local not found!");
+    logError("Create it from the example:");
+    logError("  cp platform/.env.example platform/.env.local");
+    logError("Then fill in your Supabase and Anthropic credentials.");
+    console.log("");
+    process.exit(1);
+  }
+  checks.push({ ok: true, label: ".env.local found" });
+
+  // 3. Parse and validate env vars
+  const envContent = readFileSync(envPath, "utf8");
+  const envVars = {};
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    let val = trimmed.slice(eqIdx + 1).trim();
+    // Remove surrounding quotes
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1);
+    }
+    envVars[key] = val;
+  }
+
+  const missingVars = [];
+  const placeholderVars = [];
+  for (const key of REQUIRED_ENV_VARS) {
+    const val = envVars[key] || process.env[key];
+    if (!val) {
+      missingVars.push(key);
+    } else if (PLACEHOLDER_PATTERNS.some((p) => p.test(val))) {
+      placeholderVars.push(key);
+    }
+  }
+
+  if (missingVars.length > 0 || placeholderVars.length > 0) {
+    const total = missingVars.length + placeholderVars.length;
+    checks.push({
+      ok: false,
+      label: `${REQUIRED_ENV_VARS.length - total}/${REQUIRED_ENV_VARS.length} required env vars valid`,
+    });
+    if (missingVars.length) logError(`  Missing: ${missingVars.join(", ")}`);
+    if (placeholderVars.length) logError(`  Placeholder values: ${placeholderVars.join(", ")}`);
+  } else {
+    checks.push({ ok: true, label: `${REQUIRED_ENV_VARS.length}/${REQUIRED_ENV_VARS.length} required env vars present` });
+  }
+
+  // 4. Port availability
+  try {
+    const pids = execSync(`lsof -ti:${PORT} 2>/dev/null`, { encoding: "utf8" }).trim();
+    if (pids) {
+      const pidList = pids.split("\n").filter((p) => Number(p) !== process.pid);
+      if (pidList.length > 0) {
+        checks.push({ ok: false, label: `Port ${PORT} in use by PID ${pidList.join(", ")} (will kill)` });
+      } else {
+        checks.push({ ok: true, label: `Port ${PORT} is free` });
+      }
+    } else {
+      checks.push({ ok: true, label: `Port ${PORT} is free` });
+    }
+  } catch {
+    checks.push({ ok: true, label: `Port ${PORT} is free` });
+  }
+
+  // Print summary
+  console.log("");
+  log("Preflight checks:");
+  for (const c of checks) {
+    const icon = c.ok ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✖\x1b[0m";
+    console.log(`  ${icon} ${c.label}`);
+  }
+  console.log("");
+
+  // Fatal: missing env vars should stop (placeholder is a warning, not fatal)
+  if (missingVars.length > 0) {
+    logError("Cannot start — fix the missing env vars above, then run pnpm dev again.");
+    process.exit(1);
+  }
+}
+
 // Go
+preflight();
 startServer();
