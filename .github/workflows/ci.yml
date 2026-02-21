@@ -10,10 +10,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # ⚠️  continue-on-error: GitHub will mark the run "completed" (not "failed")
-    # so you don't get an email for every CI issue. Failures still show as ✗ in
-    # the Actions UI — deploy.yml is the source of truth for email alerts.
-    continue-on-error: true
     strategy:
       matrix:
         node-version: [20, 22]  # Node 18 EOL — dropped for security
@@ -107,7 +103,6 @@ jobs:
   # Platform build verification
   platform-build:
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: test
     steps:
       - uses: actions/checkout@v4
@@ -131,15 +126,14 @@ jobs:
         run: cd platform && pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          SUPABASE_SERVICE_ROLE_KEY: placeholder
-          ANTHROPIC_API_KEY: placeholder
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-build-check.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-build-check-anon
+          SUPABASE_SERVICE_ROLE_KEY: ci-build-check-service
+          ANTHROPIC_API_KEY: sk-ant-ci-build-check
 
   # Docker build validation — catches Dockerfile issues before deploy
   docker-build:
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
@@ -162,7 +156,6 @@ jobs:
   # Apply migrations on main branch deploy
   migrate:
     runs-on: ubuntu-latest
-    continue-on-error: true
     needs: [test, platform-build]
     if: >-
       github.event_name == 'push' && github.ref == 'refs/heads/main' &&
@@ -191,7 +184,6 @@ jobs:
   # Migration validation (lint SQL, check for breaking changes)
   migration-check:
     runs-on: ubuntu-latest
-    continue-on-error: true
     if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     steps:
       - uses: actions/checkout@v4
