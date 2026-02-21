@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev-watchdog.mjs",
-    "dev:bare": "next dev --port 3001 --turbopack",
+    "dev:bare": "echo '⚠️  WARNING: Running without watchdog. Use pnpm dev instead!' && next dev --port 3001 --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --max-warnings=200",
