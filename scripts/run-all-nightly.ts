@@ -120,18 +120,18 @@ interface PhaseResult {
 // ============================================================================
 
 const HEAP_TIERS = [
-  // Minimum 4GB, max 10GB — give each org plenty of headroom.
-  // GitHub Actions large runners have 14GB; standard has 7GB.
-  // The freemem() clamp below will cap to actual available memory.
-  { maxSignals: 10_000,   heapMB: 4096 },   // Small:   4GB
-  { maxSignals: 50_000,   heapMB: 5120 },   // Medium:  5GB
-  { maxSignals: 100_000,  heapMB: 6144 },   // Large:   6GB
-  { maxSignals: 500_000,  heapMB: 8192 },   // XLarge:  8GB
-  { maxSignals: Infinity, heapMB: 10240 },  // Huge:   10GB
+  // Capped at 4GB to stay within ubuntu-latest (7GB total RAM).
+  // Node.js runtime + V8 overhead = ~1.5GB, OS = ~1GB → usable heap ≈ 4.5GB.
+  // Signal cap (MAX_CONSOLIDATION_SIGNALS env) ensures 4GB is sufficient.
+  // Previous 8-10GB tiers caused swap thrashing → SIGKILL on standard runners.
+  { maxSignals: 10_000,   heapMB: 2048 },   // Small:   2GB
+  { maxSignals: 50_000,   heapMB: 3072 },   // Medium:  3GB
+  { maxSignals: 100_000,  heapMB: 4096 },   // Large:   4GB
+  { maxSignals: Infinity, heapMB: 4096 },   // Cap:     4GB (max for standard runner)
 ];
 
-/** Retry multiplier: if an org OOMs, retry with this much more heap */
-const HEAP_RETRY_MULTIPLIER = 1.5;
+/** Retry multiplier: if an org OOMs, retry with this much more heap (reduced from 1.5) */
+const HEAP_RETRY_MULTIPLIER = 1.25;
 /** Max retries per org on OOM */
 const MAX_OOM_RETRIES = 1;
 
@@ -535,12 +535,25 @@ async function phase4FullPipeline(supabase: ReturnType<typeof createClient>, cus
     ...(coreBrain ? [coreBrain] : []),
   ];
   let orgIndex = 0;
+  let budgetExceeded = false;
+  const MAX_TOTAL_RUNTIME_MS = 100 * 60 * 1000; // 100 min (workflow timeout is 120)
 
   for (const customer of customers) {
+    if (budgetExceeded) break;  // Exit outer loop too
     log('PHASE-4', `── Customer: ${customer.name} (${customer.orgs.length} org${customer.orgs.length !== 1 ? 's' : ''}) ──`);
 
     for (const org of customer.orgs) {
       orgIndex++;
+
+      // Runtime budget guard: skip remaining orgs AND customers if approaching timeout.
+      const elapsed = Date.now() - start;
+      if (elapsed > MAX_TOTAL_RUNTIME_MS) {
+        const elapsedMin = Math.round(elapsed / 60000);
+        log('PHASE-4', `⏱ Runtime budget exceeded (${elapsedMin}m > 100m limit), skipping remaining orgs to avoid workflow timeout`);
+        errors.push(`Runtime budget exceeded at ${elapsedMin}m — ${allOrgs.length - orgIndex} orgs skipped`);
+        budgetExceeded = true;
+        break;
+      }
 
       // Dynamic heap sizing for full pipeline too
       let heapMB = 4096;

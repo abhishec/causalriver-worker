@@ -111,6 +111,9 @@
     "platform/**/*.{ts,tsx}": [
       "bash -c 'ESLINT_USE_FLAT_CONFIG=false eslint --max-warnings=50 \"$@\"' --",
       "bash -c 'cd platform && pnpm exec tsc --noEmit'"
+    ],
+    "packages/memory-stack/**/*.ts": [
+      "bash -c 'cd packages/memory-stack && pnpm exec tsc --noEmit'"
     ]
   },
   "packageManager": "pnpm@9.0.0",

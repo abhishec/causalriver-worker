@@ -219,11 +219,15 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
 
       // ── 10M SCALE FIX: Memory-bounded signal fetch ──────────────────
       // Problem: At 10M signals, accumulating all into an array uses 5GB+ RAM → OOM.
-      // Solution: Cap at 500K signals max for consolidation. Use stratified
-      // sampling by domain so every domain gets proportional representation.
+      // Solution: Cap signals for consolidation. Use stratified sampling by domain
+      // so every domain gets proportional representation.
       // Downstream algorithms (causal discovery, pattern mining) work with
       // statistical samples — they don't need ALL 10M signals.
-      const MAX_CONSOLIDATION_SIGNALS = 500_000;
+      // Configurable via env var: CI uses 50K (safe for 7GB runners), local uses 500K.
+      const parsedSignalCap = parseInt(
+        process.env.MAX_CONSOLIDATION_SIGNALS || '500000', 10,
+      );
+      const MAX_CONSOLIDATION_SIGNALS = Number.isNaN(parsedSignalCap) ? 500_000 : parsedSignalCap;
 
       const allSignals: any[] = [];
 
@@ -2350,6 +2354,12 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       steps.push(anomalyStep);
       if (anomalyStep.status === 'error') errors.push('Anomaly detection failed');
 
+      // ── Memory management: GC at phase boundaries ──────────────────
+      // The consolidation pipeline accumulates large intermediate data structures.
+      // V8 GC can't reclaim them while referenced in the closure scope.
+      // Strategy: call gc() at phase boundaries to release intermediate data.
+      // Requires --expose-gc flag (set in workflow env: NODE_OPTIONS).
+
       // GC before pattern mining — steps 1-3 generate large intermediate data
       if (typeof globalThis.gc === 'function') globalThis.gc();
 
@@ -2390,6 +2400,10 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       const cognitiveStep = await runCognitiveAnalysis(signals, relationships, anomalies);
       steps.push(cognitiveStep);
 
+      // GC after graph updates + cognitive analysis — release DAG, discovered paths,
+      // expertise/collaboration graph intermediate data before training phase
+      if (typeof globalThis.gc === 'function') globalThis.gc();
+
       // Step 6: TRAIN
       log('6/10', 'Training brain with discovered knowledge...');
       const trainStep = await trainPacks(packs);
@@ -2408,6 +2422,9 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       steps.push(strengthenStep);
       if (strengthenStep.status === 'error') errors.push('Edge strengthening failed');
 
+      // GC after train/prune/strengthen — release training packs and edge update results
+      if (typeof globalThis.gc === 'function') globalThis.gc();
+
       // Bonus: Threshold optimization
       log('BONUS', 'Optimizing signal thresholds...');
       const thresholdStep = await optimizeThresholds();
@@ -2424,6 +2441,10 @@ export function createConsolidationEngine(config: ConsolidationConfig) {
       log('BONUS', 'Consolidating observational memory...');
       const obsConsolidationStep = await consolidateObservations(signals, relationships, anomalies);
       steps.push(obsConsolidationStep);
+
+      // GC before report generation — release all signal/relationship references
+      // signals, relationships, anomalies, patterns are no longer needed after this point
+      if (typeof globalThis.gc === 'function') globalThis.gc();
 
       // Step 9: REPORT
       log('9/10', 'Generating consolidation report...');

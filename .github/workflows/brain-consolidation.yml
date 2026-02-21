@@ -15,11 +15,8 @@ name: Brain Consolidation (Nightly Sleep)
 # then generating executive briefings.
 #
 # Architecture:
-#   GitHub Actions (scheduler) → brain-consolidation-runner.ts (Node.js)
-#   - Runs outside Deno/Edge Functions (needs Node.js modules)
-#   - Consolidates all active orgs, then core brain
-#   - Generates daily brain snapshot for website dashboard
-#   - Produces executive briefing via LLM amplifier
+#   Job 1: Typecheck — fast tsc --noEmit to catch type errors before runtime
+#   Job 2: Consolidation — tsx runs scripts from source (no dist/ build needed)
 #
 # Schedule: Nightly at 2 AM UTC (matches brain-consolidation agent schedule)
 # Fallback: Manual trigger via workflow_dispatch
@@ -56,8 +53,41 @@ permissions:
   issues: write  # Required for failure notification (actions/github-script)
 
 jobs:
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 1: Typecheck — fast gate to catch type errors before expensive run
+  # ──────────────────────────────────────────────────────────────────────
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Typecheck memory-stack
+        run: pnpm --filter @nexus-ai/memory-stack run typecheck
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Job 2: Brain Sleep Cycle — the actual consolidation pipeline
+  # NOTE: No "Build memory-stack" step. Nightly scripts import from src/
+  # via tsx, not from dist/. The old tsup build was flaky (DTS worker race)
+  # and unnecessary — typecheck above validates types without artifacts.
+  # ──────────────────────────────────────────────────────────────────────
   consolidation:
     name: Brain Sleep Cycle
+    needs: typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 120  # 2-hour max (large orgs with 10M signals)
 
@@ -77,8 +107,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build memory-stack
-        run: pnpm --filter @nexus-ai/memory-stack run build
+      - name: Validate required secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Fall back to NEXT_PUBLIC_SUPABASE_URL if SUPABASE_URL is not set
+          if [ -z "$SUPABASE_URL" ] && [ -n "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+          fi
+
+          missing=0
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) not configured."
+            echo "  → Go to Settings > Secrets and variables > Actions"
+            missing=1
+          fi
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY not configured."
+            echo "  → Go to Settings > Secrets and variables > Actions"
+            missing=1
+          fi
+          if [ $missing -gt 0 ]; then
+            exit 1
+          fi
+          echo "✅ All required secrets are configured."
 
       - name: Run All Nightly Agents
         # Nightly agents may hit transient errors (DB timeouts, API rate limits).
@@ -100,32 +154,31 @@ jobs:
           LOOKBACK_HOURS: ${{ github.event.inputs.lookback_hours || '48' }}
           CONSOLIDATION_MODE: 'once'
           PRUNE_AFTER_DAYS: '30'
+          MAX_CONSOLIDATION_SIGNALS: '50000'
         run: |
           # Fall back to NEXT_PUBLIC_SUPABASE_URL if SUPABASE_URL is not set
           if [ -z "$SUPABASE_URL" ] && [ -n "$NEXT_PUBLIC_SUPABASE_URL" ]; then
             export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
           fi
 
-          # Validate required secrets
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "::error::SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) must be configured in repository secrets."
-            exit 1
-          fi
-          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::error::SUPABASE_SERVICE_ROLE_KEY must be configured in repository secrets."
-            echo ""
-            echo "To configure:"
-            echo "  1. Go to Settings > Secrets and variables > Actions"
-            echo "  2. Add SUPABASE_SERVICE_ROLE_KEY"
-            exit 1
-          fi
-
           echo "=== NexusBrain Nightly — All Agents, All Customers, All Orgs ==="
           echo "Time: $(date -u)"
           echo "Phases: Edge Jobs → Consolidation → Oracle RL → Full Pipeline"
+          echo "Signal cap: $MAX_CONSOLIDATION_SIGNALS (env-configurable)"
           echo ""
 
           pnpm exec tsx scripts/run-all-nightly.ts
+
+      - name: Report Nightly Status
+        if: always()
+        run: |
+          if [ "${{ steps.nightly.outcome }}" = "failure" ]; then
+            echo "::warning::Nightly consolidation had failures. Check logs for per-org details."
+          elif [ "${{ steps.nightly.outcome }}" = "success" ]; then
+            echo "✅ Nightly consolidation completed successfully."
+          else
+            echo "::notice::Nightly consolidation status: ${{ steps.nightly.outcome }}"
+          fi
 
       - name: Upload Consolidation Report
         if: always()

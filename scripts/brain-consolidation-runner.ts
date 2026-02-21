@@ -276,6 +276,10 @@ async function runOnce(supabase: ReturnType<typeof createClient>): Promise<void>
       } catch (err) {
         logError('ORG', `Failed to consolidate org ${orgId.substring(0, 8)}`, err);
       }
+      // GC between orgs — release the previous org's consolidation intermediate data
+      // to prevent cross-org memory accumulation. Each org's result is persisted
+      // inside consolidateOrg(), so keeping the result reference is only for reporting.
+      if (typeof globalThis.gc === 'function') globalThis.gc();
     }
 
     // Phase 2: Always consolidate core brain last (it receives federated knowledge)

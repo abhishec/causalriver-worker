@@ -54,6 +54,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 tsup",
     "test": "vitest run",
     "test:watch": "vitest",
