@@ -33,9 +33,11 @@ export interface SupabaseSecurityIssue {
 
 export class SupabaseSecurityScanner {
   private supabase: SupabaseClient;
+  private supabaseUrl: string;
   private knownTables: string[] = [];
 
   constructor(supabaseUrl: string, supabaseServiceKey: string) {
+    this.supabaseUrl = supabaseUrl;
     this.supabase = createClient(supabaseUrl, supabaseServiceKey);
   }
 
@@ -181,9 +183,14 @@ export class SupabaseSecurityScanner {
 
     for (const tableName of this.knownTables) {
       // Check if anon role can access
+      const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+      if (!anonKey) {
+        // Skip public access check if anon key not available (not a security issue)
+        break;
+      }
       const anonClient = createClient(
-        this.supabase.supabaseUrl,
-        process.env.SUPABASE_ANON_KEY || ''
+        this.supabaseUrl,
+        anonKey
       );
 
       const { data, error } = await anonClient
