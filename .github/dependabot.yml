@@ -4,9 +4,11 @@
 # Automated dependency updates and security vulnerability alerts
 #
 # This will:
-# - Create PRs for outdated dependencies
+# - Create PRs for outdated dependencies (grouped to reduce PR noise)
 # - Alert on known CVEs
 # - Keep dependencies up to date
+#
+# PR volume: max 5 npm + 3 actions = 8 PRs/week (grouped)
 #
 
 version: 2
@@ -18,17 +20,26 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "security"
     reviewers:
-      - "abhishec"
+      - "abhishek"
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
     # Only allow patch and minor updates (safer)
     versioning-strategy: increase-if-necessary
+    # Group related updates into fewer PRs
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+      tree-sitter:
+        patterns: ["tree-sitter*"]
+      supabase:
+        patterns: ["@supabase/*"]
 
   # NPM dependencies - platform
   - package-ecosystem: "npm"
@@ -37,16 +48,27 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "security"
     reviewers:
-      - "abhishec"
+      - "abhishek"
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
     versioning-strategy: increase-if-necessary
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+      anthropic:
+        patterns: ["@anthropic-ai/*"]
+      supabase:
+        patterns: ["@supabase/*"]
+      types:
+        patterns: ["@types/*"]
+        update-types: ["minor", "patch"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -55,17 +77,13 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
       prefix: "ci"
       include: "scope"
-
-  # Docker (if using)
-  # - package-ecosystem: "docker"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #   open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["actions/*"]

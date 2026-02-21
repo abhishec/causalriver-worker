@@ -128,11 +128,15 @@ export class SecurityHardeningAgent extends ManusNativeAgent {
     });
 
     this.projectRoot = process.cwd();
-    this.supabaseUrl = process.env.SUPABASE_URL || '';
-    this.supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    // Use config values (passed from run-security-agent.ts) — NOT process.env directly.
+    // The parent BaseTrainingAgent already reads env vars into config.supabaseUrl/supabaseKey.
+    // Re-reading process.env here was causing "supabaseKey is required" errors in CI
+    // because the env var key name didn't match what the Supabase SDK expected.
+    this.supabaseUrl = config.supabaseUrl || process.env.SUPABASE_URL || '';
+    this.supabaseServiceKey = config.supabaseKey || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
     if (!this.supabaseUrl || !this.supabaseServiceKey) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
+      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required — pass via config or set env vars');
     }
   }
 
@@ -1772,7 +1776,7 @@ globalRegistry.register({
     return new SecurityHardeningAgent({
       organizationId: config.organizationId || '00000000-0000-4000-a000-000000000001',
       supabaseUrl: config.supabaseUrl,
-      supabaseServiceKey: config.supabaseKey,
+      supabaseKey: config.supabaseKey,
       verbose: config.verbose,
       brainRegionConfig: { enableAll: true, verbose: config.verbose },
       enableMotorCommands: true,
@@ -1793,7 +1797,7 @@ if (require.main === module) {
   const config: BrainNativeAgentConfig & ManusCapabilitiesConfig = {
     organizationId: process.env.DEFAULT_ORG_ID || '00000000-0000-4000-a000-000000000001',
     supabaseUrl: process.env.SUPABASE_URL!,
-    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     dryRun: process.argv.includes('--dry-run'),
     verbose: process.argv.includes('--verbose'),
     brainRegionConfig: {

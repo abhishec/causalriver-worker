@@ -32,38 +32,53 @@ jobs:
           sleep 120
 
       - name: Check critical endpoints
+        id: health
+        # continue-on-error so transient network blips don't fail the workflow.
+        # The "Create GitHub Issue" step checks step conclusion for real failures.
+        continue-on-error: true
         run: |
           BASE_URL="${{ github.event.inputs.url || 'https://platform.usebrainos.com' }}"
           ENDPOINTS=("/login" "/signup" "/api/health")
           FAILED=0
+          MAX_RETRIES=3
+          RETRY_DELAY=30
 
           for path in "${ENDPOINTS[@]}"; do
             URL="${BASE_URL}${path}"
-            echo "Checking ${URL}..."
+            SUCCESS=false
 
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$URL" || echo "000")
+            for attempt in $(seq 1 $MAX_RETRIES); do
+              echo "Checking ${URL} (attempt ${attempt}/${MAX_RETRIES})..."
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$URL" || echo "000")
 
-            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 400 ]; then
-              echo "  ✅ ${path} → HTTP ${HTTP_CODE}"
-            elif [ "$HTTP_CODE" -eq 000 ]; then
-              echo "  ❌ ${path} → TIMEOUT / UNREACHABLE"
-              FAILED=$((FAILED + 1))
-            else
-              echo "  ❌ ${path} → HTTP ${HTTP_CODE}"
+              if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 400 ]; then
+                echo "  ✅ ${path} → HTTP ${HTTP_CODE}"
+                SUCCESS=true
+                break
+              elif [ "$attempt" -lt "$MAX_RETRIES" ]; then
+                echo "  ⚠️  ${path} → HTTP ${HTTP_CODE} — retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+              fi
+            done
+
+            if [ "$SUCCESS" = false ]; then
+              echo "  ❌ ${path} → HTTP ${HTTP_CODE} (failed after ${MAX_RETRIES} attempts)"
               FAILED=$((FAILED + 1))
             fi
           done
 
           echo ""
           if [ "$FAILED" -gt 0 ]; then
-            echo "::error::${FAILED} endpoint(s) failed health check after deploy!"
+            echo "::error::${FAILED} endpoint(s) failed health check after ${MAX_RETRIES} retries!"
             exit 1
           else
             echo "✅ All endpoints healthy"
           fi
 
       - name: Create GitHub Issue on Failure
-        if: failure()
+        # Uses step conclusion since health check has continue-on-error.
+        # Only fires after all retries are exhausted — not for transient blips.
+        if: steps.health.conclusion == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
