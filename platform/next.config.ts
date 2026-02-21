@@ -4,9 +4,9 @@ import path from "path";
 const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {
-  // Standalone output for Docker deployment (ECS/Fargate) and Amplify WEB_COMPUTE.
-  // Only enable for production builds — causes webpack cache corruption in dev.
-  ...(isDev ? {} : { output: 'standalone', outputFileTracingRoot: path.join(__dirname, '../') }),
+  // Amplify WEB_COMPUTE handles Next.js SSR natively — no standalone output needed.
+  // Standalone is for Docker/ECS with `node server.js`. We deploy via Amplify only.
+
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
   compress: isDev,
   typescript: {

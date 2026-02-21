@@ -91,15 +91,21 @@ export async function middleware(request: NextRequest) {
   }
 
   // Production: Run IDS and Supabase session in parallel — they are independent.
-  const [securityBlock, response] = await Promise.all([
-    securityMiddleware(request),
-    updateSession(request),
-  ]);
+  // IDS is wrapped in try/catch so a crash in the security layer never takes down
+  // the entire app. A broken IDS degrades security; a broken middleware = site down.
+  let securityBlock: Response | null = null;
+  try {
+    securityBlock = await securityMiddleware(request);
+  } catch {
+    // IDS failure → log and continue without blocking.
+    // Better to serve the page insecurely than to return 500 to every user.
+  }
 
   if (securityBlock) {
     return securityBlock; // Block malicious request immediately
   }
 
+  const response = await updateSession(request);
   addSecurityHeaders(response);
   return response;
 }
