@@ -6,11 +6,18 @@ import type { AccountingDomainData } from "@/components/copilot/types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatSGD(n: number): string {
+// Currency configuration — change these to support different locales
+const CURRENCY_LOCALE = "en-SG";
+const CURRENCY_CODE = "SGD";
+
+function formatCurrency(n: number): string {
   const abs = Math.abs(n);
-  const formatted = abs.toLocaleString("en-SG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatted = abs.toLocaleString(CURRENCY_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return n < 0 ? `(${formatted})` : formatted;
 }
+
+/** @deprecated Use formatCurrency instead */
+const formatSGD = formatCurrency;
 
 function AmountCell({ value, colored = false }: { value: number; colored?: boolean }) {
   const isNeg = value < 0;
@@ -110,7 +117,11 @@ function PLTab({ pl, period }: { pl: AccountingDomainData["profitAndLoss"]; peri
 
 function BalanceSheetTab({ bs, period }: { bs: AccountingDomainData["balanceSheet"]; period?: string }) {
   if (!bs) return <EmptyState message="No balance sheet data available. Ask: 'Generate the balance sheet'" />;
-  const checkBalance = Math.abs(bs.totalAssets - (bs.totalLiabilities + bs.totalEquity)) < 1;
+  const difference = bs.totalAssets - (bs.totalLiabilities + bs.totalEquity);
+  const absDifference = Math.abs(difference);
+  // Use relative tolerance: 0.01% of total assets, with a min of $0.01 to handle rounding
+  const tolerance = Math.max(bs.totalAssets * 0.0001, 0.01);
+  const isBalanced = absDifference <= tolerance;
   return (
     <div className="flex flex-col gap-0">
       {period && (
@@ -145,11 +156,18 @@ function BalanceSheetTab({ bs, period }: { bs: AccountingDomainData["balanceShee
         </span>
       </div>
       <div className={cn(
-        "mx-3 mb-3 px-3 py-1.5 rounded-lg flex items-center gap-2 text-[11px] font-medium",
-        checkBalance ? "bg-success/10 text-success border border-success/20" : "bg-danger/10 text-danger border border-danger/20"
+        "mx-3 mb-3 px-3 py-1.5 rounded-lg flex flex-col gap-1 text-[11px] font-medium",
+        isBalanced ? "bg-success/10 text-success border border-success/20" : "bg-danger/10 text-danger border border-danger/20"
       )}>
-        <span>{checkBalance ? "✓" : "✗"}</span>
-        <span>{checkBalance ? "Balance sheet is balanced" : "Balance sheet is NOT balanced — check retained earnings"}</span>
+        <div className="flex items-center gap-2">
+          <span>{isBalanced ? "✓" : "✗"}</span>
+          <span>{isBalanced ? "Balance sheet is balanced" : "Balance sheet is NOT balanced"}</span>
+        </div>
+        {!isBalanced && (
+          <div className="text-[10px] font-normal ml-5 text-danger/80">
+            Difference: SGD {formatSGD(absDifference)} (Assets {difference > 0 ? "exceed" : "less than"} Liabilities + Equity) — check retained earnings and rounding
+          </div>
+        )}
       </div>
     </div>
   );
@@ -157,25 +175,35 @@ function BalanceSheetTab({ bs, period }: { bs: AccountingDomainData["balanceShee
 
 // ─── Tab: Trial Balance ───────────────────────────────────────────────────────
 
+const TB_PAGE_SIZE = 25;
+
 function TrialBalanceTab({ tb }: { tb: AccountingDomainData["trialBalance"] }) {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   if (!tb) return <EmptyState message="No trial balance data available. Ask: 'Generate the trial balance'" />;
 
   const filtered = tb.accounts.filter(
     (a) => !search || a.account.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / TB_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(safePage * TB_PAGE_SIZE, (safePage + 1) * TB_PAGE_SIZE);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header info */}
       <div className="px-3 py-2 border-b border-border-subtle flex items-center justify-between shrink-0">
         <span className="text-[11px] text-muted">Period: <span className="text-foreground font-medium">{tb.period}</span></span>
-        <span className={cn(
-          "text-[10px] font-medium px-2 py-0.5 rounded-full",
-          tb.balanced ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
-        )}>
-          {tb.balanced ? "✓ Balanced" : "✗ Unbalanced"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted">{filtered.length} accounts</span>
+          <span className={cn(
+            "text-[10px] font-medium px-2 py-0.5 rounded-full",
+            tb.balanced ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+          )}>
+            {tb.balanced ? "✓ Balanced" : "✗ Unbalanced"}
+          </span>
+        </div>
       </div>
 
       {/* Search */}
@@ -184,7 +212,7 @@ function TrialBalanceTab({ tb }: { tb: AccountingDomainData["trialBalance"] }) {
           type="text"
           placeholder="Search accounts..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(0); }}
           className="w-full px-2.5 py-1.5 text-[12px] bg-surface border border-border-subtle rounded-lg text-foreground placeholder:text-muted focus:outline-none focus:border-accent/50"
         />
       </div>
@@ -199,19 +227,42 @@ function TrialBalanceTab({ tb }: { tb: AccountingDomainData["trialBalance"] }) {
 
       {/* Rows */}
       <div className="flex-1 overflow-y-auto">
-        {filtered.map((acc) => (
+        {paginated.map((acc) => (
           <div key={acc.account} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-3 py-1 hover:bg-surface/30 transition-colors border-b border-border-subtle/30">
             <span className="text-[11px] text-foreground truncate">{acc.account}</span>
             <span className="text-[10px] text-muted text-right w-20 capitalize">{acc.type}</span>
             <span className="text-[11px] tabular-nums font-mono text-right w-24 text-foreground">
-              {acc.netDebit > 0 ? formatSGD(acc.netDebit) : "—"}
+              {acc.netDebit > 0 ? formatCurrency(acc.netDebit) : "—"}
             </span>
             <span className="text-[11px] tabular-nums font-mono text-right w-24 text-foreground">
-              {acc.netCredit > 0 ? formatSGD(acc.netCredit) : "—"}
+              {acc.netCredit > 0 ? formatCurrency(acc.netCredit) : "—"}
             </span>
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="shrink-0 border-t border-border-subtle px-3 py-1.5 flex items-center justify-between">
+          <button
+            onClick={() => setPage(Math.max(0, safePage - 1))}
+            disabled={safePage === 0}
+            className={cn("text-[10px] px-2 py-0.5 rounded", safePage === 0 ? "text-muted/30" : "text-accent hover:bg-accent/10")}
+          >
+            Prev
+          </button>
+          <span className="text-[10px] text-muted">
+            {safePage + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
+            disabled={safePage >= totalPages - 1}
+            className={cn("text-[10px] px-2 py-0.5 rounded", safePage >= totalPages - 1 ? "text-muted/30" : "text-accent hover:bg-accent/10")}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Totals */}
       <div className="shrink-0 border-t border-border-subtle bg-surface/30">
@@ -219,10 +270,10 @@ function TrialBalanceTab({ tb }: { tb: AccountingDomainData["trialBalance"] }) {
           <span className="text-[12px] font-semibold text-foreground">Total</span>
           <span className="w-20" />
           <span className="text-[12px] font-semibold tabular-nums font-mono text-right w-24 text-foreground">
-            {formatSGD(tb.totalDebits)}
+            {formatCurrency(tb.totalDebits)}
           </span>
           <span className="text-[12px] font-semibold tabular-nums font-mono text-right w-24 text-foreground">
-            {formatSGD(tb.totalCredits)}
+            {formatCurrency(tb.totalCredits)}
           </span>
         </div>
       </div>

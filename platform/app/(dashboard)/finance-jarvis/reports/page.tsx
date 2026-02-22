@@ -5,10 +5,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { FinanceJarvisAnalysis, InsightSeverity, InsightCategory } from "@/lib/finance-jarvis";
 
+const CURRENCY_SYMBOL = "S$"; // SGD short symbol for compact display
+
 function fmtK(n: number): string {
-  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
+  if (Math.abs(n) >= 1_000_000) return `${CURRENCY_SYMBOL}${(n / 1_000_000).toFixed(2)}M`;
+  if (Math.abs(n) >= 1_000) return `${CURRENCY_SYMBOL}${(n / 1_000).toFixed(0)}K`;
+  return `${CURRENCY_SYMBOL}${n.toFixed(0)}`;
 }
 
 const SEVERITY_COLORS: Record<InsightSeverity, string> = {
@@ -31,15 +33,26 @@ const CATEGORY_LABELS: Record<InsightCategory, string> = {
 export default function FinanceReportsPage() {
   const [data, setData] = useState<FinanceJarvisAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<InsightSeverity | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<InsightCategory | "all">("all");
   const [activeTab, setActiveTab] = useState<"insights" | "spend" | "departments" | "forecast">("insights");
 
   useEffect(() => {
     fetch("/api/finance-jarvis")
-      .then((r) => r.json())
-      .then((d) => { setData(d.analysis); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => {
+        if (!d.analysis) throw new Error("No analysis data returned");
+        setData(d.analysis);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load reports");
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -57,7 +70,32 @@ export default function FinanceReportsPage() {
     );
   }
 
-  if (!data) return <div className="text-center py-20 text-muted">Failed to load data</div>;
+  if (error || !data) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center max-w-sm">
+          <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">Failed to load reports</p>
+          <p className="text-xs text-muted mb-4">{error || "No data returned from the API"}</p>
+          <div className="flex gap-2 justify-center">
+            <Link href="/finance-jarvis" className="px-4 py-1.5 text-xs rounded-lg bg-card border border-border-subtle hover:border-accent/30 transition-colors">
+              Dashboard
+            </Link>
+            <button
+              onClick={() => { setError(null); setLoading(true); window.location.reload(); }}
+              className="px-4 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const filteredInsights = data.insights.filter((i) => {
     if (filter !== "all" && i.severity !== filter) return false;

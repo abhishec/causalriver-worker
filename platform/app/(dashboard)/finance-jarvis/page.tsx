@@ -7,10 +7,12 @@ import type { FinanceJarvisAnalysis, InsightSeverity } from "@/lib/finance-jarvi
 
 // ─── Formatters ─────────────────────────────────────────────────────────────
 
+const CURRENCY_SYMBOL = "S$"; // SGD short symbol for compact display
+
 function fmtK(n: number): string {
-  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
+  if (Math.abs(n) >= 1_000_000) return `${CURRENCY_SYMBOL}${(n / 1_000_000).toFixed(2)}M`;
+  if (Math.abs(n) >= 1_000) return `${CURRENCY_SYMBOL}${(n / 1_000).toFixed(0)}K`;
+  return `${CURRENCY_SYMBOL}${n.toFixed(0)}`;
 }
 
 function fmtPct(n: number): string {
@@ -46,12 +48,23 @@ function MiniBarChart({ data, color = "bg-accent" }: { data: number[]; color?: s
 export default function FinanceJarvisPage() {
   const [data, setData] = useState<FinanceJarvisAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/finance-jarvis")
-      .then((r) => r.json())
-      .then((d) => { setData(d.analysis); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => {
+        if (!d.analysis) throw new Error("No analysis data returned");
+        setData(d.analysis);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load finance data");
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -70,7 +83,27 @@ export default function FinanceJarvisPage() {
     );
   }
 
-  if (!data) return <div className="text-center py-20 text-muted">Failed to load data</div>;
+  if (error || !data) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center max-w-sm">
+          <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">Failed to load Finance Jarvis</p>
+          <p className="text-xs text-muted mb-4">{error || "No data returned from the API"}</p>
+          <button
+            onClick={() => { setError(null); setLoading(true); window.location.reload(); }}
+            className="px-4 py-1.5 text-xs rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const k = data.kpis;
   const trends = data.monthlyTrends;
@@ -101,7 +134,7 @@ export default function FinanceJarvisPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "ARR", value: fmtK(k.arr), sub: fmtPct(k.arrGrowth) + " MoM", trend: k.arrGrowth >= 0 },
           { label: "Monthly Revenue", value: fmtK(k.totalRevenue), sub: fmtPct(k.totalRevenueGrowth), trend: k.totalRevenueGrowth >= 0 },
@@ -201,17 +234,32 @@ export default function FinanceJarvisPage() {
         {/* Cash Forecast */}
         <div className="rounded-xl bg-card border border-border-subtle p-5">
           <h3 className="text-sm font-medium mb-4">Cash Forecast (6mo)</h3>
-          <div className="space-y-2">
-            {data.cashFlowForecast.map((f) => (
-              <div key={f.month} className="flex items-center gap-3 text-xs">
-                <div className="w-16 text-muted">{f.month}</div>
-                <div className={cn("w-20 font-mono", f.projectedNetCash >= 0 ? "text-emerald-400" : "text-red-400")}>
-                  {f.projectedNetCash >= 0 ? "+" : ""}{fmtK(f.projectedNetCash)}
+          <div className="space-y-2.5">
+            {data.cashFlowForecast.map((f) => {
+              const confPct = Math.round(f.confidence * 100);
+              return (
+                <div key={f.month}>
+                  <div className="flex items-center gap-3 text-xs">
+                    <div className="w-16 text-muted">{f.month}</div>
+                    <div className={cn("w-20 font-mono", f.projectedNetCash >= 0 ? "text-emerald-400" : "text-red-400")}>
+                      {f.projectedNetCash >= 0 ? "+" : ""}{fmtK(f.projectedNetCash)}
+                    </div>
+                    <div className="flex-1 text-right text-muted-foreground font-mono">{fmtK(f.projectedBalance)}</div>
+                    <div className="w-10 text-right text-muted/50">{confPct}%</div>
+                  </div>
+                  {/* Confidence interval bar */}
+                  <div className="ml-16 mt-1 h-1 bg-surface rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all",
+                        confPct >= 80 ? "bg-emerald-500/60" : confPct >= 60 ? "bg-amber-500/60" : "bg-red-500/40"
+                      )}
+                      style={{ width: `${confPct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="flex-1 text-right text-muted-foreground font-mono">{fmtK(f.projectedBalance)}</div>
-                <div className="w-10 text-right text-muted/50">{Math.round(f.confidence * 100)}%</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
