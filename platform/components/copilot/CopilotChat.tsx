@@ -1488,6 +1488,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     isReady() {
       return !!sendMessageRef.current && !isLoadingRef.current;
     },
+    getCurrentMessages() {
+      return messagesRef.current.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+    },
+    getActiveService() {
+      return activeServiceRef.current;
+    },
   }));
 
   const color = persona.color || "accent";

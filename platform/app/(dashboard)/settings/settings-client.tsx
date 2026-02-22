@@ -118,6 +118,14 @@ export function SettingsClient({
   const [localCustomers, setLocalCustomers] = useState(allCustomers);
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
 
+  // Sync activeTab with URL search params on navigation (fixes stale tab state)
+  useEffect(() => {
+    const raw = searchParams?.get("tab") || "overview";
+    const mapped = tabMap[raw] || raw;
+    setActiveTab(mapped);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   // Toast helper — auto-dismiss after 3s, clears previous timer on re-fire
   const showToast = useCallback((msg: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);

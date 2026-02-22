@@ -133,6 +133,30 @@ function CopilotPageInner() {
   // ── CopilotController: reliable command execution via direct ref ────────────
   const chatRef = useRef<CopilotChatHandle>(null);
 
+  // Save current messages to DB before clearing (prevents message loss on domain/service switch)
+  const saveCurrentMessagesBeforeClear = useCallback(async () => {
+    const currentMsgs = chatRef.current?.getCurrentMessages();
+    if (!currentMsgs || currentMsgs.length === 0) return;
+    // At least one user message must exist to warrant saving
+    const hasUserMsg = currentMsgs.some((m) => m.role === "user");
+    if (!hasUserMsg) return;
+    try {
+      const svcMode = (chatRef.current?.getActiveService() || "general") as "general" | "aas" | "seaas";
+      const firstUser = currentMsgs.find((m) => m.role === "user");
+      const title = firstUser
+        ? firstUser.content.length > 60 ? firstUser.content.slice(0, 57) + "..." : firstUser.content
+        : "Untitled conversation";
+      await saveConversation({
+        conversationId: activeConversationId || undefined,
+        title,
+        messages: currentMsgs,
+        serviceMode: svcMode,
+      });
+    } catch (err) {
+      logger.error("[CopilotPage] Failed to save messages before clear:", err);
+    }
+  }, [saveConversation, activeConversationId]);
+
   const resetAllState = useCallback(() => {
     setActiveConversationId(null);
     setArtifacts([]);
@@ -144,53 +168,58 @@ function CopilotPageInner() {
 
   const controller: CopilotController = useMemo(() => ({
     startNewConversation() {
-      resetAllState();
-      // Also fire event for any legacy listeners (conversation sidebar, etc.)
-      window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+      // Save current messages before clearing
+      saveCurrentMessagesBeforeClear().finally(() => {
+        resetAllState();
+        // Also fire event for any legacy listeners (conversation sidebar, etc.)
+        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+      });
     },
 
     executeCommand(cmd) {
-      // 1. Reset everything
-      resetAllState();
-      // Fire legacy event for non-controller listeners
-      window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+      // 1. Save current messages, then reset everything and execute
+      saveCurrentMessagesBeforeClear().finally(() => {
+        resetAllState();
+        // Fire legacy event for non-controller listeners
+        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
 
-      // 2. Switch service if needed (skip for "custom" and "workflows" — they don't map to a service mode)
-      if (cmd.service && cmd.service !== "custom" && cmd.service !== "workflows" && cmd.service !== activeService) {
-        setActiveService(cmd.service as ServiceMode);
-      }
-
-      // 3. Check if command has interactive gathering params
-      const systemGathering = COMMAND_GATHERING_MAP[cmd.id];
-      const customG = mergedGatheringMap?.[cmd.id];
-      const gatheringConfig = systemGathering || customG;
-
-      if (gatheringConfig && gatheringConfig.params.length > 0) {
-        const allCmds = [...ALL_SLASH_COMMANDS, ...(mergedCustomCommands || [])];
-        const fullCmd = allCmds.find(c => c.id === cmd.id);
-        if (fullCmd) {
-          setArtifactPaneOpen(true);
-          // Wait one frame for reset to flush, then start gathering
-          requestAnimationFrame(() => {
-            chatRef.current?.startGathering(fullCmd);
-          });
-          return;
+        // 2. Switch service if needed (skip for "custom" and "workflows" — they don't map to a service mode)
+        if (cmd.service && cmd.service !== "custom" && cmd.service !== "workflows" && cmd.service !== activeService) {
+          setActiveService(cmd.service as ServiceMode);
         }
-      }
 
-      // 4. Direct submit with frame-based retry (replaces setTimeout guessing)
-      // Pass commandId for non-gathering commands (e.g. workflows, custom agents)
-      const trySubmit = (attempt: number) => {
-        if (chatRef.current?.isReady()) {
-          chatRef.current.submitMessage(cmd.prompt, cmd.id);
-        } else if (attempt < 30) {
-          // requestAnimationFrame fires after React render — much more reliable than setTimeout
-          requestAnimationFrame(() => trySubmit(attempt + 1));
-        } else {
-          logger.error("[CopilotController] Chat not ready after 30 frames — command dropped");
+        // 3. Check if command has interactive gathering params
+        const systemGathering = COMMAND_GATHERING_MAP[cmd.id];
+        const customG = mergedGatheringMap?.[cmd.id];
+        const gatheringConfig = systemGathering || customG;
+
+        if (gatheringConfig && gatheringConfig.params.length > 0) {
+          const allCmds = [...ALL_SLASH_COMMANDS, ...(mergedCustomCommands || [])];
+          const fullCmd = allCmds.find(c => c.id === cmd.id);
+          if (fullCmd) {
+            setArtifactPaneOpen(true);
+            // Wait one frame for reset to flush, then start gathering
+            requestAnimationFrame(() => {
+              chatRef.current?.startGathering(fullCmd);
+            });
+            return;
+          }
         }
-      };
-      requestAnimationFrame(() => trySubmit(0));
+
+        // 4. Direct submit with frame-based retry (replaces setTimeout guessing)
+        // Pass commandId for non-gathering commands (e.g. workflows, custom agents)
+        const trySubmit = (attempt: number) => {
+          if (chatRef.current?.isReady()) {
+            chatRef.current.submitMessage(cmd.prompt, cmd.id);
+          } else if (attempt < 30) {
+            // requestAnimationFrame fires after React render — much more reliable than setTimeout
+            requestAnimationFrame(() => trySubmit(attempt + 1));
+          } else {
+            logger.error("[CopilotController] Chat not ready after 30 frames — command dropped");
+          }
+        };
+        requestAnimationFrame(() => trySubmit(0));
+      });
     },
 
     injectPrompt(text) {
@@ -200,7 +229,7 @@ function CopilotPageInner() {
     cancelGeneration() {
       chatRef.current?.resetChat();
     },
-  }), [activeService, mergedGatheringMap, mergedCustomCommands, resetAllState]);
+  }), [activeService, mergedGatheringMap, mergedCustomCommands, resetAllState, saveCurrentMessagesBeforeClear]);
 
   // ── Auto-inject from ?q=, ?service=, or ?cmd= query params ──────────────────
   useEffect(() => {
@@ -415,14 +444,17 @@ function CopilotPageInner() {
     const handler = (e: Event) => {
       const svc = (e as CustomEvent).detail as ServiceMode;
       if (svc && ["general", "aas", "seaas"].includes(svc) && svc !== activeService) {
-        handleServiceChange(svc);
-        // Reset chat when manually switching service tabs
-        window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+        // Save current messages before switching service mode
+        saveCurrentMessagesBeforeClear().finally(() => {
+          handleServiceChange(svc);
+          // Reset chat when manually switching service tabs
+          window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+        });
       }
     };
     window.addEventListener("service-mode-changed", handler);
     return () => window.removeEventListener("service-mode-changed", handler);
-  }, [activeService, handleServiceChange]);
+  }, [activeService, handleServiceChange, saveCurrentMessagesBeforeClear]);
 
   // ── Conversation actions ──────────────────────────────────────────────────
   const handleSelectConversation = useCallback(async (id: string) => {

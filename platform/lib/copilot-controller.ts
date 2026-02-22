@@ -25,6 +25,10 @@ export interface CopilotChatHandle {
   }): void;
   /** Whether the chat is ready to accept a message (not loading, sendMessage available) */
   isReady(): boolean;
+  /** Get the current messages array (for save-before-clear) */
+  getCurrentMessages(): Array<{ role: "user" | "assistant"; content: string }>;
+  /** Get the current active service mode */
+  getActiveService(): string;
 }
 
 // ─── CopilotController ──────────────────────────────────────────────────────
