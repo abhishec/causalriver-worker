@@ -105,6 +105,7 @@ function CopilotPageInner() {
 
   // ── Conversation state ────────────────────────────────────────────────────
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [conversationLoading, setConversationLoading] = useState(false);
   const {
     loadList,
     saveConversation,
@@ -407,46 +408,52 @@ function CopilotPageInner() {
   // ── Conversation actions ──────────────────────────────────────────────────
   const handleSelectConversation = useCallback(async (id: string) => {
     setActiveConversationId(id);
+    setConversationLoading(true);
     setArtifacts([]);
     setActiveArtifactId(null);
     setMessageArtifactMap(new Map());
 
-    const data = await loadConversation(id);
-    if (data) {
-      if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
-        setActiveService(data.service_mode);
-        // Sync sidebar tab pills when loading a saved conversation
-        window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: data.service_mode }));
-      }
-
-      try {
-        const artifactsRes = await fetch(`/api/se-aas/artifacts?conversationId=${id}&limit=50`);
-        if (artifactsRes.ok) {
-          const artifactsJson = await artifactsRes.json();
-          if (artifactsJson.artifacts?.length > 0) {
-            const restored: UnifiedArtifact[] = artifactsJson.artifacts.map((a: any) => ({
-              id: a.id,
-              type: a.domain_type?.startsWith("aas-") ? "financial-statement" : "engineering-analysis",
-              title: a.title || a.domain_type || "Artifact",
-              content: JSON.stringify(a.result_data || {}, null, 2),
-              rawData: a.result_data,
-              createdAt: new Date(a.created_at).getTime(),
-              service: a.domain_type?.startsWith("aas-") ? "aas" as const : "seaas" as const,
-              domainId: a.domain_type,
-              pinned: false,
-            }));
-            setArtifacts(restored);
-            setActiveArtifactId(restored[0]?.id || null);
-            setArtifactPaneOpen(true);
-          }
+    try {
+      const data = await loadConversation(id);
+      if (data) {
+        if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
+          setActiveService(data.service_mode);
+          // Sync sidebar tab pills when loading a saved conversation
+          window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: data.service_mode }));
         }
-      } catch {
-        // Non-blocking
-      }
 
-      window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
-        detail: { messages: data.messages, title: data.title },
-      }));
+        try {
+          const artifactsRes = await fetch(`/api/se-aas/artifacts?conversationId=${id}&limit=50`);
+          if (artifactsRes.ok) {
+            const artifactsJson = await artifactsRes.json();
+            if (artifactsJson.artifacts?.length > 0) {
+              const restored: UnifiedArtifact[] = artifactsJson.artifacts.map((a: any) => ({
+                id: a.id,
+                type: a.domain_type?.startsWith("aas-") ? "financial-statement" : "engineering-analysis",
+                title: a.title || a.domain_type || "Artifact",
+                content: JSON.stringify(a.result_data || {}, null, 2),
+                rawData: a.result_data,
+                createdAt: new Date(a.created_at).getTime(),
+                service: a.domain_type?.startsWith("aas-") ? "aas" as const : "seaas" as const,
+                domainId: a.domain_type,
+                pinned: false,
+              }));
+              setArtifacts(restored);
+              setActiveArtifactId(restored[0]?.id || null);
+              setArtifactPaneOpen(true);
+            }
+          }
+        } catch (err) {
+          // Log artifact loading failure but don't block conversation load
+          console.warn("[Copilot] Failed to load artifacts for conversation:", id, err);
+        }
+
+        window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
+          detail: { messages: data.messages, title: data.title },
+        }));
+      }
+    } finally {
+      setConversationLoading(false);
     }
   }, [loadConversation]);
 
@@ -539,7 +546,20 @@ function CopilotPageInner() {
       {/* ── Main 2-column layout (chat + artifact) ────────────────────────── */}
       <div className="flex flex-1 min-h-0">
         {/* ── Center: Chat ─────────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-w-0 flex flex-col relative">
+          {/* Conversation loading overlay */}
+          {conversationLoading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
+                </div>
+                <span className="text-xs text-muted-foreground">Loading conversation...</span>
+              </div>
+            </div>
+          )}
           <ErrorBoundary section="Copilot Chat">
             <CopilotChat
               ref={chatRef}

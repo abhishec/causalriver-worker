@@ -19,6 +19,7 @@ import { useCommandGathering } from "./useCommandGathering";
 import { COMMAND_GATHERING_MAP } from "./command-gathering";
 import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
+import { SmartSuggestionCard } from "./SmartSuggestionCard";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -1086,6 +1087,10 @@ export async function consumeSSEStream(
             if (parsed.compositionResult) {
               callbacks.onCompositionResult?.(parsed.compositionResult);
             }
+            // Workflow progress events
+            if (parsed.workflowProgress) {
+              callbacks.onWorkflowProgress?.(parsed.workflowProgress);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1297,6 +1302,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const hasStreamErrorRef = useRef(false);
 
   // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
   const [brainMetaPerMessage, setBrainMetaPerMessage] = useState<Map<number, BrainMeta>>(new Map());
@@ -1306,6 +1312,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
   const agentStepsRef = useRef(agentSteps);
   agentStepsRef.current = agentSteps;
+
+  // ── Workflow progress state ─────────────────────────────────────────────
+  const [workflowProgress, setWorkflowProgress] = useState<import("./types").WorkflowProgress | null>(null);
+
+  // ── Smart Suggestions state ─────────────────────────────────────────────
+  const [smartSuggestions, setSmartSuggestions] = useState<import("./SmartSuggestionCard").SmartSuggestion[]>([]);
+  const agentUsageHistoryRef = useRef<Array<{ agentType: string; timestamp: number }>>([]);
 
   // ── Proactive insights state (Week 6: "While you were away") ──────────
   const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
@@ -1657,6 +1670,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     setBrainMeta(null);
     setFollowUps([]);
     setLastFailedPrompt(null);
+    hasStreamErrorRef.current = false;
 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
@@ -1713,6 +1727,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           },
           onError: (error) => {
             if (controller.signal.aborted) return;
+            hasStreamErrorRef.current = true;
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
@@ -1743,31 +1758,37 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             // Bug fix #4: Don't emit artifacts if aborted
             if (controller.signal.aborted) return;
 
-            // Generate follow-up suggestions based on the conversation
+            // Generate follow-up suggestions regardless of stream errors
             if (finalAssistantContent) {
               const suggestions = generateFollowUps(trimmed, finalAssistantContent);
               setFollowUps(suggestions);
 
-              // Bug fix #1: Read onArtifact from ref to get latest value
-              const artifactCb = onArtifactRef.current;
-              if (artifactCb) {
-                extractArtifacts(finalAssistantContent, trimmed, messageIdx).forEach((a) => artifactCb(a));
-              }
+              // Guard: Don't save or extract artifacts if stream had an error
+              // This prevents persisting partial/error content as a valid conversation
+              if (!hasStreamErrorRef.current) {
+                // Bug fix #1: Read onArtifact from ref to get latest value
+                const artifactCb = onArtifactRef.current;
+                if (artifactCb) {
+                  extractArtifacts(finalAssistantContent, trimmed, messageIdx).forEach((a) => artifactCb(a));
+                }
 
-              // Persist conversation via onSave callback
-              const saveCb = onSaveRef.current;
-              if (saveCb) {
-                // Auto-generate title from first user message
-                const allMsgs = messagesRef.current;
-                const firstUser = allMsgs.find((m) => m.role === "user");
-                const title = firstUser
-                  ? firstUser.content.length > 60
-                    ? firstUser.content.slice(0, 57) + "..."
-                    : firstUser.content
-                  : "Untitled conversation";
-                saveCb({ messages: allMsgs, title, serviceMode: activeServiceRef.current });
+                // Persist conversation via onSave callback
+                const saveCb = onSaveRef.current;
+                if (saveCb) {
+                  // Auto-generate title from first user message
+                  const allMsgs = messagesRef.current;
+                  const firstUser = allMsgs.find((m) => m.role === "user");
+                  const title = firstUser
+                    ? firstUser.content.length > 60
+                      ? firstUser.content.slice(0, 57) + "..."
+                      : firstUser.content
+                    : "Untitled conversation";
+                  saveCb({ messages: allMsgs, title, serviceMode: activeServiceRef.current });
+                }
               }
             }
+            // Reset for next message
+            hasStreamErrorRef.current = false;
           },
           // ── Agent execution SSE callbacks (Week 3: OpenClaw) ──
           onAgentStep: (step) => {
@@ -1786,6 +1807,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           onAgentStatus: (status) => {
             if (controller.signal.aborted) return;
             setAgentStatus(status);
+            // Track agent usage for smart suggestions
+            if (status.status === "completed" && status.agentType) {
+              agentUsageHistoryRef.current.push({ agentType: status.agentType, timestamp: Date.now() });
+              import("./SmartSuggestionCard").then(({ detectSmartSuggestions }) => {
+                const suggestions = detectSmartSuggestions(agentUsageHistoryRef.current, 0);
+                if (suggestions.length > 0) setSmartSuggestions(suggestions);
+              });
+            }
           },
           onProgressiveArtifact: (artifact) => {
             if (controller.signal.aborted) return;
@@ -1823,6 +1852,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             if (controller.signal.aborted) return;
             setProactiveInsights(insights);
             setInsightsDismissed(false);
+          },
+          onWorkflowProgress: (progress) => {
+            if (controller.signal.aborted) return;
+            setWorkflowProgress(progress);
           },
         },
         controller.signal
@@ -2041,6 +2074,69 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <AgentStepTimeline steps={agentSteps} agentStatus={agentStatus} />
                         </div>
                       )}
+                      {/* Workflow progress card — shows during workflow execution */}
+                      {isLastAssistant && workflowProgress && (
+                        <div style={{ marginBottom: 12 }} className="px-3.5 py-3 rounded-xl border border-border-subtle bg-card">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-semibold text-foreground">{workflowProgress.workflowName}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                              workflowProgress.status === "completed" ? "bg-emerald-500/10 text-emerald-400" :
+                              workflowProgress.status === "failed" ? "bg-red-500/10 text-red-400" :
+                              workflowProgress.status === "paused" ? "bg-purple-500/10 text-purple-400" :
+                              "bg-blue-500/10 text-blue-400"
+                            }`}>
+                              {workflowProgress.status}
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            {workflowProgress.steps.map((step) => (
+                              <div key={step.order} className="flex items-center gap-2 text-[11px]">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                  step.status === "completed" ? "bg-emerald-500" :
+                                  step.status === "running" ? "bg-blue-500 animate-pulse" :
+                                  step.status === "failed" ? "bg-red-500" :
+                                  step.status === "skipped" ? "bg-amber-500" :
+                                  "bg-gray-500/40"
+                                }`} />
+                                <span className={step.status === "running" ? "text-foreground font-medium" : "text-muted-foreground"}>
+                                  Step {step.order}: {step.label}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-2 h-1 bg-surface-hover rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-accent rounded-full transition-all duration-300"
+                              style={{ width: `${(workflowProgress.currentStep / workflowProgress.totalSteps) * 100}%` }}
+                            />
+                          </div>
+                          <div className="text-[10px] text-muted mt-1">
+                            {workflowProgress.currentStep}/{workflowProgress.totalSteps} steps
+                          </div>
+                        </div>
+                      )}
+                      {/* Smart suggestions — inline after agent/workflow completes */}
+                      {isLastAssistant && smartSuggestions.length > 0 && !isLoading && (
+                        <div style={{ marginBottom: 12 }} className="space-y-2">
+                          {smartSuggestions.map((suggestion, si) => (
+                            <SmartSuggestionCard
+                              key={si}
+                              suggestion={suggestion}
+                              onDismiss={() => setSmartSuggestions(prev => prev.filter((_, idx) => idx !== si))}
+                              onAction={(s) => {
+                                if (s.type === "save-as-agent") {
+                                  window.location.href = `/agent-studio/new?prefill=${encodeURIComponent(s.agentType || "")}`;
+                                } else if (s.type === "save-as-workflow") {
+                                  window.location.href = "/workflows?create=true";
+                                } else if (s.type === "view-approvals") {
+                                  window.location.href = "/tasks?status=awaiting_approval";
+                                }
+                                setSmartSuggestions(prev => prev.filter((_, idx) => idx !== si));
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
                       <div className="text-[15px] leading-[1.7] text-foreground/90">
                         {msg.content?.startsWith("__ERROR__") ? (
                           /* ── Error state with retry button ── */
@@ -2234,7 +2330,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 onSelect={(cmd: SlashCommand) => {
                   setShowSlashPicker(false);
                   setSlashQuery("");
-                  if (onServiceChange && cmd.service !== "custom") {
+                  if (onServiceChange && cmd.service !== "custom" && cmd.service !== "workflows") {
                     onServiceChange(cmd.service);
                   }
                   onArtifactPaneOpen?.();

@@ -104,6 +104,7 @@ export function SettingsClient({
   const [createCustomerId, setCreateCustomerId] = useState<string | null>(null);
   const [defaultWsId, setDefaultWsId] = useState<string | null>(initialDefaultWsId ?? null);
   const [settingDefault, setSettingDefault] = useState<string | null>(null);
+  const [switchingWorkspaceId, setSwitchingWorkspaceId] = useState<string | null>(null);
   // Track expanded customers in the Customers tab
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(() => {
     // Auto-expand the current workspace's customer
@@ -111,6 +112,8 @@ export function SettingsClient({
     return currentCustId ? new Set([currentCustId]) : new Set();
   });
 
+  // Mutable local copy of allCustomers so we can append workspaces without page reload
+  const [localCustomers, setLocalCustomers] = useState(allCustomers);
   const connectedTypes = new Set(connectors.map((c) => c.connector_type));
 
   // Toast helper — auto-dismiss after 3s, clears previous timer on re-fire
@@ -139,11 +142,26 @@ export function SettingsClient({
       });
       const data = await res.json();
       if (!res.ok) { setCreateError(data.error || "Failed to create workspace."); return; }
+
+      // Append the new workspace to local state instead of full page reload
+      const newWs: SiblingWorkspace & { customer_id?: string } = {
+        id: data.workspace.id,
+        name: data.workspace.name,
+        slug: data.workspace.slug,
+        plan: data.workspace.plan || "starter",
+        connectors: [],
+        customer_id: custId,
+      };
+      setLocalCustomers(prev => prev.map(c =>
+        c.id === custId
+          ? { ...c, workspaces: [...c.workspaces, newWs] }
+          : c
+      ));
+
       showToast(`Workspace "${data.workspace.name}" created!`);
       setShowCreateWorkspace(false);
       setCreateName("");
       setCreateCustomerId(null);
-      window.location.reload();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Unexpected error.");
     } finally {
@@ -161,8 +179,8 @@ export function SettingsClient({
       });
       if (res.ok) {
         setDefaultWsId(wsId);
-        // Find workspace name from allCustomers or siblingWorkspaces
-        const wsName = allCustomers.flatMap(c => c.workspaces).find(w => w.id === wsId)?.name
+        // Find workspace name from localCustomers or siblingWorkspaces
+        const wsName = localCustomers.flatMap(c => c.workspaces).find(w => w.id === wsId)?.name
           ?? siblingWorkspaces.find(w => w.id === wsId)?.name
           ?? "Workspace";
         showToast(`"${wsName}" set as default workspace`);
@@ -175,7 +193,7 @@ export function SettingsClient({
     } finally {
       setSettingDefault(null);
     }
-  }, [allCustomers, siblingWorkspaces, showToast]);
+  }, [localCustomers, siblingWorkspaces, showToast]);
 
   const handleSignOut = useCallback(async () => {
     localStorage.removeItem("nexus_current_workspace");
@@ -277,9 +295,9 @@ export function SettingsClient({
             <h2 className="text-sm font-medium mb-1">Customers</h2>
             <p className="text-xs text-muted mb-6">Your customer accounts and their workspaces</p>
 
-            {allCustomers.length > 0 ? (
+            {localCustomers.length > 0 ? (
               <div className="space-y-4">
-                {allCustomers.map((cust) => {
+                {localCustomers.map((cust) => {
                   const isExpanded = expandedCustomers.has(cust.id);
                   const totalConnectors = cust.workspaces.reduce((acc, ws) => acc + (ws.connectors?.length ?? 0), 0);
                   return (
@@ -342,14 +360,27 @@ export function SettingsClient({
                                       )}
                                       <button
                                         onClick={() => {
-                                          if (!isCurrent) switchWorkspace(ws.id);
+                                          if (!isCurrent && !switchingWorkspaceId) {
+                                            setSwitchingWorkspaceId(ws.id);
+                                            switchWorkspace(ws.id);
+                                          }
                                         }}
+                                        disabled={switchingWorkspaceId === ws.id}
                                         className={cn(
                                           "truncate text-[13px] text-left",
-                                          isCurrent ? "font-medium cursor-default" : "text-muted-foreground hover:text-foreground cursor-pointer"
+                                          isCurrent ? "font-medium cursor-default" : "text-muted-foreground hover:text-foreground cursor-pointer",
+                                          switchingWorkspaceId === ws.id && "opacity-60"
                                         )}
                                       >
-                                        {ws.name}
+                                        {switchingWorkspaceId === ws.id ? (
+                                          <span className="flex items-center gap-1.5">
+                                            <svg className="w-3 h-3 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
+                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                            </svg>
+                                            <span>Switching...</span>
+                                          </span>
+                                        ) : ws.name}
                                       </button>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
@@ -367,7 +398,7 @@ export function SettingsClient({
                                       ) : (
                                         <button
                                           onClick={() => handleSetDefault(ws.id)}
-                                          disabled={settingDefault !== null}
+                                          disabled={settingDefault === ws.id}
                                           className="text-[10px] text-muted hover:text-accent font-medium px-1.5 py-0.5 rounded hover:bg-accent/8 transition-colors disabled:opacity-50"
                                         >
                                           {settingDefault === ws.id ? "Setting..." : "Set Default"}
@@ -440,7 +471,7 @@ export function SettingsClient({
                 })}
               </div>
             ) : (
-              /* Fallback: show current workspace's customer if allCustomers is empty */
+              /* Fallback: show current workspace's customer if localCustomers is empty */
               customer ? (
                 <div className="rounded-xl border border-border-subtle bg-surface/50 p-5">
                   <div className="flex items-start gap-4">

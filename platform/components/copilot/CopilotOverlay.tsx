@@ -205,13 +205,22 @@ export function CopilotOverlay() {
     setIsLoading(true);
     setResponse("");
 
+    if (!currentWorkspace?.id) {
+      setResponse("Workspace not loaded yet. Please try again.");
+      setIsLoading(false);
+      return;
+    }
+
+    // 30-second timeout to prevent spinning forever
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     try {
       const res = await fetch("/api/copilot/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: trimmed,
-          workspaceId: currentWorkspace?.id,
+          workspaceId: currentWorkspace.id,
         }),
         signal: controller.signal,
       });
@@ -238,13 +247,22 @@ export function CopilotOverlay() {
         controller.signal
       );
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (err instanceof DOMException && err.name === "AbortError") {
+        // Distinguish user-cancel from timeout
+        if (!abortRef.current) {
+          // Timeout triggered the abort
+          setResponse("Request timed out. Please try again or open the full Copilot for longer queries.");
+          setIsLoading(false);
+        }
+        return;
+      }
       setResponse(
         err instanceof Error
           ? `Error: ${err.message}`
           : "Something went wrong"
       );
     } finally {
+      clearTimeout(timeout);
       setIsLoading(false);
       abortRef.current = null;
     }

@@ -9,6 +9,7 @@ import { useChatHistory, type ChatHistoryItem } from "@/lib/use-chat-history";
 import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/SlashCommandPicker";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
 import { useCopilotController } from "@/lib/copilot-controller";
+import { getVocabulary } from "@/lib/service-vocabulary";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -17,6 +18,24 @@ type ServiceMode = "general" | "aas" | "seaas";
 /* ── Navigation — icon rail items (no "Chats") ───────────────────────────── */
 
 const NAV_ITEMS = [
+  {
+    label: "Agent Studio",
+    href: "/agent-studio",
+    // Brain/sparkle icon (heroicons: sparkles)
+    icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z",
+  },
+  {
+    label: "Tasks",
+    href: "/tasks",
+    // Clipboard/check icon
+    icon: "M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75",
+  },
+  {
+    label: "Workflows",
+    href: "/workflows",
+    // Flow/arrows icon
+    icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5",
+  },
   {
     label: "Connectors",
     href: "/connectors",
@@ -242,7 +261,29 @@ function ChatHistorySection({
       </div>
       <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-thin">
         {historyLoading ? (
-          <div className="px-3 py-2 text-center text-[10px] text-muted">Loading...</div>
+          <div className="px-3 py-2 space-y-2">
+            {/* Skeleton group label */}
+            <div className="h-2.5 w-16 rounded bg-surface-hover/60 animate-pulse" />
+            {/* Skeleton chat items */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 px-2 py-1.5">
+                <div className="w-3 h-3 rounded bg-surface-hover/40 animate-pulse shrink-0" />
+                <div className="h-3 w-full rounded bg-surface-hover/50 animate-pulse" />
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1.5">
+                <div className="w-3 h-3 rounded bg-surface-hover/40 animate-pulse [animation-delay:100ms] shrink-0" />
+                <div className="h-3 w-3/4 rounded bg-surface-hover/50 animate-pulse [animation-delay:100ms]" />
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1.5">
+                <div className="w-3 h-3 rounded bg-surface-hover/40 animate-pulse [animation-delay:200ms] shrink-0" />
+                <div className="h-3 w-5/6 rounded bg-surface-hover/50 animate-pulse [animation-delay:200ms]" />
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1.5">
+                <div className="w-3 h-3 rounded bg-surface-hover/40 animate-pulse [animation-delay:300ms] shrink-0" />
+                <div className="h-3 w-2/3 rounded bg-surface-hover/50 animate-pulse [animation-delay:300ms]" />
+              </div>
+            </div>
+          </div>
         ) : groups.length === 0 ? (
           <div className="px-3 py-4 text-center">
             <div className="text-[10px] text-muted">No chats yet</div>
@@ -264,6 +305,177 @@ function ChatHistorySection({
   );
 }
 
+/* ── Active Work Section ─────────────────────────────────────────────── */
+
+function ActiveWorkSection() {
+  const [tasks, setTasks] = useState<Array<{ id: string; agent_type: string; status: string; created_at: string }>>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    let mounted = true;
+    const load = () => {
+      fetch("/api/tasks?status=running,awaiting_approval&limit=5")
+        .then(r => r.json())
+        .then(data => { if (mounted && data.tasks) setTasks(data.tasks); })
+        .catch(() => {});
+    };
+    load();
+    const interval = setInterval(load, 5000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
+
+  if (tasks.length === 0) return null;
+
+  return (
+    <div className="border-t border-border-subtle">
+      <button
+        onClick={() => router.push("/tasks")}
+        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
+      >
+        <span>Active Work ({tasks.length})</span>
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div className="px-2 pb-2">
+        {tasks.slice(0, 5).map(task => (
+          <button
+            key={task.id}
+            onClick={() => router.push(`/tasks?id=${task.id}`)}
+            className="flex items-center gap-1.5 px-2 py-1.5 mx-0 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
+          >
+            <span className={cn(
+              "w-1.5 h-1.5 rounded-full shrink-0",
+              task.status === "running" ? "bg-blue-500 animate-pulse" :
+              task.status === "awaiting_approval" ? "bg-purple-500" : "bg-gray-400"
+            )} />
+            <span className="truncate text-muted-foreground">{task.agent_type || "Task"}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── My Workflows Section ───────────────────────────────────────────── */
+
+function MyWorkflowsSection() {
+  const [workflows, setWorkflows] = useState<Array<{ id: string; name: string; total_runs: number }>>([]);
+  const router = useRouter();
+  const copilotController = useCopilotController();
+
+  useEffect(() => {
+    fetch("/api/workflows?limit=5")
+      .then(r => r.json())
+      .then(data => { if (data.workflows) setWorkflows(data.workflows.slice(0, 5)); })
+      .catch(() => {});
+  }, []);
+
+  if (workflows.length === 0) return null;
+
+  function handleRunWorkflow(workflow: { id: string; name: string }) {
+    const isCopilot = window.location.pathname.startsWith("/copilot");
+    if (isCopilot && copilotController) {
+      copilotController.executeCommand({
+        id: `workflow-${workflow.id}`,
+        prompt: `Run workflow: ${workflow.name}`,
+        service: "workflows",
+      });
+    } else {
+      router.push(`/workflows/${workflow.id}`);
+    }
+  }
+
+  return (
+    <div className="border-t border-border-subtle">
+      <button
+        onClick={() => router.push("/workflows")}
+        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
+      >
+        <span>My Workflows ({workflows.length})</span>
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div className="px-2 pb-2">
+        {workflows.map(wf => (
+          <button
+            key={wf.id}
+            onClick={() => handleRunWorkflow(wf)}
+            className="flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
+          >
+            <span className="truncate text-muted-foreground">{wf.name}</span>
+            <span className="text-[10px] text-muted shrink-0">{wf.total_runs} runs</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── My Agents Section ──────────────────────────────────────────────── */
+
+function MyAgentsSection() {
+  const [agents, setAgents] = useState<Array<{ id: string; label: string; service: string; usage_count: number }>>([]);
+  const router = useRouter();
+  const copilotController = useCopilotController();
+
+  useEffect(() => {
+    fetch("/api/templates?owner=mine&limit=5")
+      .then(r => r.json())
+      .then(data => { if (data.templates) setAgents(data.templates.slice(0, 5)); })
+      .catch(() => {});
+  }, []);
+
+  if (agents.length === 0) return null;
+
+  function handleRunAgent(agent: { id: string; label: string }) {
+    const isCopilot = window.location.pathname.startsWith("/copilot");
+    if (isCopilot && copilotController) {
+      copilotController.executeCommand({
+        id: agent.id,
+        prompt: `Run agent: ${agent.label}`,
+        service: "custom",
+      });
+    } else {
+      router.push(`/agent-studio/${agent.id}`);
+    }
+  }
+
+  return (
+    <div className="border-t border-border-subtle">
+      <button
+        onClick={() => router.push("/agent-studio")}
+        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
+      >
+        <span>My Agents ({agents.length})</span>
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div className="px-2 pb-2">
+        {agents.map(agent => (
+          <button
+            key={agent.id}
+            onClick={() => handleRunAgent(agent)}
+            className="flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
+          >
+            <span className="truncate text-muted-foreground">{agent.label}</span>
+            <span className={cn(
+              "text-[9px] px-1.5 py-0.5 rounded shrink-0",
+              agent.service === "seaas" ? "bg-blue-500/10 text-blue-400" :
+              agent.service === "aas" ? "bg-emerald-500/10 text-emerald-400" :
+              "bg-gray-500/10 text-gray-400"
+            )}>
+              {agent.service === "seaas" ? "SE" : agent.service === "aas" ? "AA" : "Gen"}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Sidebar — Two-Column (Icon Rail + Content Panel) ─────────────── */
 
 export function Sidebar() {
@@ -276,6 +488,19 @@ export function Sidebar() {
   const startX = useRef(0);
   const startW = useRef(0);
   const { groups, loading: historyLoading } = useChatHistory();
+
+  // Service-aware vocabulary for labels
+  const vocab = useMemo(() => getVocabulary(activeService), [activeService]);
+
+  // Service-aware nav label overrides
+  const navLabelOverrides = useMemo(() => {
+    const map: Record<string, string> = {
+      "/agent-studio": vocab.navAgentStudio,
+      "/tasks": vocab.navTasks,
+      "/workflows": vocab.navWorkflows,
+    };
+    return map;
+  }, [vocab]);
 
   // Track active conversation from copilot page
   useEffect(() => {
@@ -414,11 +639,12 @@ export function Sidebar() {
         <nav className="flex flex-col items-center gap-1">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+            const displayLabel = navLabelOverrides[item.href] || item.label;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                title={item.label}
+                title={displayLabel}
                 className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center transition-colors relative",
                   isActive
@@ -477,8 +703,15 @@ export function Sidebar() {
 
           <div className="h-px bg-border-subtle mx-3" />
 
+          {/* Active Work — live tasks needing attention */}
+          <ActiveWorkSection />
+
           {/* Commands */}
           <CommandsSection activeService={activeService} />
+
+          {/* My Workflows + My Agents */}
+          <MyWorkflowsSection />
+          <MyAgentsSection />
 
           {/* Chat History */}
           <ChatHistorySection
