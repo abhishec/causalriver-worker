@@ -105,7 +105,7 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/tasks?limit=50`);
+        const res = await fetch(`/api/tasks?limit=50&organizationId=${encodeURIComponent(workspaceId)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.tasks) setTasks(data.tasks);

@@ -1,0 +1,101 @@
+/**
+ * Task Rejection API
+ * POST /api/tasks/[taskId]/reject
+ */
+
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+
+interface Props {
+  params: Promise<{ taskId: string }>;
+}
+
+export async function POST(request: NextRequest, { params }: Props) {
+  try {
+    const { taskId } = await params;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const service = await createServiceClient();
+
+    const { data: task } = await service
+      .from("brain_agent_tasks")
+      .select("id, status, organization_id, agent_type, confidence_score, prompt, auto_execute_threshold, result_metadata")
+      .eq("id", taskId)
+      .single();
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    if (task.status !== "awaiting_approval") {
+      return NextResponse.json({ error: `Task is ${task.status}, not awaiting approval` }, { status: 400 });
+    }
+
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", task.organization_id)
+      .single();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
+    // Parse optional rejection note from request body
+    let rejectionNote = "";
+    try {
+      const body = await request.json();
+      rejectionNote = body?.note || "";
+    } catch {
+      // No body or invalid JSON — that's fine
+    }
+
+    await service
+      .from("brain_agent_tasks")
+      .update({
+        status: "rejected",
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", taskId);
+
+    // Emit rejection RL signal — critical for confidence calibration
+    const confidenceDelta = task.confidence_score && task.auto_execute_threshold
+      ? task.auto_execute_threshold - task.confidence_score
+      : null;
+
+    await service.from("cross_domain_signals").insert({
+      organization_id: task.organization_id,
+      source_domain: "brain.agents",
+      signal_type: "task_rejected",
+      signal_value: -(task.confidence_score || 0.5),
+      entity_type: "brain_agent_task",
+      entity_id: taskId,
+      signal_metadata: {
+        rejectedBy: user.id,
+        rejectorRole: membership.role,
+        rejectionNote: rejectionNote?.slice(0, 500) || null,
+        agentType: task.agent_type,
+        confidenceScore: task.confidence_score,
+        autoExecuteThreshold: task.auto_execute_threshold,
+        confidenceDelta,
+        prompt: task.prompt?.slice(0, 200),
+        closedLoopTrackingId: task.result_metadata?.closedLoopTrackingId || null,
+        brainLayersUsed: task.result_metadata?.brainLayersUsed ? Object.keys(task.result_metadata.brainLayersUsed) : null,
+        topLayerContributions: task.result_metadata?.topLayerContributions || null,
+      },
+    });
+
+    return NextResponse.json({ success: true, status: "rejected" });
+  } catch (error: any) {
+    logger.error("[TaskReject] Error:", error);
+    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
+  }
+}

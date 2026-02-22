@@ -10,6 +10,39 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 
+/**
+ * Resolve workspace ID — prefers query param, falls back to
+ * getCurrentWorkspaceId(), then uses service client as last resort
+ * (avoids RLS recursion on org_members in user client).
+ */
+async function resolveWorkspaceId(
+  request: NextRequest,
+  userId: string
+): Promise<string | null> {
+  const fromParam = request.nextUrl.searchParams.get("organizationId");
+  if (fromParam) return fromParam;
+
+  try {
+    return await getCurrentWorkspaceId();
+  } catch {
+    // getCurrentWorkspaceId may fail due to RLS recursion on org_members.
+    // Fall back to service client lookup.
+    try {
+      const service = await createServiceClient();
+      const { data } = await service
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", userId)
+        .order("joined_at", { ascending: true })
+        .limit(1)
+        .single();
+      return data?.organization_id ?? null;
+    } catch {
+      return null;
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -19,7 +52,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
+    const workspaceId = await resolveWorkspaceId(request, user.id);
+    if (!workspaceId) {
+      return NextResponse.json({ tasks: [] });
+    }
+
     const status = request.nextUrl.searchParams.get("status");
     const agentType = request.nextUrl.searchParams.get("agentType");
     const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 200);
