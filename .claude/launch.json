@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "platform",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "platform", "dev"],
+      "port": 3001
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "website", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "demo", "dev"],
+      "port": 3002
+    }
+  ]
+}
