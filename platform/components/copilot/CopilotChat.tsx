@@ -33,6 +33,7 @@ export type {
   DomainResult,
 } from "./types";
 
+import type { SmartSuggestion } from "./SmartSuggestionCard";
 import type {
   BrainMeta,
   CopilotArtifact,
@@ -42,6 +43,7 @@ import type {
   AgentStep,
   AgentStatus,
   ProactiveInsight,
+  WorkflowProgress,
 } from "./types";
 
 interface Message {
@@ -1006,6 +1008,7 @@ export type {
   AgentStatus,
   ProgressiveArtifact,
   ProactiveInsight,
+  WorkflowProgress,
   CompositionStep,
   CompositionResult,
   SSECallbacks,
@@ -1314,10 +1317,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   agentStepsRef.current = agentSteps;
 
   // ── Workflow progress state ─────────────────────────────────────────────
-  const [workflowProgress, setWorkflowProgress] = useState<import("./types").WorkflowProgress | null>(null);
+  const [workflowProgress, setWorkflowProgress] = useState<WorkflowProgress | null>(null);
 
   // ── Smart Suggestions state ─────────────────────────────────────────────
-  const [smartSuggestions, setSmartSuggestions] = useState<import("./SmartSuggestionCard").SmartSuggestion[]>([]);
+  const [smartSuggestions, setSmartSuggestions] = useState<SmartSuggestion[]>([]);
   const agentUsageHistoryRef = useRef<Array<{ agentType: string; timestamp: number }>>([]);
 
   // ── Proactive insights state (Week 6: "While you were away") ──────────
@@ -1421,6 +1424,8 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   onArtifactPaneOpenRef.current = onArtifactPaneOpen;
   // Ref for sendMessage so event handlers can call it without stale closures
   const sendMessageRef = useRef<((msg: string) => void) | null>(null);
+  // Pending command ID for non-gathering commands (e.g. workflows triggered from sidebar)
+  const pendingCommandIdRef = useRef<string | null>(null);
 
   // ── Expose imperative methods to parent via ref (Phase 1: CopilotController) ──
   useImperativeHandle(ref, () => ({
@@ -1443,7 +1448,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       gatheringRef.current.cancel();
       inputRef.current?.focus();
     },
-    submitMessage(prompt: string) {
+    submitMessage(prompt: string, commandId?: string) {
+      // Store pending command ID so sendMessage can include it in the request body
+      if (commandId) {
+        pendingCommandIdRef.current = commandId;
+      }
       sendMessageRef.current?.(prompt);
     },
     setInputText(text: string) {
@@ -1699,7 +1708,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           // Phase 4: include selected branch so SE-aaS domains get code intelligence
           ...(branch ? { branch } : {}),
           // Interactive gathering: include command ID and gathered params (use ref for fresh values)
-          ...(gatheringRef.current.state.command ? { commandId: gatheringRef.current.state.command.id } : {}),
+          // Also check pendingCommandIdRef for non-gathering commands (e.g. workflows from sidebar)
+          ...(gatheringRef.current.state.command
+            ? { commandId: gatheringRef.current.state.command.id }
+            : pendingCommandIdRef.current
+            ? { commandId: pendingCommandIdRef.current }
+            : {}),
           ...(Object.keys(gatheringRef.current.state.collectedParams).length > 0 ? { commandParams: gatheringRef.current.state.collectedParams } : {}),
           ...extraParams,
         }),
@@ -1853,7 +1867,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setProactiveInsights(insights);
             setInsightsDismissed(false);
           },
-          onWorkflowProgress: (progress) => {
+          onWorkflowProgress: (progress: WorkflowProgress) => {
             if (controller.signal.aborted) return;
             setWorkflowProgress(progress);
           },
@@ -1878,6 +1892,8 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     } finally {
       setIsLoading(false);
       abortRef.current = null;
+      // Clear pending command ID after use (for non-gathering commands like workflows)
+      pendingCommandIdRef.current = null;
       // Reset gathering state after execution completes (fix: stuck "executing" phase)
       if (gatheringRef.current.state.phase === "executing") {
         gatheringRef.current.reset();
@@ -2123,7 +2139,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                               key={si}
                               suggestion={suggestion}
                               onDismiss={() => setSmartSuggestions(prev => prev.filter((_, idx) => idx !== si))}
-                              onAction={(s) => {
+                              onAction={(s: SmartSuggestion) => {
                                 if (s.type === "save-as-agent") {
                                   window.location.href = `/agent-studio/new?prefill=${encodeURIComponent(s.agentType || "")}`;
                                 } else if (s.type === "save-as-workflow") {
@@ -2330,7 +2346,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 onSelect={(cmd: SlashCommand) => {
                   setShowSlashPicker(false);
                   setSlashQuery("");
-                  if (onServiceChange && cmd.service !== "custom" && cmd.service !== "workflows") {
+                  if (onServiceChange && (cmd.service === "general" || cmd.service === "aas" || cmd.service === "seaas")) {
                     onServiceChange(cmd.service);
                   }
                   onArtifactPaneOpen?.();
