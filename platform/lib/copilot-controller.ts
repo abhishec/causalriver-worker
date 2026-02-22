@@ -9,8 +9,8 @@ import { createContext, useContext } from "react";
 export interface CopilotChatHandle {
   /** Reset all chat state (messages, input, loading, gathering) */
   resetChat(): void;
-  /** Submit a message directly */
-  submitMessage(prompt: string): void;
+  /** Submit a message directly. Optional commandId for non-gathering commands (e.g. workflows). */
+  submitMessage(prompt: string, commandId?: string): void;
   /** Fill the input without submitting */
   setInputText(text: string): void;
   /** Start interactive parameter gathering for a command */

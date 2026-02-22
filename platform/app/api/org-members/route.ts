@@ -77,6 +77,7 @@ export async function GET(request: Request) {
       ...m,
       email: userMap.get(m.user_id)?.email || "",
       name: userMap.get(m.user_id)?.name || "",
+      invited_by_name: m.invited_by ? (userMap.get(m.invited_by)?.name || userMap.get(m.invited_by)?.email || null) : null,
     }));
 
     // Also fetch pending invitations

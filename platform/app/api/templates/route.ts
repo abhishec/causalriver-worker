@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ id: data.id, commandId: data.command_id });
+    return NextResponse.json({ id: data.id, commandId: data.command_id, template: { id: data.id, command_id: data.command_id } });
   } catch (err: unknown) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to create template" },

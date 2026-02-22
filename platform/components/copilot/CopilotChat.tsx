@@ -1130,6 +1130,7 @@ export async function consumeSSEStream(
             if (parsed.agentExecutionArtifact) callbacks.onAgentExecutionArtifact?.(parsed.agentExecutionArtifact);
             if (parsed.compositionStep) callbacks.onCompositionStep?.(parsed.compositionStep);
             if (parsed.compositionResult) callbacks.onCompositionResult?.(parsed.compositionResult);
+            if (parsed.workflowProgress) callbacks.onWorkflowProgress?.(parsed.workflowProgress);
           } catch { /* skip */ }
         }
       }
@@ -1704,7 +1705,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
         body: JSON.stringify({
           message: trimmed,
           conversationHistory: history.length > 0 ? history : undefined,
-          serviceMode: activeServiceRef.current !== "general" ? activeServiceRef.current : undefined,
+          serviceMode: activeServiceRef.current,
           // Phase 4: include selected branch so SE-aaS domains get code intelligence
           ...(branch ? { branch } : {}),
           // Interactive gathering: include command ID and gathered params (use ref for fresh values)
@@ -1889,6 +1890,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
         };
         return updated;
       });
+      // Reset gathering state on error to prevent stuck UI
+      // (handles network failures, 503, timeouts — not just AbortError)
+      if (gatheringRef.current.state.phase !== "idle") {
+        gatheringRef.current.reset();
+      }
     } finally {
       setIsLoading(false);
       abortRef.current = null;
@@ -2143,7 +2149,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                                 if (s.type === "save-as-agent") {
                                   window.location.href = `/agent-studio/new?prefill=${encodeURIComponent(s.agentType || "")}`;
                                 } else if (s.type === "save-as-workflow") {
-                                  window.location.href = "/workflows?create=true";
+                                  const params = new URLSearchParams({ create: "true" });
+                                  if (s.agentSequence?.length) {
+                                    params.set("steps", s.agentSequence.join(","));
+                                  }
+                                  window.location.href = `/workflows?${params.toString()}`;
                                 } else if (s.type === "view-approvals") {
                                   window.location.href = "/tasks?status=awaiting_approval";
                                 }

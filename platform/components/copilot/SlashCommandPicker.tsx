@@ -105,9 +105,11 @@ export function SlashCommandPicker({ query, onSelect, onClose, customCommands, o
   const aasCmds = filtered.filter((c) => c.service === "aas");
   const generalCmds = filtered.filter((c) => c.service === "general");
   const customCmds = filtered.filter((c) => c.service === "custom");
+  const workflowCmds = filtered.filter((c) => c.service === "workflows");
   if (seaasCmds.length > 0) grouped.push({ group: "Engineering (SE-aaS)", cmds: seaasCmds });
   if (aasCmds.length > 0) grouped.push({ group: "Accounting (AAS)", cmds: aasCmds });
   if (generalCmds.length > 0) grouped.push({ group: "General", cmds: generalCmds });
+  if (workflowCmds.length > 0) grouped.push({ group: "Workflows", cmds: workflowCmds });
   if (customCmds.length > 0) grouped.push({ group: "Custom", cmds: customCmds });
 
   return (

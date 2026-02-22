@@ -14,13 +14,15 @@ interface Member {
   joined_at: string;
   email: string;
   name: string;
+  invited_by?: string;
+  invited_by_name?: string | null;
 }
 
 interface PendingInvite {
   id: string;
   invitee_email: string;
-  role: string;
-  status: string;
+  role: "admin" | "member" | "viewer";
+  status: "pending" | "accepted" | "expired";
   created_at: string;
   expires_at: string;
 }
@@ -186,6 +188,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
             <tr className="text-xs text-muted border-b border-border-subtle bg-surface/50">
               <th className="text-left py-2.5 px-4 font-medium">Member</th>
               <th className="text-left py-2.5 px-4 font-medium">Role</th>
+              <th className="text-left py-2.5 px-4 font-medium hidden sm:table-cell">Invited By</th>
               <th className="text-left py-2.5 px-4 font-medium">Joined</th>
               {canManage && <th className="text-right py-2.5 px-4 font-medium">Actions</th>}
             </tr>
@@ -240,6 +243,11 @@ export function MembersTab({ orgId }: { orgId: string }) {
                     >
                       {m.role}
                     </span>
+                  )}
+                </td>
+                <td className="py-3 px-4 text-xs text-muted hidden sm:table-cell">
+                  {m.invited_by_name || (
+                    <span className="text-muted/50">—</span>
                   )}
                 </td>
                 <td className="py-3 px-4 text-xs text-muted font-mono">

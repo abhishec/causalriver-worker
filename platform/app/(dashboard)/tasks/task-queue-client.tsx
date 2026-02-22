@@ -145,13 +145,18 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
     try {
       const res = await fetch(`/api/tasks/${taskId}/approve`, { method: "POST" });
       if (res.ok) {
+        const task = tasks.find(t => t.id === taskId);
         setTasks(prev => prev.map(t =>
           t.id === taskId ? { ...t, status: "completed" as TaskStatus } : t
         ));
+        // Auto-resume the parent workflow when a workflow step is approved
+        if (task?.workflow_run_id) {
+          fetch(`/api/workflow-runs/${task.workflow_run_id}/resume`, { method: "POST" }).catch(() => {});
+        }
       }
     } catch { /* */ }
     setApproving(null);
-  }, []);
+  }, [tasks]);
 
   const handleReject = useCallback(async (taskId: string) => {
     setApproving(taskId);

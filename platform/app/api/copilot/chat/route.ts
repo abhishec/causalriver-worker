@@ -132,9 +132,28 @@ function createSSEStream() {
     send(JSON.stringify({ proactiveInsights: insights }));
   };
 
+  /** Stream workflow execution progress */
+  const sendWorkflowProgress = (progress: {
+    runId: string;
+    workflowId: string;
+    workflowName: string;
+    status: "running" | "paused" | "completed" | "failed";
+    currentStep: number;
+    totalSteps: number;
+    steps: Array<{
+      order: number;
+      label: string;
+      status: "pending" | "running" | "completed" | "failed" | "skipped";
+      parallel_group?: string;
+    }>;
+  }) => {
+    send(JSON.stringify({ workflowProgress: progress }));
+  };
+
   return {
     stream, send, sendText, sendError, close,
     sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
+    sendWorkflowProgress,
   };
 }
 
@@ -983,6 +1002,200 @@ export async function POST(request: NextRequest) {
         }
       } catch (templateErr) {
         logger.warn("[CustomTemplate] Non-fatal: template loading failed:", templateErr);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // WORKFLOW EXECUTION MODE
+    // When commandId starts with "workflow-", load the workflow from DB
+    // and execute it via the workflow engine, streaming progress events
+    // back to the copilot UI via sendWorkflowProgress().
+    // ══════════════════════════════════════════════════════════════════════
+
+    if (commandId && typeof commandId === 'string' && commandId.startsWith('workflow-')) {
+      try {
+        const workflowId = commandId.replace('workflow-', '');
+
+        // Validate workflow ID is non-empty (prevent empty-ID queries)
+        if (!workflowId || workflowId.length < 10) {
+          const { stream: errStream, sendError: errSendErr, close: errClose } = createSSEStream();
+          errSendErr("Invalid workflow ID");
+          errClose();
+          return new Response(errStream, {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive" },
+          });
+        }
+
+        // Load the workflow definition (org-scoped)
+        const { data: workflow } = await service
+          .from('workflows')
+          .select('*')
+          .eq('id', workflowId)
+          .eq('organization_id', workspaceId)
+          .neq('status', 'archived')
+          .single();
+
+        if (!workflow) {
+          // Workflow not found — send error via SSE instead of leaving client hanging
+          const { stream: nfStream, sendError: nfSendErr, close: nfClose } = createSSEStream();
+          nfSendErr("Workflow not found or archived");
+          nfClose();
+          return new Response(nfStream, {
+            status: 200,
+            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive" },
+          });
+        }
+
+        {
+          const {
+            stream: wfStream, send: wfSend, sendText: wfSendText,
+            sendError: wfSendError, close: wfClose, sendWorkflowProgress,
+          } = createSSEStream();
+
+          // Track usage
+          await service
+            .from('workflows')
+            .update({
+              total_runs: (workflow.total_runs || 0) + 1,
+              last_run_at: new Date().toISOString(),
+            })
+            .eq('id', workflowId)
+            .then(() => {}, () => {});
+
+          // Build step status array for progress tracking
+          const steps = (workflow.steps || []) as Array<{
+            order: number; label: string; parallel_group?: string;
+          }>;
+
+          // Fire-and-stream: execute workflow and relay progress
+          (async () => {
+            try {
+              // Send initial progress
+              sendWorkflowProgress({
+                runId: "",
+                workflowId: workflow.id,
+                workflowName: workflow.name,
+                status: "running",
+                currentStep: 0,
+                totalSteps: steps.length,
+                steps: steps.map(s => ({
+                  order: s.order,
+                  label: s.label,
+                  status: "pending" as const,
+                  parallel_group: s.parallel_group,
+                })),
+              });
+
+              const { executeWorkflow } = await import("@/lib/workflows/engine");
+
+              const result = await executeWorkflow(service, {
+                workflow,
+                organizationId: workspaceId,
+                userId: user.id,
+                inputPayload: commandParams as Record<string, unknown> | undefined,
+                conversationId: undefined,
+              }, {
+                onStepStart: (stepOrder, label) => {
+                  sendWorkflowProgress({
+                    runId: "",
+                    workflowId: workflow.id,
+                    workflowName: workflow.name,
+                    status: "running",
+                    currentStep: stepOrder,
+                    totalSteps: steps.length,
+                    steps: steps.map(s => ({
+                      order: s.order,
+                      label: s.label,
+                      status: s.order === stepOrder ? "running" as const
+                        : s.order < stepOrder ? "completed" as const
+                        : "pending" as const,
+                      parallel_group: s.parallel_group,
+                    })),
+                  });
+                },
+                onStepComplete: (stepOrder, label, status) => {
+                  sendWorkflowProgress({
+                    runId: "",
+                    workflowId: workflow.id,
+                    workflowName: workflow.name,
+                    status: "running",
+                    currentStep: stepOrder,
+                    totalSteps: steps.length,
+                    steps: steps.map(s => ({
+                      order: s.order,
+                      label: s.label,
+                      status: s.order === stepOrder
+                        ? (status === "completed" ? "completed" as const : "failed" as const)
+                        : s.order < stepOrder ? "completed" as const
+                        : "pending" as const,
+                      parallel_group: s.parallel_group,
+                    })),
+                  });
+                },
+                onWorkflowPaused: (stepOrder, taskId) => {
+                  sendWorkflowProgress({
+                    runId: "",
+                    workflowId: workflow.id,
+                    workflowName: workflow.name,
+                    status: "paused",
+                    currentStep: stepOrder,
+                    totalSteps: steps.length,
+                    steps: steps.map(s => ({
+                      order: s.order,
+                      label: s.label,
+                      status: s.order === stepOrder ? "running" as const
+                        : s.order < stepOrder ? "completed" as const
+                        : "pending" as const,
+                      parallel_group: s.parallel_group,
+                    })),
+                  });
+                  wfSendText(`Workflow paused at step ${stepOrder} — task ${taskId} is awaiting approval. Approve it in the Task Queue to continue.`);
+                },
+              });
+
+              // Send final progress
+              sendWorkflowProgress({
+                runId: result.runId,
+                workflowId: workflow.id,
+                workflowName: workflow.name,
+                status: result.status === "completed" ? "completed" : "failed",
+                currentStep: steps.length,
+                totalSteps: steps.length,
+                steps: steps.map(s => ({
+                  order: s.order,
+                  label: s.label,
+                  status: "completed" as const,
+                  parallel_group: s.parallel_group,
+                })),
+              });
+
+              const summary = result.status === "completed"
+                ? `Workflow "${workflow.name}" completed successfully in ${(result.durationMs / 1000).toFixed(1)}s. ` +
+                  `${result.completedSteps} steps completed${result.failedSteps > 0 ? `, ${result.failedSteps} failed` : ""}.`
+                : `Workflow "${workflow.name}" finished with status: ${result.status}. ` +
+                  `${result.completedSteps} completed, ${result.failedSteps} failed.`;
+
+              wfSendText(summary);
+            } catch (err) {
+              wfSendError(err instanceof Error ? err.message : 'Workflow execution failed');
+            } finally {
+              wfClose();
+            }
+          })();
+
+          return new Response(wfStream, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache, no-transform",
+              Connection: "keep-alive",
+              "X-Accel-Buffering": "no",
+            },
+          });
+        }
+      } catch (wfErr) {
+        logger.warn("[Workflow] Non-fatal: workflow routing failed:", wfErr);
       }
     }
 

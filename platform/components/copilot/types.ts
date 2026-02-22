@@ -203,6 +203,22 @@ export interface CompositionStep {
   detail?: string;
 }
 
+/** Workflow progress event — streamed during workflow execution */
+export interface WorkflowProgress {
+  runId: string;
+  workflowId: string;
+  workflowName: string;
+  status: "running" | "paused" | "completed" | "failed";
+  currentStep: number;
+  totalSteps: number;
+  steps: Array<{
+    order: number;
+    label: string;
+    status: "pending" | "running" | "completed" | "failed" | "skipped";
+    parallel_group?: string;
+  }>;
+}
+
 /** Agent Composer: full composition result */
 export interface CompositionResult {
   name: string;
@@ -228,6 +244,8 @@ export interface SSECallbacks {
   onCompositionStep?: (step: CompositionStep) => void;
   /** Agent Composer: full composition result */
   onCompositionResult?: (result: CompositionResult) => void;
+  /** Workflow execution progress updates */
+  onWorkflowProgress?: (progress: WorkflowProgress) => void;
   onDone: () => void;
 }
 

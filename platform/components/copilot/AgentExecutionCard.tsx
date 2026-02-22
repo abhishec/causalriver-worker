@@ -36,9 +36,10 @@ interface AgentExecutionCardProps {
   data: AgentExecutionData;
   className?: string;
   onResume?: (taskId: string) => void;
+  onSaveAsAgent?: (data: AgentExecutionData) => void;
 }
 
-export function AgentExecutionCard({ data, className = "", onResume }: AgentExecutionCardProps) {
+export function AgentExecutionCard({ data, className = "", onResume, onSaveAsAgent }: AgentExecutionCardProps) {
   const [activeTab, setActiveTab] = useState<"summary" | "steps" | "actions">("summary");
   const [resuming, setResuming] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -108,6 +109,14 @@ export function AgentExecutionCard({ data, className = "", onResume }: AgentExec
               className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
             >
               {resuming ? "Resuming..." : "Resume"}
+            </button>
+          )}
+          {data.status === "completed" && onSaveAsAgent && (
+            <button
+              onClick={() => onSaveAsAgent(data)}
+              className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+            >
+              Save as Agent
             </button>
           )}
         </div>

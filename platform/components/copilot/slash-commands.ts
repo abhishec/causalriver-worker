@@ -16,7 +16,7 @@ export interface SlashCommand {
   description: string;
   icon: string;
   prompt: string;
-  service: "general" | "aas" | "seaas" | "custom";
+  service: "general" | "aas" | "seaas" | "custom" | "workflows";
   category: string;
 }
 
