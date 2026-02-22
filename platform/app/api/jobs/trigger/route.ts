@@ -53,6 +53,8 @@ const NODE_JOBS = [
   'connector_sync',
   'training_packs',
   'prediction_outcomes',
+  'evolution_cycle',
+  'learning_cycle',
   'consolidation_full',
   'all_daily_full',
 ] as const;
@@ -283,6 +285,20 @@ async function executeViaNodeJs(
 
       case 'prediction_outcomes':
         return await jobs.runPredictionOutcomeVerification(organizationId);
+
+      case 'evolution_cycle': {
+        const { runBrainEvolutionCycle } = await import("@nexus-ai/memory-stack");
+        return await runBrainEvolutionCycle(service, organizationId, "full");
+      }
+
+      case 'learning_cycle': {
+        const { createClosedLoopLearningEngine } = await import("@nexus-ai/memory-stack");
+        const engine = createClosedLoopLearningEngine({
+          supabase: service,
+          organizationId,
+        });
+        return await engine.runLearningCycle();
+      }
 
       case 'consolidation_full':
         return await jobs.runConsolidationCycle(organizationId);
