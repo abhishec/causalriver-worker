@@ -10,6 +10,7 @@ import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/Slas
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
 import { useCopilotController } from "@/lib/copilot-controller";
 import { getVocabulary } from "@/lib/service-vocabulary";
+import { useWorkspace } from "@/lib/workspace-context";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -420,13 +421,15 @@ function MyAgentsSection() {
   const [agents, setAgents] = useState<Array<{ id: string; label: string; service: string; usage_count: number }>>([]);
   const router = useRouter();
   const copilotController = useCopilotController();
+  const { currentWorkspace } = useWorkspace();
 
   useEffect(() => {
-    fetch("/api/templates?owner=mine&limit=5")
-      .then(r => r.json())
+    if (!currentWorkspace?.id) return;
+    fetch(`/api/templates?workspaceId=${currentWorkspace.id}&limit=5`)
+      .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.json(); })
       .then(data => { if (data.templates) setAgents(data.templates.slice(0, 5)); })
       .catch(() => {});
-  }, []);
+  }, [currentWorkspace?.id]);
 
   if (agents.length === 0) return null;
 

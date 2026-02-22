@@ -20,7 +20,7 @@ export interface GatheringParam {
   type: "select" | "date" | "date_range" | "number" | "text" | "chips" | "file" | "gl_check";
   /** Whether this param must be filled before execution */
   required: boolean;
-  /** API endpoint to fetch dynamic options (e.g. "/api/org/list") */
+  /** API endpoint to fetch dynamic options (e.g. "/api/workspace/memberships") */
   optionsEndpoint?: string;
   /** JSON key in API response to extract options array */
   optionsKey?: string;
@@ -72,8 +72,8 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       {
         id: "workspace",
@@ -118,8 +118,8 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       {
         id: "engagement",
@@ -149,8 +149,8 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       {
         id: "engagement",
@@ -200,8 +200,8 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       {
         id: "engagement",
@@ -249,8 +249,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -307,8 +307,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -339,8 +339,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -373,8 +373,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -408,8 +408,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -444,8 +444,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -489,8 +489,8 @@ const AAS_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -530,8 +530,8 @@ const AAS_FULL_REVIEW: CommandGathering = {
       label: "Workspace",
       type: "select",
       required: true,
-      optionsEndpoint: "/api/org/list",
-      optionsKey: "organizations",
+      optionsEndpoint: "/api/workspace/memberships",
+      optionsKey: "memberships",
     },
     GL_DATA_PARAM,
     {
@@ -568,8 +568,8 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {
@@ -604,8 +604,8 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
     ],
@@ -626,8 +626,8 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
         label: "Workspace",
         type: "select",
         required: true,
-        optionsEndpoint: "/api/org/list",
-        optionsKey: "organizations",
+        optionsEndpoint: "/api/workspace/memberships",
+        optionsKey: "memberships",
       },
       GL_DATA_PARAM,
       {

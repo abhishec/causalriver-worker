@@ -19,6 +19,7 @@ import { useEffect } from "react";
 interface ErrorEntry {
   timestamp: string;
   message: string;
+  stack?: string;
   component?: string;
   operation?: string;
   extra?: Record<string, unknown>;
@@ -45,7 +46,8 @@ function createErrorTracker(): ErrorTracker {
     captureError(error, context) {
       const entry: ErrorEntry = {
         timestamp: new Date().toISOString(),
-        message: error.message,
+        message: error.message || String(error),
+        stack: error.stack,
         component: context?.component,
         operation: context?.operation,
         extra: context?.extra,
@@ -57,9 +59,9 @@ function createErrorTracker(): ErrorTracker {
 
       // Always log in dev; in prod, log as collapsible group
       if (process.env.NODE_ENV === "development") {
-        console.error("[ErrorTracker]", entry);
+        console.error(`[ErrorTracker] ${entry.message}`, entry.component ? `(${entry.component})` : "", error);
       } else {
-        console.groupCollapsed(`[ErrorTracker] ${error.message}`);
+        console.groupCollapsed(`[ErrorTracker] ${entry.message}`);
         console.error(entry);
         console.groupEnd();
       }
