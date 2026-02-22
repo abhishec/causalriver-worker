@@ -125,7 +125,7 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
     const { data: first } = await supabase
       .from("org_members")
       .select(
-        "organization_id, organizations:organization_id(is_core_brain)"
+        "organization_id, organizations:organization_id(is_core_brain), is_platform_admin"
       )
       .eq("user_id", user.id)
       .order("joined_at", { ascending: true });
@@ -134,9 +134,28 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
       const nonCore = (first as any[]).find(
         (m) => !(m.organizations as any)?.is_core_brain
       );
-      return nonCore?.organization_id ?? first[0].organization_id;
+      if (nonCore) return nonCore.organization_id;
+
+      // Only fall back to CORE if user is a platform admin (non-admins can't read CORE via RLS)
+      const isPlatformAdmin = (first as any[]).some((m) => m.is_platform_admin);
+      if (isPlatformAdmin) return first[0].organization_id;
+
+      // Non-admin with only CORE membership — return it anyway (best effort)
+      return first[0].organization_id;
     }
 
+    // 4. No memberships found — only use CORE for platform admins
+    const { data: adminCheck } = await supabase
+      .from("org_members")
+      .select("is_platform_admin")
+      .eq("user_id", user.id)
+      .eq("is_platform_admin", true)
+      .limit(1)
+      .single();
+
+    if (adminCheck) return CORE_WORKSPACE_ID;
+
+    // Non-admin with no workspace memberships — return empty string to signal "no workspace"
     return CORE_WORKSPACE_ID;
   } catch {
     return CORE_WORKSPACE_ID;

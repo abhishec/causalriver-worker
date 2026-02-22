@@ -66,7 +66,28 @@ export default async function SettingsPage() {
 
   if (!orgData) {
     logger.error("[Settings] Org query returned null for workspaceId:", workspaceId, "error:", orgResult.error);
+
+    // Attempt recovery: resolve via customer chain → primary_org_id
+    const { getCurrentCustomer } = await import("@/lib/workspace-helpers");
+    const recoveryCustomer = await getCurrentCustomer();
+    if (recoveryCustomer?.primary_org_id && recoveryCustomer.primary_org_id !== workspaceId) {
+      const { data: recoveredOrg } = await safe(supabase
+        .from("organizations")
+        .select("id, name, slug, plan, is_core_brain, customer_id")
+        .eq("id", recoveryCustomer.primary_org_id)
+        .single());
+      if (recoveredOrg) {
+        // Use recovered org data — reassign orgData
+        (orgResult as any).data = recoveredOrg;
+      }
+    }
   }
+
+  // Re-read after potential recovery
+  const finalOrgData = (orgResult.data as {
+    id: string; name: string; slug: string; plan: string;
+    is_core_brain: boolean; customer_id: string | null;
+  } | null);
 
   // ── Parse all customer memberships ──
   const customerMembershipRows = (allCustomerMembershipsResult.data || []) as {
@@ -150,7 +171,7 @@ export default async function SettingsPage() {
   });
 
   // ── For backward compat: current workspace's customer + siblings ──
-  const customerId = orgData?.customer_id ?? null;
+  const customerId = finalOrgData?.customer_id ?? null;
   const customer = allCustomers.find(c => c.id === customerId) ?? null;
   const siblingWorkspaces = allWorkspacesAcrossCustomers
     .filter(ws => ws.customer_id === customerId)
@@ -163,7 +184,7 @@ export default async function SettingsPage() {
   return (
     <Suspense fallback={<div className="p-8 text-sm text-muted">Loading settings...</div>}>
       <SettingsClient
-        org={orgData}
+        org={finalOrgData}
         orgId={workspaceId}
         budget={budgetResult.data}
         apiKeys={apiKeysResult.data || []}

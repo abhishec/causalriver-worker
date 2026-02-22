@@ -12,7 +12,7 @@ import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
-import { PartnerDashboard } from "@/components/settings/PartnerDashboard";
+
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
 import { useWorkspace } from "@/lib/workspace-context";
 import { createClient } from "@/lib/supabase/client";
@@ -70,8 +70,7 @@ interface SettingsClientProps {
 
 /* ── SVG icon paths for sidebar nav ─────────────────────────────────────── */
 const TAB_ICONS: Record<string, string> = {
-  customers:     "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21",
-  workspace:     "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+  overview:      "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21",
   members:       "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
   connections:   "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
   brain:         "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
@@ -89,10 +88,12 @@ export function SettingsClient({
   allCustomers = [],
 }: SettingsClientProps) {
   const searchParams = useSearchParams();
-  const { switchWorkspace } = useWorkspace();
+  const { switchWorkspace, currentRole, isPlatformAdmin, currentCustomer, workspaces } = useWorkspace();
   // Default to "customers" tab, but respect URL param; map legacy "general" to "workspace"
-  const rawTab = searchParams?.get("tab") || "customers";
-  const initialTab = rawTab === "general" ? "workspace" : rawTab;
+  const rawTab = searchParams?.get("tab") || "overview";
+  // Map legacy tab names to merged tabs
+  const tabMap: Record<string, string> = { general: "overview", workspace: "overview", customers: "overview", operations: "brain" };
+  const initialTab = tabMap[rawTab] || rawTab;
   const initialAction = searchParams?.get("action") ?? null;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
@@ -214,20 +215,113 @@ export function SettingsClient({
     });
   }, []);
 
-  const isDesignPartner = customer?.is_design_partner ?? false;
-
   const tabs = [
-    { id: "customers", label: "Customers" },
-    { id: "workspace", label: "Workspace" },
+    { id: "overview", label: "Overview" },
     { id: "members", label: "Members" },
     { id: "connections", label: "Connections", count: connectors.length },
-    { id: "brain", label: "Brain Config" },
-    { id: "operations", label: "Brain Ops" },
+    { id: "brain", label: "Brain" },
     { id: "notifications", label: "Notifications" },
     { id: "api", label: "API Keys", count: apiKeys.length },
-    ...(isDesignPartner ? [{ id: "partner", label: "Partner Program" }] : []),
-    { id: "danger", label: "Danger Zone" },
+    ...((currentRole === "owner" || isPlatformAdmin) ? [{ id: "danger", label: "Danger Zone" }] : []),
   ];
+
+  // Role display
+  const roleLabel = isPlatformAdmin ? "Platform Admin" : currentRole ? currentRole.charAt(0).toUpperCase() + currentRole.slice(1) : "Member";
+  const isOwnerOrAdmin = currentRole === "owner" || currentRole === "admin" || isPlatformAdmin;
+
+  // Editable workspace name state
+  const [editName, setEditName] = useState(org?.name || "");
+  const [savingName, setSavingName] = useState(false);
+  const nameChanged = editName !== (org?.name || "");
+
+  // Editable budget state
+  const [editBudget, setEditBudget] = useState({
+    daily_llm_budget: budget?.daily_llm_budget ?? 2,
+    monthly_llm_budget: budget?.monthly_llm_budget ?? 50,
+    monthly_aws_budget: budget?.monthly_aws_budget ?? 100,
+    alert_threshold_pct: budget?.alert_threshold_pct ?? 80,
+  });
+  const [savingBudget, setSavingBudget] = useState(false);
+
+  const handleSaveName = useCallback(async () => {
+    if (!editName.trim() || !isOwnerOrAdmin) return;
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/workspace/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: orgId, name: editName.trim() }),
+      });
+      if (res.ok) {
+        showToast("Workspace name updated");
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to update name");
+      }
+    } catch {
+      showToast("Failed to update workspace name");
+    } finally {
+      setSavingName(false);
+    }
+  }, [editName, orgId, isOwnerOrAdmin, showToast]);
+
+  const handleSaveBudget = useCallback(async () => {
+    if (!isOwnerOrAdmin) return;
+    setSavingBudget(true);
+    try {
+      const res = await fetch("/api/workspace/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: orgId, ...editBudget }),
+      });
+      if (res.ok) {
+        showToast("Budget settings updated");
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to update budget");
+      }
+    } catch {
+      showToast("Failed to update budget settings");
+    } finally {
+      setSavingBudget(false);
+    }
+  }, [editBudget, orgId, isOwnerOrAdmin, showToast]);
+
+  // If org is null — show error recovery UI
+  if (!org) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-7rem)]">
+        <div className="max-w-md w-full rounded-xl border border-border-subtle bg-surface/50 p-8 text-center space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-warning/10 flex items-center justify-center">
+            <svg className="w-6 h-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h2 className="text-sm font-semibold">Unable to load workspace settings</h2>
+          <p className="text-xs text-muted-foreground">
+            The current workspace could not be found. This can happen if you don&apos;t have access to this workspace.
+          </p>
+          {workspaces.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <p className="text-[11px] text-muted font-medium">Switch to an available workspace:</p>
+              <div className="space-y-1">
+                {workspaces.slice(0, 5).map((ws) => (
+                  <button
+                    key={ws.workspace.id}
+                    onClick={() => switchWorkspace(ws.workspace.id)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs hover:bg-surface-hover border border-border-subtle transition-colors"
+                  >
+                    <span className="font-medium">{ws.workspace.name}</span>
+                    <span className="text-muted text-[10px]">{ws.role}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-8 min-h-[calc(100vh-7rem)]">
@@ -286,14 +380,106 @@ export function SettingsClient({
 
       {/* ── Content Area ────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0 max-w-3xl py-1">
+        {/* ── Role / Context Banner ──────────────────────────────── */}
+        <div className="flex items-center gap-2 mb-6 px-1">
+          <Badge variant={isPlatformAdmin ? "accent" : "default"} size="xs">
+            {roleLabel}
+          </Badge>
+          {currentCustomer && (
+            <>
+              <span className="text-muted text-[10px]">&middot;</span>
+              <span className="text-[11px] text-muted-foreground">
+                {currentCustomer.name}
+                {org?.name && <> &rsaquo; {org.name}</>}
+              </span>
+            </>
+          )}
+        </div>
 
         {/* ══════════════════════════════════════════════════════════════ */}
-        {/* Customers Tab (NEW — first tab) */}
+        {/* Overview Tab (merged Customers + Workspace) */}
         {/* ══════════════════════════════════════════════════════════════ */}
-        {activeTab === "customers" && (
+        {activeTab === "overview" && (
           <div>
-            <h2 className="text-sm font-medium mb-1">Customers</h2>
-            <p className="text-xs text-muted mb-6">Your customer accounts and their workspaces</p>
+            {/* ── Current Workspace Info ── */}
+            <h2 className="text-sm font-medium mb-1">Current Workspace</h2>
+            <p className="text-xs text-muted mb-4">
+              {customer
+                ? <>Active workspace under <span className="font-medium text-foreground">{customer.name}</span></>
+                : "Workspace overview and customer accounts"
+              }
+            </p>
+            <div className="rounded-xl border border-border-subtle bg-surface/50 p-5 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg font-bold text-accent">{org.name?.charAt(0)?.toUpperCase() || "W"}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  {isOwnerOrAdmin ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="text-sm font-medium bg-transparent border-none outline-none focus:ring-0 p-0 min-w-0"
+                      />
+                      {nameChanged && (
+                        <button
+                          onClick={handleSaveName}
+                          disabled={savingName || !editName.trim()}
+                          className="text-[10px] font-medium px-2 py-0.5 rounded bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 transition-colors shrink-0"
+                        >
+                          {savingName ? "Saving..." : "Save"}
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm font-medium">{org.name}</div>
+                  )}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Badge variant="accent" size="xs">{org.plan || "starter"}</Badge>
+                    <span className="text-[10px] text-muted font-mono">{org.slug}</span>
+                    {defaultWsId === orgId && <Badge variant="default" size="xs">Default</Badge>}
+                  </div>
+                </div>
+              </div>
+              {budget && (
+                <div className="mt-4 pt-4 border-t border-border-subtle">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="px-3 py-2 rounded-lg bg-surface/50">
+                      <div className="text-[10px] text-muted mb-0.5">Daily LLM</div>
+                      <div className="text-xs font-semibold font-mono">{formatUSD(budget.daily_llm_budget || 2)}</div>
+                    </div>
+                    <div className="px-3 py-2 rounded-lg bg-surface/50">
+                      <div className="text-[10px] text-muted mb-0.5">Monthly LLM</div>
+                      <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_llm_budget || 50)}</div>
+                    </div>
+                    <div className="px-3 py-2 rounded-lg bg-surface/50">
+                      <div className="text-[10px] text-muted mb-0.5">Monthly AWS</div>
+                      <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_aws_budget || 100)}</div>
+                    </div>
+                    <div className="px-3 py-2 rounded-lg bg-surface/50">
+                      <div className="text-[10px] text-muted mb-0.5">Alert</div>
+                      <div className="text-xs font-semibold font-mono">{budget.alert_threshold_pct || 80}%</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Customer Accounts ── */}
+            <h3 className="text-sm font-medium mb-1">Customer Accounts</h3>
+            <p className="text-xs text-muted mb-4">Your customer accounts and their workspaces</p>
+            {localCustomers.length > 0 && (
+              <div className="flex items-center gap-2 mb-6 px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle">
+                <svg className="w-3.5 h-3.5 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+                <span className="text-[11px] text-muted-foreground">
+                  You belong to <span className="font-medium text-foreground">{localCustomers.length}</span> customer account{localCustomers.length !== 1 ? "s" : ""} with <span className="font-medium text-foreground">{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0)}</span> total workspace{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0) !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
 
             {localCustomers.length > 0 ? (
               <div className="space-y-4">
@@ -314,6 +500,7 @@ export function SettingsClient({
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{cust.name}</span>
                             <Badge variant="accent" size="xs">{cust.plan}</Badge>
+                            <Badge variant="default" size="xs">{cust.role.charAt(0).toUpperCase() + cust.role.slice(1)}</Badge>
                             {cust.is_design_partner && (
                               <Badge variant="default" size="xs">Design Partner</Badge>
                             )}
@@ -385,8 +572,22 @@ export function SettingsClient({
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
                                       <Badge variant="default" size="xs">{ws.plan}</Badge>
-                                      {isCurrent && (
+                                      {isCurrent ? (
                                         <span className="text-[10px] text-accent font-medium">Current</span>
+                                      ) : (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!switchingWorkspaceId) {
+                                              setSwitchingWorkspaceId(ws.id);
+                                              switchWorkspace(ws.id);
+                                            }
+                                          }}
+                                          disabled={!!switchingWorkspaceId}
+                                          className="text-[10px] font-medium px-2 py-0.5 rounded bg-accent/10 text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
+                                        >
+                                          {switchingWorkspaceId === ws.id ? "Switching..." : "Switch"}
+                                        </button>
                                       )}
                                       {isDefault ? (
                                         <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 rounded bg-surface border border-border-subtle">
@@ -499,101 +700,6 @@ export function SettingsClient({
           </div>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════ */}
-        {/* Workspace Tab (renamed from General) */}
-        {/* ══════════════════════════════════════════════════════════════ */}
-        {activeTab === "workspace" && (
-          <div>
-            <h2 className="text-sm font-medium mb-1">Current Workspace</h2>
-            <p className="text-xs text-muted mb-6">
-              {customer
-                ? <>Active workspace under <span className="font-medium text-foreground">{customer.name}</span></>
-                : "Basic workspace information"
-              }
-            </p>
-            <div className="space-y-5">
-              {/* Profile avatar + name */}
-              <div className="flex items-center gap-4 pb-5 border-b border-border-subtle">
-                <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <span className="text-xl font-bold text-accent">{org?.name?.charAt(0)?.toUpperCase() || "W"}</span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">{org?.name || "Workspace"}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="accent" size="xs">{org?.plan || "starter"}</Badge>
-                    <span className="text-[10px] text-muted font-mono">{org?.slug}</span>
-                    {defaultWsId === orgId && (
-                      <Badge variant="default" size="xs">Default</Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Name</label>
-                <input
-                  type="text"
-                  defaultValue={org?.name || ""}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-input-focus"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Slug</label>
-                <input
-                  type="text"
-                  defaultValue={org?.slug || ""}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm text-muted-foreground focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Workspace ID</label>
-                <input
-                  type="text"
-                  defaultValue={orgId}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-xs font-mono text-muted focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* ── Plan & Budget Summary ─────────────────────── */}
-            {budget && (
-              <div className="mt-8 pt-6 border-t border-border-subtle">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                  </svg>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Plan &amp; Budget</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="px-3 py-2 rounded-lg bg-surface/50">
-                    <div className="text-[10px] text-muted mb-0.5">Daily LLM</div>
-                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.daily_llm_budget || 2)}</div>
-                  </div>
-                  <div className="px-3 py-2 rounded-lg bg-surface/50">
-                    <div className="text-[10px] text-muted mb-0.5">Monthly LLM</div>
-                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_llm_budget || 50)}</div>
-                  </div>
-                  <div className="px-3 py-2 rounded-lg bg-surface/50">
-                    <div className="text-[10px] text-muted mb-0.5">Monthly AWS</div>
-                    <div className="text-xs font-semibold font-mono">{formatUSD(budget.monthly_aws_budget || 100)}</div>
-                  </div>
-                  <div className="px-3 py-2 rounded-lg bg-surface/50">
-                    <div className="text-[10px] text-muted mb-0.5">Alert</div>
-                    <div className="text-xs font-semibold font-mono">{budget.alert_threshold_pct || 80}%</div>
-                  </div>
-                </div>
-                <div className="mt-2.5 flex items-center gap-1.5">
-                  <StatusDot type="success" size="sm" />
-                  <span className="text-[10px] text-success font-medium">Within budget limits</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Members Tab */}
         {activeTab === "members" && (
           <div>
@@ -615,72 +721,94 @@ export function SettingsClient({
         {/* Brain Config Tab */}
         {activeTab === "brain" && (
           <div>
-            <h2 className="text-sm font-medium mb-1">Brain Configuration</h2>
-            <p className="text-xs text-muted mb-6">Train your Brain and configure cost controls</p>
+            <h2 className="text-sm font-medium mb-1">Brain</h2>
+            <p className="text-xs text-muted mb-6">Training, operations, and cost controls</p>
 
             {/* Brain Training Section */}
             <div className="mb-8">
               <BrainTrainingSection orgId={orgId} connectors={connectors} />
             </div>
 
+            {/* Brain Operations Section */}
+            <div className="mb-8 pt-6 border-t border-border-subtle">
+              <h3 className="text-sm font-semibold mb-1">Operations</h3>
+              <p className="text-xs text-muted mb-4">Brain trigger mechanisms — monitor, configure, and run on-demand</p>
+              <BrainOperationsSection orgId={orgId} connectors={connectors} />
+            </div>
+
             {/* Budget Controls */}
-            <div className="mb-4">
+            <div className="pt-6 border-t border-border-subtle mb-4">
               <h3 className="text-sm font-semibold mb-1">Budget Controls</h3>
               <p className="text-xs text-muted mb-4">Cost limits and alerts</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Daily LLM Budget</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Daily LLM Budget ($)</label>
                 <input
-                  type="text"
-                  defaultValue={budget?.daily_llm_budget ? formatUSD(budget.daily_llm_budget) : "$2.00"}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={editBudget.daily_llm_budget}
+                  onChange={(e) => setEditBudget(prev => ({ ...prev, daily_llm_budget: parseFloat(e.target.value) || 0 }))}
+                  readOnly={!isOwnerOrAdmin}
+                  className={cn("w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-input-focus", !isOwnerOrAdmin && "text-muted-foreground")}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Monthly LLM Budget</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Monthly LLM Budget ($)</label>
                 <input
-                  type="text"
-                  defaultValue={budget?.monthly_llm_budget ? formatUSD(budget.monthly_llm_budget) : "$50.00"}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none"
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={editBudget.monthly_llm_budget}
+                  onChange={(e) => setEditBudget(prev => ({ ...prev, monthly_llm_budget: parseFloat(e.target.value) || 0 }))}
+                  readOnly={!isOwnerOrAdmin}
+                  className={cn("w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-input-focus", !isOwnerOrAdmin && "text-muted-foreground")}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Monthly AWS Budget</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Monthly AWS Budget ($)</label>
                 <input
-                  type="text"
-                  defaultValue={budget?.monthly_aws_budget ? formatUSD(budget.monthly_aws_budget) : "$100.00"}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none"
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={editBudget.monthly_aws_budget}
+                  onChange={(e) => setEditBudget(prev => ({ ...prev, monthly_aws_budget: parseFloat(e.target.value) || 0 }))}
+                  readOnly={!isOwnerOrAdmin}
+                  className={cn("w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-input-focus", !isOwnerOrAdmin && "text-muted-foreground")}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Alert Threshold</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Alert Threshold (%)</label>
                 <input
-                  type="text"
-                  defaultValue={budget?.alert_threshold_pct ? `${budget.alert_threshold_pct}%` : "80%"}
-                  readOnly
-                  className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none"
+                  type="number"
+                  step="5"
+                  min="0"
+                  max="100"
+                  value={editBudget.alert_threshold_pct}
+                  onChange={(e) => setEditBudget(prev => ({ ...prev, alert_threshold_pct: parseInt(e.target.value) || 0 }))}
+                  readOnly={!isOwnerOrAdmin}
+                  className={cn("w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-input-focus", !isOwnerOrAdmin && "text-muted-foreground")}
                 />
               </div>
             </div>
+            {isOwnerOrAdmin && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={handleSaveBudget}
+                  disabled={savingBudget}
+                  className="px-4 py-2 rounded-lg text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 transition-colors"
+                >
+                  {savingBudget ? "Saving..." : "Save Budget"}
+                </button>
+              </div>
+            )}
             {budget && (
               <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-success/5 border border-success/15">
                 <StatusDot type="success" size="sm" pulse />
                 <span className="text-xs text-success font-medium">Within budget limits</span>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Brain Operations Tab */}
-        {activeTab === "operations" && (
-          <div>
-            <h2 className="text-sm font-medium mb-1">Brain Operations</h2>
-            <p className="text-xs text-muted mb-6">All 4 brain trigger mechanisms — monitor, configure, and run on-demand</p>
-            <BrainOperationsSection orgId={orgId} connectors={connectors} />
           </div>
         )}
 
@@ -702,15 +830,7 @@ export function SettingsClient({
           </div>
         )}
 
-        {/* Partner Program Tab (design partners only) */}
-        {activeTab === "partner" && isDesignPartner && (
-          <PartnerDashboard
-            orgId={orgId}
-            orgName={org?.name ?? "Workspace"}
-          />
-        )}
-
-        {/* Danger Zone Tab */}
+        {/* Danger Zone Tab (owners/platform admins only) */}
         {activeTab === "danger" && (
           <div>
             <h2 className="text-sm font-medium text-danger mb-1">Danger Zone</h2>

@@ -96,7 +96,7 @@ function WorkspaceRow({
 // ── Main Component ──────────────────────────────────────────────────────────
 
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
-  const { currentWorkspace, workspaces, switchWorkspace, isPlatformAdmin, isLoading } = useWorkspace();
+  const { currentWorkspace, workspaces, switchWorkspace, isPlatformAdmin, currentRole, isLoading } = useWorkspace();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -177,13 +177,14 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           <>
             <div className="flex-1 min-w-0 text-left">
               <div className="text-[13px] font-medium truncate text-foreground">{displayName}</div>
-              {currentWorkspace.customer_name ? (
-                <div className="text-[11px] text-muted truncate">
-                  {currentWorkspace.customer_name} › {currentWorkspace.name}
-                </div>
-              ) : (
-                <div className="text-[11px] text-muted truncate">{currentWorkspace.name}</div>
-              )}
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={cn(
+                  "text-[9px] font-semibold px-1 py-px rounded",
+                  isPlatformAdmin ? "bg-accent/15 text-accent" : "bg-surface-hover text-muted-foreground"
+                )}>
+                  {isPlatformAdmin ? "Platform Admin" : currentRole ? currentRole.charAt(0).toUpperCase() + currentRole.slice(1) : "Member"}
+                </span>
+              </div>
             </div>
             {/* Chevron up/down */}
             <svg className="w-4 h-4 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -265,7 +266,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               {/* ── Create New Workspace ── */}
               <div className="h-px bg-border-subtle mx-2 my-1" />
               <Link
-                href="/settings?tab=general&action=create-workspace"
+                href="/settings?tab=overview&action=create-workspace"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[12px] text-accent hover:bg-accent/8 transition-colors"
               >
