@@ -7,13 +7,13 @@ import { useSearchParams } from "next/navigation";
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next");
-  const authError = searchParams.get("error");
+  const nextUrl = searchParams?.get("next") ?? null;
+  const authError = searchParams?.get("error") ?? null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const authType = searchParams.get("type");
+  const authType = searchParams?.get("type") ?? null;
   const [error, setError] = useState<string | null>(
     authError === "auth_failed"
       ? authType === "recovery"

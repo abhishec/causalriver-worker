@@ -50,7 +50,7 @@ const ADMIN_SECTIONS = [
 ];
 
 export function AdminSidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-60 bg-gradient-sidebar border-r border-border flex flex-col">

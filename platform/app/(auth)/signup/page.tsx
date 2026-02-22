@@ -7,8 +7,8 @@ import { useSearchParams } from "next/navigation";
 
 function SignupForm() {
   const searchParams = useSearchParams();
-  const inviteToken = searchParams.get("invite");
-  const inviteEmail = searchParams.get("email") || "";
+  const inviteToken = searchParams?.get("invite") ?? null;
+  const inviteEmail = searchParams?.get("email") || "";
 
   const [email, setEmail] = useState(inviteEmail);
   const [password, setPassword] = useState("");

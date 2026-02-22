@@ -16,7 +16,7 @@ interface InviteInfo {
 export default function InvitePage() {
   const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = (params?.token as string) ?? "";
 
   const [info, setInfo] = useState<InviteInfo | null>(null);
   const [user, setUser] = useState<any>(null);

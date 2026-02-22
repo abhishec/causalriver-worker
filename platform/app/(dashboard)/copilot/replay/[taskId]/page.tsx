@@ -41,7 +41,7 @@ interface StepData {
 export default function AgentReplayPage() {
   const params = useParams();
   const router = useRouter();
-  const taskId = params.taskId as string;
+  const taskId = (params?.taskId as string) ?? "";
 
   const [task, setTask] = useState<TaskData | null>(null);
   const [steps, setSteps] = useState<StepData[]>([]);

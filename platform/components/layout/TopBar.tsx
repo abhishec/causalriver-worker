@@ -27,7 +27,7 @@ const ROUTE_LABELS: Record<string, string> = {
 };
 
 export function TopBar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   // Hide topbar on copilot page — it has its own header with service tabs
   if (pathname === "/copilot") return null;

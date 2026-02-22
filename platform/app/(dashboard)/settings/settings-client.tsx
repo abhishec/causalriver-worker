@@ -91,9 +91,9 @@ export function SettingsClient({
   const searchParams = useSearchParams();
   const { switchWorkspace } = useWorkspace();
   // Default to "customers" tab, but respect URL param; map legacy "general" to "workspace"
-  const rawTab = searchParams.get("tab") || "customers";
+  const rawTab = searchParams?.get("tab") || "customers";
   const initialTab = rawTab === "general" ? "workspace" : rawTab;
-  const initialAction = searchParams.get("action");
+  const initialAction = searchParams?.get("action") ?? null;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);

@@ -479,7 +479,7 @@ function MyAgentsSection() {
 /* ── Main Sidebar — Two-Column (Icon Rail + Content Panel) ─────────────── */
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const [collapsed, setCollapsed] = useState(false);
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);

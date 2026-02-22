@@ -12,6 +12,7 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useWorkspace } from "@/lib/workspace-context";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTemplates } from "@/lib/templates/useTemplates";
+import { useWorkflows } from "@/lib/workflows/useWorkflows";
 import { AgentComposerPanel } from "@/components/copilot/AgentComposerPanel";
 import { SaveTemplateDialog } from "@/components/copilot/SaveTemplateDialog";
 import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
@@ -103,6 +104,23 @@ function CopilotPageInner() {
     refetch: refetchTemplates,
   } = useTemplates(currentWorkspace?.id);
 
+  // ── Workflows (workflow slash commands) ────────────────────────────────
+  const {
+    workflowCommands,
+    workflowGatheringMap,
+    refetch: refetchWorkflows,
+  } = useWorkflows(currentWorkspace?.id);
+
+  // ── Merged commands + gathering (templates + workflows) ────────────────
+  const mergedCustomCommands = useMemo(
+    () => [...(customCommands || []), ...(workflowCommands || [])],
+    [customCommands, workflowCommands]
+  );
+  const mergedGatheringMap = useMemo(
+    () => ({ ...(customGatheringMap || {}), ...(workflowGatheringMap || {}) }),
+    [customGatheringMap, workflowGatheringMap]
+  );
+
   // ── Conversation state ────────────────────────────────────────────────────
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [conversationLoading, setConversationLoading] = useState(false);
@@ -137,18 +155,18 @@ function CopilotPageInner() {
       // Fire legacy event for non-controller listeners
       window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
 
-      // 2. Switch service if needed
-      if (cmd.service && cmd.service !== "custom" && cmd.service !== activeService) {
+      // 2. Switch service if needed (skip for "custom" and "workflows" — they don't map to a service mode)
+      if (cmd.service && cmd.service !== "custom" && cmd.service !== "workflows" && cmd.service !== activeService) {
         setActiveService(cmd.service as ServiceMode);
       }
 
       // 3. Check if command has interactive gathering params
       const systemGathering = COMMAND_GATHERING_MAP[cmd.id];
-      const customG = customGatheringMap?.[cmd.id];
+      const customG = mergedGatheringMap?.[cmd.id];
       const gatheringConfig = systemGathering || customG;
 
       if (gatheringConfig && gatheringConfig.params.length > 0) {
-        const allCmds = [...ALL_SLASH_COMMANDS, ...(customCommands || [])];
+        const allCmds = [...ALL_SLASH_COMMANDS, ...(mergedCustomCommands || [])];
         const fullCmd = allCmds.find(c => c.id === cmd.id);
         if (fullCmd) {
           setArtifactPaneOpen(true);
@@ -161,9 +179,10 @@ function CopilotPageInner() {
       }
 
       // 4. Direct submit with frame-based retry (replaces setTimeout guessing)
+      // Pass commandId for non-gathering commands (e.g. workflows, custom agents)
       const trySubmit = (attempt: number) => {
         if (chatRef.current?.isReady()) {
-          chatRef.current.submitMessage(cmd.prompt);
+          chatRef.current.submitMessage(cmd.prompt, cmd.id);
         } else if (attempt < 30) {
           // requestAnimationFrame fires after React render — much more reliable than setTimeout
           requestAnimationFrame(() => trySubmit(attempt + 1));
@@ -181,11 +200,11 @@ function CopilotPageInner() {
     cancelGeneration() {
       chatRef.current?.resetChat();
     },
-  }), [activeService, customGatheringMap, customCommands, resetAllState]);
+  }), [activeService, mergedGatheringMap, mergedCustomCommands, resetAllState]);
 
   // ── Auto-inject from ?q=, ?service=, or ?cmd= query params ──────────────────
   useEffect(() => {
-    const svc = searchParams.get("service") as ServiceMode | null;
+    const svc = searchParams?.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
       setActiveService(svc);
       if (svc !== "general") {
@@ -194,9 +213,9 @@ function CopilotPageInner() {
     }
 
     // ?cmd=<commandId> — from sidebar command click on non-copilot page
-    const cmdId = searchParams.get("cmd");
+    const cmdId = searchParams?.get("cmd") ?? null;
     if (cmdId) {
-      const allCmds = [...ALL_SLASH_COMMANDS, ...(customCommands || [])];
+      const allCmds = [...ALL_SLASH_COMMANDS, ...(mergedCustomCommands || [])];
       const cmd = allCmds.find((c) => c.id === cmdId);
       if (cmd) {
         // Use controller for reliable command execution (replaces setTimeout + events)
@@ -206,7 +225,7 @@ function CopilotPageInner() {
       }
     }
 
-    const q = searchParams.get("q");
+    const q = searchParams?.get("q") ?? null;
     if (q) {
       // Use controller instead of setTimeout + event
       requestAnimationFrame(() => {
@@ -214,7 +233,7 @@ function CopilotPageInner() {
       });
       window.history.replaceState({}, "", "/copilot");
     }
-  }, [searchParams, controller, customCommands]);
+  }, [searchParams, controller, mergedCustomCommands]);
 
   // ── Listen for new-conversation from sidebar command clicks ────────────────
   useEffect(() => {
@@ -459,7 +478,7 @@ function CopilotPageInner() {
 
   // ── Load conversation from ?c= query param (placed after handleSelectConversation) ──
   useEffect(() => {
-    const convId = searchParams.get("c");
+    const convId = searchParams?.get("c") ?? null;
     if (convId) {
       handleSelectConversation(convId);
     }
@@ -583,8 +602,8 @@ function CopilotPageInner() {
                 setActiveArtifactId(id);
                 setArtifactPaneOpen(true);
               }}
-              customCommands={customCommands}
-              customGatheringMap={customGatheringMap}
+              customCommands={mergedCustomCommands}
+              customGatheringMap={mergedGatheringMap}
               onCreateAgent={() => setShowComposer(true)}
             />
           </ErrorBoundary>
@@ -664,7 +683,7 @@ function CopilotPageInner() {
               createdAt: Date.now(),
             });
           }}
-          onSaved={refetchTemplates}
+          onSaved={() => { refetchTemplates(); refetchWorkflows(); }}
           onSaveAsCommand={(compositionData) => {
             setCompositionForSave(compositionData);
             setShowComposer(false);
