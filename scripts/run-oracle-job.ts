@@ -18,16 +18,35 @@
  *   LOOKBACK_HOURS (optional — how far back to fetch signals, default: 48)
  */
 
-import { config as loadEnv } from 'dotenv';
-import { resolve } from 'path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import {
   createOutcomeOracle,
   createCausalMethodBandit,
 } from '../packages/memory-stack/src/index';
 
-// Load environment variables
-loadEnv({ path: resolve(__dirname, '../.env') });
+// Load environment variables from .env (no dotenv dependency)
+function loadEnvFile(): void {
+  try {
+    const envPath = resolve(import.meta.dirname || __dirname, '..', '.env');
+    const content = readFileSync(envPath, 'utf-8');
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex === -1) continue;
+      const key = trimmed.substring(0, eqIndex).trim();
+      const value = trimmed.substring(eqIndex + 1).trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // .env file not found — rely on environment variables
+  }
+}
+loadEnvFile();
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -55,7 +74,7 @@ async function processOracleForOrg(
   predictionsVerified: number;
   predictionsExpired: number;
   predictionsPending: number;
-  averageReward: number;
+  banditRewardsGiven: number;
 }> {
   const since = new Date(Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000).toISOString();
 
@@ -72,12 +91,12 @@ async function processOracleForOrg(
 
   if (signalError) {
     console.warn(`  ⚠️  Signal fetch error for org ${orgId}: ${signalError.message}`);
-    return { orgId, signalsProcessed: 0, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, averageReward: 0 };
+    return { orgId, signalsProcessed: 0, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, banditRewardsGiven: 0 };
   }
 
   if (!signals || signals.length === 0) {
     log(`  📭 No signals found for org ${orgId} (last ${LOOKBACK_HOURS}h)`);
-    return { orgId, signalsProcessed: 0, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, averageReward: 0 };
+    return { orgId, signalsProcessed: 0, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, banditRewardsGiven: 0 };
   }
 
   // Create bandit + oracle
@@ -106,7 +125,7 @@ async function processOracleForOrg(
   // Prune completed predictions
   oracle.pruneCompleted();
 
-  log(`  ✅ Verified: ${result.predictionsVerified}, Expired: ${result.predictionsExpired}, Pending: ${result.predictionsPending}, Avg Reward: ${(result.averageReward ?? 0).toFixed(3)}`);
+  log(`  Verified: ${result.predictionsVerified}, Expired: ${result.predictionsExpired}, Pending: ${result.predictionsPending}, Bandit rewards: ${result.banditRewardsGiven}`);
 
   return {
     orgId,
@@ -114,7 +133,7 @@ async function processOracleForOrg(
     predictionsVerified: result.predictionsVerified,
     predictionsExpired: result.predictionsExpired,
     predictionsPending: result.predictionsPending,
-    averageReward: result.averageReward ?? 0,
+    banditRewardsGiven: result.banditRewardsGiven,
   };
 }
 
@@ -155,47 +174,43 @@ async function main() {
   let totalVerified = 0;
   let totalExpired = 0;
   let totalSignals = 0;
-  let totalReward = 0;
+  let totalBanditRewards = 0;
   let orgsProcessed = 0;
 
   for (const org of orgs) {
-    console.log(`🏢 ${org.name} (${org.id})`);
+    console.log(`[ORACLE] ${org.name} (${org.id})`);
     try {
       const result = await processOracleForOrg(supabase, org.id);
       totalVerified += result.predictionsVerified;
       totalExpired += result.predictionsExpired;
       totalSignals += result.signalsProcessed;
-      totalReward += result.averageReward;
+      totalBanditRewards += result.banditRewardsGiven;
       orgsProcessed++;
 
       if (result.predictionsVerified > 0 || result.predictionsExpired > 0) {
         console.log(
-          `   ✅ ${result.predictionsVerified} verified | ` +
-          `⏰ ${result.predictionsExpired} expired | ` +
-          `⏳ ${result.predictionsPending} pending | ` +
-          `🎯 avg reward: ${result.averageReward.toFixed(3)}`
+          `   ${result.predictionsVerified} verified | ` +
+          `${result.predictionsExpired} expired | ` +
+          `${result.predictionsPending} pending | ` +
+          `${result.banditRewardsGiven} bandit rewards`
         );
       } else {
-        console.log(`   📭 No predictions due for verification`);
+        console.log(`   No predictions due for verification`);
       }
     } catch (err: any) {
-      console.error(`   ❌ Error: ${err.message}`);
+      console.error(`   ERROR: ${err.message}`);
     }
   }
 
   const duration = Date.now() - startTime;
-  const avgReward = orgsProcessed > 0 ? totalReward / orgsProcessed : 0;
 
-  console.log(`\n${'─'.repeat(60)}`);
-  console.log(`✅ Oracle job complete in ${(duration / 1000).toFixed(1)}s`);
-  console.log(`\n📊 Summary:`);
-  console.log(`   Organizations processed: ${orgsProcessed}`);
-  console.log(`   Total signals processed:  ${totalSignals}`);
-  console.log(`   Predictions verified:     ${totalVerified}`);
-  console.log(`   Predictions expired:      ${totalExpired}`);
-  console.log(`   Average bandit reward:    ${avgReward.toFixed(3)}`);
-  console.log(`\n🔮 The brain learned from ${totalVerified} autonomous verifications`);
-  console.log(`🎯 UCB1 bandit arms updated — better method selection next cycle`);
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`Oracle job complete in ${(duration / 1000).toFixed(1)}s`);
+  console.log(`  Organizations processed: ${orgsProcessed}`);
+  console.log(`  Total signals processed:  ${totalSignals}`);
+  console.log(`  Predictions verified:     ${totalVerified}`);
+  console.log(`  Predictions expired:      ${totalExpired}`);
+  console.log(`  Bandit rewards given:     ${totalBanditRewards}`);
 }
 
 main().catch((err) => {

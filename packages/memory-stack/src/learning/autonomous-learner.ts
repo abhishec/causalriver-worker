@@ -70,6 +70,8 @@ import {
   type OutcomeOracleConfig,
   type IncomingSignal,
 } from '../causality/outcome-oracle';
+// ── Feedback Loop: Bridge Oracle → Consolidation Strengthen Step ────────────
+import { createFeedbackLoop } from '../causality/feedback-loop';
 
 // ============================================================================
 // TYPES
@@ -246,6 +248,12 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
           : { supabase, bandit: bandit ?? undefined }
       )
     : null;
+
+  // Feedback loop instance — records predictions so the consolidation strengthen
+  // step can find them via getRelationshipAccuracy(). Without this, predictions
+  // only exist in outcome_observation_windows (Oracle's table) and never reach
+  // prediction_records (Feedback Loop's table), causing strengthened=0 forever.
+  const feedbackLoop = isOracleEnabled ? createFeedbackLoop() : null;
 
   const trainer = createBrainTrainer();
   const maturityEvaluator = createMaturityEvaluator();
@@ -956,6 +964,33 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
                 (b) => b.sourceDomain === rel.source_domain && b.targetDomain === rel.target_domain
               )?.selectedMethod ?? rel.discovery_method ?? 'three_paradigm';
 
+            // Record prediction in feedback loop FIRST to get its ID, then pass
+            // that same ID to the Oracle so both systems share the same prediction ID.
+            // Without this bridge, the Oracle verifies predictions that the feedback loop
+            // can't find (different ID spaces), causing strengthen step to see 0 verified.
+            let sharedPredictionId: string | undefined;
+            if (feedbackLoop) {
+              try {
+                sharedPredictionId = await feedbackLoop.recordPrediction(supabase, organizationId, {
+                  relationshipId: rel.id || `${rel.source_domain}_${rel.target_domain}`,
+                  sourceDomain: rel.source_domain,
+                  targetDomain: rel.target_domain,
+                  entityType: 'domain_pair',
+                  entityId: `${rel.source_domain}_${rel.target_domain}`,
+                  prediction: {
+                    targetMetric: `${rel.target_domain}_activity`,
+                    direction: rel.effect_size > 0 ? 'increase' : 'decrease',
+                    magnitude: Math.max(-1, Math.min(1, rel.effect_size)),
+                    timeframeHours: (rel.optimal_lag_days || 2) * 24,
+                    confidence: 1 - (rel.granger_p_value || 0.5),
+                  },
+                  featureSnapshot: {},
+                });
+              } catch {
+                // Non-critical — feedback loop recording may fail (e.g. missing table)
+              }
+            }
+
             const prediction = buildWatchedPrediction(
               {
                 organization_id: organizationId,
@@ -969,6 +1004,9 @@ export function createAutonomousLearner(config: AutonomousLearnerConfig) {
               'connector_metric', // verified against connector sync signals
               discoveryMethod as any,
               {
+                // Use the feedback loop's ID so Oracle.verifyPrediction() can find
+                // the record in prediction_records when it calls feedbackLoop.verifyPrediction()
+                predictionId: sharedPredictionId,
                 // expiryMultiplier: how many lag periods until expiry (default 3x)
                 expiryMultiplier: Math.max(2, Math.ceil(7 / Math.max(1, rel.optimal_lag_days))),
               }
