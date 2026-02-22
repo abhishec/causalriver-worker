@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { CopilotChat } from "@/components/copilot/CopilotChat";
 import type { CopilotArtifact, BrainMeta, DomainResult } from "@/components/copilot/types";
 import { ArtifactPane } from "@/components/copilot/ArtifactPane";
@@ -68,7 +69,7 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
 function CopilotPageInner() {
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, isLoading: workspaceLoading, workspaces } = useWorkspace();
   const searchParams = useSearchParams();
 
   // ── Service mode ──────────────────────────────────────────────────────────
@@ -580,6 +581,59 @@ function CopilotPageInner() {
 
   // Service artifacts for the current service
   const serviceArtifacts = artifacts.filter((a) => a.service === activeService);
+
+  // ── Workspace guard: prevent 500 errors when no workspace is selected ──
+  if (workspaceLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
+          </div>
+          <span className="text-xs text-muted-foreground">Loading workspace...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentWorkspace) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="text-center max-w-md">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No Workspace Selected</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            {workspaces.length === 0
+              ? "You don't have any workspaces yet. Create one in Settings to start using Copilot."
+              : "Please select a workspace from the sidebar to start using Copilot."}
+          </p>
+          <div className="flex gap-3 justify-center">
+            {workspaces.length === 0 ? (
+              <Link
+                href="/settings?tab=overview&action=create-workspace"
+                className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+              >
+                Create Workspace
+              </Link>
+            ) : (
+              <Link
+                href="/settings?tab=overview"
+                className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+              >
+                Go to Settings
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <CopilotControllerContext.Provider value={controller}>
