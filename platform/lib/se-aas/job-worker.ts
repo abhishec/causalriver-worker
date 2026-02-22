@@ -123,12 +123,17 @@ export async function processSeAaSJobs(
         const payload = job.payload as Record<string, unknown>;
         const userId = (payload.userId as string) || "worker";
 
+        const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+        if (!anthropicApiKey) {
+          throw new Error("ANTHROPIC_API_KEY not configured — cannot execute SE-aaS domain task");
+        }
+
         const { result: domainResult, artifactId } = await executeDomain(supabase, {
           domainType: job.task_type,
           request: payload,
           organizationId: job.organization_id,
           userId,
-          anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+          anthropicApiKey,
         });
 
         return { ...domainResult, artifactId };

@@ -74,12 +74,17 @@ export async function authenticateSeAaSRequest(
     userId = `api-key:${workspaceId}`;
   }
 
+  const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicApiKey) {
+    throw { status: 503, error: "AI service unavailable: ANTHROPIC_API_KEY not configured" };
+  }
+
   return {
     userId: userId!,
     workspaceId: workspaceId!,
     organizationId: workspaceId!,  // backward compat
     supabase,
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    anthropicApiKey,
   };
 }
 

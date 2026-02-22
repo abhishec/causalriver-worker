@@ -67,7 +67,11 @@ export async function POST(request: Request) {
         // Determine the sync endpoint for each connector type
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || "http://localhost:3001";
+          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+
+        if (!baseUrl) {
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+        }
 
         let syncUrl: string;
         let syncBody: Record<string, unknown> = {};
@@ -203,7 +207,11 @@ export async function POST(request: Request) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || "http://localhost:3001";
+          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+
+        if (!baseUrl) {
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+        }
 
         const cookieHeader = request.headers.get("cookie") || "";
 

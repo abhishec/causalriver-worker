@@ -80,7 +80,12 @@ export async function maybeTriggerBrainCycle(
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-      "http://localhost:3001";
+      (process.env.NODE_ENV === "production" ? null : "http://localhost:3001");
+
+    if (!baseUrl) {
+      logger.error("[BrainTrigger] Cannot trigger brain cycle: NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+      return { triggered: false, reason: "NEXT_PUBLIC_APP_URL or VERCEL_URL not configured" };
+    }
 
     // Use service-level call (no user cookie needed — this is server-to-server)
     const response = await fetch(`${baseUrl}/api/brain/cycle`, {
