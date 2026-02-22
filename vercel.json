@@ -3,5 +3,11 @@
   "buildCommand": "pnpm --filter @nexus-ai/memory-stack build && cd platform && pnpm build",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "outputDirectory": "platform/.next"
+  "outputDirectory": "platform/.next",
+  "crons": [
+    {
+      "path": "/api/brain/health/cron",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

@@ -12,6 +12,7 @@ import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
+import { HealthScoreWidget } from "@/components/brain/HealthScoreWidget";
 
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -723,6 +724,11 @@ export function SettingsClient({
           <div>
             <h2 className="text-sm font-medium mb-1">Brain</h2>
             <p className="text-xs text-muted mb-6">Training, operations, and cost controls</p>
+
+            {/* Brain Health Score */}
+            <div className="mb-8">
+              <HealthScoreWidget organizationId={orgId} />
+            </div>
 
             {/* Brain Training Section */}
             <div className="mb-8">

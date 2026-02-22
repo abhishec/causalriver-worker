@@ -362,6 +362,46 @@ export async function POST(request: NextRequest) {
       duration_ms: durationMs,
     });
 
+    // ── Post-cycle: Health snapshot + evolution signal ────────────
+    // After any brain cycle, run a lightweight health poll and emit
+    // evolution metrics. This closes the RL loop: cycle → health → signal.
+    try {
+      const { pollHealthOnce } = await import("@/lib/health/health-poller");
+      const healthResult = await pollHealthOnce(service, workspaceId);
+
+      // Compute learning velocity (signals for RL)
+      const snap = controller.getSnapshot?.();
+      const cycleCount = snap?.cycleCount ?? 0;
+      const layerHealth = snap?.layerHealth ?? {};
+
+      // Emit evolution signal with health + cycle metrics
+      await service.from("cross_domain_signals").insert({
+        organization_id: workspaceId,
+        source_domain: "brain.evolution",
+        signal_type: "cycle_completed",
+        signal_value: healthResult.snapshot.overall_score / 100,
+        entity_type: "brain_cycle",
+        signal_metadata: {
+          mode,
+          cycle_count: cycleCount,
+          duration_ms: durationMs,
+          health_score: healthResult.snapshot.overall_score,
+          health_status: healthResult.snapshot.status,
+          violations: healthResult.violations.length,
+          alerts_created: healthResult.alertsCreated,
+          layer_health_summary: typeof layerHealth === 'object' ? Object.keys(layerHealth).length : 0,
+          completed_at: new Date().toISOString(),
+        },
+      });
+
+      logger.warn(
+        `[BrainCycle] Post-cycle health: score=${healthResult.snapshot.overall_score}, status=${healthResult.snapshot.status}, violations=${healthResult.violations.length}`,
+      );
+    } catch (healthErr) {
+      // Non-critical: don't fail the cycle response if health polling errors
+      logger.error("[BrainCycle] Post-cycle health check failed:", healthErr);
+    }
+
     return NextResponse.json({
       success: true,
       mode,

@@ -1393,6 +1393,26 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     setPendingVerifications((prev) => prev.filter((v) => v.predictionId !== predictionId));
   }, []);
 
+  // ── Fetch health-driven suggestions on mount (Phase 2) ──
+  const [healthSuggestions, setHealthSuggestions] = useState<SmartSuggestion[]>([]);
+  useEffect(() => {
+    if (!organizationId) return;
+    let cancelled = false;
+    const fetchHealthSuggestions = async () => {
+      try {
+        const { fetchHealthForSuggestions, generateHealthSuggestions } = await import("@/lib/suggestions/health-suggestion-bridge");
+        const healthData = await fetchHealthForSuggestions(organizationId);
+        if (cancelled || !healthData) return;
+        const suggestions = generateHealthSuggestions(healthData);
+        if (suggestions.length > 0) setHealthSuggestions(suggestions);
+      } catch { /* Non-critical */ }
+    };
+    fetchHealthSuggestions();
+    // Refresh health suggestions every 5 minutes
+    const interval = setInterval(fetchHealthSuggestions, 5 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [organizationId]);
+
   // Stable conversation ID for feedback tracking (one per chat session)
   const [conversationId] = useState(() => `conv_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`);
 
@@ -2138,11 +2158,61 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                         </div>
                       )}
                       {/* Smart suggestions — inline after agent/workflow completes */}
-                      {isLastAssistant && smartSuggestions.length > 0 && !isLoading && (
+                      {isLastAssistant && (smartSuggestions.length > 0 || healthSuggestions.length > 0) && !isLoading && (
                         <div style={{ marginBottom: 12 }} className="space-y-2">
+                          {/* Health-driven suggestions (show first, max 2) */}
+                          {healthSuggestions.slice(0, 2).map((suggestion, si) => (
+                            <SmartSuggestionCard
+                              key={`health-${si}`}
+                              suggestion={suggestion}
+                              onDismiss={() => {
+                                setHealthSuggestions(prev => prev.filter((_, idx) => idx !== si));
+                                // Record dismissal feedback
+                                if (organizationId) {
+                                  fetch("/api/suggestions/feedback", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      organizationId,
+                                      suggestionType: suggestion.healthDimension || suggestion.type,
+                                      action: "dismissed",
+                                      suggestionData: { title: suggestion.title },
+                                    }),
+                                  }).catch(() => {});
+                                }
+                              }}
+                              onAction={(s: SmartSuggestion) => {
+                                // Execute health action
+                                if (s.healthAction?.type === "navigate") {
+                                  window.location.href = s.healthAction.url;
+                                } else if (s.healthAction?.type === "api_call") {
+                                  fetch(s.healthAction.url, {
+                                    method: s.healthAction.method || "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: s.healthAction.body ? JSON.stringify(s.healthAction.body) : undefined,
+                                  }).catch(() => {});
+                                }
+                                // Record acceptance feedback
+                                if (organizationId) {
+                                  fetch("/api/suggestions/feedback", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      organizationId,
+                                      suggestionType: s.healthDimension || s.type,
+                                      action: "accepted",
+                                      suggestionData: { title: s.title, action: s.healthAction },
+                                    }),
+                                  }).catch(() => {});
+                                }
+                                setHealthSuggestions(prev => prev.filter((_, idx) => idx !== si));
+                              }}
+                            />
+                          ))}
+                          {/* Behavior-driven suggestions */}
                           {smartSuggestions.map((suggestion, si) => (
                             <SmartSuggestionCard
-                              key={si}
+                              key={`smart-${si}`}
                               suggestion={suggestion}
                               onDismiss={() => setSmartSuggestions(prev => prev.filter((_, idx) => idx !== si))}
                               onAction={(s: SmartSuggestion) => {
