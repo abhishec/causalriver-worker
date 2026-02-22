@@ -99,8 +99,14 @@ async function processOracleForOrg(
     return { orgId, signalsProcessed: 0, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, banditRewardsGiven: 0 };
   }
 
-  // Create bandit + oracle
+  // Create bandit + oracle, loading prior bandit state from DB so the UCB1 arms
+  // retain learned preferences across nightly runs (without this, the brain forgets
+  // which causal discovery method works best and explores uniformly every night).
   const bandit = createCausalMethodBandit({ supabase, organizationId: orgId });
+  const { loaded: banditArmsLoaded } = await bandit.loadState();
+  if (banditArmsLoaded > 0) {
+    log(`  Bandit: loaded ${banditArmsLoaded} arm states from prior runs`);
+  }
   const oracle = createOutcomeOracle({ supabase, bandit, organizationId: orgId });
 
   // Load pending predictions from DB
@@ -109,7 +115,7 @@ async function processOracleForOrg(
 
   if (pendingCount === 0) {
     log(`  📭 No pending predictions for org ${orgId}`);
-    return { orgId, signalsProcessed: signals.length, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, averageReward: 0 };
+    return { orgId, signalsProcessed: signals.length, predictionsVerified: 0, predictionsExpired: 0, predictionsPending: 0, banditRewardsGiven: 0 };
   }
 
   log(`  🔮 Processing ${pendingCount} predictions against ${signals.length} signals...`);

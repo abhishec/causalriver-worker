@@ -1891,9 +1891,70 @@ export function createBrainPipeline(config: BrainPipelineConfig) {
             }));
         }
 
+        // L3: Persist dream associations — cross-domain pattern discovery
+        if (cognitiveStackResult.dreaming.associationsFound > 0) {
+          persistPromises.push(upsertMemory('dream_associations',
+            `Dreaming: ${cognitiveStackResult.dreaming.associationsFound} associations, ` +
+            `${cognitiveStackResult.dreaming.crossDomainConnections} cross-domain connections, ` +
+            `${cognitiveStackResult.dreaming.surfacedInsights} surfaced insights`,
+            0.65, 0.5, {
+              source: 'L3_dreaming',
+              associationsFound: cognitiveStackResult.dreaming.associationsFound,
+              crossDomainConnections: cognitiveStackResult.dreaming.crossDomainConnections,
+              surfacedInsights: cognitiveStackResult.dreaming.surfacedInsights,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L4: Persist hierarchical memory state — encoded items and episodes
+        if (cognitiveStackResult.memory.itemsEncoded > 0) {
+          persistPromises.push(upsertMemory('hierarchical_memory',
+            `Memory: ${cognitiveStackResult.memory.itemsEncoded} items encoded, ` +
+            `${cognitiveStackResult.memory.episodesRecorded} episodes recorded, ` +
+            `working memory size: ${cognitiveStackResult.memory.workingMemorySize}`,
+            0.6, 0.5, {
+              source: 'L4_memory',
+              itemsEncoded: cognitiveStackResult.memory.itemsEncoded,
+              episodesRecorded: cognitiveStackResult.memory.episodesRecorded,
+              workingMemorySize: cognitiveStackResult.memory.workingMemorySize,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L9: Persist theory of mind state — user/stakeholder modeling
+        if (cognitiveStackResult.theoryOfMind.userModelUpdated) {
+          persistPromises.push(upsertMemory('theory_of_mind',
+            `Theory of Mind: perspective=${cognitiveStackResult.theoryOfMind.perspective}, ` +
+            `predicted intent=${cognitiveStackResult.theoryOfMind.predictedIntent}, ` +
+            `cognitive state=${cognitiveStackResult.theoryOfMind.cognitiveState}`,
+            0.7, 0.6, {
+              source: 'L9_theory_of_mind',
+              userModelUpdated: cognitiveStackResult.theoryOfMind.userModelUpdated,
+              predictedIntent: cognitiveStackResult.theoryOfMind.predictedIntent,
+              cognitiveState: cognitiveStackResult.theoryOfMind.cognitiveState,
+              perspective: cognitiveStackResult.theoryOfMind.perspective,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
+        // L10: Persist temporal consciousness — rhythms and goal tracking
+        if (cognitiveStackResult.temporal.rhythmsDetected > 0 || cognitiveStackResult.temporal.goalsTracked > 0) {
+          persistPromises.push(upsertMemory('temporal_consciousness',
+            `Temporal: ${cognitiveStackResult.temporal.rhythmsDetected} rhythms detected, ` +
+            `${cognitiveStackResult.temporal.goalsTracked} goals tracked, ` +
+            `health=${cognitiveStackResult.temporal.temporalHealth}`,
+            0.7, 0.6, {
+              source: 'L10_temporal',
+              rhythmsDetected: cognitiveStackResult.temporal.rhythmsDetected,
+              goalsTracked: cognitiveStackResult.temporal.goalsTracked,
+              temporalHealth: cognitiveStackResult.temporal.temporalHealth,
+              generatedAt: new Date().toISOString(),
+            }));
+        }
+
         if (persistPromises.length > 0) {
           await Promise.allSettled(persistPromises);
-          log(`Cognitive Stack: persisted ${persistPromises.length} layer outputs (L5,L6,L7,L8,L11,L12,L13,L14,L15) to ai_memory`);
+          log(`Cognitive Stack: persisted ${persistPromises.length} layer outputs (L3,L4,L5,L6,L7,L8,L9,L10,L11,L12,L13,L14,L15) to ai_memory`);
         }
       } catch (err) {
         const msg = `Cognitive layer persistence failed (non-critical): ${(err as Error).message}`;
