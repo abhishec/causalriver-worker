@@ -8,6 +8,7 @@
  *   - Input mapping between steps (previous_output, original_input, custom, merge_parallel)
  *   - Failure behaviors (stop, skip, retry_once)
  *   - Approval pausing (workflow pauses until task is approved)
+ *   - Conditional branching (jump to step based on output evaluation)
  *   - Brain episodic memory continuity across steps
  *
  * Each step calls the shared executeAgent() from lib/agents/execute.ts
@@ -15,7 +16,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { WorkflowDefinition, WorkflowStep, WorkflowRun } from "./types";
+import type { WorkflowDefinition, WorkflowStep, WorkflowRun, WorkflowCondition } from "./types";
 import { executeAgent } from "@/lib/agents/execute";
 import { logger } from "@/lib/logger";
 
@@ -141,9 +142,25 @@ export async function executeWorkflow(
     }
   }
 
+  // ── Build step lookup for conditional branching ─────────────────
+  const stepsByOrder = new Map<number, WorkflowStep>();
+  for (const s of workflow.steps) {
+    stepsByOrder.set(s.order, s);
+  }
+  /** When set, jump to this step order instead of continuing sequentially */
+  let jumpToOrder: number | null = null;
+
   // ── Execute each group sequentially ────────────────────────────
-  for (const group of stepGroups) {
+  for (let groupIdx = 0; groupIdx < stepGroups.length; groupIdx++) {
+    const group = stepGroups[groupIdx];
     if (shouldStop) break;
+
+    // ── Handle conditional jump: skip groups until we reach the target step ──
+    if (jumpToOrder !== null) {
+      const groupContainsTarget = group.some(s => s.order === jumpToOrder);
+      if (!groupContainsTarget) continue; // Skip until we find the jump target
+      jumpToOrder = null; // Found it — clear the jump
+    }
 
     // Skip groups where ALL steps are already completed (resume support)
     if (group.every(step => completedStepOrders.has(step.order))) {
@@ -177,6 +194,20 @@ export async function executeWorkflow(
         completedSteps++;
         previousOutput = result.output;
         if (result.summary) episodicContext.push(result.summary);
+
+        // ── Evaluate conditional branching after successful completion ──
+        if (step.condition && result.output) {
+          const condResult = evaluateCondition(step.condition, result.output);
+          const targetOrder = condResult ? step.condition.trueBranch : step.condition.falseBranch;
+          if (targetOrder !== undefined && targetOrder !== null) {
+            jumpToOrder = targetOrder;
+            // Reset groupIdx to -1 so the for-loop starts scanning from the beginning
+            groupIdx = -1;
+            logger.info(`[WorkflowEngine] Condition on step ${step.order}: ${condResult ? "TRUE" : "FALSE"} → jumping to step ${targetOrder}`);
+            continue;
+          }
+          // No branch target → continue sequentially
+        }
       } else if (result.status === "paused") {
         // Workflow pauses — mark and return
         await supabase
@@ -637,4 +668,166 @@ function groupSteps(steps: WorkflowStep[]): WorkflowStep[][] {
   return Array.from(groups.values()).sort(
     (a, b) => Math.min(...a.map(s => s.order)) - Math.min(...b.map(s => s.order))
   );
+}
+
+// ── Condition Evaluator ──────────────────────────────────────────────────────
+
+/**
+ * Evaluate a workflow condition against step output.
+ *
+ * Supports four condition types:
+ *   - confidence_threshold: checks output.confidence > value
+ *   - status_check: checks output.status === value
+ *   - data_exists: checks if a field is non-null/non-empty
+ *   - custom_expression: evaluates a safe JavaScript-like expression
+ *
+ * Returns true/false. Returns false on any evaluation error (fail-safe).
+ */
+function evaluateCondition(
+  condition: WorkflowCondition,
+  output: Record<string, unknown>,
+): boolean {
+  try {
+    switch (condition.type) {
+      case "confidence_threshold": {
+        const field = condition.field || "confidence";
+        const value = getNestedField(output, field);
+        if (value === undefined || value === null) return false;
+        return compareValues(Number(value), condition.operator || ">", Number(condition.value ?? 0));
+      }
+
+      case "status_check": {
+        const field = condition.field || "status";
+        const value = getNestedField(output, field);
+        if (value === undefined || value === null) return false;
+        return compareValues(String(value), condition.operator || "==", String(condition.value ?? ""));
+      }
+
+      case "data_exists": {
+        const field = condition.field || "";
+        if (!field) return false;
+        const value = getNestedField(output, field);
+        if (value === undefined || value === null) return false;
+        if (typeof value === "string" && value.trim() === "") return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        return true;
+      }
+
+      case "custom_expression": {
+        if (!condition.expression) return false;
+        return evaluateExpression(condition.expression, output);
+      }
+
+      default:
+        return false;
+    }
+  } catch (err) {
+    logger.warn("[WorkflowEngine] Condition evaluation error:", err);
+    return false;
+  }
+}
+
+/**
+ * Safely access nested object fields using dot notation.
+ * e.g., "artifacts.0.type" → output.artifacts[0].type
+ */
+function getNestedField(obj: Record<string, unknown>, path: string): unknown {
+  const parts = path.split(".");
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current === null || current === undefined) return undefined;
+    if (typeof current === "object") {
+      current = (current as Record<string, unknown>)[part];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+}
+
+/**
+ * Compare two values using the given operator.
+ */
+function compareValues(
+  left: string | number | boolean,
+  operator: string,
+  right: string | number | boolean,
+): boolean {
+  switch (operator) {
+    case ">": return left > right;
+    case ">=": return left >= right;
+    case "<": return left < right;
+    case "<=": return left <= right;
+    case "==": return String(left) === String(right);
+    case "!=": return String(left) !== String(right);
+    case "contains":
+      return typeof left === "string" && typeof right === "string" && left.includes(right);
+    case "exists":
+      return left !== null && left !== undefined;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Evaluate a simple expression safely (no eval()).
+ * Supports patterns like:
+ *   "output.confidence > 0.8"
+ *   "output.confidence > 0.8 && output.samples > 100"
+ *   "output.status == 'success'"
+ *
+ * This is deliberately limited — not a full JS parser.
+ */
+function evaluateExpression(expression: string, output: Record<string, unknown>): boolean {
+  try {
+    // Split on && and ||
+    const orParts = expression.split("||").map(s => s.trim());
+    for (const orPart of orParts) {
+      const andParts = orPart.split("&&").map(s => s.trim());
+      let allTrue = true;
+
+      for (const clause of andParts) {
+        if (!evaluateSingleClause(clause, output)) {
+          allTrue = false;
+          break;
+        }
+      }
+
+      if (allTrue) return true; // OR: at least one group of ANDs is true
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Evaluate a single comparison clause like "output.confidence > 0.8"
+ */
+function evaluateSingleClause(clause: string, output: Record<string, unknown>): boolean {
+  // Match pattern: <field> <operator> <value>
+  const match = clause.match(
+    /^([\w.]+)\s*(>=|<=|!=|==|>|<|contains|exists)\s*(.+)?$/
+  );
+  if (!match) return false;
+
+  const [, fieldPath, operator, rawValue] = match;
+
+  // Resolve field path — strip "output." prefix if present
+  const cleanPath = fieldPath.startsWith("output.") ? fieldPath.slice(7) : fieldPath;
+  const fieldValue = getNestedField(output, cleanPath);
+
+  if (operator === "exists") {
+    return fieldValue !== null && fieldValue !== undefined;
+  }
+
+  if (rawValue === undefined) return false;
+
+  // Parse the comparison value
+  const trimmed = rawValue.trim().replace(/^['"]|['"]$/g, "");
+  const numValue = Number(trimmed);
+  const compareVal = isNaN(numValue) ? trimmed : numValue;
+  const fieldVal = typeof fieldValue === "number" ? fieldValue : (typeof fieldValue === "string" ? fieldValue : Number(fieldValue));
+
+  return compareValues(fieldVal as string | number, operator, compareVal as string | number);
 }

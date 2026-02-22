@@ -20,6 +20,9 @@ import { ALL_SLASH_COMMANDS } from "@/components/copilot/SlashCommandPicker";
 import { logger } from "@/lib/logger";
 import { CopilotControllerContext, type CopilotChatHandle, type CopilotController } from "@/lib/copilot-controller";
 import { COMMAND_GATHERING_MAP } from "@/components/copilot/command-gathering";
+import { SmartSuggestionCard } from "@/components/copilot/SmartSuggestionCard";
+import type { SmartSuggestion } from "@/components/copilot/SmartSuggestionCard";
+import { useSmartSuggestions } from "@/lib/hooks/useSmartSuggestions";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -111,6 +114,13 @@ function CopilotPageInner() {
     workflowGatheringMap,
     refetch: refetchWorkflows,
   } = useWorkflows(currentWorkspace?.id);
+
+  // ── Smart Suggestions (health-driven + usage-driven) ──────────────────
+  const {
+    suggestions: smartSuggestions,
+    dismiss: dismissSuggestion,
+    healthScore: brainHealthScore,
+  } = useSmartSuggestions(currentWorkspace?.id);
 
   // ── Merged commands + gathering (templates + workflows) ────────────────
   const mergedCustomCommands = useMemo(
@@ -652,6 +662,32 @@ function CopilotPageInner() {
       <div className="flex flex-1 min-h-0">
         {/* ── Center: Chat ─────────────────────────────────────────────── */}
         <div className="flex-1 min-w-0 flex flex-col relative">
+          {/* ── Smart Suggestions (inline above chat) ────────────────── */}
+          {smartSuggestions.length > 0 && (
+            <div className="px-4 pt-3 pb-1 space-y-2 border-b border-border-subtle bg-surface/50">
+              {smartSuggestions.map((suggestion) => (
+                <SmartSuggestionCard
+                  key={suggestion.type}
+                  suggestion={suggestion}
+                  onDismiss={() => dismissSuggestion(suggestion.type)}
+                  onAction={(s: SmartSuggestion) => {
+                    // Route action based on suggestion type
+                    if (s.healthAction?.url) {
+                      window.location.href = s.healthAction.url;
+                    } else if (s.type === "view-approvals") {
+                      window.location.href = "/tasks?status=awaiting_approval";
+                    } else if (s.type === "save-as-agent") {
+                      setShowComposer(true);
+                    } else if (s.type === "save-as-workflow") {
+                      window.location.href = "/workflows/new";
+                    }
+                    dismissSuggestion(s.type, "action_taken");
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
           {/* Conversation loading overlay */}
           {conversationLoading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">

@@ -24,6 +24,36 @@ export interface WorkflowStep {
   approval_required: boolean;
   /** Max time in seconds before this step is killed */
   timeout_seconds?: number;
+  /**
+   * Conditional branching — evaluate after step completes.
+   * If condition is true, jump to trueBranch step order.
+   * If false, jump to falseBranch (or continue sequentially if undefined).
+   */
+  condition?: WorkflowCondition;
+}
+
+// ── Conditional Branching ─────────────────────────────────────────────────
+
+export type ConditionType =
+  | "confidence_threshold"   // output.confidence > threshold
+  | "status_check"           // output.status === expected
+  | "data_exists"            // output[field] is not null/empty
+  | "custom_expression";     // JavaScript-like expression
+
+export interface WorkflowCondition {
+  type: ConditionType;
+  /** The field to evaluate from step output (e.g., "confidence", "status") */
+  field?: string;
+  /** Comparison operator */
+  operator?: ">" | ">=" | "<" | "<=" | "==" | "!=" | "contains" | "exists";
+  /** The threshold/expected value */
+  value?: string | number | boolean;
+  /** Full expression for custom_expression type (e.g., "output.accuracy > 0.8 && output.samples > 100") */
+  expression?: string;
+  /** Step order to jump to when condition is TRUE */
+  trueBranch: number;
+  /** Step order to jump to when condition is FALSE (omit = continue sequentially) */
+  falseBranch?: number;
 }
 
 // ── Workflow Definition (DB Row) ────────────────────────────────────────────
