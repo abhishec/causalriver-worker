@@ -88,3 +88,18 @@
 - **Lesson**: Always check current build state before starting a task. If build is already broken, note it and proceed with code changes + TypeScript verification only.
 - **Pattern**: For UI-only changes, `tsc --noEmit` is sufficient validation when the full build has a pre-existing issue
 - **Rule added**: Case 006 documents the Next.js 15 route group build bug — DO NOT waste time trying to fix it, just verify types
+
+## Retro 006: VC Technical Due Diligence Review (2026-02-23)
+- **Task**: `14e8ba76` — Deep review of BrainOS codebase from VC fund manager perspective
+- **Time**: ~15 min (background agent did heavy lifting in parallel)
+- **Model used**: Sonnet for dispatch (correct — audit is pattern-matching, not deep debugging)
+- **What went well**:
+  - Used background Explore agent ("very thorough" mode) — covered 10+ dimensions in single pass
+  - Agent produced comprehensive 12-section report with quantified metrics
+  - Found all key stats: 754 files, 144 routes, 0% stubs, AUROC 0.828, 24 brain regions
+  - Scored each dimension independently (8.6/10 overall)
+  - Identified both green flags (defensible IP, benchmarked) and yellow flags (limited coverage %, no Redis)
+  - Saved as reusable artifact (`platform/docs/vc-technical-due-diligence.md`)
+- **What went wrong**: Nothing significant — agent was thorough and accurate
+- **Pattern**: For investor-facing audits, background Explore agent with "very thorough" mode produces VC-quality output
+- **RL improvement**: Background agent pattern (Retro 004) confirmed again — parallel execution saves time and agent handles multi-dimensional analysis well

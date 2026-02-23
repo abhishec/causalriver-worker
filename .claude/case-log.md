@@ -65,3 +65,18 @@
 - **Current state**: Build fails during "Collecting page data" for all route-group pages. TypeScript + ESLint pass. Pages compile correctly. Dev server works fine. **This is a pre-existing issue, not a regression.**
 - **Potential fix**: Migrate to Next.js 15.4+ if/when this bug is fixed, or restructure routes to not use route groups
 - **⚠️ WARNING**: DO NOT add filesystem operations (mkdirSync, writeFileSync) to the `--require` preload script — they run in webpack workers and cause race conditions that produce MORE PageNotFoundErrors
+
+## Case 007: VC Technical Due Diligence Audit (2026-02-23)
+- **Context**: Comprehensive codebase review from VC fund manager perspective
+- **Score**: 8.6/10 overall — strong technical foundation, defensible IP
+- **Method**: Background Explore agent with "very thorough" mode, full codebase traversal
+- **Key metrics**:
+  - 754 TypeScript files, 144 API routes (0% stubs), 130 test files
+  - 463 files in memory-stack (causal engine), 63 files in causality module
+  - Benchmarks: AUROC 0.828 (CausalRivers), F1 0.493 (CauseME), 79.6% (LongMemEval)
+- **Dimension scores**: Architecture 9/10, Product 8.5/10, Code Quality 9/10, Security 9/10, Scalability 8/10, Moat 9.5/10, Operations 8/10, GTM 7.5/10
+- **Green flags**: Defensible causal IP, benchmarked rigor, real revenue, production operations, self-improving brain, security hardened
+- **Yellow flags**: Limited test coverage %, small team, no distributed cache, single-region deployment, health alerts designed but not deployed
+- **No red flags**: No hardcoded secrets, no stubs, no deprecated patterns
+- **Report saved**: `platform/docs/vc-technical-due-diligence.md`
+- **Pattern**: Background Explore agent with "very thorough" mode is ideal for large-scale audit tasks — covers all dimensions in a single pass
