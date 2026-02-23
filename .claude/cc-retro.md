@@ -136,3 +136,25 @@
 - **Lesson**: When adding a distributed cache, don't try to cache everything. Large per-instance caches (controller cache at 200MB) are better left in-memory. Redis adds value for shared state (rate limiting, dedup) not bulk storage.
 - **Pattern**: When making a sync function async, grep for ALL call sites before committing. The change from `checkSessionRateLimit` (sync) to async required `await` in 7 different files — missing any one would be a runtime bug.
 - **RL improvement**: Retro 007's "explore before implementing" pattern confirmed again — saved time by understanding existing infrastructure first
+
+## Retro 009: Fix Next.js 15 Build Failure — Case 006 (2026-02-23)
+- **Task**: `1d39a728` — Fix pre-existing build failure with route group PageNotFoundError
+- **Time**: ~45 min (estimated 30 min — over budget due to Turbopack dead-end)
+- **Model used**: Opus for research (correct — deep framework internals), Sonnet for implementation
+- **What went well**:
+  - Used Opus agent for thorough research — identified 3 ranked approaches with pros/cons
+  - Opus correctly identified Next.js 15.5 + Turbopack as a potential fix (compilation DID work)
+  - Applied case-log patterns: avoided all 5 previously-failed approaches
+  - Final fix was simple: upgrade 15.3.3 → 15.5.12 (webpack, not Turbopack)
+  - Added force-dynamic to 64 API routes via batch script (< 1 min)
+  - Build succeeds fully: compile (26s) → page data → static pages (9/9) → ✅
+- **What went wrong**:
+  - Spent ~25 min testing Turbopack which ultimately doesn't fix the core bug
+  - Turbopack fixes compilation but NOT "Collecting page data" phase (same module resolution)
+  - Clean vs incremental builds behave differently — got confused by an incremental build "succeeding"
+  - Should have tested plain webpack upgrade FIRST (it was the simpler change)
+  - 3-attempt circuit breaker should have kicked in sooner on Turbopack
+- **Lesson**: When upgrading a framework to fix a bug, test the simplest change first (version bump only). Don't add extra changes (Turbopack flag) simultaneously — it's harder to isolate what works.
+- **Pattern**: For Next.js route group builds, the key combo is: (1) Next.js 15.5+, (2) webpack (not Turbopack), (3) force-dynamic on all API routes, (4) suppress-document-error.cjs safety net, (5) ignoreBuildErrors + ignoreDuringBuilds (type/lint done separately)
+- **⚠️ Anti-pattern**: Turbopack build (`next build --turbopack`) DOES NOT fix the route group module resolution bug. Don't waste time on it again.
+- **RL improvement**: Case log's "failed approaches" section saved ~2 hours by avoiding known dead-ends. But should have been more aggressive with the circuit breaker on new dead-ends (Turbopack).

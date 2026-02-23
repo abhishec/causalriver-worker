@@ -90,3 +90,21 @@
 - **Fallback chain**: Session rate limit = Redis → fail-open. API key rate limit = Supabase RPC → Redis → fail-open.
 - **Breaking change pattern**: Making sync → async requires updating ALL call sites. Use `grep` to find every caller before committing.
 - **Files**: `lib/redis.ts` (new), `lib/security-middleware.ts`, `lib/rate-limiter.ts`, + 5 route files for await updates
+
+## Case 009: Next.js 15 Build Fixed — Route Group Resolution (2026-02-23)
+- **Symptom**: Same as Case 006 — `next build` fails with PageNotFoundError for route group pages
+- **Root cause**: Next.js 15.3.3 webpack module resolution bug — "Collecting page data" uses URL paths but modules are at route group paths
+- **Fix**: Upgrade Next.js 15.3.3 → 15.5.12 + force-dynamic on all 64 API routes + ignoreBuildErrors/ignoreDuringBuilds
+- **Why 15.5.12 works**: The 15.5 release fixed webpack's page data collection to correctly resolve route group modules. The suppress-document-error.cjs safety net handles remaining /_document edge cases.
+- **⚠️ TURBOPACK DOES NOT FIX THIS**: `next build --turbopack` compiles successfully but "Collecting page data" still fails. Turbopack build is broken for route groups. Don't waste time on it.
+- **What was needed**:
+  1. Next.js 15.5.12 (webpack module resolution fix)
+  2. `export const dynamic = "force-dynamic"` on ALL API routes (prevents prerender attempts)
+  3. `typescript: { ignoreBuildErrors: true }` (type check done via separate tsc --noEmit)
+  4. `eslint: { ignoreDuringBuilds: true }` (ESLint done via lint-staged)
+  5. `experimental: { globalNotFound: true }` (better 404 handling with route groups)
+  6. suppress-document-error.cjs (safety net for /_document edge case)
+  7. 8 GB memory allocation
+- **Build times**: Clean: ~74s compile + ~15s page data/static gen. Incremental: ~26s total.
+- **Dead-ends tested**: Turbopack clean build (panics on directory creation), Turbopack incremental (passes compilation but fails page data collection), force-dynamic at line 1 breaking Turbopack's static analysis
+- **Pattern**: When fixing framework bugs, test the SIMPLEST change first (version bump). Don't combine multiple changes (version + bundler switch) — isolate variables.
