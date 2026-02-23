@@ -224,3 +224,25 @@
 - **Anti-pattern**: Don't assume "the pipeline handles multi-X" just because the config supports it. Always trace the data flow: config → sync → storage → query → display. The bug was in step 2 (sync).
 - **RL improvement**: Retro 012's exploration-first approach saved time on the copilot changes, but missed the multi-repo sync bug. Future pattern: when touching connectors, always verify the FULL sync path for ALL configured entities.
 - **Commits**: `a23b26d05` (visual artifacts), `92b84db1a` (live demo + HHI), `8102c11b4` (multi-repo + prediction + centrality)
+
+## Retro 014: Security Hardening for Tookitaki Demo (2026-02-23)
+- **Task**: `25d9940d` — Security audit and hardening before connecting Tookitaki production credentials
+- **Time**: ~35 min (estimated 30 min — on target)
+- **Model used**: Sonnet for implementation, Haiku for Explore agents (correct — security audit is well-scoped)
+- **What went well**:
+  - **3 parallel Explore agents** for audit worked perfectly — credential storage, data isolation, and RLS audit covered the full surface area
+  - Found 5 vulnerabilities across 3 severity levels (2 critical, 2 high, 1 medium, 1 low)
+  - **entity_links RLS bug** (`organization_members` → `org_members`) would have broken copilot cross-domain queries. Not a leak but a denial of service on a core feature
+  - **Workflow tables RLS** was a real cross-tenant data leak — `USING (true)` without `TO service_role` meant any authed user could read ALL orgs' workflow data
+  - **Credential encryption** — pgcrypto was enabled but never actually called! Comments said "encrypted JSONB" but code stored plaintext. Implemented full dual-column migration with trigger for backward compat
+  - **Token logging** sanitized across all 3 OAuth callbacks — was logging full `tokenData` objects on error paths
+  - **Service role key** removed from all Bearer auth patterns — now uses CRON_SECRET for internal calls
+  - Clean TypeScript compilation, all pre-commit hooks passed
+- **What went wrong**:
+  - Initial plan proposed DB-only encryption (transparent), but audit of 12+ read paths showed all routes use direct `.select("credentials")` not `get_connector_credentials()` RPC. Had to pivot to dual-column approach
+  - The `store_connector_credentials()` RPC function has different signatures across callbacks (Slack uses it, GitHub/Jira don't). Inconsistency adds risk
+- **Pattern**: For encryption migrations, ALWAYS audit both WRITE and READ paths before choosing approach. DB-level encryption is only transparent if ALL access goes through the encrypted function, not direct column access
+- **Pattern**: For security audit, launch parallel Explore agents with distinct focus areas (storage, isolation, RLS). Comprehensive coverage in 1 round
+- **Anti-pattern**: Migration comments lie! "Encrypted JSONB" comment on `org_connectors.credentials` was written aspirationally, not factually. Always verify actual function code, not comments
+- **Phase 2 TODO**: Migrate all 12+ sync route reads from `.select("credentials")` to `get_connector_credentials()` RPC, then NULL out plaintext column
+- **Commits**: `59647e1f0` (RLS fixes + encryption + logging + cron auth)

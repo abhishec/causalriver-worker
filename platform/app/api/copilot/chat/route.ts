@@ -3095,6 +3095,117 @@ RULES FOR CORRECTIONS:
       }
     }
 
+    // ── REINFORCEMENT LEARNING CONTEXT: Visible Learning Loop ──────────
+    // Fetch brain intelligence metrics so the copilot can reference its own
+    // learning journey. This is the "wow" factor — users SEE the AI getting smarter.
+    let learningPulse: {
+      intelligenceScore: number;
+      predictionAccuracy: number | null;
+      totalCorrections: number;
+      totalFeedback: number;
+      satisfactionRate: number;
+      recentEmergenceEvents: Array<{ event_type: string; summary: string; created_at: string }>;
+      learningVelocity: string;
+      brierScore: number | null;
+      edgesLearned: number;
+      memoriesStored: number;
+      lastLearningCycle: string | null;
+    } | null = null;
+
+    try {
+      const [
+        intelligenceSnap,
+        feedbackStats,
+        correctionCount,
+        emergenceEvents,
+        rlState,
+      ] = await Promise.all([
+        // Latest intelligence snapshot
+        service
+          .from("brain_intelligence_snapshots")
+          .select("intelligence_score, prediction_accuracy, brier_score, causal_edges_total, memories_total, feedback_processed, created_at")
+          .eq("organization_id", workspaceId)
+          .order("snapshot_date", { ascending: false })
+          .limit(1),
+        // Feedback stats (last 30 days)
+        service
+          .from("copilot_response_feedback")
+          .select("rating")
+          .eq("organization_id", workspaceId)
+          .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        // Correction count
+        service
+          .from("ai_memory")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", workspaceId)
+          .eq("memory_type", "correction"),
+        // Recent emergence events (learning milestones)
+        service
+          .from("brain_emergence_log")
+          .select("event_type, summary, created_at")
+          .eq("organization_id", workspaceId)
+          .order("created_at", { ascending: false })
+          .limit(3),
+        // RL state — get exploration rate and reward trend
+        service
+          .from("brain_rl_state")
+          .select("cumulative_reward, reward_trend, exploration_rate")
+          .eq("organization_id", workspaceId)
+          .limit(1),
+      ]);
+
+      const snap = intelligenceSnap.data?.[0];
+      const feedbackRows = feedbackStats.data || [];
+      const helpfulCount = feedbackRows.filter((r: any) => r.rating === "helpful").length;
+      const totalFeedback = feedbackRows.length;
+      const rewardTrend = rlState.data?.[0]?.reward_trend || "stable";
+
+      learningPulse = {
+        intelligenceScore: snap?.intelligence_score ?? 0,
+        predictionAccuracy: snap?.prediction_accuracy ?? null,
+        totalCorrections: correctionCount.count ?? 0,
+        totalFeedback,
+        satisfactionRate: totalFeedback > 0 ? helpfulCount / totalFeedback : 0,
+        recentEmergenceEvents: (emergenceEvents.data || []) as any[],
+        learningVelocity: rewardTrend === "improving" ? "accelerating" : rewardTrend === "declining" ? "recalibrating" : "steady",
+        brierScore: snap?.brier_score ?? null,
+        edgesLearned: snap?.causal_edges_total ?? 0,
+        memoriesStored: snap?.memories_total ?? 0,
+        lastLearningCycle: snap?.created_at ?? null,
+      };
+
+      // Inject learning awareness into system prompt
+      if (learningPulse.intelligenceScore > 0 || learningPulse.totalFeedback > 0) {
+        const emergenceSummary = learningPulse.recentEmergenceEvents.length > 0
+          ? learningPulse.recentEmergenceEvents
+              .map((e: any) => `- ${e.event_type}: ${e.summary}`)
+              .join("\n")
+          : "No recent emergence events";
+
+        effectiveSystemPrompt += `\n\n## 🧠 BRAIN LEARNING STATUS (Reinforcement Learning Loop)
+You are a continuously learning system. Here is your current learning state for THIS workspace:
+
+**Intelligence Score**: ${learningPulse.intelligenceScore}/100
+**Prediction Accuracy**: ${learningPulse.predictionAccuracy !== null ? (learningPulse.predictionAccuracy * 100).toFixed(1) + "%" : "calibrating..."}
+**Learning Velocity**: ${learningPulse.learningVelocity}
+**Knowledge Base**: ${learningPulse.edgesLearned} causal edges, ${learningPulse.memoriesStored} memories, ${learningPulse.totalCorrections} user corrections applied
+**User Satisfaction**: ${(learningPulse.satisfactionRate * 100).toFixed(0)}% (from ${learningPulse.totalFeedback} interactions)
+
+Recent Learning Events:
+${emergenceSummary}
+
+BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
+- When you use a learned correction, subtly acknowledge it: "Based on what I've learned from this workspace..."
+- When asked about your capabilities, reference your intelligence score and learning progress
+- If a user gives you negative feedback, acknowledge you're learning: "I'm continuously improving — your feedback directly updates my knowledge"
+- Reference specific learning milestones when relevant (e.g., "Since I learned ${learningPulse.edgesLearned} causal relationships in this workspace...")
+- Show confidence calibrated to your actual accuracy — don't oversell if accuracy is low
+- NEVER fabricate learning stats — only reference the numbers above`;
+      }
+    } catch {
+      // Non-fatal: learning context is enrichment
+    }
+
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModel = selectSmartModel(message, {
@@ -3201,6 +3312,13 @@ RULES FOR CORRECTIONS:
               uncertainAreas: brainContext.uncertainAreas,
             },
           }));
+        }
+
+        // ── LEARNING PULSE: Send brain intelligence & RL metrics to frontend ──
+        // The UI renders this as a "Brain is learning" indicator that shows
+        // intelligence score, learning velocity, and recent emergence events.
+        if (learningPulse) {
+          send(JSON.stringify({ learningPulse }));
         }
 
         // Send Commander dispatch metadata

@@ -1131,6 +1131,7 @@ export async function consumeSSEStream(
             if (parsed.compositionStep) callbacks.onCompositionStep?.(parsed.compositionStep);
             if (parsed.compositionResult) callbacks.onCompositionResult?.(parsed.compositionResult);
             if (parsed.workflowProgress) callbacks.onWorkflowProgress?.(parsed.workflowProgress);
+            if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
           } catch { /* skip */ }
         }
       }
@@ -1270,6 +1271,117 @@ function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta | null; isLoad
   );
 }
 
+// ─── Learning Pulse Indicator (Visible RL Loop) ──────────────────────────────
+// Shows brain intelligence score, learning velocity, and recent emergence events.
+// This is the "wow" factor — users SEE the AI getting smarter with each interaction.
+
+function LearningPulseIndicator({ pulse }: { pulse: import("./types").LearningPulse | null }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!pulse || (pulse.intelligenceScore === 0 && pulse.totalFeedback === 0)) return null;
+
+  const velocityColor = pulse.learningVelocity === "accelerating" ? "text-success" : pulse.learningVelocity === "recalibrating" ? "text-warning" : "text-muted";
+  const velocityIcon = pulse.learningVelocity === "accelerating" ? "\u2191" : pulse.learningVelocity === "recalibrating" ? "\u2193" : "\u2192";
+  const scoreColor = pulse.intelligenceScore >= 70 ? "text-success" : pulse.intelligenceScore >= 40 ? "text-warning" : "text-muted";
+
+  return (
+    <div className="rounded-xl bg-gradient-to-r from-purple-500/5 to-blue-500/5 border border-purple-500/15 overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 px-4 py-2 text-xs hover:bg-purple-500/10 transition-colors"
+      >
+        <div className="flex items-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+          <span className="text-purple-500 font-medium">Brain Learning</span>
+        </div>
+        <div className="flex items-center gap-3 flex-1 justify-end">
+          <span className={cn("font-medium tabular-nums", scoreColor)}>
+            IQ {pulse.intelligenceScore}
+          </span>
+          <span className={cn("font-medium", velocityColor)}>
+            {velocityIcon} {pulse.learningVelocity}
+          </span>
+          {pulse.totalCorrections > 0 && (
+            <span className="text-muted">
+              {pulse.totalCorrections} corrections
+            </span>
+          )}
+        </div>
+        <svg
+          className={cn("w-3.5 h-3.5 text-muted transition-transform", expanded && "rotate-180")}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-3 pt-1 space-y-3 border-t border-purple-500/10">
+          {/* Intelligence Score */}
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Intelligence Score</div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 rounded-full bg-surface overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all"
+                  style={{ width: `${Math.min(pulse.intelligenceScore, 100)}%` }}
+                />
+              </div>
+              <span className={cn("text-[10px] font-medium tabular-nums", scoreColor)}>
+                {pulse.intelligenceScore}/100
+              </span>
+            </div>
+          </div>
+
+          {/* Knowledge metrics */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg bg-surface p-2">
+              <div className="text-[10px] text-muted">Causal Edges</div>
+              <div className="text-sm font-semibold">{pulse.edgesLearned}</div>
+            </div>
+            <div className="rounded-lg bg-surface p-2">
+              <div className="text-[10px] text-muted">Memories</div>
+              <div className="text-sm font-semibold">{pulse.memoriesStored}</div>
+            </div>
+            <div className="rounded-lg bg-surface p-2">
+              <div className="text-[10px] text-muted">Satisfaction</div>
+              <div className="text-sm font-semibold">{(pulse.satisfactionRate * 100).toFixed(0)}%</div>
+            </div>
+            <div className="rounded-lg bg-surface p-2">
+              <div className="text-[10px] text-muted">Accuracy</div>
+              <div className="text-sm font-semibold">
+                {pulse.predictionAccuracy !== null ? `${(pulse.predictionAccuracy * 100).toFixed(1)}%` : "Calibrating"}
+              </div>
+            </div>
+          </div>
+
+          {/* Recent learning events */}
+          {pulse.recentEmergenceEvents.length > 0 && (
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Recent Learning Events</div>
+              <div className="space-y-1">
+                {pulse.recentEmergenceEvents.map((e, i) => (
+                  <div key={i} className="flex items-start gap-1.5 text-[11px]">
+                    <span className="text-purple-500 mt-0.5">&#x2727;</span>
+                    <span className="text-muted-foreground">{e.summary}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Federation status */}
+          <div className="flex items-center gap-1.5 text-[10px] text-muted">
+            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+            <span>Reinforcement learning active &middot; Federated to core brain</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
 export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(function CopilotChat({
@@ -1301,6 +1413,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const isLoadingRef = useRef(false);
   isLoadingRef.current = isLoading;
   const [brainMeta, setBrainMeta] = useState<BrainMeta | null>(null);
+  const [learningPulse, setLearningPulse] = useState<import("./types").LearningPulse | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -1790,6 +1903,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             // Bug fix #7: Forward brain meta to parent via callback
             onBrainMetaRef.current?.(meta);
           },
+          onLearningPulse: (pulse) => {
+            if (controller.signal.aborted) return;
+            setLearningPulse(pulse);
+          },
           onDomainResult: (result) => {
             if (controller.signal.aborted) return;
             // Attach the message index so the parent can link this artifact to the chat message
@@ -2183,6 +2300,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <div className="text-[10px] text-muted mt-1">
                             {workflowProgress.currentStep}/{workflowProgress.totalSteps} steps
                           </div>
+                        </div>
+                      )}
+                      {/* Brain Learning Pulse — visible RL loop indicator */}
+                      {isLastAssistant && learningPulse && !isLoading && (
+                        <div style={{ marginBottom: 12 }}>
+                          <LearningPulseIndicator pulse={learningPulse} />
                         </div>
                       )}
                       {/* Smart suggestions — inline after agent/workflow completes */}

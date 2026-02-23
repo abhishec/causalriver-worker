@@ -230,6 +230,21 @@ export interface CompositionResult {
   complexity: "light" | "medium" | "heavy";
 }
 
+/** Brain Learning Pulse — RL metrics streamed to frontend for visible learning indicator */
+export interface LearningPulse {
+  intelligenceScore: number;
+  predictionAccuracy: number | null;
+  totalCorrections: number;
+  totalFeedback: number;
+  satisfactionRate: number;
+  recentEmergenceEvents: Array<{ event_type: string; summary: string; created_at: string }>;
+  learningVelocity: string;
+  brierScore: number | null;
+  edgesLearned: number;
+  memoriesStored: number;
+  lastLearningCycle: string | null;
+}
+
 export interface SSECallbacks {
   onText: (text: string, accumulated: string) => void;
   onError: (error: string) => void;
@@ -246,6 +261,8 @@ export interface SSECallbacks {
   onCompositionResult?: (result: CompositionResult) => void;
   /** Workflow execution progress updates */
   onWorkflowProgress?: (progress: WorkflowProgress) => void;
+  /** Brain RL learning pulse — intelligence metrics for visible learning indicator */
+  onLearningPulse?: (pulse: LearningPulse) => void;
   onDone: () => void;
 }
 
