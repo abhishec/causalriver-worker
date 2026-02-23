@@ -103,3 +103,19 @@
 - **What went wrong**: Nothing significant — agent was thorough and accurate
 - **Pattern**: For investor-facing audits, background Explore agent with "very thorough" mode produces VC-quality output
 - **RL improvement**: Background agent pattern (Retro 004) confirmed again — parallel execution saves time and agent handles multi-dimensional analysis well
+
+## Retro 007: Health Alerting System — Close Gaps (2026-02-23)
+- **Task**: `01b4c321` — Implement health alerting system
+- **Time**: ~25 min (estimated 30 min — under budget!)
+- **Model used**: Sonnet (correct — standard feature work with existing patterns)
+- **What went well**:
+  - Explored existing infrastructure FIRST — discovered 80% was already built
+  - Rewrote task scope based on actual gaps (saved ~4 hours of unnecessary work)
+  - Added 3 features (auto-resolution, SLA monitoring, delivery retry) to existing code
+  - Built settings UI + 3 API routes (list, config, lifecycle)
+  - Deduplicated ~80 lines of copy-pasted health check functions
+  - Lint-staged passed first try (ESLint + TypeScript clean)
+- **What went wrong**: One TypeScript error in settings UI (`Record<string, number>` cast) — fixed in 30 seconds
+- **Lesson**: Always explore existing code before implementing. The VC review said "designed but not deployed" but in fact it was ~80% deployed. The real gap was much smaller.
+- **Pattern**: When a task says "implement X", first check if X already exists partially. Rewriting the task scope BEFORE coding saves massive time.
+- **RL improvement**: Plan mode worked well — forced thorough exploration before coding
