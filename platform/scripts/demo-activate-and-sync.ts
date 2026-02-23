@@ -371,13 +371,24 @@ async function syncJiraForOrg(
           assignee: fields.assignee?.displayName || null,
           reporter: fields.reporter?.displayName || null,
           cycle_time_hours: cycleTimeHours,
+          created_date: fields.created || null,
+          resolved_date: fields.resolutiondate || null,
           story_points: fields.storyPoints || fields.story_points || null,
           sprint: fields.sprint?.name || null,
+          sprint_id: fields.sprint?.id || null,
           labels: Array.isArray(fields.labels) ? fields.labels : [],
           components: Array.isArray(fields.components)
             ? fields.components.map((c: any) => c.name).filter(Boolean) : [],
           fix_versions: Array.isArray(fields.fixVersions)
             ? fields.fixVersions.map((v: any) => v.name).filter(Boolean) : [],
+          comment_excerpts: (() => {
+            const comments = fields.comment?.comments;
+            if (!Array.isArray(comments) || comments.length === 0) return null;
+            return comments.slice(0, 3).map((c: any) => {
+              const text = typeof c.body === "string" ? c.body : JSON.stringify(c.body ?? "");
+              return text.slice(0, 300);
+            });
+          })(),
         },
         created_at: fields.resolutiondate || fields.updated || fields.created,
       };
@@ -393,7 +404,7 @@ async function syncJiraForOrg(
         let hasMore = true;
         while (hasMore) {
           const boardRes = await fetch(
-            `${siteUrl}/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
+            `${siteUrl}/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
             { headers: authHeaders }
           );
           if (!boardRes.ok) throw new Error(`Board API ${boardRes.status}`);
@@ -474,7 +485,7 @@ async function syncJiraForOrg(
           `project = "${project.key}"${fixVersionClause} AND updated >= -90d ORDER BY updated DESC`
         );
         const issuesRes = await fetch(
-          `${siteUrl}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
+          `${siteUrl}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
           { headers: authHeaders }
         );
 

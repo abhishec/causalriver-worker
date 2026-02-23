@@ -172,7 +172,7 @@ export async function POST(request: Request) {
           while (hasMore) {
             const boardRes = await jiraFetch(
               credentials, siteUrl,
-              `/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
+              `/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
             );
             const issues = boardRes?.issues || [];
             boardIssues = boardIssues.concat(issues);
@@ -224,35 +224,52 @@ export async function POST(request: Request) {
       }
 
       // ── Phase C: Plan-based sync (Advanced Roadmaps) ─────────────────────────
-      // Plans may contain cross-project issues. We try the plan API first, then
-      // fall back to project-scoped JQL with fixVersion filter.
+      // Jira Advanced Roadmaps Plans are NOT boards — Plan ID ≠ Board ID.
+      // The Plans REST API doesn't expose a direct "get issues in plan" endpoint.
+      // Plans are a UI layer that groups issues from multiple projects by teams/releases.
+      //
+      // Strategy: Extract the plan's version context from the source name/URL,
+      // then use JQL to fetch cross-project issues for that version.
+      // The project-level sync (Phase D) handles this via fixVersion + projectKeys.
       for (const plan of planSources) {
         try {
-          // Attempt Advanced Roadmaps plan issues endpoint
-          // This endpoint may not be available on all Jira Cloud instances
-          const planRes = await jiraFetch(
-            credentials, siteUrl,
-            `/rest/agile/1.0/board/${plan.externalId}/issue?maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
-          );
-          const planIssues = (planRes?.issues || []).filter(
-            (i: any) => !syncedIssueKeys.has(i.key)
-          );
+          // Extract version from plan name (e.g. "Fincense 5.11.5 Plan/Timeline" → "5.11.5")
+          const planVersion = plan.name?.match(/\d+\.\d+\.\d+/)?.[0] || effectiveFixVersion;
+          const planProjectKeys = effectiveProjectKeys || [];
 
-          if (planIssues.length > 0) {
-            logger.info(`[Jira sync] Plan ${plan.externalId}: ${planIssues.length} new issues`);
-            const signals = planIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId));
-            for (const i of planIssues) syncedIssueKeys.add(i.key);
+          if (planVersion && planProjectKeys.length > 0) {
+            // Query plan-scoped issues via JQL — cross-project with fixVersion filter
+            const projectClause = planProjectKeys.map((k) => `"${k}"`).join(', ');
+            const jql = encodeURIComponent(
+              `project IN (${projectClause}) AND fixVersion = "${planVersion}" AND updated >= ${jqlLookback} ORDER BY updated DESC`
+            );
+            const planRes = await jiraFetch(
+              credentials, siteUrl,
+              `/rest/api/3/search?jql=${jql}&maxResults=200&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
+            );
+            const planIssues = (planRes?.issues || []).filter(
+              (i: any) => !syncedIssueKeys.has(i.key)
+            );
 
-            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
-            if (insertErr) errors.push(`plan-${plan.externalId}: ${insertErr.message}`);
-            else signalsGenerated += signals.length;
-            recordsProcessed += planIssues.length;
+            if (planIssues.length > 0) {
+              logger.info(`[Jira sync] Plan ${plan.externalId} (v${planVersion}): ${planIssues.length} new issues via JQL`);
+              const signals = planIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId));
+              for (const i of planIssues) syncedIssueKeys.add(i.key);
 
-            await linkIssuesToGitHub(service, workspaceId, planIssues);
+              const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
+              if (insertErr) errors.push(`plan-${plan.externalId}: ${insertErr.message}`);
+              else signalsGenerated += signals.length;
+              recordsProcessed += planIssues.length;
+
+              await linkIssuesToGitHub(service, workspaceId, planIssues);
+            } else {
+              logger.info(`[Jira sync] Plan ${plan.externalId}: 0 new issues (all covered by board/project sync)`);
+            }
+          } else {
+            logger.info(`[Jira sync] Plan ${plan.externalId}: No version/project context — will be covered by project-level sync`);
           }
-        } catch {
-          // Plan API not available — will be covered by project-level sync below
-          logger.info(`[Jira sync] Plan ${plan.externalId} API not available — falling back to project-level sync`);
+        } catch (planErr: any) {
+          logger.warn(`[Jira sync] Plan ${plan.externalId} sync failed: ${planErr.message} — falling back to project-level sync`);
         }
       }
 
@@ -277,7 +294,7 @@ export async function POST(request: Request) {
           );
           const issuesRes = await jiraFetch(
             credentials, siteUrl,
-            `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
+            `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
           );
 
           // Dedup: skip issues already synced from board/plan sources
@@ -423,6 +440,19 @@ async function jiraFetch(
 }
 
 /**
+ * Extract first 3 comment texts (truncated to 300 chars each).
+ * Persisted in signal_metadata so cross-linking can work even if entity_links fails.
+ */
+function extractCommentExcerpts(commentField: any): string[] | null {
+  const comments = commentField?.comments;
+  if (!Array.isArray(comments) || comments.length === 0) return null;
+  return comments.slice(0, 3).map((c: any) => {
+    const text = typeof c.body === 'string' ? c.body : JSON.stringify(c.body ?? '');
+    return text.slice(0, 300);
+  });
+}
+
+/**
  * Transform a raw Jira issue into a Brain L1 signal.
  */
 function transformIssueToSignal(
@@ -464,8 +494,12 @@ function transformIssueToSignal(
       assignee_id: fields.assignee?.accountId || null,
       reporter: fields.reporter?.displayName || null,
       cycle_time_hours: cycleTimeHours,
+      // Raw dates for audit trail + per-ticket cycle time analysis
+      created_date: fields.created || null,
+      resolved_date: fields.resolutiondate || null,
       story_points: fields.storyPoints || fields.customfield_10016 || null,
       sprint: fields.sprint?.name || null,
+      sprint_id: fields.sprint?.id || null,
       labels: Array.isArray(fields.labels) ? fields.labels : [],
       components: Array.isArray(fields.components)
         ? fields.components.map((c: any) => c.name).filter(Boolean)
@@ -473,6 +507,8 @@ function transformIssueToSignal(
       fix_versions: Array.isArray(fields.fixVersions)
         ? fields.fixVersions.map((v: any) => v.name).filter(Boolean)
         : [],
+      // First 3 comment excerpts for cross-linking resilience (entity_links fallback)
+      comment_excerpts: extractCommentExcerpts(fields.comment),
     },
     created_at: fields.resolutiondate || fields.updated || fields.created,
   };
