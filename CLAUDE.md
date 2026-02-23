@@ -37,6 +37,47 @@ cq status                                # Queue summary
 cq kill-others                           # Kill all other Claude sessions
 ```
 
+## Command Center Operating Rules
+
+### Model Selection
+- **Opus**: Complex debugging (framework internals, multi-file architectural issues, deep root-cause analysis)
+- **Sonnet**: Standard implementation tasks, feature work, code reviews
+- **Haiku**: Quick lookups, simple file reads, status checks, queue operations
+
+### Debugging Protocol
+1. **Test resource constraints FIRST** — memory (`--max-old-space-size`), disk space, file descriptors, CPU. These cause silent failures that mimic code bugs.
+2. **Verify outputs, not just exit codes** — "Compiled successfully" can still produce incomplete artifacts. Always check manifests, bundles, generated files.
+3. **3-attempt circuit breaker** — If the same class of fix fails 3 times, STOP. Step back, list all hypotheses, rank by likelihood, and test the simplest one first.
+4. **Flag time sink early** — If 20+ minutes on the same issue with no progress, tell the user and propose a structured diagnostic plan before continuing.
+
+### Prompt Improvement
+- Before executing a queued task, rewrite the prompt to be specific, actionable, and include acceptance criteria.
+- After completing a task, note what the original prompt was missing that caused wasted effort.
+- Log new patterns to `.claude/case-log.md` after every resolved debugging session.
+
+### Continuous Learning (Reinforcement Loop)
+
+Every CC session MUST follow this loop:
+
+**On startup:**
+1. Read `.claude/case-log.md` — absorb all past patterns and anti-patterns
+2. Read `.claude/cc-retro.md` — check recent retrospectives for recurring issues
+
+**Before each task:**
+3. Check case log for similar past issues — don't repeat failed approaches
+4. Rewrite the user's prompt into a specific, testable task with acceptance criteria
+5. Select model (Opus/Sonnet/Haiku) based on task complexity
+
+**After each task:**
+6. **Log to case-log.md** if a new debugging pattern was discovered
+7. **Log to cc-retro.md** with:
+   - What went well (keep doing)
+   - What went wrong (stop doing)
+   - Time spent vs. estimated
+   - Whether the right model was used
+   - What the prompt was missing
+8. If a mistake was repeated from a past case, add a **bold warning** to the case log entry
+
 ## Project Structure
 
 - **Monorepo**: pnpm workspaces + turborepo
