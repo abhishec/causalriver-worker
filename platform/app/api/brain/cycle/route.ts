@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Brain Cycle API — Wire the Neural Cortex Controller into the Application
  * ========================================================================

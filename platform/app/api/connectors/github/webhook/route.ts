@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * GitHub Webhook Handler — Automated PR Review
  * =============================================

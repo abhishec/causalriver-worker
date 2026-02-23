@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Task Queue API — List tasks with filters
  * ==========================================

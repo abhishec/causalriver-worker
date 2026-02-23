@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * SE-aaS Metrics API
  * ===================

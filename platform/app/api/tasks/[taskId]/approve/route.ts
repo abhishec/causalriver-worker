@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Task Approval API
  * POST /api/tasks/[taskId]/approve

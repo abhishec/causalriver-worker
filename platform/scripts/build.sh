@@ -1,23 +1,19 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# build.sh — Safe Next.js 15 build wrapper for App Router projects
+# build.sh — Safe Next.js 15.5 build wrapper for App Router projects
 #
-# Fixes three issues that cause local builds to fail:
+# Fixes the route group PageNotFoundError (Case 006) via:
+# 1. Upgrade to Next.js 15.5.12 — fixes webpack module resolution for route groups
+# 2. suppress-document-error.cjs — intercepts /_document unhandled rejections
+# 3. All API routes marked force-dynamic — prevents prerender attempts
+# 4. 8 GB memory — prevents OOM in webpack workers
 #
-# 1. Memory limit (root cause of most failures):
-#    Webpack runs multiple worker processes during compilation. With Node's
-#    default ~1.5 GB heap limit, workers silently OOM → incomplete manifests
-#    → PageNotFoundError for many routes. We set --max-old-space-size=8192.
-#
-# 2. /_document PageNotFoundError (Next.js 15 App Router bug):
-#    Next.js always registers /_document in its pages mapping, even for
-#    App Router-only projects. During "Collecting page data" it can throw a
-#    PageNotFoundError as an unhandled rejection, triggering process.exit(1).
-#    The --require preload (suppress-document-error.cjs) intercepts this.
-#
-# 3. .next/package.json missing after clean:
-#    After rm -rf .next, Next.js 15 may fail with ENOENT on .next/package.json.
-#    We pre-create it so the build can start.
+# Historical context (Case 006):
+# - Next.js 15.3.3 had a bug where "Collecting page data" used URL paths
+#   (/login) but modules were under route groups ((auth)/login) → ENOENT
+# - Upgrading to 15.5.12 fixes this for webpack builds
+# - Turbopack builds still fail at "Collecting page data" (Turbopack bug)
+# - Dev server uses Turbopack fine; build uses webpack
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -34,13 +30,12 @@ if [ ! -f "$PLATFORM_DIR/.next/package.json" ]; then
 fi
 
 # ── Set Node options ─────────────────────────────────────────────────────────
-# 1. Give webpack workers enough memory (8 GB — 4 GB was marginal, caused partial compilation)
+# 1. Give webpack workers enough memory (8 GB)
 # 2. Suppress /_document unhandled rejection in App Router projects
-# 3. .next/package.json auto-created by suppress-document-error.cjs in worker processes too
 SUPPRESS_SCRIPT="$SCRIPT_DIR/suppress-document-error.cjs"
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192 --require $SUPPRESS_SCRIPT"
 
-echo "🔨 Building Next.js (App Router)..."
+echo "🔨 Building Next.js 15.5 (App Router, webpack)..."
 
 npx next build "$@"
 EXIT_CODE=$?

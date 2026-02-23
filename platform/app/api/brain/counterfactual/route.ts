@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Brain Counterfactual API — "What If?" Analysis Nobody Has Built
  * =================================================================

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Brain Execution API — The brain's "hands" (Motor Cortex)
  *

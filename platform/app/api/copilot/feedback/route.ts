@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Copilot Feedback API — Every Answer Improves the Brain
  * =========================================================

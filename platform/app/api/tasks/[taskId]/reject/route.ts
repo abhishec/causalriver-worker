@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Task Rejection API
  * POST /api/tasks/[taskId]/reject

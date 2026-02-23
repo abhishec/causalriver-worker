@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Pending Verifications API — Surface Due Predictions for User Verification
  * ===========================================================================

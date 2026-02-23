@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Single Workflow API — Get, Update, Delete
  * ==========================================

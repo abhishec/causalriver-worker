@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Workflow Run Cancel API — Cancel running/paused workflow
  * =========================================================

@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Slack Webhook Handler — Real-Time Event Processing
  * ===================================================

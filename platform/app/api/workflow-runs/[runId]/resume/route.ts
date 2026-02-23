@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Workflow Run Resume API — Resume paused workflow
  * ==================================================

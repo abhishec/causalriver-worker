@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Verify Prediction API — User Confirms Whether Brain Was Right
  * ================================================================

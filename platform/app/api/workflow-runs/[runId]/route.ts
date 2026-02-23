@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Workflow Run Detail API — Get run with steps
  * =============================================

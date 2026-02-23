@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Workflow Runs API — List runs for a workflow
  * =============================================

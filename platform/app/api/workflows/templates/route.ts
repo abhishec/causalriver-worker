@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Workflow Templates API — Get pre-built workflow templates
  * =========================================================

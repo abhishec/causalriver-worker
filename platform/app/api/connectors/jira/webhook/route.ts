@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 /**
  * Jira Webhook Handler — Real-Time Issue Event Processing
  * ========================================================
