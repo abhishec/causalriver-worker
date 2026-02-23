@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { WorkspaceProvider } from "@/lib/workspace-context";
+import { RoleGuard } from "@/components/layout/RoleGuard";
 import { DashboardShell } from "./dashboard-shell";
 import { CopilotLazy } from "./copilot-lazy";
 
@@ -21,7 +22,9 @@ export default function DashboardLayout({
           <TopBar />
           <main className="p-6 bg-gradient-brain min-h-[calc(100vh-3.5rem)]">
             <div className="animate-fade-in-up">
-              {children}
+              <RoleGuard>
+                {children}
+              </RoleGuard>
             </div>
           </main>
         </DashboardShell>

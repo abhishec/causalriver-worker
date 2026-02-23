@@ -770,31 +770,11 @@ function CopilotPageInner() {
           />
         ) : (
           /* Empty artifact state — matches HTML .art-col > .art-empty */
-          <div
-            style={{
-              width: 440,
-              flexShrink: 0,
-              background: "#fff",
-              borderLeft: "1px solid rgba(31,30,29,.1)",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                color: "#73726c",
-              }}
-            >
-              <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.4 }}>✦</div>
-              <h4 style={{ fontSize: 14, fontWeight: 500, color: "#73726c" }}>No artifact yet</h4>
-              <p style={{ fontSize: 12, color: "rgba(115,114,108,.6)", marginTop: 4 }}>Artifacts from analyses will appear here</p>
+          <div className="w-[440px] shrink-0 bg-card border-l border-border-subtle flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col items-center justify-center text-center text-muted">
+              <div className="text-2xl mb-2 opacity-40">✦</div>
+              <h4 className="text-sm font-medium text-muted-foreground">No artifact yet</h4>
+              <p className="text-xs text-muted mt-1">Artifacts from analyses will appear here</p>
             </div>
           </div>
         )}

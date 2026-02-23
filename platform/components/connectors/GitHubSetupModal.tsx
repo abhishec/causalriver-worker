@@ -273,7 +273,7 @@ export function GitHubSetupModal({
                 <p className="text-[10px] text-muted mt-1">
                   Needs <code className="bg-surface px-1 rounded">repo</code> scope.{" "}
                   <a
-                    href="https://github.com/settings/tokens/new?scopes=repo&description=NexusBrain"
+                    href="https://github.com/settings/tokens/new?scopes=repo&description=BrainOS"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-accent hover:underline"

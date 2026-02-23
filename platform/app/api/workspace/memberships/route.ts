@@ -30,8 +30,8 @@ export async function GET() {
       .select(
         `organization_id, role, is_platform_admin,
          organizations:organization_id(
-           id, name, slug, plan, is_core_brain, customer_id,
-           customer:customer_id(id, name, slug)
+           id, name, slug, plan, is_core_brain, customer_id, allowed_email_domains,
+           customer:customer_id(id, name, slug, allowed_email_domains)
          )`
       )
       .eq("user_id", user.id)
@@ -42,16 +42,46 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Extract email domain for access control checks
+    const userEmailDomain = user.email
+      ? user.email.split("@")[1]?.toLowerCase()
+      : null;
+
     // Flatten nested organizations fields so generic option mappers can read {id, name}
-    const memberships = (rows ?? []).map((r: Record<string, unknown>) => {
-      const org = r.organizations as Record<string, unknown> | null;
-      return {
-        ...r,
-        id: r.organization_id,
-        name: org?.name ?? r.organization_id,
-        slug: org?.slug,
-      };
-    });
+    // Also filter by email domain restrictions
+    const memberships = (rows ?? [])
+      .filter((r: Record<string, unknown>) => {
+        // Email domain access control — only show workspaces the user's domain is allowed in
+        const org = r.organizations as Record<string, unknown> | null;
+        if (!org || !userEmailDomain) return true;
+
+        // Check org-level domain restriction first
+        const orgDomains = org.allowed_email_domains as string[] | null;
+        if (orgDomains && orgDomains.length > 0) {
+          return orgDomains.includes(userEmailDomain);
+        }
+
+        // Fallback to customer-level domain restriction
+        const customer = org.customer as Record<string, unknown> | null;
+        if (customer) {
+          const customerDomains = customer.allowed_email_domains as string[] | null;
+          if (customerDomains && customerDomains.length > 0) {
+            return customerDomains.includes(userEmailDomain);
+          }
+        }
+
+        // No restrictions — allow access
+        return true;
+      })
+      .map((r: Record<string, unknown>) => {
+        const org = r.organizations as Record<string, unknown> | null;
+        return {
+          ...r,
+          id: r.organization_id,
+          name: org?.name ?? r.organization_id,
+          slug: org?.slug,
+        };
+      });
 
     return NextResponse.json({ memberships });
   } catch (err) {
