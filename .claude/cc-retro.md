@@ -34,3 +34,20 @@
 - **What went wrong**: Nothing significant
 - **Prompt was missing**: Original prompt didn't mention shell env shadowing — but the debugging protocol caught it
 - **RL improvement**: The debugging protocol from Retro 001 paid off — checking environment first saved hours
+
+## Retro 003: E2E Conversation Saving Tests (2026-02-23)
+- **Task**: `0b8c9047` — E2E test that conversation saving works
+- **Time**: ~25 min (estimated 20 min — slightly over due to Playwright iteration)
+- **Model used**: Sonnet (correct — standard test writing)
+- **What went well**:
+  - Created full E2E infrastructure: auth setup, Playwright config with auth project
+  - API CRUD test passed first try
+  - UI test (send → AI response → verify in DB) robust approach
+  - All 5 tests green (auth + 2 conversation + 2 smoke)
+  - Clean commit passed lint-staged (ESLint + TypeScript)
+- **What went wrong**:
+  - First auth setup attempt used wrong selectors (generic `input[type="email"]` vs specific `#email`)
+  - UI test initially didn't wait for stream completion (checked DB before save fired)
+  - Reload-based verification failed due to workspace context loss — simplified to API verification
+- **Lesson**: For E2E tests, verify data via API calls rather than UI rendering. UI tests are flaky due to timing/state. API tests are deterministic.
+- **Pattern**: Always test the data layer (API CRUD) separately from UI rendering. If API test passes but UI fails, it's a rendering/timing issue, not a data bug.
