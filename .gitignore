@@ -74,6 +74,11 @@ infrastructure/cdk/cdk.out/*.lock
 # Backup files
 *.bak
 
+# Playwright
+platform/.auth/
+test-results/
+playwright-report/
+
 # IDE configs (may contain paths/secrets)
 .idea/
 .vscode/settings.json

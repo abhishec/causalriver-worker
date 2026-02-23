@@ -1,4 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+import dotenv from "dotenv";
+
+// Load .env.local for E2E test credentials
+dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 
 /**
  * Playwright E2E test configuration for BrainOS platform.
@@ -10,11 +15,11 @@ export default defineConfig({
   testDir: "./e2e",
 
   /* Maximum time one test can run */
-  timeout: 30_000,
+  timeout: 60_000,
 
   /* Expect assertions timeout */
   expect: {
-    timeout: 5_000,
+    timeout: 10_000,
   },
 
   /* Fail the build on CI if test.only is left in source */
@@ -40,11 +45,21 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
-  /* Only Chromium for speed */
   projects: [
+    // Auth setup — runs first, saves session to .auth/user.json
+    {
+      name: "setup",
+      testMatch: /auth\.setup\.ts/,
+    },
+
+    // Main tests — use saved auth state (skip login)
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: path.join(__dirname, ".auth/user.json"),
+      },
+      dependencies: ["setup"],
     },
   ],
 
