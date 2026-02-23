@@ -159,7 +159,7 @@ export async function POST(request: Request) {
           );
           const issuesRes = await jiraFetch(
             credentials, siteUrl,
-            `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints`
+            `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
           );
 
           const issues = issuesRes?.issues || [];
@@ -184,6 +184,13 @@ export async function POST(request: Request) {
                 project_name: project.name,
                 issue_key: issue.key,
                 summary: fields.summary,
+                // Store truncated description for requirement-level copilot intelligence
+                // This is what makes the copilot answer "What are the P0 requirements?" with actual details
+                description: typeof fields.description === 'string'
+                  ? fields.description.slice(0, 800)
+                  : typeof fields.description === 'object' && fields.description
+                    ? JSON.stringify(fields.description).slice(0, 800)
+                    : null,
                 status: fields.status?.name,
                 status_category: fields.status?.statusCategory?.name,
                 issue_type: fields.issuetype?.name,
@@ -194,6 +201,13 @@ export async function POST(request: Request) {
                 cycle_time_hours: cycleTimeHours,
                 story_points: fields.storyPoints || fields.customfield_10016 || null,
                 sprint: fields.sprint?.name || null,
+                labels: Array.isArray(fields.labels) ? fields.labels : [],
+                components: Array.isArray(fields.components)
+                  ? fields.components.map((c: any) => c.name).filter(Boolean)
+                  : [],
+                fix_versions: Array.isArray(fields.fixVersions)
+                  ? fields.fixVersions.map((v: any) => v.name).filter(Boolean)
+                  : [],
               },
               created_at: fields.resolutiondate || fields.updated || fields.created,
             };

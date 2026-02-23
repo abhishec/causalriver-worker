@@ -758,6 +758,108 @@ export async function POST(request: NextRequest) {
       // Long-Context Manager optimizes the fullPrompt AFTER buildContext.
       // Structured Output validates responses AFTER LLM generation.
 
+      // ── Requirement Intelligence: inject Jira ticket details for requirement queries ──
+      // When the query is about requirements, P0/P1 items, release status, or sprint content,
+      // we fetch actual Jira ticket metadata (summaries, descriptions, priorities, statuses)
+      // and inject them into the context. This is what makes the copilot answer
+      // "What are the P0 requirements?" with SPECIFIC ticket-level details rather than
+      // generic statistical patterns. This is the difference between "meh" and "wow".
+      const requirementKeywords = /\b(requirement|release|p0|p1|p2|sprint|backlog|ticket|issue|story|epic|blocker|priority|scope|milestone|deliverable|acceptance\s+criteria|user\s+stor|feature\s+request|bug|defect|roadmap|fix\s*version)\b/i;
+      if (requirementKeywords.test(message)) {
+        try {
+          // Fetch top 60 Jira signals for this workspace, ordered by priority + recency
+          const { data: jiraSignals } = await service
+            .from("cross_domain_signals")
+            .select("signal_type, signal_metadata, entity_id, created_at")
+            .eq("organization_id", workspaceId)
+            .eq("source_domain", "product.jira")
+            .order("created_at", { ascending: false })
+            .limit(60);
+
+          if (jiraSignals && jiraSignals.length > 0) {
+            // Sort by priority (P0 first) then recency
+            const priorityOrder: Record<string, number> = {
+              'Highest': 0, 'Blocker': 0, 'Critical': 0,
+              'High': 1,
+              'Medium': 2,
+              'Low': 3, 'Lowest': 4,
+            };
+            const sorted = [...jiraSignals].sort((a, b) => {
+              const pa = priorityOrder[a.signal_metadata?.priority] ?? 5;
+              const pb = priorityOrder[b.signal_metadata?.priority] ?? 5;
+              if (pa !== pb) return pa - pb;
+              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            });
+
+            // Build a structured ticket list for the LLM
+            const ticketLines = sorted.slice(0, 40).map((s: any) => {
+              const m = s.signal_metadata || {};
+              const status = m.status_category === 'Done' ? '✅' : m.status_category === 'In Progress' ? '🔄' : '📋';
+              const desc = m.description ? ` — ${m.description.slice(0, 200)}` : '';
+              const labels = m.labels?.length ? ` [${m.labels.join(', ')}]` : '';
+              const fixVers = m.fix_versions?.length ? ` (fixVersion: ${m.fix_versions.join(', ')})` : '';
+              const assignee = m.assignee ? ` → ${m.assignee}` : '';
+              const points = m.story_points ? ` (${m.story_points}pts)` : '';
+              return `${status} ${m.issue_key || s.entity_id} | ${m.priority || '?'} | ${m.issue_type || '?'} | ${m.status || '?'}${assignee}${points}${fixVers}${labels}\n   ${m.summary || 'No summary'}${desc}`;
+            });
+
+            // Compute summary stats
+            const byPriority: Record<string, number> = {};
+            const byStatus: Record<string, number> = {};
+            const byAssignee: Record<string, number> = {};
+            for (const s of jiraSignals) {
+              const m = s.signal_metadata || {};
+              byPriority[m.priority || 'Unknown'] = (byPriority[m.priority || 'Unknown'] || 0) + 1;
+              byStatus[m.status_category || 'Unknown'] = (byStatus[m.status_category || 'Unknown'] || 0) + 1;
+              if (m.assignee) byAssignee[m.assignee] = (byAssignee[m.assignee] || 0) + 1;
+            }
+
+            const statsLines = [
+              `Total tickets: ${jiraSignals.length}`,
+              `By priority: ${Object.entries(byPriority).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+              `By status: ${Object.entries(byStatus).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+              `Top assignees: ${Object.entries(byAssignee).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} (${v})`).join(', ')}`,
+            ];
+
+            // Inject as a special brain region
+            (brainRegions as any).requirementIntelligence = {
+              ticketList: ticketLines.join('\n'),
+              stats: statsLines.join('\n'),
+              ticketCount: jiraSignals.length,
+            };
+
+            logger.info(`[Copilot] Injected requirement intelligence: ${jiraSignals.length} Jira tickets for workspace ${workspaceId}`);
+          }
+
+          // Also fetch entity links to show which PRs address which requirements
+          let prToJiraLinks: any[] | null = null;
+          try {
+            const { data: links } = await service
+              .from("entity_links")
+              .select("source_entity_id, target_entity_id, link_type, evidence, confidence")
+              .eq("organization_id", workspaceId)
+              .eq("link_type", "pr_references_ticket")
+              .order("confidence", { ascending: false })
+              .limit(30);
+            prToJiraLinks = links;
+          } catch {
+            // entity_links table may not exist in some envs
+          }
+
+          if (prToJiraLinks && prToJiraLinks.length > 0) {
+            const linkLines = prToJiraLinks.map((l: any) =>
+              `PR ${l.source_entity_id} → ${l.target_entity_id} (${(l.confidence * 100).toFixed(0)}% confidence: ${l.evidence})`
+            );
+            (brainRegions as any).codeCoverage = {
+              prToTicketLinks: linkLines.join('\n'),
+              linkCount: prToJiraLinks.length,
+            };
+          }
+        } catch (reqErr) {
+          logger.warn("[Copilot] Non-fatal: requirement intelligence fetch failed:", reqErr);
+        }
+      }
+
       // ── Build unified context from ALL available brain regions ───────
       const builder = createBrainContextBuilder(brainRegions as BrainRegions);
       brainContext = builder.buildContext(message);
@@ -2013,10 +2115,11 @@ DO NOT invent any data. Instead:
 - NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
     }
 
-    // ── Visual chart instruction: teach Claude to emit inline charts ──────
-    effectiveSystemPrompt += `\n\n## VISUAL CHART OUTPUT
-When data is suitable for visualization (time series, comparisons, distributions), output an interactive chart using a fenced code block with language "chart" and a JSON body:
+    // ── Visual output instruction: charts, diagrams, infographics ─────────
+    effectiveSystemPrompt += `\n\n## VISUAL OUTPUT — Charts, Diagrams & Infographics
+You MUST use rich visual output whenever data supports it. The UI renders these as interactive artifacts.
 
+### 1. Charts (for metrics, trends, comparisons)
 \`\`\`chart
 {
   "type": "bar",
@@ -2026,8 +2129,34 @@ When data is suitable for visualization (time series, comparisons, distributions
   "data": [{"date": "Jan 1", "engineering": 42}, {"date": "Jan 2", "engineering": 55}]
 }
 \`\`\`
+Types: "bar", "line", "area", "stacked-bar". Use REAL data from brain context.
 
-Chart types: "bar", "line", "area", "stacked-bar". Always use REAL data from brain context. Combine charts with narrative explanation. Use charts when showing trends, comparisons, or distributions — they render as interactive visualizations in the UI.`;
+### 2. Mermaid Diagrams (for causal flows, architecture, dependencies)
+\`\`\`mermaid
+graph TD
+  A[Engineering Velocity] -->|effect: 0.72| B[Delivery Speed]
+  B -->|effect: 0.45| C[Customer Satisfaction]
+  C -->|effect: 0.88| D[Revenue Growth]
+  style A fill:#3b82f6,color:#fff
+  style D fill:#10b981,color:#fff
+\`\`\`
+Use Mermaid for: causal dependency graphs, release pipelines, team workflows, entity relationship diagrams, Gantt charts for timelines, state diagrams for ticket lifecycles.
+
+### 3. When to use which visual:
+- **Requirements/Release questions**: Start with a summary table of tickets by priority, then a Mermaid Gantt chart showing timeline, then a stacked-bar chart showing status distribution.
+- **Causal/Impact questions**: Use a Mermaid flowchart showing the causal chain with effect sizes on edges (e.g., A -->|0.72| B). Color high-impact nodes red/orange.
+- **Health/Velocity questions**: Line chart showing velocity over time, plus a Mermaid diagram of bottleneck dependencies.
+- **Who does what questions**: Stacked-bar chart of workload distribution, plus a Mermaid diagram of team collaboration patterns.
+- **Release readiness**: Progress bar via chart (actual vs target), Mermaid Gantt chart for sprint timeline, plus risk assessment table.
+
+### 4. Visual Presentation Rules:
+- ALWAYS include at least one visual element in responses about data
+- Lead with the visual, then explain with narrative
+- Use color coding consistently: red=#ef4444 (risk/critical), amber=#f59e0b (warning), green=#10b981 (good), blue=#3b82f6 (info)
+- For causal graphs: thicker lines = stronger effects (show effect_size on edge labels)
+- Show numbers precisely — use actual data values, not approximations
+- Combine multiple visual types when the data warrants it (e.g., chart + Mermaid diagram together)
+- For requirement lists, use markdown tables with columns: Key | Priority | Status | Assignee | Summary`;
 
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
@@ -2085,6 +2214,42 @@ USE THESE LINKS to:
 - Answer "What Slack discussions happened around [PR]?" → find Slack→PR links
 - Connect velocity collapse signals to specific Jira tickets via PR links
 - Show the full chain: Jira ticket → PR → commit → Slack discussion`;
+    }
+
+    // ── REQUIREMENT INTELLIGENCE: Ticket-level data for requirement queries ────
+    // This is what makes the copilot produce "wow" results for design partners.
+    // When users ask about P0 requirements, release status, or sprint progress,
+    // this injects the ACTUAL Jira ticket data (not just aggregated patterns)
+    // into the LLM prompt so it can give specific, impressive answers.
+    const reqIntel = (brainRegions as any)?.requirementIntelligence;
+    const codeCoverage = (brainRegions as any)?.codeCoverage;
+
+    if (reqIntel && reqIntel.ticketCount > 0) {
+      effectiveSystemPrompt += `\n\n## REQUIREMENT INTELLIGENCE — ${reqIntel.ticketCount} Jira Tickets (use these for SPECIFIC answers about requirements, releases, and sprint status)
+
+### Ticket Statistics
+${reqIntel.stats}
+
+### Ticket Details (sorted by priority then recency)
+${reqIntel.ticketList}
+
+USE THIS DATA TO:
+- List SPECIFIC requirements when asked "What are the P0 requirements?"
+- Show exactly who is working on what and their progress
+- Identify blockers, at-risk items, and scope changes
+- Answer with ticket keys (e.g., "PROJ-123: Summary") — be SPECIFIC, not generic
+- When asked about release readiness, compute % done from status distribution
+- Highlight high-priority unresolved tickets as risks`;
+    }
+
+    if (codeCoverage && codeCoverage.linkCount > 0) {
+      effectiveSystemPrompt += `\n\n## CODE COVERAGE — PRs Addressing Requirements (${codeCoverage.linkCount} verified links)
+${codeCoverage.prToTicketLinks}
+
+USE THIS DATA TO:
+- Show which code changes (PRs) address which Jira requirements
+- Identify requirements WITHOUT linked PRs (coverage gaps)
+- Answer "What code supports requirement X?" with specific PR numbers`;
     }
 
     // ── BRAIN NUTRITION: LEAP Context (Deep Brain Reasoning from Sleep Cycles) ──
