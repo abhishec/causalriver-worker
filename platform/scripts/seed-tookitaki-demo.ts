@@ -57,7 +57,10 @@ interface WorkspaceDef {
     name: string;
     url: string;
     externalId: string;
+    projectKey?: string; // extracted from URL (e.g. FIN from projects/FIN/boards/544)
   }>;
+  jiraProjectKeys?: string[];      // explicit project keys to scope sync
+  jiraFixVersionFilter?: string;   // e.g. "5.11.5" — scopes JQL to fixVersion="X"
 }
 
 const WORKSPACES: WorkspaceDef[] = [
@@ -65,6 +68,8 @@ const WORKSPACES: WorkspaceDef[] = [
     name: "Tookitaki Fincense Release 5.11.5",
     slug: "tookitaki-fincense-5-11-5",
     releaseVersion: "5.11.5",
+    jiraProjectKeys: ["FIN"],        // Fincense project
+    jiraFixVersionFilter: "5.11.5",  // Scope to 5.11.5 release tickets only
     repos: [
       {
         owner: "tookitaki",
@@ -91,6 +96,7 @@ const WORKSPACES: WorkspaceDef[] = [
         name: "Fincense 5.11.5 Plan/Timeline",
         url: "https://tookitaki.atlassian.net/jira/plans/108/scenarios/108/timeline?vid=137",
         externalId: "108",
+        // Plan 108 = Advanced Roadmaps — sync extracts issues from plan's cross-project scope
       },
     ],
   },
@@ -98,6 +104,8 @@ const WORKSPACES: WorkspaceDef[] = [
     name: "Tookitaki Fincense Release 6.3.4",
     slug: "tookitaki-fincense-6-3-4",
     releaseVersion: "6.3.4",
+    jiraProjectKeys: ["FIN"],        // Fincense project (from board URL: projects/FIN/boards/544)
+    jiraFixVersionFilter: "6.3.4",   // Scope to 6.3.4 release tickets only
     repos: [
       {
         owner: "tookitaki",
@@ -124,6 +132,7 @@ const WORKSPACES: WorkspaceDef[] = [
         name: "Fincense FIN Board",
         url: "https://tookitaki.atlassian.net/jira/software/c/projects/FIN/boards/544",
         externalId: "544",
+        projectKey: "FIN",  // Extracted from: projects/FIN/boards/544
       },
       {
         type: "dashboard",
@@ -306,7 +315,12 @@ async function seedGitHubConnectors(orgId: string, repos: WorkspaceDef["repos"])
   }
 }
 
-async function seedJiraConnectors(orgId: string, jiraItems: WorkspaceDef["jira"]) {
+async function seedJiraConnectors(
+  orgId: string,
+  jiraItems: WorkspaceDef["jira"],
+  projectKeys?: string[],
+  fixVersionFilter?: string,
+) {
   const { data: existingConnector } = await supabase
     .from("org_connectors")
     .select("id")
@@ -314,23 +328,37 @@ async function seedJiraConnectors(orgId: string, jiraItems: WorkspaceDef["jira"]
     .eq("connector_type", "jira")
     .maybeSingle();
 
+  // Auto-extract project keys from board URLs (e.g. projects/FIN/boards/544 → "FIN")
+  const extractedProjectKeys = new Set<string>(projectKeys || []);
+  for (const j of jiraItems) {
+    if (j.projectKey) extractedProjectKeys.add(j.projectKey);
+    const boardMatch = j.url.match(/projects\/([A-Z][A-Z0-9]+)\/boards/);
+    if (boardMatch) extractedProjectKeys.add(boardMatch[1]);
+  }
+
+  const connectorConfig = {
+    siteUrl: "https://tookitaki.atlassian.net",
+    sources: jiraItems.map((j) => ({
+      type: j.type,
+      name: j.name,
+      url: j.url,
+      externalId: j.externalId,
+      projectKey: j.projectKey || null,
+    })),
+    // These are CRITICAL for scoping the sync to the right release
+    projectKeys: extractedProjectKeys.size > 0 ? [...extractedProjectKeys] : undefined,
+    fixVersionFilter: fixVersionFilter || undefined,
+    note: "Jira API token required — run sync after providing token",
+  };
+
   if (!existingConnector) {
     const { data: connector, error } = await supabase
       .from("org_connectors")
       .insert({
         organization_id: orgId,
         connector_type: "jira",
-        status: "pending", // Needs Jira API token to activate
-        config: {
-          siteUrl: "https://tookitaki.atlassian.net",
-          sources: jiraItems.map((j) => ({
-            type: j.type,
-            name: j.name,
-            url: j.url,
-            externalId: j.externalId,
-          })),
-          note: "Jira API token required — run sync after providing token",
-        },
+        status: "pending",
+        config: connectorConfig,
       })
       .select("id")
       .single();
@@ -339,23 +367,13 @@ async function seedJiraConnectors(orgId: string, jiraItems: WorkspaceDef["jira"]
       console.error(`    [error] Jira connector:`, error.message);
       return;
     }
-    console.log(`    [created] Jira connector (${connector.id}) — ${jiraItems.length} sources configured`);
+    console.log(`    [created] Jira connector (${connector.id}) — ${jiraItems.length} sources, projectKeys=[${[...extractedProjectKeys].join(',')}], fixVersion=${fixVersionFilter || 'all'}`);
   } else {
     await supabase
       .from("org_connectors")
-      .update({
-        config: {
-          siteUrl: "https://tookitaki.atlassian.net",
-          sources: jiraItems.map((j) => ({
-            type: j.type,
-            name: j.name,
-            url: j.url,
-            externalId: j.externalId,
-          })),
-        },
-      })
+      .update({ config: connectorConfig })
       .eq("id", existingConnector.id);
-    console.log(`    [exists] Jira connector (${existingConnector.id}) — sources updated`);
+    console.log(`    [exists] Jira connector (${existingConnector.id}) — sources updated, projectKeys=[${[...extractedProjectKeys].join(',')}], fixVersion=${fixVersionFilter || 'all'}`);
   }
 }
 
@@ -421,7 +439,7 @@ async function main() {
     console.log("\n  Connectors:");
     await seedS3Connector(org.id);
     await seedGitHubConnectors(org.id, wsDef.repos);
-    await seedJiraConnectors(org.id, wsDef.jira);
+    await seedJiraConnectors(org.id, wsDef.jira, wsDef.jiraProjectKeys, wsDef.jiraFixVersionFilter);
   }
 
   // ─── Summary ────────────────────────────────────────────────────────────

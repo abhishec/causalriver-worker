@@ -327,16 +327,131 @@ async function syncJiraForOrg(
 
   try {
     const basicAuth = Buffer.from(`${email}:${apiToken}`).toString("base64");
+    const authHeaders = { Authorization: `Basic ${basicAuth}`, Accept: "application/json" };
 
-    // Fetch accessible projects
+    const projectKeys = connectorConfig.projectKeys as string[] | undefined;
+    const fixVersionFilter = connectorConfig.fixVersionFilter || connectorConfig.sources?.[0]?.name?.match(/\d+\.\d+\.\d+/)?.[0];
+    const sources = (connectorConfig.sources || []) as Array<{
+      type: string; externalId: string; name?: string; url?: string; projectKey?: string;
+    }>;
+
+    let signalsGenerated = 0;
+    let recordsProcessed = 0;
+    const errors: string[] = [];
+    const syncedIssueKeys = new Set<string>();
+
+    // Helper: transform issue to signal
+    const issueToSignal = (issue: any, projKey?: string, projName?: string) => {
+      const fields = issue.fields || {};
+      const pKey = projKey || fields.project?.key || issue.key?.split("-")[0] || "UNKNOWN";
+      const pName = projName || fields.project?.name || pKey;
+      const isResolved = !!fields.resolutiondate;
+      const cycleTimeHours = isResolved
+        ? (new Date(fields.resolutiondate).getTime() - new Date(fields.created).getTime()) / 3600000
+        : null;
+      return {
+        organization_id: orgId,
+        source_domain: "product.jira",
+        signal_type: isResolved ? "ticket_resolved" : "ticket_in_progress",
+        signal_value: cycleTimeHours || 1,
+        entity_type: "jira_issue",
+        entity_id: `${pKey}-${issue.key}`,
+        signal_metadata: {
+          project_key: pKey, project_name: pName, issue_key: issue.key,
+          summary: fields.summary,
+          description: typeof fields.description === "string"
+            ? fields.description.slice(0, 800)
+            : typeof fields.description === "object" && fields.description
+              ? JSON.stringify(fields.description).slice(0, 800)
+              : null,
+          status: fields.status?.name,
+          status_category: fields.status?.statusCategory?.name,
+          issue_type: fields.issuetype?.name,
+          priority: fields.priority?.name,
+          assignee: fields.assignee?.displayName || null,
+          reporter: fields.reporter?.displayName || null,
+          cycle_time_hours: cycleTimeHours,
+          story_points: fields.storyPoints || fields.story_points || null,
+          sprint: fields.sprint?.name || null,
+          labels: Array.isArray(fields.labels) ? fields.labels : [],
+          components: Array.isArray(fields.components)
+            ? fields.components.map((c: any) => c.name).filter(Boolean) : [],
+          fix_versions: Array.isArray(fields.fixVersions)
+            ? fields.fixVersions.map((v: any) => v.name).filter(Boolean) : [],
+        },
+        created_at: fields.resolutiondate || fields.updated || fields.created,
+      };
+    };
+
+    // ── Phase A: Board-specific sync (Agile API) ─────────────────────────
+    const boardSources = sources.filter((s) => s.type === "board" && s.externalId);
+    for (const board of boardSources) {
+      try {
+        console.log(`    🎯 Fetching board ${board.externalId} via Agile API...`);
+        let startAt = 0;
+        let boardIssues: any[] = [];
+        let hasMore = true;
+        while (hasMore) {
+          const boardRes = await fetch(
+            `${siteUrl}/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
+            { headers: authHeaders }
+          );
+          if (!boardRes.ok) throw new Error(`Board API ${boardRes.status}`);
+          const boardData = await boardRes.json();
+          const issues = boardData?.issues || [];
+          boardIssues = boardIssues.concat(issues);
+          startAt += issues.length;
+          hasMore = issues.length === 50 && startAt < (boardData?.total || 0);
+          if (startAt >= 500) break;
+        }
+
+        // Optional fixVersion filter within board issues
+        if (fixVersionFilter) {
+          boardIssues = boardIssues.filter((issue: any) => {
+            const fv = issue.fields?.fixVersions || [];
+            return fv.length === 0 || fv.some((v: any) => v.name?.includes(fixVersionFilter));
+          });
+        }
+
+        console.log(`    📋 Board ${board.externalId}: ${boardIssues.length} issues`);
+        const signals = boardIssues.map((i: any) => issueToSignal(i, board.projectKey));
+        for (const i of boardIssues) syncedIssueKeys.add(i.key);
+
+        if (signals.length > 0) {
+          const { error: insertErr } = await supabase.from("cross_domain_signals").insert(signals);
+          if (insertErr) errors.push(`board-${board.externalId}: ${insertErr.message}`);
+          else signalsGenerated += signals.length;
+        }
+        recordsProcessed += boardIssues.length;
+      } catch (boardErr: any) {
+        console.log(`    ⚠️  Board ${board.externalId} Agile API failed: ${boardErr.message} — will fall back to project sync`);
+        errors.push(`board-${board.externalId}: ${boardErr.message}`);
+      }
+    }
+
+    // ── Phase B: Dashboard validation ────────────────────────────────────
+    const dashboardSources = sources.filter((s) => s.type === "dashboard" && s.externalId);
+    for (const dash of dashboardSources) {
+      try {
+        const dashRes = await fetch(
+          `${siteUrl}/rest/api/3/dashboard/${dash.externalId}`,
+          { headers: authHeaders }
+        );
+        if (dashRes.ok) {
+          const dashData = await dashRes.json();
+          console.log(`    📊 Dashboard "${dashData?.name || dash.externalId}" validated ✓`);
+        } else {
+          console.log(`    ⚠️  Dashboard ${dash.externalId}: ${dashRes.status} — non-fatal`);
+        }
+      } catch {
+        // Non-fatal
+      }
+    }
+
+    // ── Phase C: Project-level sync (catch-all with dedup) ───────────────
     const projectsRes = await fetch(
       `${siteUrl}/rest/api/3/project/search?maxResults=50`,
-      {
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          Accept: "application/json",
-        },
-      }
+      { headers: authHeaders }
     );
 
     if (!projectsRes.ok) {
@@ -346,15 +461,7 @@ async function syncJiraForOrg(
     const projectsData = await projectsRes.json();
     const projects = projectsData.values || [];
 
-    const projectKeys = connectorConfig.projectKeys as string[] | undefined;
-    const fixVersionFilter = connectorConfig.fixVersionFilter || connectorConfig.sources?.[0]?.name?.match(/\d+\.\d+\.\d+/)?.[0];
-
-    let signalsGenerated = 0;
-    let recordsProcessed = 0;
-    const errors: string[] = [];
-
     for (const project of projects) {
-      // Filter by configured project keys if set
       if (projectKeys && projectKeys.length > 0 && !projectKeys.includes(project.key)) {
         continue;
       }
@@ -367,13 +474,8 @@ async function syncJiraForOrg(
           `project = "${project.key}"${fixVersionClause} AND updated >= -90d ORDER BY updated DESC`
         );
         const issuesRes = await fetch(
-          `${siteUrl}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,story_points`,
-          {
-            headers: {
-              Authorization: `Basic ${basicAuth}`,
-              Accept: "application/json",
-            },
-          }
+          `${siteUrl}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`,
+          { headers: authHeaders }
         );
 
         if (!issuesRes.ok) {
@@ -383,56 +485,20 @@ async function syncJiraForOrg(
         }
 
         const issuesData = await issuesRes.json();
-        const issues = issuesData.issues || [];
+        // Dedup: skip issues already synced from board phase
+        const issues = (issuesData.issues || []).filter((i: any) => !syncedIssueKeys.has(i.key));
 
-        // Transform to Brain L1 signals
-        const signals = issues.map((issue: any) => {
-          const fields = issue.fields || {};
-          const isResolved = !!fields.resolutiondate;
-          const cycleTimeHours = isResolved
-            ? (new Date(fields.resolutiondate).getTime() - new Date(fields.created).getTime()) / 3600000
-            : null;
-
-          return {
-            organization_id: orgId,
-            source_domain: "product.jira",
-            signal_type: isResolved ? "ticket_resolved" : "ticket_in_progress",
-            signal_value: cycleTimeHours || 1,
-            entity_type: "jira_issue",
-            entity_id: `${project.key}-${issue.key}`,
-            signal_metadata: {
-              project_key: project.key,
-              project_name: project.name,
-              issue_key: issue.key,
-              summary: fields.summary,
-              status: fields.status?.name,
-              status_category: fields.status?.statusCategory?.name,
-              issue_type: fields.issuetype?.name,
-              priority: fields.priority?.name,
-              assignee: fields.assignee?.displayName || null,
-              reporter: fields.reporter?.displayName || null,
-              cycle_time_hours: cycleTimeHours,
-              story_points: fields.story_points || null,
-              sprint: fields.sprint?.name || null,
-            },
-            created_at: fields.resolutiondate || fields.updated || fields.created,
-          };
-        });
+        const signals = issues.map((issue: any) => issueToSignal(issue, project.key, project.name));
+        for (const i of issues) syncedIssueKeys.add(i.key);
 
         if (signals.length > 0) {
-          const { error: insertErr } = await supabase
-            .from("cross_domain_signals")
-            .insert(signals);
-
-          if (insertErr) {
-            errors.push(`${project.key}: ${insertErr.message}`);
-          } else {
-            signalsGenerated += signals.length;
-          }
+          const { error: insertErr } = await supabase.from("cross_domain_signals").insert(signals);
+          if (insertErr) errors.push(`${project.key}: ${insertErr.message}`);
+          else signalsGenerated += signals.length;
         }
 
         recordsProcessed += issues.length;
-        console.log(`    📋 ${project.key}: ${issues.length} issues → ${signals.length} signals`);
+        console.log(`    📋 ${project.key}: ${issues.length} new issues → ${signals.length} signals`);
 
         // Link Jira issues to GitHub PRs
         try {
@@ -452,7 +518,7 @@ async function syncJiraForOrg(
             });
           }
         } catch {
-          // Non-fatal — entity_links may not exist
+          // Non-fatal
         }
       } catch (projectErr: any) {
         errors.push(`${project.key}: ${projectErr.message}`);
@@ -478,7 +544,8 @@ async function syncJiraForOrg(
     }
 
     const duration = ((Date.now() - startMs) / 1000).toFixed(1);
-    console.log(`    ✅ Jira sync: ${signalsGenerated} signals from ${recordsProcessed} issues (${duration}s)`);
+    console.log(`    ✅ Jira sync: ${signalsGenerated} signals from ${recordsProcessed} issues, ${syncedIssueKeys.size} unique (${duration}s)`);
+    console.log(`       Sources: ${boardSources.length} boards, ${dashboardSources.length} dashboards + project catch-all. fixVersion=${fixVersionFilter || 'all'}, projectKeys=[${(projectKeys || []).join(',')}]`);
     if (errors.length > 0) {
       console.log(`    ⚠️  Errors: ${errors.join("; ")}`);
     }

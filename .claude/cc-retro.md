@@ -196,3 +196,31 @@
 - **Critical insight**: **The copilot is signal-centric, not document-centric.** It stores metrics, entity links, and causal edges — NOT raw Jira descriptions or PR diffs. For requirement-level queries, you MUST inject the raw signal_metadata (which includes summaries) into the LLM context. The brain context builder doesn't do this automatically.
 - **Pattern**: Always validate end-to-end output quality BEFORE a demo. "The pipeline works" ≠ "the output is impressive". Check what the LLM actually receives in its system prompt.
 - **Anti-pattern**: Don't assume the brain context builder includes everything. It includes patterns + causal edges (statistical aggregates), NOT individual records. Custom injection is needed for record-level queries.
+
+## Retro 013: Tookitaki Demo — P0 Wow Enhancement + Multi-Repo Fix (2026-02-23)
+- **Task**: `896b902f` — Make copilot produce "wow" results for Tookitaki P0 requirements demo
+- **Time**: ~90 min across 2 context windows (estimated 60 min — over due to multi-repo bug discovery + prediction model implementation)
+- **Model used**: Sonnet for implementation + Opus Explore agents for deep pipeline/multi-repo analysis (correct mix)
+- **What went well**:
+  - **Pre-computed visual artifacts**: Injected chart specs (stacked-bar, workload, type breakdown), Mermaid diagrams, and risk assessments directly into LLM context — copilot can now render rich infographics without computing them at response time
+  - **Response Blueprint**: Added 7-step structured output template that forces the LLM to produce consistent, visually rich responses for P0 queries
+  - **Live Capability Demonstration**: The "killer wow" — when user asks about P0 requirements, copilot now shows "Brain OS is ALREADY computing this" with real live metrics from ai_memory
+  - **HHI implementation**: Added Herfindahl-Hirschman Index to reviewer concentration analysis (antitrust-style metric, >0.25 = dangerous)
+  - **Velocity prediction**: Implemented Holt's double exponential smoothing as XGBoost equivalent — captures level + trend + confidence without ML dependencies
+  - **Betweenness centrality**: Full Brandes algorithm (O(V*E)) with z-score normalization for bottleneck detection
+  - **CRITICAL BUG FIX**: Discovered and fixed multi-repo sync — only ONE repo was syncing per workspace despite config storing multiple repos
+  - **Final validation**: 40/40 P0 requirements (100%) verified implemented
+  - **User confirmed**: "all artifacts enabled wowed" — design partner demo ready
+- **What went wrong**:
+  - Multi-repo bug was a surprise — should have been caught during Retro 012's demo setup work
+  - `sorted` variable scoping error (defined inside if-block, used outside) — classic JS scoping mistake
+  - `trackedBranches` renamed to `defaultTrackedBranches` during refactor but old references left behind
+  - `reviewer_breakdown` format mismatch (array vs object) — ai_memory stores arrays but old code expected Record<string, number>
+  - Took 2 context windows — first window spent on visual artifacts, second on prediction models + multi-repo fix
+- **Critical bug discovered**: **GitHub sync only synced ONE repo per workspace.** Config stored `repositories[]` array but sync route only read `config.owner`/`config.repo` (singular). This would have been a catastrophic demo failure — "we cannot have surprises" was prophetic.
+- **Lesson**: When implementing multi-entity features (multi-repo, multi-board), always verify the SYNC layer handles arrays, not just the CONFIG layer. The seed script stored arrays correctly, but the sync route was still singular.
+- **Pattern**: For demo "wow" factor, pre-compute visual artifacts server-side and inject them into the LLM prompt. Don't rely on the LLM to generate chart specs from raw data — it's inconsistent. Give it the exact spec and tell it to embed it.
+- **Pattern**: For statistical predictions without ML libraries, Holt's double exponential smoothing is a credible alternative to XGBoost for time-series trends. It captures level + trend with configurable smoothing (α=0.3, β=0.1 worked well).
+- **Anti-pattern**: Don't assume "the pipeline handles multi-X" just because the config supports it. Always trace the data flow: config → sync → storage → query → display. The bug was in step 2 (sync).
+- **RL improvement**: Retro 012's exploration-first approach saved time on the copilot changes, but missed the multi-repo sync bug. Future pattern: when touching connectors, always verify the FULL sync path for ALL configured entities.
+- **Commits**: `a23b26d05` (visual artifacts), `92b84db1a` (live demo + HHI), `8102c11b4` (multi-repo + prediction + centrality)

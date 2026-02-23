@@ -138,18 +138,136 @@ export async function POST(request: Request) {
     let recordsProcessed = 0;
     const errors: string[] = [];
 
+    // ── SOURCE-AWARE SYNC ────────────────────────────────────────────────────
+    // If connector has `sources` config (dashboard/board/plan), use source-type-
+    // specific APIs. This is critical for Tookitaki where dashboards and boards
+    // scope to specific releases, not all org-wide tickets.
+    const sources = config?.sources as Array<{
+      type: string; externalId: string; name?: string; url?: string; projectKey?: string;
+    }> | undefined;
+
+    // Auto-resolve projectKeys from stored connector config if not in request body
+    const effectiveProjectKeys: string[] | undefined =
+      projectKeys ??
+      (config?.projectKeys as string[] | undefined);
+
+    // Track which issue keys were already synced (dedup across board + project sources)
+    const syncedIssueKeys = new Set<string>();
+    const boardSources = (sources || []).filter((s) => s.type === 'board' && s.externalId);
+    const dashboardSources = (sources || []).filter((s) => s.type === 'dashboard' && s.externalId);
+    const planSources = (sources || []).filter((s) => s.type === 'plan' && s.externalId);
+
     try {
-      // Fetch accessible projects
+      // ── Phase A: Board-specific sync (Agile API) ────────────────────────────
+      // Boards give us the EXACT issues the team is working on — most precise source.
+      // Uses /rest/agile/1.0/board/{boardId}/issue which returns the board's backlog + active sprint.
+      for (const board of boardSources) {
+        try {
+          logger.info(`[Jira sync] Fetching board ${board.externalId} issues via Agile API...`);
+
+          // Fetch board issues — paginate to get all (Agile API max 50 per page)
+          let startAt = 0;
+          let boardIssues: any[] = [];
+          let hasMore = true;
+          while (hasMore) {
+            const boardRes = await jiraFetch(
+              credentials, siteUrl,
+              `/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
+            );
+            const issues = boardRes?.issues || [];
+            boardIssues = boardIssues.concat(issues);
+            startAt += issues.length;
+            hasMore = issues.length === 50 && startAt < (boardRes?.total || 0);
+            // Safety cap: 500 issues max per board
+            if (startAt >= 500) break;
+          }
+
+          // Optional: filter by fixVersion even within board issues
+          if (effectiveFixVersion) {
+            boardIssues = boardIssues.filter((issue: any) => {
+              const fv = issue.fields?.fixVersions || [];
+              return fv.length === 0 || fv.some((v: any) => v.name?.includes(effectiveFixVersion));
+            });
+          }
+
+          logger.info(`[Jira sync] Board ${board.externalId}: ${boardIssues.length} issues`);
+
+          const signals = boardIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId, board.projectKey));
+          for (const i of boardIssues) syncedIssueKeys.add(i.key);
+
+          if (signals.length > 0) {
+            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
+            if (insertErr) errors.push(`board-${board.externalId}: ${insertErr.message}`);
+            else signalsGenerated += signals.length;
+          }
+          recordsProcessed += boardIssues.length;
+
+          // Cross-link board issues to GitHub PRs
+          await linkIssuesToGitHub(service, workspaceId, boardIssues);
+        } catch (boardErr: any) {
+          logger.warn(`[Jira sync] Board ${board.externalId} Agile API failed, will fall back to project sync: ${boardErr.message}`);
+          errors.push(`board-${board.externalId}: ${boardErr.message}`);
+        }
+      }
+
+      // ── Phase B: Dashboard validation ────────────────────────────────────────
+      // Dashboards don't have a direct "get issues" API, but we validate access
+      // and extract any project keys from dashboard gadgets for scoping.
+      for (const dash of dashboardSources) {
+        try {
+          const dashRes = await jiraFetch(credentials, siteUrl, `/rest/api/3/dashboard/${dash.externalId}`);
+          logger.info(`[Jira sync] Dashboard "${dashRes?.name || dash.externalId}" validated ✓`);
+        } catch (dashErr: any) {
+          logger.warn(`[Jira sync] Dashboard ${dash.externalId} validation failed: ${dashErr.message}`);
+          // Non-fatal — dashboard access isn't required for project-level sync
+        }
+      }
+
+      // ── Phase C: Plan-based sync (Advanced Roadmaps) ─────────────────────────
+      // Plans may contain cross-project issues. We try the plan API first, then
+      // fall back to project-scoped JQL with fixVersion filter.
+      for (const plan of planSources) {
+        try {
+          // Attempt Advanced Roadmaps plan issues endpoint
+          // This endpoint may not be available on all Jira Cloud instances
+          const planRes = await jiraFetch(
+            credentials, siteUrl,
+            `/rest/agile/1.0/board/${plan.externalId}/issue?maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
+          );
+          const planIssues = (planRes?.issues || []).filter(
+            (i: any) => !syncedIssueKeys.has(i.key)
+          );
+
+          if (planIssues.length > 0) {
+            logger.info(`[Jira sync] Plan ${plan.externalId}: ${planIssues.length} new issues`);
+            const signals = planIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId));
+            for (const i of planIssues) syncedIssueKeys.add(i.key);
+
+            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
+            if (insertErr) errors.push(`plan-${plan.externalId}: ${insertErr.message}`);
+            else signalsGenerated += signals.length;
+            recordsProcessed += planIssues.length;
+
+            await linkIssuesToGitHub(service, workspaceId, planIssues);
+          }
+        } catch {
+          // Plan API not available — will be covered by project-level sync below
+          logger.info(`[Jira sync] Plan ${plan.externalId} API not available — falling back to project-level sync`);
+        }
+      }
+
+      // ── Phase D: Project-level sync (standard REST API — catch-all) ─────────
+      // Fetches all accessible projects, filtered by projectKeys + fixVersion.
+      // Deduplicates against issues already synced from boards/plans above.
       const projectsRes = await jiraFetch(credentials, siteUrl, '/rest/api/3/project/search?maxResults=50');
       const projects = projectsRes?.values || [];
 
       for (const project of projects) {
-        // Filter by projectKeys if provided
-        if (projectKeys && projectKeys.length > 0 && !projectKeys.includes(project.key)) {
+        // Filter by projectKeys if provided (from request body OR stored config)
+        if (effectiveProjectKeys && effectiveProjectKeys.length > 0 && !effectiveProjectKeys.includes(project.key)) {
           continue;
         }
 
-        // Fetch issues — scope by fixVersion when provided (critical for multi-release orgs)
         try {
           const fixVersionClause = effectiveFixVersion
             ? ` AND fixVersion = "${effectiveFixVersion}"`
@@ -162,92 +280,26 @@ export async function POST(request: Request) {
             `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
           );
 
-          const issues = issuesRes?.issues || [];
+          // Dedup: skip issues already synced from board/plan sources
+          const issues = (issuesRes?.issues || []).filter(
+            (i: any) => !syncedIssueKeys.has(i.key)
+          );
 
-          // Transform each issue to Brain L1 signal
-          const signals = issues.map((issue: any) => {
-            const fields = issue.fields || {};
-            const isResolved = !!fields.resolutiondate;
-            const cycleTimeHours = isResolved
-              ? (new Date(fields.resolutiondate).getTime() - new Date(fields.created).getTime()) / 3600000
-              : null;
+          const signals = issues.map((issue: any) =>
+            transformIssueToSignal(issue, workspaceId, project.key, project.name)
+          );
+          for (const i of issues) syncedIssueKeys.add(i.key);
 
-            return {
-              organization_id: workspaceId,
-              source_domain: 'product.jira',
-              signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
-              signal_value: cycleTimeHours || 1,
-              entity_type: 'jira_issue',
-              entity_id: `${project.key}-${issue.key}`,
-              signal_metadata: {
-                project_key: project.key,
-                project_name: project.name,
-                issue_key: issue.key,
-                summary: fields.summary,
-                // Store truncated description for requirement-level copilot intelligence
-                // This is what makes the copilot answer "What are the P0 requirements?" with actual details
-                description: typeof fields.description === 'string'
-                  ? fields.description.slice(0, 800)
-                  : typeof fields.description === 'object' && fields.description
-                    ? JSON.stringify(fields.description).slice(0, 800)
-                    : null,
-                status: fields.status?.name,
-                status_category: fields.status?.statusCategory?.name,
-                issue_type: fields.issuetype?.name,
-                priority: fields.priority?.name,
-                assignee: fields.assignee?.displayName || null,
-                assignee_id: fields.assignee?.accountId || null,
-                reporter: fields.reporter?.displayName || null,
-                cycle_time_hours: cycleTimeHours,
-                story_points: fields.storyPoints || fields.customfield_10016 || null,
-                sprint: fields.sprint?.name || null,
-                labels: Array.isArray(fields.labels) ? fields.labels : [],
-                components: Array.isArray(fields.components)
-                  ? fields.components.map((c: any) => c.name).filter(Boolean)
-                  : [],
-                fix_versions: Array.isArray(fields.fixVersions)
-                  ? fields.fixVersions.map((v: any) => v.name).filter(Boolean)
-                  : [],
-              },
-              created_at: fields.resolutiondate || fields.updated || fields.created,
-            };
-          });
-
-          // Batch insert to cross_domain_signals
           if (signals.length > 0) {
-            const { error: insertErr } = await service
-              .from('cross_domain_signals')
-              .insert(signals);
-
-            if (insertErr) {
-              errors.push(`${project.key}: ${insertErr.message}`);
-            } else {
-              signalsGenerated += signals.length;
-            }
+            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
+            if (insertErr) errors.push(`${project.key}: ${insertErr.message}`);
+            else signalsGenerated += signals.length;
           }
 
           recordsProcessed += issues.length;
 
-          // NB-016: Back-link Jira issues → GitHub PRs referenced in their descriptions/comments.
-          // Runs after signals are inserted so failures here never block signal ingestion.
-          for (const issue of issues) {
-            try {
-              const fields = issue.fields || {};
-              const commentTexts: string[] = (fields.comment?.comments || []).map(
-                (c: any) => (typeof c.body === 'string' ? c.body : JSON.stringify(c.body ?? ''))
-              );
-              await linkJiraToGitHub(service, workspaceId, {
-                key: issue.key,
-                summary: fields.summary || '',
-                description: typeof fields.description === 'string'
-                  ? fields.description
-                  : JSON.stringify(fields.description ?? ''),
-                commentTexts,
-              });
-            } catch {
-              // Non-fatal — entity_links table may not exist in this env
-            }
-          }
+          // Cross-link to GitHub
+          await linkIssuesToGitHub(service, workspaceId, issues);
         } catch (projectErr: any) {
           errors.push(`${project.key}: ${projectErr.message}`);
         }
@@ -255,6 +307,8 @@ export async function POST(request: Request) {
     } catch (fetchErr: any) {
       errors.push(`Jira API: ${fetchErr.message}`);
     }
+
+    logger.info(`[Jira sync] Total: ${signalsGenerated} signals from ${recordsProcessed} issues (${syncedIssueKeys.size} unique). Sources: ${boardSources.length} boards, ${dashboardSources.length} dashboards, ${planSources.length} plans + project catch-all.`);
 
     const duration_ms = Date.now() - startMs;
 
@@ -366,6 +420,87 @@ async function jiraFetch(
   }
 
   return response.json();
+}
+
+/**
+ * Transform a raw Jira issue into a Brain L1 signal.
+ */
+function transformIssueToSignal(
+  issue: any,
+  organizationId: string,
+  projectKey?: string,
+  projectName?: string,
+): Record<string, any> {
+  const fields = issue.fields || {};
+  const pKey = projectKey || fields.project?.key || issue.key?.split('-')[0] || 'UNKNOWN';
+  const pName = projectName || fields.project?.name || pKey;
+  const isResolved = !!fields.resolutiondate;
+  const cycleTimeHours = isResolved
+    ? (new Date(fields.resolutiondate).getTime() - new Date(fields.created).getTime()) / 3600000
+    : null;
+
+  return {
+    organization_id: organizationId,
+    source_domain: 'product.jira',
+    signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
+    signal_value: cycleTimeHours || 1,
+    entity_type: 'jira_issue',
+    entity_id: `${pKey}-${issue.key}`,
+    signal_metadata: {
+      project_key: pKey,
+      project_name: pName,
+      issue_key: issue.key,
+      summary: fields.summary,
+      description: typeof fields.description === 'string'
+        ? fields.description.slice(0, 800)
+        : typeof fields.description === 'object' && fields.description
+          ? JSON.stringify(fields.description).slice(0, 800)
+          : null,
+      status: fields.status?.name,
+      status_category: fields.status?.statusCategory?.name,
+      issue_type: fields.issuetype?.name,
+      priority: fields.priority?.name,
+      assignee: fields.assignee?.displayName || null,
+      assignee_id: fields.assignee?.accountId || null,
+      reporter: fields.reporter?.displayName || null,
+      cycle_time_hours: cycleTimeHours,
+      story_points: fields.storyPoints || fields.customfield_10016 || null,
+      sprint: fields.sprint?.name || null,
+      labels: Array.isArray(fields.labels) ? fields.labels : [],
+      components: Array.isArray(fields.components)
+        ? fields.components.map((c: any) => c.name).filter(Boolean)
+        : [],
+      fix_versions: Array.isArray(fields.fixVersions)
+        ? fields.fixVersions.map((v: any) => v.name).filter(Boolean)
+        : [],
+    },
+    created_at: fields.resolutiondate || fields.updated || fields.created,
+  };
+}
+
+/**
+ * Back-link Jira issues → GitHub PRs referenced in descriptions/comments.
+ * Non-fatal — failures here never block signal ingestion.
+ */
+async function linkIssuesToGitHub(supabase: any, workspaceId: string, issues: any[]) {
+  for (const issue of issues) {
+    try {
+      const fields = issue.fields || {};
+      const commentTexts: string[] = (fields.comment?.comments || []).map(
+        (c: any) => (typeof c.body === 'string' ? c.body : JSON.stringify(c.body ?? ''))
+      );
+      await linkJiraToGitHub(supabase, workspaceId, {
+        key: issue.key,
+        summary: fields.summary || '',
+        description: typeof fields.description === 'string'
+          ? fields.description
+          : JSON.stringify(fields.description ?? ''),
+        commentTexts,
+      });
+    } catch {
+      // Non-fatal — entity_links table may not exist in this env
+    }
+  }
 }
 
 /**
