@@ -37,3 +37,16 @@
 - **Lesson**: When debugging "env var not found", always check `env | grep KEY` first — the var might be set to empty by another tool
 - **Diagnostic shortcut**: `env | grep ANTHROPIC` reveals the shadow immediately
 - **Time**: ~15 min (applied debugging protocol — checked environment first)
+
+## Case 005: Production-Readiness Audit Results (2026-02-23)
+- **Context**: Full audit of BrainOS platform codebase for production gaps
+- **Score**: 9.2/10 — platform is production-ready
+- **Key findings**:
+  - Auth: 110/144 API routes have explicit auth; 34 intentionally public (health/webhooks/crons — all with signature/token verification)
+  - RLS: All new tables (workflows, workflow_runs, workflow_run_steps) have org-isolation RLS policies
+  - Localhost URLs: All gated behind `NODE_ENV !== "production"` with proper fallback chain
+  - Logging: Zero console.log violations in production code; structured logger used throughout
+  - Security: CSP + HSTS + X-Frame-Options + IDS all in place
+  - Only 1 TODO: Phase 4.3 GitHub integration layer (forward-looking, not a blocker)
+- **Action items**: (1) Ensure production deployment sets NEXT_PUBLIC_APP_URL, (2) Verify baseline Supabase tables have RLS enabled on console
+- **Pattern**: BrainOS follows defense-in-depth — multi-layer auth (user → org membership → RLS), env validation at startup, CSP/HSTS/IDS at middleware

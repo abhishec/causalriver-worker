@@ -51,3 +51,22 @@
   - Reload-based verification failed due to workspace context loss — simplified to API verification
 - **Lesson**: For E2E tests, verify data via API calls rather than UI rendering. UI tests are flaky due to timing/state. API tests are deterministic.
 - **Pattern**: Always test the data layer (API CRUD) separately from UI rendering. If API test passes but UI fails, it's a rendering/timing issue, not a data bug.
+
+## Retro 004: Production-Readiness Audit (2026-02-23)
+- **Task**: `0c490c0d` — Validate production-readiness gaps and build missing glue code
+- **Time**: ~10 min (used background agent for parallel audit)
+- **Model used**: Sonnet for agent dispatch (correct — audit is pattern-matching, not deep debugging)
+- **What went well**:
+  - Used background Explore agent for comprehensive codebase audit (very thorough mode)
+  - Covered 10 audit categories: TODOs, error handling, hardcoded values, auth, logging, RLS, unimplemented routes, security headers, workspace isolation, env validation
+  - Analyzed 144+ API routes, 50+ library files, 2 migration files
+  - Score: 9.2/10 — platform is production-ready
+- **What went wrong**: Nothing significant — agent was thorough and accurate
+- **Key findings**:
+  - Only 1 TODO (Phase 4.3 GitHub integration — not a blocker)
+  - All localhost references properly gated behind NODE_ENV
+  - 110/144 routes have explicit auth; remaining 34 are intentionally public (health, webhooks, crons)
+  - RLS policies present on all new tables; baseline tables need Supabase console verification
+  - Security headers comprehensive (CSP, HSTS, X-Frame-Options, IDS)
+- **RL improvement**: Background agent pattern works well for audit tasks — parallel execution saves time
+- **Pattern**: For large-scale audits, use a background Explore agent with "very thorough" mode and specific search patterns
