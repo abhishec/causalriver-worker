@@ -7,7 +7,7 @@
 # 1. Memory limit (root cause of most failures):
 #    Webpack runs multiple worker processes during compilation. With Node's
 #    default ~1.5 GB heap limit, workers silently OOM → incomplete manifests
-#    → PageNotFoundError for many routes. We set --max-old-space-size=4096.
+#    → PageNotFoundError for many routes. We set --max-old-space-size=8192.
 #
 # 2. /_document PageNotFoundError (Next.js 15 App Router bug):
 #    Next.js always registers /_document in its pages mapping, even for
@@ -34,10 +34,11 @@ if [ ! -f "$PLATFORM_DIR/.next/package.json" ]; then
 fi
 
 # ── Set Node options ─────────────────────────────────────────────────────────
-# 1. Give webpack workers enough memory (4 GB vs default ~1.5 GB)
+# 1. Give webpack workers enough memory (8 GB — 4 GB was marginal, caused partial compilation)
 # 2. Suppress /_document unhandled rejection in App Router projects
+# 3. .next/package.json auto-created by suppress-document-error.cjs in worker processes too
 SUPPRESS_SCRIPT="$SCRIPT_DIR/suppress-document-error.cjs"
-export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=4096 --require $SUPPRESS_SCRIPT"
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192 --require $SUPPRESS_SCRIPT"
 
 echo "🔨 Building Next.js (App Router)..."
 
