@@ -25,13 +25,15 @@ export async function GET() {
     }
 
     const admin = getAdminClient();
+
+    // ── Query 1: Core membership data (always works, no optional columns) ──
     const { data: rows, error } = await admin
       .from("org_members")
       .select(
         `organization_id, role, is_platform_admin,
          organizations:organization_id(
-           id, name, slug, plan, is_core_brain, customer_id, allowed_email_domains,
-           customer:customer_id(id, name, slug, allowed_email_domains)
+           id, name, slug, plan, is_core_brain, customer_id,
+           customer:customer_id(id, name, slug)
          )`
       )
       .eq("user_id", user.id)
@@ -42,32 +44,54 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // ── Query 2: Domain restrictions (optional — migration may not exist) ──
+    // If allowed_email_domains columns don't exist yet, skip domain filtering
+    let domainMap: Record<string, { orgDomains: string[]; customerDomains: string[] }> = {};
+    try {
+      const orgIds = (rows ?? []).map((r: Record<string, unknown>) => r.organization_id);
+      if (orgIds.length > 0) {
+        const { data: domainRows } = await admin
+          .from("organizations")
+          .select("id, allowed_email_domains, customer_id, customer:customer_id(allowed_email_domains)")
+          .in("id", orgIds);
+
+        if (domainRows) {
+          for (const dr of domainRows as Record<string, unknown>[]) {
+            const cust = dr.customer as Record<string, unknown> | null;
+            domainMap[dr.id as string] = {
+              orgDomains: (dr.allowed_email_domains as string[]) ?? [],
+              customerDomains: (cust?.allowed_email_domains as string[]) ?? [],
+            };
+          }
+        }
+      }
+    } catch {
+      // Migration 20260324000001 not applied yet — skip domain filtering
+      logger.warn("[/api/workspace/memberships] allowed_email_domains not available — skipping domain filter");
+    }
+
     // Extract email domain for access control checks
     const userEmailDomain = user.email
       ? user.email.split("@")[1]?.toLowerCase()
       : null;
 
     // Flatten nested organizations fields so generic option mappers can read {id, name}
-    // Also filter by email domain restrictions
+    // Also filter by email domain restrictions (if available)
     const memberships = (rows ?? [])
       .filter((r: Record<string, unknown>) => {
-        // Email domain access control — only show workspaces the user's domain is allowed in
-        const org = r.organizations as Record<string, unknown> | null;
-        if (!org || !userEmailDomain) return true;
+        const orgId = r.organization_id as string;
+        if (!userEmailDomain || !domainMap[orgId]) return true;
+
+        const { orgDomains, customerDomains } = domainMap[orgId];
 
         // Check org-level domain restriction first
-        const orgDomains = org.allowed_email_domains as string[] | null;
-        if (orgDomains && orgDomains.length > 0) {
+        if (orgDomains.length > 0) {
           return orgDomains.includes(userEmailDomain);
         }
 
         // Fallback to customer-level domain restriction
-        const customer = org.customer as Record<string, unknown> | null;
-        if (customer) {
-          const customerDomains = customer.allowed_email_domains as string[] | null;
-          if (customerDomains && customerDomains.length > 0) {
-            return customerDomains.includes(userEmailDomain);
-          }
+        if (customerDomains.length > 0) {
+          return customerDomains.includes(userEmailDomain);
         }
 
         // No restrictions — allow access

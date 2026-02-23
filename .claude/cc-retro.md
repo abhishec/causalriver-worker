@@ -246,3 +246,23 @@
 - **Anti-pattern**: Migration comments lie! "Encrypted JSONB" comment on `org_connectors.credentials` was written aspirationally, not factually. Always verify actual function code, not comments
 - **Phase 2 TODO**: Migrate all 12+ sync route reads from `.select("credentials")` to `get_connector_credentials()` RPC, then NULL out plaintext column
 - **Commits**: `59647e1f0` (RLS fixes + encryption + logging + cron auth)
+
+## Retro 015: Pre-Demo Deep Check + Final Hardening (2026-02-24)
+- **Task**: Production deep check, Tookitaki setup verification, nightly cron audit, UI flow audit, branding cleanup
+- **Time**: ~40 min (estimated 30 min — slightly over due to Chrome extension disconnection)
+- **Model used**: Sonnet for coordination, Explore agents for parallel audits (correct)
+- **What went well**:
+  - **3 parallel Explore agents** confirmed full readiness: Tookitaki seed data (9.5/10), cron system (complete), connector UI flows (clean)
+  - **Production health endpoint** confirmed live: `{"status":"ok","version":"1.0.0"}`
+  - **Login page** renders correctly with all auth options (email, magic link, Google, GitHub)
+  - **No demo-blocking issues found** — all 4 security migrations syntactically correct, all 3 cron routes properly authenticated, all connector flows pass audit
+  - **3 cosmetic NexusBrain → Brain OS** comment fixes committed cleanly
+  - **Build passed** twice (pre and post fix) — clean ESLint + TypeScript
+- **What went wrong**:
+  - Chrome extension disconnected mid-audit — couldn't visually verify connector setup modals on localhost. Relied on code-level Explore agent audit instead (sufficient but not visual)
+  - Couldn't log into production (prohibited action) — user needs to verify dashboard themselves
+- **Pattern**: For demo readiness, launch 3 parallel Explore agents with distinct audit scopes: (1) seed data + provisioning, (2) cron/nightly, (3) UI flows. Covers full surface area in one round
+- **Pattern**: Always check production health endpoint (`/api/brain/health`) first — confirms deployment is live without needing auth
+- **Anti-pattern**: Don't try to navigate to auth-protected pages in browser automation — it wastes time on redirects
+- **Commits**: `1dda5b709` (NexusBrain → Brain OS comment cleanup)
+- **Demo readiness**: 9.5/10 — only remaining action is user logging into production and entering Jira credentials via UI

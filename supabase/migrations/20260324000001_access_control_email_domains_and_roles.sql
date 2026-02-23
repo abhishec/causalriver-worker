@@ -18,7 +18,7 @@ ALTER TABLE organizations
   ADD COLUMN IF NOT EXISTS allowed_email_domains TEXT[] DEFAULT '{}';
 
 COMMENT ON COLUMN organizations.allowed_email_domains IS
-  'Email domain allowlist (e.g. {"tookitaki.com", "nexus.ai"}). '
+  'Email domain allowlist (e.g. {"tookitaki.com", "monetiz3.com"}). '
   'Empty = no restriction (all authenticated users with membership can access). '
   'Non-empty = only users whose email ends with one of these domains can access.';
 
@@ -128,18 +128,19 @@ COMMENT ON FUNCTION get_user_access_tier(UUID, UUID) IS
 
 -- ── 5. Set up Tookitaki domain restriction ───────────────────────────────
 -- This will restrict Tookitaki workspaces to only @tookitaki.com and
--- @nexus.ai (for our team's admin access).
+-- @monetiz3.com (for BrainOS admin team access).
 
 -- Note: This only runs if the customer exists. Safe for all environments.
+-- Domains: tookitaki.com = design partner team, monetiz3.com = BrainOS admin team
 DO $$
 BEGIN
   UPDATE customers
-  SET allowed_email_domains = ARRAY['tookitaki.com', 'nexus.ai', 'nexus-ai.com']
+  SET allowed_email_domains = ARRAY['tookitaki.com', 'monetiz3.com']
   WHERE slug = 'tookitaki'
     AND (allowed_email_domains IS NULL OR allowed_email_domains = '{}');
 
   IF FOUND THEN
-    RAISE NOTICE 'Set Tookitaki email domain restrictions: tookitaki.com, nexus.ai, nexus-ai.com';
+    RAISE NOTICE 'Set Tookitaki email domain restrictions: tookitaki.com, monetiz3.com';
   END IF;
 END;
 $$;
