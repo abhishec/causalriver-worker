@@ -33,7 +33,7 @@ type ServiceMode = "general" | "aas" | "seaas";
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
     name: "Intelligence Copilot",
-    description: "Your intelligence co-pilot — ask anything about your business, grounded in evidence-based analysis",
+    description: "Your general-purpose AI assistant — chat freely, ask questions, brainstorm ideas, or run deep analyses with / commands",
     color: "accent",
   },
   aas: {
@@ -50,10 +50,10 @@ const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string;
 
 const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
   general: [
-    "Why is churn increasing?",
-    "Show me the strongest financial relationships",
+    "Why is churn increasing this quarter?",
+    "Summarize the key risks facing our business right now",
     "What anomalies were detected today?",
-    "Give me the full intelligence report",
+    "Help me prepare talking points for the board meeting",
   ],
   aas: [
     "Show me the P&L for 2025",
@@ -794,7 +794,7 @@ function CopilotPageInner() {
             >
               <div style={{ fontSize: 24, marginBottom: 8, opacity: 0.4 }}>✦</div>
               <h4 style={{ fontSize: 14, fontWeight: 500, color: "#73726c" }}>No artifact yet</h4>
-              <p style={{ fontSize: 12, color: "rgba(115,114,108,.6)", marginTop: 4 }}>Click a command to see results</p>
+              <p style={{ fontSize: 12, color: "rgba(115,114,108,.6)", marginTop: 4 }}>Artifacts from analyses will appear here</p>
             </div>
           </div>
         )}

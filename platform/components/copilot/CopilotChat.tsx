@@ -2042,8 +2042,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             <p className="text-xs text-muted mt-1.5">
               {activeService === "seaas" ? "Ask anything about your codebase, or type / for commands" :
                activeService === "aas" ? "Ask anything about your finances, or type / for commands" :
-               "Ask anything about your business, or type / for commands"}
+               "Just start typing — ask questions, brainstorm ideas, or get analysis"}
             </p>
+            {activeService === "general" && (
+              <p className="text-[11px] text-muted/60 mt-1">
+                Type <kbd className="px-1.5 py-0.5 rounded bg-surface-hover border border-border-subtle text-[10px] font-mono">/</kbd> for advanced commands
+              </p>
+            )}
 
             {/* Example prompt chips — click to start a conversation immediately */}
             <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-[540px]">
@@ -2579,7 +2584,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 placeholder={
                   activeService === "seaas" ? "Ask about engineering, or type / for commands…" :
                   activeService === "aas" ? "Ask about finances, or type / for commands…" :
-                  "Ask anything, or type / for commands…"
+                  "Ask me anything about your business…"
                 }
                 disabled={isLoading}
                 rows={1}
