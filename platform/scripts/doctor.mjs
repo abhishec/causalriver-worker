@@ -134,6 +134,15 @@ function checkRequiredEnvVars(vars) {
     ok(`${REQUIRED_ENV.length}/${REQUIRED_ENV.length} required env vars present`);
   }
 
+  // Check for empty shell env vars that shadow .env.local values.
+  // Tools like Claude Code export ANTHROPIC_API_KEY="" which prevents
+  // Next.js / dotenv from loading the real value from .env.local.
+  for (const key of REQUIRED_ENV) {
+    if (vars[key] && process.env[key] !== undefined && process.env[key].trim() === "") {
+      warn(`${key} — empty in shell env (will shadow .env.local). Dev scripts auto-fix this.`);
+    }
+  }
+
   // Optional vars (just info, no fail)
   for (const key of OPTIONAL_ENV) {
     const val = vars[key] || process.env[key];

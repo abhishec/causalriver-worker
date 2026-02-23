@@ -159,6 +159,18 @@ function validateEnv() {
     process.exit(1);
   }
   ok(`Env validated (${REQUIRED.length} required vars present)`);
+
+  // Inject .env.local values into process.env for vars that are empty or missing.
+  // Why: Tools like Claude Code export ANTHROPIC_API_KEY="" in the shell environment.
+  // Next.js / dotenv won't overwrite existing env vars (even empty ones), so the
+  // empty shell value shadows the real .env.local value. Fix by explicitly setting
+  // process.env from the parsed file for any required var that's empty.
+  for (const k of REQUIRED) {
+    if (vars[k] && (!process.env[k] || process.env[k].trim() === "")) {
+      process.env[k] = vars[k];
+      info(`Injected ${k} from .env.local (was empty in shell env)`);
+    }
+  }
 }
 
 /* ── Step 4: Readiness check + Pre-warm routes ───────────────────── */

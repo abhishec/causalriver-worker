@@ -28,3 +28,12 @@
 - **Fix**: Use real .env.local during builds, don't substitute dummy values
 - **Pattern**: Compile-time inlined vars have build-wide side effects beyond their direct usage site
 - **Lesson**: Never hide .env.local during Next.js builds — NEXT_PUBLIC vars are baked into the JS bundle at compile time
+
+## Case 004: ANTHROPIC_API_KEY empty in shell shadows .env.local (2026-02-23)
+- **Symptom**: API routes return 503 "ANTHROPIC_API_KEY not configured" despite key being in .env.local
+- **Root cause**: Claude Code exports `ANTHROPIC_API_KEY=""` (empty string) into child process env. Next.js / dotenv never overwrite existing env vars — even empty ones. So the empty shell value shadows the real .env.local value.
+- **Fix**: In dev-watchdog.mjs and dev.mjs, after parsing .env.local, inject values into process.env for any required var that's empty in the shell. This runs BEFORE spawning `next dev`.
+- **Pattern**: Empty env var ≠ unset env var. `process.env.KEY = ""` is truthy for `!== undefined` but falsy for `if (!val)`. dotenv treats any existing key (even empty) as "already defined".
+- **Lesson**: When debugging "env var not found", always check `env | grep KEY` first — the var might be set to empty by another tool
+- **Diagnostic shortcut**: `env | grep ANTHROPIC` reveals the shadow immediately
+- **Time**: ~15 min (applied debugging protocol — checked environment first)

@@ -384,6 +384,18 @@ function preflight() {
     logError("Cannot start — fix the missing env vars above, then run pnpm dev again.");
     process.exit(1);
   }
+
+  // 5. Inject .env.local values into process.env for vars that are empty or missing.
+  // Why: Tools like Claude Code set ANTHROPIC_API_KEY="" in the shell environment.
+  // Next.js / dotenv won't overwrite existing env vars (even empty ones), so the
+  // empty shell value shadows the real .env.local value. We fix this by explicitly
+  // setting process.env from the parsed file for any required var that's empty.
+  for (const key of REQUIRED_ENV_VARS) {
+    if (envVars[key] && (!process.env[key] || process.env[key].trim() === "")) {
+      process.env[key] = envVars[key];
+      log(`Injected ${key} from .env.local (was empty in shell env)`);
+    }
+  }
 }
 
 // Go
