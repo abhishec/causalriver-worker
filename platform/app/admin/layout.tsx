@@ -2,6 +2,9 @@ import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "./admin-sidebar";
 
+// Force dynamic rendering — this layout checks auth + admin status at runtime.
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({
   children,
 }: {

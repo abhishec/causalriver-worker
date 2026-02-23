@@ -1,5 +1,9 @@
 import { AuthLeftPanel } from "./AuthLeftPanel";
 import { CORE_ORG_ID } from "@/lib/constants";
+
+// Force dynamic rendering — this layout fetches live brain stats from Supabase
+// and must not be pre-rendered at build time (which fails without a live DB).
+export const dynamic = "force-dynamic";
 function getHeaders() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
