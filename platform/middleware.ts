@@ -22,22 +22,36 @@ const forceIDS = process.env.DEV_ENABLE_IDS === "true";
 /* ── Security headers helper ──────────────────────────────────────── */
 
 function addSecurityHeaders(response: NextResponse) {
-  // Content Security Policy (CSP) - Prevents XSS attacks
+  // Content Security Policy (CSP) — Defense against XSS
+  //
+  // Production:
+  //   - No unsafe-eval (only needed for Next.js hot reload in dev)
+  //   - unsafe-inline for style-src only (Tailwind + inline styles — industry standard)
+  //   - Nonce-based CSP would be ideal for script-src but requires per-request nonce
+  //     generation in Next.js middleware which adds complexity. unsafe-inline is kept
+  //     for script-src as a pragmatic choice — the IDS layer blocks actual XSS payloads.
+  //   - connect-src: Supabase (DB/auth), Anthropic (AI), Google/GitHub (OAuth)
+  //
+  // Dev:
+  //   - unsafe-eval allowed (Next.js HMR/fast refresh requires it)
+  //   - localhost connections allowed (dev server, WebSocket HMR)
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net",
+    isDev
+      ? "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net"
+      : "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
     isDev
-      ? "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.co wss://*.supabase.co"
-      : "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://github.com",
+      ? "connect-src 'self' http://localhost:* ws://localhost:* https://*.supabase.co wss://*.supabase.co https://api.anthropic.com"
+      : "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://accounts.google.com https://github.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self' https://*.supabase.co https://accounts.google.com https://github.com",
     "object-src 'none'",
-    "upgrade-insecure-requests",
-  ].join('; ');
+    isDev ? "" : "upgrade-insecure-requests",
+  ].filter(Boolean).join('; ');
   response.headers.set('Content-Security-Policy', cspDirectives);
 
   // HTTP Strict Transport Security (HSTS) - Force HTTPS
