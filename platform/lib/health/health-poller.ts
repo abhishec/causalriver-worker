@@ -35,6 +35,7 @@ export interface HealthSnapshot {
     signals: HealthDimension;
     connectors: HealthDimension;
     jobs: HealthDimension;
+    pipeline_sla: HealthDimension;
   };
   recommendations: string[];
   timestamp: string;
@@ -49,7 +50,7 @@ export interface PollResult {
   durationMs: number;
 }
 
-interface AlertViolation {
+export interface AlertViolation {
   dimension: string;
   score: number;
   threshold: number;
@@ -57,24 +58,26 @@ interface AlertViolation {
   message: string;
 }
 
-interface Thresholds {
+export interface Thresholds {
   min_prediction_score: number;
   min_causal_graph_score: number;
   min_signal_score: number;
   min_connector_score: number;
   min_job_score: number;
   min_overall_score: number;
+  min_pipeline_sla_score: number;
   cooldown_hours: number;
   enabled: boolean;
 }
 
-const DEFAULT_THRESHOLDS: Thresholds = {
+export const DEFAULT_THRESHOLDS: Thresholds = {
   min_prediction_score: 30,
   min_causal_graph_score: 20,
   min_signal_score: 20,
   min_connector_score: 30,
   min_job_score: 40,
   min_overall_score: 30,
+  min_pipeline_sla_score: 50,
   cooldown_hours: 4,
   enabled: true,
 };
@@ -93,16 +96,17 @@ export async function pollHealthOnce(
 ): Promise<PollResult> {
   const startTime = Date.now();
 
-  // 1. Score all dimensions in parallel
-  const [predictions, causalGraph, signals, connectors, jobs] = await Promise.all([
+  // 1. Score all dimensions in parallel (including SLA)
+  const [predictions, causalGraph, signals, connectors, jobs, pipelineSla] = await Promise.all([
     checkPredictionHealth(supabase, organizationId),
     checkCausalGraphHealth(supabase, organizationId),
     checkSignalHealth(supabase, organizationId),
     checkConnectorHealth(supabase, organizationId),
     checkJobHealth(supabase, organizationId),
+    checkPipelineSLA(supabase, organizationId),
   ]);
 
-  const scores = [predictions.score, causalGraph.score, signals.score, connectors.score, jobs.score];
+  const scores = [predictions.score, causalGraph.score, signals.score, connectors.score, jobs.score, pipelineSla.score];
   const overallScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
   const status: HealthSnapshot["status"] =
@@ -114,7 +118,7 @@ export async function pollHealthOnce(
   const snapshot: HealthSnapshot = {
     overall_score: overallScore,
     status,
-    dimensions: { predictions, causal_graph: causalGraph, signals, connectors, jobs },
+    dimensions: { predictions, causal_graph: causalGraph, signals, connectors, jobs, pipeline_sla: pipelineSla },
     recommendations: generateRecommendations(predictions, causalGraph, signals, connectors, jobs),
     timestamp: new Date().toISOString(),
   };
@@ -140,6 +144,7 @@ export async function pollHealthOnce(
       ["signals", signals.score, thresholds.min_signal_score],
       ["connectors", connectors.score, thresholds.min_connector_score],
       ["jobs", jobs.score, thresholds.min_job_score],
+      ["pipeline_sla", pipelineSla.score, thresholds.min_pipeline_sla_score ?? 50],
       ["overall", overallScore, thresholds.min_overall_score],
     ];
 
@@ -204,6 +209,15 @@ export async function pollHealthOnce(
     }
   }
 
+  // 5b. Auto-resolve: close open alerts for dimensions that recovered
+  if (thresholds.enabled) {
+    try {
+      await autoResolveRecoveredAlerts(supabase, organizationId, snapshot, thresholds);
+    } catch {
+      // Non-critical: auto-resolution failure shouldn't break polling
+    }
+  }
+
   // 6. Emit RL signal for brain learning
   let signalEmitted = false;
   try {
@@ -221,6 +235,7 @@ export async function pollHealthOnce(
         signal_score: signals.score,
         connector_score: connectors.score,
         job_score: jobs.score,
+        pipeline_sla_score: pipelineSla.score,
         violations_count: violations.length,
         alerts_created: alertsCreated,
         polled_at: new Date().toISOString(),
@@ -297,9 +312,9 @@ export async function pollAllOrganizations(
   return { results, totalDurationMs: Date.now() - startTime };
 }
 
-// ── Health Check Functions ──────────────────────────────────────────────────
+// ── Health Check Functions (exported for reuse in check-alerts route) ───────
 
-async function checkPredictionHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+export async function checkPredictionHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
   try {
     const [totalResult, verifiedResult, correctResult] = await Promise.all([
       supabase.from("prediction_records").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
@@ -322,7 +337,7 @@ async function checkPredictionHealth(supabase: SupabaseClient, orgId: string): P
   }
 }
 
-async function checkCausalGraphHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+export async function checkCausalGraphHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
   try {
     const [totalResult, significantResult, recentResult] = await Promise.all([
       supabase.from("causal_relationships_statistical").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
@@ -345,7 +360,7 @@ async function checkCausalGraphHealth(supabase: SupabaseClient, orgId: string): 
   }
 }
 
-async function checkSignalHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+export async function checkSignalHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
   try {
     const [totalResult, recentResult, domainResult] = await Promise.all([
       supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
@@ -368,7 +383,7 @@ async function checkSignalHealth(supabase: SupabaseClient, orgId: string): Promi
   }
 }
 
-async function checkConnectorHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+export async function checkConnectorHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
   try {
     const { data: connectors } = await supabase
       .from("org_connectors")
@@ -397,7 +412,7 @@ async function checkConnectorHealth(supabase: SupabaseClient, orgId: string): Pr
   }
 }
 
-async function checkJobHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+export async function checkJobHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
   try {
     const { data: recentJobs } = await supabase
       .from("scheduled_job_runs")
@@ -425,9 +440,143 @@ async function checkJobHealth(supabase: SupabaseClient, orgId: string): Promise<
   }
 }
 
+// ── Pipeline SLA Check ──────────────────────────────────────────────────────
+
+/**
+ * Check if the nightly consolidation pipeline completed within its SLA window.
+ * SLA window: 2 AM - 7 AM UTC.
+ * Score: 100 if completed in window, 50 if completed late, 0 if missing/failed.
+ */
+export async function checkPipelineSLA(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+  try {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const { data: jobs } = await supabase
+      .from("scheduled_job_runs")
+      .select("status, started_at, completed_at, duration_ms")
+      .eq("organization_id", orgId)
+      .eq("job_type", "consolidation")
+      .gte("started_at", todayStart.toISOString())
+      .order("started_at", { ascending: false })
+      .limit(1);
+
+    if (!jobs || jobs.length === 0) {
+      // No consolidation job today — could be before the window
+      const hour = new Date().getUTCHours();
+      if (hour < 7) {
+        return { score: 80, status: "pending", details: { note: "Pipeline hasn't run yet today (before SLA window)" } };
+      }
+      return { score: 0, status: "missed", details: { note: "No consolidation job ran today" } };
+    }
+
+    const job = jobs[0] as { status: string; started_at: string; completed_at: string | null; duration_ms: number | null };
+    const completedAt = job.completed_at ? new Date(job.completed_at) : null;
+
+    if (job.status === "error") {
+      return { score: 0, status: "failed", details: { job_status: job.status, started_at: job.started_at } };
+    }
+
+    if (job.status === "success" && completedAt) {
+      const completedHour = completedAt.getUTCHours();
+      const inWindow = completedHour >= 2 && completedHour < 7;
+      return {
+        score: inWindow ? 100 : 50,
+        status: inWindow ? "on_time" : "late",
+        details: {
+          completed_at: completedAt.toISOString(),
+          in_sla_window: inWindow,
+          duration_ms: job.duration_ms,
+        },
+      };
+    }
+
+    // Running
+    return { score: 60, status: "running", details: { started_at: job.started_at } };
+  } catch {
+    return { score: 0, status: "unavailable", details: { note: "Job runs table not available" } };
+  }
+}
+
+// ── Auto-Resolution ─────────────────────────────────────────────────────────
+
+/**
+ * Auto-resolve open health alerts for dimensions that have recovered above threshold.
+ * Marks cascade_alerts as read and logs resolution to health_alert_log.
+ */
+async function autoResolveRecoveredAlerts(
+  supabase: SupabaseClient,
+  organizationId: string,
+  snapshot: HealthSnapshot,
+  thresholds: Thresholds,
+): Promise<number> {
+  // Get open health alerts for this org
+  const { data: openAlerts } = await supabase
+    .from("cascade_alerts")
+    .select("id, trigger_domain, severity")
+    .eq("organization_id", organizationId)
+    .eq("alert_type", "health_monitor")
+    .eq("is_read", false);
+
+  if (!openAlerts || openAlerts.length === 0) return 0;
+
+  // Build dimension → score mapping
+  const dimensionScores: Record<string, number> = {
+    predictions: snapshot.dimensions.predictions.score,
+    causal_graph: snapshot.dimensions.causal_graph.score,
+    signals: snapshot.dimensions.signals.score,
+    connectors: snapshot.dimensions.connectors.score,
+    jobs: snapshot.dimensions.jobs.score,
+    overall: snapshot.overall_score,
+  };
+
+  const dimensionThresholds: Record<string, number> = {
+    predictions: thresholds.min_prediction_score,
+    causal_graph: thresholds.min_causal_graph_score,
+    signals: thresholds.min_signal_score,
+    connectors: thresholds.min_connector_score,
+    jobs: thresholds.min_job_score,
+    overall: thresholds.min_overall_score,
+  };
+
+  let resolved = 0;
+
+  for (const alert of openAlerts) {
+    const dimension = (alert as { trigger_domain: string }).trigger_domain;
+    const score = dimensionScores[dimension];
+    const threshold = dimensionThresholds[dimension];
+
+    if (score !== undefined && threshold !== undefined && score >= threshold) {
+      // Dimension recovered — auto-resolve
+      await supabase
+        .from("cascade_alerts")
+        .update({ is_read: true, updated_at: new Date().toISOString() })
+        .eq("id", (alert as { id: string }).id);
+
+      await supabase.from("health_alert_log").insert({
+        organization_id: organizationId,
+        dimension,
+        score,
+        threshold,
+        severity: "info",
+        message: `Auto-resolved: ${dimension} health recovered to ${score}/100 (threshold: ${threshold})`,
+        delivered_in_app: true,
+      });
+
+      resolved++;
+    }
+  }
+
+  if (resolved > 0) {
+    logger.warn(`[HealthPoller] Auto-resolved ${resolved} alerts for org ${organizationId}`);
+  }
+
+  return resolved;
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function scoreSeverity(score: number, threshold: number): "critical" | "high" | "medium" | "low" {
+export function scoreSeverity(score: number, threshold: number): "critical" | "high" | "medium" | "low" {
   const gap = threshold - score;
   const ratio = gap / Math.max(threshold, 1);
   if (score === 0 || ratio > 0.7) return "critical";
@@ -436,13 +585,14 @@ function scoreSeverity(score: number, threshold: number): "critical" | "high" | 
   return "low";
 }
 
-function getRecommendation(dimension: string): string {
+export function getRecommendation(dimension: string): string {
   switch (dimension) {
     case "predictions": return "Run more prediction verification cycles and weight updates.";
     case "causal_graph": return "Run causal discovery to refresh the graph.";
     case "signals": return "Check connector sync status. Trigger a manual sync.";
     case "connectors": return "Verify connector credentials and re-authenticate if expired.";
     case "jobs": return "Check scheduled job logs for errors.";
+    case "pipeline_sla": return "Nightly consolidation missed its SLA window (2-7 AM UTC). Check pg_cron jobs and edge function logs.";
     case "overall": return "Multiple dimensions degraded. Run full brain consolidation.";
     default: return "Review health dashboard for details.";
   }
@@ -465,6 +615,7 @@ function generateRecommendations(
   else if (predictions.status === "low_accuracy") recs.push("Prediction accuracy is low. Run more verification cycles.");
   if (jobs.status === "no_recent_jobs") recs.push("No scheduled jobs in 48h. Set up automated brain cycles.");
   else if (jobs.status === "failing") recs.push("Multiple job failures detected. Check error logs.");
+  // Note: pipeline SLA recommendations are handled by getRecommendation() for alert-level feedback
   if (recs.length === 0) recs.push("Brain is healthy. Continue monitoring.");
   return recs;
 }
