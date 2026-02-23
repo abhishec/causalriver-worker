@@ -181,3 +181,18 @@
 - **What went well**: Created 4 new spec files (19 tests) covering dashboard nav, API health, API keys, and workflows. 3x coverage increase. All pass lint-staged.
 - **What went wrong**: Had to rebuild .next due to stale types from Turbopack experiments
 - **Pattern**: E2E tests should test via `page.evaluate(fetch())` for API routes (no browser rendering needed) and via `page.goto()` for UI routes. Keep tests resilient by checking for generic elements (h1, main, form) rather than specific text.
+
+## Retro 012: Design Partner Demo — Brain Copilot Enhancement (2026-02-23)
+- **Task**: Tookitaki demo setup — 4 queued tasks
+- **Time**: ~40 min (deep exploration + surgical code changes)
+- **Model used**: Sonnet + Opus explore agents (correct — needed deep pipeline understanding)
+- **What went well**:
+  - Explored the ENTIRE copilot pipeline (ingestion → signals → causal graph → context builder → LLM) and found the critical gap: copilot had aggregate patterns but NOT individual ticket details
+  - Created seed script + activation script for automated workspace setup
+  - Surgical fix: enhanced Jira sync to store descriptions + injected Requirement Intelligence into copilot context
+  - Added visual output instructions (Mermaid diagrams, charts, infographics) to copilot prompt
+  - All 3 changes (Jira sync, copilot context, demo scripts) committed as a single cohesive change
+- **What went wrong**: Initial demo script had NeuralCortexController type mismatches — simplified to skip direct brain cycle (requires Next.js server context)
+- **Critical insight**: **The copilot is signal-centric, not document-centric.** It stores metrics, entity links, and causal edges — NOT raw Jira descriptions or PR diffs. For requirement-level queries, you MUST inject the raw signal_metadata (which includes summaries) into the LLM context. The brain context builder doesn't do this automatically.
+- **Pattern**: Always validate end-to-end output quality BEFORE a demo. "The pipeline works" ≠ "the output is impressive". Check what the LLM actually receives in its system prompt.
+- **Anti-pattern**: Don't assume the brain context builder includes everything. It includes patterns + causal edges (statistical aggregates), NOT individual records. Custom injection is needed for record-level queries.
