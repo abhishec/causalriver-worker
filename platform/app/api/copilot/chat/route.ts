@@ -806,53 +806,241 @@ export async function POST(request: NextRequest) {
             // Compute summary stats
             const byPriority: Record<string, number> = {};
             const byStatus: Record<string, number> = {};
+            const byStatusCategory: Record<string, number> = {};
             const byAssignee: Record<string, number> = {};
+            const byIssueType: Record<string, number> = {};
+            const byComponent: Record<string, number> = {};
             for (const s of jiraSignals) {
               const m = s.signal_metadata || {};
               byPriority[m.priority || 'Unknown'] = (byPriority[m.priority || 'Unknown'] || 0) + 1;
-              byStatus[m.status_category || 'Unknown'] = (byStatus[m.status_category || 'Unknown'] || 0) + 1;
+              byStatus[m.status || 'Unknown'] = (byStatus[m.status || 'Unknown'] || 0) + 1;
+              byStatusCategory[m.status_category || 'Unknown'] = (byStatusCategory[m.status_category || 'Unknown'] || 0) + 1;
               if (m.assignee) byAssignee[m.assignee] = (byAssignee[m.assignee] || 0) + 1;
+              byIssueType[m.issue_type || 'Unknown'] = (byIssueType[m.issue_type || 'Unknown'] || 0) + 1;
+              if (m.components && Array.isArray(m.components)) {
+                for (const comp of m.components) {
+                  byComponent[comp] = (byComponent[comp] || 0) + 1;
+                }
+              }
             }
 
             const statsLines = [
               `Total tickets: ${jiraSignals.length}`,
               `By priority: ${Object.entries(byPriority).map(([k, v]) => `${k}=${v}`).join(', ')}`,
-              `By status: ${Object.entries(byStatus).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+              `By status: ${Object.entries(byStatusCategory).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+              `By type: ${Object.entries(byIssueType).map(([k, v]) => `${k}=${v}`).join(', ')}`,
+              ...(Object.keys(byComponent).length > 0 ? [`By component: ${Object.entries(byComponent).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => `${k}=${v}`).join(', ')}`] : []),
               `Top assignees: ${Object.entries(byAssignee).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} (${v})`).join(', ')}`,
             ];
 
-            // Inject as a special brain region
+            // ── Pre-compute chart data for the LLM to embed as ready-made artifacts ──
+            // Status Distribution Chart (stacked-bar by priority)
+            const priorityList = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
+            const statusCats = ['To Do', 'In Progress', 'Done'];
+            const priorityStatusMatrix: Array<Record<string, any>> = [];
+            for (const pri of priorityList) {
+              if (!byPriority[pri]) continue;
+              const row: Record<string, any> = { priority: pri };
+              for (const sc of statusCats) {
+                row[sc] = sorted.filter((s: any) => {
+                  const m = s.signal_metadata || {};
+                  return m.priority === pri && (m.status_category === sc);
+                }).length;
+              }
+              if (Object.values(row).some((v, i) => i > 0 && typeof v === 'number' && v > 0)) {
+                priorityStatusMatrix.push(row);
+              }
+            }
+
+            const statusChartSpec = JSON.stringify({
+              type: "stacked-bar",
+              title: "Requirements by Priority & Status",
+              xKey: "priority",
+              series: [
+                { key: "To Do", label: "To Do", color: "#94a3b8" },
+                { key: "In Progress", label: "In Progress", color: "#3b82f6" },
+                { key: "Done", label: "Done", color: "#10b981" },
+              ],
+              data: priorityStatusMatrix,
+            });
+
+            // Workload Distribution Chart (bar by assignee)
+            const assigneeChartData = Object.entries(byAssignee)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 10)
+              .map(([name, count]) => ({ assignee: name.split(' ')[0], tickets: count }));
+            const workloadChartSpec = assigneeChartData.length > 1 ? JSON.stringify({
+              type: "bar",
+              title: "Workload Distribution",
+              xKey: "assignee",
+              series: [{ key: "tickets", label: "Assigned Tickets", color: "#8b5cf6" }],
+              data: assigneeChartData,
+            }) : null;
+
+            // Issue Type Breakdown Chart
+            const typeChartData = Object.entries(byIssueType)
+              .sort((a, b) => b[1] - a[1])
+              .map(([type, count]) => ({ type, count }));
+            const typeChartSpec = typeChartData.length > 1 ? JSON.stringify({
+              type: "bar",
+              title: "Issue Type Breakdown",
+              xKey: "type",
+              series: [{ key: "count", label: "Count", color: "#f59e0b" }],
+              data: typeChartData,
+            }) : null;
+
+            // ── Pre-compute Mermaid diagram: Feature Status Map ──
+            // Shows each high-priority ticket as a node, color-coded by status
+            const p0p1Tickets = sorted.filter((s: any) => {
+              const pri = s.signal_metadata?.priority;
+              return pri === 'Highest' || pri === 'Blocker' || pri === 'Critical' || pri === 'High';
+            }).slice(0, 15);
+
+            let mermaidStatusMap = 'graph LR\n';
+            const mermaidNodes: string[] = [];
+            for (const t of p0p1Tickets) {
+              const m = t.signal_metadata || {};
+              const key = (m.issue_key || t.entity_id || '').replace(/[^A-Za-z0-9-]/g, '');
+              if (!key) continue;
+              const safeKey = key.replace(/-/g, '_');
+              const shortSummary = (m.summary || 'No summary').slice(0, 40).replace(/["\[\](){}]/g, '');
+              const statusCat = m.status_category || 'To Do';
+              const fillColor = statusCat === 'Done' ? '#10b981' :
+                statusCat === 'In Progress' ? '#3b82f6' : '#94a3b8';
+              mermaidNodes.push(`  ${safeKey}["${key}<br/>${shortSummary}"]`);
+              mermaidNodes.push(`  style ${safeKey} fill:${fillColor},color:#fff,stroke:${fillColor}`);
+            }
+            mermaidStatusMap += mermaidNodes.join('\n');
+
+            // ── Pre-compute risk items ──
+            const blockers = sorted.filter((s: any) => {
+              const m = s.signal_metadata || {};
+              const isHighPri = ['Highest', 'Blocker', 'Critical', 'High'].includes(m.priority);
+              const isOpen = m.status_category !== 'Done';
+              return isHighPri && isOpen;
+            });
+            const riskItems = blockers.slice(0, 10).map((s: any) => {
+              const m = s.signal_metadata || {};
+              return `- **${m.issue_key || s.entity_id}** (${m.priority}) — ${m.summary || 'No summary'} [${m.status}]${m.assignee ? ` → ${m.assignee}` : ' ⚠️ UNASSIGNED'}`;
+            });
+            const completionRate = jiraSignals.length > 0
+              ? ((byStatusCategory['Done'] || 0) / jiraSignals.length * 100).toFixed(1)
+              : '0';
+
+            // Inject as a special brain region with pre-computed visuals
             (brainRegions as any).requirementIntelligence = {
               ticketList: ticketLines.join('\n'),
               stats: statsLines.join('\n'),
               ticketCount: jiraSignals.length,
+              // Pre-computed artifacts for the LLM
+              precomputedCharts: {
+                statusDistribution: statusChartSpec,
+                workloadDistribution: workloadChartSpec,
+                issueTypeBreakdown: typeChartSpec,
+              },
+              precomputedMermaid: mermaidStatusMap,
+              riskAssessment: {
+                completionRate,
+                blockerCount: blockers.length,
+                riskItems: riskItems.join('\n'),
+                riskLevel: blockers.length > 5 ? 'HIGH' : blockers.length > 2 ? 'MEDIUM' : 'LOW',
+              },
+              byPriority,
+              byStatusCategory,
+              byIssueType,
+              byComponent,
             };
 
             logger.info(`[Copilot] Injected requirement intelligence: ${jiraSignals.length} Jira tickets for workspace ${workspaceId}`);
           }
 
-          // Also fetch entity links to show which PRs address which requirements
+          // Also fetch entity links to build a rich ticket↔PR coverage map
           let prToJiraLinks: any[] | null = null;
+          let commitToJiraLinks: any[] | null = null;
           try {
-            const { data: links } = await service
-              .from("entity_links")
-              .select("source_entity_id, target_entity_id, link_type, evidence, confidence")
-              .eq("organization_id", workspaceId)
-              .eq("link_type", "pr_references_ticket")
-              .order("confidence", { ascending: false })
-              .limit(30);
-            prToJiraLinks = links;
+            const [prLinks, commitLinks] = await Promise.all([
+              service
+                .from("entity_links")
+                .select("source_entity_id, target_entity_id, link_type, evidence, confidence")
+                .eq("organization_id", workspaceId)
+                .eq("link_type", "pr_references_ticket")
+                .order("confidence", { ascending: false })
+                .limit(50),
+              service
+                .from("entity_links")
+                .select("source_entity_id, target_entity_id, link_type, evidence, confidence")
+                .eq("organization_id", workspaceId)
+                .eq("link_type", "commit_references_ticket")
+                .order("confidence", { ascending: false })
+                .limit(50),
+            ]);
+            prToJiraLinks = prLinks.data;
+            commitToJiraLinks = commitLinks.data;
           } catch {
             // entity_links table may not exist in some envs
           }
 
-          if (prToJiraLinks && prToJiraLinks.length > 0) {
-            const linkLines = prToJiraLinks.map((l: any) =>
-              `PR ${l.source_entity_id} → ${l.target_entity_id} (${(l.confidence * 100).toFixed(0)}% confidence: ${l.evidence})`
-            );
+          const allCodeLinks = [...(prToJiraLinks || []), ...(commitToJiraLinks || [])];
+          if (allCodeLinks.length > 0) {
+            // Build per-ticket coverage map
+            const ticketCoverage: Record<string, { prs: string[]; commits: string[] }> = {};
+            for (const l of allCodeLinks) {
+              const ticketId = l.target_entity_id?.replace('jira#', '') || '';
+              if (!ticketId) continue;
+              if (!ticketCoverage[ticketId]) ticketCoverage[ticketId] = { prs: [], commits: [] };
+              if (l.link_type === 'pr_references_ticket') {
+                ticketCoverage[ticketId].prs.push(l.source_entity_id);
+              } else {
+                const commitHash = l.source_entity_id?.split(':')?.[1]?.slice(0, 8) || l.source_entity_id;
+                ticketCoverage[ticketId].commits.push(commitHash);
+              }
+            }
+
+            // Compute coverage stats (use jiraSignals which is in scope)
+            const allTicketKeys = (jiraSignals || []).map((s: any) => s.signal_metadata?.issue_key || '').filter(Boolean);
+            const coveredTickets = allTicketKeys.filter((k: string) => ticketCoverage[k]);
+            const uncoveredTickets = allTicketKeys.filter((k: string) => !ticketCoverage[k]);
+
+            // Build coverage text
+            const linkLines = Object.entries(ticketCoverage).slice(0, 30).map(([ticket, cov]) => {
+              const prText = cov.prs.length > 0 ? `PRs: ${cov.prs.join(', ')}` : '';
+              const commitText = cov.commits.length > 0 ? `Commits: ${cov.commits.join(', ')}` : '';
+              return `- ${ticket} → ${[prText, commitText].filter(Boolean).join(' | ')}`;
+            });
+
+            // Build Mermaid coverage map
+            const mermaidCovLines: string[] = ['graph LR'];
+            const coveredSet = new Set<string>();
+            for (const [ticket, cov] of Object.entries(ticketCoverage).slice(0, 12)) {
+              const safeTicket = ticket.replace(/[^A-Za-z0-9]/g, '_');
+              coveredSet.add(safeTicket);
+              mermaidCovLines.push(`  ${safeTicket}["${ticket}"]`);
+              mermaidCovLines.push(`  style ${safeTicket} fill:#10b981,color:#fff`);
+              for (const pr of cov.prs.slice(0, 2)) {
+                const safePr = pr.replace(/[^A-Za-z0-9]/g, '_');
+                mermaidCovLines.push(`  ${safePr}["${pr}"] --> ${safeTicket}`);
+                mermaidCovLines.push(`  style ${safePr} fill:#3b82f6,color:#fff`);
+              }
+            }
+            // Show a few uncovered tickets as red nodes
+            for (const ticket of uncoveredTickets.slice(0, 5)) {
+              const safeTicket = ticket.replace(/[^A-Za-z0-9]/g, '_');
+              if (!coveredSet.has(safeTicket)) {
+                mermaidCovLines.push(`  ${safeTicket}["${ticket}<br/>NO CODE"]`);
+                mermaidCovLines.push(`  style ${safeTicket} fill:#ef4444,color:#fff`);
+              }
+            }
+
             (brainRegions as any).codeCoverage = {
               prToTicketLinks: linkLines.join('\n'),
-              linkCount: prToJiraLinks.length,
+              linkCount: allCodeLinks.length,
+              coverageRate: allTicketKeys.length > 0
+                ? ((coveredTickets.length / allTicketKeys.length) * 100).toFixed(1)
+                : '0',
+              coveredCount: coveredTickets.length,
+              uncoveredCount: uncoveredTickets.length,
+              uncoveredTickets: uncoveredTickets.slice(0, 10),
+              mermaidCoverageMap: mermaidCovLines.join('\n'),
             };
           }
         } catch (reqErr) {
@@ -2117,46 +2305,62 @@ DO NOT invent any data. Instead:
 
     // ── Visual output instruction: charts, diagrams, infographics ─────────
     effectiveSystemPrompt += `\n\n## VISUAL OUTPUT — Charts, Diagrams & Infographics
-You MUST use rich visual output whenever data supports it. The UI renders these as interactive artifacts.
+You MUST use rich visual output whenever data supports it. The UI renders these as beautiful interactive artifacts that WOW users.
 
-### 1. Charts (for metrics, trends, comparisons)
+### 1. Charts (rendered as interactive Recharts components)
+Wrap JSON in a \`\`\`chart fence. Supported types: "bar", "line", "area", "stacked-bar".
 \`\`\`chart
-{
-  "type": "bar",
-  "title": "Signal Activity by Domain",
-  "xKey": "date",
-  "series": [{"key": "engineering", "label": "Engineering", "color": "#3b82f6"}],
-  "data": [{"date": "Jan 1", "engineering": 42}, {"date": "Jan 2", "engineering": 55}]
-}
+{"type":"stacked-bar","title":"Requirements by Priority & Status","xKey":"priority","series":[{"key":"Done","label":"Done","color":"#10b981"},{"key":"In Progress","label":"In Progress","color":"#3b82f6"},{"key":"To Do","label":"To Do","color":"#94a3b8"}],"data":[{"priority":"Highest","Done":3,"In Progress":5,"To Do":2}]}
 \`\`\`
-Types: "bar", "line", "area", "stacked-bar". Use REAL data from brain context.
+Use colors: green=#10b981, blue=#3b82f6, amber=#f59e0b, red=#ef4444, purple=#8b5cf6, gray=#94a3b8, cyan=#06b6d4, pink=#ec4899
 
-### 2. Mermaid Diagrams (for causal flows, architecture, dependencies)
+### 2. Mermaid Diagrams (rendered as interactive SVG with dark/light theme)
 \`\`\`mermaid
 graph TD
   A[Engineering Velocity] -->|effect: 0.72| B[Delivery Speed]
-  B -->|effect: 0.45| C[Customer Satisfaction]
-  C -->|effect: 0.88| D[Revenue Growth]
-  style A fill:#3b82f6,color:#fff
-  style D fill:#10b981,color:#fff
+  style A fill:#3b82f6,color:#fff,stroke:#3b82f6
 \`\`\`
-Use Mermaid for: causal dependency graphs, release pipelines, team workflows, entity relationship diagrams, Gantt charts for timelines, state diagrams for ticket lifecycles.
+Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDiagram, gitgraph.
 
-### 3. When to use which visual:
-- **Requirements/Release questions**: Start with a summary table of tickets by priority, then a Mermaid Gantt chart showing timeline, then a stacked-bar chart showing status distribution.
-- **Causal/Impact questions**: Use a Mermaid flowchart showing the causal chain with effect sizes on edges (e.g., A -->|0.72| B). Color high-impact nodes red/orange.
-- **Health/Velocity questions**: Line chart showing velocity over time, plus a Mermaid diagram of bottleneck dependencies.
-- **Who does what questions**: Stacked-bar chart of workload distribution, plus a Mermaid diagram of team collaboration patterns.
-- **Release readiness**: Progress bar via chart (actual vs target), Mermaid Gantt chart for sprint timeline, plus risk assessment table.
+### 3. Mandatory Visual Patterns by Query Type:
+
+**P0/P1 Requirements → MINIMUM 3 visual artifacts:**
+1. Stacked-bar chart: status distribution by priority
+2. Mermaid flowchart: feature status map (green=done, blue=wip, gray=todo, red=blocker)
+3. Markdown table: structured ticket list with Key|Priority|Type|Status|Assignee|Summary
+4. (bonus) Mermaid diagram: blocker dependency graph showing what blocks what
+
+**Release Readiness → MINIMUM 3 visual artifacts:**
+1. Bar chart: completion % by component/epic (target vs actual)
+2. Mermaid Gantt chart: timeline of sprint/release milestones
+3. Risk table with color-coded severity
+4. (bonus) Stacked-bar: issue type breakdown
+
+**Causal/Impact Analysis → MINIMUM 2 visual artifacts:**
+1. Mermaid flowchart: causal chain with effect_size on edges, nodes colored by impact
+2. Line chart: metric trend over time showing the causal relationship
+3. (bonus) Mermaid stateDiagram showing state transitions
+
+**Engineering Health/Velocity → MINIMUM 2 visual artifacts:**
+1. Line or area chart: velocity/throughput trends
+2. Mermaid flowchart: bottleneck dependency map
+3. (bonus) Bar chart: reviewer/contributor distribution
+
+**Team/Workload → MINIMUM 2 visual artifacts:**
+1. Bar chart: ticket/PR distribution by assignee
+2. Mermaid diagram: collaboration/ownership map
 
 ### 4. Visual Presentation Rules:
-- ALWAYS include at least one visual element in responses about data
-- Lead with the visual, then explain with narrative
-- Use color coding consistently: red=#ef4444 (risk/critical), amber=#f59e0b (warning), green=#10b981 (good), blue=#3b82f6 (info)
-- For causal graphs: thicker lines = stronger effects (show effect_size on edge labels)
-- Show numbers precisely — use actual data values, not approximations
-- Combine multiple visual types when the data warrants it (e.g., chart + Mermaid diagram together)
-- For requirement lists, use markdown tables with columns: Key | Priority | Status | Assignee | Summary`;
+- **ALWAYS lead with visuals** — charts and diagrams FIRST, then narrative explanation
+- **Minimum 2 visual artifacts per response** when data exists — chart + diagram together
+- **Color coding** (CONSISTENT everywhere): red=#ef4444 (risk/blocker), amber=#f59e0b (warning/medium), green=#10b981 (done/good), blue=#3b82f6 (in-progress/info), purple=#8b5cf6 (assignments), gray=#94a3b8 (todo/unknown)
+- **Mermaid node styling**: ALWAYS add style directives with fill colors and white text (color:#fff)
+- **Chart data**: Use REAL numbers from the brain context. Never approximate or invent.
+- **Tables**: Use markdown tables liberally. For requirements: Key | Priority | Type | Status | Assignee | Summary
+- **Bold numbers**: Wrap key metrics in **bold** (e.g., **85%** completion, **3** blockers)
+- **Section headers**: Use ## and ### to create scannable structure
+- **Emoji indicators**: ✅ Done, 🔄 In Progress, 📋 To Do, 🔴 Blocker, ⚠️ At Risk, 🟢 On Track`;
+
 
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
@@ -2216,40 +2420,112 @@ USE THESE LINKS to:
 - Show the full chain: Jira ticket → PR → commit → Slack discussion`;
     }
 
-    // ── REQUIREMENT INTELLIGENCE: Ticket-level data for requirement queries ────
-    // This is what makes the copilot produce "wow" results for design partners.
-    // When users ask about P0 requirements, release status, or sprint progress,
-    // this injects the ACTUAL Jira ticket data (not just aggregated patterns)
-    // into the LLM prompt so it can give specific, impressive answers.
+    // ── REQUIREMENT INTELLIGENCE: Ticket-level data + pre-computed visuals ────
+    // This is the "wow factory" — the copilot's killer feature for design partners.
+    // We inject BOTH raw ticket data AND pre-computed chart specs + Mermaid code
+    // so the LLM produces stunning visual artifacts with real data on first response.
     const reqIntel = (brainRegions as any)?.requirementIntelligence;
     const codeCoverage = (brainRegions as any)?.codeCoverage;
 
     if (reqIntel && reqIntel.ticketCount > 0) {
-      effectiveSystemPrompt += `\n\n## REQUIREMENT INTELLIGENCE — ${reqIntel.ticketCount} Jira Tickets (use these for SPECIFIC answers about requirements, releases, and sprint status)
+      const risk = reqIntel.riskAssessment || {};
+      const charts = reqIntel.precomputedCharts || {};
 
-### Ticket Statistics
-${reqIntel.stats}
+      effectiveSystemPrompt += `\n\n## REQUIREMENT INTELLIGENCE — ${reqIntel.ticketCount} Jira Tickets
 
-### Ticket Details (sorted by priority then recency)
+### Executive Summary
+- **Completion Rate**: ${risk.completionRate || '?'}% of tickets are Done
+- **Risk Level**: ${risk.riskLevel || 'UNKNOWN'} (${risk.blockerCount || 0} open high-priority blockers)
+- **Ticket Distribution**: ${reqIntel.stats}
+
+### Risk & Blockers (HIGHLIGHT THESE — color red)
+${risk.riskItems || 'No high-priority blockers found'}
+
+### Full Ticket Details (sorted by priority then recency)
 ${reqIntel.ticketList}
 
-USE THIS DATA TO:
-- List SPECIFIC requirements when asked "What are the P0 requirements?"
-- Show exactly who is working on what and their progress
-- Identify blockers, at-risk items, and scope changes
-- Answer with ticket keys (e.g., "PROJ-123: Summary") — be SPECIFIC, not generic
-- When asked about release readiness, compute % done from status distribution
-- Highlight high-priority unresolved tickets as risks`;
+---
+
+## PRE-COMPUTED VISUAL ARTIFACTS — USE THESE EXACTLY (copy-paste into your response)
+
+### ARTIFACT 1: Status Distribution Chart (ALWAYS include this)
+Embed this chart block in your response (it renders as an interactive stacked-bar chart):
+\`\`\`chart
+${charts.statusDistribution || '{}'}
+\`\`\`
+
+${charts.workloadDistribution ? `### ARTIFACT 2: Workload Distribution Chart (include when discussing team/assignments)
+\`\`\`chart
+${charts.workloadDistribution}
+\`\`\`` : ''}
+
+${charts.issueTypeBreakdown ? `### ARTIFACT 3: Issue Type Breakdown (include when discussing scope)
+\`\`\`chart
+${charts.issueTypeBreakdown}
+\`\`\`` : ''}
+
+### ARTIFACT 4: Feature Status Map (Mermaid — ALWAYS include for P0/P1 queries)
+This renders as a color-coded visual map of high-priority requirements:
+\`\`\`mermaid
+${reqIntel.precomputedMermaid || 'graph LR\n  NoData[No high-priority tickets]'}
+\`\`\`
+
+---
+
+## RESPONSE BLUEPRINT FOR REQUIREMENT QUERIES
+
+When answering about P0/P1 requirements, structure your response in this EXACT order:
+
+**1. EXECUTIVE DASHBOARD** (first thing the user sees)
+Start with a bold summary line: completion rate, risk level, blocker count.
+
+**2. STATUS DISTRIBUTION CHART** (embed the pre-computed chart above)
+Copy the stacked-bar chart block from ARTIFACT 1 above into your response.
+
+**3. REQUIREMENTS TABLE** (structured markdown table)
+| Key | Priority | Type | Status | Assignee | Summary |
+Use the ticket details data. Separate by priority level with headers.
+
+**4. FEATURE STATUS MAP** (embed the pre-computed Mermaid diagram)
+Copy ARTIFACT 4 above. Each node is color-coded: green=done, blue=in-progress, gray=todo.
+
+**5. RISK ASSESSMENT** (use red/amber colors)
+List all open high-priority blockers from the Risk & Blockers section above.
+Add a Mermaid diagram showing dependencies between blockers:
+\`\`\`mermaid
+graph TD
+  BLOCKER1[Ticket Key - Summary] -->|blocks| FEATURE1[Dependent Feature]
+  style BLOCKER1 fill:#ef4444,color:#fff
+\`\`\`
+
+**6. CODE COVERAGE ANALYSIS** (if PR links are available)
+Show which requirements have linked PRs (green) vs gaps (red).
+
+**7. WORKLOAD CHART** (embed ARTIFACT 2 if available)
+
+**CRITICAL**: You MUST include at least 3 visual artifacts (charts + Mermaid diagrams) in EVERY response about requirements. The chart/mermaid blocks render as beautiful interactive visuals. Users judge the product by these visuals — make them count.`;
     }
 
     if (codeCoverage && codeCoverage.linkCount > 0) {
-      effectiveSystemPrompt += `\n\n## CODE COVERAGE — PRs Addressing Requirements (${codeCoverage.linkCount} verified links)
+      effectiveSystemPrompt += `\n\n## CODE COVERAGE — ${codeCoverage.linkCount} Code↔Ticket Links | **${codeCoverage.coverageRate || '?'}%** coverage (${codeCoverage.coveredCount || 0} covered, ${codeCoverage.uncoveredCount || 0} gaps)
+
+### Ticket → Code Mapping
 ${codeCoverage.prToTicketLinks}
 
-USE THIS DATA TO:
-- Show which code changes (PRs) address which Jira requirements
-- Identify requirements WITHOUT linked PRs (coverage gaps)
-- Answer "What code supports requirement X?" with specific PR numbers`;
+${codeCoverage.uncoveredCount > 0 ? `### ⚠️ COVERAGE GAPS — Tickets with NO linked code
+These tickets have no PRs or commits addressing them:
+${(codeCoverage.uncoveredTickets || []).map((t: string) => `- 🔴 **${t}** — No code coverage`).join('\n')}` : '### ✅ All tracked tickets have code coverage'}
+
+### Pre-computed Coverage Map (Mermaid — include this in your response)
+\`\`\`mermaid
+${codeCoverage.mermaidCoverageMap || 'graph LR\n  NoCovData[No coverage data]'}
+\`\`\`
+
+USE THIS TO:
+- Show code coverage % prominently in executive summaries
+- Highlight coverage gaps in red — these are release risks
+- Link specific PRs to specific requirements when asked "What code backs this?"
+- Include the pre-computed Mermaid coverage map in your response for visual impact`;
     }
 
     // ── BRAIN NUTRITION: LEAP Context (Deep Brain Reasoning from Sleep Cycles) ──
