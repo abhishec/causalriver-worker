@@ -18,6 +18,13 @@ interface RepoInfo {
   branches?: string[]; // available branches fetched from API
 }
 
+export interface GitHubRepoEntry {
+  owner: string;
+  name: string;
+  fullName: string;
+  branch?: string;
+}
+
 export interface GitHubReleaseConfig {
   /** Which branches to track — e.g. ["release/6.3.4", "release/5.11.5-enterprise"] */
   trackedBranches: string[];
@@ -26,6 +33,8 @@ export interface GitHubReleaseConfig {
    * "3m" | "6m" | "1y" | "2y" | "all"
    */
   dataLookback: string;
+  /** Additional repos to track with the same token */
+  repositories?: GitHubRepoEntry[];
 }
 
 interface GitHubSetupModalProps {
@@ -57,6 +66,10 @@ export function GitHubSetupModal({
   const [error, setError] = useState("");
   const [repoInfo, setRepoInfo] = useState<RepoInfo | null>(null);
 
+  // Multi-repo support
+  const [additionalRepos, setAdditionalRepos] = useState<GitHubRepoEntry[]>([]);
+  const [additionalRepoInput, setAdditionalRepoInput] = useState("");
+
   // Branch + lookback config (step 2)
   const [availableBranches, setAvailableBranches] = useState<string[]>([]);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
@@ -71,6 +84,40 @@ export function GitHubSetupModal({
     if (slashMatch) return { owner: slashMatch[1], repo: slashMatch[2] };
     return null;
   }, []);
+
+  const handleAddRepo = () => {
+    const inputs = additionalRepoInput.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean);
+    const newRepos: GitHubRepoEntry[] = [];
+    const invalid: string[] = [];
+
+    for (const input of inputs) {
+      const parsed = parseRepoUrl(input);
+      if (parsed) {
+        const fullName = `${parsed.owner}/${parsed.repo}`;
+        // Don't add duplicates or the primary repo
+        if (!additionalRepos.some((r) => r.fullName === fullName) &&
+            !(repoInfo && repoInfo.fullName === fullName)) {
+          newRepos.push({ owner: parsed.owner, name: parsed.repo, fullName });
+        }
+      } else {
+        invalid.push(input);
+      }
+    }
+
+    if (newRepos.length > 0) {
+      setAdditionalRepos((prev) => [...prev, ...newRepos]);
+    }
+    if (invalid.length > 0) {
+      setError(`Could not parse ${invalid.length} entry(s). Use: owner/repo or https://github.com/owner/repo`);
+    } else {
+      setError("");
+    }
+    setAdditionalRepoInput("");
+  };
+
+  const removeAdditionalRepo = (index: number) => {
+    setAdditionalRepos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleConnect = async () => {
     if (!token.trim()) { setError("Please enter your GitHub Personal Access Token"); return; }
@@ -129,7 +176,11 @@ export function GitHubSetupModal({
   const handleStartIngestion = () => {
     if (!repoInfo) return;
     if (selectedBranches.length === 0) { setError("Please select at least one branch to track"); return; }
-    onConnected(repoInfo, { trackedBranches: selectedBranches, dataLookback: lookback });
+    onConnected(repoInfo, {
+      trackedBranches: selectedBranches,
+      dataLookback: lookback,
+      repositories: additionalRepos.length > 0 ? additionalRepos : undefined,
+    });
     handleClose();
   };
 
@@ -143,6 +194,8 @@ export function GitHubSetupModal({
     setSelectedBranches([]);
     setLookback("6m");
     setBranchSearch("");
+    setAdditionalRepos([]);
+    setAdditionalRepoInput("");
     onClose();
   };
 
@@ -379,6 +432,67 @@ export function GitHubSetupModal({
                 </p>
               </div>
 
+              {/* Additional Repositories — multi-repo support */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Additional Repositories
+                  <span className="ml-1 text-[10px] font-normal text-muted">(optional — add more repos with the same token)</span>
+                </label>
+
+                {/* Existing repos as chips */}
+                {additionalRepos.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {additionalRepos.map((repo, idx) => (
+                      <div
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent/5 border border-accent/20 text-xs group"
+                      >
+                        <svg className="w-3 h-3 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        <span className="text-foreground font-mono font-medium">{repo.fullName}</span>
+                        <button
+                          onClick={() => removeAdditionalRepo(idx)}
+                          className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-danger/10 text-muted hover:text-danger transition-colors ml-0.5"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Multi-line repo input */}
+                <div className="flex gap-2">
+                  <textarea
+                    value={additionalRepoInput}
+                    onChange={(e) => setAdditionalRepoInput(e.target.value)}
+                    placeholder={`Add more repos — one per line or comma-separated\ne.g. tookitaki/compliance-engine\ne.g. https://github.com/tookitaki/aml-suite`}
+                    rows={2}
+                    className="flex-1 px-3 py-2 rounded-lg bg-surface border border-border text-xs placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none font-mono"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        handleAddRepo();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleAddRepo}
+                    disabled={!additionalRepoInput.trim()}
+                    className="px-3 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed self-end"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted mt-1">
+                  All repos use the same token. Branch selection above applies to the primary repo ({repoInfo?.fullName}).
+                  Additional repos track their default branch. Press <kbd className="bg-surface px-1 rounded border border-border-subtle text-[9px]">⌘ Enter</kbd> to add.
+                </p>
+              </div>
+
               {/* Data lookback */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-2">
@@ -430,6 +544,12 @@ export function GitHubSetupModal({
                       {LOOKBACK_OPTIONS.find(o => o.value === lookback)?.label}
                     </span>
                   </div>
+                  {additionalRepos.length > 0 && (
+                    <div className="flex justify-between text-muted">
+                      <span>Total repos</span>
+                      <span className="font-mono text-foreground">{1 + additionalRepos.length}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-muted">
                     <span>Release tracking</span>
                     <span className="font-mono text-foreground">

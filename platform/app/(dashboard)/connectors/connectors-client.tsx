@@ -226,6 +226,7 @@ export function ConnectorsClient({
         body: JSON.stringify({
           trackedBranches: releaseConfig.trackedBranches,
           dataLookback: releaseConfig.dataLookback,
+          repositories: releaseConfig.repositories,
         }),
       })
         .then((res) => res.json())
@@ -265,6 +266,7 @@ export function ConnectorsClient({
           projectKeys: config.trackedProjects,
           dataLookback: config.dataLookback,
           fixVersionFilter: config.fixVersionFilter,
+          sources: config.sources,
         }),
       })
         .then((res) => res.json())

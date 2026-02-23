@@ -8,6 +8,14 @@
     {
       "path": "/api/brain/health/cron",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/learning",
+      "schedule": "0 */4 * * *"
+    },
+    {
+      "path": "/api/cron/evolution",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

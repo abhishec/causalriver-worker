@@ -16,6 +16,14 @@ interface JiraSiteInfo {
   projects: JiraProjectInfo[];
 }
 
+export interface JiraSource {
+  type: "board" | "dashboard" | "plan";
+  externalId: string;
+  name: string;
+  url: string;
+  projectKey?: string;
+}
+
 export interface JiraConfig {
   siteUrl: string;
   email: string;
@@ -30,6 +38,8 @@ export interface JiraConfig {
   dataLookback: string;
   /** Optional: filter by fix version label — links issues to releases */
   fixVersionFilter?: string;
+  /** Optional: board/dashboard/plan URLs for scoped ingestion */
+  sources?: JiraSource[];
 }
 
 interface JiraSetupModalProps {
@@ -69,6 +79,10 @@ export function JiraSetupModal({
   const [fixVersionFilter, setFixVersionFilter] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
 
+  // Multi-source: board/dashboard links
+  const [sources, setSources] = useState<JiraSource[]>([]);
+  const [sourceInput, setSourceInput] = useState("");
+
   const normaliseSiteUrl = (raw: string): string => {
     let url = raw.trim().replace(/\/$/, "");
     if (!url.startsWith("http")) url = `https://${url}`;
@@ -77,6 +91,91 @@ export function JiraSetupModal({
       url = `https://${raw.trim()}.atlassian.net`;
     }
     return url;
+  };
+
+  /** Parse a Jira URL into a typed source (board / dashboard / plan) */
+  const parseJiraUrl = useCallback((url: string): JiraSource | null => {
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+
+    // Board: .../jira/software/c/projects/{KEY}/boards/{ID}  or .../projects/{KEY}/board
+    const boardMatch = trimmed.match(/\/projects\/([A-Z0-9]+)\/boards?\/(\d+)/i)
+      || trimmed.match(/\/jira\/software\/c\/projects\/([A-Z0-9]+)\/boards?\/(\d+)/i);
+    if (boardMatch) {
+      return {
+        type: "board",
+        externalId: boardMatch[2],
+        projectKey: boardMatch[1].toUpperCase(),
+        name: `${boardMatch[1].toUpperCase()} Board #${boardMatch[2]}`,
+        url: trimmed,
+      };
+    }
+
+    // Dashboard: .../jira/dashboards/{ID}
+    const dashMatch = trimmed.match(/\/dashboards?\/(\d+)/i);
+    if (dashMatch) {
+      return {
+        type: "dashboard",
+        externalId: dashMatch[1],
+        name: `Dashboard #${dashMatch[1]}`,
+        url: trimmed,
+      };
+    }
+
+    // Plan: .../jira/plans/{ID}
+    const planMatch = trimmed.match(/\/plans?\/(\d+)/i);
+    if (planMatch) {
+      return {
+        type: "plan",
+        externalId: planMatch[1],
+        name: `Plan #${planMatch[1]}`,
+        url: trimmed,
+      };
+    }
+
+    // Fallback: try to detect project key from URL
+    const projectMatch = trimmed.match(/\/projects\/([A-Z0-9]+)/i);
+    if (projectMatch) {
+      return {
+        type: "board",
+        externalId: "0",
+        projectKey: projectMatch[1].toUpperCase(),
+        name: `${projectMatch[1].toUpperCase()} Project`,
+        url: trimmed,
+      };
+    }
+
+    return null;
+  }, []);
+
+  const handleAddSource = () => {
+    // Support multiple URLs separated by newlines or commas
+    const urls = sourceInput.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean);
+    const newSources: JiraSource[] = [];
+    const invalid: string[] = [];
+
+    for (const url of urls) {
+      const parsed = parseJiraUrl(url);
+      if (parsed && !sources.some((s) => s.url === parsed.url)) {
+        newSources.push(parsed);
+      } else if (!parsed) {
+        invalid.push(url);
+      }
+    }
+
+    if (newSources.length > 0) {
+      setSources((prev) => [...prev, ...newSources]);
+    }
+    if (invalid.length > 0) {
+      setError(`Could not parse ${invalid.length} URL(s). Supported: board, dashboard, or plan URLs.`);
+    } else {
+      setError("");
+    }
+    setSourceInput("");
+  };
+
+  const removeSource = (index: number) => {
+    setSources((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleValidate = async () => {
@@ -165,6 +264,7 @@ export function JiraSetupModal({
         trackedProjects: selectedProjects,
         dataLookback: lookback,
         fixVersionFilter: fixVersionFilter.trim() || undefined,
+        sources: sources.length > 0 ? sources : undefined,
       },
       siteInfo
     );
@@ -182,6 +282,8 @@ export function JiraSetupModal({
     setLookback("6m");
     setFixVersionFilter("");
     setProjectSearch("");
+    setSources([]);
+    setSourceInput("");
     onClose();
   };
 
@@ -418,6 +520,71 @@ export function JiraSetupModal({
                 )}
               </div>
 
+              {/* Board & Dashboard Links — multi-source input */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Board &amp; Dashboard Links
+                  <span className="ml-1 text-[10px] font-normal text-muted">(optional — paste one or more Jira URLs)</span>
+                </label>
+
+                {/* Existing sources as chips */}
+                {sources.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {sources.map((source, idx) => (
+                      <div
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent/5 border border-accent/20 text-xs group"
+                      >
+                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-1 py-0.5 rounded ${
+                          source.type === "board" ? "text-accent bg-accent/10" :
+                          source.type === "dashboard" ? "text-purple-500 bg-purple-500/10" :
+                          "text-amber-500 bg-amber-500/10"
+                        }`}>
+                          {source.type}
+                        </span>
+                        <span className="text-foreground font-medium">{source.name}</span>
+                        <button
+                          onClick={() => removeSource(idx)}
+                          className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-danger/10 text-muted hover:text-danger transition-colors ml-0.5"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Multi-line URL input */}
+                <div className="flex gap-2">
+                  <textarea
+                    value={sourceInput}
+                    onChange={(e) => setSourceInput(e.target.value)}
+                    placeholder={`Paste Jira board or dashboard URLs...\ne.g. https://company.atlassian.net/jira/software/c/projects/FIN/boards/544\ne.g. https://company.atlassian.net/jira/dashboards/10431`}
+                    rows={3}
+                    className="flex-1 px-3 py-2 rounded-lg bg-surface border border-border text-xs placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none font-mono"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        handleAddSource();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleAddSource}
+                    disabled={!sourceInput.trim()}
+                    className="px-3 py-2 rounded-lg bg-accent/10 border border-accent/20 text-accent text-xs font-medium hover:bg-accent/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed self-end"
+                  >
+                    + Add
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted mt-1">
+                  Paste one or more Jira board, dashboard, or plan URLs — one per line or comma-separated.
+                  Press <kbd className="bg-surface px-1 rounded border border-border-subtle text-[9px]">⌘ Enter</kbd> to add.
+                </p>
+              </div>
+
               {/* Fix version filter */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -488,6 +655,16 @@ export function JiraSetupModal({
                       {LOOKBACK_OPTIONS.find(o => o.value === lookback)?.label}
                     </span>
                   </div>
+                  {sources.length > 0 && (
+                    <div className="flex justify-between text-muted">
+                      <span>Sources</span>
+                      <span className="font-mono text-foreground">
+                        {sources.filter(s => s.type === "board").length > 0 && `${sources.filter(s => s.type === "board").length} board(s)`}
+                        {sources.filter(s => s.type === "board").length > 0 && sources.filter(s => s.type === "dashboard").length > 0 && " + "}
+                        {sources.filter(s => s.type === "dashboard").length > 0 && `${sources.filter(s => s.type === "dashboard").length} dashboard(s)`}
+                      </span>
+                    </div>
+                  )}
                   {fixVersionFilter && (
                     <div className="flex justify-between text-muted">
                       <span>Fix version filter</span>
