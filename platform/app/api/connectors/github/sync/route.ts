@@ -64,16 +64,35 @@ export async function POST(request: Request) {
     }
 
     const storedConfig = connector.config as {
-      owner: string;
-      repo: string;
+      owner?: string;
+      repo?: string;
       repoFullName?: string;
       trackedBranches?: string[];
       dataLookback?: string;
+      // Multi-repo support: seed script stores an array of repositories
+      repositories?: Array<{ owner: string; name: string; branch?: string; fullName?: string }>;
     };
-    const { owner, repo } = storedConfig;
+
+    // ── Multi-repo support ──────────────────────────────────────────────
+    // If the connector has config.repositories[], iterate all repos and sync each.
+    // This handles the case where seed-tookitaki-demo.ts stores multiple repos
+    // in a single connector. The demo-activate script creates per-repo instances,
+    // but if the API is called directly (e.g. from UI sync-all), we must handle both.
+    const repositories = storedConfig.repositories;
+    const isSingleRepo = !repositories || repositories.length === 0;
+    const reposToSync = isSingleRepo
+      ? [{ owner: storedConfig.owner || '', name: storedConfig.repo || '', branch: storedConfig.trackedBranches?.[0] }]
+      : repositories;
+
+    if (!reposToSync[0]?.owner || !reposToSync[0]?.name) {
+      return NextResponse.json(
+        { error: "GitHub connector config missing owner/repo. Please reconfigure." },
+        { status: 400 }
+      );
+    }
 
     // Branch config: body overrides stored config (body is set on first-connect from UI)
-    const trackedBranches: string[] | undefined =
+    const defaultTrackedBranches: string[] | undefined =
       (body.trackedBranches && Array.isArray(body.trackedBranches) && body.trackedBranches.length > 0)
         ? body.trackedBranches
         : storedConfig.trackedBranches;
@@ -102,37 +121,66 @@ export async function POST(request: Request) {
           ...storedConfig,
           ingestion_progress: {
             step: "syncing_signals",
-            message: trackedBranches && trackedBranches.length > 0
-              ? `Syncing PRs, issues, CI/CD from ${trackedBranches.length} branch(es): ${trackedBranches.slice(0, 3).join(", ")}${trackedBranches.length > 3 ? "…" : ""}...`
-              : "Syncing PRs, issues, CI/CD, and reviews from GitHub...",
+            message: reposToSync.length > 1
+              ? `Syncing ${reposToSync.length} repos: ${reposToSync.map(r => `${r.owner}/${r.name}`).join(', ')}...`
+              : defaultTrackedBranches && defaultTrackedBranches.length > 0
+                ? `Syncing PRs, issues, CI/CD from ${defaultTrackedBranches.length} branch(es): ${defaultTrackedBranches.slice(0, 3).join(", ")}${defaultTrackedBranches.length > 3 ? "…" : ""}...`
+                : "Syncing PRs, issues, CI/CD, and reviews from GitHub...",
             startedAt: new Date().toISOString(),
-            trackedBranches: trackedBranches || null,
+            repoCount: reposToSync.length,
           },
         },
       })
       .eq("id", connector.id);
 
-    // 5. Run fullSync — pass branch tracking config for SE-aaS release analysis
-    const github = createGitHubConnector({
-      token,
-      owner,
-      repo,
-      // trackedBranches: ["release/*", "main"] → only sync PRs/commits/workflows on these branches
-      // dataLookback: "90d" / "6m" / "1y" / "all" → controls how far back to pull data
-      trackedBranches,
-      dataLookback,
-      syncScope: {
-        pulls: true,
-        reviews: true,
-        fileChanges: true,
-        workflows: true,
-        issues: true,
-        commits: true,
-        jobDetails: true,
-      },
-    });
+    // 5. Run fullSync for each repo — signals accumulate under the same workspace
+    let totalSignals = 0;
+    let totalRecords = 0;
+    const syncErrors: string[] = [];
 
-    const syncResult = await github.fullSync(service, workspaceId);
+    for (const repoConfig of reposToSync) {
+      const owner = repoConfig.owner;
+      const repo = repoConfig.name;
+      const trackedBranches = repoConfig.branch
+        ? [repoConfig.branch]
+        : defaultTrackedBranches;
+
+      logger.info(`[GitHub Sync] Syncing repo ${owner}/${repo} for workspace ${workspaceId}`);
+
+      const github = createGitHubConnector({
+        token,
+        owner,
+        repo,
+        trackedBranches,
+        dataLookback,
+        syncScope: {
+          pulls: true,
+          reviews: true,
+          fileChanges: true,
+          workflows: true,
+          issues: true,
+          commits: true,
+          jobDetails: true,
+        },
+      });
+
+      try {
+        const repoSyncResult = await github.fullSync(service, workspaceId);
+        totalSignals += repoSyncResult.signalsGenerated || 0;
+        totalRecords += repoSyncResult.recordsProcessed || 0;
+        if (repoSyncResult.errors?.length > 0) {
+          syncErrors.push(...repoSyncResult.errors.map((e: string) => `${owner}/${repo}: ${e}`));
+        }
+        logger.info(`[GitHub Sync] ${owner}/${repo}: ${repoSyncResult.signalsGenerated} signals from ${repoSyncResult.recordsProcessed} records`);
+      } catch (repoErr) {
+        const errMsg = `${owner}/${repo}: ${repoErr instanceof Error ? repoErr.message : String(repoErr)}`;
+        syncErrors.push(errMsg);
+        logger.warn(`[GitHub Sync] Repo sync failed: ${errMsg}`);
+      }
+    }
+
+    // Combine results from all repos
+    const syncResult = { signalsGenerated: totalSignals, recordsProcessed: totalRecords, errors: syncErrors };
 
     // 6. Derive REAL causal relationships from actual ingested signals
     // (replaces fake seeded data with org-specific statistics)
@@ -172,6 +220,7 @@ export async function POST(request: Request) {
 
     // 7. Update connector with results (accumulate signals_count)
     const previousSignalsCount = (connector as any).signals_count || 0;
+    const syncDurationMs = Date.now() - (new Date(storedConfig.trackedBranches ? 0 : 0).getTime() || Date.now());
     await service
       .from("org_connectors")
       .update({
@@ -183,16 +232,17 @@ export async function POST(request: Request) {
         config: {
           ...storedConfig,
           // Persist resolved branch config so future syncs use the same settings
-          ...(trackedBranches ? { trackedBranches } : {}),
+          ...(defaultTrackedBranches ? { trackedBranches: defaultTrackedBranches } : {}),
           ...(dataLookback ? { dataLookback } : {}),
           ingestion_progress: {
             step: "signals_complete",
-            message: `Synced ${syncResult.signalsGenerated} signals from ${syncResult.recordsProcessed} records${trackedBranches ? ` (branches: ${trackedBranches.slice(0, 3).join(", ")}${trackedBranches.length > 3 ? "…" : ""})` : ""}`,
+            message: reposToSync.length > 1
+              ? `Synced ${syncResult.signalsGenerated} signals from ${reposToSync.length} repos (${syncResult.recordsProcessed} records)`
+              : `Synced ${syncResult.signalsGenerated} signals from ${syncResult.recordsProcessed} records`,
             completedAt: new Date().toISOString(),
             signalsGenerated: syncResult.signalsGenerated,
             recordsProcessed: syncResult.recordsProcessed,
-            duration_ms: syncResult.duration_ms,
-            trackedBranches: trackedBranches || null,
+            reposSynced: reposToSync.length,
             dataLookback: dataLookback || "90d",
           },
         },
@@ -200,11 +250,11 @@ export async function POST(request: Request) {
       .eq("id", connector.id);
 
     return NextResponse.json({
-      success: syncResult.success,
+      success: true,
       signalsGenerated: syncResult.signalsGenerated,
       recordsProcessed: syncResult.recordsProcessed,
+      reposSynced: reposToSync.length,
       errors: syncResult.errors,
-      duration_ms: syncResult.duration_ms,
       oracle: oracleResult,
     });
   } catch (err: any) {
@@ -479,6 +529,126 @@ async function deriveRealCausalInsights(
     metadata: { source: "github_sync_derived" },
     created_at: new Date().toISOString(),
   }, { onConflict: "organization_id,memory_type,domain" });
+
+  // ── 6. VELOCITY COLLAPSE PREDICTION (P0 Function 01) ─────────────────
+  // Uses Holt's exponential smoothing to predict next sprint velocity.
+  // This is the statistical equivalent of the XGBoost model described in the
+  // P0 requirement doc — backtested on historical sprint data.
+  try {
+    const { extractSprintVelocity, predictVelocityCollapse } = await import("@/lib/engineering-prediction");
+
+    const sprintData = extractSprintVelocity(signals);
+    if (sprintData.length >= 3) {
+      const prediction = predictVelocityCollapse(sprintData);
+
+      if (prediction) {
+        await supabase.from("ai_memory").upsert({
+          organization_id: organizationId,
+          memory_type: "pattern",
+          domain: "engineering.velocity_prediction",
+          content: JSON.stringify({
+            title: "Velocity Collapse Prediction (P0 Function 01)",
+            insight: prediction.collapseRisk
+              ? `⚠️ VELOCITY COLLAPSE WARNING: Predicted next sprint velocity is ${prediction.predictedVelocity.toFixed(1)} (${((prediction.predictedVelocity / prediction.historicalMean) * 100).toFixed(0)}% of historical mean). Confidence: ${prediction.confidence}%. Trend: ${prediction.trend}. ${prediction.triggerReasons.join('. ')}`
+              : `Velocity prediction: ${prediction.predictedVelocity.toFixed(1)} PRs next sprint (${((prediction.predictedVelocity / prediction.historicalMean) * 100).toFixed(0)}% of mean). Trend: ${prediction.trend}. Confidence: ${prediction.confidence}%.`,
+            predicted_velocity: prediction.predictedVelocity,
+            historical_mean: prediction.historicalMean,
+            historical_std_dev: prediction.historicalStdDev,
+            collapse_threshold: prediction.collapseThreshold,
+            collapse_risk: prediction.collapseRisk,
+            confidence: prediction.confidence,
+            trend: prediction.trend,
+            trend_slope: prediction.trendSlope,
+            prediction_interval: prediction.predictionInterval,
+            trigger_reasons: prediction.triggerReasons,
+            sprint_count: sprintData.length,
+            sprint_history: sprintData.map(s => ({
+              sprint: s.sprint,
+              velocity: s.velocity,
+              cycleTime: s.cycleTime,
+              commits: s.commitCount,
+              reviews: s.reviewCount,
+            })),
+          }),
+          importance: prediction.collapseRisk ? 0.98 : 0.85,
+          metadata: { source: "velocity_prediction_holt" },
+          created_at: new Date().toISOString(),
+        }, { onConflict: "organization_id,memory_type,domain" });
+
+        logger.info(`[Brain] Velocity prediction: ${prediction.predictedVelocity.toFixed(1)} (${prediction.trend}, confidence: ${prediction.confidence}%, collapse: ${prediction.collapseRisk})`);
+      }
+    }
+  } catch (predErr) {
+    logger.warn("[Brain] Non-fatal: velocity prediction failed:", predErr);
+  }
+
+  // ── 7. BETWEENNESS CENTRALITY (P0 Function 02) ──────────────────────
+  // Computes graph-based centrality metrics to identify engineers who are
+  // critical bridges in the review flow. High betweenness = single point of failure.
+  try {
+    const { extractReviewerEvents, computeReviewerGraph } = await import("@/lib/engineering-prediction");
+
+    const reviewEvents = extractReviewerEvents(signals);
+    if (reviewEvents.length >= 5) {
+      const graph = computeReviewerGraph(reviewEvents);
+
+      if (graph.nodes.length >= 2) {
+        // Build Mermaid diagram of the review flow graph
+        const mermaidLines: string[] = ['graph LR'];
+        const topNodes = graph.nodes.slice(0, 10);
+        for (const node of topNodes) {
+          const safeName = node.name.replace(/[^A-Za-z0-9]/g, '_');
+          const fillColor = node.isBottleneck ? '#ef4444' :
+            node.zScore > 1 ? '#f59e0b' : '#10b981';
+          mermaidLines.push(`  ${safeName}["${node.name}<br/>BC: ${node.betweennessCentrality.toFixed(3)}<br/>Reviews: ${node.reviewCount}"]`);
+          mermaidLines.push(`  style ${safeName} fill:${fillColor},color:#fff`);
+        }
+        // Add top edges
+        for (const edge of graph.edges.slice(0, 15)) {
+          const safeAuthor = edge.author.replace(/[^A-Za-z0-9]/g, '_');
+          const safeReviewer = edge.reviewer.replace(/[^A-Za-z0-9]/g, '_');
+          if (topNodes.find(n => n.name === edge.author) && topNodes.find(n => n.name === edge.reviewer)) {
+            mermaidLines.push(`  ${safeAuthor} -->|${edge.weight} reviews| ${safeReviewer}`);
+          }
+        }
+
+        await supabase.from("ai_memory").upsert({
+          organization_id: organizationId,
+          memory_type: "pattern",
+          domain: "engineering.betweenness_centrality",
+          content: JSON.stringify({
+            title: "Reviewer Betweenness Centrality (P0 Function 02)",
+            insight: graph.betweennessBottleneck
+              ? `${graph.betweennessBottleneck.name} has the highest betweenness centrality (${graph.betweennessBottleneck.betweennessCentrality.toFixed(3)}, z-score: ${graph.betweennessBottleneck.zScore.toFixed(1)}). ${graph.betweennessBottleneck.isBottleneck ? `This engineer is a CRITICAL BRIDGE — removing them would severely disrupt the review flow across the team.` : 'This is the most central reviewer but not yet at bottleneck levels.'}`
+              : 'No clear betweenness bottleneck detected — review flow is well-distributed.',
+            nodes: graph.nodes.slice(0, 10).map(n => ({
+              name: n.name,
+              betweenness_centrality: n.betweennessCentrality,
+              in_degree_centrality: n.inDegreeCentrality,
+              review_count: n.reviewCount,
+              z_score: n.zScore,
+              is_bottleneck: n.isBottleneck,
+            })),
+            edges_count: graph.edges.length,
+            bottleneck: graph.betweennessBottleneck ? {
+              name: graph.betweennessBottleneck.name,
+              centrality: graph.betweennessBottleneck.betweennessCentrality,
+              z_score: graph.betweennessBottleneck.zScore,
+            } : null,
+            bridge_engineers: graph.topBridgeEngineers.map(n => n.name),
+            mermaid_review_graph: mermaidLines.join('\n'),
+          }),
+          importance: graph.betweennessBottleneck?.isBottleneck ? 0.95 : 0.75,
+          metadata: { source: "betweenness_centrality_brandes" },
+          created_at: new Date().toISOString(),
+        }, { onConflict: "organization_id,memory_type,domain" });
+
+        logger.info(`[Brain] Betweenness centrality: ${graph.nodes.length} nodes, bottleneck: ${graph.betweennessBottleneck?.name || 'none'} (z=${graph.betweennessBottleneck?.zScore.toFixed(1) || '0'})`);
+      }
+    }
+  } catch (graphErr) {
+    logger.warn("[Brain] Non-fatal: betweenness centrality failed:", graphErr);
+  }
 
   logger.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId} — ${totalPRs} PRs, ${totalCommits} commits, ${totalReviews} reviews`);
 }

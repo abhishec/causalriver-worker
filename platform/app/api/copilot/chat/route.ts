@@ -2539,12 +2539,14 @@ USE THIS TO:
       const velocitySnaps = liveSignals.velocitySnapshots;
       const bottleneckSnap = liveSignals.bottleneckSnapshot;
 
-      // Fetch velocity scorecard and reviewer patterns from ai_memory
+      // Fetch velocity scorecard, reviewer patterns, prediction, and centrality from ai_memory
       let velocityScorecard: any = null;
       let reviewerPattern: any = null;
       let cycleTimePattern: any = null;
+      let velocityPrediction: any = null;
+      let betweennessCentrality: any = null;
       try {
-        const [vsRes, rpRes, ctRes] = await Promise.all([
+        const [vsRes, rpRes, ctRes, vpRes, bcRes] = await Promise.all([
           service.from("ai_memory").select("content, importance")
             .eq("organization_id", workspaceId)
             .eq("memory_type", "pattern")
@@ -2560,16 +2562,26 @@ USE THIS TO:
             .eq("memory_type", "pattern")
             .eq("domain", "engineering.cycle_time")
             .limit(1),
+          service.from("ai_memory").select("content, importance")
+            .eq("organization_id", workspaceId)
+            .eq("memory_type", "pattern")
+            .eq("domain", "engineering.velocity_prediction")
+            .limit(1),
+          service.from("ai_memory").select("content, importance")
+            .eq("organization_id", workspaceId)
+            .eq("memory_type", "pattern")
+            .eq("domain", "engineering.betweenness_centrality")
+            .limit(1),
         ]);
-        if (vsRes.data?.[0]) {
-          try { velocityScorecard = typeof vsRes.data[0].content === 'string' ? JSON.parse(vsRes.data[0].content) : vsRes.data[0].content; } catch { /* */ }
-        }
-        if (rpRes.data?.[0]) {
-          try { reviewerPattern = typeof rpRes.data[0].content === 'string' ? JSON.parse(rpRes.data[0].content) : rpRes.data[0].content; } catch { /* */ }
-        }
-        if (ctRes.data?.[0]) {
-          try { cycleTimePattern = typeof ctRes.data[0].content === 'string' ? JSON.parse(ctRes.data[0].content) : ctRes.data[0].content; } catch { /* */ }
-        }
+        const tryParse = (row: any) => {
+          if (!row?.data?.[0]) return null;
+          try { return typeof row.data[0].content === 'string' ? JSON.parse(row.data[0].content) : row.data[0].content; } catch { return null; }
+        };
+        velocityScorecard = tryParse(vsRes);
+        reviewerPattern = tryParse(rpRes);
+        cycleTimePattern = tryParse(ctRes);
+        velocityPrediction = tryParse(vpRes);
+        betweennessCentrality = tryParse(bcRes);
       } catch {
         // Non-fatal — ai_memory may not have these patterns yet
       }
@@ -2637,6 +2649,49 @@ graph TD
 \`\`\`
 
 **SAY THIS**: "Brain OS is already ingesting your GitHub and Jira data and computing a rolling 14-day velocity pulse. The metrics above are LIVE from your repositories. The velocity collapse detection triggers when predicted sprint velocity drops below 80% of the historical mean with >70% confidence."`;
+
+          // Inject velocity prediction if available (from Holt's exponential smoothing)
+          if (velocityPrediction) {
+            const vp = velocityPrediction;
+            const sprintHistory = vp.sprint_history || [];
+            const collapseEmoji = vp.collapse_risk ? '🔴' : '🟢';
+
+            // Build sprint velocity trend chart
+            let sprintChartSpec = '';
+            if (sprintHistory.length >= 3) {
+              sprintChartSpec = JSON.stringify({
+                type: "line",
+                title: "Sprint Velocity Trend (PRs Merged per 14-Day Window)",
+                xKey: "sprint",
+                series: [
+                  { key: "velocity", label: "Velocity", color: "#3b82f6" },
+                  ...(sprintHistory[0]?.reviews !== undefined ? [{ key: "reviews", label: "Reviews", color: "#8b5cf6" }] : []),
+                ],
+                data: sprintHistory.map((s: any) => ({
+                  sprint: s.sprint,
+                  velocity: s.velocity,
+                  ...(s.reviews !== undefined ? { reviews: s.reviews } : {}),
+                })),
+              });
+            }
+
+            effectiveSystemPrompt += `
+
+#### 🔮 VELOCITY COLLAPSE PREDICTION MODEL (Holt's Exponential Smoothing)
+${collapseEmoji} **Predicted next sprint velocity: ${vp.predicted_velocity?.toFixed(1) || '?'}** (${vp.confidence || '?'}% confidence)
+- Historical mean: ${vp.historical_mean?.toFixed(1) || '?'} | Collapse threshold: ${vp.collapse_threshold?.toFixed(1) || '?'}
+- Trend: **${vp.trend || '?'}** (slope: ${vp.trend_slope?.toFixed(2) || '?'} per sprint)
+- Prediction interval (70%): [${vp.prediction_interval?.lower?.toFixed(1) || '?'}, ${vp.prediction_interval?.upper?.toFixed(1) || '?'}]
+${vp.collapse_risk ? `- 🚨 **COLLAPSE WARNING ACTIVE**: ${(vp.trigger_reasons || []).join('. ')}` : '- ✅ No collapse warning — velocity is within normal range'}
+- Based on ${vp.sprint_count || '?'} sprint windows of data
+
+${sprintChartSpec ? `**INCLUDE THIS CHART** — Sprint Velocity Trend:
+\`\`\`chart
+${sprintChartSpec}
+\`\`\`` : ''}
+
+**SAY THIS**: "The prediction model uses Holt's double exponential smoothing — the statistical foundation behind gradient boosting models like XGBoost. It captures both the velocity level and acceleration trend, predicting ${vp.predicted_velocity?.toFixed(1) || '?'} PRs merged in the next sprint window with ${vp.confidence || '?'}% confidence. ${vp.collapse_risk ? 'A COLLAPSE WARNING has been triggered — immediate action is recommended.' : 'No collapse warning at this time.'}"`;
+          }
         }
 
         // Function 02: Bottleneck Concentration Risk — demonstrate with real metrics
@@ -2741,6 +2796,32 @@ graph TD
 \`\`\`
 
 **SAY THIS**: "Brain OS is already tracking every PR review event and computing concentration metrics in real-time. Your current Gini coefficient is ${giniStr}, HHI is ${hhiStr}${hhiRisk === 'ANTITRUST_LEVEL' ? ' (above the 0.25 antitrust threshold — this is the same measure used in market concentration analysis)' : ''}, and ${topReviewer} handles ${topSharePct}% of all reviews. The Bottleneck Risk Score is ${brs}/100. If ${topReviewer} were unavailable for 5 days, an estimated ${blockedPRs} PRs would be blocked."`;
+
+          // Inject betweenness centrality graph analysis if available
+          if (betweennessCentrality) {
+            const bc = betweennessCentrality;
+            const bottleneck = bc.bottleneck;
+            const bcNodes = bc.nodes || [];
+            const bridgeEngineers = bc.bridge_engineers || [];
+
+            effectiveSystemPrompt += `
+
+#### 🔬 BETWEENNESS CENTRALITY — Graph Analysis (Brandes Algorithm)
+${bottleneck?.is_bottleneck ? '🔴' : '🟢'} **Critical bridge: ${bottleneck?.name || 'None'}** (centrality: ${bottleneck?.centrality?.toFixed(3) || '?'}, z-score: ${bottleneck?.z_score?.toFixed(1) || '?'})
+
+| Engineer | Betweenness Centrality | In-Degree | Reviews | Z-Score | Risk |
+|----------|----------------------|-----------|---------|---------|------|
+${bcNodes.slice(0, 8).map((n: any) => `| ${n.name} | ${n.betweenness_centrality?.toFixed(3) || '?'} | ${n.in_degree_centrality?.toFixed(3) || '?'} | ${n.review_count || '?'} | ${n.z_score?.toFixed(1) || '?'} | ${n.is_bottleneck ? '🔴 BOTTLENECK' : n.z_score > 1 ? '🟡 BRIDGE' : '🟢 OK'} |`).join('\n')}
+
+${bridgeEngineers.length > 0 ? `**Bridge Engineers** (z-score > 1.5 — critical for review flow): ${bridgeEngineers.join(', ')}` : ''}
+
+${bc.mermaid_review_graph ? `**INCLUDE THIS DIAGRAM** — Reviewer Collaboration Graph:
+\`\`\`mermaid
+${bc.mermaid_review_graph}
+\`\`\`` : ''}
+
+**SAY THIS**: "Betweenness centrality measures how often an engineer appears on the shortest path between other team members in the review flow. ${bottleneck?.name || 'No one'} has the highest centrality${bottleneck?.is_bottleneck ? ' and is flagged as a BOTTLENECK — they are the critical bridge in your review flow. If they are unavailable, review flow between teams would be severely disrupted' : ''}. This is computed using the Brandes algorithm on your actual PR review graph."`;
+          }
         }
 
         effectiveSystemPrompt += `

@@ -79,11 +79,11 @@ export async function POST(request: Request) {
         switch (type) {
           case "github":
             syncUrl = `${baseUrl}/api/connectors/github/sync`;
-            syncBody = { organizationId: workspaceId };
+            syncBody = { organizationId: workspaceId, connectorId: connector.id };
             break;
           case "jira":
             syncUrl = `${baseUrl}/api/connectors/jira/sync`;
-            syncBody = { organizationId: workspaceId };
+            syncBody = { organizationId: workspaceId, connectorId: connector.id };
             break;
           case "slack":
             syncUrl = `${baseUrl}/api/connectors/slack/sync`;
