@@ -50,3 +50,18 @@
   - Only 1 TODO: Phase 4.3 GitHub integration layer (forward-looking, not a blocker)
 - **Action items**: (1) Ensure production deployment sets NEXT_PUBLIC_APP_URL, (2) Verify baseline Supabase tables have RLS enabled on console
 - **Pattern**: BrainOS follows defense-in-depth — multi-layer auth (user → org membership → RLS), env validation at startup, CSP/HSTS/IDS at middleware
+
+## Case 006: Next.js 15 build fails with PageNotFoundError for route groups (2026-02-23)
+- **Symptom**: `next build` fails during "Collecting page data" with `PageNotFoundError: Cannot find module for page: /login` etc., even though `app/(auth)/login/page.tsx` exists and compiles correctly
+- **Root cause**: Next.js 15.3.3 bug — "Collecting page data" phase uses URL paths (e.g. `/login`) to find modules, but compiled modules are under route group paths (e.g. `(auth)/login`). Mismatch causes ENOENT
+- **What DOESN'T work**:
+  - `export const dynamic = "force-dynamic"` on root layout — still tries to collect page data
+  - Suppressing `process.exit(1)` — build continues but produces incomplete manifests
+  - Adding filesystem operations in `--require` script — causes race conditions in workers
+  - 4GB memory (marginal for this codebase) — causes cascading failures that look like the route group bug
+- **What partially works**:
+  - `suppress-document-error.cjs` catching `unhandledRejection` → only works for `/_document`, not other routes (they use a different error path — caught internally by Next.js, not thrown as unhandled rejection)
+  - 8GB memory (`--max-old-space-size=8192`) — eliminates OOM-related cascading failures
+- **Current state**: Build fails during "Collecting page data" for all route-group pages. TypeScript + ESLint pass. Pages compile correctly. Dev server works fine. **This is a pre-existing issue, not a regression.**
+- **Potential fix**: Migrate to Next.js 15.4+ if/when this bug is fixed, or restructure routes to not use route groups
+- **⚠️ WARNING**: DO NOT add filesystem operations (mkdirSync, writeFileSync) to the `--require` preload script — they run in webpack workers and cause race conditions that produce MORE PageNotFoundErrors

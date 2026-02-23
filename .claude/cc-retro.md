@@ -70,3 +70,21 @@
   - Security headers comprehensive (CSP, HSTS, X-Frame-Options, IDS)
 - **RL improvement**: Background agent pattern works well for audit tasks — parallel execution saves time
 - **Pattern**: For large-scale audits, use a background Explore agent with "very thorough" mode and specific search patterns
+
+## Retro 005: Add Free Chat Mode to General Copilot Tab (2026-02-23)
+- **Task**: `011d77f6` — Add free chat mode to General copilot tab
+- **Time**: ~30 min (estimated 15 min — over budget due to build debugging)
+- **Model used**: Sonnet (correct for UX changes)
+- **What went well**:
+  - Explored copilot codebase thoroughly before making changes (found that free-text ALREADY works technically)
+  - Made targeted UX improvements: empty state text, placeholder, example prompts, artifact pane text
+  - TypeScript + ESLint pass cleanly
+  - Applied circuit breaker when build debugging went past 3 attempts
+- **What went wrong**:
+  - Spent ~20 min debugging pre-existing build failure (Next.js 15 route group bug)
+  - Tried 4 different approaches to fix build before triggering circuit breaker
+  - Adding filesystem ops to --require preload script MADE THINGS WORSE (race conditions in workers)
+  - Should have verified "is the build already broken?" FIRST before starting
+- **Lesson**: Always check current build state before starting a task. If build is already broken, note it and proceed with code changes + TypeScript verification only.
+- **Pattern**: For UI-only changes, `tsc --noEmit` is sufficient validation when the full build has a pre-existing issue
+- **Rule added**: Case 006 documents the Next.js 15 route group build bug — DO NOT waste time trying to fix it, just verify types
