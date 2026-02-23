@@ -304,6 +304,34 @@ async function deriveRealCausalInsights(
       gini = sumDiff / (2 * n * n * mean);
     }
 
+    // Compute HHI (Herfindahl-Hirschman Index) — antitrust-style concentration measure
+    // HHI = sum of (market_share_i)^2 for all reviewers
+    // 0 = perfectly distributed, 1.0 = one person does everything
+    // >0.25 = antitrust-level concentration (from P0 requirement doc)
+    let hhi = 0;
+    for (const [, cnt] of sorted) {
+      const share = cnt / total;
+      hhi += share * share;
+    }
+
+    // Compute in-degree centrality: how many unique PRs point to each reviewer
+    // This is a simplified version - counts unique PR reviews per reviewer
+    const reviewerInDegree: Record<string, number> = {};
+    for (const s of reviewSignals) {
+      const reviewer = s.signal_metadata?.reviewer || "unknown";
+      const prId = s.entity_id || s.signal_metadata?.pr_number || 'unknown';
+      const key = `${reviewer}:${prId}`;
+      if (!reviewerInDegree[key]) {
+        reviewerInDegree[key] = 1;
+        reviewerInDegree[reviewer] = (reviewerInDegree[reviewer] || 0) + 1;
+      }
+    }
+
+    // Identify under-utilized reviewers (reviewed <5 PRs in 14 days)
+    const underUtilized = sorted
+      .filter(([, cnt]) => cnt < 5)
+      .map(([name, cnt]) => ({ name, reviews: cnt }));
+
     // Write real causal relationship: reviewer concentration → cycle time
     if (topShare > 0.3) {
       await supabase.from("causal_relationships_statistical").upsert({
@@ -316,7 +344,7 @@ async function deriveRealCausalInsights(
         p_value: topShare > 0.5 ? 0.01 : 0.04,
         lag_days: 0,
         confidence: Math.min(0.95, 0.6 + topShare),
-        natural_language: `${topName} is reviewing ${(topShare * 100).toFixed(0)}% of all PRs. When ${topName} is unavailable, PRs wait. Gini=${gini.toFixed(2)} — ${gini > 0.5 ? "highly concentrated" : "moderately concentrated"} review load.`,
+        natural_language: `${topName} is reviewing ${(topShare * 100).toFixed(0)}% of all PRs. When ${topName} is unavailable, PRs wait. Gini=${gini.toFixed(2)}, HHI=${hhi.toFixed(3)} — ${hhi > 0.25 ? "antitrust-level concentration (HHI>0.25)" : gini > 0.5 ? "highly concentrated" : "moderately concentrated"} review load.`,
         sample_size: total,
         granger_f_statistic: topShare * 15,
         discovered_at: new Date().toISOString(),
@@ -328,12 +356,20 @@ async function deriveRealCausalInsights(
       memory_type: "pattern",
       domain: "engineering.reviewers",
       content: JSON.stringify({
-        title: "Review Load Distribution",
-        insight: `${topName} handles ${(topShare * 100).toFixed(0)}% of code reviews (${topReviewer?.[1]} of ${total} reviews). ${topShare > 0.5 ? `This is a critical bus factor risk — if ${topName} is unavailable, PRs will stack up.` : topShare > 0.3 ? `Review load is moderately concentrated. Consider spreading reviews.` : "Review load is reasonably distributed."}`,
+        title: "Review Load Distribution & Concentration Risk",
+        insight: `${topName} handles ${(topShare * 100).toFixed(0)}% of code reviews (${topReviewer?.[1]} of ${total} reviews). Gini=${gini.toFixed(2)}, HHI=${hhi.toFixed(3)}. ${hhi > 0.25 ? `⚠️ ANTITRUST-LEVEL CONCENTRATION (HHI>0.25): review load is dangerously concentrated. If ${topName} is unavailable for 5 days, an estimated ${Math.round(topReviewer?.[1] * 5 / 14)} PRs would be blocked.` : topShare > 0.3 ? `Review load is moderately concentrated. Consider spreading reviews to ${underUtilized.length} under-utilized reviewers.` : "Review load is reasonably distributed."}`,
         top_reviewer: topName,
         top_reviewer_share: topShare,
         gini_coefficient: gini,
-        reviewer_breakdown: sorted.slice(0, 5).map(([name, count]) => ({ name, count, share: count / total })),
+        hhi_index: hhi,
+        hhi_risk: hhi > 0.25 ? 'ANTITRUST_LEVEL' : hhi > 0.15 ? 'MODERATE' : 'LOW',
+        reviewer_breakdown: sorted.slice(0, 8).map(([name, count]) => ({ name, count, share: count / total })),
+        under_utilized_reviewers: underUtilized.slice(0, 5),
+        unavailability_impact: {
+          top_reviewer: topName,
+          estimated_blocked_prs_5day: Math.round((topReviewer?.[1] || 0) * 5 / 14),
+          risk_narrative: `If ${topName} is unavailable for 5 days, approximately ${Math.round((topReviewer?.[1] || 0) * 5 / 14)} PRs would be blocked based on current review velocity.`,
+        },
         sample_size: total,
       }),
       importance: topShare > 0.5 ? 0.95 : topShare > 0.3 ? 0.80 : 0.60,
