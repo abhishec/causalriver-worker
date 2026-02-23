@@ -63,11 +63,13 @@ const MAX_TOKENS_AGENTIC = 2048;
 const MAX_TOKENS_FAST = 1024;
 
 // ── COST-OPTIMIZED MODEL SELECTION ──
+// Canonical source: packages/memory-stack/src/infra/smart-model-router.ts
+// Edge functions can't import from workspace packages — keep in sync manually.
 // Sonnet for agentic reasoning (tool selection needs intelligence)
 // Haiku for fast-path, cerebellum cache, and self-correction (structured/simple tasks)
-const MODEL_AGENTIC = 'claude-sonnet-4-20250514';    // Complex reasoning + tool use
-const MODEL_FAST    = 'claude-3-5-haiku-20241022';    // Simple Q&A with context (10x cheaper)
-const MODEL_VERIFY  = 'claude-3-5-haiku-20241022';    // Self-correction checks (10x cheaper)
+const MODEL_AGENTIC = 'claude-sonnet-4-20250514';    // = smart-model-router.MODEL_DEEP
+const MODEL_FAST    = 'claude-haiku-4-5-20251001';    // = smart-model-router.MODEL_FAST
+const MODEL_VERIFY  = 'claude-haiku-4-5-20251001';    // = smart-model-router.MODEL_FAST
 
 /** Fast-path cache TTL (24 hours) */
 const FAST_PATH_CACHE_TTL_HOURS = 24;

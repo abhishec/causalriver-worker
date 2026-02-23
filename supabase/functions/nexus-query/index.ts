@@ -271,7 +271,8 @@ serve(async (req: Request) => {
 
     if (anthropicKey) {
       // Primary: Anthropic Claude
-      modelUsed = 'claude-3-5-haiku-20241022'; // Cost optimization: Haiku is 10x cheaper for simple Q&A queries
+      // Canonical source: packages/memory-stack/src/infra/smart-model-router.ts (MODEL_FAST)
+      modelUsed = 'claude-haiku-4-5-20251001'; // Cost optimization: Haiku is 10x cheaper for simple Q&A queries
       const llmResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {

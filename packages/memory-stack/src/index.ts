@@ -453,6 +453,24 @@ export {
   type BrainHealthMonitor,
 } from './causality/brain-health-monitor';
 
+// Phase 9: Causal Graph Diffing (Knowledge Evolution Tracking)
+export {
+  computeGraphDiff,
+  captureGraphSnapshot,
+  diffSnapshotsById,
+  diffCurrentVsSnapshot,
+  diffByTimePeriod,
+  listSnapshots,
+  type SerializedEdge,
+  type GraphSnapshot,
+  type SnapshotRef,
+  type EdgeDiff,
+  type EdgeChange,
+  type DiffStats,
+  type CausalGraphDiff,
+  type DiffOptions,
+} from './causality/causal-graph-diff';
+
 // ============================================================================
 // BRIDGES - Cross-Layer Wiring (THE NERVOUS SYSTEM)
 // ============================================================================

@@ -14,6 +14,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import { logger } from "@/lib/logger";
 import type { SlashCommand } from "./SlashCommandPicker";
 import {
   COMMAND_GATHERING_MAP,
@@ -88,6 +89,8 @@ export interface GatheringState {
   currentInteractive: GatheringInteractive | null;
   /** Loading state for fetching dynamic options */
   loadingOptions: boolean;
+  /** Error message when options fail to load */
+  optionsError: string | null;
 }
 
 export interface UseCommandGatheringReturn {
@@ -104,6 +107,8 @@ export interface UseCommandGatheringReturn {
   cancel: () => void;
   /** Reset gathering state back to idle (call after execution completes) */
   reset: () => void;
+  /** Retry loading options for the current parameter after a failure */
+  retryOptions: () => void;
   /** Whether gathering is active */
   isActive: boolean;
   /** Get label for a collected param value */
@@ -121,6 +126,7 @@ const INITIAL_STATE: GatheringState = {
   messages: [],
   currentInteractive: null,
   loadingOptions: false,
+  optionsError: null,
 };
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
@@ -165,9 +171,13 @@ export function useCommandGathering(
       abortRef.current = controller;
 
       try {
-        setState((s) => ({ ...s, loadingOptions: true }));
+        setState((s) => ({ ...s, loadingOptions: true, optionsError: null }));
         const res = await fetch(endpoint, { signal: controller.signal });
-        if (!res.ok) return [];
+        if (!res.ok) {
+          logger.error(`[useCommandGathering] fetchOptions failed: ${endpoint} → ${res.status}`);
+          setState((s) => ({ ...s, optionsError: `Failed to load options (${res.status})` }));
+          return [];
+        }
         const data = await res.json();
         const key = param.optionsKey || "items";
         const items = data[key] || data || [];
@@ -177,7 +187,11 @@ export function useCommandGathering(
               label: String(item.name ?? item.label ?? item.id ?? ""),
             }))
           : [];
-      } catch {
+      } catch (err) {
+        if ((err as Error)?.name !== "AbortError") {
+          logger.error("[useCommandGathering] fetchOptions error:", err);
+          setState((s) => ({ ...s, optionsError: "Failed to load options" }));
+        }
         return [];
       } finally {
         if (!controller.signal.aborted) {
@@ -347,6 +361,7 @@ export function useCommandGathering(
         messages: [],
         currentInteractive: null,
         loadingOptions: false,
+        optionsError: null,
       };
 
       setState(initialState);
@@ -454,6 +469,18 @@ export function useCommandGathering(
     [state.gathering]
   );
 
+  const retryOptions = useCallback(() => {
+    setState((prev) => {
+      if (prev.phase !== "gathering" || !prev.gathering) return prev;
+      // Re-fetch options for the current param
+      const param = prev.gathering.params[prev.currentParamIndex];
+      if (!param) return prev;
+      // Clear the error and trigger re-fetch
+      advanceToParam(prev.gathering, prev.currentParamIndex, prev.collectedParams, prev.messages.slice(0, -1));
+      return { ...prev, optionsError: null, loadingOptions: true };
+    });
+  }, [advanceToParam]);
+
   const reset = useCallback(() => {
     setState(INITIAL_STATE);
   }, []);
@@ -473,6 +500,7 @@ export function useCommandGathering(
     confirm,
     cancel,
     reset,
+    retryOptions,
     isActive,
     getParamLabel,
   };

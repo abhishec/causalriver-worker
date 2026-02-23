@@ -26,16 +26,29 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   estimateImpact,
 } from "@/lib/nexus-copilot-adapter";
-import type {
-  TrainedCausalEdge,
-  TrainedRule,
-  TrainedPattern,
-  TrainedCascadeRule,
-  BrainContext,
-  BrainRegions,
-} from "@nexus-ai/memory-stack";
-import { createBrainContextMesh, createBrainFeedbackBus, createLLMQueryInterpreter } from "@nexus-ai/memory-stack";
-import type { QueryInterpretation } from "@nexus-ai/memory-stack";
+// ── @nexus-ai/memory-stack: bypasses Turbopack bundling ──────────────────────
+// memory-stack embeds TypeScript's compiler which uses dynamic require("fs").
+// Turbopack replaces require() with __require() which doesn't support dynamic calls.
+// Solution: use eval("require") to force native Node.js require at runtime.
+// Type definitions are inlined to avoid even `import type` triggering module resolution.
+
+interface TrainedCausalEdge { source_domain: string; target_domain: string; effect_size: number; optimal_lag_days: number; confidence: number; method: string; [k: string]: unknown; }
+interface TrainedRule { id: string; title: string; natural_language: string; conditions: string[]; content: string; [k: string]: unknown; }
+interface TrainedPattern { [k: string]: unknown; }
+interface TrainedCascadeRule { [k: string]: unknown; }
+interface BrainContext { fullPrompt: string; intent: string; domains: string[]; confidence: number; sections: Array<{ title: string; content: string }>; [k: string]: unknown; }
+interface BrainRegions { [k: string]: unknown; }
+interface QueryInterpretation { intent: string; domains: string[]; requiredData: string[]; tokenBudget?: { system: number; history: number }; confidence: number; primaryDomain?: string; serviceRoute?: { type: string; seaasDomain?: string; seaasInput?: Record<string, unknown>; aasDomain?: string; aasInput?: Record<string, unknown> }; complexity?: number; entities?: unknown[]; responseStrategy?: unknown; [k: string]: unknown; }
+
+// eslint-disable-next-line no-eval
+const _nativeRequire = eval("require") as NodeRequire;
+let _memStackMod: Record<string, any> | null = null;
+function getMemoryStackSync() {
+  if (!_memStackMod) {
+    _memStackMod = _nativeRequire("@nexus-ai/memory-stack");
+  }
+  return _memStackMod!;
+}
 
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
@@ -69,8 +82,11 @@ function createSSEStream() {
     },
   });
 
+  let closed = false;
+
   const send = (data: string) => {
-    controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+    if (closed || !controller) return;
+    try { controller.enqueue(encoder.encode(`data: ${data}\n\n`)); } catch { /* stream already closed */ }
   };
 
   const sendText = (text: string) => {
@@ -82,8 +98,10 @@ function createSSEStream() {
   };
 
   const close = () => {
+    if (closed) return;
+    closed = true;
     send("[DONE]");
-    controller?.close();
+    try { controller?.close(); } catch { /* already closed */ }
   };
 
   // ── Agent Streaming Events (Week 2: OpenClaw + Agent Integration) ──
@@ -412,7 +430,29 @@ export async function POST(request: NextRequest) {
     // ── Brain Commander: Unified intelligence pipeline ──────────────────
     // Replace manual DB queries with Commander — single source of truth
     // for intelligence gathering, dispatch assessment, and permission filtering.
-    const { createBrainCommander } = await import("@nexus-ai/memory-stack");
+    let memStack: Record<string, any>;
+    try {
+      memStack = getMemoryStackSync();
+    } catch (memErr) {
+      logger.error("[Copilot/Chat] Failed to load @nexus-ai/memory-stack:", memErr);
+      // Return a graceful SSE error instead of 500
+      const { stream, sendText, sendError, close } = createSSEStream();
+      (async () => {
+        sendText("I'm unable to process your request right now — the brain intelligence engine failed to initialize. This is typically a server configuration issue. Please try again in a moment, or contact your administrator if the problem persists.");
+        sendError("Brain engine initialization failed");
+        close();
+      })();
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    }
+
+    const { createBrainCommander } = memStack;
     const commander = createBrainCommander({
       supabase,
       organizationId: workspaceId,
@@ -426,6 +466,7 @@ export async function POST(request: NextRequest) {
     // Provides: intent classification, entity extraction, service routing,
     // required data signals (skip unneeded DB queries), adaptive token budgets.
     // Falls back to regex dispatch-assessor on any failure.
+    const { createLLMQueryInterpreter } = memStack;
     const interpreter = createLLMQueryInterpreter({
       anthropicApiKey,
     });
@@ -436,11 +477,21 @@ export async function POST(request: NextRequest) {
       logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
     }
 
-    const commandResult = await commander.command(message, {
-      userId: user.id,
-      entityState,
-      interpretation,
-    });
+    let commandResult;
+    try {
+      commandResult = await commander.command(message, {
+        userId: user.id,
+        entityState,
+        interpretation,
+      });
+    } catch (cmdErr) {
+      logger.warn("[Copilot/Chat] Brain commander failed (non-fatal, falling back to basic chat):", cmdErr);
+      // Graceful fallback: return a basic chat response without brain intelligence
+      commandResult = {
+        intelligence: { causalEdges: [], rules: [], cascadeRules: [], patterns: [], insights: [] },
+        dispatch: { complexityScore: 0 },
+      };
+    }
 
     const { intelligence } = commandResult;
 
@@ -453,7 +504,7 @@ export async function POST(request: NextRequest) {
     // (Xero, Volopay, etc.) that have the same shape as patterns. By including them
     // in the patterns array, the brain context builder naturally surfaces them to the LLM.
     const dbPatterns: TrainedPattern[] = intelligence.patterns as unknown as TrainedPattern[];
-    const dbInsights = intelligence.insights.map((row) => ({
+    const dbInsights = intelligence.insights.map((row: { content: string; domain?: string; importance: number; metadata?: Record<string, unknown> }) => ({
       content: row.content,
       domain: row.domain || "general",
       importance: row.importance,
@@ -472,7 +523,7 @@ export async function POST(request: NextRequest) {
 
     if (useFramework && anthropicKey) {
       try {
-        const { createCopilotInstance, extractDomains, normalizeEntityState, selectModel } = await import("@nexus-ai/memory-stack");
+        const { createCopilotInstance, extractDomains, normalizeEntityState, selectModel } = memStack;
         const { createNexusBrainAdapter } = await import("@/lib/nexus-copilot-adapter");
 
         // Detect domains for the adapter
@@ -482,7 +533,7 @@ export async function POST(request: NextRequest) {
         const adapter = createNexusBrainAdapter({
           causalEdges: causalEdges as any,
           rules: rules as any,
-          cascadeRules,
+          cascadeRules: cascadeRules as any,
           patterns: patterns as any,
           entityState,
           detectedDomains,
@@ -547,7 +598,7 @@ export async function POST(request: NextRequest) {
         createUncertaintyQuantifier,
         createBrainHealthMonitor,
         createEmptyDAG,
-      } = await import("@nexus-ai/memory-stack");
+      } = memStack;
 
       // Check if any GitHub connector is active with ingested data (supports multi-instance)
       const { data: ghConnectors } = await Promise.resolve(service
@@ -615,6 +666,7 @@ export async function POST(request: NextRequest) {
       // ── Live Engineering Metrics via Brain Context Mesh ──────────────
       // The Mesh handles velocity, bottleneck, signals, and entity links
       // in a single call with caching and resilience built in.
+      const { createBrainContextMesh } = memStack;
       const mesh = createBrainContextMesh({ supabase: service, organizationId: workspaceId });
       const copilotDomainCtx = await mesh.getDomainContext('copilot') as any;
       // BRAIN NUTRITION: Also get universal context for LEAP (deep brain reasoning)
@@ -681,7 +733,7 @@ export async function POST(request: NextRequest) {
         createSessionMemory,
         createReasoningChain,
         createMultiModalInference,
-      } = await import("@nexus-ai/memory-stack");
+      } = memStack;
 
       // Agent Loop — autonomous multi-step execution planning
       brainRegions.agentLoop = createAgentLoop({ maxSteps: 10 });
@@ -747,7 +799,7 @@ export async function POST(request: NextRequest) {
           organizationId: workspaceId,
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-          interpretation, // Phase 3: pass interpretation for targeted context
+          interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
         });
 
         const DELIVERY_DOMAINS = ['pod-match', 'delivery-intelligence', 'early-warning', 'scope-creep'];
@@ -840,7 +892,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
             transactions: glData,
             jurisdiction: 'SG',
-            interpretation, // Phase 3: pass interpretation for targeted context
+            interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
           });
 
           accountingResult = {
@@ -1542,7 +1594,7 @@ export async function POST(request: NextRequest) {
             registerAllBrainAgents: regAll,
             createDomainTaxonomy: createDT,
             createCrossSystemEntityGraph: createCSEG,
-          } = await import("@nexus-ai/memory-stack");
+          } = memStack;
 
           const dt = createDT();
           const eg = createCSEG();
@@ -1839,9 +1891,7 @@ export async function POST(request: NextRequest) {
 
     if (actionIntents.has(detectedIntent) || forceAction) {
       try {
-        const { createDomainActionEngine, formatArtifactForPrompt } = await import(
-          "@nexus-ai/memory-stack"
-        );
+        const { createDomainActionEngine, formatArtifactForPrompt } = memStack;
         const engine = createDomainActionEngine({
           supabase,
           organizationId: workspaceId,
@@ -2294,7 +2344,7 @@ RULES FOR CORRECTIONS:
     }
 
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
-    const { selectModel: selectSmartModel } = await import("@nexus-ai/memory-stack");
+    const { selectModel: selectSmartModel } = memStack;
     const v4SmartModel = selectSmartModel(message, {
       commanderComplexity: commandResult?.dispatch?.complexityScore,
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
@@ -2456,6 +2506,7 @@ RULES FOR CORRECTIONS:
         clearTimeout(streamTimeout);
 
         // ── Brain Feedback: teach the Brain from Copilot interaction (Phase 4: 5s timeout) ──
+        const { createBrainFeedbackBus } = memStack;
         const bus = createBrainFeedbackBus({ supabase: service, organizationId: workspaceId });
         const feedbackTimeout = new Promise<void>((resolve) => setTimeout(resolve, 5_000));
         await Promise.race([
@@ -2539,6 +2590,7 @@ RULES FOR CORRECTIONS:
       },
     });
   } catch (err) {
+    logger.error("[Copilot/Chat] Unhandled error in POST handler:", err);
     const errorMessage =
       err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });

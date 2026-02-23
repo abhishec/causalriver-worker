@@ -32,7 +32,7 @@ export interface RedTeamConfig {
   logger?: NexusLogger;
   /** Anthropic API key — when provided, generates LLM-powered adversarial scenarios */
   anthropicApiKey?: string;
-  /** LLM model for red-teaming (default: 'claude-3-5-haiku-20241022') */
+  /** LLM model for red-teaming (default: 'claude-haiku-4-5-20251001') */
   llmModel?: string;
 }
 

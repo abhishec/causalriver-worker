@@ -69,7 +69,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "Organization",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -77,7 +77,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
       },
       {
         id: "workspace",
-        label: "Workspace",
+        label: "Engagement",
         type: "select",
         required: true,
         optionsEndpoint: "/api/org/{{org}}/workspaces",
@@ -102,20 +102,20 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Run early warning analysis for **{{workspace}}** over **{{time_range}}**?",
     gatheringPrompts: {
-      org: "Which workspace do you want to check for velocity risks?",
+      org: "Which customer workspace do you want to check for velocity risks?",
       workspace:
-        "I found {{count}} workspaces with Git configured. Which one should I analyze?",
+        "I found {{count}} engagements with Git configured. Which one should I analyze?",
       time_range: "What time range should I look at? The default is 30 days.",
     },
     promptBuilder: (p) =>
-      `Analyse delivery velocity and predict risk of velocity collapse for workspace "${p.workspace}" over the ${p.time_range || "last 30 days"}. Include SPOF bottleneck risk via Gini, HHI & Betweenness Centrality.`,
+      `Analyse delivery velocity and predict risk of velocity collapse${p.workspace ? ` for engagement "${p.workspace}"` : ""} over the ${p.time_range || "last 30 days"}. Include SPOF bottleneck risk via Gini, HHI & Betweenness Centrality.`,
   },
   {
     commandId: "delivery-intelligence",
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "Organization",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -134,7 +134,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Show delivery intelligence dashboard for **{{engagement}}**?",
     gatheringPrompts: {
-      org: "Which workspace's delivery health do you want to see?",
+      org: "Which customer workspace's delivery health do you want to see?",
       engagement:
         "Which engagement should I analyze? Here are the active ones:",
     },
@@ -146,7 +146,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "Organization",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -180,7 +180,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Find the best pod match for **{{engagement}}**{{tech_stack_filter}}?",
     gatheringPrompts: {
-      org: "Which workspace needs a pod recommendation?",
+      org: "Which customer workspace needs a pod recommendation?",
       engagement: "Which engagement are you staffing?",
       tech_stack_filter:
         "Want to filter by specific tech stack? Pick one or more, or skip.",
@@ -197,7 +197,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "Organization",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -216,7 +216,7 @@ const SEAAS_P0_GATHERING: CommandGathering[] = [
     confirmationMessage:
       "Check for scope creep in **{{engagement}}**?",
     gatheringPrompts: {
-      org: "Which workspace are you checking for scope creep?",
+      org: "Which customer workspace are you checking for scope creep?",
       engagement: "Which engagement should I audit for scope drift?",
     },
     promptBuilder: (p) =>

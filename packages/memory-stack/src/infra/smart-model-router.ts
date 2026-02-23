@@ -30,7 +30,7 @@
 // ============================================================================
 
 /** Fast model — high quality for structured tasks, 3x cheaper than Sonnet */
-export const MODEL_FAST = 'claude-3-5-haiku-20241022';
+export const MODEL_FAST = 'claude-haiku-4-5-20251001';
 
 /** Deep model — full reasoning power for complex multi-domain analysis */
 export const MODEL_DEEP = 'claude-sonnet-4-20250514';

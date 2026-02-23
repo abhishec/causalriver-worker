@@ -32,7 +32,7 @@ export interface NarrativeConfig {
   logger?: NexusLogger;
   /** Anthropic API key — when provided, narratives are LLM-generated instead of template-based */
   anthropicApiKey?: string;
-  /** LLM model (default: 'claude-3-5-haiku-20241022') — Haiku for cost efficiency */
+  /** LLM model (default: 'claude-haiku-4-5-20251001') — Haiku for cost efficiency */
   llmModel?: string;
   /** Max tokens for LLM response (default: 1024) */
   llmMaxTokens?: number;

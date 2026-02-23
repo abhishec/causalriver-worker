@@ -34,7 +34,7 @@ export interface BrainAmplifierConfig {
   provider: 'anthropic' | 'openai';
   /** API key */
   apiKey: string;
-  /** Fast model for high-volume tasks (default: claude-3-5-haiku-20241022) */
+  /** Fast model for high-volume tasks (default: claude-haiku-4-5-20251001) */
   fastModel?: string;
   /** Deep model for high-value tasks (default: claude-sonnet-4-5-20250929) */
   deepModel?: string;

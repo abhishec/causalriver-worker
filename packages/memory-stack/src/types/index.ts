@@ -25,7 +25,7 @@ export interface EmbeddingConfig {
   useAIEnhancement?: boolean;
   /** API key for the AI provider (required if useAIEnhancement is true) */
   aiApiKey?: string;
-  /** AI model for semantic extraction (e.g., 'claude-3-haiku-20240307') */
+  /** AI model for semantic extraction (defaults to MODEL_FAST from smart-model-router) */
   aiModel?: string;
   /**
    * Neural embedding provider to use for real semantic embeddings.

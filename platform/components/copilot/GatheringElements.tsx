@@ -1092,8 +1092,11 @@ export interface GatheringElementProps {
   onSkip?: () => void;
   onConfirm?: () => void;
   onModify?: () => void;
+  onRetry?: () => void;
   loading?: boolean;
   disabled?: boolean;
+  /** Error message when options failed to load */
+  optionsError?: string | null;
 }
 
 export function GatheringElement({
@@ -1102,9 +1105,43 @@ export function GatheringElement({
   onSkip,
   onConfirm,
   onModify,
+  onRetry,
   loading,
   disabled,
+  optionsError,
 }: GatheringElementProps) {
+  if (optionsError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-3 flex flex-col gap-2"
+      >
+        <div className="flex items-center gap-2 text-[13px] text-red-400">
+          <span>&#x26A0;</span>
+          <span>{optionsError}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="text-[12px] text-accent hover:text-accent-dark transition-colors self-start font-medium"
+            >
+              Retry
+            </button>
+          )}
+          {onSkip && (
+            <button
+              onClick={onSkip}
+              className="text-[12px] text-muted hover:text-foreground transition-colors self-start"
+            >
+              Skip this step
+            </button>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
   if (loading) return <GatheringLoader />;
 
   return (

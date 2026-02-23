@@ -10,6 +10,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createLLMResponseLayer } from '../orchestrator/llm-response-layer';
 import type { NexusQueryResult } from '../orchestrator/nexus-orchestrator';
+import { MODEL_DEEP } from '../infra/smart-model-router';
 
 // ============================================================================
 // MOCK SETUP
@@ -123,7 +124,7 @@ describe('LLM Response Layer', () => {
       const llm = createLLMResponseLayer({
         provider: 'anthropic',
         apiKey: 'sk-ant-test',
-        model: 'claude-sonnet-4-20250514',
+        model: MODEL_DEEP,
       });
 
       await llm.query('Test query', mockNexusContext);

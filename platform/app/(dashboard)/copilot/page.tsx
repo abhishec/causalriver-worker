@@ -33,7 +33,7 @@ type ServiceMode = "general" | "aas" | "seaas";
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
     name: "Intelligence Copilot",
-    description: "Your intelligence co-pilot — every answer grounded in evidence-based analysis",
+    description: "Your intelligence co-pilot — ask anything about your business, grounded in evidence-based analysis",
     color: "accent",
   },
   aas: {
@@ -146,7 +146,9 @@ function CopilotPageInner() {
 
   // Save current messages to DB before clearing (prevents message loss on domain/service switch)
   const saveCurrentMessagesBeforeClear = useCallback(async () => {
-    const currentMsgs = chatRef.current?.getCurrentMessages();
+    // Guard: ref may not be ready yet (e.g. during initial mount or workspace loading)
+    if (!chatRef.current || typeof chatRef.current.getCurrentMessages !== "function") return;
+    const currentMsgs = chatRef.current.getCurrentMessages();
     if (!currentMsgs || currentMsgs.length === 0) return;
     // At least one user message must exist to warrant saving
     const hasUserMsg = currentMsgs.some((m) => m.role === "user");
@@ -418,7 +420,15 @@ function CopilotPageInner() {
           title: newArtifact.title,
           resultData: result.data,
         }),
-      }).catch(() => {});
+      }).then((res) => {
+        if (!res.ok) {
+          logger.error(`[CopilotPage] Artifact persistence failed: ${res.status}`);
+          setSaveErrorToast("Artifact could not be saved — it may be lost on reload");
+        }
+      }).catch((err) => {
+        logger.error("[CopilotPage] Artifact persistence error:", err);
+        setSaveErrorToast("Artifact could not be saved — it may be lost on reload");
+      });
     }
   }, [activeConversationId, currentWorkspace?.id]);
 
@@ -507,7 +517,8 @@ function CopilotPageInner() {
           }
         } catch (err) {
           // Log artifact loading failure but don't block conversation load
-          console.warn("[Copilot] Failed to load artifacts for conversation:", id, err);
+          logger.warn("[Copilot] Failed to load artifacts for conversation:", id, err);
+          setSaveErrorToast("Could not load saved artifacts for this conversation");
         }
 
         window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
@@ -574,6 +585,12 @@ function CopilotPageInner() {
       }
     } catch (err) {
       logger.error("[CopilotPage] handleSave failed:", err);
+      // Dispatch the save error event so the toast appears
+      window.dispatchEvent(
+        new CustomEvent(CONVERSATION_SAVE_ERROR_EVENT, {
+          detail: "Failed to save conversation",
+        })
+      );
     }
   }, [saveConversation, activeConversationId]);
 
@@ -654,6 +671,12 @@ function CopilotPageInner() {
           <span className="text-sm font-medium text-foreground">{persona.name}</span>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleNewConversation}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-accent/20 bg-accent/5 text-accent hover:bg-accent/10 transition-colors"
+          >
+            <span className="text-sm">✦</span> New conversation
+          </button>
           <ThemeToggle />
         </div>
       </div>

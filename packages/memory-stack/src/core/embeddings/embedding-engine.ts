@@ -26,6 +26,7 @@ import {
   type NeuralEmbeddingConfig,
   type EmbeddingModel,
 } from './neural-embedding-engine';
+import { MODEL_FAST } from '../../infra/smart-model-router';
 
 // ============================================================================
 // CORE HASHING FUNCTIONS
@@ -129,7 +130,7 @@ export function cosineSimilarity(a: number[], b: number[]): number {
 export async function extractSemanticConcepts(
   text: string,
   apiKey: string,
-  model: string = 'claude-3-haiku-20240307'
+  model: string = MODEL_FAST
 ): Promise<string> {
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -194,7 +195,7 @@ export function createEmbeddingEngine(config: EmbeddingConfig) {
     dimensions = 384,
     useAIEnhancement = false,
     aiApiKey,
-    aiModel = 'claude-3-haiku-20240307',
+    aiModel = MODEL_FAST,
     embeddingModel,
     embeddingApiKey,
     embeddingApiEndpoint,

@@ -42,7 +42,18 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ memberships: rows ?? [] });
+    // Flatten nested organizations fields so generic option mappers can read {id, name}
+    const memberships = (rows ?? []).map((r: Record<string, unknown>) => {
+      const org = r.organizations as Record<string, unknown> | null;
+      return {
+        ...r,
+        id: r.organization_id,
+        name: org?.name ?? r.organization_id,
+        slug: org?.slug,
+      };
+    });
+
+    return NextResponse.json({ memberships });
   } catch (err) {
     logger.error("[/api/workspace/memberships] error:", err);
     return NextResponse.json(

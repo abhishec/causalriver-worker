@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "platform",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
       "runtimeArgs": ["--filter", "platform", "dev"],
       "port": 3001
     },

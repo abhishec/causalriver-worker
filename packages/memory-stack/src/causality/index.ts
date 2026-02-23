@@ -107,3 +107,6 @@ export * from './context-aware-reasoner';
 
 // Phase 8: Meta-Cognition (Brain Self-Awareness)
 export * from './brain-health-monitor';
+
+// Phase 9: Causal Graph Diffing (Knowledge Evolution Tracking)
+export * from './causal-graph-diff';

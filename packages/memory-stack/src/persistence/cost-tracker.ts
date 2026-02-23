@@ -44,7 +44,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 /** Pricing table — updated regularly. Prices in USD per 1K tokens. */
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   // Anthropic
-  'claude-3-5-haiku-20241022':    { input: 0.001,  output: 0.005 },
+  'claude-haiku-4-5-20251001':    { input: 0.001,  output: 0.005 },
+  'claude-3-5-haiku-20241022':    { input: 0.001,  output: 0.005 },  // legacy alias
   'claude-3-haiku-20240307':      { input: 0.00025, output: 0.00125 },
   'claude-sonnet-4-20250514':     { input: 0.003,  output: 0.015 },
   'claude-sonnet-4-5-20250929':   { input: 0.003,  output: 0.015 },
