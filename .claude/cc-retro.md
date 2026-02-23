@@ -158,3 +158,18 @@
 - **Pattern**: For Next.js route group builds, the key combo is: (1) Next.js 15.5+, (2) webpack (not Turbopack), (3) force-dynamic on all API routes, (4) suppress-document-error.cjs safety net, (5) ignoreBuildErrors + ignoreDuringBuilds (type/lint done separately)
 - **⚠️ Anti-pattern**: Turbopack build (`next build --turbopack`) DOES NOT fix the route group module resolution bug. Don't waste time on it again.
 - **RL improvement**: Case log's "failed approaches" section saved ~2 hours by avoiding known dead-ends. But should have been more aggressive with the circuit breaker on new dead-ends (Turbopack).
+
+## Retro 010: Tighten CSP Security Headers (2026-02-23)
+- **Task**: `2226a644` — Tighten CSP headers, remove unsafe-eval in production
+- **Time**: ~8 min (estimated 10 min — under budget)
+- **Model used**: Sonnet (correct — standard security config)
+- **What went well**:
+  - Used Explore agent to find ALL CSP locations (2 files — middleware.ts + security-middleware.ts)
+  - Identified the conflicting CSP definitions and unified them
+  - Split dev vs prod CSP (unsafe-eval only in dev for HMR)
+  - API routes now use the strictest possible CSP: `default-src 'none'`
+  - Added missing connect-src entries (api.anthropic.com)
+  - Build + tsc + ESLint all pass
+- **What went wrong**: Nothing significant — quick focused task
+- **Lesson**: API routes should have `default-src 'none'` since they return JSON not HTML — no need for script/style/img permissions
+- **RL improvement**: Now that build works (Case 009), can verify CSP changes via full build. Previously was limited to tsc --noEmit.
