@@ -20,7 +20,7 @@
  *   │    ...                       │
  *   │  ──────────────────────────  │
  *   │  PLATFORM (admin only)       │
- *   │    NexusBrain Core           │
+ *   │    Brain OS Core             │
  *   │  ──────────────────────────  │
  *   │  Manage All Workspaces →     │
  *   └──────────────────────────────┘

@@ -69,7 +69,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   any: "bg-muted/10 text-muted",
 };
 
-/* ── Service grouping: maps connector types to NexusBrain services ────── */
+/* ── Service grouping: maps connector types to Brain OS services ────── */
 
 const SERVICE_MAP: Record<string, string> = {
   github: "seaas", jira: "seaas", slack: "seaas", notion: "seaas", linear: "seaas",
