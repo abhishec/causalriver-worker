@@ -108,7 +108,9 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenData.ok) {
-      logger.error('Slack OAuth error:', tokenData);
+      logger.error('Slack OAuth error:', {
+        error: tokenData.error,
+      });
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -180,8 +182,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       new URL('/connectors?success=slack_connected', request.url)
     );
-  } catch (error: any) {
-    logger.error('Slack callback error:', error);
+  } catch (error: unknown) {
+    logger.error('Slack callback error:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

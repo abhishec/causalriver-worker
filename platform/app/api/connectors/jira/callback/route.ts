@@ -96,7 +96,11 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok) {
-      logger.error('Jira OAuth error:', tokenData);
+      logger.error('Jira OAuth error:', {
+        error: tokenData.error,
+        error_description: tokenData.error_description,
+        status: tokenResponse.status,
+      });
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -164,8 +168,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       new URL('/connectors?success=jira_connected', request.url)
     );
-  } catch (error: any) {
-    logger.error('Jira callback error:', error);
+  } catch (error: unknown) {
+    logger.error('Jira callback error:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

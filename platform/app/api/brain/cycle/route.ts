@@ -84,10 +84,11 @@ if (process.env.NODE_ENV === "production") {
 export async function POST(request: NextRequest) {
   try {
     // ── Auth (allow internal cron bypass) ──────────────────────────
+    const cronSecret = process.env.CRON_SECRET;
     const isInternalCron =
       request.headers.get("x-internal-cron") === "true" &&
-      process.env.SUPABASE_SERVICE_ROLE_KEY &&
-      request.headers.get("authorization") === `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`;
+      cronSecret &&
+      request.headers.get("authorization") === `Bearer ${cronSecret}`;
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Auth: service key or admin session
+    // Auth: cron secret or admin session (never expose service_role key in headers)
     const serviceKey = request.headers.get("x-service-key");
-    const expectedKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const expectedKey = process.env.CRON_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!serviceKey || serviceKey !== expectedKey) {
       // Fallback: check admin session

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
  *   Designed to be called by Vercel Cron, Supabase pg_cron, or external schedulers.
  *   Polls health for all active organizations and creates alerts for violations.
  *
- * Auth: Bearer CRON_SECRET (env variable) or service_role key.
+ * Auth: Bearer CRON_SECRET (env variable) or Vercel Cron header.
  *
  * Schedule (vercel.json): every 5 minutes
  *
@@ -34,16 +34,14 @@ export async function GET(request: NextRequest) {
     const isVercelCron = request.headers.get(VERCEL_CRON_HEADER) === "1";
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     const isAuthorized =
       isVercelCron ||
-      (cronSecret && authHeader === `Bearer ${cronSecret}`) ||
-      (serviceRoleKey && authHeader === `Bearer ${serviceRoleKey}`);
+      (cronSecret && authHeader === `Bearer ${cronSecret}`);
 
     if (!isAuthorized) {
       return NextResponse.json(
-        { error: "Unauthorized. Provide CRON_SECRET or service_role key." },
+        { error: "Unauthorized. Provide CRON_SECRET." },
         { status: 401 },
       );
     }
@@ -71,7 +69,7 @@ export async function GET(request: NextRequest) {
             headers: {
               "Content-Type": "application/json",
               "x-internal-cron": "true",
-              Authorization: `Bearer ${serviceRoleKey}`,
+              Authorization: `Bearer ${cronSecret}`,
             },
             body: JSON.stringify({
               organizationId: org.organizationId,

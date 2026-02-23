@@ -124,7 +124,10 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (tokenData.error) {
-      logger.error('GitHub OAuth error:', tokenData);
+      logger.error('GitHub OAuth error:', {
+        error: tokenData.error,
+        error_description: tokenData.error_description,
+      });
       return NextResponse.redirect(
         new URL(`/connectors?error=${tokenData.error}`, request.url)
       );
@@ -208,8 +211,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       new URL('/connectors?success=github_connected', request.url)
     );
-  } catch (error: any) {
-    logger.error('GitHub callback error:', error);
+  } catch (error: unknown) {
+    logger.error('GitHub callback error:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.redirect(
       new URL('/connectors?error=auth_failed', request.url)
     );

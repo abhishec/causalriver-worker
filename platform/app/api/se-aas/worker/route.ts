@@ -16,14 +16,14 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify worker auth: service-role key or worker secret
+    // Verify worker auth: worker secret or cron secret only (never expose service_role key in headers)
     const authHeader = request.headers.get("authorization");
     const workerSecret = process.env.SE_AAS_WORKER_SECRET;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const cronSecret = process.env.CRON_SECRET;
 
     const isAuthorized =
       (workerSecret && authHeader === `Bearer ${workerSecret}`) ||
-      (serviceRoleKey && authHeader === `Bearer ${serviceRoleKey}`);
+      (cronSecret && authHeader === `Bearer ${cronSecret}`);
 
     if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
