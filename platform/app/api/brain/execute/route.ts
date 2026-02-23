@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (user) {
       userId = user.id;
       // Session rate limit for browser users
-      const sessionRL = checkSessionRateLimit(user.id, "/api/brain/execute");
+      const sessionRL = await checkSessionRateLimit(user.id, "/api/brain/execute");
       if (!sessionRL.allowed) {
         return NextResponse.json(
           { error: "Too many requests. Please slow down." },

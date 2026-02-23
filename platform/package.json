@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/dev-watchdog.mjs",
-    "dev:bare": "echo '\u26a0\ufe0f  WARNING: Running without watchdog. Use pnpm dev instead!' && next dev --port 3001 --turbopack",
+    "dev:bare": "echo '⚠️  WARNING: Running without watchdog. Use pnpm dev instead!' && next dev --port 3001 --turbopack",
     "build": "bash scripts/build.sh",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --max-warnings=200",
@@ -23,6 +23,7 @@
     "@octokit/rest": "^20.1.2",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.95.3",
+    "@upstash/redis": "^1.36.2",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.1",
     "framer-motion": "^12.34.0",

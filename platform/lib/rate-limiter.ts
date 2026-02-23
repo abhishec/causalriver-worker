@@ -13,6 +13,8 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit as redisCheckRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 import crypto from "crypto";
 
 interface RateLimitResult {
@@ -22,11 +24,11 @@ interface RateLimitResult {
   error?: string;
 }
 
-// In-memory fallback for when DB is unavailable
-const memoryWindows = new Map<string, { count: number; windowStart: number }>();
-
 /**
  * Check rate limit for an API key.
+ *
+ * Primary: Supabase RPC (tracks in DB for billing/audit).
+ * Fallback: Redis sliding window (shared across serverless instances).
  *
  * @param keyHash  SHA-256 hash of the API key
  * @param limitPerMinute  Max requests per minute for this key
@@ -48,8 +50,8 @@ export async function checkRateLimit(
     });
 
     if (error) {
-      // Fail open with in-memory fallback
-      return checkRateLimitMemory(keyHash, limitPerMinute, resetAt);
+      // DB error — fall back to Redis
+      return checkRateLimitRedis(keyHash, limitPerMinute, resetAt);
     }
 
     const remaining = typeof data === "number" ? data : 0;
@@ -65,42 +67,40 @@ export async function checkRateLimit(
 
     return { allowed: true, remaining, resetAt };
   } catch {
-    // DB unavailable — use memory fallback
-    return checkRateLimitMemory(keyHash, limitPerMinute, resetAt);
+    // DB unavailable — fall back to Redis
+    return checkRateLimitRedis(keyHash, limitPerMinute, resetAt);
   }
 }
 
 /**
- * In-memory rate limiter fallback (conservative: 50% of DB limit).
- * Used when Supabase RPC is unavailable.
+ * Redis-backed rate limiter fallback (conservative: 50% of DB limit).
+ * Used when Supabase RPC is unavailable. Shared across serverless instances
+ * (unlike the old in-memory Map which was per-instance).
  */
-function checkRateLimitMemory(
+async function checkRateLimitRedis(
   keyHash: string,
   limitPerMinute: number,
   resetAt: Date
-): RateLimitResult {
-  const now = Date.now();
-  const windowMs = 60_000;
+): Promise<RateLimitResult> {
   const conservativeLimit = Math.max(Math.floor(limitPerMinute * 0.5), 5);
-  const key = keyHash.substring(0, 16); // Truncate for memory efficiency
+  const key = `apikey:${keyHash.substring(0, 16)}`;
 
-  const existing = memoryWindows.get(key);
-  if (!existing || now - existing.windowStart > windowMs) {
-    memoryWindows.set(key, { count: 1, windowStart: now });
-    return { allowed: true, remaining: conservativeLimit - 1, resetAt };
+  try {
+    const result = await redisCheckRateLimit(key, conservativeLimit, 60);
+    if (!result.allowed) {
+      return {
+        allowed: false,
+        remaining: 0,
+        resetAt,
+        error: `Rate limit exceeded (fallback mode). Retry after ${resetAt.toISOString()}.`,
+      };
+    }
+    return { allowed: true, remaining: result.remaining, resetAt };
+  } catch (err) {
+    // Both DB and Redis are down — fail open with warning
+    logger.warn(`[RateLimit] Both DB and Redis unavailable, failing open: ${err}`);
+    return { allowed: true, remaining: conservativeLimit, resetAt };
   }
-
-  existing.count++;
-  if (existing.count > conservativeLimit) {
-    return {
-      allowed: false,
-      remaining: 0,
-      resetAt,
-      error: `Rate limit exceeded (fallback mode). Retry after ${resetAt.toISOString()}.`,
-    };
-  }
-
-  return { allowed: true, remaining: conservativeLimit - existing.count, resetAt };
 }
 
 /**

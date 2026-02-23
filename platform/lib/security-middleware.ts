@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import crypto from "crypto";
 import { logger } from "@/lib/logger";
+import { checkRateLimit as redisCheckRateLimit } from "@/lib/redis";
 
 // ── CORS Configuration ────────────────────────────────────────────────
 
@@ -71,10 +72,10 @@ export function validateCsrf(request: NextRequest): boolean {
 // ── Session Rate Limiting ─────────────────────────────────────────────
 
 /**
- * In-memory sliding window rate limiter for session-authenticated endpoints.
+ * Redis-backed sliding window rate limiter for session-authenticated endpoints.
+ * Uses @/lib/redis which falls back to in-memory when Upstash is not configured.
  * More lenient than API key limits (60 req/min default).
  */
-const sessionWindows = new Map<string, { count: number; windowStart: number }>();
 
 const SESSION_RATE_LIMITS: Record<string, number> = {
   "/api/copilot/chat": 30,           // 30 req/min — chat is expensive
@@ -94,46 +95,23 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   default: 60,                       // 60 req/min for anything else
 };
 
-export function checkSessionRateLimit(
+export async function checkSessionRateLimit(
   userId: string,
   pathname: string
-): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const windowMs = 60_000;
-
+): Promise<{ allowed: boolean; remaining: number }> {
   // Find matching rate limit
   const matchingPath = Object.keys(SESSION_RATE_LIMITS).find((p) => p !== "default" && pathname.startsWith(p));
   const limit = SESSION_RATE_LIMITS[matchingPath || "default"] || 60;
 
   const key = `session:${userId}:${matchingPath || "default"}`;
-  const existing = sessionWindows.get(key);
 
-  if (!existing || now - existing.windowStart > windowMs) {
-    sessionWindows.set(key, { count: 1, windowStart: now });
-    return { allowed: true, remaining: limit - 1 };
-  }
-
-  existing.count++;
-  if (existing.count > limit) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  return { allowed: true, remaining: limit - existing.count };
-}
-
-// Cleanup stale session windows every 5 minutes.
-// .unref() prevents this timer from keeping the process alive on shutdown.
-if (typeof setInterval !== "undefined") {
-  const cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    for (const [key, window] of sessionWindows) {
-      if (now - window.windowStart > 120_000) {
-        sessionWindows.delete(key);
-      }
-    }
-  }, 300_000);
-  if (typeof cleanupTimer === "object" && "unref" in cleanupTimer) {
-    cleanupTimer.unref();
+  try {
+    const result = await redisCheckRateLimit(key, limit, 60);
+    return { allowed: result.allowed, remaining: result.remaining };
+  } catch (err) {
+    // Fail open — if Redis is down, allow the request but log
+    logger.warn(`[RateLimit] Redis error, failing open: ${err}`);
+    return { allowed: true, remaining: limit };
   }
 }
 
@@ -240,8 +218,8 @@ export async function enforceSessionSecurity(
     return { ok: true, userId: "anonymous", supabase };
   }
 
-  // Session rate limit
-  const rateLimit = checkSessionRateLimit(user.id, request.nextUrl.pathname);
+  // Session rate limit (Redis-backed, async)
+  const rateLimit = await checkSessionRateLimit(user.id, request.nextUrl.pathname);
   if (!rateLimit.allowed) {
     logger.warn("session_rate_limited", { userId: user.id });
     return {

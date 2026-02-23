@@ -40,7 +40,7 @@ export async function authenticateSeAaSRequest(
     userId = user.id;
 
     // Session rate limit
-    const sessionRL = checkSessionRateLimit(user.id, "/api/se-aas");
+    const sessionRL = await checkSessionRateLimit(user.id, "/api/se-aas");
     if (!sessionRL.allowed) {
       throw { status: 429, error: "Too many requests. Please slow down." };
     }

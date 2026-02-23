@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Rate limit (skip for internal cron) ──────────────────────
-    const rateLimit = !isInternalCron ? checkSessionRateLimit(user!.id, "/api/brain/cycle") : { allowed: true };
+    const rateLimit = !isInternalCron ? await checkSessionRateLimit(user!.id, "/api/brain/cycle") : { allowed: true };
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Brain cycles are resource-intensive." },

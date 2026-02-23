@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Rate limit ───────────────────────────────────────────────
-    const rateLimit = checkSessionRateLimit(user.id, "/api/jobs/trigger");
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/jobs/trigger");
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Job triggers are rate-limited to 5/min." },
