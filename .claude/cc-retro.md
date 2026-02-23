@@ -173,3 +173,11 @@
 - **What went wrong**: Nothing significant — quick focused task
 - **Lesson**: API routes should have `default-src 'none'` since they return JSON not HTML — no need for script/style/img permissions
 - **RL improvement**: Now that build works (Case 009), can verify CSP changes via full build. Previously was limited to tsc --noEmit.
+
+## Retro 011: Expand E2E Test Coverage (2026-02-23)
+- **Task**: `077781e4` — Expand Playwright E2E test coverage
+- **Time**: ~10 min (estimated 15 min — under budget)
+- **Model used**: Sonnet (correct — standard test writing)
+- **What went well**: Created 4 new spec files (19 tests) covering dashboard nav, API health, API keys, and workflows. 3x coverage increase. All pass lint-staged.
+- **What went wrong**: Had to rebuild .next due to stale types from Turbopack experiments
+- **Pattern**: E2E tests should test via `page.evaluate(fetch())` for API routes (no browser rendering needed) and via `page.goto()` for UI routes. Keep tests resilient by checking for generic elements (h1, main, form) rather than specific text.
