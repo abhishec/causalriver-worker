@@ -487,5 +487,65 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
     }
   }
 
-  logger.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId}`);
+  // ── 4. RELEASE READINESS SCORECARD ──────────────────────────────────────
+  // This is the single most important pattern for design partner demos.
+  // Pre-computes a release health summary that the brain context builder
+  // AUTOMATICALLY includes in every copilot query. The copilot can then
+  // reference this pre-built insight without needing to compute it on-the-fly.
+  const byPriority: Record<string, { total: number; done: number; inProgress: number; todo: number }> = {};
+  const byType: Record<string, number> = {};
+  let totalDone = 0;
+  let totalInProgress = 0;
+  let totalTodo = 0;
+  const blockers: string[] = [];
+
+  for (const s of signals) {
+    const m = s.signal_metadata || {};
+    const priority = m.priority || 'Unknown';
+    const statusCat = m.status_category || 'Unknown';
+    const issueType = m.issue_type || 'Unknown';
+
+    if (!byPriority[priority]) byPriority[priority] = { total: 0, done: 0, inProgress: 0, todo: 0 };
+    byPriority[priority].total++;
+
+    if (statusCat === 'Done') { byPriority[priority].done++; totalDone++; }
+    else if (statusCat === 'In Progress') { byPriority[priority].inProgress++; totalInProgress++; }
+    else { byPriority[priority].todo++; totalTodo++; }
+
+    byType[issueType] = (byType[issueType] || 0) + 1;
+
+    // Track blockers: high-priority items not done
+    if ((priority === 'Highest' || priority === 'Blocker' || priority === 'Critical' || priority === 'High') && statusCat !== 'Done') {
+      blockers.push(`${m.issue_key}: ${m.summary || 'No summary'} [${priority}/${m.status || '?'}]${m.assignee ? ` → ${m.assignee}` : ''}`);
+    }
+  }
+
+  const total = signals.length;
+  const completionRate = total > 0 ? ((totalDone / total) * 100).toFixed(0) : '0';
+  const riskLevel = blockers.length > 5 ? 'HIGH' : blockers.length > 2 ? 'MEDIUM' : 'LOW';
+
+  await supabase.from("ai_memory").upsert({
+    organization_id: organizationId,
+    memory_type: "pattern",
+    domain: "product.release_readiness",
+    content: JSON.stringify({
+      title: "Release Readiness Scorecard",
+      insight: `Release status: ${completionRate}% complete (${totalDone}/${total} tickets done, ${totalInProgress} in progress, ${totalTodo} to do). Risk level: ${riskLevel} — ${blockers.length} high-priority items still open.${blockers.length > 0 ? ` Top blockers: ${blockers.slice(0, 5).join('; ')}` : ' No blockers detected.'}`,
+      completion_rate: parseFloat(completionRate),
+      total_tickets: total,
+      done: totalDone,
+      in_progress: totalInProgress,
+      todo: totalTodo,
+      risk_level: riskLevel,
+      blocker_count: blockers.length,
+      blockers: blockers.slice(0, 10),
+      by_priority: byPriority,
+      by_type: byType,
+    }),
+    importance: 0.95, // Highest importance — used in every copilot query about releases
+    metadata: { source: "jira_sync_derived" },
+    created_at: new Date().toISOString(),
+  }, { onConflict: "organization_id,memory_type,domain" });
+
+  logger.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId} — release readiness: ${completionRate}% (${riskLevel} risk, ${blockers.length} blockers)`);
 }

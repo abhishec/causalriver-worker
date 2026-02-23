@@ -277,12 +277,12 @@ async function deriveRealCausalInsights(
 
   // ── 2. REVIEWER CONCENTRATION (real bottleneck detection) ─────────────
   const reviewSignals = signals.filter((s: any) => s.signal_type === "pr_reviewed");
+  const reviewerCounts: Record<string, number> = {};
+  for (const s of reviewSignals) {
+    const reviewer = s.signal_metadata?.reviewer || "unknown";
+    reviewerCounts[reviewer] = (reviewerCounts[reviewer] || 0) + 1;
+  }
   if (reviewSignals.length >= 5) {
-    const reviewerCounts: Record<string, number> = {};
-    for (const s of reviewSignals) {
-      const reviewer = s.signal_metadata?.reviewer || "unknown";
-      reviewerCounts[reviewer] = (reviewerCounts[reviewer] || 0) + 1;
-    }
     const total = reviewSignals.length;
     const sorted = Object.entries(reviewerCounts).sort((a, b) => b[1] - a[1]);
     const topReviewer = sorted[0];
@@ -410,5 +410,39 @@ async function deriveRealCausalInsights(
     }, { onConflict: "organization_id,memory_type,domain" });
   }
 
-  logger.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId}`);
+  // ── 5. ENGINEERING VELOCITY SCORECARD ──────────────────────────────────
+  // Pre-computed release velocity summary. The brain context builder includes this
+  // automatically in every copilot query, giving instant access to "how's engineering doing?"
+  const totalPRs = mergedPRs.length;
+  const totalCommits = commitSignals.length;
+  const totalReviews = reviewSignals.length;
+  const avgCycleTime = cycleTimes.length > 0
+    ? cycleTimes.reduce((a: number, b: number) => a + b, 0) / cycleTimes.length
+    : 0;
+  const prVelocity = totalPRs > 0 ? `${totalPRs} PRs merged (avg ${avgCycleTime.toFixed(0)}h cycle time)` : 'No merged PRs yet';
+  const reviewHealth = reviewSignals.length > 0
+    ? `${totalReviews} reviews across ${Object.keys(reviewerCounts).length} reviewers`
+    : 'No review data yet';
+
+  await supabase.from("ai_memory").upsert({
+    organization_id: organizationId,
+    memory_type: "pattern",
+    domain: "engineering.velocity_scorecard",
+    content: JSON.stringify({
+      title: "Engineering Velocity Scorecard",
+      insight: `Engineering velocity (last 90 days): ${prVelocity}. ${totalCommits} commits by ${topContributors.length} contributors. ${reviewHealth}. ${hotspots.length > 0 ? `High-churn files: ${hotspots.slice(0, 3).map(([p]) => p.split('/').pop()).join(', ')}.` : ''}`,
+      total_prs: totalPRs,
+      total_commits: totalCommits,
+      total_reviews: totalReviews,
+      avg_cycle_time_hours: avgCycleTime,
+      unique_contributors: topContributors.length,
+      unique_reviewers: Object.keys(reviewerCounts).length,
+      hotspot_count: hotspots.length,
+    }),
+    importance: 0.90,
+    metadata: { source: "github_sync_derived" },
+    created_at: new Date().toISOString(),
+  }, { onConflict: "organization_id,memory_type,domain" });
+
+  logger.info(`[Brain] Derived real causal insights from ${signals.length} signals for org ${organizationId} — ${totalPRs} PRs, ${totalCommits} commits, ${totalReviews} reviews`);
 }
