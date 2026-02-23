@@ -80,3 +80,13 @@
 - **No red flags**: No hardcoded secrets, no stubs, no deprecated patterns
 - **Report saved**: `platform/docs/vc-technical-due-diligence.md`
 - **Pattern**: Background Explore agent with "very thorough" mode is ideal for large-scale audit tasks — covers all dimensions in a single pass
+
+## Case 008: Redis Distributed Cache for Serverless (2026-02-23)
+- **Context**: Rate limiting used per-instance in-memory Maps — didn't share state across serverless instances
+- **Decision**: @upstash/redis (HTTP-based) NOT ioredis (TCP persistent connections) — Vercel serverless can't hold persistent connections
+- **Architecture**: RedisAdapter interface → UpstashRedisAdapter (prod) or InMemoryRedis (local dev) via factory singleton
+- **What NOT to cache in Redis**: Controller cache (200MB per controller) — too large, stays in-memory per-instance
+- **What TO cache in Redis**: Rate limit counters (shared across instances), request dedup tokens
+- **Fallback chain**: Session rate limit = Redis → fail-open. API key rate limit = Supabase RPC → Redis → fail-open.
+- **Breaking change pattern**: Making sync → async requires updating ALL call sites. Use `grep` to find every caller before committing.
+- **Files**: `lib/redis.ts` (new), `lib/security-middleware.ts`, `lib/rate-limiter.ts`, + 5 route files for await updates

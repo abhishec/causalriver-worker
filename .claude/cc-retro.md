@@ -119,3 +119,20 @@
 - **Lesson**: Always explore existing code before implementing. The VC review said "designed but not deployed" but in fact it was ~80% deployed. The real gap was much smaller.
 - **Pattern**: When a task says "implement X", first check if X already exists partially. Rewriting the task scope BEFORE coding saves massive time.
 - **RL improvement**: Plan mode worked well — forced thorough exploration before coding
+
+## Retro 008: Redis Distributed Cache Layer (2026-02-23)
+- **Task**: `0704a0a1` — Add Redis distributed cache layer with Upstash adapter
+- **Time**: ~20 min (estimated 25 min — under budget)
+- **Model used**: Sonnet (correct — standard infrastructure work with clear patterns)
+- **What went well**:
+  - Explored existing caching infrastructure FIRST — found ioredis in memory-stack but NOT in platform
+  - Chose @upstash/redis (HTTP-based) instead of ioredis — correct for Vercel serverless (no persistent connections)
+  - Smart scoping: controller cache (200MB/controller) stays in-memory — too large for Redis, local-only
+  - Created clean adapter pattern (RedisAdapter interface) with in-memory fallback for local dev
+  - Updated all 7 call sites for async checkSessionRateLimit — found them all via grep
+  - Both pre-commit hooks (ESLint + tsc) passed first try
+  - Rate limiter now has 3-tier fallback: Supabase RPC → Redis → fail-open (was: RPC → in-memory Map → fail-open)
+- **What went wrong**: Nothing significant — clean execution
+- **Lesson**: When adding a distributed cache, don't try to cache everything. Large per-instance caches (controller cache at 200MB) are better left in-memory. Redis adds value for shared state (rate limiting, dedup) not bulk storage.
+- **Pattern**: When making a sync function async, grep for ALL call sites before committing. The change from `checkSessionRateLimit` (sync) to async required `await` in 7 different files — missing any one would be a runtime bug.
+- **RL improvement**: Retro 007's "explore before implementing" pattern confirmed again — saved time by understanding existing infrastructure first
