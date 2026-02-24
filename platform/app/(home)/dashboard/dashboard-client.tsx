@@ -52,7 +52,11 @@ export function DashboardClient() {
 
   // Prevent hydration mismatch: server always renders loading state,
   // so client must also render loading on first paint before SWR cache kicks in.
-  useEffect(() => { setMounted(true); }, []);
+  // Also clear any stale launchingId from previous navigation (BUG-5).
+  useEffect(() => {
+    setMounted(true);
+    setLaunchingId(null);
+  }, []);
 
   // Workspaces grouped by customer for display
   const customerGroups = useMemo(() => {
@@ -166,9 +170,8 @@ export function DashboardClient() {
   const handleLaunchWorker = useCallback((wsId: string, worker: ServiceMode) => {
     setLaunchingId(`${wsId}-${worker}`);
     localStorage.setItem(SERVICE_MODE_KEY, worker);
-    switchWorkspace(wsId);
-    // Dispatch service-mode-changed so sidebar picks up the new worker
-    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: worker }));
+    // skipReload so router.push below actually fires (BUG-1 fix)
+    switchWorkspace(wsId, { skipReload: true });
     router.push("/copilot");
   }, [switchWorkspace, router]);
 
@@ -176,6 +179,8 @@ export function DashboardClient() {
     localStorage.removeItem("nexus_current_workspace");
     localStorage.removeItem("nexus_current_org");
     localStorage.removeItem("nexus_active_customer");
+    localStorage.removeItem("nexus_service_mode");
+    localStorage.removeItem("nexus_workspace_memberships");
     document.cookie = "nexus_current_workspace=;path=/;max-age=0;SameSite=Lax";
     document.cookie = "nexus_current_org=;path=/;max-age=0;SameSite=Lax";
     const supabase = createBrowserClient(
@@ -218,6 +223,27 @@ export function DashboardClient() {
           >
             Refresh
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Single-customer non-admin users auto-resolve via useEffect in workspace-context.
+  // Show loading until that effect fires to avoid a blank flash (BUG-4/7).
+  const pendingAutoCustomer = !activeCustomerId && !isPlatformAdmin && customersForUser.length === 1;
+  if (pendingAutoCustomer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+            <span className="text-lg font-bold text-accent">N</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+            <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
+          </div>
+          <span className="text-xs text-muted-foreground">Loading your workspace...</span>
         </div>
       </div>
     );
@@ -500,7 +526,7 @@ export function DashboardClient() {
                               className="flex items-center gap-3 rounded-lg border border-border-subtle bg-surface p-3 hover:border-accent/40 hover:bg-surface-hover transition-all group text-left"
                             >
                               <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
-                                <svg className="w-4.5 h-4.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d={w.icon} />
                                 </svg>
                               </div>

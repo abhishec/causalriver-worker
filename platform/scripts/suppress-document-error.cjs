@@ -14,17 +14,15 @@
  */
 "use strict";
 
+// ── 1. Intercept unhandled rejection handlers ──────────────────────────────
 const originalOn = process.on.bind(process);
 
 process.on = function patchedOn(event, handler) {
   if (event === "unhandledRejection" && typeof handler === "function") {
     const wrapped = function (err, promise) {
       if (err && typeof err === "object") {
-        // Suppress ALL PageNotFoundError rejections during build
-        if (err.type === "PageNotFoundError") {
-          return;
-        }
-        // Suppress "Failed to collect page data" wrapper errors
+        if (err.type === "PageNotFoundError") return;
+        if (err.code === "ENOENT" && err.type === "PageNotFoundError") return;
         if (
           typeof err.message === "string" &&
           err.message.startsWith("Failed to collect page data")
@@ -38,3 +36,19 @@ process.on = function patchedOn(event, handler) {
   }
   return originalOn.call(process, event, handler);
 };
+
+// ── 2. Global safety net for PageNotFoundError rejections ──────────────────
+process.on("unhandledRejection", (err) => {
+  if (err && typeof err === "object") {
+    const e = /** @type {any} */ (err);
+    if (e.type === "PageNotFoundError") return;
+    if (
+      typeof e.message === "string" &&
+      e.message.startsWith("Failed to collect page data")
+    ) {
+      return;
+    }
+  }
+  // Re-throw non-suppressed rejections
+  throw err;
+});
