@@ -54,6 +54,7 @@ const STANDARD_ACCESS_ROUTES = [
   "/inbox",
   "/demo-chat",
   "/finance-jarvis",
+  "/dashboard",
 ];
 
 function getAccessTier(role: string | null, isPlatformAdmin: boolean): AccessTier {

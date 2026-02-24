@@ -76,7 +76,13 @@ function CopilotPageInner() {
   const searchParams = useSearchParams();
 
   // ── Service mode ──────────────────────────────────────────────────────────
-  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
+  const [activeService, setActiveService] = useState<ServiceMode>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("nexus_service_mode");
+      if (saved === "general" || saved === "aas" || saved === "seaas") return saved;
+    }
+    return "seaas";
+  });
   const persona = SERVICE_PERSONAS[activeService];
 
   // Service tabs now live in the sidebar — copilot page only shows the active persona

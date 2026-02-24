@@ -24,6 +24,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/training": "Training",
   "/simulator": "Simulator",
   "/aaas": "AAAS",
+  "/dashboard": "Dashboard",
 };
 
 export function TopBar() {
