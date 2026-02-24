@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
+import DOMPurify from "dompurify";
 import type { SEaaSDomainData } from "@/components/copilot/types";
 
 // ─── Mermaid diagram renderer ─────────────────────────────────────────────────
@@ -68,7 +69,7 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
         {svg ? (
           <div
             className="[&_svg]:max-w-full [&_svg]:h-auto"
-            dangerouslySetInnerHTML={{ __html: svg }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ["foreignObject"] }) }}
           />
         ) : (
           <div className="flex items-center gap-2 py-8 text-xs text-muted">

@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate correction length
+    if (correction && (typeof correction !== "string" || correction.length > 5000)) {
+      return NextResponse.json({
+        error: "correction must be a string under 5000 characters",
+      }, { status: 400 });
+    }
+
     // Verify user belongs to this org
     const { data: feedbackMembership } = await supabase
       .from("org_members")
@@ -69,7 +76,8 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      logger.error("[feedback] DB insert error:", insertError.message);
+      return NextResponse.json({ error: "Failed to save feedback" }, { status: 500 });
     }
 
     // If correction provided, immediately learn from it

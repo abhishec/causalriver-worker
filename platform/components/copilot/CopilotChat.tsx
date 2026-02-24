@@ -7,6 +7,7 @@ import { useShikiHighlight } from "@/lib/shiki";
 import { useTheme } from "@/lib/theme-context";
 import dynamic from "next/dynamic";
 import { parseChartSpec } from "@/components/copilot/chart-utils";
+import DOMPurify from "dompurify";
 
 // Lazy-load InlineChart — recharts (150+ KB) is only loaded when a chart is rendered
 const InlineChart = dynamic(
@@ -281,7 +282,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
         {svg ? (
           <div
             className="[&_svg]:max-w-full [&_svg]:h-auto"
-            dangerouslySetInnerHTML={{ __html: svg }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ["foreignObject"] }) }}
           />
         ) : (
           <div className="flex items-center gap-2 py-8 text-xs text-muted">

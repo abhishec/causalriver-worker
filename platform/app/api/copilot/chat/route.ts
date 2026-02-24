@@ -333,6 +333,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (message.length > 50000) {
+      return NextResponse.json(
+        { error: "Message too long (max 50,000 characters)" },
+        { status: 400 }
+      );
+    }
 
     // ── Validate workspace ID format (prevent path traversal) ──────────
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
