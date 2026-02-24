@@ -64,8 +64,9 @@ const nextConfig: NextConfig = {
       '@supabase/supabase-js',
       'xlsx',
     ],
-    // Better 404 handling with route groups (Next.js 15.4+)
-    globalNotFound: true,
+    // globalNotFound causes flaky build-trace failures in Next.js 15.5
+    // (_not-found/page.js.nft.json missing). app/not-found.tsx works without it.
+    // globalNotFound: true,
   },
   // Native Node.js modules — resolved at runtime, not bundled by webpack.
   // @nexus-ai/memory-stack is pre-built via tsup (dist/index.js) with tree-sitter

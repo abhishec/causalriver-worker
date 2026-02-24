@@ -394,7 +394,12 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
+  const [activeService, setActiveService] = useState<ServiceMode>(() => {
+    if (typeof window === "undefined") return "seaas";
+    const stored = localStorage.getItem("nexus_service_mode");
+    if (stored === "aas" || stored === "general" || stored === "seaas") return stored;
+    return "seaas";
+  });
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);

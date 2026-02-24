@@ -50,7 +50,7 @@ interface WorkspaceContextType {
   isPlatformAdmin: boolean;
   isLoading: boolean;
   fetchError: string | null;
-  switchWorkspace: (workspaceId: string) => void;
+  switchWorkspace: (workspaceId: string, opts?: { skipReload?: boolean }) => void;
   refreshWorkspaces: () => Promise<void>;
   // Customer-first navigation
   activeCustomerId: string | null;
@@ -246,9 +246,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     if (!isFresh) loadWorkspaces();
   }, [loadWorkspaces]);
 
-  /* Switch workspace: persist in localStorage + cookie (for server components) */
+  /* Switch workspace: persist in localStorage + cookie (for server components)
+   * Pass skipReload=true when navigating programmatically (e.g. dashboard → copilot)
+   * so the reload doesn't kill the router.push. */
   const switchWorkspace = useCallback(
-    (workspaceId: string) => {
+    (workspaceId: string, { skipReload = false }: { skipReload?: boolean } = {}) => {
       const exists = memberships.find((m) => m.organization_id === workspaceId);
       if (!exists && !isPlatformAdmin) return;
 
@@ -258,8 +260,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       document.cookie = `${STORAGE_KEY}=${workspaceId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
       document.cookie = `${OLD_STORAGE_KEY}=${workspaceId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
 
-      /* Force reload to refresh server components with new workspace */
-      window.location.reload();
+      if (!skipReload) {
+        /* Force reload to refresh server components with new workspace */
+        window.location.reload();
+      }
     },
     [memberships, isPlatformAdmin]
   );

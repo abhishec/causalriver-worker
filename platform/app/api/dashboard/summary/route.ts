@@ -42,7 +42,28 @@ export async function GET() {
       connectors: string[];
       has_brain: boolean;
       active_agents: number;
+      active_services: string[];
     }> = {};
+
+    // Fetch workspace settings for active_services
+    let settingsMap: Record<string, string[]> = {};
+    try {
+      const { data: orgs } = await admin
+        .from("organizations")
+        .select("id, settings")
+        .in("id", orgIds);
+
+      if (orgs) {
+        for (const org of orgs as { id: string; settings: Record<string, unknown> | null }[]) {
+          const settings = org.settings ?? {};
+          settingsMap[org.id] = Array.isArray(settings.active_services)
+            ? (settings.active_services as string[])
+            : ["seaas", "aas", "general"]; // default: all
+        }
+      }
+    } catch {
+      // settings column may not have active_services yet
+    }
 
     // Initialize all orgs
     for (const orgId of orgIds) {
@@ -51,6 +72,7 @@ export async function GET() {
         connectors: [],
         has_brain: false,
         active_agents: 0,
+        active_services: settingsMap[orgId] ?? ["seaas", "aas", "general"],
       };
     }
 

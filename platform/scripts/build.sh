@@ -21,13 +21,12 @@ PLATFORM_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$PLATFORM_DIR"
 
 # ── Ensure .next scaffolding exists (needed after clean builds) ────────────────
+# Next.js --experimental-app-only still looks for pages-manifest.json and
+# next-font-manifest.json during the static export phase.
 mkdir -p "$PLATFORM_DIR/.next/server"
-if [ ! -f "$PLATFORM_DIR/.next/package.json" ]; then
-  echo '{"type":"commonjs"}' > "$PLATFORM_DIR/.next/package.json"
-fi
-if [ ! -f "$PLATFORM_DIR/.next/server/pages-manifest.json" ]; then
-  echo '{}' > "$PLATFORM_DIR/.next/server/pages-manifest.json"
-fi
+[ ! -f "$PLATFORM_DIR/.next/package.json" ] && echo '{"type":"commonjs"}' > "$PLATFORM_DIR/.next/package.json"
+[ ! -f "$PLATFORM_DIR/.next/server/pages-manifest.json" ] && echo '{}' > "$PLATFORM_DIR/.next/server/pages-manifest.json"
+[ ! -f "$PLATFORM_DIR/.next/server/next-font-manifest.json" ] && echo '{"pages":{},"app":{},"appUsingSizeAdjust":false,"pagesUsingSizeAdjust":false}' > "$PLATFORM_DIR/.next/server/next-font-manifest.json"
 
 # ── Set Node options ─────────────────────────────────────────────────────────
 SUPPRESS_SCRIPT="$SCRIPT_DIR/suppress-document-error.cjs"
