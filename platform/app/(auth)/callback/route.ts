@@ -7,7 +7,12 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
-  const next = searchParams.get("next") ?? "/overview";
+  const rawNext = searchParams.get("next");
+  // Prevent open redirect: only allow same-origin relative paths
+  const next =
+    rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+      ? rawNext
+      : "/overview";
   const type = searchParams.get("type") as
     | "recovery"
     | "signup"
@@ -36,8 +41,7 @@ export async function GET(request: Request) {
       if (type === "recovery") {
         return NextResponse.redirect(`${origin}/reset-password`);
       }
-      const redirectTo = next.startsWith("/invite/") ? next : next;
-      return NextResponse.redirect(`${origin}${redirectTo}`);
+      return NextResponse.redirect(`${origin}${next}`);
     }
   }
 

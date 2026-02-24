@@ -46,7 +46,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = JSON.parse(body);
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      logger.warn('[Jira Webhook] Malformed JSON payload');
+      return NextResponse.json({ ok: true }); // Ack to prevent retries
+    }
     const webhookEvent = payload.webhookEvent || payload.issue_event_type_name || '';
 
     logger.info(`[Jira Webhook] Received event: ${webhookEvent}`);

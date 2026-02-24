@@ -35,7 +35,12 @@ import { logger } from "@/lib/logger";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
-    const payload = JSON.parse(body);
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
 
     // ── Step 1: Handle url_verification challenge ──────────────────
     if (payload.type === 'url_verification') {

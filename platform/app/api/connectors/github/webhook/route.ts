@@ -63,7 +63,13 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse event
     const event = req.headers.get('x-github-event');
-    const payload = JSON.parse(body);
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      logger.warn('[GitHub Webhook] Malformed JSON payload');
+      return NextResponse.json({ ok: true }); // Ack to prevent retries
+    }
 
     logger.debug(`[GitHub Webhook] Received ${event} event`);
 

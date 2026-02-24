@@ -155,8 +155,9 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
 
     if (adminCheck) return CORE_WORKSPACE_ID;
 
-    // Non-admin with no workspace memberships — return empty string to signal "no workspace"
-    return CORE_WORKSPACE_ID;
+    // Non-admin with no workspace memberships — return empty string
+    // (callers should handle this by redirecting to workspace selection)
+    return "";
   } catch {
     return CORE_WORKSPACE_ID;
   }

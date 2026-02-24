@@ -65,7 +65,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Parse webhook payload
-    const event: LinearWebhookEvent = JSON.parse(body);
+    let event: LinearWebhookEvent;
+    try {
+      event = JSON.parse(body);
+    } catch {
+      logger.warn('Linear webhook: malformed JSON payload');
+      return NextResponse.json({ ok: true }); // Ack to prevent retries
+    }
 
     logger.info('Received Linear webhook', {
       type: event.type,

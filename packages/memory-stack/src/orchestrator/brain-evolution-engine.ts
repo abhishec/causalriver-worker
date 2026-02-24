@@ -994,8 +994,10 @@ function computeIntelligenceScore(
   const velocityNormalized = Math.min(1, totalActivity / 50); // 50+ activities/week = max
   const velocityScore = velocityNormalized * 20;
 
-  // Total (0-100)
-  return Math.round(Math.min(100, accuracyScore + calibrationScore + knowledgeScore + velocityScore));
+  // Total (0-100) — guard against NaN from upstream bad data
+  const total = accuracyScore + calibrationScore + knowledgeScore + velocityScore;
+  if (!isFinite(total)) return 0;
+  return Math.round(Math.min(100, total));
 }
 
 // ============================================================================
