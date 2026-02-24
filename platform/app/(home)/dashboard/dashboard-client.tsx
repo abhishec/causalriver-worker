@@ -19,10 +19,10 @@ interface WorkspaceSummary {
   active_agents: number;
 }
 
-const AI_WORKERS: { id: ServiceMode; label: string; desc: string }[] = [
-  { id: "seaas", label: "SE-aaS", desc: "Software Engineering" },
-  { id: "aas", label: "AAAS", desc: "Accounting & Audit" },
-  { id: "general", label: "General", desc: "General AI Assistant" },
+const AI_WORKERS: { id: ServiceMode; label: string; desc: string; icon: string }[] = [
+  { id: "seaas", label: "SE-aaS", desc: "Software Engineering", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
+  { id: "aas", label: "AAAS", desc: "Accounting & Audit", icon: "M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" },
+  { id: "general", label: "General", desc: "General AI Assistant", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" },
 ];
 
 const SERVICE_MODE_KEY = "nexus_service_mode";
@@ -46,11 +46,8 @@ export function DashboardClient() {
   const [summaries, setSummaries] = useState<Record<string, WorkspaceSummary>>({});
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [userName, setUserName] = useState("");
-  const [launching, setLaunching] = useState(false);
-
-  // Two-step selection: workspace first, then AI worker
-  const [selectedWsId, setSelectedWsId] = useState<string | null>(null);
-  const [selectedWorker, setSelectedWorker] = useState<ServiceMode | null>(null);
+  const [launchingId, setLaunchingId] = useState<string | null>(null);
+  const [brainStats, setBrainStats] = useState<Record<string, { score: number; accuracy: number; trend: string; predictions: number; improvement: number }>>({});
 
   // Workspaces grouped by customer for display
   const customerGroups = useMemo(() => {
@@ -68,13 +65,11 @@ export function DashboardClient() {
       }
     }
 
-    // Customer groups first
     for (const cust of customersForUser) {
       const ws = byCustomer.get(cust.id) ?? [];
       if (ws.length > 0) groups.push({ customer: cust, workspaces: ws });
     }
 
-    // Internal/personal workspaces last (admin only)
     if (noCustomer.length > 0 && isPlatformAdmin) {
       groups.push({ customer: null, workspaces: noCustomer });
     }
@@ -83,9 +78,16 @@ export function DashboardClient() {
   }, [workspaces, customersForUser, isPlatformAdmin]);
 
   // Filtered workspaces when a customer is selected
-  const activeWorkspaces = activeCustomerId
-    ? workspacesForActiveCustomer
-    : [];
+  const activeWorkspaces = activeCustomerId ? workspacesForActiveCustomer : [];
+
+  // Summary stats
+  const stats = useMemo(() => {
+    const ws = activeWorkspaces;
+    const totalWorkers = ws.length * AI_WORKERS.length; // potential workers
+    const activeAgents = ws.reduce((sum, m) => sum + (summaries[m.workspace.id]?.active_agents ?? 0), 0);
+    const brainActive = ws.filter((m) => summaries[m.workspace.id]?.has_brain).length;
+    return { workspaceCount: ws.length, totalWorkers, activeAgents, brainActive };
+  }, [activeWorkspaces, summaries]);
 
   // Fetch user name
   useEffect(() => {
@@ -122,11 +124,31 @@ export function DashboardClient() {
     return () => { cancelled = true; };
   }, [workspaceLoading, workspaces.length]);
 
-  // Reset selection when customer changes
+  // Fetch brain evolution stats per workspace
   useEffect(() => {
-    setSelectedWsId(null);
-    setSelectedWorker(null);
-  }, [activeCustomerId]);
+    if (activeWorkspaces.length === 0) return;
+    let cancelled = false;
+    for (const m of activeWorkspaces) {
+      fetch(`/api/brain/evolution?organizationId=${m.workspace.id}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (cancelled || !json?.state) return;
+          const s = json.state;
+          setBrainStats((prev) => ({
+            ...prev,
+            [m.workspace.id]: {
+              score: s.intelligenceScore ?? 0,
+              accuracy: s.accuracy?.overall ?? 0,
+              trend: s.accuracy?.trend ?? "stable",
+              predictions: s.knowledge?.verifiedPredictions ?? 0,
+              improvement: s.accuracy?.improvementRate ?? 0,
+            },
+          }));
+        })
+        .catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [activeWorkspaces]);
 
   const handleSelectCustomer = useCallback((customerId: string) => {
     setActiveCustomer(customerId);
@@ -136,22 +158,14 @@ export function DashboardClient() {
     setActiveCustomer("");
   }, [setActiveCustomer]);
 
-  const handleSelectWorkspace = useCallback((wsId: string) => {
-    setSelectedWsId((prev) => prev === wsId ? null : wsId);
-    setSelectedWorker(null);
-  }, []);
-
-  const handleSelectWorker = useCallback((worker: ServiceMode) => {
-    setSelectedWorker((prev) => prev === worker ? null : worker);
-  }, []);
-
-  const handleLaunch = useCallback(() => {
-    if (!selectedWsId || !selectedWorker) return;
-    setLaunching(true);
-    localStorage.setItem(SERVICE_MODE_KEY, selectedWorker);
-    switchWorkspace(selectedWsId);
+  const handleLaunchWorker = useCallback((wsId: string, worker: ServiceMode) => {
+    setLaunchingId(`${wsId}-${worker}`);
+    localStorage.setItem(SERVICE_MODE_KEY, worker);
+    switchWorkspace(wsId);
+    // Dispatch service-mode-changed so sidebar picks up the new worker
+    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: worker }));
     router.push("/copilot");
-  }, [selectedWsId, selectedWorker, switchWorkspace, router]);
+  }, [switchWorkspace, router]);
 
   const handleSignOut = useCallback(async () => {
     localStorage.removeItem("nexus_current_workspace");
@@ -212,8 +226,8 @@ export function DashboardClient() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── Top Nav ──────────────────────────────────────────────────────── */}
-      <nav className="border-b border-border-subtle">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+      <nav className="border-b border-border-subtle bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
               <span className="text-sm font-bold text-accent">N</span>
@@ -255,26 +269,19 @@ export function DashboardClient() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            {userName ? `Welcome back, ${userName}` : "Welcome back"}
-          </h1>
-        </div>
-
+      <main className="max-w-5xl mx-auto px-6 py-8">
         {/* ── Empty state ──────────────────────────────────────────────── */}
         {workspaces.length === 0 ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center max-w-sm">
               <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">No workspaces yet</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">No AI workers yet</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                Create your first workspace to get started.
+                Create your first workspace and launch an AI worker.
               </p>
               <Link
                 href="/settings?tab=overview&action=create-workspace"
@@ -287,16 +294,21 @@ export function DashboardClient() {
 
         ) : needsCustomerSelection ? (
           /* ════════════════════════════════════════════════════════════════
-             STEP 1: Choose Customer (platform admin or multi-customer user)
+             STEP 1: Choose Customer (platform admin or multi-customer)
              ════════════════════════════════════════════════════════════════ */
           <>
-            <p className="text-sm text-muted-foreground mb-6">
-              Choose a customer account to view their workspaces.
-            </p>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                {userName ? `Welcome back, ${userName}` : "AI Worker Command Center"}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Choose a customer to see their workspaces and AI workers.
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {customerGroups.map((group) => {
-                if (!group.customer) return null; // skip platform workspaces in picker
+                if (!group.customer) return null;
                 const cust = group.customer;
                 return (
                   <button
@@ -330,7 +342,7 @@ export function DashboardClient() {
               })}
             </div>
 
-            {/* Platform section for admins */}
+            {/* Platform internal section for admins */}
             {isPlatformAdmin && customerGroups.some((g) => !g.customer) && (
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-3">
@@ -355,33 +367,72 @@ export function DashboardClient() {
 
         ) : (
           /* ════════════════════════════════════════════════════════════════
-             STEP 2: Choose Workspace → Choose AI Worker → Launch
+             AI WORKER COMMAND CENTER — Workspaces + Workers
              ════════════════════════════════════════════════════════════════ */
           <>
-            <p className="text-sm text-muted-foreground mb-6">
-              Select a workspace, then choose an AI worker to launch.
-            </p>
+            {/* Header + Stats */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                {userName ? `Welcome back, ${userName}` : "AI Worker Command Center"}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Launch AI workers, track their progress, or create new workspaces.
+              </p>
+            </div>
 
-            <div className="space-y-3">
+            {/* Quick Stats Bar */}
+            <div className="flex items-center gap-6 mb-6 px-4 py-3 rounded-xl bg-surface border border-border-subtle">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-foreground">{stats.workspaceCount}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Workspaces</div>
+                </div>
+              </div>
+              <div className="h-8 w-px bg-border-subtle" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-foreground">{stats.brainActive}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Brains Active</div>
+                </div>
+              </div>
+              <div className="h-8 w-px bg-border-subtle" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-foreground">{stats.activeAgents}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Agents Running</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workspace Cards with inline AI Workers */}
+            <div className="space-y-4">
               {activeWorkspaces.map((m) => {
                 const ws = m.workspace;
                 const summary = summaries[ws.id];
-                const isExpanded = selectedWsId === ws.id;
+                const brain = brainStats[ws.id];
 
                 return (
                   <div
                     key={m.organization_id}
-                    className={`rounded-xl border transition-all ${
-                      isExpanded
-                        ? "border-accent bg-accent/[0.02] ring-1 ring-accent/10"
-                        : "border-border-subtle bg-surface hover:border-border"
-                    }`}
+                    className="rounded-xl border border-border-subtle bg-surface overflow-hidden"
                   >
-                    {/* Workspace header — click to expand */}
-                    <button
-                      onClick={() => handleSelectWorkspace(ws.id)}
-                      className="w-full text-left p-5"
-                    >
+                    {/* Workspace header */}
+                    <div className="px-5 pt-5 pb-3">
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
@@ -394,89 +445,95 @@ export function DashboardClient() {
                             <p className="text-sm text-muted-foreground mt-0.5">{ws.description}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 ml-3">
-                          <span className="text-[10px] text-muted-foreground uppercase">{m.role}</span>
-                          <svg
-                            className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
+                        <span className="text-[10px] text-muted-foreground uppercase ml-3">{m.role}</span>
                       </div>
 
-                      {/* Status chips */}
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                      {/* Status row */}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 flex-wrap">
                         {summaryLoading ? (
-                          <div className="h-3 w-28 rounded skeleton-shimmer" />
+                          <div className="h-3 w-40 rounded skeleton-shimmer" />
                         ) : (
                           <>
-                            <span className="flex items-center gap-1">
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                              </svg>
-                              {summary?.connector_count ?? 0} connectors
-                            </span>
                             <span className="flex items-center gap-1">
                               <span className={`w-1.5 h-1.5 rounded-full ${summary?.has_brain ? "bg-green-400" : "bg-zinc-400"}`} />
                               Brain {summary?.has_brain ? "active" : "idle"}
                             </span>
+                            <span>{summary?.connector_count ?? 0} connectors</span>
+                            {(summary?.active_agents ?? 0) > 0 && (
+                              <span className="text-emerald-400">{summary.active_agents} agent{summary.active_agents !== 1 ? "s" : ""} running</span>
+                            )}
+                            {brain && (
+                              <>
+                                <span className="flex items-center gap-1">
+                                  IQ {brain.score}
+                                  {brain.trend === "improving" && <span className="text-emerald-400">{"\u2191"}</span>}
+                                </span>
+                                <span>{Math.round(brain.accuracy)}% accuracy</span>
+                                {brain.improvement > 0 && (
+                                  <span className="text-emerald-400">+{brain.improvement.toFixed(1)}% this week</span>
+                                )}
+                              </>
+                            )}
                           </>
                         )}
                       </div>
-                    </button>
+                    </div>
 
-                    {/* Expanded: AI Worker selection */}
-                    {isExpanded && (
-                      <div className="px-5 pb-5 pt-0">
-                        <div className="border-t border-border-subtle pt-4">
-                          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                            Choose AI Worker
-                          </div>
-                          <div className="grid grid-cols-3 gap-3">
-                            {AI_WORKERS.map((w) => {
-                              const isSelected = selectedWorker === w.id;
-                              return (
-                                <button
-                                  key={w.id}
-                                  onClick={() => handleSelectWorker(w.id)}
-                                  className={`rounded-lg border-2 p-3 text-center transition-all ${
-                                    isSelected
-                                      ? "border-accent bg-accent/5"
-                                      : "border-border-subtle hover:border-border hover:bg-surface-hover"
-                                  }`}
-                                >
-                                  <div className={`text-sm font-semibold ${isSelected ? "text-accent" : "text-foreground"}`}>
-                                    {w.label}
-                                  </div>
-                                  <div className="text-[10px] text-muted-foreground mt-0.5">{w.desc}</div>
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* Launch button */}
-                          {selectedWorker && (
-                            <button
-                              onClick={handleLaunch}
-                              disabled={launching}
-                              className="mt-4 w-full px-5 py-3 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent/90 active:bg-accent/80 transition-all flex items-center justify-center gap-2 shadow-sm"
-                            >
-                              {launching
-                                ? "Launching..."
-                                : `Launch ${AI_WORKERS.find((w) => w.id === selectedWorker)?.label} on ${ws.name}`}
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
+                    {/* AI Workers — inline, always visible */}
+                    <div className="border-t border-border-subtle px-5 py-4 bg-background/50">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                        AI Workers
                       </div>
-                    )}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {AI_WORKERS.map((w) => {
+                          const isLaunching = launchingId === `${ws.id}-${w.id}`;
+                          return (
+                            <button
+                              key={w.id}
+                              onClick={() => handleLaunchWorker(ws.id, w.id)}
+                              disabled={isLaunching}
+                              className="flex items-center gap-3 rounded-lg border border-border-subtle bg-surface p-3 hover:border-accent/40 hover:bg-surface-hover transition-all group text-left"
+                            >
+                              <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                                <svg className="w-4.5 h-4.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d={w.icon} />
+                                </svg>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
+                                  {w.label}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground">{w.desc}</div>
+                              </div>
+                              <div className="shrink-0">
+                                {isLaunching ? (
+                                  <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                  </svg>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Create new workspace */}
+            <Link
+              href="/settings?tab=overview&action=create-workspace"
+              className="mt-4 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border-subtle py-5 text-sm text-muted-foreground hover:border-accent/40 hover:text-accent transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Create New Workspace
+            </Link>
           </>
         )}
       </main>

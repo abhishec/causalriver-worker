@@ -102,6 +102,78 @@ function ServiceTabsPills({ activeService, onServiceChange }: {
   );
 }
 
+/* ── Brain Status Banner ─────────────────────────────────────────────────── */
+
+interface BrainEvolution {
+  intelligenceScore: number;
+  accuracy: { overall: number; trend: string; improvementRate: number };
+  knowledge: { verifiedPredictions: number; totalCausalEdges: number };
+  learningVelocity: { weightUpdatesPerWeek: number };
+}
+
+function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined }) {
+  const [data, setData] = useState<BrainEvolution | null>(null);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    let cancelled = false;
+    fetch(`/api/brain/evolution?organizationId=${workspaceId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.state) setData(json.state);
+      })
+      .catch(() => {});
+    // Refresh every 60s to show live learning
+    const interval = setInterval(() => {
+      fetch(`/api/brain/evolution?organizationId=${workspaceId}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (!cancelled && json?.state) setData(json.state);
+        })
+        .catch(() => {});
+    }, 60_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [workspaceId]);
+
+  if (!data) return null;
+
+  const trendIcon = data.accuracy.trend === "improving" ? "\u2191" : data.accuracy.trend === "degrading" ? "\u2193" : "\u2192";
+  const trendColor = data.accuracy.trend === "improving" ? "text-emerald-400" : data.accuracy.trend === "degrading" ? "text-red-400" : "text-muted-foreground";
+
+  return (
+    <div className="mx-3 px-3 py-2.5 rounded-lg bg-gradient-to-r from-accent/5 to-emerald-500/5 border border-accent/10 shrink-0">
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Brain Learning</span>
+      </div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+        <div className="flex items-baseline gap-1">
+          <span className="text-sm font-bold text-foreground">{data.intelligenceScore}</span>
+          <span className="text-[9px] text-muted-foreground">IQ score</span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-sm font-bold text-foreground">{Math.round(data.accuracy.overall)}%</span>
+          <span className={`text-[9px] ${trendColor}`}>{trendIcon}</span>
+          <span className="text-[9px] text-muted-foreground">accuracy</span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-sm font-bold text-foreground">{data.knowledge.verifiedPredictions}</span>
+          <span className="text-[9px] text-muted-foreground">verified</span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-sm font-bold text-foreground">{data.knowledge.totalCausalEdges}</span>
+          <span className="text-[9px] text-muted-foreground">edges</span>
+        </div>
+      </div>
+      {data.accuracy.improvementRate > 0 && (
+        <div className="mt-1.5 text-[10px] text-emerald-400">
+          +{data.accuracy.improvementRate.toFixed(1)}% faster this week
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Chat History Group ──────────────────────────────────────────────────── */
 
 function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
@@ -315,179 +387,6 @@ function ChatHistorySection({
   );
 }
 
-/* ── Active Work Section ─────────────────────────────────────────────── */
-
-function ActiveWorkSection() {
-  const [tasks, setTasks] = useState<Array<{ id: string; agent_type: string; status: string; created_at: string }>>([]);
-  const router = useRouter();
-
-  useEffect(() => {
-    let mounted = true;
-    const load = () => {
-      fetch("/api/tasks?status=running,awaiting_approval&limit=5")
-        .then(r => r.json())
-        .then(data => { if (mounted && data.tasks) setTasks(data.tasks); })
-        .catch(() => {});
-    };
-    load();
-    const interval = setInterval(load, 5000);
-    return () => { mounted = false; clearInterval(interval); };
-  }, []);
-
-  if (tasks.length === 0) return null;
-
-  return (
-    <div className="border-t border-border-subtle">
-      <button
-        onClick={() => router.push("/tasks")}
-        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
-      >
-        <span>Active Work ({tasks.length})</span>
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
-      </button>
-      <div className="px-2 pb-2">
-        {tasks.slice(0, 5).map(task => (
-          <button
-            key={task.id}
-            onClick={() => router.push(`/tasks?id=${task.id}`)}
-            className="flex items-center gap-1.5 px-2 py-1.5 mx-0 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
-          >
-            <span className={cn(
-              "w-1.5 h-1.5 rounded-full shrink-0",
-              task.status === "running" ? "bg-blue-500 animate-pulse" :
-              task.status === "awaiting_approval" ? "bg-purple-500" : "bg-gray-400"
-            )} />
-            <span className="truncate text-muted-foreground">{task.agent_type || "Task"}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── My Workflows Section ───────────────────────────────────────────── */
-
-function MyWorkflowsSection() {
-  const [workflows, setWorkflows] = useState<Array<{ id: string; name: string; total_runs: number }>>([]);
-  const router = useRouter();
-  const copilotController = useCopilotController();
-
-  useEffect(() => {
-    fetch("/api/workflows?limit=5")
-      .then(r => r.json())
-      .then(data => { if (data.workflows) setWorkflows(data.workflows.slice(0, 5)); })
-      .catch(() => {});
-  }, []);
-
-  if (workflows.length === 0) return null;
-
-  function handleRunWorkflow(workflow: { id: string; name: string }) {
-    const isCopilot = window.location.pathname.startsWith("/copilot");
-    if (isCopilot && copilotController) {
-      copilotController.executeCommand({
-        id: `workflow-${workflow.id}`,
-        prompt: `Run workflow: ${workflow.name}`,
-        service: "workflows",
-      });
-    } else {
-      router.push(`/workflows/${workflow.id}`);
-    }
-  }
-
-  return (
-    <div className="border-t border-border-subtle">
-      <button
-        onClick={() => router.push("/workflows")}
-        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
-      >
-        <span>My Workflows ({workflows.length})</span>
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
-      </button>
-      <div className="px-2 pb-2">
-        {workflows.map(wf => (
-          <button
-            key={wf.id}
-            onClick={() => handleRunWorkflow(wf)}
-            className="flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
-          >
-            <span className="truncate text-muted-foreground">{wf.name}</span>
-            <span className="text-[10px] text-muted shrink-0">{wf.total_runs} runs</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── My Agents Section ──────────────────────────────────────────────── */
-
-function MyAgentsSection() {
-  const [agents, setAgents] = useState<Array<{ id: string; label: string; service: string; usage_count: number }>>([]);
-  const router = useRouter();
-  const copilotController = useCopilotController();
-  const { currentWorkspace } = useWorkspace();
-
-  useEffect(() => {
-    if (!currentWorkspace?.id) return;
-    fetch(`/api/templates?workspaceId=${currentWorkspace.id}&limit=5`)
-      .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.json(); })
-      .then(data => { if (data.templates) setAgents(data.templates.slice(0, 5)); })
-      .catch(() => {});
-  }, [currentWorkspace?.id]);
-
-  if (agents.length === 0) return null;
-
-  function handleRunAgent(agent: { id: string; label: string }) {
-    const isCopilot = window.location.pathname.startsWith("/copilot");
-    if (isCopilot && copilotController) {
-      copilotController.executeCommand({
-        id: agent.id,
-        prompt: `Run agent: ${agent.label}`,
-        service: "custom",
-      });
-    } else {
-      router.push(`/agent-studio/${agent.id}`);
-    }
-  }
-
-  return (
-    <div className="border-t border-border-subtle">
-      <button
-        onClick={() => router.push("/agent-studio")}
-        className="flex items-center justify-between w-full px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-foreground transition-colors"
-      >
-        <span>My Agents ({agents.length})</span>
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
-      </button>
-      <div className="px-2 pb-2">
-        {agents.map(agent => (
-          <button
-            key={agent.id}
-            onClick={() => handleRunAgent(agent)}
-            className="flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg text-xs w-full text-left hover:bg-surface-hover transition-colors"
-          >
-            <span className="truncate text-muted-foreground">{agent.label}</span>
-            <span className={cn(
-              "text-[9px] px-1.5 py-0.5 rounded shrink-0",
-              agent.service === "seaas" ? "bg-blue-500/10 text-blue-400" :
-              agent.service === "aas" ? "bg-emerald-500/10 text-emerald-400" :
-              "bg-gray-500/10 text-gray-400"
-            )}>
-              {agent.service === "seaas" ? "SE" : agent.service === "aas" ? "AA" : "Gen"}
-            </span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ── Main Sidebar — Two-Column (Icon Rail + Content Panel) ─────────────── */
 
 export function Sidebar() {
@@ -499,8 +398,9 @@ export function Sidebar() {
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
+  const router = useRouter();
   const { groups, loading: historyLoading } = useChatHistory();
-  const { currentRole, isPlatformAdmin } = useWorkspace();
+  const { currentRole, isPlatformAdmin, currentWorkspace } = useWorkspace();
 
   // Role-based nav filtering: non-admin users don't see admin-only items
   const isFullAccess = isPlatformAdmin || currentRole === "owner" || currentRole === "admin";
@@ -631,13 +531,26 @@ export function Sidebar() {
         className="flex flex-col items-center bg-background border-r border-border-subtle shrink-0 py-2"
         style={{ width: ICON_RAIL_WIDTH }}
       >
-        {/* Logo icon */}
-        <button
-          onClick={toggleCollapse}
-          className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center mb-3 hover:bg-accent/25 transition-colors"
-          title={collapsed ? "Expand sidebar (\u2318[)" : "Collapse sidebar (\u2318[)"}
+        {/* Logo — click to go to Dashboard (mission control) */}
+        <Link
+          href="/dashboard"
+          className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center mb-1 hover:bg-accent/25 transition-colors"
+          title="Dashboard — AI Worker Command Center"
         >
           <span className="text-sm font-bold text-accent">N</span>
+        </Link>
+
+        {/* Collapse toggle */}
+        <button
+          onClick={toggleCollapse}
+          className="w-6 h-5 rounded flex items-center justify-center text-muted/50 hover:text-muted hover:bg-surface-hover transition-colors mb-1"
+          title={collapsed ? "Expand sidebar (\u2318[)" : "Collapse sidebar (\u2318[)"}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            {collapsed
+              ? <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              : <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />}
+          </svg>
         </button>
 
         {/* Search */}
@@ -708,9 +621,14 @@ export function Sidebar() {
           style={{ width: contentWidth }}
           className="h-screen flex flex-col bg-background border-r border-border transition-[width] duration-200"
         >
-          {/* Header */}
+          {/* Header — shows active AI worker name */}
           <div className="flex items-center justify-between px-4 h-12 shrink-0">
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">Brain OS</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <span className="text-[14px] font-semibold tracking-tight text-foreground">
+                {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "AI Worker"}
+              </span>
+            </div>
             <button
               onClick={toggleCollapse}
               className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors"
@@ -722,30 +640,59 @@ export function Sidebar() {
             </button>
           </div>
 
-          {/* Active AI Worker — read-only indicator, switch on dashboard */}
-          <div className="flex items-center gap-2 px-4 py-2 shrink-0">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/70">Active:</span>
-            <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-accent/10 text-accent border border-accent/20">
-              {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "SE-aaS"}
-            </span>
-            <a href="/dashboard" className="ml-auto text-[10px] text-muted hover:text-accent transition-colors">
-              Change
-            </a>
-          </div>
+          {/* Workspace + AI Worker — back to dashboard */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-3 py-2 mx-2 rounded-lg hover:bg-surface-hover transition-colors group shrink-0"
+            title="Back to Dashboard"
+          >
+            <svg className="w-4 h-4 text-muted-foreground/60 group-hover:text-accent transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors">
+                {currentWorkspace?.name ?? "No workspace"}
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "SE-aaS"}
+                </span>
+              </div>
+            </div>
+          </Link>
 
           <div className="h-px bg-border-subtle mx-3" />
 
-          {/* Active Work — live tasks needing attention */}
-          <ActiveWorkSection />
+          {/* Brain Intelligence — live learning stats */}
+          <div className="py-2 shrink-0">
+            <BrainStatusBanner workspaceId={currentWorkspace?.id} />
+          </div>
 
-          {/* Commands */}
+          {/* New Chat — prominent action */}
+          <div className="px-3 py-2 shrink-0">
+            <button
+              onClick={() => {
+                const isCopilot = pathname.startsWith("/copilot");
+                if (isCopilot) {
+                  window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
+                } else {
+                  router.push("/copilot");
+                }
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              New Chat
+            </button>
+          </div>
+
+          {/* Domains / Capabilities for this AI worker */}
           <CommandsSection activeService={activeService} />
 
-          {/* My Workflows + My Agents */}
-          <MyWorkflowsSection />
-          <MyAgentsSection />
-
-          {/* Chat History */}
+          {/* Saved Chats */}
           <ChatHistorySection
             groups={groups}
             historyLoading={historyLoading}
