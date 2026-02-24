@@ -154,3 +154,24 @@
 - **Trigger**: User said "my feedback should train reinforcement learning"
 - **Lesson**: **Every user correction is a training signal.** Log immediately to both case-log.md (with [USER CORRECTION] tag) and cc-retro.md. Read these on startup. The compound effect: mistake rate drops over time because we actively learn from feedback.
 - **Pattern**: User correction → (1) acknowledge, (2) log to case-log with [USER CORRECTION], (3) log to cc-retro, (4) update CLAUDE.md rules if systematic
+
+## Case 015: Route Group Build Failure — PageNotFoundError (2026-02-24)
+- **Symptom**: `next build` fails at "Collecting page data" with `PageNotFoundError: Cannot find module for page: /login` (and other route group pages)
+- **Root cause**: Next.js 15.5.12 "Collecting page data" phase resolves pages by URL path (/login) but modules are at route group paths ((auth)/login/page.tsx). This fails for ALL route groups: (auth), (dashboard), (home).
+- **What DIDN'T work**:
+  - Patching `process.on('unhandledRejection')` — Next.js handles errors synchronously, not via unhandled rejections
+  - Patching `process.exit` — errors occur in worker threads, not the main process
+  - Disabling `globalNotFound: true` — not the cause
+  - Retry with .next cache — second attempt fails identically
+- **What WORKED**: `--experimental-app-only` flag in `npx next build`. This tells Next.js to skip Pages Router data collection entirely, which is the phase that fails.
+- **Fix location**: `platform/scripts/build.sh` line 40: `npx next build --experimental-app-only`
+- **Also required**: Pre-seed `.next/server/pages-manifest.json` with `{}` for clean builds (prevents ENOENT before compilation starts)
+- **Anti-pattern**: Don't `rm -rf .next` before building — incremental builds are fine. Only clean when switching branches or debugging stale cache.
+- **Time spent**: ~45 min across 7 build attempts before finding --experimental-app-only
+
+## Case 016: [USER CORRECTION] Dashboard Layout — Think Like a User (2026-02-24)
+- **Trigger**: User said "this is the old screen...completely out of scope...think of it as a user...ur disappointing me"
+- **Mistake**: Put the dashboard inside the `(dashboard)` route group which includes the full sidebar with commands, service tabs, chat history. It looked identical to the existing copilot page.
+- **Lesson**: **The dashboard is a LANDING PAGE, not a sidebar page.** Users need a clean, focused selection experience: pick workspace → pick service → launch. No distractions.
+- **Fix**: Created new `(home)` route group with minimal layout (WorkspaceProvider only, no Sidebar/TopBar). Full-screen design with step-by-step flow.
+- **Pattern**: Before building any new page, ask: "What is the USER's mental model here?" Landing pages need clean layouts. Operational pages need the sidebar. Don't default to putting everything in the sidebar.
