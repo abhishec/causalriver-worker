@@ -11,6 +11,16 @@ export const dynamic = "force-dynamic";
 
 async function validateJira(domain: string, email: string, apiToken: string) {
   const baseUrl = domain.includes("://") ? domain.replace(/\/+$/, "") : `https://${domain}`;
+  // SSRF protection: block private/internal IP ranges
+  try {
+    const parsed = new URL(baseUrl);
+    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|localhost|::1)/i.test(parsed.hostname)) {
+      throw new Error("Private/internal domains are not allowed");
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("not allowed")) throw e;
+    throw new Error("Invalid domain URL");
+  }
   const auth = Buffer.from(`${email}:${apiToken}`).toString("base64");
   const res = await fetch(`${baseUrl}/rest/api/3/myself`, {
     headers: { Authorization: `Basic ${auth}`, Accept: "application/json" },

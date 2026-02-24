@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient }       from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { provisionWorkspace as provisionOrg } from "@/lib/workspace-provisioning";
 import { logger } from "@/lib/logger";
 
@@ -31,11 +31,12 @@ function slugify(name: string, suffix: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const service = await createServiceClient();
-
-    // ── Auth: platform admin only ──────────────────────────────────
-    const { data: { user }, error: authErr } = await service.auth.getUser();
+    // Use regular client for auth (service client doesn't read user session correctly)
+    const authClient = await createClient();
+    const { data: { user }, error: authErr } = await authClient.auth.getUser();
     if (authErr || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const service = await createServiceClient();
 
     const { data: adminCheck } = await service
       .from("customer_members")

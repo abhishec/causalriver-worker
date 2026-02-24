@@ -19,7 +19,7 @@ const BrainQuerySchema = z.object({
     organizationId: z.string().uuid(),
     timeRange: z.string().optional(),
   }).optional(),
-  anthropicApiKey: z.string().optional(),
+  // anthropicApiKey removed — always use server-side key for security
 });
 
 export async function POST(request: NextRequest) {
@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
         ...validated.context,
         organizationId: resolvedOrgId,
       },
-      anthropicApiKey: validated.anthropicApiKey,
     });
 
     return NextResponse.json(result);

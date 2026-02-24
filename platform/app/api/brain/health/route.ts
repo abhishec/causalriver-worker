@@ -131,13 +131,15 @@ export async function GET(request: NextRequest) {
  * 6. Job execution health (are scheduled jobs running?)
  */
 async function handleLearningHealth(request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+  // Auth guard — outside the try/catch so auth failures return proper 401/403, not 200
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
@@ -354,14 +356,14 @@ async function checkConnectorHealth(supabase: any, workspaceId: string): Promise
   try {
     const { data: connectors } = await supabase
       .from("org_connectors")
-      .select("connector_type, status, last_synced_at, credentials")
+      .select("connector_type, status, last_synced_at")
       .eq("organization_id", workspaceId);
 
     if (!connectors || connectors.length === 0) {
       return { score: 0, status: "no_connectors", details: { connected_count: 0 } };
     }
 
-    const connected = connectors.filter((c: any) => c.status === "connected" || c.credentials);
+    const connected = connectors.filter((c: any) => c.status === "connected" || c.status === "active");
     const recentlySynced = connectors.filter((c: any) => {
       if (!c.last_synced_at) return false;
       return Date.now() - new Date(c.last_synced_at).getTime() < 24 * 60 * 60 * 1000;

@@ -298,7 +298,8 @@ function inferConnectorFromDomain(sourceDomain: string): string {
     "hubspot",
   ];
 
-  for (const part of parts.reverse()) {
+  const reversed = [...parts].reverse();
+  for (const part of reversed) {
     if (knownConnectors.includes(part)) return part;
   }
   return parts[parts.length - 1] || "unknown";
