@@ -51,6 +51,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
+    // Verify the authenticated user belongs to the org extracted from state
+    const { data: orgMembership } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('organization_id', orgId)
+      .maybeSingle();
+
+    if (!orgMembership) {
+      return NextResponse.redirect(new URL('/connectors?error=forbidden', request.url));
+    }
+
     // Get OAuth credentials (org-level or platform-level)
     const service = await createServiceClient();
     const { data: orgOAuthData } = await service.rpc('get_org_oauth_credentials', {

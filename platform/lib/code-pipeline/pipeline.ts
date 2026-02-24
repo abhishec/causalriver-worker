@@ -237,7 +237,11 @@ export async function runCodePipeline(
     try {
       const commitSha = await createBranchAndCommit(
         token, owner, repo, baseBranch, branchName,
-        artifacts.map((a) => ({ path: a.title || `fix-${issue.type}.ts`, content: a.content })),
+        artifacts.map((a) => ({
+          // Sanitize path — strip traversal sequences, only allow safe filename characters
+          path: (a.title || `fix-${issue.type}.ts`).replace(/\.\./g, '').replace(/^\/+/, '').replace(/[^a-zA-Z0-9/_.\-]/g, '_'),
+          content: a.content,
+        })),
         `[Brain Fix] ${issue.type}: ${issue.description.slice(0, 72)}`
       );
 

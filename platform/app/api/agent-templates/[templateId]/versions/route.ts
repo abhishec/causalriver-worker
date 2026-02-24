@@ -48,6 +48,29 @@ export async function GET(_request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify user belongs to the template's org before returning version history
+    const { data: template } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .single();
+
+    if (!template) {
+      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    }
+
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", template.organization_id)
+      .single();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
     const versions = await getVersionHistory(service, templateId);
 
     return NextResponse.json({ versions, count: versions.length });

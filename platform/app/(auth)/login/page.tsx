@@ -25,8 +25,11 @@ function LoginForm() {
 
   const supabase = createClient();
 
-  // Where to redirect after login
-  const redirectTo = nextUrl || "/dashboard";
+  // Where to redirect after login — only allow same-origin relative paths
+  const redirectTo =
+    nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//")
+      ? nextUrl
+      : "/dashboard";
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
