@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
       .from("prediction_records")
       .select("domain, entity_type, entity_id, confidence")
       .eq("id", predictionId)
+      .eq("organization_id", organizationId)
       .single();
 
     // 4. Emit feedback signal to brain (for weight adjustment)

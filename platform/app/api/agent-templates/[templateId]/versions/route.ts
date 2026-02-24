@@ -156,6 +156,22 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify membership
+    const { data: template } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .single();
+    if (!template) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", template.organization_id)
+      .single();
+    if (!membership) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+
     const success = await rollbackToVersion(service, templateId, versionId, user.id);
 
     if (!success) {
@@ -191,6 +207,22 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify membership
+    const { data: tmpl } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .single();
+    if (!tmpl) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    const { data: mem } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", tmpl.organization_id)
+      .single();
+    if (!mem) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+
     const success = await deprecateVersion(service, templateId, versionId);
 
     if (!success) {

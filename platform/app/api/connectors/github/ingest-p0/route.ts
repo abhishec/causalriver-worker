@@ -61,6 +61,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verify user is a member of the target organization
+    const { data: membership } = await authClient
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const supabase = await createServiceClient();
     const octokit = new Octokit({ auth: githubToken });
 
