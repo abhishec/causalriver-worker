@@ -69,6 +69,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (correction && (typeof correction !== "string" || correction.length > 5000)) {
+      return NextResponse.json(
+        { error: "correction must be a string under 5000 characters" },
+        { status: 400 }
+      );
+    }
+
     const workspaceId = await getCurrentWorkspaceId();
 
     // ── Insert into brain_feedback_queue ─────────────────────────

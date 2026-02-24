@@ -525,13 +525,15 @@ async function autoResolveRecoveredAlerts(
 
   if (!openAlerts || openAlerts.length === 0) return 0;
 
-  // Build dimension → score mapping
+  // Build dimension → score mapping (must match dimensionChecks in pollHealthOnce)
   const dimensionScores: Record<string, number> = {
     predictions: snapshot.dimensions.predictions.score,
     causal_graph: snapshot.dimensions.causal_graph.score,
     signals: snapshot.dimensions.signals.score,
     connectors: snapshot.dimensions.connectors.score,
     jobs: snapshot.dimensions.jobs.score,
+    pipeline_sla: snapshot.dimensions.pipeline_sla?.score ?? 0,
+    code_health: snapshot.dimensions.code_health?.score ?? 0,
     overall: snapshot.overall_score,
   };
 
@@ -541,6 +543,8 @@ async function autoResolveRecoveredAlerts(
     signals: thresholds.min_signal_score,
     connectors: thresholds.min_connector_score,
     jobs: thresholds.min_job_score,
+    pipeline_sla: thresholds.min_pipeline_sla_score ?? 50,
+    code_health: thresholds.min_code_health_score ?? 20,
     overall: thresholds.min_overall_score,
   };
 

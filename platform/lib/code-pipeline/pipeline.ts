@@ -292,7 +292,10 @@ export async function runCodePipeline(
         confidence, createdAt: new Date().toISOString(), durationMs: Date.now() - startTime,
       };
     } catch (ghErr) {
-      logger.error("[CodePipeline] GitHub integration failed:", ghErr);
+      const ghErrMsg = (ghErr instanceof Error ? ghErr.message : String(ghErr))
+        .replace(/ghp_[a-zA-Z0-9_]+/g, "[REDACTED]")
+        .replace(/Bearer\s+[a-zA-Z0-9_.-]+/g, "Bearer [REDACTED]");
+      logger.error("[CodePipeline] GitHub integration failed:", ghErrMsg);
       await supabase
         .from("code_pipeline_runs")
         .update({ branch_name: branchName, stage: "branch_created", completed_at: new Date().toISOString(), duration_ms: Date.now() - startTime })
