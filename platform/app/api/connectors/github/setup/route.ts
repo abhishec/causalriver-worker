@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/vnd.github.v3+json",
-          "User-Agent": "NexusBrain-Platform",
+          "User-Agent": "BrainOS-Platform",
         },
       }
     );

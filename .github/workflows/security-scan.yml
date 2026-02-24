@@ -1,4 +1,4 @@
-name: Security Hardening Scan
+name: Security & Dependency Audit
 
 on:
   # Daily at 2 AM UTC

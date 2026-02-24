@@ -108,3 +108,49 @@
 - **Build times**: Clean: ~74s compile + ~15s page data/static gen. Incremental: ~26s total.
 - **Dead-ends tested**: Turbopack clean build (panics on directory creation), Turbopack incremental (passes compilation but fails page data collection), force-dynamic at line 1 breaking Turbopack's static analysis
 - **Pattern**: When fixing framework bugs, test the SIMPLEST change first (version bump). Don't combine multiple changes (version + bundler switch) — isolate variables.
+
+## Case 010: Amplify SSR Lambda Missing Server Env Vars (2026-02-24)
+- **Symptom**: All API routes return 500 with "Missing required env var: NEXT_PUBLIC_SUPABASE_URL" (misleading error) or `SUPABASE_SERVICE_ROLE_KEY` is undefined
+- **User-visible**: "No Workspace Selected" — data exists (5 memberships) but API can't query it
+- **Red herring**: Initially suspected `NEXT_PUBLIC_*` vars weren't passed to Lambda. Actually, `NEXT_PUBLIC_*` vars ARE available (inlined by Next.js at build time). The REAL problem is non-prefixed server-only vars.
+- **Root cause**: AWS Amplify SSR Lambda does NOT pass Amplify Console env vars to the Node.js runtime. All env vars set in Amplify Console are available at BUILD TIME only. `NEXT_PUBLIC_*` vars work because Next.js inlines them into the JavaScript bundle during compilation. Non-prefixed vars (`SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`) are accessed via `process.env` at runtime → undefined.
+- **Diagnostic**: Added `?env=true` parameter to health endpoint that returns `!!process.env.X` for each key. Confirmed `SUPABASE_SERVICE_ROLE_KEY: false` in production Lambda.
+- **Fix**: Use `next.config.ts` `env` property to inline server-only vars at build time:
+  ```typescript
+  env: {
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  }
+  ```
+- **Why this is safe**: `env` in next.config.ts uses DefinePlugin to replace `process.env.X` at build time. These vars are only referenced in server-side files (admin.ts, server.ts), so they're embedded in `.next/server/` bundles only — never in client bundles.
+- **Also added**: Non-prefixed fallbacks in `server.ts` and `admin.ts` (`process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL`) as belt-and-suspenders
+- **⚠️ CRITICAL PATTERN**: On Amplify SSR, EVERY server-only env var must be listed in `next.config.ts env`. If you add a new env var, add it there too or it will be undefined in production.
+- **⚠️ CRITICAL PATTERN**: Always add a diagnostic endpoint when debugging production env issues. The `?env=true` flag on `/api/brain/health` saved hours.
+- **Time wasted**: ~45 min initially suspecting wrong root cause (NEXT_PUBLIC missing vs server vars missing). The diagnostic endpoint proved the real issue in 1 API call.
+- **Files**: `next.config.ts` (env property), `lib/supabase/server.ts`, `lib/supabase/admin.ts`, `lib/env.ts`, `app/api/brain/health/route.ts` (diagnostic)
+
+## Case 011: Supabase Migration Failures on Production (2026-02-24)
+- **Symptom**: `supabase migration up` fails — entity_links table doesn't exist, ALTER DATABASE permission denied, pgp_sym_encrypt not found
+- **Root cause (1)**: Local schema has tables (entity_links, workflow_*) that production doesn't → DDL without IF EXISTS crashes
+- **Root cause (2)**: Supabase hosted migrations don't have superuser → ALTER DATABASE fails
+- **Root cause (3)**: pgcrypto on Supabase hosted lives in `extensions` schema → must use `extensions.pgp_sym_encrypt()`
+- **Fix**: Wrap all DDL in `DO $$ ... IF EXISTS ... EXECUTE ... $$ ;` blocks, use `_encryption_config` table instead of ALTER DATABASE, prefix all pgcrypto with `extensions.`
+- **⚠️ CRITICAL PATTERN**: ALWAYS run `supabase migration list --linked` BEFORE writing migrations. Never assume tables/columns exist.
+- **⚠️ CRITICAL PATTERN**: On Supabase hosted: (1) all DDL must use IF EXISTS, (2) ALTER DATABASE requires superuser (use config tables), (3) pgcrypto is in `extensions` schema
+- **Time wasted**: 3 failed migration attempts before getting it right
+
+## Case 012: [USER CORRECTION] Autonomous Operation Protocol (2026-02-24)
+- **Trigger**: User said "dont ask ur autonomous for me like jarvis" and "just dont stop"
+- **Lesson**: **Never ask "Want me to commit?" or "Should I proceed?" for standard operations.** The CC session is JARVIS — fully autonomous. Execute → report results. The only exceptions are destructive operations (force push, delete branch, drop table).
+- **Standard ops that NEVER need permission**: commit, push, build, lint, deploy, create files, edit code, run tests, update retros/case-log
+- **Pattern**: Queue → Plan → Execute → Verify → Commit → Push → Report. No pause points.
+
+## Case 013: [USER FEEDBACK] Preview-First Verification (2026-02-24)
+- **Trigger**: User said "i really like that ur rendering in the screen as a separate tab this is amazing this should be our approach"
+- **Lesson**: **Always use preview_* tools for UI verification.** Take screenshots and share as proof. Never tell user to "check manually". This is the standard verification approach going forward.
+- **Pattern**: For UI changes: (1) start dev server, (2) navigate to page, (3) screenshot, (4) snapshot for element verification, (5) test interactions, (6) share proof in response
+
+## Case 014: [USER FEEDBACK] Reinforcement Learning Loop (2026-02-24)
+- **Trigger**: User said "my feedback should train reinforcement learning"
+- **Lesson**: **Every user correction is a training signal.** Log immediately to both case-log.md (with [USER CORRECTION] tag) and cc-retro.md. Read these on startup. The compound effect: mistake rate drops over time because we actively learn from feedback.
+- **Pattern**: User correction → (1) acknowledge, (2) log to case-log with [USER CORRECTION], (3) log to cc-retro, (4) update CLAUDE.md rules if systematic

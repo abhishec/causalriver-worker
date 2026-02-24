@@ -28,7 +28,7 @@ async function validateGitHub(token: string, owner: string, repo: string) {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github.v3+json",
-      "User-Agent": "NexusBrain-Platform",
+      "User-Agent": "BrainOS-Platform",
     },
   });
   if (!res.ok) {

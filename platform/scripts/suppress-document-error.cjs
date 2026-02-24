@@ -3,14 +3,14 @@
  *
  * Loaded via NODE_OPTIONS="--require ..." BEFORE Next.js boots.
  *
- * Next.js 15 App Router "Collecting page data" phase throws PageNotFoundError
- * as unhandled rejections for routes it can't resolve (/_document, route groups,
- * etc.). These are non-fatal — App Router pages render correctly at runtime via
- * dynamic routing. But the unhandled rejection triggers process.exit(1).
+ * Next.js 15 App Router "Collecting page data" phase can throw
+ * PageNotFoundError as unhandled rejections for routes it can't resolve
+ * (/_document, route groups, etc.). These are non-fatal — App Router pages
+ * render correctly at runtime via dynamic routing.
  *
- * This script intercepts ALL PageNotFoundError unhandled rejections so the
- * build can complete. It also catches "Failed to collect page data" wrapper
- * errors that Next.js throws after catching PageNotFoundError internally.
+ * The primary fix is --experimental-app-only in build.sh, which skips the
+ * Pages Router data collection entirely. This script is a safety net for
+ * any remaining unhandled rejection edge cases.
  */
 "use strict";
 

@@ -291,3 +291,86 @@
 - **Anti-pattern**: Don't reference `pgp_sym_encrypt` without extensions prefix on Supabase hosted
 - **Commits**: `f573e8bbd` (P0 memberships fix), `ac80853b8` (resilient migrations + encryption + P1 fixes)
 - **Production state**: All 5 migrations applied, encryption key configured, Settings page should now load
+
+## Retro 017: CI Fix + Production Verification (2026-02-24)
+- **Task**: Fix CI lint failure (219 no-console warnings > max 50), verify production deployment
+- **Time**: ~25 min (estimated 10 min — over due to GitHub API rate limit burnout)
+- **Model used**: Sonnet (correct — routine fix)
+- **What went well**:
+  - **Root cause in <2 min**: 6 script files legitimately use console.log, need eslint-disable
+  - **Warnings dropped 219 → 30** — well within the 50 max threshold
+  - **CI fully green**: All 6 jobs passed (migration-check, test(20), test(22), docker-build, platform-build, migrate)
+  - **Production health confirmed**: `{"status":"ok","version":"1.0.0"}`
+  - **Security headers live**: HSTS, X-Frame-Options, X-XSS-Protection, X-Content-Type-Options all active
+- **What went wrong**:
+  - **GitHub API rate limit hit** — burned through 5000 requests from frequent polling. Should use `gh run watch` instead of manual polling
+  - **Chrome extension disconnected** — couldn't visually verify production login flow
+  - **Spent ~15 min waiting** on rate limit resets — wasted time
+- **CRITICAL PATTERN**: **Use `gh run watch <id>` for CI monitoring** — single long-running command instead of repeated API polls
+- **CRITICAL PATTERN**: **After pushing, check rate limit budget with `gh api rate_limit`** before starting poll loops
+- **Anti-pattern**: Don't poll `gh run view` in tight loops — burns through API quota rapidly
+- **Commits**: `7a5694d0a` (CI lint fix)
+- **CI**: All green. Amplify auto-deploy from main should have latest code live
+
+## Retro 018: Amplify SSR Env Var Root Cause + CLAUDE.md Upgrade (2026-02-24)
+- **Task**: Debug why production shows "No Workspace Selected" despite data existing, fix Amplify SSR env vars, upgrade CLAUDE.md with Boris Cherny best practices
+- **Time**: ~60 min (estimated 20 min — significantly over due to wrong initial hypothesis)
+- **Model used**: Sonnet (should have been Opus — this was deep infrastructure debugging across Amplify/Next.js/Lambda boundaries)
+- **What went well**:
+  - **Added `?env=true` diagnostic to health endpoint** — this single addition proved the root cause in 1 API call. Game-changer for future production debugging.
+  - **Queried production DB directly** to confirm data exists (5 memberships for abhishek@tookitaki.com) — ruled out data issues immediately
+  - **Used AWS CLI** to verify Amplify env vars were set, check deploy status, and monitor builds
+  - **Definitive fix**: `next.config.ts env` property inlines server vars at build time — works regardless of Lambda runtime
+  - **CLAUDE.md upgrade**: Added 6 new execution discipline rules (Plan Node Default, Subagent Orchestration, Root Cause Mandate, Blast Radius Minimization, Verification Before Done, Autonomous Bug Fixing)
+- **What went wrong**:
+  - **Wrong initial hypothesis**: Spent ~20 min assuming `NEXT_PUBLIC_*` vars were missing from Lambda. The diagnostic proved the opposite — `NEXT_PUBLIC_*` worked fine (inlined at build time), non-prefixed server vars were the issue
+  - **First fix (commit abc5e413a) was wrong approach**: Added `SUPABASE_URL` fallback env vars to Amplify + code fallbacks. Didn't fix the real issue because Amplify Console vars don't reach Lambda runtime AT ALL (not just NEXT_PUBLIC ones)
+  - **Should have added the diagnostic endpoint FIRST** instead of guessing. Would have saved 20+ minutes
+  - **Didn't follow Debugging Protocol #2** ("verify outputs, not just exit codes") — should have verified the API actually returned data, not just that CI passed
+- **CRITICAL LESSON**: When debugging production, **add a diagnostic endpoint FIRST**, verify the state, THEN fix. Don't guess → fix → deploy → check → wrong → repeat.
+- **Model correction**: Opus would have been better for this cross-infrastructure debugging (Amplify build system + Next.js compilation + Lambda runtime + env var lifecycle). This crossed 4 system boundaries.
+- **Commits**: `abc5e413a` (env fallbacks — partial fix), `a523629db` (next.config.ts env — definitive fix)
+- **Production state**: All env vars confirmed true via diagnostic. Amplify build 460 succeeded.
+- **Cost assessment**: Expensive. Sonnet for ~60 min of cross-system debugging. Should have been Opus (faster root cause → fewer deploy cycles). Explore agents were Sonnet when Haiku suffices for file search.
+- **Subagent cost waste**: Explore agents used default Sonnet for grep/glob — Haiku would have been 10x cheaper.
+
+### Session-Wide Cost Retrospective (2026-02-24)
+
+Honest model usage audit across the full session:
+
+| Task | Model Used | Should Have Been | Waste? |
+|------|-----------|-----------------|--------|
+| NexusBrain→Brain OS cleanup | Sonnet | **Haiku** (simple find-replace) | Yes |
+| Settings P0 crash debug | Sonnet | Sonnet (correct) | No |
+| Production migration push | Sonnet | Sonnet (correct, multi-step) | No |
+| Deep audit (Explore agents) | Sonnet | **Haiku** (just file search) | Yes |
+| CI lint fix | Sonnet | **Haiku** (add eslint-disable to 6 files) | Yes |
+| CI monitoring (polling) | Sonnet | **Haiku** (bash commands) | Yes |
+| Amplify SSR env debugging | Sonnet | **Opus** (4 system boundaries) | Wrong model |
+| CLAUDE.md upgrade | Sonnet | Sonnet (correct, writing) | No |
+
+**Estimated savings with proper model selection: ~30-40% per session.**
+**Rule added to CLAUDE.md**: Mandatory Haiku for Explore/Bash agents, escalation criteria for Opus, cost tracking in every retro.
+
+## Retro 019: Post-Login Dashboard Feature (2026-02-24)
+- **Task**: Build `/dashboard` landing page — workspace cards + service selector + launch flow
+- **Time**: ~25 min (estimated 20 min — on target)
+- **Model used**: Opus main + Haiku Explore agent (correct — UI feature with moderate complexity)
+- **What went well**:
+  - **Plan mode worked perfectly** — explored codebase first, designed complete plan, got user approval, then executed
+  - **Haiku Explore agent** mapped entire post-login flow in one pass (correct model choice)
+  - **Build passed first try** (after turbo cache was cleared) — TypeScript, ESLint, full build all clean
+  - **Preview verification** — temporarily added /dashboard to public routes, took screenshots, confirmed rendering, then reverted. No manual user checking needed.
+  - **Service mode persistence** — added localStorage bridge between dashboard and copilot page
+  - **Pre-commit hooks passed first try** (lint-staged ESLint + TypeScript)
+  - **627 lines of new code** across 5 files — all clean, no errors
+- **What went wrong**:
+  - **First build attempt** hit turbo cache issue — showed errors from stale cache, `--force` fixed it
+  - **3 edit attempts failed** because files weren't Read first — wasted 3 tool calls
+  - **Middleware temp change** for preview — could have used `preview_eval` to mock auth instead
+- **[USER CORRECTION]**: "dont ask ur autonomous for me like jarvis" — **STOP asking "Want me to commit?" and just DO IT.** The user wants fully autonomous operation. Queue → execute → report results. No permission-seeking for standard operations.
+- **[USER FEEDBACK]**: "i really like that ur rendering in the screen as a separate tab this is amazing this should be our approach" — **Preview-first verification is the standard now.** Always use preview_* tools to verify UI changes and share screenshots as proof. Never tell the user to check manually.
+- **[USER FEEDBACK]**: "my feedback should train reinforcement learning" — **Every user correction MUST be logged to case-log.md and cc-retro.md immediately.** This is how the system compounds.
+- **Cost assessment**: Good. Haiku for Explore, Opus for main context (feature was complex enough). Could have used Sonnet for main context but Opus was already selected.
+- **Subagent models**: 1x Haiku Explore (correct)
+- **Commits**: `3424080a5` (post-login dashboard)
