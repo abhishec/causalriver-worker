@@ -32,7 +32,7 @@ export async function GET() {
       .select(
         `organization_id, role, is_platform_admin,
          organizations:organization_id(
-           id, name, slug, plan, is_core_brain, customer_id,
+           id, name, slug, plan, is_core_brain, customer_id, description,
            customer:customer_id(id, name, slug)
          )`
       )
