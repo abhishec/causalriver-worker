@@ -546,7 +546,10 @@ export function Sidebar() {
   // AI Worker name from localStorage (set when launching from dashboard)
   const [aiWorkerName, setAiWorkerName] = useState<string | null>(null);
   useEffect(() => {
-    setAiWorkerName(localStorage.getItem("nexus_ai_worker_name"));
+    const sync = () => setAiWorkerName(localStorage.getItem("nexus_ai_worker_name"));
+    sync();
+    window.addEventListener("nexus-service-mode-changed", sync);
+    return () => window.removeEventListener("nexus-service-mode-changed", sync);
   }, []);
 
   // Restore persisted state

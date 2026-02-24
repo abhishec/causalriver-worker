@@ -131,6 +131,16 @@ export async function PATCH(request: Request) {
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
 
+    // Validate role value to prevent privilege escalation
+    const ALLOWED_ROLES = ["owner", "admin", "member", "viewer"];
+    if (!ALLOWED_ROLES.includes(role)) {
+      return NextResponse.json({ error: `Invalid role. Allowed: ${ALLOWED_ROLES.join(", ")}` }, { status: 400 });
+    }
+    // Only owners can assign the owner role
+    if (role === "owner" && myMembership.role !== "owner") {
+      return NextResponse.json({ error: "Only owners can assign the owner role" }, { status: 403 });
+    }
+
     // Update (RLS will enforce additional constraints)
     const { error } = await supabase
       .from("org_members")
@@ -168,7 +178,31 @@ export async function DELETE(request: Request) {
         { status: 400 }
       );
 
-    // RLS policies handle authorization
+    // Verify caller is owner/admin OR is removing themselves
+    const { data: deleteMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", orgId)
+      .single();
+
+    if (!deleteMembership) {
+      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+    }
+
+    // Non-admin/owner can only remove themselves
+    if (!["owner", "admin"].includes(deleteMembership.role)) {
+      const { data: targetMember } = await supabase
+        .from("org_members")
+        .select("user_id")
+        .eq("id", memberId)
+        .eq("organization_id", orgId)
+        .single();
+      if (!targetMember || targetMember.user_id !== user.id) {
+        return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
+      }
+    }
+
     const { error } = await supabase
       .from("org_members")
       .delete()

@@ -108,13 +108,15 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Determine S3 key ───────────────────────────────────────────
+    // Sanitize file name to prevent path traversal (e.g. "../../other-org/data.json")
+    const safeName = (file.name || "upload").split(/[/\\]/).pop()!.replace(/[^a-zA-Z0-9._-]/g, "_");
     const keyMap: Record<string, string> = {
       "gl-data": "gl-data.json",
       "transactions": "transactions.json",
-      "report": `reports/${file.name}`,
-      "custom": file.name,
+      "report": `reports/${safeName}`,
+      "custom": safeName,
     };
-    const s3Key = keyMap[fileType] || file.name;
+    const s3Key = keyMap[fileType] || safeName;
 
     // ── Service client (needed for both storage fallback and DB writes) ────
     const service = await createServiceClient();

@@ -110,6 +110,7 @@ export async function POST(req: NextRequest) {
         })
         .eq("id", conversationId)
         .eq("user_id", user.id)
+        .eq("org_id", workspaceId as string)
         .select("id")
         .single();
 

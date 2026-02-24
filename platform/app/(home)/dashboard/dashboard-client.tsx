@@ -466,16 +466,15 @@ export function DashboardClient() {
         return;
       }
       // Update local state
-      setSummaries((prev) => {
-        const updated = { ...prev };
-        const ws = updated[worker.workspaceId];
-        if (ws?.ai_workers) {
-          ws.ai_workers = ws.ai_workers.map((w) =>
+      setSummaries((prev) => ({
+        ...prev,
+        [worker.workspaceId]: {
+          ...prev[worker.workspaceId],
+          ai_workers: (prev[worker.workspaceId]?.ai_workers ?? []).map((w) =>
             w.id === worker.id ? { ...w, name: renameValue.trim() } : w
-          );
-        }
-        return updated;
-      });
+          ),
+        },
+      }));
       setRenamingId(null);
     } catch (err) {
       logger.warn("[Dashboard] Rename network error:", err);
@@ -1084,7 +1083,7 @@ export function DashboardClient() {
                       </div>
 
                       <button
-                        onClick={() => setWizardStep(1)}
+                        onClick={() => { setWizardStep(1); setWizardWorkspace(null); setWizardNewWsName(""); }}
                         className="mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
                       >
                         &larr; Back

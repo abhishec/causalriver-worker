@@ -40,6 +40,19 @@ export async function POST(request: Request) {
     const skipBrainCycle: boolean = body.skipBrainCycle === true;
 
     const workspaceId = body.organizationId || await getCurrentWorkspaceId();
+
+    // Verify caller is a member of this workspace
+    const { data: syncMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .maybeSingle();
+
+    if (!syncMembership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const service = await createServiceClient();
 
     // Find all active connectors for this org
