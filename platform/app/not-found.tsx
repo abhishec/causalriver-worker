@@ -23,11 +23,11 @@ export default function NotFound() {
         </p>
 
         <Link
-          href="/overview"
+          href="/dashboard"
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
         >
           <span>&larr;</span>
-          Back to Overview
+          Back to Dashboard
         </Link>
       </div>
     </div>

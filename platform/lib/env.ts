@@ -90,7 +90,8 @@ export function validateEnv(): void {
 
     console.error(msg);
   } else {
-    console.log(
+    // Intentional console.warn — runs at startup before logger module loads
+    console.warn(
       `✅ Env validated (${RULES.filter((r) => r.required).length} required vars present)`
     );
   }
