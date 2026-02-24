@@ -1680,20 +1680,22 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       }
 
       // No gathering needed — submit directly.
-      // Use retry loop: if isLoading is still true (e.g. from a reset that hasn't
-      // flushed yet after copilot-new-conversation), wait and retry up to 5 times.
+      // Use rAF-based retry: if isLoading is still true (e.g. from a reset that
+      // hasn't flushed yet after copilot-new-conversation), wait for the next
+      // frame and retry up to 10 frames (~160ms at 60fps). This is more reliable
+      // than fixed setTimeout intervals which can fire before React flushes state.
       setInput(prompt);
       let retries = 0;
-      const maxRetries = 5;
+      const maxRetries = 10;
       const trySubmit = () => {
         if (isLoadingRef.current && retries < maxRetries) {
           retries++;
-          setTimeout(trySubmit, 100);
+          requestAnimationFrame(trySubmit);
           return;
         }
         sendMessageRef.current?.(prompt);
       };
-      setTimeout(trySubmit, 80);
+      requestAnimationFrame(trySubmit);
     };
     // "copilot-jump-to-message" scrolls to a specific message in the chat (artifact → message linking)
     const handleJumpToMessage = (event: Event) => {

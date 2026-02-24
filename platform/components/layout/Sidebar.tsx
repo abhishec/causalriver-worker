@@ -107,8 +107,9 @@ function ServiceTabsPills({ activeService, onServiceChange }: {
 interface BrainEvolution {
   intelligenceScore: number;
   accuracy: { overall: number; trend: string; improvementRate: number };
-  knowledge: { verifiedPredictions: number; totalCausalEdges: number };
-  learningVelocity: { weightUpdatesPerWeek: number };
+  knowledge: { verifiedPredictions: number; totalCausalEdges: number; cognitiveLayersActive: number };
+  learningVelocity: { weightUpdatesPerWeek: number; newEdgesPerWeek: number; totalEvidence: number };
+  interventions?: { totalActedOn: number; successRate: number };
 }
 
 function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined }) {
@@ -117,21 +118,20 @@ function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined })
   useEffect(() => {
     if (!workspaceId) return;
     let cancelled = false;
-    fetch(`/api/brain/evolution?organizationId=${workspaceId}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => {
-        if (!cancelled && json?.state) setData(json.state);
-      })
-      .catch(() => {});
-    // Refresh every 60s to show live learning
-    const interval = setInterval(() => {
+    const load = () => {
       fetch(`/api/brain/evolution?organizationId=${workspaceId}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((json) => {
-          if (!cancelled && json?.state) setData(json.state);
+          if (cancelled) return;
+          // API returns { evolution: {...} } — fall back to json.state for compat
+          const evo = json?.evolution ?? json?.state;
+          if (evo) setData(evo);
         })
         .catch(() => {});
-    }, 60_000);
+    };
+    load();
+    // Refresh every 60s to show live learning
+    const interval = setInterval(load, 60_000);
     return () => { cancelled = true; clearInterval(interval); };
   }, [workspaceId]);
 
@@ -139,6 +139,11 @@ function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined })
 
   const trendIcon = data.accuracy.trend === "improving" ? "\u2191" : data.accuracy.trend === "degrading" ? "\u2193" : "\u2192";
   const trendColor = data.accuracy.trend === "improving" ? "text-emerald-400" : data.accuracy.trend === "degrading" ? "text-red-400" : "text-muted-foreground";
+
+  // Hours saved estimation: verified predictions × 2h + interventions × 4h
+  const hoursSaved = Math.round(
+    (data.knowledge.verifiedPredictions * 2) + ((data.interventions?.totalActedOn ?? 0) * 4)
+  );
 
   return (
     <div className="mx-3 px-3 py-2.5 rounded-lg bg-gradient-to-r from-accent/5 to-emerald-500/5 border border-accent/10 shrink-0">
@@ -148,26 +153,46 @@ function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined })
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{data.intelligenceScore}</span>
-          <span className="text-[9px] text-muted-foreground">IQ score</span>
+          <span className="text-sm font-bold text-accent">{data.intelligenceScore}</span>
+          <span className="text-[9px] text-muted-foreground">IQ</span>
+          {data.accuracy.trend === "improving" && (
+            <span className="text-[9px] text-emerald-400">{"\u2191"}</span>
+          )}
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{Math.round(data.accuracy.overall)}%</span>
+          <span className="text-sm font-bold text-foreground">{Math.round(data.accuracy.overall * 100)}%</span>
           <span className={`text-[9px] ${trendColor}`}>{trendIcon}</span>
           <span className="text-[9px] text-muted-foreground">accuracy</span>
         </div>
+        {hoursSaved > 0 && (
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-bold text-emerald-400">{hoursSaved}h</span>
+            <span className="text-[9px] text-muted-foreground">saved</span>
+          </div>
+        )}
         <div className="flex items-baseline gap-1">
           <span className="text-sm font-bold text-foreground">{data.knowledge.verifiedPredictions}</span>
-          <span className="text-[9px] text-muted-foreground">verified</span>
-        </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{data.knowledge.totalCausalEdges}</span>
-          <span className="text-[9px] text-muted-foreground">edges</span>
+          <span className="text-[9px] text-muted-foreground">predictions</span>
         </div>
       </div>
+      {/* Learning velocity bar */}
+      {data.knowledge.cognitiveLayersActive > 0 && (
+        <div className="mt-2">
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-0.5">
+            <span>Cognitive Layers</span>
+            <span className="tabular-nums">{data.knowledge.cognitiveLayersActive}/15</span>
+          </div>
+          <div className="h-1 rounded-full bg-border-subtle overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
+              style={{ width: `${Math.round((data.knowledge.cognitiveLayersActive / 15) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
       {data.accuracy.improvementRate > 0 && (
         <div className="mt-1.5 text-[10px] text-emerald-400">
-          +{data.accuracy.improvementRate.toFixed(1)}% faster this week
+          +{data.accuracy.improvementRate.toFixed(1)}% improvement this week
         </div>
       )}
     </div>

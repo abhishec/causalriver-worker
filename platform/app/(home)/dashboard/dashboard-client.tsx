@@ -19,6 +19,22 @@ interface WorkspaceSummary {
   active_agents: number;
 }
 
+interface BrainEvolution {
+  score: number;
+  accuracy: number;
+  trend: string;
+  predictions: number;
+  improvement: number;
+  // Full evolution data for WOW banner
+  headline?: string;
+  subtitle?: string;
+  badges?: string[];
+  learningVelocity?: { newEdgesPerWeek: number; weightUpdatesPerWeek: number; totalEvidence: number };
+  knowledge?: { totalCausalEdges: number; verifiedPredictions: number; cognitiveLayersActive: number; highConfidenceEdges: number };
+  interventions?: { totalSuggested: number; totalActedOn: number; successRate: number; avgImpactScore: number };
+  timeline?: { date: string; intelligenceScore: number; accuracy: number }[];
+}
+
 const AI_WORKERS: { id: ServiceMode; label: string; desc: string; icon: string }[] = [
   { id: "seaas", label: "SE-aaS", desc: "Software Engineering", icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" },
   { id: "aas", label: "AAAS", desc: "Accounting & Audit", icon: "M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" },
@@ -48,7 +64,7 @@ export function DashboardClient() {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [launchingId, setLaunchingId] = useState<string | null>(null);
-  const [brainStats, setBrainStats] = useState<Record<string, { score: number; accuracy: number; trend: string; predictions: number; improvement: number }>>({});
+  const [brainStats, setBrainStats] = useState<Record<string, BrainEvolution>>({});
 
   // Prevent hydration mismatch: server always renders loading state,
   // so client must also render loading on first paint before SWR cache kicks in.
@@ -133,7 +149,7 @@ export function DashboardClient() {
     return () => { cancelled = true; };
   }, [workspaceLoading, workspaces.length]);
 
-  // Fetch brain evolution stats per workspace
+  // Fetch brain evolution stats per workspace (full data for WOW banner)
   useEffect(() => {
     if (activeWorkspaces.length === 0) return;
     let cancelled = false;
@@ -141,8 +157,10 @@ export function DashboardClient() {
       fetch(`/api/brain/evolution?organizationId=${m.workspace.id}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((json) => {
-          if (cancelled || !json?.state) return;
-          const s = json.state;
+          if (cancelled) return;
+          // API returns { evolution: {...}, summary: {...} }
+          const s = json?.evolution ?? json?.state;
+          if (!s) return;
           setBrainStats((prev) => ({
             ...prev,
             [m.workspace.id]: {
@@ -151,6 +169,13 @@ export function DashboardClient() {
               trend: s.accuracy?.trend ?? "stable",
               predictions: s.knowledge?.verifiedPredictions ?? 0,
               improvement: s.accuracy?.improvementRate ?? 0,
+              headline: json?.summary?.headline,
+              subtitle: json?.summary?.subtitle,
+              badges: json?.summary?.badges,
+              learningVelocity: s.learningVelocity,
+              knowledge: s.knowledge,
+              interventions: s.interventions,
+              timeline: s.timeline,
             },
           }));
         })
@@ -158,6 +183,49 @@ export function DashboardClient() {
     }
     return () => { cancelled = true; };
   }, [activeWorkspaces]);
+
+  // Aggregate brain intelligence stats for the WOW banner
+  const brainIntelligence = useMemo(() => {
+    const entries = Object.values(brainStats).filter((b) => b.score > 0);
+    if (entries.length === 0) return null;
+
+    const avgScore = Math.round(entries.reduce((s, b) => s + b.score, 0) / entries.length);
+    const avgAccuracy = Math.round(entries.reduce((s, b) => s + b.accuracy, 0) / entries.length * 100);
+    const totalPredictions = entries.reduce((s, b) => s + (b.knowledge?.verifiedPredictions ?? b.predictions ?? 0), 0);
+    const totalEdges = entries.reduce((s, b) => s + (b.knowledge?.totalCausalEdges ?? 0), 0);
+    const totalInterventions = entries.reduce((s, b) => s + (b.interventions?.totalActedOn ?? 0), 0);
+    const avgSuccessRate = entries.filter((b) => b.interventions).length > 0
+      ? Math.round(entries.reduce((s, b) => s + (b.interventions?.successRate ?? 0), 0) / entries.filter((b) => b.interventions).length * 100)
+      : 0;
+    const isImproving = entries.some((b) => b.trend === "improving");
+    const avgImprovement = entries.reduce((s, b) => s + (b.improvement ?? 0), 0) / entries.length;
+    const activeLayers = Math.max(...entries.map((b) => b.knowledge?.cognitiveLayersActive ?? 0));
+
+    // "Hours saved" estimation: each verified prediction ~2h of manual analysis,
+    // each intervention acted on ~4h of reactive work avoided
+    const hoursSaved = Math.round(totalPredictions * 2 + totalInterventions * 4);
+
+    // Collect unique badges across all workspaces
+    const allBadges = [...new Set(entries.flatMap((b) => b.badges ?? []))];
+
+    // Best headline from highest-scoring workspace
+    const best = entries.reduce((a, b) => (a.score > b.score ? a : b));
+
+    return {
+      avgScore,
+      avgAccuracy,
+      totalPredictions,
+      totalEdges,
+      totalInterventions,
+      avgSuccessRate,
+      isImproving,
+      avgImprovement,
+      activeLayers,
+      hoursSaved,
+      badges: allBadges.slice(0, 4),
+      headline: best.headline ?? "Brain Intelligence",
+    };
+  }, [brainStats]);
 
   const handleSelectCustomer = useCallback((customerId: string) => {
     setActiveCustomer(customerId);
@@ -267,7 +335,7 @@ export function DashboardClient() {
             {activeCustomer && (
               <>
                 <span className="text-muted-foreground/40 mx-0.5">/</span>
-                {isPlatformAdmin ? (
+                {isPlatformAdmin || customersForUser.length > 1 ? (
                   <button
                     onClick={handleBackToCustomers}
                     className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-accent transition-colors"
@@ -450,6 +518,113 @@ export function DashboardClient() {
               </div>
             </div>
 
+            {/* ── Brain Intelligence Banner (WOW) ──────────────────── */}
+            {brainIntelligence && (
+              <div className="mb-6 rounded-xl border border-accent/20 bg-gradient-to-r from-accent/5 via-surface to-emerald-500/5 overflow-hidden">
+                <div className="px-5 py-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">Brain Intelligence</div>
+                      <div className="text-[10px] text-muted-foreground">
+                        Your AI workers are learning and getting smarter
+                        {brainIntelligence.isImproving && (
+                          <span className="text-emerald-400 ml-1">
+                            {"\u2022"} Actively improving
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Key metrics row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {/* IQ Score */}
+                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold text-accent tabular-nums">{brainIntelligence.avgScore}</span>
+                        <span className="text-[10px] text-muted-foreground">/100</span>
+                        {brainIntelligence.isImproving && (
+                          <span className="text-emerald-400 text-xs">{"\u2191"}</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">IQ Score</div>
+                    </div>
+
+                    {/* Accuracy */}
+                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold text-foreground tabular-nums">{brainIntelligence.avgAccuracy}%</span>
+                        {brainIntelligence.avgImprovement > 0 && (
+                          <span className="text-emerald-400 text-xs">+{brainIntelligence.avgImprovement.toFixed(1)}%</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Accuracy</div>
+                    </div>
+
+                    {/* Hours Saved */}
+                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold text-emerald-400 tabular-nums">{brainIntelligence.hoursSaved}h</span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Hours Saved</div>
+                    </div>
+
+                    {/* Learning Progress */}
+                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl font-bold text-foreground tabular-nums">{brainIntelligence.totalPredictions}</span>
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Predictions Verified</div>
+                    </div>
+                  </div>
+
+                  {/* Progress bar + badges */}
+                  <div className="mt-3 flex items-center gap-3 flex-wrap">
+                    {/* Knowledge progress bar */}
+                    <div className="flex-1 min-w-[120px]">
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+                        <span>Cognitive Layers</span>
+                        <span className="tabular-nums">{brainIntelligence.activeLayers}/15</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-border-subtle overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
+                          style={{ width: `${Math.round((brainIntelligence.activeLayers / 15) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Badges */}
+                    {brainIntelligence.badges.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {brainIntelligence.badges.map((badge) => (
+                          <span
+                            key={badge}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/10 text-accent whitespace-nowrap"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional detail row */}
+                  <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground">
+                    <span>{brainIntelligence.totalEdges} causal edges learned</span>
+                    {brainIntelligence.totalInterventions > 0 && (
+                      <span>{brainIntelligence.totalInterventions} interventions ({brainIntelligence.avgSuccessRate}% success)</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Workspace Cards with inline AI Workers */}
             <div className="space-y-4">
               {activeWorkspaces.map((m) => {
@@ -495,14 +670,18 @@ export function DashboardClient() {
                             )}
                             {brain && (
                               <>
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1 font-medium text-accent">
                                   IQ {brain.score}
                                   {brain.trend === "improving" && <span className="text-emerald-400">{"\u2191"}</span>}
+                                  {brain.trend === "degrading" && <span className="text-amber-400">{"\u2193"}</span>}
                                 </span>
-                                <span>{Math.round(brain.accuracy)}% accuracy</span>
+                                <span>{Math.round(brain.accuracy * 100)}% accuracy</span>
                                 {brain.improvement > 0 && (
-                                  <span className="text-emerald-400">+{brain.improvement.toFixed(1)}% this week</span>
+                                  <span className="text-emerald-400">+{brain.improvement.toFixed(1)}%/wk</span>
                                 )}
+                                {brain.knowledge?.verifiedPredictions ? (
+                                  <span>{brain.knowledge.verifiedPredictions} predictions</span>
+                                ) : null}
                               </>
                             )}
                           </>

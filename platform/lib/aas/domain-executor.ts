@@ -275,12 +275,21 @@ export async function executeAccountingAgent(
   // ── Step 3: Build agent input ───────────────────────────────────────────
   const agentInput = buildAgentInput(action, transactions, period, jurisdiction);
 
-  // ── Step 4: Execute the agent ───────────────────────────────────────────
+  // ── Step 4: Execute the agent (with timeout) ───────────────────────────
+  const AGENT_TIMEOUT_MS = 30_000;
   const startMs = Date.now();
   let result: Record<string, unknown>;
 
   try {
-    result = await (info.agent as any).execute(agentInput, ctx) as Record<string, unknown>;
+    result = await Promise.race([
+      (info.agent as any).execute(agentInput, ctx) as Promise<Record<string, unknown>>,
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error(`Agent ${info.name} timed out after ${AGENT_TIMEOUT_MS / 1000}s`)),
+          AGENT_TIMEOUT_MS,
+        ),
+      ),
+    ]);
   } catch (err) {
     result = {
       status: 'error',
