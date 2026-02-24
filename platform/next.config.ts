@@ -4,6 +4,25 @@ import path from "path";
 const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {
+  // ── Amplify SSR env var fix ──────────────────────────────────────────────────
+  // AWS Amplify SSR Lambda does NOT pass Amplify Console env vars to the Node.js
+  // runtime. NEXT_PUBLIC_* vars work because Next.js inlines them at build time,
+  // but server-only vars (SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY) are
+  // missing at runtime. This `env` config inlines them into the server bundle
+  // at build time so they're available regardless of Lambda runtime env.
+  //
+  // Security: These values are only embedded in server-side bundles (.next/server/)
+  // and never exposed to the client, since they're only referenced in server files.
+  env: {
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
+    AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
+    AWS_S3_REGION: process.env.AWS_S3_REGION,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
   compress: isDev,
 
