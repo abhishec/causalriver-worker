@@ -414,7 +414,7 @@ export default async function OverviewPage() {
       totalEdges={totalEdges}
       signalsToday={signalsToday}
       predictionAccuracy={predictionAccuracy}
-      connectorsActive={latest?.regions_active?.length ?? 0}
+      connectorsActive={connectorsResult.data?.length ?? 0}
       costToday={costToday}
       dailyBudget={dailyBudget}
       monthlyBudget={monthlyBudget}

@@ -240,7 +240,7 @@ export default function OnboardingPage() {
 
   // ── Fetch first results for Step 4 ──────────────────────────────────
   useEffect(() => {
-    if (step !== 4 || !githubConnected || loadingResults) return;
+    if (step !== 4 || !githubConnected || !orgId || loadingResults) return;
 
     async function loadFirstResults() {
       setLoadingResults(true);

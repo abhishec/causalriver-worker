@@ -283,7 +283,7 @@ export function CausalPLRenderer({ data }: { data: Record<string, any> }) {
                       </div>
                       <div className="px-3 py-2 space-y-1">
                         {attr.attributions.map((a, i) => {
-                          const barWidth = Math.min(100, Math.abs(a.contributionPct));
+                          const barWidth = Math.min(100, Math.abs(a.contributionPct ?? 0));
                           return (
                             <div key={i}>
                               <div className="flex justify-between text-[10px] mb-0.5">

@@ -166,7 +166,7 @@ export function RevenueLeakageRenderer({ data }: { data: Record<string, any> }) 
             )}
 
             {/* Top leaking accounts */}
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-1.5">Top Accounts by Leakage</div>
+            {findings.length > 0 && <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-1.5">Top Accounts by Leakage</div>}
             <div className="space-y-1.5">
               {Array.from(
                 findings.reduce((map, f) => {
