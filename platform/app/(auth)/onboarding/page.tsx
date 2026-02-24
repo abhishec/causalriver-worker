@@ -339,11 +339,18 @@ export default function OnboardingPage() {
   async function handleFinish() {
     setLoading(true);
     try {
-      await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         data: { onboarding_complete: true, org_name: orgName.trim() },
       });
+      if (error) {
+        logger.warn("[Onboarding] updateUser failed:", error.message);
+      }
+      // Refresh session so middleware sees updated user_metadata immediately
+      // Without this, middleware still sees onboarding_complete=false and redirects back
+      await supabase.auth.refreshSession();
       router.push("/dashboard");
     } catch {
+      // Even on failure, attempt to proceed — user can retry from dashboard
       router.push("/dashboard");
     }
   }

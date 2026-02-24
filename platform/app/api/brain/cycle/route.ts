@@ -238,7 +238,10 @@ export async function POST(request: NextRequest) {
             streamHandle = controller.beginStreamingCycle(streamInput);
           }
 
-          while (true) {
+          const MAX_SIGNAL_PAGES = 200; // Safety: max 200 pages × 500 signals = 100K signals
+          let pageCount = 0;
+          while (pageCount < MAX_SIGNAL_PAGES) {
+            pageCount++;
             const { data: page } = await service
               .from("cross_domain_signals")
               .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
