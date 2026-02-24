@@ -104,6 +104,7 @@ export async function GET() {
           id: r.organization_id,
           name: org?.name ?? r.organization_id,
           slug: org?.slug,
+          customer_id: org?.customer_id ?? null,
         };
       });
 

@@ -419,18 +419,22 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [activeService, setActiveService] = useState<ServiceMode>(() => {
-    if (typeof window === "undefined") return "seaas";
-    const stored = localStorage.getItem("nexus_service_mode");
-    if (stored === "aas" || stored === "general" || stored === "seaas") return stored;
-    return "seaas";
-  });
+  // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
+  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
   const router = useRouter();
   const { groups, loading: historyLoading } = useChatHistory();
   const { currentRole, isPlatformAdmin, currentWorkspace } = useWorkspace();
+
+  // Hydrate service mode from localStorage after mount (avoids SSR mismatch)
+  useEffect(() => {
+    const stored = localStorage.getItem("nexus_service_mode");
+    if (stored === "aas" || stored === "general" || stored === "seaas") {
+      setActiveService(stored);
+    }
+  }, []);
 
   // Role-based nav filtering: non-admin users don't see admin-only items
   const isFullAccess = isPlatformAdmin || currentRole === "owner" || currentRole === "admin";
