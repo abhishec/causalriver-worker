@@ -874,7 +874,7 @@ async function computeKnowledgeGrowth(
     totalRules: rules.count ?? 0,
     totalPredictions: predictions.count ?? 0,
     verifiedPredictions: verified.count ?? 0,
-    cognitiveLayersActive: Math.min(15, cognitiveLayersActive + 9), // Add LEAP layers
+    cognitiveLayersActive: Math.min(30, cognitiveLayersActive + 9), // All 30 cognitive layers
     // Federation-aware knowledge metrics (THE NETWORK EFFECT)
     federatedCoreEdges: coreEdgesCount,
     isFederating,

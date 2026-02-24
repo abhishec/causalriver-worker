@@ -36,6 +36,7 @@ export interface HealthSnapshot {
     connectors: HealthDimension;
     jobs: HealthDimension;
     pipeline_sla: HealthDimension;
+    code_health: HealthDimension;
   };
   recommendations: string[];
   timestamp: string;
@@ -96,17 +97,18 @@ export async function pollHealthOnce(
 ): Promise<PollResult> {
   const startTime = Date.now();
 
-  // 1. Score all dimensions in parallel (including SLA)
-  const [predictions, causalGraph, signals, connectors, jobs, pipelineSla] = await Promise.all([
+  // 1. Score all dimensions in parallel (including SLA + code health)
+  const [predictions, causalGraph, signals, connectors, jobs, pipelineSla, codeHealth] = await Promise.all([
     checkPredictionHealth(supabase, organizationId),
     checkCausalGraphHealth(supabase, organizationId),
     checkSignalHealth(supabase, organizationId),
     checkConnectorHealth(supabase, organizationId),
     checkJobHealth(supabase, organizationId),
     checkPipelineSLA(supabase, organizationId),
+    checkCodeHealth(supabase, organizationId),
   ]);
 
-  const scores = [predictions.score, causalGraph.score, signals.score, connectors.score, jobs.score, pipelineSla.score];
+  const scores = [predictions.score, causalGraph.score, signals.score, connectors.score, jobs.score, pipelineSla.score, codeHealth.score];
   const overallScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
   const status: HealthSnapshot["status"] =
@@ -118,7 +120,7 @@ export async function pollHealthOnce(
   const snapshot: HealthSnapshot = {
     overall_score: overallScore,
     status,
-    dimensions: { predictions, causal_graph: causalGraph, signals, connectors, jobs, pipeline_sla: pipelineSla },
+    dimensions: { predictions, causal_graph: causalGraph, signals, connectors, jobs, pipeline_sla: pipelineSla, code_health: codeHealth },
     recommendations: generateRecommendations(predictions, causalGraph, signals, connectors, jobs),
     timestamp: new Date().toISOString(),
   };
@@ -572,6 +574,73 @@ async function autoResolveRecoveredAlerts(
   }
 
   return resolved;
+}
+
+// ── Code Health Check ────────────────────────────────────────────────────────
+
+/**
+ * Check code health: pipeline activity, fix success rate, error signals, agent reliability.
+ * This is the 7th health dimension — provides visibility into code quality and system reliability.
+ */
+export async function checkCodeHealth(supabase: SupabaseClient, orgId: string): Promise<HealthDimension> {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const oneDayAgo = new Date(Date.now() - 86400000).toISOString();
+
+    const [totalRuns, successfulRuns, recentFixes, errorSignals, totalTasks, failedTasks] = await Promise.all([
+      // Code pipeline runs (total)
+      supabase.from("code_pipeline_runs").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
+      // Successful pipeline runs (completed stage)
+      supabase.from("code_pipeline_runs").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("stage", "completed"),
+      // Fixes in last 7 days
+      supabase.from("code_pipeline_runs").select("id", { count: "exact", head: true }).eq("organization_id", orgId)
+        .gte("created_at", sevenDaysAgo),
+      // Error signals in last 24h (gaba = inhibition, norepinephrine = attention/alertness)
+      supabase.from("cross_domain_signals").select("id", { count: "exact", head: true }).eq("organization_id", orgId)
+        .in("signal_type", ["gaba", "norepinephrine", "copilot_feedback_not_helpful", "copilot_feedback_incorrect"])
+        .gte("created_at", oneDayAgo),
+      // Agent tasks in last 7 days
+      supabase.from("brain_agent_tasks").select("id", { count: "exact", head: true }).eq("organization_id", orgId)
+        .gte("created_at", sevenDaysAgo),
+      // Failed agent tasks in last 7 days
+      supabase.from("brain_agent_tasks").select("id", { count: "exact", head: true }).eq("organization_id", orgId)
+        .eq("status", "error").gte("created_at", sevenDaysAgo),
+    ]);
+
+    const total = totalRuns.count || 0;
+    const successful = successfulRuns.count || 0;
+    const recent = recentFixes.count || 0;
+    const errors24h = errorSignals.count || 0;
+    const taskTotal = totalTasks.count || 0;
+    const taskFailed = failedTasks.count || 0;
+    const taskSuccessRate = taskTotal > 0 ? (taskTotal - taskFailed) / taskTotal : 1;
+
+    // Scoring: pipeline activity (30) + fix success rate (30) + error trend (20) + task reliability (20)
+    const activityScore = Math.min(recent / 3, 1) * 30;
+    const fixRate = total > 0 ? successful / total : 0;
+    const fixScore = fixRate * 30;
+    const errorScore = errors24h < 5 ? 20 : errors24h < 20 ? 10 : 0;
+    const reliabilityScore = taskSuccessRate * 20;
+
+    return {
+      score: Math.round(activityScore + fixScore + errorScore + reliabilityScore),
+      status: taskSuccessRate >= 0.9 && errors24h < 5 ? "healthy"
+        : errors24h > 20 ? "degraded"
+          : total === 0 ? "no_pipeline_runs"
+            : "learning",
+      details: {
+        pipeline_runs: total,
+        successful_fixes: successful,
+        fixes_last_7d: recent,
+        error_signals_24h: errors24h,
+        agent_tasks_7d: taskTotal,
+        agent_failures_7d: taskFailed,
+        agent_success_rate: Math.round(taskSuccessRate * 100) / 100,
+      },
+    };
+  } catch {
+    return { score: 50, status: "unavailable", details: { note: "Code health tables not fully available" } };
+  }
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

@@ -108,9 +108,9 @@ export async function GET(request: NextRequest) {
       healthStatus: healthData?.status ?? "unknown",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[SmartSuggestions] GET error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Graceful degradation: return empty suggestions instead of 500
+    logger.warn("[SmartSuggestions] GET failed, returning empty:", error);
+    return NextResponse.json({ suggestions: [], healthScore: null, healthStatus: "unknown" });
   }
 }
 

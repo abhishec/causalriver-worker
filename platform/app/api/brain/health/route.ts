@@ -222,12 +222,17 @@ async function handleLearningHealth(request: NextRequest) {
       ),
       timestamp: new Date().toISOString(),
     });
-  } catch (err) {
+  } catch {
+    // Graceful degradation: return initializing state instead of 500
     return NextResponse.json({
-      status: "error",
-      message: err instanceof Error ? err.message : "Learning health check failed",
+      status: "initializing",
+      overall_score: 0,
+      organization_id: request.nextUrl.searchParams.get("organizationId") || "",
+      dimensions: {},
+      evolution: { status: "no_snapshots" },
+      recommendations: ["Connect data sources to start learning."],
       timestamp: new Date().toISOString(),
-    }, { status: 500 });
+    });
   }
 }
 

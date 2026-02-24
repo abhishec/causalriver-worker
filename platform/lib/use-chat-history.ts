@@ -49,7 +49,7 @@ function groupByDate(items: ChatHistoryItem[]): ChatHistoryGroup[] {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
-export function useChatHistory() {
+export function useChatHistory(serviceMode?: "general" | "aas" | "seaas") {
   const { currentWorkspace } = useWorkspace();
   const [items, setItems] = useState<ChatHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -124,7 +124,13 @@ export function useChatHistory() {
     };
   }, [currentWorkspace?.id]);
 
-  const groups = useMemo(() => groupByDate(items), [items]);
+  // Filter by service mode (AI Worker scoping) — show only conversations for this worker
+  const filteredItems = useMemo(
+    () => serviceMode ? items.filter((i) => i.service_mode === serviceMode) : items,
+    [items, serviceMode]
+  );
 
-  return { groups, loading, items };
+  const groups = useMemo(() => groupByDate(filteredItems), [filteredItems]);
+
+  return { groups, loading, items: filteredItems };
 }

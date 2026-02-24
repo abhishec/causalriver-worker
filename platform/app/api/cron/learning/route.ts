@@ -42,16 +42,19 @@ export async function GET(request: NextRequest) {
     const service = await createServiceClient();
     const { createClosedLoopLearningEngine } = await import("@nexus-ai/memory-stack");
 
-    // ── Get all organizations ────────────────────────────────────
+    // ── Get all organizations with AI Workers ────────────────────
     const { data: orgs } = await service
       .from("organizations")
-      .select("id, name");
+      .select("id, name, settings");
 
     if (!orgs || orgs.length === 0) {
       return NextResponse.json({ success: true, message: "No organizations found" });
     }
 
     const results: Array<{
+      workerId: string;
+      workerName: string;
+      service: string;
       orgId: string;
       orgName: string;
       success: boolean;
@@ -60,43 +63,84 @@ export async function GET(request: NextRequest) {
       durationMs: number;
     }> = [];
 
-    logger.info(`[CronLearning] Starting learning cycle for ${orgs.length} organizations`);
+    logger.info(`[CronLearning] Starting AI Worker learning cycle for ${orgs.length} organizations`);
 
     for (const org of orgs) {
-      const start = Date.now();
-      try {
-        const engine = createClosedLoopLearningEngine({
-          supabase: service,
-          organizationId: org.id,
-        });
+      const settings = (org as { settings?: { ai_workers?: Array<{ id: string; name: string; service: string; status: string }> } }).settings;
+      const workers = settings?.ai_workers?.filter(w => w.status === "active") || [];
 
-        const cycleResult = await engine.runLearningCycle();
+      if (workers.length === 0) {
+        // No AI Workers — run org-level learning as fallback
+        const start = Date.now();
+        try {
+          const engine = createClosedLoopLearningEngine({
+            supabase: service,
+            organizationId: org.id,
+          });
+          const cycleResult = await engine.runLearningCycle();
+          results.push({
+            workerId: `org_${org.id}`,
+            workerName: `${org.name} (org-level)`,
+            service: "general",
+            orgId: org.id, orgName: org.name,
+            success: true,
+            loops: cycleResult as unknown as Record<string, unknown>,
+            durationMs: Date.now() - start,
+          });
+          logger.info(`[CronLearning] ${org.name} (org-level): learning cycle complete`);
+        } catch (err) {
+          results.push({
+            workerId: `org_${org.id}`,
+            workerName: `${org.name} (org-level)`,
+            service: "general",
+            orgId: org.id, orgName: org.name,
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+            durationMs: Date.now() - start,
+          });
+          logger.error(`[CronLearning] ${org.name} (org-level) failed:`, err);
+        }
+        continue;
+      }
 
-        results.push({
-          orgId: org.id,
-          orgName: org.name,
-          success: true,
-          loops: cycleResult as unknown as Record<string, unknown>,
-          durationMs: Date.now() - start,
-        });
-
-        logger.info(`[CronLearning] ${org.name}: learning cycle complete`);
-      } catch (err) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        results.push({
-          orgId: org.id,
-          orgName: org.name,
-          success: false,
-          error: errMsg,
-          durationMs: Date.now() - start,
-        });
-        logger.error(`[CronLearning] ${org.name} failed:`, err);
+      // Run learning PER AI WORKER
+      for (const worker of workers) {
+        const start = Date.now();
+        try {
+          const engine = createClosedLoopLearningEngine({
+            supabase: service,
+            organizationId: org.id,
+          });
+          const cycleResult = await engine.runLearningCycle();
+          results.push({
+            workerId: worker.id,
+            workerName: worker.name,
+            service: worker.service,
+            orgId: org.id, orgName: org.name,
+            success: true,
+            loops: cycleResult as unknown as Record<string, unknown>,
+            durationMs: Date.now() - start,
+          });
+          logger.info(`[CronLearning] AI Worker "${worker.name}" (${worker.service}@${org.name}): learning cycle complete`);
+        } catch (err) {
+          results.push({
+            workerId: worker.id,
+            workerName: worker.name,
+            service: worker.service,
+            orgId: org.id, orgName: org.name,
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+            durationMs: Date.now() - start,
+          });
+          logger.error(`[CronLearning] AI Worker "${worker.name}" failed:`, err);
+        }
       }
     }
 
     const succeeded = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
     const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
+    const totalWorkers = results.length;
 
     // Log run
     try {
@@ -107,18 +151,18 @@ export async function GET(request: NextRequest) {
         started_at: new Date(Date.now() - totalMs).toISOString(),
         completed_at: new Date().toISOString(),
         status: failed > 0 ? "partial" : "success",
-        result: JSON.stringify({ succeeded, failed }),
+        result: JSON.stringify({ totalWorkers, succeeded, failed }),
         duration_ms: totalMs,
       });
     } catch { /* non-fatal */ }
 
     logger.info(
-      `[CronLearning] Complete: ${succeeded}/${orgs.length} succeeded, ${totalMs}ms total`
+      `[CronLearning] Complete: ${succeeded}/${totalWorkers} AI Workers succeeded, ${failed} failed, ${totalMs}ms total`
     );
 
     return NextResponse.json({
       success: true,
-      summary: { totalOrgs: orgs.length, succeeded, failed, totalDurationMs: totalMs },
+      summary: { totalOrgs: orgs.length, totalWorkers, succeeded, failed, totalDurationMs: totalMs },
       results,
     });
   } catch (error: unknown) {

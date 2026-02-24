@@ -28,7 +28,7 @@ import { useSmartSuggestions } from "@/lib/hooks/useSmartSuggestions";
 
 type ServiceMode = "general" | "aas" | "seaas";
 
-// Service tabs now live in the sidebar (Sidebar.tsx ServiceTabsPills)
+// Service mode is locked to the AI Worker launched from the dashboard
 
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
@@ -88,7 +88,7 @@ function CopilotPageInner() {
   }, []);
   const persona = SERVICE_PERSONAS[activeService];
 
-  // Service tabs now live in the sidebar — copilot page only shows the active persona
+  // Service mode is locked to the AI Worker — no service switching in copilot
 
   // ── Layout state ──────────────────────────────────────────────────────────
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
@@ -467,24 +467,8 @@ function CopilotPageInner() {
     setArtifactPaneOpen(false);
   }, []);
 
-  // ── Listen for service-mode-changed from sidebar tab pills ─────────────
-  // This fires only on MANUAL tab switches (user clicks General/AAAS/SE-aaS pill).
-  // Command clicks go through handleCommandClick → copilot-inject-and-submit instead.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const svc = (e as CustomEvent).detail as ServiceMode;
-      if (svc && ["general", "aas", "seaas"].includes(svc) && svc !== activeService) {
-        // Save current messages before switching service mode
-        saveCurrentMessagesBeforeClear().finally(() => {
-          handleServiceChange(svc);
-          // Reset chat when manually switching service tabs
-          window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-        });
-      }
-    };
-    window.addEventListener("service-mode-changed", handler);
-    return () => window.removeEventListener("service-mode-changed", handler);
-  }, [activeService, handleServiceChange, saveCurrentMessagesBeforeClear]);
+  // Service mode is locked to the AI Worker — no service-mode-changed listener needed.
+  // When loading a saved conversation, the service mode is set from the conversation data.
 
   // ── Conversation actions ──────────────────────────────────────────────────
   const handleSelectConversation = useCallback(async (id: string) => {
@@ -499,8 +483,6 @@ function CopilotPageInner() {
       if (data) {
         if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
           setActiveService(data.service_mode);
-          // Sync sidebar tab pills when loading a saved conversation
-          window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: data.service_mode }));
         }
 
         try {

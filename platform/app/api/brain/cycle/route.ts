@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
         let causalEdges: any[] = [];
         try {
           const { data: edges } = await service
-            .from("causal_relationships")
+            .from("causal_relationships_statistical")
             .select("source_domain, target_domain, correlation_strength, p_value, confidence, effect_size")
             .eq("organization_id", workspaceId)
             .gte("confidence", 0.3)

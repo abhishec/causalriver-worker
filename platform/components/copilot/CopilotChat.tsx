@@ -20,6 +20,7 @@ import { COMMAND_GATHERING_MAP } from "./command-gathering";
 import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
 import { SmartSuggestionCard } from "./SmartSuggestionCard";
+import { MessageFeedback } from "./MessageFeedback";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -2459,6 +2460,16 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                             </button>
                           ))}
                         </div>
+                      )}
+
+                      {/* RL Feedback — thumbs up/down per assistant message */}
+                      {msg.content && !msg.content.startsWith("__ERROR__") && !isLoading && organizationId && (
+                        <MessageFeedback
+                          messageIndex={i}
+                          organizationId={organizationId}
+                          conversationId={conversationId}
+                          serviceMode={activeService || "general"}
+                        />
                       )}
                     </div>
                   )}

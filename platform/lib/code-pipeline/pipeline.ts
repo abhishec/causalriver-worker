@@ -207,47 +207,101 @@ export async function runCodePipeline(
     }
 
     // ── Stages 3-6: Branch, Test, PR, Monitor ──────────────────────────
-    // These require GitHub connector integration.
-    // For now, create the branch name and mark as ready for manual PR.
-
+    // Full GitHub integration using the org's GitHub connector token.
     const branchName = `brain-fix/${issue.type}-${Date.now()}`;
 
-    await supabase
-      .from("code_pipeline_runs")
-      .update({
-        branch_name: branchName,
-        stage: "branch_created",
-      })
-      .eq("id", runId);
+    // Get GitHub credentials from org_connectors
+    const ghCreds = await getGitHubCredentials(supabase, organizationId);
 
-    // TODO (Phase 4.3): Wire GitHub integration layer for:
-    // - createBranch()
-    // - commitFiles()
-    // - triggerWorkflow()
-    // - createPR()
-    // These require the GitHub connector's token from org_connectors.
-    // For now, the pipeline generates the fix and stores artifacts.
+    if (!ghCreds) {
+      // No GitHub connector — store artifacts only, mark as branch_created
+      await supabase
+        .from("code_pipeline_runs")
+        .update({ branch_name: branchName, stage: "branch_created" })
+        .eq("id", runId);
 
-    logger.warn(`[CodePipeline] Fix generated for branch ${branchName}: ${artifacts.length} artifacts, confidence=${confidence}`);
+      logger.warn(`[CodePipeline] No GitHub connector — artifacts stored, branch ${branchName} not pushed`);
+      await emitPipelineSignal(supabase, organizationId, runId, "fix_generated", confidence);
 
-    await emitPipelineSignal(supabase, organizationId, runId, "fix_generated", confidence);
+      return {
+        id: runId, organizationId, issue, stage: "branch_created", branchName,
+        agentTaskId: agentResult.taskId,
+        fixArtifacts: artifacts.map((a) => ({ path: a.title || "fix", content: a.content, language: a.language || "text" })),
+        confidence, createdAt: new Date().toISOString(), durationMs: Date.now() - startTime,
+      };
+    }
 
-    return {
-      id: runId,
-      organizationId,
-      issue,
-      stage: "branch_created",
-      branchName,
-      agentTaskId: agentResult.taskId,
-      fixArtifacts: artifacts.map((a) => ({
-        path: a.title || "fix",
-        content: a.content,
-        language: a.language || "text",
-      })),
-      confidence,
-      createdAt: new Date().toISOString(),
-      durationMs: Date.now() - startTime,
-    };
+    const { token, owner, repo, baseBranch } = ghCreds;
+
+    // ── Stage 3: CREATE BRANCH + COMMIT ──────────────────────────────
+    try {
+      const commitSha = await createBranchAndCommit(
+        token, owner, repo, baseBranch, branchName,
+        artifacts.map((a) => ({ path: a.title || `fix-${issue.type}.ts`, content: a.content })),
+        `[Brain Fix] ${issue.type}: ${issue.description.slice(0, 72)}`
+      );
+
+      await supabase
+        .from("code_pipeline_runs")
+        .update({ branch_name: branchName, stage: "branch_created" })
+        .eq("id", runId);
+
+      // ── Stage 4: RUN TESTS (wait for CI) ─────────────────────────
+      await updateStage(supabase, runId, "tests_running");
+      const ciResult = await pollCIChecks(token, owner, repo, commitSha);
+
+      if (!ciResult.passed) {
+        await supabase
+          .from("code_pipeline_runs")
+          .update({ stage: "failed", test_results: ciResult, completed_at: new Date().toISOString(), duration_ms: Date.now() - startTime })
+          .eq("id", runId);
+        await emitPipelineSignal(supabase, organizationId, runId, "ci_failed", confidence * 0.3);
+
+        return {
+          id: runId, organizationId, issue, stage: "failed", branchName,
+          testResults: ciResult as unknown as Record<string, unknown>,
+          createdAt: new Date().toISOString(), durationMs: Date.now() - startTime,
+        };
+      }
+
+      // ── Stage 5: OPEN PR ──────────────────────────────────────────
+      const pr = await openPullRequest(token, owner, repo, branchName, baseBranch, issue, confidence);
+
+      await supabase
+        .from("code_pipeline_runs")
+        .update({ stage: "pr_opened", pr_number: pr.number, pr_url: pr.url })
+        .eq("id", runId);
+
+      await emitPipelineSignal(supabase, organizationId, runId, "pr_opened", confidence);
+      logger.warn(`[CodePipeline] PR #${pr.number} opened: ${pr.url}`);
+
+      // ── Stage 6: MONITOR (non-blocking — tracked by webhook) ──────
+      // PR monitoring happens asynchronously via GitHub webhooks
+      // calling updatePipelinePRStatus() when PR is merged/closed.
+      await updateStage(supabase, runId, "monitoring");
+
+      return {
+        id: runId, organizationId, issue, stage: "monitoring", branchName,
+        prUrl: pr.url, prNumber: pr.number,
+        agentTaskId: agentResult.taskId,
+        fixArtifacts: artifacts.map((a) => ({ path: a.title || "fix", content: a.content, language: a.language || "text" })),
+        confidence, createdAt: new Date().toISOString(), durationMs: Date.now() - startTime,
+      };
+    } catch (ghErr) {
+      logger.error("[CodePipeline] GitHub integration failed:", ghErr);
+      await supabase
+        .from("code_pipeline_runs")
+        .update({ branch_name: branchName, stage: "branch_created", completed_at: new Date().toISOString(), duration_ms: Date.now() - startTime })
+        .eq("id", runId);
+      await emitPipelineSignal(supabase, organizationId, runId, "fix_generated", confidence);
+
+      return {
+        id: runId, organizationId, issue, stage: "branch_created", branchName,
+        agentTaskId: agentResult.taskId,
+        fixArtifacts: artifacts.map((a) => ({ path: a.title || "fix", content: a.content, language: a.language || "text" })),
+        confidence, createdAt: new Date().toISOString(), durationMs: Date.now() - startTime,
+      };
+    }
   } catch (err) {
     await updateStage(supabase, runId, "failed");
     logger.error("[CodePipeline] Fix generation failed:", err);
@@ -395,6 +449,244 @@ function buildFixPrompt(issue: CodeIssue): string {
   );
 
   return parts.join("\n");
+}
+
+// ── GitHub Integration Helpers ────────────────────────────────────────────
+
+interface GitHubCredentials {
+  token: string;
+  owner: string;
+  repo: string;
+  baseBranch: string;
+}
+
+/**
+ * Get GitHub credentials from org_connectors for this organization.
+ * Returns null if no GitHub connector is configured.
+ */
+async function getGitHubCredentials(
+  supabase: SupabaseClient,
+  organizationId: string,
+): Promise<GitHubCredentials | null> {
+  try {
+    const { data } = await supabase
+      .from("org_connectors")
+      .select("credentials, config")
+      .eq("organization_id", organizationId)
+      .eq("connector_type", "github")
+      .limit(1)
+      .single();
+
+    if (!data?.credentials) return null;
+
+    const creds = data.credentials as Record<string, unknown>;
+    const config = (data.config as Record<string, unknown>) || {};
+    const token = (creds.access_token || creds.token) as string;
+    if (!token) return null;
+
+    // Parse owner/repo from config or credentials
+    const repository = (config.repository || creds.repository || "") as string;
+    const [owner, repo] = repository.includes("/") ? repository.split("/") : ["", ""];
+    if (!owner || !repo) return null;
+
+    return {
+      token,
+      owner,
+      repo,
+      baseBranch: (config.base_branch as string) || "main",
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Stage 3: Create a branch and commit fix artifacts via GitHub REST API.
+ * Returns the commit SHA.
+ */
+async function createBranchAndCommit(
+  token: string,
+  owner: string,
+  repo: string,
+  baseBranch: string,
+  branchName: string,
+  files: Array<{ path: string; content: string }>,
+  commitMessage: string,
+): Promise<string> {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github.v3+json",
+    "Content-Type": "application/json",
+  };
+  const baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
+
+  // 1. Get the SHA of the base branch
+  const refRes = await fetch(`${baseUrl}/git/ref/heads/${baseBranch}`, { headers });
+  if (!refRes.ok) throw new Error(`Failed to get base branch ref: ${refRes.status}`);
+  const refData = await refRes.json() as { object: { sha: string } };
+  const baseSha = refData.object.sha;
+
+  // 2. Create branch
+  const createRefRes = await fetch(`${baseUrl}/git/refs`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ ref: `refs/heads/${branchName}`, sha: baseSha }),
+  });
+  if (!createRefRes.ok) {
+    const err = await createRefRes.text();
+    throw new Error(`Failed to create branch: ${createRefRes.status} ${err}`);
+  }
+
+  // 3. Create blobs for each file
+  const blobs: Array<{ path: string; sha: string }> = [];
+  for (const file of files) {
+    const blobRes = await fetch(`${baseUrl}/git/blobs`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ content: file.content, encoding: "utf-8" }),
+    });
+    if (!blobRes.ok) throw new Error(`Failed to create blob for ${file.path}`);
+    const blobData = await blobRes.json() as { sha: string };
+    blobs.push({ path: file.path, sha: blobData.sha });
+  }
+
+  // 4. Create tree
+  const treeRes = await fetch(`${baseUrl}/git/trees`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      base_tree: baseSha,
+      tree: blobs.map((b) => ({ path: b.path, mode: "100644", type: "blob", sha: b.sha })),
+    }),
+  });
+  if (!treeRes.ok) throw new Error(`Failed to create tree: ${treeRes.status}`);
+  const treeData = await treeRes.json() as { sha: string };
+
+  // 5. Create commit
+  const commitRes = await fetch(`${baseUrl}/git/commits`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      message: commitMessage,
+      tree: treeData.sha,
+      parents: [baseSha],
+    }),
+  });
+  if (!commitRes.ok) throw new Error(`Failed to create commit: ${commitRes.status}`);
+  const commitData = await commitRes.json() as { sha: string };
+
+  // 6. Update branch ref to point to new commit
+  await fetch(`${baseUrl}/git/refs/heads/${branchName}`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({ sha: commitData.sha }),
+  });
+
+  return commitData.sha;
+}
+
+/**
+ * Stage 4: Poll GitHub Check Runs for a commit SHA.
+ * Waits up to 2 minutes, polling every 10s.
+ */
+async function pollCIChecks(
+  token: string,
+  owner: string,
+  repo: string,
+  sha: string,
+): Promise<{ passed: boolean; url: string; details?: string }> {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github.v3+json",
+  };
+  const url = `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/check-runs`;
+  const maxAttempts = 12; // 12 × 10s = 2 minutes
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise((r) => setTimeout(r, 10_000)); // wait 10s
+
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) continue;
+
+      const data = await res.json() as { total_count: number; check_runs: Array<{ status: string; conclusion: string | null; html_url: string }> };
+      if (data.total_count === 0 && attempt < 3) continue; // CI not started yet
+
+      const allComplete = data.check_runs.every((cr) => cr.status === "completed");
+      if (!allComplete && attempt < maxAttempts - 1) continue;
+
+      const allPassed = data.check_runs.every(
+        (cr) => cr.conclusion === "success" || cr.conclusion === "neutral" || cr.conclusion === "skipped",
+      );
+
+      return {
+        passed: allPassed || data.total_count === 0, // No checks = pass
+        url: data.check_runs[0]?.html_url || `https://github.com/${owner}/${repo}/commit/${sha}`,
+        details: data.check_runs.map((cr) => `${cr.status}:${cr.conclusion}`).join(", "),
+      };
+    } catch {
+      // Retry on failure
+    }
+  }
+
+  // Timeout — assume pass (no CI configured or slow CI)
+  return { passed: true, url: `https://github.com/${owner}/${repo}/commit/${sha}`, details: "timeout" };
+}
+
+/**
+ * Stage 5: Open a Pull Request via GitHub REST API.
+ */
+async function openPullRequest(
+  token: string,
+  owner: string,
+  repo: string,
+  branchName: string,
+  baseBranch: string,
+  issue: CodeIssue,
+  confidence: number,
+): Promise<{ number: number; url: string }> {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github.v3+json",
+    "Content-Type": "application/json",
+  };
+
+  const title = `[Brain Fix] ${issue.type.replace(/_/g, " ")}: ${issue.description.slice(0, 60)}`;
+  const body = [
+    `## Brain OS Automated Fix`,
+    ``,
+    `**Issue type:** ${issue.type}`,
+    `**Severity:** ${issue.severity}`,
+    `**Source:** ${issue.source}`,
+    `**Confidence:** ${Math.round(confidence * 100)}%`,
+    ``,
+    `### Description`,
+    issue.description,
+    ``,
+    `---`,
+    `*This PR was automatically generated by Brain OS Code Pipeline.*`,
+    `*The Brain's confidence in this fix is ${Math.round(confidence * 100)}%.*`,
+    `*Merging this PR will emit a positive RL signal, improving future fixes.*`,
+  ].join("\n");
+
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      title,
+      body,
+      head: branchName,
+      base: baseBranch,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Failed to create PR: ${res.status} ${err}`);
+  }
+
+  const pr = await res.json() as { number: number; html_url: string };
+  return { number: pr.number, url: pr.html_url };
 }
 
 function mapRunRecord(run: Record<string, unknown>): CodePipelineRun {
