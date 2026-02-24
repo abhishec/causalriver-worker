@@ -43,11 +43,16 @@ export function DashboardClient() {
   } = useWorkspace();
 
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [summaries, setSummaries] = useState<Record<string, WorkspaceSummary>>({});
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [launchingId, setLaunchingId] = useState<string | null>(null);
   const [brainStats, setBrainStats] = useState<Record<string, { score: number; accuracy: number; trend: string; predictions: number; improvement: number }>>({});
+
+  // Prevent hydration mismatch: server always renders loading state,
+  // so client must also render loading on first paint before SWR cache kicks in.
+  useEffect(() => { setMounted(true); }, []);
 
   // Workspaces grouped by customer for display
   const customerGroups = useMemo(() => {
@@ -182,7 +187,7 @@ export function DashboardClient() {
   }, []);
 
   /* ── Loading ──────────────────────────────────────────────────────────── */
-  if (workspaceLoading) {
+  if (!mounted || workspaceLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
