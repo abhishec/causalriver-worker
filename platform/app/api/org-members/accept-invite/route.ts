@@ -111,23 +111,29 @@ export async function POST(request: Request) {
       .single();
 
     if (orgData?.customer_id) {
-      // Only insert customer_members if user doesn't already have a row for this customer.
-      // This prevents overwriting an existing primary_org_id when a user is invited
-      // to a second workspace under the same customer.
-      const { data: existingCustMember } = await service
-        .from("customer_members")
-        .select("id")
-        .eq("customer_id", orgData.customer_id)
-        .eq("user_id", user.id)
-        .single();
+      // Sync customer_members — wrapped in try/catch for resilience
+      // if customer_members table doesn't exist, invitation still succeeds
+      try {
+        const { data: existingCustMember } = await service
+          .from("customer_members")
+          .select("id")
+          .eq("customer_id", orgData.customer_id)
+          .eq("user_id", user.id)
+          .single();
 
-      if (!existingCustMember) {
-        await service.from("customer_members").insert({
-          customer_id: orgData.customer_id,
-          user_id: user.id,
-          role: invitation.role,
-          primary_org_id: invitation.organization_id,
-        });
+        if (!existingCustMember) {
+          const { error: insertError } = await service.from("customer_members").insert({
+            customer_id: orgData.customer_id,
+            user_id: user.id,
+            role: invitation.role,
+            primary_org_id: invitation.organization_id,
+          });
+          if (insertError) {
+            logger.warn("[org-members/accept-invite] customer_members sync failed:", insertError.message);
+          }
+        }
+      } catch {
+        logger.warn("[org-members/accept-invite] customer_members not available — invitation accepted without customer sync");
       }
     }
 

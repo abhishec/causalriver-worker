@@ -64,18 +64,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Update customer_members.primary_org_id
-    const { error: updateError } = await supabase
-      .from("customer_members")
-      .update({ primary_org_id: workspaceId })
-      .eq("user_id", user.id)
-      .eq("customer_id", workspace.customer_id);
+    // Wrapped in try/catch — customer_members table may not exist in all environments
+    try {
+      const { error: updateError } = await supabase
+        .from("customer_members")
+        .update({ primary_org_id: workspaceId })
+        .eq("user_id", user.id)
+        .eq("customer_id", workspace.customer_id);
 
-    if (updateError) {
-      logger.error("[/api/workspace/set-default] update error:", updateError);
-      return NextResponse.json(
-        { error: updateError.message },
-        { status: 500 }
-      );
+      if (updateError) {
+        // Log but don't crash — default workspace still works via cookie fallback
+        logger.warn("[/api/workspace/set-default] customer_members update failed:", updateError.message);
+      }
+    } catch {
+      logger.warn("[/api/workspace/set-default] customer_members not available — skipping persistent default");
     }
 
     return NextResponse.json({ success: true, defaultWorkspaceId: workspaceId });
