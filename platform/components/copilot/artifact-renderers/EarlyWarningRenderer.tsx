@@ -101,7 +101,7 @@ export function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
             <ScoreBar value={current} label="Current velocity" max={50} />
             <ScoreBar value={previous} label="Previous velocity" max={50} />
             <ScoreBar value={confidence} label="Prediction confidence" />
-            <ScoreBar value={100 - Math.abs(decline)} label="Stability index" />
+            <ScoreBar value={Math.max(0, 100 - Math.abs(decline))} label="Stability index" />
           </>
         )}
       </div>

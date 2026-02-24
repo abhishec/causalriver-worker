@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -202,9 +202,8 @@ export function RevenueLeakageRenderer({ data }: { data: Record<string, any> }) 
               </thead>
               <tbody>
                 {findings.map((f, i) => (
-                  <>
+                  <React.Fragment key={i}>
                     <tr
-                      key={i}
                       className={cn(
                         "border-b border-border-subtle last:border-b-0 cursor-pointer transition-colors hover:bg-surface-hover/50",
                         expandedIdx === i && "bg-surface-hover/30",
@@ -241,7 +240,7 @@ export function RevenueLeakageRenderer({ data }: { data: Record<string, any> }) 
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

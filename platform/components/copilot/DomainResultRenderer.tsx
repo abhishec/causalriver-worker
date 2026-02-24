@@ -113,7 +113,7 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
       <ArtifactFeedback
         artifactId={artifactId}
         domainId={resolvedDomainId}
-        service={result.service as "seaas" | "aas" | "general"}
+        service={(result.service === "delivery-intelligence" ? "seaas" : result.service) as "seaas" | "aas" | "general"}
       />
     </div>
   );

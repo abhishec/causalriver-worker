@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { BrainClient } from "./brain-client";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { logger } from "@/lib/logger";
 
 
@@ -81,13 +82,15 @@ export default async function BrainPage() {
   const signals = signalsResult.data || [];
 
   return (
-    <BrainClient
-      causalEdges={causalEdges}
-      entities={entities}
-      snapshot={snapshot}
-      discoveryTimeline={discoveryTimeline}
-      layerHealth={layerHealth}
-      signals={signals}
-    />
+    <ErrorBoundary section="Brain Explorer">
+      <BrainClient
+        causalEdges={causalEdges}
+        entities={entities}
+        snapshot={snapshot}
+        discoveryTimeline={discoveryTimeline}
+        layerHealth={layerHealth}
+        signals={signals}
+      />
+    </ErrorBoundary>
   );
 }

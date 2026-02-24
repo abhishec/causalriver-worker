@@ -721,8 +721,14 @@ export async function POST(request: NextRequest) {
       }
 
       // ── Persona (configurable — defaults to generic NexusBrain Copilot) ──
+      // Sanitize persona fields to prevent prompt injection via user-controlled input
       if (persona) {
-        brainRegions.persona = persona;
+        const sanitize = (s: string, maxLen: number) =>
+          (s || "").replace(/[\x00-\x1F\x7F]/g, "").slice(0, maxLen);
+        brainRegions.persona = {
+          name: sanitize(persona.name, 200),
+          description: sanitize(persona.description, 500),
+        };
       }
 
       // ── Claude-Aspirational Capabilities ──────────────────────────────
@@ -1075,7 +1081,7 @@ export async function POST(request: NextRequest) {
       : !interpretation ? detectSEaaSRoute(message) : null;
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
-      : serviceRoute?.type !== 'se-aas' ? detectAccountingRoute(message) : null;
+      : !interpretation ? detectAccountingRoute(message) : null;
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
@@ -3221,6 +3227,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
+    const streamStartMs = Date.now();
 
     (async () => {
       try {
@@ -3344,7 +3351,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
         if (systemTokens > MAX_SYSTEM_PROMPT_TOKENS) {
           logger.warn(`[TokenBudget] System prompt ${systemTokens} tokens exceeds budget ${MAX_SYSTEM_PROMPT_TOKENS}, truncating`);
           // Truncate from the end (preserves persona + core instructions, trims entity links/LEAP)
-          effectiveSystemPrompt = effectiveSystemPrompt.slice(0, MAX_SYSTEM_PROMPT_TOKENS * 4);
+          effectiveSystemPrompt = effectiveSystemPrompt.slice(0, (MAX_SYSTEM_PROMPT_TOKENS - 10_000) * 4);
         }
 
         const anthropicStream = anthropic.messages.stream({
@@ -3401,7 +3408,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
             bus.recordExecution({
               service: 'copilot',
               domainType: detectedIntent,
-              durationMs: Date.now() - Date.now(), // approximate
+              durationMs: Date.now() - streamStartMs,
               claudePowered: true,
               brainAugmented: !!brainContext,
               causalEdgesUsed: causalEdges.length,

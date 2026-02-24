@@ -131,8 +131,9 @@ export function CashFlowForecastRenderer({ data }: { data: Record<string, any> }
 
   // Stats
   const currentCash = predictions[0]?.netCashPosition ?? 0;
-  const minCash = Math.min(...predictions.map((p) => p.netCashPosition));
-  const minWeek = predictions.findIndex((p) => p.netCashPosition === minCash) + 1;
+  const minCash = predictions.length > 0 ? Math.min(...predictions.map((p) => p.netCashPosition)) : 0;
+  const minWeekIdx = predictions.findIndex((p) => p.netCashPosition === minCash);
+  const minWeek = minWeekIdx >= 0 ? minWeekIdx + 1 : 0;
   const runwayWeeks = forecast?.runwayWeeks ?? predictions.length;
   const confidence = forecast?.overallConfidence ?? 0;
 

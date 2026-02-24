@@ -36,13 +36,14 @@ export async function POST(req: NextRequest) {
     // Jira Cloud webhooks can use a shared secret
     const webhookSecret = process.env.JIRA_WEBHOOK_SECRET;
 
-    if (webhookSecret) {
-      // If secret is configured, verify the request
-      const authHeader = req.headers.get('authorization');
-      if (authHeader !== `Bearer ${webhookSecret}`) {
-        logger.error('[Jira Webhook] Invalid authorization');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      logger.error('[Jira Webhook] JIRA_WEBHOOK_SECRET not configured — rejecting request');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${webhookSecret}`) {
+      logger.error('[Jira Webhook] Invalid authorization');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const payload = JSON.parse(body);

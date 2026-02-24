@@ -26,7 +26,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { createPRAnalyzer } from '@nexus-ai/memory-stack';
 import { Octokit } from '@octokit/rest';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { ingestPRAsSignals } from '@/lib/p0/ingest-pr-signals';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
       .update(body)
       .digest('hex')}`;
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(signature || '', 'utf8');
+    const expBuf = Buffer.from(expectedSignature, 'utf8');
+    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
       logger.error('[GitHub Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }

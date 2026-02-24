@@ -23,9 +23,15 @@ export async function POST(request: Request) {
     const role = body.role;
     const organizationId = body.orgId || body.organizationId;
 
-    if (!email || !organizationId)
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !EMAIL_RE.test(email))
       return NextResponse.json(
-        { error: "email and orgId are required" },
+        { error: "Valid email is required" },
+        { status: 400 }
+      );
+    if (!organizationId)
+      return NextResponse.json(
+        { error: "orgId is required" },
         { status: 400 }
       );
 
