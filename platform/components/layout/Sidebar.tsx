@@ -490,11 +490,27 @@ export function Sidebar() {
   const { currentRole, isPlatformAdmin, currentWorkspace } = useWorkspace();
 
   // Hydrate service mode from localStorage after mount (avoids SSR mismatch)
+  // BUG-08 FIX: Also listen for storage events so sidebar updates when worker is switched
   useEffect(() => {
-    const stored = localStorage.getItem("nexus_service_mode");
-    if (stored === "aas" || stored === "general" || stored === "seaas") {
-      setActiveService(stored);
-    }
+    const syncFromStorage = () => {
+      const stored = localStorage.getItem("nexus_service_mode");
+      if (stored === "aas" || stored === "general" || stored === "seaas") {
+        setActiveService(stored);
+      }
+    };
+    syncFromStorage();
+
+    // Listen for cross-tab storage changes and custom in-tab events
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "nexus_service_mode") syncFromStorage();
+    };
+    const handleCustom = () => syncFromStorage();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("nexus-service-mode-changed", handleCustom);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("nexus-service-mode-changed", handleCustom);
+    };
   }, []);
 
   // Role-based nav filtering: non-admin users don't see admin-only items

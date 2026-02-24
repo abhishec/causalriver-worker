@@ -38,6 +38,15 @@ export async function GET(request: NextRequest) {
     const workspaceId = request.nextUrl.searchParams.get("workspaceId");
     if (!workspaceId) return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
 
+    // Verify user belongs to this workspace
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .single();
+    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
     const admin = getAdminClient();
 
     // Fetch org settings
@@ -82,6 +91,15 @@ export async function POST(request: NextRequest) {
     if (!["seaas", "aas", "general"].includes(service)) {
       return NextResponse.json({ error: "Invalid service type" }, { status: 400 });
     }
+
+    // Verify user belongs to this workspace
+    const { data: postMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .single();
+    if (!postMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const admin = getAdminClient();
 
@@ -169,6 +187,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "workspaceId and workerId required" }, { status: 400 });
     }
 
+    // Verify membership + validate inputs
+    const { data: patchMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .single();
+    if (!patchMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    if (status !== undefined && !["active", "paused"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+    if (name !== undefined && (typeof name !== "string" || name.trim().length === 0 || name.length > 200)) {
+      return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+    }
+
     const admin = getAdminClient();
 
     const { data: org } = await admin
@@ -191,10 +225,15 @@ export async function PATCH(request: NextRequest) {
     if (description !== undefined) workers[idx].description = description;
     if (status !== undefined) workers[idx].status = status;
 
-    await admin
+    const { error: updateErr } = await admin
       .from("organizations")
       .update({ settings: { ...settings, ai_workers: workers } })
       .eq("id", workspaceId);
+
+    if (updateErr) {
+      logger.error("[ai-workers] PATCH update failed:", updateErr);
+      return NextResponse.json({ error: "Failed to update worker" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, worker: workers[idx] });
   } catch (err) {
@@ -218,6 +257,15 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "workspaceId and workerId required" }, { status: 400 });
     }
 
+    // Verify membership
+    const { data: delMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .single();
+    if (!delMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
     const admin = getAdminClient();
 
     const { data: org } = await admin
@@ -235,10 +283,15 @@ export async function DELETE(request: NextRequest) {
 
     const filtered = workers.filter((w) => w.id !== workerId);
 
-    await admin
+    const { error: deleteErr } = await admin
       .from("organizations")
       .update({ settings: { ...settings, ai_workers: filtered } })
       .eq("id", workspaceId);
+
+    if (deleteErr) {
+      logger.error("[ai-workers] DELETE update failed:", deleteErr);
+      return NextResponse.json({ error: "Failed to delete worker" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

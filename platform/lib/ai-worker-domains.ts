@@ -10,7 +10,7 @@
  */
 
 export const SERVICE_DOMAIN_MAP: Record<string, string[]> = {
-  seaas: ["engineering", "engineering.github", "engineering.jira", "engineering.code", "engineering.linear"],
+  seaas: ["engineering", "engineering.github", "engineering.jira", "engineering.code", "engineering.linear", "product", "product.jira", "product.cycle_time", "product.release_readiness"],
   aas: ["finance", "finance.accounting", "finance.audit", "finance.gst", "finance.pnl"],
   general: [], // empty = all domains (no filter applied)
 };

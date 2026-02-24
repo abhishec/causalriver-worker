@@ -196,7 +196,7 @@ export async function POST(request: Request) {
         .from("cross_domain_signals")
         .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
         .eq("organization_id", workspaceId)
-        .eq("source_domain", "engineering")
+        .like("source_domain", "engineering%")
         .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("signal_timestamp", { ascending: false })
         .limit(500);

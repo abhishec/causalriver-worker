@@ -321,8 +321,10 @@ export function DashboardClient() {
     localStorage.setItem(SERVICE_MODE_KEY, worker.service);
     localStorage.setItem("nexus_ai_worker_id", worker.id);
     localStorage.setItem("nexus_ai_worker_name", worker.name);
+    // Dispatch event so sidebar picks up the new service mode without page reload
+    window.dispatchEvent(new Event("nexus-service-mode-changed"));
     switchWorkspace(worker.workspaceId, { skipReload: true });
-    router.push("/copilot");
+    router.push(`/copilot?workerId=${encodeURIComponent(worker.id)}&service=${encodeURIComponent(worker.service)}`);
   }, [switchWorkspace, router]);
 
   const handleSignOut = useCallback(async () => {
@@ -437,7 +439,8 @@ export function DashboardClient() {
       localStorage.setItem("nexus_ai_worker_id", data.worker.id);
       localStorage.setItem("nexus_ai_worker_name", data.worker.name);
       switchWorkspace(targetWorkspaceId, { skipReload: true });
-      router.push("/copilot");
+      window.dispatchEvent(new Event("nexus-service-mode-changed"));
+      router.push(`/copilot?workerId=${encodeURIComponent(data.worker.id)}&service=${encodeURIComponent(wizardService)}`);
     } catch {
       setWizardError("Something went wrong");
       setWizardCreating(false);
@@ -449,7 +452,7 @@ export function DashboardClient() {
   const handleRename = useCallback(async (worker: AIWorkerDisplay) => {
     if (!renameValue.trim()) return;
     try {
-      await fetch("/api/ai-workers", {
+      const res = await fetch("/api/ai-workers", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -458,6 +461,10 @@ export function DashboardClient() {
           name: renameValue.trim(),
         }),
       });
+      if (!res.ok) {
+        logger.warn("[Dashboard] Rename failed:", res.status);
+        return;
+      }
       // Update local state
       setSummaries((prev) => {
         const updated = { ...prev };
@@ -470,8 +477,8 @@ export function DashboardClient() {
         return updated;
       });
       setRenamingId(null);
-    } catch {
-      // Ignore rename failure
+    } catch (err) {
+      logger.warn("[Dashboard] Rename network error:", err);
     }
   }, [renameValue]);
 

@@ -509,7 +509,7 @@ export function CapabilitiesClient({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {group.items.map((cap) => {
-              const colors = CATEGORY_COLORS[cap.category] || CATEGORY_COLORS.accounting;
+              const colors = CATEGORY_COLORS[cap.category] || CATEGORY_COLORS["accounting-core"] || { bg: "bg-muted/5", border: "border-muted/20", text: "text-muted" };
               const badge = STATUS_BADGES[cap.status];
               const artifactCount = cap.domainType ? domainCounts[cap.domainType] || 0 : 0;
               const isExpanded = expandedId === cap.id;
@@ -555,7 +555,8 @@ export function CapabilitiesClient({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/copilot?q=${encodeURIComponent(cap.examplePrompts[0])}`);
+                          const svcParam = cap.servicePack === "swe-aas" ? "seaas" : cap.servicePack === "accounting-aas" ? "aas" : "general";
+                          router.push(`/copilot?q=${encodeURIComponent(cap.examplePrompts[0])}&service=${svcParam}`);
                         }}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-accent/10 text-accent text-[10px] font-medium hover:bg-accent/20 transition-colors"
                       >
@@ -575,7 +576,7 @@ export function CapabilitiesClient({
                           {cap.examplePrompts.map((prompt, i) => (
                             <Link
                               key={i}
-                              href={`/copilot?q=${encodeURIComponent(prompt)}`}
+                              href={`/copilot?q=${encodeURIComponent(prompt)}&service=${cap.servicePack === "swe-aas" ? "seaas" : cap.servicePack === "accounting-aas" ? "aas" : "general"}`}
                               onClick={(e) => e.stopPropagation()}
                               className="block text-xs text-foreground hover:text-accent transition-colors p-1.5 rounded bg-surface/50 hover:bg-surface"
                             >

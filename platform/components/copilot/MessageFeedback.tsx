@@ -13,52 +13,74 @@ interface MessageFeedbackProps {
 /**
  * Thumbs up/down feedback on assistant messages.
  * Sends RL signals (dopamine/gaba) to the brain via /api/copilot/feedback.
+ *
+ * FIX BUG-12: Don't set submitted=true until fetch succeeds
+ * FIX BUG-13: Don't fire not_helpful immediately on thumbs-down — wait for correction flow
  */
 export function MessageFeedback({ messageIndex, organizationId, conversationId, serviceMode }: MessageFeedbackProps) {
-  const [rating, setRating] = useState<"helpful" | "not_helpful" | null>(null);
+  const [rating, setRating] = useState<"helpful" | "not_helpful" | "incorrect" | null>(null);
   const [showCorrection, setShowCorrection] = useState(false);
   const [correction, setCorrection] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(false);
 
-  const submitFeedback = useCallback(async (r: "helpful" | "not_helpful", correctionText?: string) => {
-    setRating(r);
-    setSubmitted(true);
-
+  const submitFeedback = useCallback(async (r: "helpful" | "not_helpful" | "incorrect", correctionText?: string) => {
+    setError(false);
     try {
-      await fetch("/api/copilot/feedback", {
+      const res = await fetch("/api/copilot/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           organizationId,
           conversationId: conversationId || undefined,
           messageIndex,
-          rating: correctionText ? "incorrect" : r,
+          rating: r,
           correction: correctionText || undefined,
           domain: serviceMode,
         }),
       });
+      if (!res.ok) {
+        setError(true);
+        return;
+      }
+      setSubmitted(true);
     } catch (err) {
       logger.warn("[MessageFeedback] submit failed:", err);
+      setError(true);
     }
   }, [organizationId, conversationId, messageIndex, serviceMode]);
 
   const handleThumbsUp = useCallback(() => {
     if (rating) return;
+    setRating("helpful");
     submitFeedback("helpful");
   }, [rating, submitFeedback]);
 
   const handleThumbsDown = useCallback(() => {
     if (rating) return;
+    // BUG-13 FIX: Don't submit immediately — show correction input first
+    // Only one API call will be made: either not_helpful (on skip) or incorrect (on submit)
     setRating("not_helpful");
     setShowCorrection(true);
-    submitFeedback("not_helpful");
-  }, [rating, submitFeedback]);
+  }, [rating]);
 
   const handleCorrectionSubmit = useCallback(() => {
-    if (!correction.trim()) return;
-    submitFeedback("not_helpful", correction.trim());
+    const trimmed = correction.trim();
+    if (trimmed) {
+      // User provided a correction → send as "incorrect" with correction text
+      submitFeedback("incorrect", trimmed);
+    } else {
+      // No correction → send as "not_helpful"
+      submitFeedback("not_helpful");
+    }
     setShowCorrection(false);
   }, [correction, submitFeedback]);
+
+  const handleCorrectionSkip = useCallback(() => {
+    // User skipped correction → send as "not_helpful"
+    submitFeedback("not_helpful");
+    setShowCorrection(false);
+  }, [submitFeedback]);
 
   if (submitted && !showCorrection) {
     return (
@@ -72,7 +94,9 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
             <path d="M15.73 5.25h1.035A7.984 7.984 0 0118 9.375c0 .621-.504 1.125-1.125 1.125H14.25l-1.5 6.75h-.003a.75.75 0 01-.727.563h-.002a.75.75 0 01-.727-.563L9.75 10.5H7.125A1.125 1.125 0 016 9.375c0-1.538.434-2.974 1.187-4.193l.06-.098A1.125 1.125 0 018.18 4.5h7.55z" />
           </svg>
         )}
-        <span className="text-[10px] text-muted-foreground">Feedback recorded</span>
+        <span className="text-[10px] text-muted-foreground">
+          {error ? "Failed to send — try again" : "Feedback recorded"}
+        </span>
       </div>
     );
   }
@@ -121,7 +145,7 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
             Submit
           </button>
           <button
-            onClick={() => { setShowCorrection(false); setSubmitted(true); }}
+            onClick={handleCorrectionSkip}
             className="text-xs text-muted-foreground"
           >
             Skip

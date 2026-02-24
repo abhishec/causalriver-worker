@@ -1829,6 +1829,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     // Reset agent state for new message
     setAgentSteps([]);
     setAgentStatus(null);
+    setWorkflowProgress(null);
 
     // Bug fix #2: Read history from ref to avoid stale closure
     const currentMessages = messagesRef.current;
@@ -1934,10 +1935,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 }
 
                 // Persist conversation via onSave callback
+                // Use finalAssistantContent (closure) so we don't depend on stale messagesRef
                 const saveCb = onSaveRef.current;
-                if (saveCb) {
-                  // Auto-generate title from first user message
-                  const allMsgs = messagesRef.current;
+                if (saveCb && finalAssistantContent) {
+                  const refMsgs = messagesRef.current;
+                  // Ensure last assistant message has the final content (ref may lag one render)
+                  const allMsgs = refMsgs.length > 0 && refMsgs[refMsgs.length - 1]?.role === "assistant"
+                    ? [...refMsgs.slice(0, -1), { role: "assistant" as const, content: finalAssistantContent }]
+                    : refMsgs;
                   const firstUser = allMsgs.find((m) => m.role === "user");
                   const title = firstUser
                     ? firstUser.content.length > 60

@@ -97,7 +97,7 @@ export class CredentialManager {
         metadata: connector.metadata as ConnectorMetadata,
       };
     } catch (err) {
-      console.error(`Failed to get ${connectorType} credentials:`, err);
+      console.error(`Failed to get ${connectorType} credentials:`, err instanceof Error ? err.message : String(err));
       return null;
     }
   }
@@ -176,7 +176,7 @@ export class CredentialManager {
       const tokenData = await response.json();
 
       if (!response.ok) {
-        console.error('Failed to refresh Jira token:', tokenData);
+        console.error('Failed to refresh Jira token:', tokenData?.error || tokenData?.error_description || 'unknown error');
         return null;
       }
 
@@ -209,7 +209,7 @@ export class CredentialManager {
         siteUrl: connector?.metadata?.site_url!,
       };
     } catch (err) {
-      console.error('Error refreshing Jira token:', err);
+      console.error('Error refreshing Jira token:', err instanceof Error ? err.message : String(err));
       return null;
     }
   }

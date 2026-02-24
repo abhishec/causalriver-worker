@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
     const requestedOrgId = validated.context?.organizationId;
     const resolvedOrgId = requestedOrgId || await getCurrentWorkspaceId();
 
-    // Verify user is a member of the target organization
-    if (requestedOrgId) {
+    // Verify user is a member of the target organization (always, not just when explicitly provided)
+    {
       const { data: membership } = await supabase
         .from('org_members')
         .select('role')
         .eq('user_id', user.id)
-        .eq('organization_id', requestedOrgId)
+        .eq('organization_id', resolvedOrgId)
         .single();
 
       if (!membership) {

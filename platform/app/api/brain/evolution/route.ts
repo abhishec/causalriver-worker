@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       serviceMode: serviceMode || "all",
       // Human-readable summary for the dashboard
       summary: {
-        headline: getEvolutionHeadline(state.intelligenceScore, state.accuracy.trend),
+        headline: getEvolutionHeadline(state.intelligenceScore, state.accuracy?.trend ?? "stable"),
         subtitle: getEvolutionSubtitle(state),
         badges: getEvolutionBadges(state),
       },

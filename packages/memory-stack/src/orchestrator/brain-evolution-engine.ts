@@ -374,7 +374,7 @@ async function verifyPendingPredictions(
       .from('cross_domain_signals')
       .select('signal_type, signal_value, created_at')
       .eq('organization_id', organizationId)
-      .eq('source_domain', prediction.domain)
+      .like('source_domain', `${prediction.domain}%`)
       .eq('entity_type', prediction.entity_type)
       .eq('entity_id', prediction.entity_id)
       .gt('created_at', prediction.created_at)
@@ -874,7 +874,10 @@ async function computeKnowledgeGrowth(
     totalRules: rules.count ?? 0,
     totalPredictions: predictions.count ?? 0,
     verifiedPredictions: verified.count ?? 0,
-    cognitiveLayersActive: Math.min(30, cognitiveLayersActive + 9), // All 30 cognitive layers
+    // Scale 6 table-presence checks to 30 layers:
+    // Base 9 (L1-L9: sensory/routing always active) + each check activates ~3.5 more layers (L10-L30)
+    // 0 checks → 9/30, 3 checks → 20/30, 6 checks → 30/30
+    cognitiveLayersActive: Math.min(30, 9 + Math.round(cognitiveLayersActive * 3.5)),
     // Federation-aware knowledge metrics (THE NETWORK EFFECT)
     federatedCoreEdges: coreEdgesCount,
     isFederating,

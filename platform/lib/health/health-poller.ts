@@ -67,6 +67,7 @@ export interface Thresholds {
   min_job_score: number;
   min_overall_score: number;
   min_pipeline_sla_score: number;
+  min_code_health_score: number;
   cooldown_hours: number;
   enabled: boolean;
 }
@@ -79,6 +80,7 @@ export const DEFAULT_THRESHOLDS: Thresholds = {
   min_job_score: 40,
   min_overall_score: 30,
   min_pipeline_sla_score: 50,
+  min_code_health_score: 20,
   cooldown_hours: 4,
   enabled: true,
 };
@@ -147,6 +149,7 @@ export async function pollHealthOnce(
       ["connectors", connectors.score, thresholds.min_connector_score],
       ["jobs", jobs.score, thresholds.min_job_score],
       ["pipeline_sla", pipelineSla.score, thresholds.min_pipeline_sla_score ?? 50],
+      ["code_health", codeHealth.score, thresholds.min_code_health_score ?? 20],
       ["overall", overallScore, thresholds.min_overall_score],
     ];
 
@@ -639,7 +642,7 @@ export async function checkCodeHealth(supabase: SupabaseClient, orgId: string): 
       },
     };
   } catch {
-    return { score: 50, status: "unavailable", details: { note: "Code health tables not fully available" } };
+    return { score: 0, status: "unavailable", details: { note: "Code health tables not fully available" } };
   }
 }
 

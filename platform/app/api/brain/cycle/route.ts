@@ -348,21 +348,25 @@ export async function POST(request: NextRequest) {
 
     const durationMs = Date.now() - startTime;
 
-    // ── Log execution ────────────────────────────────────────────
-    await service.from("scheduled_job_runs").insert({
-      organization_id: workspaceId,
-      job_name: `brain-cycle-${mode}`,
-      job_type: `brain_cycle_${mode}`,
-      started_at: new Date(startTime).toISOString(),
-      completed_at: new Date().toISOString(),
-      status: "success",
-      result: JSON.stringify({
-        mode,
-        cycleCount: controller.getSnapshot?.()?.cycleCount,
-        durationMs,
-      }),
-      duration_ms: durationMs,
-    });
+    // ── Log execution (non-fatal) ──────────────────────────────────
+    try {
+      await service.from("scheduled_job_runs").insert({
+        organization_id: workspaceId,
+        job_name: `brain-cycle-${mode}`,
+        job_type: `brain_cycle_${mode}`,
+        started_at: new Date(startTime).toISOString(),
+        completed_at: new Date().toISOString(),
+        status: "success",
+        result: JSON.stringify({
+          mode,
+          cycleCount: controller.getSnapshot?.()?.cycleCount,
+          durationMs,
+        }),
+        duration_ms: durationMs,
+      });
+    } catch (logErr) {
+      logger.warn("[BrainCycle] Failed to log cycle run (non-fatal):", logErr);
+    }
 
     // ── Post-cycle: Health snapshot + evolution signal ────────────
     // After any brain cycle, run a lightweight health poll and emit
@@ -396,7 +400,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      logger.warn(
+      logger.info(
         `[BrainCycle] Post-cycle health: score=${healthResult.snapshot.overall_score}, status=${healthResult.snapshot.status}, violations=${healthResult.violations.length}`,
       );
     } catch (healthErr) {

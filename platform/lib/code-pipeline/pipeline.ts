@@ -484,9 +484,10 @@ async function getGitHubCredentials(
     const token = (creds.access_token || creds.token) as string;
     if (!token) return null;
 
-    // Parse owner/repo from config or credentials
-    const repository = (config.repository || creds.repository || "") as string;
-    const [owner, repo] = repository.includes("/") ? repository.split("/") : ["", ""];
+    // Parse owner/repo from config fields (GitHub connector stores as config.owner + config.repo)
+    const repoFullName = (config.repoFullName || config.repository || creds.repository || "") as string;
+    const owner = (config.owner as string) || repoFullName.split("/")[0] || "";
+    const repo = (config.repo as string) || repoFullName.split("/")[1] || "";
     if (!owner || !repo) return null;
 
     return {

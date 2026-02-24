@@ -79,13 +79,37 @@ function CopilotPageInner() {
   // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
   const [activeService, setActiveService] = useState<ServiceMode>("seaas");
 
-  // Hydrate service mode from localStorage after mount
+  // ── AI Worker identity from URL or localStorage ──────────────────────────
+  const [workerId, setWorkerId] = useState<string | null>(null);
+  const [workerName, setWorkerName] = useState<string | null>(null);
+
+  // Hydrate service mode + worker identity from URL params or localStorage after mount
   useEffect(() => {
-    const saved = localStorage.getItem("nexus_service_mode");
-    if (saved === "general" || saved === "aas" || saved === "seaas") {
-      setActiveService(saved);
+    // URL params take priority (set by dashboard launch)
+    const urlService = searchParams?.get("service");
+    const urlWorkerId = searchParams?.get("workerId");
+
+    if (urlService === "general" || urlService === "aas" || urlService === "seaas") {
+      setActiveService(urlService);
+      localStorage.setItem("nexus_service_mode", urlService);
+    } else {
+      const saved = localStorage.getItem("nexus_service_mode");
+      if (saved === "general" || saved === "aas" || saved === "seaas") {
+        setActiveService(saved);
+      }
     }
-  }, []);
+
+    if (urlWorkerId) {
+      setWorkerId(urlWorkerId);
+      localStorage.setItem("nexus_ai_worker_id", urlWorkerId);
+    } else {
+      const savedId = localStorage.getItem("nexus_ai_worker_id");
+      if (savedId) setWorkerId(savedId);
+    }
+
+    const savedName = localStorage.getItem("nexus_ai_worker_name");
+    if (savedName) setWorkerName(savedName);
+  }, [searchParams]);
   const persona = SERVICE_PERSONAS[activeService];
 
   // Service mode is locked to the AI Worker — no service switching in copilot
@@ -258,9 +282,7 @@ function CopilotPageInner() {
     const svc = searchParams?.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
       setActiveService(svc);
-      if (svc !== "general") {
-        setArtifactPaneOpen(true);
-      }
+      // Don't auto-open artifact pane on fresh load — only open when artifacts arrive
     }
 
     // ?cmd=<commandId> — from sidebar command click on non-copilot page
@@ -719,7 +741,7 @@ function CopilotPageInner() {
             <CopilotChat
               ref={chatRef}
               endpoint="/api/copilot/chat"
-              extraParams={{ workspaceId: currentWorkspace?.id }}
+              extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined }}
               activeService={activeService}
               persona={{
                 name: persona.name,

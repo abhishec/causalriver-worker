@@ -33,8 +33,9 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (process.env.NODE_ENV === "production" && cronSecret) {
-      if (authHeader !== `Bearer ${cronSecret}`) {
+    // Fail closed: if CRON_SECRET is not set in production, reject all requests
+    if (process.env.NODE_ENV === "production") {
+      if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
     }
@@ -103,15 +104,16 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Run learning PER AI WORKER
-      for (const worker of workers) {
-        const start = Date.now();
-        try {
-          const engine = createClosedLoopLearningEngine({
-            supabase: service,
-            organizationId: org.id,
-          });
-          const cycleResult = await engine.runLearningCycle();
+      // Run learning ONCE per org (engine is org-scoped), then log per-worker
+      const orgStart = Date.now();
+      try {
+        const engine = createClosedLoopLearningEngine({
+          supabase: service,
+          organizationId: org.id,
+        });
+        const cycleResult = await engine.runLearningCycle();
+        const orgDurationMs = Date.now() - orgStart;
+        for (const worker of workers) {
           results.push({
             workerId: worker.id,
             workerName: worker.name,
@@ -119,10 +121,13 @@ export async function GET(request: NextRequest) {
             orgId: org.id, orgName: org.name,
             success: true,
             loops: cycleResult as unknown as Record<string, unknown>,
-            durationMs: Date.now() - start,
+            durationMs: orgDurationMs,
           });
-          logger.info(`[CronLearning] AI Worker "${worker.name}" (${worker.service}@${org.name}): learning cycle complete`);
-        } catch (err) {
+        }
+        logger.info(`[CronLearning] ${org.name}: learning cycle complete for ${workers.length} workers (${orgDurationMs}ms)`);
+      } catch (err) {
+        const orgDurationMs = Date.now() - orgStart;
+        for (const worker of workers) {
           results.push({
             workerId: worker.id,
             workerName: worker.name,
@@ -130,10 +135,10 @@ export async function GET(request: NextRequest) {
             orgId: org.id, orgName: org.name,
             success: false,
             error: err instanceof Error ? err.message : String(err),
-            durationMs: Date.now() - start,
+            durationMs: orgDurationMs,
           });
-          logger.error(`[CronLearning] AI Worker "${worker.name}" failed:`, err);
         }
+        logger.error(`[CronLearning] ${org.name} workers failed:`, err);
       }
     }
 
