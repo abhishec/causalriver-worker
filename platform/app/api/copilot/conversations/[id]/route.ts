@@ -71,8 +71,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
     const updates: Record<string, unknown> = {};
-    if (body.title !== undefined) updates.title = body.title;
-    if (body.messages !== undefined) updates.messages = body.messages;
+    if (body.title !== undefined) {
+      if (typeof body.title !== "string" || body.title.length > 500) {
+        return NextResponse.json({ error: "title must be a string under 500 chars" }, { status: 400 });
+      }
+      updates.title = body.title.trim();
+    }
+    if (body.messages !== undefined) {
+      if (!Array.isArray(body.messages)) {
+        return NextResponse.json({ error: "messages must be an array" }, { status: 400 });
+      }
+      updates.messages = body.messages;
+    }
     if (body.serviceMode !== undefined) updates.service_mode = body.serviceMode;
 
     if (Object.keys(updates).length === 0) {

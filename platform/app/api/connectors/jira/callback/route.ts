@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`/connectors?error=${error}`, request.url)
+        new URL(`/connectors?error=${encodeURIComponent(error)}`, request.url)
       );
     }
 
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         status: tokenResponse.status,
       });
       return NextResponse.redirect(
-        new URL(`/connectors?error=${tokenData.error}`, request.url)
+        new URL(`/connectors?error=${encodeURIComponent(tokenData.error ?? 'oauth_error')}`, request.url)
       );
     }
 
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     if (!resourcesResponse.ok) {
       logger.error('[Jira callback] accessible-resources failed:', resourcesResponse.status);
       return NextResponse.redirect(
-        new URL('/connections?error=jira_no_sites', request.url)
+        new URL('/connectors?error=jira_no_sites', request.url)
       );
     }
 
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     if (!Array.isArray(resources) || resources.length === 0) {
       logger.error('[Jira callback] No accessible Jira sites found');
       return NextResponse.redirect(
-        new URL('/connections?error=jira_no_sites', request.url)
+        new URL('/connectors?error=jira_no_sites', request.url)
       );
     }
     const primarySite = resources[0]; // Use first available site
