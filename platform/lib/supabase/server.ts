@@ -3,7 +3,11 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 function requireEnv(key: string): string {
-  const val = process.env[key];
+  // Try the exact key first, then fall back to non-NEXT_PUBLIC_ prefixed version.
+  // AWS Amplify SSR Lambda may not pass NEXT_PUBLIC_ vars to the Node.js runtime
+  // even though they're set in the Amplify Console (they're baked into the client
+  // bundle at build time but may not be in process.env at SSR runtime).
+  const val = process.env[key] || process.env[key.replace("NEXT_PUBLIC_", "")];
   if (!val) throw new Error(`Missing required env var: ${key}. Check your .env.local`);
   return val;
 }

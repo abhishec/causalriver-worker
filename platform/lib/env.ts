@@ -48,7 +48,12 @@ export function validateEnv(): void {
   const warnings: string[] = [];
 
   for (const rule of RULES) {
-    const value = process.env[rule.key];
+    // Try the exact key first, then fall back to non-NEXT_PUBLIC_ version.
+    // AWS Amplify SSR Lambda may only pass non-prefixed vars to Node.js runtime.
+    const value = process.env[rule.key]
+      || (rule.key.startsWith("NEXT_PUBLIC_")
+          ? process.env[rule.key.replace("NEXT_PUBLIC_", "")]
+          : undefined);
 
     if (!value || value.trim() === "") {
       if (rule.required) {
@@ -89,4 +94,29 @@ export function validateEnv(): void {
       `✅ Env validated (${RULES.filter((r) => r.required).length} required vars present)`
     );
   }
+}
+
+/**
+ * Get an environment variable with Amplify SSR fallback.
+ *
+ * AWS Amplify SSR Lambda may not pass NEXT_PUBLIC_ prefixed vars to the
+ * Node.js runtime (they're baked into the client bundle at build time but
+ * may not be in process.env at SSR runtime). This helper tries:
+ *   1. The exact key (e.g. NEXT_PUBLIC_SUPABASE_URL)
+ *   2. The non-prefixed version (e.g. SUPABASE_URL)
+ *
+ * Use this for ALL server-side env var access instead of `process.env` directly.
+ */
+export function getEnv(key: string): string | undefined {
+  return process.env[key]
+    || (key.startsWith("NEXT_PUBLIC_")
+        ? process.env[key.replace("NEXT_PUBLIC_", "")]
+        : undefined);
+}
+
+/** Throws if the env var is not set. */
+export function requireEnv(key: string): string {
+  const val = getEnv(key);
+  if (!val) throw new Error(`Missing required env var: ${key}`);
+  return val;
 }

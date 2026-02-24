@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 3. Initialize Supabase
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) {
       logger.error('[Outcomes Webhook] Missing SUPABASE env vars');
@@ -228,7 +228,7 @@ export async function GET(req: NextRequest) {
     const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
     const predictionId = searchParams.get('predictionId');
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!supabaseUrl || !supabaseKey) {
       logger.error('[Outcomes Webhook] Missing SUPABASE env vars');

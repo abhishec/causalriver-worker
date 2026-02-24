@@ -31,11 +31,24 @@ export async function GET(request: NextRequest) {
 
   // Basic liveness check (no auth required)
   if (!detail && !learning) {
+    const envCheck = request.nextUrl.searchParams.get("env") === "true";
     return NextResponse.json({
       status: "ok",
       service: "nexusbrain",
       version: "1.0.0",
       timestamp: new Date().toISOString(),
+      ...(envCheck ? {
+        env: {
+          NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
+          CRON_SECRET: !!process.env.CRON_SECRET,
+          AWS_S3_BUCKET_NAME: !!process.env.AWS_S3_BUCKET_NAME,
+          AWS_ACCESS_KEY_ID: !!process.env.AWS_ACCESS_KEY_ID,
+          NODE_ENV: process.env.NODE_ENV,
+        },
+      } : {}),
     });
   }
 

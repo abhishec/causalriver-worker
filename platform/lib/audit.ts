@@ -90,7 +90,7 @@ export async function logAuditEvent(params: AuditEventParams): Promise<string | 
   try {
     // Create Supabase client with service role (required for audit logging)
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
@@ -243,7 +243,7 @@ export async function getAuditTrail(
   limit: number = 100
 ) {
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
@@ -266,7 +266,7 @@ export async function getAuditTrail(
  */
 export async function getUserActivity(limit: number = 50) {
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
@@ -287,7 +287,7 @@ export async function getUserActivity(limit: number = 50) {
  */
 export async function getSecurityEvents(organizationId: string, hours: number = 24) {
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 

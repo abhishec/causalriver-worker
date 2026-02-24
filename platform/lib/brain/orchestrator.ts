@@ -267,7 +267,7 @@ export async function executeUnifiedQuery(
   const domainResults: BrainQueryResponse['domainResults'] = [];
 
   // Create Supabase client for Brain context assembly
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const orgId = request.context?.organizationId;
 
