@@ -722,11 +722,16 @@ export function Sidebar() {
             </button>
           </div>
 
-          {/* AI Worker Pills */}
-          <div className="px-4 pt-2 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
-            AI Workers
+          {/* Active AI Worker — read-only indicator, switch on dashboard */}
+          <div className="flex items-center gap-2 px-4 py-2 shrink-0">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/70">Active:</span>
+            <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-accent/10 text-accent border border-accent/20">
+              {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "SE-aaS"}
+            </span>
+            <a href="/dashboard" className="ml-auto text-[10px] text-muted hover:text-accent transition-colors">
+              Change
+            </a>
           </div>
-          <ServiceTabsPills activeService={activeService} onServiceChange={handleServiceChange} />
 
           <div className="h-px bg-border-subtle mx-3" />
 
