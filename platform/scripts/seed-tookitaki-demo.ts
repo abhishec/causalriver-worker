@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Seed Script: Tookitaki Demo — Two Workspaces
  *

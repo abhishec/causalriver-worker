@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Seed Script: Create "PH Accounting" Design Partner (Customer + Workspace)
  *

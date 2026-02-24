@@ -266,3 +266,28 @@
 - **Anti-pattern**: Don't try to navigate to auth-protected pages in browser automation — it wastes time on redirects
 - **Commits**: `1dda5b709` (NexusBrain → Brain OS comment cleanup)
 - **Demo readiness**: 9.5/10 — only remaining action is user logging into production and entering Jira credentials via UI
+
+## Retro 016: P0 Settings Crash + Production Migration Push + Deep Defensive Audit (2026-02-24)
+- **Task**: Fix Settings crash, apply all migrations to production, set encryption key, deep audit for similar issues
+- **Time**: ~50 min (estimated 30 min — significantly over due to 3 migration failures requiring iteration)
+- **Model used**: Sonnet for fixes, Opus for deep audit agent (correct for complexity)
+- **What went well**:
+  - **Root cause identified in <5 min**: memberships API querying `allowed_email_domains` column that didn't exist in production
+  - **Deep audit found 5 more P1 issues** that would have embarrassed us during demo: set-default crash, accept-invite silent failure, connector callback encryption inconsistency
+  - **All 5 migrations applied to production** in correct order
+  - **Encryption key set via config table** (workaround for Supabase ALTER DATABASE restriction)
+  - **3 migration failures handled gracefully**: entity_links table missing, pgcrypto permission denied, extensions schema prefix needed
+- **What went wrong**:
+  - **3 failed migration attempts** before getting it right: (1) entity_links doesn't exist, (2) ALTER DATABASE permission denied, (3) pgp_sym_encrypt needs extensions prefix
+  - **Should have checked table existence BEFORE writing migrations** — this is Debugging Protocol #1 applied to migrations
+  - **Did not run `supabase migration list --linked` BEFORE the security hardening session** — would have caught the entity_links issue immediately
+  - The encryption key migration was supposed to be simple but took 3 tries
+- **CRITICAL PATTERN**: **Before writing any migration, ALWAYS run `supabase migration list --linked` to see what's actually in production.** Never assume tables/columns exist.
+- **CRITICAL PATTERN**: **On Supabase hosted, all DDL must be wrapped in IF EXISTS/IF NOT EXISTS checks.** Production schema may be behind local.
+- **CRITICAL PATTERN**: **pgcrypto functions live in `extensions` schema on Supabase hosted.** Always use `extensions.pgp_sym_encrypt()` not `pgp_sym_encrypt()`.
+- **CRITICAL PATTERN**: **ALTER DATABASE SET requires superuser** which Supabase migrations don't have. Use a config table + SECURITY DEFINER function instead.
+- **CRITICAL PATTERN**: **Every API route that queries optional tables/columns MUST have try/catch or safe() wrapper.** Never let a missing column crash the whole dashboard.
+- **Anti-pattern**: Don't store encryption keys via ALTER DATABASE on Supabase — use _encryption_config table
+- **Anti-pattern**: Don't reference `pgp_sym_encrypt` without extensions prefix on Supabase hosted
+- **Commits**: `f573e8bbd` (P0 memberships fix), `ac80853b8` (resilient migrations + encryption + P1 fixes)
+- **Production state**: All 5 migrations applied, encryption key configured, Settings page should now load

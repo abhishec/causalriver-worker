@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Seed Script: Create demo users for Tookitaki (customer + workspace)
  *

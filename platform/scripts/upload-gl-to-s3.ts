@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * One-time script: Download GL data from Supabase Storage and upload to S3
  *

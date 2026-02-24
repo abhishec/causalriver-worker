@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Migration Script: Move GL data to S3 + Supabase Storage
  *
