@@ -7,6 +7,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   useRef,
   type ReactNode,
 } from "react";
@@ -19,6 +20,7 @@ export interface Workspace {
   slug: string;
   plan: string;
   is_core_brain: boolean;
+  description: string | null;
   // Customer grouping (from customers table via customer_id FK).
   // null for internal workspaces (CORE brain, test workspaces).
   // Never used in brain/signal/learning paths — display + billing only.
@@ -50,6 +52,11 @@ interface WorkspaceContextType {
   fetchError: string | null;
   switchWorkspace: (workspaceId: string) => void;
   refreshWorkspaces: () => Promise<void>;
+  // Customer-first navigation
+  activeCustomerId: string | null;
+  setActiveCustomer: (customerId: string) => void;
+  customersForUser: CustomerInfo[];
+  workspacesForActiveCustomer: WorkspaceMembership[];
 }
 
 /* ── Context ───────────────────────────────────────────────────────── */
@@ -60,6 +67,7 @@ const STORAGE_KEY = "nexus_current_workspace";
 const OLD_STORAGE_KEY = "nexus_current_org";  // migration fallback
 const CACHE_KEY = "nexus_workspace_memberships";
 const OLD_CACHE_KEY = "nexus_org_memberships";  // migration fallback
+const CUSTOMER_KEY = "nexus_active_customer";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /* ── localStorage migration helpers ────────────────────────────────── */
@@ -136,6 +144,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const retryCountRef = useRef(0);
 
+  // Customer-first navigation state
+  const [activeCustomerId, setActiveCustomerIdRaw] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(CUSTOMER_KEY);
+  });
+
   /* Load user's workspaces via API route (bypasses RLS recursion issue) */
   const loadWorkspaces = useCallback(async () => {
     try {
@@ -175,6 +189,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
             slug:          org.slug,
             plan:          org.plan,
             is_core_brain: org.is_core_brain,
+            description:   org.description   ?? null,
             customer_id:   org.customer_id   ?? null,
             customer_name: cust?.name        ?? null,
             customer_slug: cust?.slug        ?? null,
@@ -264,6 +279,45 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         }
       : null;
 
+  /* ── Customer-first navigation ──────────────────────────────────── */
+
+  // Derive unique customers from workspace memberships
+  const customersForUser = useMemo<CustomerInfo[]>(() => {
+    const seen = new Map<string, CustomerInfo>();
+    for (const m of memberships) {
+      const { customer_id, customer_name, customer_slug } = m.workspace;
+      if (customer_id && customer_name && !seen.has(customer_id)) {
+        seen.set(customer_id, { id: customer_id, name: customer_name, slug: customer_slug ?? customer_id });
+      }
+    }
+    return Array.from(seen.values());
+  }, [memberships]);
+
+  // Auto-set activeCustomerId for non-admins with a single customer
+  useEffect(() => {
+    if (activeCustomerId) return; // already set
+    if (isPlatformAdmin) return;  // admins choose explicitly
+    if (customersForUser.length === 1) {
+      setActiveCustomerIdRaw(customersForUser[0].id);
+      try { localStorage.setItem(CUSTOMER_KEY, customersForUser[0].id); } catch { /* ignore */ }
+    }
+  }, [activeCustomerId, isPlatformAdmin, customersForUser]);
+
+  const setActiveCustomer = useCallback((customerId: string) => {
+    const value = customerId || null;
+    setActiveCustomerIdRaw(value);
+    try {
+      if (value) localStorage.setItem(CUSTOMER_KEY, value);
+      else localStorage.removeItem(CUSTOMER_KEY);
+    } catch { /* ignore */ }
+  }, []);
+
+  // Workspaces filtered to active customer
+  const workspacesForActiveCustomer = useMemo(() => {
+    if (!activeCustomerId) return [];
+    return memberships.filter((m) => m.workspace.customer_id === activeCustomerId);
+  }, [memberships, activeCustomerId]);
+
   return (
     <WorkspaceContext.Provider
       value={{
@@ -276,6 +330,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         fetchError,
         switchWorkspace,
         refreshWorkspaces: loadWorkspaces,
+        activeCustomerId,
+        setActiveCustomer,
+        customersForUser,
+        workspacesForActiveCustomer,
       }}
     >
       {children}

@@ -722,7 +722,10 @@ export function Sidebar() {
             </button>
           </div>
 
-          {/* Service Tab Pills */}
+          {/* AI Worker Pills */}
+          <div className="px-4 pt-2 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+            AI Workers
+          </div>
           <ServiceTabsPills activeService={activeService} onServiceChange={handleServiceChange} />
 
           <div className="h-px bg-border-subtle mx-3" />

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
-import type { WorkspaceMembership } from "@/lib/workspace-context";
+import type { WorkspaceMembership, CustomerInfo } from "@/lib/workspace-context";
 import { createBrowserClient } from "@supabase/ssr";
 import { logger } from "@/lib/logger";
 
@@ -23,13 +23,13 @@ const SERVICE_OPTIONS: { id: ServiceMode; label: string; desc: string; icon: str
   {
     id: "seaas",
     label: "SE-aaS",
-    desc: "Software Engineering as a Service",
+    desc: "Software Engineering",
     icon: "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5",
   },
   {
     id: "aas",
     label: "AAAS",
-    desc: "Accounting & Audit as a Service",
+    desc: "Accounting & Audit",
     icon: "M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z",
   },
   {
@@ -42,6 +42,177 @@ const SERVICE_OPTIONS: { id: ServiceMode; label: string; desc: string; icon: str
 
 const SERVICE_MODE_KEY = "nexus_service_mode";
 
+/* ── CustomerCard ─────────────────────────────────────────────────────────── */
+
+function CustomerCard({
+  customer,
+  workspaceCount,
+  isSelected,
+  onSelect,
+}: {
+  customer: CustomerInfo;
+  workspaceCount: number;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      onClick={onSelect}
+      className={`text-left rounded-xl border-2 p-6 transition-all ${
+        isSelected
+          ? "border-accent bg-accent/5 ring-1 ring-accent/20"
+          : "border-border-subtle bg-surface hover:border-border hover:bg-surface-hover"
+      }`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+          <span className="text-lg font-bold text-accent">
+            {customer.name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        {isSelected && (
+          <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )}
+      </div>
+      <div className="text-base font-semibold text-foreground mb-1">{customer.name}</div>
+      <div className="text-xs text-muted-foreground">
+        {workspaceCount} workspace{workspaceCount !== 1 ? "s" : ""}
+      </div>
+    </button>
+  );
+}
+
+/* ── AIWorkerPill ─────────────────────────────────────────────────────────── */
+
+function AIWorkerPill({
+  service,
+  isActive,
+  isSelected,
+  onClick,
+}: {
+  service: (typeof SERVICE_OPTIONS)[number];
+  isActive: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+        isSelected
+          ? "bg-accent text-white shadow-sm"
+          : isActive
+          ? "bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20"
+          : "bg-surface-hover text-muted-foreground border border-transparent hover:text-foreground"
+      }`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-current" : "bg-muted/40"}`} />
+      {service.label}
+    </button>
+  );
+}
+
+/* ── WorkspaceRow ─────────────────────────────────────────────────────────── */
+
+function WorkspaceRow({
+  membership,
+  summary,
+  summaryLoading,
+  selectedService,
+  onServiceSelect,
+  onLaunch,
+  launching,
+}: {
+  membership: WorkspaceMembership;
+  summary?: WorkspaceSummary;
+  summaryLoading: boolean;
+  selectedService: { wsId: string; svc: ServiceMode } | null;
+  onServiceSelect: (wsId: string, svc: ServiceMode) => void;
+  onLaunch: (wsId: string, svc: ServiceMode) => void;
+  launching: boolean;
+}) {
+  const ws = membership.workspace;
+  const isThisLaunching = launching && selectedService?.wsId === ws.id;
+  const activeServiceForRow = selectedService?.wsId === ws.id ? selectedService.svc : null;
+
+  return (
+    <div className="rounded-xl border border-border-subtle bg-surface p-5 transition-all hover:border-border">
+      {/* Header row */}
+      <div className="flex items-start justify-between mb-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-foreground truncate">{ws.name}</h3>
+            <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-accent/10 text-accent">
+              {ws.plan}
+            </span>
+          </div>
+          {ws.description && (
+            <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{ws.description}</p>
+          )}
+        </div>
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wide ml-3">{membership.role}</span>
+      </div>
+
+      {/* Status row */}
+      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+        {summaryLoading ? (
+          <div className="h-3 w-32 rounded skeleton-shimmer" />
+        ) : (
+          <>
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+              </svg>
+              {summary?.connector_count ?? 0} connectors
+            </span>
+            <span className="flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${summary?.has_brain ? "bg-green-400" : "bg-zinc-400"}`} />
+              Brain {summary?.has_brain ? "active" : "idle"}
+            </span>
+            {(summary?.active_agents ?? 0) > 0 && (
+              <span>{summary!.active_agents} agent{summary!.active_agents > 1 ? "s" : ""} running</span>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* AI Workers row */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+            AI Workers
+          </span>
+          {SERVICE_OPTIONS.map((svc) => (
+            <AIWorkerPill
+              key={svc.id}
+              service={svc}
+              isActive={true}
+              isSelected={activeServiceForRow === svc.id}
+              onClick={() => onServiceSelect(ws.id, svc.id)}
+            />
+          ))}
+        </div>
+
+        {/* Launch button */}
+        {activeServiceForRow && (
+          <button
+            onClick={() => onLaunch(ws.id, activeServiceForRow)}
+            disabled={isThisLaunching}
+            className="shrink-0 px-5 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent/90 active:bg-accent/80 transition-all flex items-center gap-1.5 shadow-sm"
+          >
+            {isThisLaunching ? "Launching..." : `Launch ${SERVICE_OPTIONS.find((s) => s.id === activeServiceForRow)?.label}`}
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Dashboard Client ─────────────────────────────────────────────────────── */
 
 export function DashboardClient() {
@@ -51,15 +222,35 @@ export function DashboardClient() {
     isLoading: workspaceLoading,
     fetchError,
     switchWorkspace,
+    isPlatformAdmin,
+    activeCustomerId,
+    setActiveCustomer,
+    customersForUser,
+    workspacesForActiveCustomer,
   } = useWorkspace();
 
   const router = useRouter();
   const [summaries, setSummaries] = useState<Record<string, WorkspaceSummary>>({});
   const [summaryLoading, setSummaryLoading] = useState(true);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
-  const [selectedService, setSelectedService] = useState<ServiceMode | null>(null);
+  const [selectedService, setSelectedService] = useState<{ wsId: string; svc: ServiceMode } | null>(null);
   const [userName, setUserName] = useState("");
   const [launching, setLaunching] = useState(false);
+
+  // Count workspaces per customer for the customer picker
+  const customerWorkspaceCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const m of workspaces) {
+      const cid = m.workspace.customer_id;
+      if (cid) counts[cid] = (counts[cid] || 0) + 1;
+    }
+    return counts;
+  }, [workspaces]);
+
+  // Internal/platform workspaces (no customer_id — for admin view)
+  const platformWorkspaces = useMemo(
+    () => workspaces.filter((m) => !m.workspace.customer_id || m.workspace.is_core_brain),
+    [workspaces]
+  );
 
   // Fetch user name
   useEffect(() => {
@@ -73,13 +264,6 @@ export function DashboardClient() {
       setUserName(name);
     });
   }, []);
-
-  // Auto-select current workspace
-  useEffect(() => {
-    if (currentWorkspace && !selectedWorkspace) {
-      setSelectedWorkspace(currentWorkspace.id);
-    }
-  }, [currentWorkspace, selectedWorkspace]);
 
   // Fetch workspace summaries
   useEffect(() => {
@@ -103,17 +287,25 @@ export function DashboardClient() {
     return () => { cancelled = true; };
   }, [workspaceLoading, workspaces.length]);
 
-  const handleLaunch = useCallback(() => {
-    if (!selectedWorkspace || !selectedService) return;
+  const handleServiceSelect = useCallback((wsId: string, svc: ServiceMode) => {
+    setSelectedService((prev) => {
+      // Toggle off if same selection
+      if (prev?.wsId === wsId && prev?.svc === svc) return null;
+      return { wsId, svc };
+    });
+  }, []);
+
+  const handleLaunch = useCallback((wsId: string, svc: ServiceMode) => {
     setLaunching(true);
-    localStorage.setItem(SERVICE_MODE_KEY, selectedService);
-    switchWorkspace(selectedWorkspace);
+    localStorage.setItem(SERVICE_MODE_KEY, svc);
+    switchWorkspace(wsId);
     router.push("/copilot");
-  }, [selectedWorkspace, selectedService, switchWorkspace, router]);
+  }, [switchWorkspace, router]);
 
   const handleSignOut = useCallback(async () => {
     localStorage.removeItem("nexus_current_workspace");
     localStorage.removeItem("nexus_current_org");
+    localStorage.removeItem("nexus_active_customer");
     document.cookie = "nexus_current_workspace=;path=/;max-age=0;SameSite=Lax";
     document.cookie = "nexus_current_org=;path=/;max-age=0;SameSite=Lax";
     const supabase = createBrowserClient(
@@ -123,8 +315,6 @@ export function DashboardClient() {
     await supabase.auth.signOut();
     window.location.href = "/login";
   }, []);
-
-  const canLaunch = selectedWorkspace && selectedService;
 
   /* ── Loading ──────────────────────────────────────────────────────────── */
   if (workspaceLoading) {
@@ -163,17 +353,46 @@ export function DashboardClient() {
     );
   }
 
+  // Determine if we should show customer picker (admin with no customer selected)
+  const showCustomerPicker = isPlatformAdmin && !activeCustomerId && customersForUser.length > 1;
+
+  // Active customer info for nav display
+  const activeCustomer = customersForUser.find((c) => c.id === activeCustomerId) ?? null;
+
+  // Which workspaces to display
+  const displayWorkspaces = activeCustomerId ? workspacesForActiveCustomer : workspaces;
+
   /* ── Main Dashboard ───────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-background">
       {/* ── Top Nav ──────────────────────────────────────────────────────── */}
       <nav className="border-b border-border-subtle">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
               <span className="text-sm font-bold text-accent">N</span>
             </div>
             <span className="text-base font-semibold text-foreground">Brain OS</span>
+
+            {/* Customer name / switcher */}
+            {activeCustomer && (
+              <>
+                <span className="text-muted-foreground mx-1">/</span>
+                {isPlatformAdmin && customersForUser.length > 1 ? (
+                  <button
+                    onClick={() => setActiveCustomer("")}
+                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-accent transition-colors"
+                  >
+                    {activeCustomer.name}
+                    <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <span className="text-sm font-medium text-foreground">{activeCustomer.name}</span>
+                )}
+              </>
+            )}
           </div>
           <div className="flex items-center gap-1">
             <Link
@@ -193,14 +412,16 @@ export function DashboardClient() {
       </nav>
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground tracking-tight">
             {userName ? `Welcome back, ${userName}` : "Welcome back"}
           </h1>
           <p className="text-base text-muted-foreground mt-2">
-            Choose your workspace and service to get started.
+            {showCustomerPicker
+              ? "Select a customer to view their workspaces."
+              : "Choose a workspace and AI worker to get started."}
           </p>
         </div>
 
@@ -228,187 +449,94 @@ export function DashboardClient() {
               </Link>
             </div>
           </div>
-        ) : (
+        ) : showCustomerPicker ? (
+          /* ── Customer Picker (platform admin, no customer selected) ── */
           <>
-            {/* ── Step 1: Select Workspace ────────────────────────────── */}
             <section className="mb-10">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="w-7 h-7 rounded-full bg-accent text-white text-xs font-bold flex items-center justify-center">1</span>
-                <h2 className="text-lg font-semibold text-foreground">Select Workspace</h2>
-              </div>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Customers</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {workspaces.map((m) => {
-                  const ws = m.workspace;
-                  const summary = summaries[ws.id];
-                  const isSelected = selectedWorkspace === ws.id;
+                {customersForUser.map((cust) => (
+                  <CustomerCard
+                    key={cust.id}
+                    customer={cust}
+                    workspaceCount={customerWorkspaceCounts[cust.id] ?? 0}
+                    isSelected={false}
+                    onSelect={() => setActiveCustomer(cust.id)}
+                  />
+                ))}
+              </div>
+            </section>
 
-                  return (
-                    <button
-                      key={ws.id}
-                      onClick={() => setSelectedWorkspace(ws.id)}
-                      className={`text-left rounded-xl border-2 p-5 transition-all ${
-                        isSelected
-                          ? "border-accent bg-accent/5 ring-1 ring-accent/20"
-                          : "border-border-subtle bg-surface hover:border-border hover:bg-surface-hover"
-                      }`}
-                    >
-                      {/* Name + plan */}
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-foreground truncate">{ws.name}</div>
-                          {ws.customer_name && (
-                            <div className="text-xs text-muted-foreground mt-0.5">{ws.customer_name}</div>
-                          )}
-                        </div>
-                        <span className="shrink-0 ml-2 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-accent/10 text-accent">
-                          {ws.plan}
-                        </span>
-                      </div>
-
-                      {/* Status */}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-3">
-                        {summaryLoading ? (
-                          <div className="h-3 w-28 rounded skeleton-shimmer" />
-                        ) : (
-                          <>
-                            <span className="flex items-center gap-1">
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                              </svg>
-                              {summary?.connector_count ?? 0} connectors
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className={`w-1.5 h-1.5 rounded-full ${summary?.has_brain ? "bg-green-400" : "bg-zinc-400"}`} />
-                              Brain {summary?.has_brain ? "active" : "idle"}
-                            </span>
-                            {(summary?.active_agents ?? 0) > 0 && (
-                              <span>{summary!.active_agents} agent{summary!.active_agents > 1 ? "s" : ""}</span>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Connector badges */}
-                      {summary?.connectors && summary.connectors.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {summary.connectors.map((c) => (
-                            <span key={c} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-hover text-muted-foreground capitalize">{c}</span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Selection indicator */}
-                      {isSelected && (
-                        <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-accent">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Selected
-                        </div>
-                      )}
-
-                      {/* Role */}
-                      <div className="mt-2 text-[10px] text-muted-foreground uppercase tracking-wide">{m.role}</div>
-                    </button>
-                  );
-                })}
-
-                {/* Create new */}
+            {/* Platform workspaces for admin */}
+            {platformWorkspaces.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-px flex-1 bg-border-subtle" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Platform</span>
+                  <div className="h-px flex-1 bg-border-subtle" />
+                </div>
+                <div className="space-y-3">
+                  {platformWorkspaces.map((m) => (
+                    <WorkspaceRow
+                      key={m.organization_id}
+                      membership={m}
+                      summary={summaries[m.workspace.id]}
+                      summaryLoading={summaryLoading}
+                      selectedService={selectedService}
+                      onServiceSelect={handleServiceSelect}
+                      onLaunch={handleLaunch}
+                      launching={launching}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        ) : (
+          /* ── Workspace List (customer selected or normal user) ──────── */
+          <>
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Workspaces</h2>
                 <Link
                   href="/settings?tab=overview&action=create-workspace"
-                  className="rounded-xl border-2 border-dashed border-border-subtle hover:border-accent/40 p-5 flex flex-col items-center justify-center min-h-[140px] transition-all group"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-accent hover:bg-accent/10 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 group-hover:bg-accent/20 flex items-center justify-center mb-2 transition-colors">
-                    <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">New Workspace</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  New Workspace
                 </Link>
               </div>
-            </section>
+              <div className="space-y-3">
+                {displayWorkspaces.map((m) => (
+                  <WorkspaceRow
+                    key={m.organization_id}
+                    membership={m}
+                    summary={summaries[m.workspace.id]}
+                    summaryLoading={summaryLoading}
+                    selectedService={selectedService}
+                    onServiceSelect={handleServiceSelect}
+                    onLaunch={handleLaunch}
+                    launching={launching}
+                  />
+                ))}
+              </div>
 
-            {/* ── Step 2: Select Service ──────────────────────────────── */}
-            <section className="mb-10">
-              <div className="flex items-center gap-3 mb-4">
-                <span className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
-                  selectedWorkspace ? "bg-accent text-white" : "bg-border-subtle text-muted-foreground"
-                }`}>2</span>
-                <h2 className={`text-lg font-semibold ${selectedWorkspace ? "text-foreground" : "text-muted-foreground"}`}>
-                  Choose Service
-                </h2>
-              </div>
-              <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 ${!selectedWorkspace ? "opacity-50 pointer-events-none" : ""}`}>
-                {SERVICE_OPTIONS.map((svc) => {
-                  const isSelected = selectedService === svc.id;
-                  return (
-                    <button
-                      key={svc.id}
-                      onClick={() => setSelectedService(svc.id)}
-                      className={`text-left rounded-xl border-2 p-5 transition-all ${
-                        isSelected
-                          ? "border-accent bg-accent/5 ring-1 ring-accent/20"
-                          : "border-border-subtle bg-surface hover:border-border hover:bg-surface-hover"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          isSelected ? "bg-accent/20" : "bg-surface-hover"
-                        }`}>
-                          <svg className={`w-5 h-5 ${isSelected ? "text-accent" : "text-muted-foreground"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d={svc.icon} />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-foreground">{svc.label}</div>
-                          <div className="text-xs text-muted-foreground">{svc.desc}</div>
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-accent">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Selected
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* ── Launch Button ───────────────────────────────────────── */}
-            <section className="flex items-center justify-between border-t border-border-subtle pt-8">
-              <div className="text-sm text-muted-foreground">
-                {canLaunch ? (
-                  <>
-                    <span className="text-foreground font-medium">
-                      {workspaces.find((m) => m.workspace.id === selectedWorkspace)?.workspace.name}
-                    </span>
-                    {" / "}
-                    <span className="text-foreground font-medium">
-                      {SERVICE_OPTIONS.find((s) => s.id === selectedService)?.label}
-                    </span>
-                  </>
-                ) : (
-                  "Select a workspace and service above to continue"
-                )}
-              </div>
-              <button
-                onClick={handleLaunch}
-                disabled={!canLaunch || launching}
-                className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
-                  canLaunch
-                    ? "bg-accent text-white hover:bg-accent/90 active:bg-accent/80 shadow-lg shadow-accent/20"
-                    : "bg-border-subtle text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                {launching ? "Launching..." : "Launch Copilot"}
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </button>
+              {/* Dashed add card */}
+              {displayWorkspaces.length > 0 && (
+                <Link
+                  href="/settings?tab=overview&action=create-workspace"
+                  className="mt-3 flex items-center justify-center rounded-xl border-2 border-dashed border-border-subtle hover:border-accent/40 p-6 transition-all group"
+                >
+                  <div className="flex items-center gap-2 text-muted-foreground group-hover:text-accent transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span className="text-sm font-medium">Add Workspace</span>
+                  </div>
+                </Link>
+              )}
             </section>
           </>
         )}
