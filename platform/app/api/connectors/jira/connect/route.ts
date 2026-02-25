@@ -170,9 +170,9 @@ export async function POST(request: NextRequest) {
         { onConflict: "organization_id,connector_type,instance_name" }
       )
       .select("id")
-      .single();
+      .maybeSingle();
 
-    if (upsertError) {
+    if (upsertError || !connector) {
       logger.error("[Jira connect] Upsert error:", upsertError);
       return NextResponse.json(
         { error: "Failed to store connector" },

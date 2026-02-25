@@ -548,9 +548,12 @@ async function deriveRealCausalInsights(
           domain: "engineering.velocity_prediction",
           content: JSON.stringify({
             title: "Velocity Collapse Prediction (P0 Function 01)",
-            insight: prediction.collapseRisk
-              ? `⚠️ VELOCITY COLLAPSE WARNING: Predicted next sprint velocity is ${prediction.predictedVelocity.toFixed(1)} (${((prediction.predictedVelocity / prediction.historicalMean) * 100).toFixed(0)}% of historical mean). Confidence: ${prediction.confidence}%. Trend: ${prediction.trend}. ${prediction.triggerReasons.join('. ')}`
-              : `Velocity prediction: ${prediction.predictedVelocity.toFixed(1)} PRs next sprint (${((prediction.predictedVelocity / prediction.historicalMean) * 100).toFixed(0)}% of mean). Trend: ${prediction.trend}. Confidence: ${prediction.confidence}%.`,
+            insight: (() => {
+              const meanPct = prediction.historicalMean > 0 ? ((prediction.predictedVelocity / prediction.historicalMean) * 100).toFixed(0) : '—';
+              return prediction.collapseRisk
+                ? `⚠️ VELOCITY COLLAPSE WARNING: Predicted next sprint velocity is ${prediction.predictedVelocity.toFixed(1)} (${meanPct}% of historical mean). Confidence: ${prediction.confidence}%. Trend: ${prediction.trend}. ${prediction.triggerReasons.join('. ')}`
+                : `Velocity prediction: ${prediction.predictedVelocity.toFixed(1)} PRs next sprint (${meanPct}% of mean). Trend: ${prediction.trend}. Confidence: ${prediction.confidence}%.`;
+            })(),
             predicted_velocity: prediction.predictedVelocity,
             historical_mean: prediction.historicalMean,
             historical_std_dev: prediction.historicalStdDev,

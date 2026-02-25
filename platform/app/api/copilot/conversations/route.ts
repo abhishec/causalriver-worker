@@ -131,9 +131,9 @@ export async function POST(req: NextRequest) {
         messages: messages || [],
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
-    if (error) {
+    if (error || !data) {
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 

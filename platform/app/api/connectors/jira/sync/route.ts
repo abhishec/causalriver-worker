@@ -613,8 +613,8 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
       domain: "product.projects",
       content: JSON.stringify({
         title: "Most Active Jira Projects",
-        insight: `The most active projects in the last 90 days: ${topProjects.map(([k, c]) => `${k} (${c} tickets, ${((c/total)*100).toFixed(0)}%)`).join(", ")}. ${topProjects[0]?.[1] / total > 0.5 ? `${topProjects[0][0]} dominates — this project carries the most delivery risk.` : "Work is spread across multiple projects."}`,
-        top_projects: topProjects.map(([key, count]) => ({ project_key: key, ticket_count: count, share: count / total })),
+        insight: `The most active projects in the last 90 days: ${topProjects.map(([k, c]) => `${k} (${c} tickets, ${total > 0 ? ((c/total)*100).toFixed(0) : '0'}%)`).join(", ")}. ${total > 0 && topProjects[0]?.[1] / total > 0.5 ? `${topProjects[0][0]} dominates — this project carries the most delivery risk.` : "Work is spread across multiple projects."}`,
+        top_projects: topProjects.map(([key, count]) => ({ project_key: key, ticket_count: count, share: total > 0 ? count / total : 0 })),
         total_tickets: total,
       }),
       importance: 0.70,

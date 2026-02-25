@@ -262,8 +262,8 @@ export async function POST(request: NextRequest) {
           signals_count: 0,
         })
         .select("id")
-        .single();
-      if (error) throw error;
+        .maybeSingle();
+      if (error || !inserted) throw error || new Error("Insert returned no rows");
       connectorId = inserted.id;
     }
 

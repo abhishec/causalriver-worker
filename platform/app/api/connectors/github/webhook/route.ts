@@ -498,14 +498,14 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
       created_at: new Date().toISOString(),
     })
     .select('id')
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    logger.error('[Architecture Sync] Failed to queue job:', error.message);
+  if (error || !job) {
+    logger.error('[Architecture Sync] Failed to queue job:', error?.message ?? 'no data');
     return;
   }
 
-  logger.debug(`[Architecture Sync] Queued architecture-extractor job ${job?.id} for org ${organizationId} (push to ${primaryBranch})`);
+  logger.debug(`[Architecture Sync] Queued architecture-extractor job ${job.id} for org ${organizationId} (push to ${primaryBranch})`);
 
   // Log activity
   await supabase.from('agent_activity_log').insert({

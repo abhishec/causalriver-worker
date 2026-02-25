@@ -1685,7 +1685,7 @@ export async function POST(request: NextRequest) {
               started_at: new Date().toISOString(),
             })
             .select("id")
-            .single();
+            .maybeSingle();
 
           if (taskErr || !agentTask) {
             agentSendError("Failed to create agent task");

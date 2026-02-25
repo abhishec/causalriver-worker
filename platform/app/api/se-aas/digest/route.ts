@@ -145,7 +145,7 @@ async function buildDigest(
       },
       {
         label: "Avg cycle time",
-        value: latestVelocity?.mean_pr_cycle_time_hours
+        value: typeof latestVelocity?.mean_pr_cycle_time_hours === "number" && isFinite(latestVelocity.mean_pr_cycle_time_hours)
           ? `${(latestVelocity.mean_pr_cycle_time_hours / 24).toFixed(1)}d`
           : "—",
       },
@@ -187,7 +187,7 @@ async function buildDigest(
       },
       {
         label: "HHI concentration",
-        value: latestBottleneck?.reviewer_hhi?.toFixed(3) ?? "—",
+        value: typeof latestBottleneck?.reviewer_hhi === "number" ? latestBottleneck.reviewer_hhi.toFixed(3) : "—",
       },
       {
         label: "WoW trend",
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
         created_at: digest.generatedAt,
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
     if (saveError) {
       logger.error("[digest POST] Failed to persist digest:", saveError.message);

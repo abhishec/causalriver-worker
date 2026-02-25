@@ -182,14 +182,14 @@ export async function POST(request: NextRequest) {
             organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "thread_engagement",
-            signal_value: threadCount / messages.length, // engagement ratio
+            signal_value: messages.length > 0 ? threadCount / messages.length : 0,
             entity_type: "slack_channel",
             entity_id: channel.name,
             signal_metadata: {
               channel_name: channel.name,
               thread_replies: threadCount,
               total_messages: messages.length,
-              engagement_ratio: threadCount / messages.length,
+              engagement_ratio: messages.length > 0 ? threadCount / messages.length : 0,
             },
           });
         }
@@ -200,13 +200,13 @@ export async function POST(request: NextRequest) {
             organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "reaction_sentiment",
-            signal_value: reactionCount / messages.length,
+            signal_value: messages.length > 0 ? reactionCount / messages.length : 0,
             entity_type: "slack_channel",
             entity_id: channel.name,
             signal_metadata: {
               channel_name: channel.name,
               total_reactions: reactionCount,
-              reactions_per_message: reactionCount / messages.length,
+              reactions_per_message: messages.length > 0 ? reactionCount / messages.length : 0,
             },
           });
         }
@@ -217,14 +217,14 @@ export async function POST(request: NextRequest) {
             organization_id: workspaceId,
             source_domain: "communication.slack",
             signal_type: "after_hours_activity",
-            signal_value: afterHoursCount / messages.length,
+            signal_value: messages.length > 0 ? afterHoursCount / messages.length : 0,
             entity_type: "slack_channel",
             entity_id: channel.name,
             signal_metadata: {
               channel_name: channel.name,
               after_hours_messages: afterHoursCount,
               total_messages: messages.length,
-              after_hours_ratio: afterHoursCount / messages.length,
+              after_hours_ratio: messages.length > 0 ? afterHoursCount / messages.length : 0,
             },
           });
         }
@@ -358,7 +358,7 @@ async function deriveRealSlackInsights(
       content: JSON.stringify({
         title: "Most Active Slack Channels",
         insight: `In the last 30 days, the most active channels are: ${topChannels.map(([ch, vol]) => `#${ch} (${vol} messages)`).join(", ")}. Total of ${totalMessages} messages across ${Object.keys(channelVolume).length} channels.`,
-        top_channels: topChannels.map(([name, volume]) => ({ name, volume, share: volume / totalMessages })),
+        top_channels: topChannels.map(([name, volume]) => ({ name, volume, share: totalMessages > 0 ? volume / totalMessages : 0 })),
         total_messages: totalMessages,
       }),
       importance: 0.60,
