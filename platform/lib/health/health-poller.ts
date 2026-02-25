@@ -231,7 +231,9 @@ export async function pollHealthOnce(
       source_domain: "brain.health",
       signal_type: "health_polled",
       signal_value: overallScore / 100,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "health_snapshot",
+      entity_id: organizationId,
       signal_metadata: {
         overall_score: overallScore,
         status,

@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
         source_domain: `verification.${prediction?.domain || "unknown"}`,
         signal_type: `prediction_verified_${userVerdict}`,
         signal_value: wasCorrect === true ? 1 : wasCorrect === false ? -1 : 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: prediction?.entity_type || "prediction",
         entity_id: predictionId,
         signal_metadata: {

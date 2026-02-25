@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       source_domain: sourceDomain,
       signal_type: `copilot_feedback_${rating}`,
       signal_value: rating === "helpful" ? 1 : rating === "not_helpful" ? 0 : -1,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "copilot_conversation",
       entity_id: conversationId,
       signal_metadata: {

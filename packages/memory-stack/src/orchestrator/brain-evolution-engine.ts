@@ -615,7 +615,7 @@ async function computeAccuracyMetrics(
       domain,
       totalPredictions: total,
       correctPredictions: correct,
-      accuracy: correct / total,
+      accuracy: total > 0 ? correct / total : 0,
       brierScore,
       trend: secondHalfAcc > firstHalfAcc + 0.05 ? 'improving'
         : secondHalfAcc < firstHalfAcc - 0.05 ? 'degrading'
@@ -626,7 +626,7 @@ async function computeAccuracyMetrics(
 
   // Overall accuracy
   const totalCorrect = predictions.filter(p => p.was_correct).length;
-  const overall = totalCorrect / predictions.length;
+  const overall = predictions.length > 0 ? totalCorrect / predictions.length : 0.5;
 
   // Week-over-week accuracy (last 12 weeks)
   const weekOverWeek: number[] = [];
@@ -978,11 +978,12 @@ function computeIntelligenceScore(
   velocity: BrainEvolutionState['learningVelocity']
 ): number {
   // Accuracy component (0-35 points)
-  const accuracyScore = Math.min(1, accuracy.overall) * 35;
+  const accuracyScore = Math.min(1, isFinite(accuracy.overall) ? accuracy.overall : 0.5) * 35;
 
   // Calibration component (0-25 points)
   // Brier score: 0 = perfect, 0.25 = no skill, 1 = worst
-  const calibrationNormalized = Math.max(0, 1 - calibration.brierScore * 4); // 0 → 1, 0.25 → 0
+  const brierScore = isFinite(calibration.brierScore) ? calibration.brierScore : 0.25;
+  const calibrationNormalized = Math.max(0, 1 - brierScore * 4); // 0 → 1, 0.25 → 0
   const calibrationScore = calibrationNormalized * 25;
 
   // Knowledge component (0-20 points)

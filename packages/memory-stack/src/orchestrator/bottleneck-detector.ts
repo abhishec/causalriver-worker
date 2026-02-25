@@ -221,7 +221,8 @@ export async function detectBottlenecks(
 
   for (const expert of experts) {
     const centralityScore = calculateCentralityScore(expert.strength, strengths);
-    const expertiseShare = (expert.strength / strengths.reduce((a: number, b: number) => a + b, 0)) * 100;
+    const totalStrength = strengths.reduce((a: number, b: number) => a + b, 0);
+    const expertiseShare = totalStrength > 0 ? (expert.strength / totalStrength) * 100 : 0;
 
     // Determine severity
     let severity: 'critical' | 'high' | 'medium' | null = null;
