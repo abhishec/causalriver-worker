@@ -213,7 +213,7 @@ export default async function EarlyWarningPage() {
                                 driver.direction === 'decrease' ? 'bg-danger' :
                                 driver.direction === 'spike' ? 'bg-warning' : 'bg-accent'
                               }`}
-                              style={{ width: `${Math.round(driver.importance * 100)}%` }}
+                              style={{ width: `${Math.round((driver.importance ?? 0) * 100)}%` }}
                             />
                           </div>
                         </div>
@@ -537,7 +537,7 @@ export default async function EarlyWarningPage() {
                     <span className="text-[10px] text-muted flex-1">
                       <span className="font-semibold text-foreground">Condition B</span>{' '}
                       Review concentration (HHI) &gt; 0.25
-                      {latestBottleneck.reviewer_hhi
+                      {typeof latestBottleneck.reviewer_hhi === 'number' && isFinite(latestBottleneck.reviewer_hhi)
                         ? ` (currently ${latestBottleneck.reviewer_hhi.toFixed(3)})`
                         : ''}
                     </span>

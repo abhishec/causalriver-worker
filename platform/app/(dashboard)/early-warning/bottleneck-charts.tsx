@@ -155,9 +155,9 @@ export function BRSBreakdown({
     },
     {
       label: 'Gatekeeper (Centrality)',
-      value: Math.min(maxBetweenness * 100, 10),
+      value: Math.min((maxBetweenness ?? 0) * 100, 10),
       max: 10,
-      raw: (maxBetweenness * 100).toFixed(1),
+      raw: ((maxBetweenness ?? 0) * 100).toFixed(1),
       color: '#a78bfa',
     },
     {
