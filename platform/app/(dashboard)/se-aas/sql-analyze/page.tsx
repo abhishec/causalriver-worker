@@ -55,8 +55,14 @@ export default function SQLAnalyzePage() {
       });
       if (!res.ok) throw new Error(`Submit failed: ${res.status}`);
       const data = await res.json();
-      const jobData = await pollJob(data.jobId);
-      setResult(jobData);
+      if (data.result) {
+        setResult({ jobId: "", status: "success", result: data.result, artifactId: data.artifactId });
+      } else if (data.jobId) {
+        const jobData = await pollJob(data.jobId);
+        setResult(jobData);
+      } else {
+        throw new Error("Unexpected response");
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.name !== "AbortError") setError("Analysis failed");
     } finally {

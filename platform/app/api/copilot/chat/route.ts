@@ -652,9 +652,9 @@ export async function POST(request: NextRequest) {
           dag.nodes.add(edge.target_domain);
           if (!dag.edges.has(edge.source_domain)) dag.edges.set(edge.source_domain, new Map());
           dag.edges.get(edge.source_domain)!.set(edge.target_domain, {
-            weight: edge.effect_size,
-            pValue: edge.granger_p_value,
-            lagDays: edge.optimal_lag_days,
+            weight: edge.effect_size ?? 0,
+            pValue: edge.granger_p_value ?? 1.0,
+            lagDays: edge.optimal_lag_days ?? 0,
             lastUpdated: new Date(),
             sampleSize: edge.sample_size || 30,
           });
@@ -1516,10 +1516,12 @@ export async function POST(request: NextRequest) {
                 status: result.status === "completed" ? "completed" : "failed",
                 currentStep: steps.length,
                 totalSteps: steps.length,
-                steps: steps.map(s => ({
+                steps: steps.map((s, i) => ({
                   order: s.order,
                   label: s.label,
-                  status: "completed" as const,
+                  status: (result.status === "completed" || i < result.completedSteps
+                    ? "completed"
+                    : "failed") as "completed" | "failed" | "running" | "pending",
                   parallel_group: s.parallel_group,
                 })),
               });

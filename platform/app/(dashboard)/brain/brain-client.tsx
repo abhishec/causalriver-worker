@@ -112,6 +112,21 @@ const LAYERS = [
   { id: "L13", name: "Immune System", desc: "Signal quality validation, quarantine", gradient: "from-teal-500 to-cyan-500", star: false },
   { id: "L14", name: "Goal Planning", desc: "Goal-backward causal planning", gradient: "from-sky-500 to-blue-600", star: false },
   { id: "L15", name: "Narrative Intelligence", desc: "Executive briefings, storylines", gradient: "from-blue-600 to-indigo-600", star: false },
+  { id: "L16", name: "Meta-Learning", desc: "Learning-rate adaptation, strategy selection", gradient: "from-indigo-600 to-violet-600", star: false },
+  { id: "L17", name: "Transfer Learning", desc: "Cross-domain knowledge transfer, analogy engine", gradient: "from-violet-600 to-purple-600", star: false },
+  { id: "L18", name: "Confidence Calibration", desc: "Prediction confidence scoring, Brier calibration", gradient: "from-purple-600 to-fuchsia-600", star: false },
+  { id: "L19", name: "Attention Allocation", desc: "Dynamic resource prioritization, signal triage", gradient: "from-fuchsia-600 to-pink-600", star: false },
+  { id: "L20", name: "Contradiction Detection", desc: "Cross-signal consistency checks, conflict resolution", gradient: "from-pink-600 to-rose-600", star: true },
+  { id: "L21", name: "Hypothesis Generation", desc: "Abductive reasoning, root-cause proposals", gradient: "from-rose-600 to-red-600", star: false },
+  { id: "L22", name: "Feedback Integration", desc: "RL reward shaping, human-in-the-loop learning", gradient: "from-red-600 to-orange-600", star: false },
+  { id: "L23", name: "Drift Detection", desc: "Concept drift monitoring, distribution shift alerts", gradient: "from-orange-600 to-amber-600", star: false },
+  { id: "L24", name: "Multi-Scale Reasoning", desc: "Micro/macro pattern synthesis, zoom levels", gradient: "from-amber-600 to-yellow-600", star: false },
+  { id: "L25", name: "Episodic Replay", desc: "Experience replay buffer, scenario re-simulation", gradient: "from-yellow-600 to-lime-600", star: false },
+  { id: "L26", name: "Skill Composition", desc: "Atomic skill chaining, workflow synthesis", gradient: "from-lime-600 to-green-600", star: false },
+  { id: "L27", name: "Value Alignment", desc: "Objective function alignment, guardrail enforcement", gradient: "from-green-600 to-emerald-600", star: false },
+  { id: "L28", name: "Emergent Abstraction", desc: "Auto-taxonomy, concept crystallization", gradient: "from-emerald-600 to-teal-600", star: false },
+  { id: "L29", name: "Self-Evaluation", desc: "Performance introspection, capability assessment", gradient: "from-teal-600 to-cyan-600", star: false },
+  { id: "L30", name: "Collective Intelligence", desc: "Multi-agent consensus, swarm optimization", gradient: "from-cyan-600 to-blue-600", star: true },
 ];
 
 /* -------------------------------------------------------------------------- */
