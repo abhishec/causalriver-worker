@@ -645,7 +645,7 @@ export default async function EarlyWarningPage() {
             </div>
             <div>
               <div className="text-sm font-medium">
-                [{latestVelocity.prediction_lower_bound?.toFixed(1)} — {latestVelocity.prediction_upper_bound?.toFixed(1)}]
+                [{latestVelocity.prediction_lower_bound?.toFixed(1) ?? '—'} — {latestVelocity.prediction_upper_bound?.toFixed(1) ?? '—'}]
               </div>
               <div className="text-xs text-muted">Confidence interval</div>
             </div>

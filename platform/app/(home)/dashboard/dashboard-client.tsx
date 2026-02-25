@@ -216,7 +216,10 @@ export function DashboardClient() {
     const totalPatterns = entries.reduce((s, b) => s + (b.knowledge?.totalPatterns ?? 0), 0);
     const totalRules = entries.reduce((s, b) => s + (b.knowledge?.totalRules ?? 0), 0);
     const isImproving = entries.some((b) => b.trend === "improving");
-    const layerValues = entries.map((b) => b.knowledge?.cognitiveLayersActive ?? 0);
+    const layerValues = entries.map((b) => {
+      const v = b.knowledge?.cognitiveLayersActive ?? 0;
+      return typeof v === "number" && isFinite(v) ? v : 0;
+    });
     const activeLayers = layerValues.length > 0 ? Math.max(...layerValues) : 0;
     const totalActedOn = entries.reduce((s, b) => s + (b.interventions?.totalActedOn ?? 0), 0);
     const totalEvidence = entries.reduce((s, b) => s + (b.learningVelocity?.totalEvidence ?? 0), 0);
