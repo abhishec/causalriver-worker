@@ -559,7 +559,7 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                       <div className="px-4 py-2 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between">
                         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{snippet.title ?? snippet.language}</span>
                       </div>
-                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code}</code></pre>
+                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code ?? "// No code available"}</code></pre>
                     </div>
                   ))}
               </div>
@@ -606,10 +606,10 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                   className="flex items-start gap-2.5 p-2.5 rounded-lg border border-accent/20 bg-accent/5 cursor-pointer hover:bg-accent/10 transition-colors"
                   onClick={() => setActiveTab("recommendations")}
                 >
-                  <PriorityIcon priority={data.recommendations[0].priority} />
+                  <PriorityIcon priority={data.recommendations[0]?.priority} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-semibold text-foreground leading-snug">{data.recommendations[0].action}</p>
-                    <p className="text-[11px] text-muted mt-0.5 leading-snug line-clamp-2">{data.recommendations[0].rationale}</p>
+                    <p className="text-[12px] font-semibold text-foreground leading-snug">{data.recommendations[0]?.action ?? "Action recommended"}</p>
+                    <p className="text-[11px] text-muted mt-0.5 leading-snug line-clamp-2">{data.recommendations[0]?.rationale}</p>
                   </div>
                 </div>
                 {data.recommendations.length > 1 && (

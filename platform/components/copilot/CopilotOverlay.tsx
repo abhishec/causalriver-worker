@@ -212,7 +212,8 @@ export function CopilotOverlay() {
     }
 
     // 30-second timeout to prevent spinning forever
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    let timedOut = false;
+    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 30000);
 
     try {
       const res = await fetch("/api/copilot/chat", {
@@ -248,9 +249,7 @@ export function CopilotOverlay() {
       );
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        // Distinguish user-cancel from timeout
-        if (!abortRef.current) {
-          // Timeout triggered the abort
+        if (timedOut) {
           setResponse("Request timed out. Please try again or open the full Copilot for longer queries.");
           setIsLoading(false);
         }

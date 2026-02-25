@@ -44,8 +44,8 @@ export function AgentExecutionCard({ data, className = "", onResume, onSaveAsAge
   const [resuming, setResuming] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
 
-  const completedSteps = data.steps.filter((s) => s.status === "completed").length;
-  const failedSteps = data.steps.filter((s) => s.status === "failed").length;
+  const completedSteps = (data.steps ?? []).filter((s) => s.status === "completed").length;
+  const failedSteps = (data.steps ?? []).filter((s) => s.status === "failed").length;
 
   const canResume = data.status === "failed";
 

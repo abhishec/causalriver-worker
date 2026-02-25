@@ -1177,7 +1177,8 @@ export async function POST(request: NextRequest) {
           if (fileData) {
             const text = await fileData.text();
             try {
-              glData = JSON.parse(text);
+              const parsed = JSON.parse(text);
+              glData = Array.isArray(parsed) ? parsed : [];
             } catch {
               logger.warn("[AaaS] GL data is malformed JSON, skipping");
             }

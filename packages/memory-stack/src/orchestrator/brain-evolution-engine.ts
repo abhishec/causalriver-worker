@@ -78,7 +78,7 @@ export interface BrainEvolutionState {
     totalRules: number;
     totalPredictions: number;
     verifiedPredictions: number;
-    cognitiveLayersActive: number; // Out of 15
+    cognitiveLayersActive: number; // Out of 30
     // Federation-aware knowledge metrics (THE NETWORK EFFECT)
     federatedCoreEdges: number;      // CORE brain edges available to this org
     isFederating: boolean;           // Is org contributing to collective learning?
@@ -480,7 +480,7 @@ async function updateCausalWeightsBayesian(
       .from('prediction_records')
       .select('domain, entity_type, source_rule_id')
       .eq('id', v.predictionId)
-      .single();
+      .maybeSingle();
 
     if (!pred) continue;
 
@@ -507,44 +507,49 @@ async function updateCausalWeightsBayesian(
     if (!edges?.length) continue;
 
     for (const edge of edges) {
-      // Bayesian update: Beta(α, β) → Beta(α + correct, β + incorrect)
-      // Start with weak prior: Alpha=2, Beta=2 (uniform-ish)
-      const priorAlpha = Math.max(2, (edge.evidence_weight ?? 1) * 10);
-      const priorBeta = Math.max(2, (1 - (edge.evidence_weight ?? 0.5)) * 10);
+      try {
+        // Bayesian update: Beta(α, β) → Beta(α + correct, β + incorrect)
+        // Start with weak prior: Alpha=2, Beta=2 (uniform-ish)
+        const priorAlpha = Math.max(2, (edge.evidence_weight ?? 1) * 10);
+        const priorBeta = Math.max(2, (1 - (edge.evidence_weight ?? 0.5)) * 10);
 
-      const posteriorAlpha = priorAlpha + correct;
-      const posteriorBeta = priorBeta + incorrect;
+        const posteriorAlpha = priorAlpha + correct;
+        const posteriorBeta = priorBeta + incorrect;
 
-      // New weight is the posterior mean
-      const newWeight = posteriorAlpha / (posteriorAlpha + posteriorBeta);
-      const oldWeight = edge.evidence_weight ?? 0.5;
+        // New weight is the posterior mean
+        const newWeight = posteriorAlpha / (posteriorAlpha + posteriorBeta);
+        const oldWeight = edge.evidence_weight ?? 0.5;
 
-      // Only update if weight changed meaningfully
-      if (Math.abs(newWeight - oldWeight) < 0.001) continue;
+        // Only update if weight changed meaningfully
+        if (Math.abs(newWeight - oldWeight) < 0.001) continue;
 
-      // Update the edge
-      await supabase
-        .from('causal_relationships_statistical')
-        .update({
-          evidence_weight: newWeight,
-          updated_at: new Date().toISOString(),
-          last_validated_at: new Date().toISOString(),
-        })
-        .eq('id', edge.id);
+        // Update the edge
+        await supabase
+          .from('causal_relationships_statistical')
+          .update({
+            evidence_weight: newWeight,
+            updated_at: new Date().toISOString(),
+            last_validated_at: new Date().toISOString(),
+          })
+          .eq('id', edge.id);
 
-      // Record weight update history
-      await supabase
-        .from('weight_update_history')
-        .insert({
-          organization_id: organizationId,
-          relationship_id: edge.id,
-          old_weight: oldWeight,
-          new_weight: newWeight,
-          update_reason: `bayesian_update: ${correct} correct, ${incorrect} incorrect (alpha=${posteriorAlpha.toFixed(1)}, beta=${posteriorBeta.toFixed(1)})`,
-          prediction_accuracy: correct / (correct + incorrect),
-        });
+        // Record weight update history
+        await supabase
+          .from('weight_update_history')
+          .insert({
+            organization_id: organizationId,
+            relationship_id: edge.id,
+            old_weight: oldWeight,
+            new_weight: newWeight,
+            update_reason: `bayesian_update: ${correct} correct, ${incorrect} incorrect (alpha=${posteriorAlpha.toFixed(1)}, beta=${posteriorBeta.toFixed(1)})`,
+            prediction_accuracy: (correct + incorrect) > 0 ? correct / (correct + incorrect) : 0,
+          });
 
-      updatedCount++;
+        updatedCount++;
+      } catch {
+        // Single edge failure should not stop the entire weight update cycle
+        continue;
+      }
     }
   }
 
