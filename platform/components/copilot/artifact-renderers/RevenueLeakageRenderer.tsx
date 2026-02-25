@@ -44,7 +44,8 @@ interface LeakageFinding {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function fmtCurrency(v: number, currency = "SGD"): string {
+function fmtCurrency(v: number | null | undefined, currency = "SGD"): string {
+  if (v == null || !isFinite(v)) return "—";
   const abs = Math.abs(v);
   const prefix = v < 0 ? "-" : "";
   const sym = currency === "USD" ? "$" : currency === "SGD" ? "S$" : `${currency} `;

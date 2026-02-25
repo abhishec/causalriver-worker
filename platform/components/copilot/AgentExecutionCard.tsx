@@ -141,7 +141,7 @@ export function AgentExecutionCard({ data, className = "", onResume, onSaveAsAge
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab === "summary" ? "Summary" : tab === "steps" ? `Steps (${data.steps.length})` : "Actions"}
+            {tab === "summary" ? "Summary" : tab === "steps" ? `Steps (${data.steps?.length ?? 0})` : "Actions"}
           </button>
         ))}
       </div>
@@ -190,7 +190,7 @@ export function AgentExecutionCard({ data, className = "", onResume, onSaveAsAge
 
         {activeTab === "steps" && (
           <div className="space-y-1">
-            {data.steps.map((step) => (
+            {(data.steps ?? []).map((step) => (
               <div key={step.stepNumber} className="flex items-start gap-2 py-1.5">
                 <span className="text-xs mt-0.5">
                   {step.status === "completed" ? "\u2705" : step.status === "failed" ? "\u274C" : "\u23F3"}

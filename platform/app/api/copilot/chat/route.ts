@@ -1810,6 +1810,7 @@ export async function POST(request: NextRequest) {
                 source_domain: "brain.training",
                 signal_type: "copilot_brain_training_completed",
                 signal_value: newAccuracy ?? 0,
+                signal_timestamp: new Date().toISOString(),
                 entity_type: "brain_agent_task",
                 entity_id: taskId,
                 signal_metadata: {
@@ -2482,6 +2483,7 @@ export async function POST(request: NextRequest) {
             source_domain: "brain.agents",
             signal_type: `copilot_agent_${agentIntent.agentType}_completed`,
             signal_value: brainResult.confidence,
+            signal_timestamp: new Date().toISOString(),
             entity_type: "brain_agent_task",
             entity_id: taskId,
             signal_metadata: {
