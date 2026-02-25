@@ -114,7 +114,8 @@ export async function maybeTriggerBrainCycle(
     }
   } catch (err: any) {
     // Never throw — this is fire-and-forget
-    logger.warn("[brain-trigger] Error:", err.message);
-    return { triggered: false, reason: err.message };
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn("[brain-trigger] Error:", msg);
+    return { triggered: false, reason: msg };
   }
 }

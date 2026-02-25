@@ -256,11 +256,7 @@ export function CopilotOverlay() {
         }
         return;
       }
-      setResponse(
-        err instanceof Error
-          ? `Error: ${err.message}`
-          : "Something went wrong"
-      );
+      setResponse("Something went wrong — please try again");
     } finally {
       clearTimeout(timeout);
       setIsLoading(false);
