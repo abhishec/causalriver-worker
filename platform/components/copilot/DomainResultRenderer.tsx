@@ -102,8 +102,8 @@ interface DomainResultRendererProps {
  * 5. GenericIntelRenderer as final fallback
  */
 export function DomainResultRenderer({ result, domainId }: DomainResultRendererProps) {
-  const rawData = result.data as Record<string, any>;
-  const resolvedDomainId = domainId || rawData?._domainType as string || "unknown";
+  const rawData = (typeof result.data === "object" && result.data ? result.data : {}) as Record<string, any>;
+  const resolvedDomainId = domainId || (rawData?._domainType as string) || "unknown";
   const artifactId = rawData?.artifactId || rawData?.id || `${resolvedDomainId}_${Date.now()}`;
 
   // Helper: wrap any renderer output with the feedback footer

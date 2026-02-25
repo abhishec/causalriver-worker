@@ -41,12 +41,14 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
       });
       if (!res.ok) {
         setError(true);
+        setRating(null);
         return;
       }
       setSubmitted(true);
     } catch (err) {
       logger.warn("[MessageFeedback] submit failed:", err);
       setError(true);
+      setRating(null);
     }
   }, [organizationId, conversationId, messageIndex, serviceMode]);
 
