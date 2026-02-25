@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CreateWorkspaceModal } from "./create-workspace-modal";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Admin — Customers & Workspaces" };
+export const metadata = { title: "Admin — Customers & AI Workers" };
 
 const PLAN_VARIANT: Record<string, "accent" | "info" | "success" | "default"> = {
   enterprise: "accent",
@@ -227,8 +227,8 @@ export default async function AdminOrgsPage() {
               <div>
                 <div className="mb-2 px-3 py-2 rounded-lg bg-surface border border-border-subtle text-[11px] text-muted flex items-center gap-2">
                   <span className="text-success">●</span>
-                  Workspaces share a customer record for billing only.
-                  Brain state, signals, and causal graphs are completely isolated per workspace.
+                  AI Workers share a customer record for billing only.
+                  Brain state, signals, and causal graphs are completely isolated per AI Worker.
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {workspaces.map((org) => (
@@ -249,7 +249,7 @@ export default async function AdminOrgsPage() {
 
       {/* ── Unclaimed workspaces (no customer) ───────────────────────────── */}
       {standaloneOrgs.length > 0 && (
-        <Section label="Unclaimed Workspaces" sublabel="Not yet linked to a customer — run backfill migration">
+        <Section label="Unclaimed AI Workers" sublabel="Not yet linked to a customer — run backfill migration">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {standaloneOrgs.map((org) => (
               <WorkspaceCard

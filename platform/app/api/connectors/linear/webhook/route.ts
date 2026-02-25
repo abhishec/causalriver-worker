@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('Linear webhook handler error', { error });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Webhook processing failed' },
       { status: 500 }
     );
   }

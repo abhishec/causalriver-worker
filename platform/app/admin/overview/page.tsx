@@ -128,7 +128,7 @@ export default async function AdminOverviewPage() {
         {/* Customers & Workspaces */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <CardTitle>Customers &amp; Workspaces</CardTitle>
+            <CardTitle>Customers &amp; AI Workers</CardTitle>
             <Link href="/admin/workspaces" className="text-xs text-accent hover:text-accent/80">View all</Link>
           </div>
           <div className="space-y-3">

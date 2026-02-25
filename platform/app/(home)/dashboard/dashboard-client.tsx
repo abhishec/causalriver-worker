@@ -570,7 +570,7 @@ export function DashboardClient() {
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
           </div>
-          <span className="text-xs text-muted-foreground">Loading your workspace...</span>
+          <span className="text-xs text-muted-foreground">Loading your AI Worker...</span>
         </div>
       </div>
     );

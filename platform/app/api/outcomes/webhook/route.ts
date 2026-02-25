@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       .select('*')
       .eq('prediction_id', payload.predictionId)
       .eq('organization_id', organizationId)
-      .single();
+      .maybeSingle();
 
     if (predError || !prediction) {
       logger.warn('Prediction not found', { predictionId: payload.predictionId });

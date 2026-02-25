@@ -197,7 +197,7 @@ export async function DELETE(request: Request) {
         .select("user_id")
         .eq("id", memberId)
         .eq("organization_id", orgId)
-        .single();
+        .maybeSingle();
       if (!targetMember || targetMember.user_id !== user.id) {
         return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
       }

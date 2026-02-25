@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can access any org
     const { data: adminCheck } = !membership
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {

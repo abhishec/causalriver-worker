@@ -61,7 +61,7 @@ export async function PATCH(
       .select("id, organization_id, trigger_domain, is_read")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!alert) {
       return NextResponse.json({ error: "Alert not found" }, { status: 404 });

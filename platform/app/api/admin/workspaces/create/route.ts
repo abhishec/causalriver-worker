@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       .from("customers")
       .select("id, name, slug")
       .eq("id", customerId)
-      .single();
+      .maybeSingle();
     if (custErr || !customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
     // ── Derive slug — ensure uniqueness ───────────────────────────

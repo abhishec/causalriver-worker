@@ -152,8 +152,8 @@ export async function POST(request: NextRequest) {
       learningImpact: rating === "incorrect" ? "high" : rating === "helpful" ? "medium" : "low",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[CopilotFeedback] POST Error:", error);
+    return NextResponse.json({ error: "Failed to process feedback" }, { status: 500 });
   }
 }
 
@@ -225,8 +225,8 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[CopilotFeedback] GET Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

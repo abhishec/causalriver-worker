@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can access any org
     const { data: adminCheck } = !membership
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {
@@ -154,9 +154,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ services, source: "health_fallback" });
     }
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Services] GET Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[OpenClaw/Services] GET Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -220,7 +219,7 @@ export async function PATCH(request: NextRequest) {
       .select("organization_id, role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can manage any org
     const { data: adminCheck } = !membership
@@ -230,7 +229,7 @@ export async function PATCH(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {
@@ -279,17 +278,16 @@ export async function PATCH(request: NextRequest) {
         result,
       });
     } catch (rpcError) {
-      const errMsg = rpcError instanceof Error ? rpcError.message : "RPC failed";
+      logger.error("[OpenClaw/Services] RPC Error:", rpcError);
       return NextResponse.json(
         {
-          error: `Failed to ${action} service: ${errMsg}`,
+          error: `Failed to ${action} service`,
         },
         { status: 502 }
       );
     }
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Services] PATCH Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[OpenClaw/Services] PATCH Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

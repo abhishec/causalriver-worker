@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       .select("organization_id, role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can connect for any org
     const { data: adminCheck } = !membership
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {
@@ -185,8 +185,7 @@ export async function POST(request: NextRequest) {
       status,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Connect] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[OpenClaw/Connect] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

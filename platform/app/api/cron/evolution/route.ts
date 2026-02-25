@@ -66,9 +66,8 @@ export async function GET(request: NextRequest) {
 
     return await runEvolutionForOrgs(service, orgs || []);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[CronEvolution] Fatal error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -133,7 +132,7 @@ async function runEvolutionForOrgs(
           service: "general",
           orgId, orgName,
           success: false,
-          error: err instanceof Error ? err.message : String(err),
+          error: "Evolution cycle failed",
           durationMs: Date.now() - start,
         });
       }
@@ -186,7 +185,7 @@ async function runEvolutionForOrgs(
           service: worker.service,
           orgId, orgName,
           success: false,
-          error: err instanceof Error ? err.message : String(err),
+          error: "Worker evolution failed",
           durationMs: Date.now() - start,
         });
         logger.error(`[CronEvolution] AI Worker "${worker.name}" failed:`, err);

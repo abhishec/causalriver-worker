@@ -753,7 +753,7 @@ export async function GET(request: Request) {
           .from("organizations")
           .select("id")
           .eq("slug", "ph-accounting")
-          .single();
+          .maybeSingle();
         if (phOrg && !orgIds.includes(phOrg.id)) {
           orgIds.push(phOrg.id);
         }
@@ -792,7 +792,7 @@ export async function GET(request: Request) {
       .from("organizations")
       .select("name")
       .eq("id", orgId)
-      .single();
+      .maybeSingle();
 
     // Check brain availability (non-blocking)
     let brainMetadata: Record<string, unknown> = { connected: false };

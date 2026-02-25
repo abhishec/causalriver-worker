@@ -207,7 +207,7 @@ export async function PATCH(request: Request) {
       .select("id, metadata")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (fetchErr || !existing) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });

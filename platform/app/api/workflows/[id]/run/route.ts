@@ -34,7 +34,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", workflowId)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (error || !workflow) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });

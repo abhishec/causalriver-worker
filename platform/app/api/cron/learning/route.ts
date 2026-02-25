@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
             service: "general",
             orgId: org.id, orgName: org.name,
             success: false,
-            error: err instanceof Error ? err.message : String(err),
+            error: "Learning cycle failed",
             durationMs: Date.now() - start,
           });
           logger.error(`[CronLearning] ${org.name} (org-level) failed:`, err);
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
             service: worker.service,
             orgId: org.id, orgName: org.name,
             success: false,
-            error: err instanceof Error ? err.message : String(err),
+            error: "Learning cycle failed",
             durationMs: orgDurationMs,
           });
         }
@@ -171,8 +171,7 @@ export async function GET(request: NextRequest) {
       results,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[CronLearning] Fatal error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

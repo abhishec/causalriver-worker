@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json(
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
           .select("*")
           .eq("id", taskId)
           .eq("organization_id", organizationId)
-          .single(),
+          .maybeSingle(),
         service
           .from("brain_agent_steps")
           .select("*")
@@ -228,7 +228,7 @@ export async function PATCH(request: NextRequest) {
       .select("id, organization_id, status, prompt, result_artifacts, confidence_score")
       .eq("id", taskId)
       .in("organization_id", memberOrgIds)
-      .single();
+      .maybeSingle();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });

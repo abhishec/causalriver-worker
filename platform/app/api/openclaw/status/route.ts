@@ -66,8 +66,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(status);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Status] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[OpenClaw/Status] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

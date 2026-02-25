@@ -163,8 +163,7 @@ export async function POST(request: NextRequest) {
           : "Noted. The Brain will adjust its approach.",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[BrainFeedback] Error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process feedback" }, { status: 500 });
   }
 }

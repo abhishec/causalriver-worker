@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error("[/api/workspace/services] query error:", error);
@@ -84,7 +84,7 @@ export async function PUT(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["admin", "owner"].includes(membership.role)) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     const currentSettings = (org?.settings as Record<string, unknown>) ?? {};
     const updatedSettings = { ...currentSettings, active_services: validServices };

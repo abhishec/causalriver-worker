@@ -71,7 +71,7 @@ export default function AgentReplayPage() {
           .single();
 
         if (!membership) {
-          setError("No workspace found");
+          setError("No AI Worker found");
           return;
         }
 

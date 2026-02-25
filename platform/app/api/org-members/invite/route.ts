@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json(
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       .eq("organization_id", organizationId)
       .eq("invitee_email", email.toLowerCase())
       .eq("status", "pending")
-      .single();
+      .maybeSingle();
 
     if (existingInvite)
       return NextResponse.json(
@@ -130,7 +130,7 @@ export async function DELETE(request: Request) {
       .from("org_invitations")
       .select("id, organization_id, status")
       .eq("id", inviteId)
-      .single();
+      .maybeSingle();
 
     if (!invite)
       return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
@@ -147,7 +147,7 @@ export async function DELETE(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", invite.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json(

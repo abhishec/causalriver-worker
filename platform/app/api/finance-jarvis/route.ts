@@ -34,7 +34,7 @@ export async function GET() {
         .select("organization_id")
         .eq("user_id", user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (membership?.organization_id) {
         const service = await createServiceClient();

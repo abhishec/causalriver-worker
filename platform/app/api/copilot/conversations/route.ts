@@ -112,12 +112,12 @@ export async function POST(req: NextRequest) {
         .eq("user_id", user.id)
         .eq("org_id", workspaceId as string)
         .select("id")
-        .single();
+        .maybeSingle();
 
       if (error) {
         return NextResponse.json({ error: "Internal error" }, { status: 500 });
       }
-      return NextResponse.json({ id: data.id });
+      return NextResponse.json({ id: data?.id ?? conversationId });
     }
 
     // Create new conversation

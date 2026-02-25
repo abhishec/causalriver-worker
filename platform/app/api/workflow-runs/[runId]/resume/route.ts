@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", runId)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (runError || !run) {
       return NextResponse.json({ error: "Workflow run not found" }, { status: 404 });
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", run.workflow_id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!workflow) {
       return NextResponse.json({ error: "Workflow definition not found" }, { status: 404 });

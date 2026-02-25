@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .select("is_platform_admin")
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
-      .single();
+      .maybeSingle();
 
     if (!member) {
       return NextResponse.json({ error: "Forbidden — platform admin required" }, { status: 403 });

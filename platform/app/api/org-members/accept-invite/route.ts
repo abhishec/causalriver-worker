@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       .from("org_invitations")
       .select("id, organization_id, invitee_email, role, status, expires_at, inviter_id")
       .eq("token", token)
-      .single();
+      .maybeSingle();
 
     if (lookupError || !invitation)
       return NextResponse.json(
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       .select("id")
       .eq("organization_id", invitation.organization_id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (existingMember) {
       // Already a member — mark invitation as accepted
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       .from("organizations")
       .select("customer_id")
       .eq("id", invitation.organization_id)
-      .single();
+      .maybeSingle();
 
     if (orgData?.customer_id) {
       // Sync customer_members — wrapped in try/catch for resilience
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
           .select("id")
           .eq("customer_id", orgData.customer_id)
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
 
         if (!existingCustMember) {
           const { error: insertError } = await service.from("customer_members").insert({

@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('[GitHub Webhook] Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Webhook processing failed' },
       { status: 500 }
     );
   }
@@ -337,7 +337,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
   } catch (error) {
     logger.error('[PR Review] Error analyzing PR:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Analysis failed' },
+      { error: 'Analysis failed' },
       { status: 500 }
     );
   }

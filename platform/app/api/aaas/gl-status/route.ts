@@ -144,7 +144,7 @@ export async function GET(request: Request) {
         .select("metadata, last_sync_at")
         .eq("organization_id", orgId)
         .eq("connector_type", "s3-storage")
-        .single();
+        .maybeSingle();
 
       if (connector) {
         const meta = connector.metadata as Record<string, unknown> | null;

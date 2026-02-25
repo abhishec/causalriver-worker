@@ -146,8 +146,8 @@ export async function POST(request: NextRequest) {
       message: `Brain evolution cycle complete. Intelligence score: ${state.intelligenceScore}/100`,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[BrainEvolution] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

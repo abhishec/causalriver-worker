@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
       count: verifications.length,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[PendingVerifications] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

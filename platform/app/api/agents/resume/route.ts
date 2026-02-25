@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       .select("id, organization_id, status, prompt, agent_type, auto_execute_threshold, created_by")
       .eq("id", taskId)
       .in("organization_id", memberOrgIds)
-      .single();
+      .maybeSingle();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       .eq("task_id", taskId)
       .order("step_number", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!checkpoint) {
       return NextResponse.json(
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
       .from("brain_agent_tasks")
       .select("status")
       .eq("id", taskId)
-      .single();
+      .maybeSingle();
 
     return NextResponse.json({
       success: true,

@@ -54,7 +54,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
       .from("agent_templates")
       .select("organization_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return NextResponse.json({ error: "Template not found" }, { status: 404 });
@@ -65,7 +65,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", template.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .from("agent_templates")
       .select("organization_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return NextResponse.json({ error: "Template not found" }, { status: 404 });
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", template.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
@@ -185,14 +185,14 @@ export async function PUT(request: NextRequest, { params }: Props) {
       .from("agent_templates")
       .select("organization_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
     if (!template) return NextResponse.json({ error: "Template not found" }, { status: 404 });
     const { data: membership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", template.organization_id)
-      .single();
+      .maybeSingle();
     if (!membership) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
     const success = await rollbackToVersion(service, templateId, versionId, user.id);
@@ -236,14 +236,14 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       .from("agent_templates")
       .select("organization_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
     if (!tmpl) return NextResponse.json({ error: "Template not found" }, { status: 404 });
     const { data: mem } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", tmpl.organization_id)
-      .single();
+      .maybeSingle();
     if (!mem) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
 
     const success = await deprecateVersion(service, templateId, versionId);

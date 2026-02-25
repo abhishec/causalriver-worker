@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json({ error: "Platform admin or service key required" }, { status: 403 });
@@ -146,7 +146,7 @@ async function checkOrgHealth(
     .from("health_alert_thresholds")
     .select("*")
     .eq("organization_id", orgId)
-    .single();
+    .maybeSingle();
 
   const thresholds: Thresholds = thresholdRow || DEFAULT_THRESHOLDS;
 
