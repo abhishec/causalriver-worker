@@ -322,13 +322,18 @@ function processGLData(transactions: GLTransaction[]) {
     if (d >= 1 && d <= 9) digitCounts[d - 1]++;
   }
   const totalAmounts = firstDigits.length;
-  const observed = digitCounts.map((c: number) => c / totalAmounts);
   const expected = [0.301, 0.176, 0.125, 0.097, 0.079, 0.067, 0.058, 0.051, 0.046];
   let chiSquare = 0;
-  for (let i = 0; i < 9; i++) {
-    chiSquare += Math.pow(digitCounts[i] - expected[i] * totalAmounts, 2) / (expected[i] * totalAmounts);
+  let benfordsConforming = true;
+  const observed = totalAmounts > 0
+    ? digitCounts.map((c: number) => c / totalAmounts)
+    : new Array(9).fill(0);
+  if (totalAmounts > 0) {
+    for (let i = 0; i < 9; i++) {
+      chiSquare += Math.pow(digitCounts[i] - expected[i] * totalAmounts, 2) / (expected[i] * totalAmounts);
+    }
+    benfordsConforming = chiSquare < 15.51;
   }
-  const benfordsConforming = chiSquare < 15.51;
 
   // Source type distribution
   const sourceTypes = new Map<string, number>();
@@ -711,7 +716,13 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   }
 
   const text = await data.text();
-  const transactions = JSON.parse(text) as GLTransaction[];
+  let transactions: GLTransaction[];
+  try {
+    transactions = JSON.parse(text) as GLTransaction[];
+  } catch {
+    logger.warn(`[GL] Malformed JSON in storage for org ${orgId}`);
+    return [];
+  }
   glCache.set(orgId, transactions);
   logger.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;
@@ -753,7 +764,7 @@ export async function GET(request: Request) {
           .from("organizations")
           .select("id")
           .eq("slug", "ph-accounting")
-          .single();
+          .maybeSingle();
         if (phOrg && !orgIds.includes(phOrg.id)) {
           orgIds.push(phOrg.id);
         }
@@ -771,7 +782,7 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       return NextResponse.json({
-        error: "No GL data found. Upload Xero GL data for your workspace first.",
+        error: "No GL data found. Upload Xero GL data first.",
         analysis: null,
       }, { status: 200 });
     }
@@ -779,7 +790,7 @@ export async function GET(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this workspace in storage.",
+        error: "No GL data found in storage.",
         analysis: null,
       }, { status: 200 });
     }
@@ -792,7 +803,7 @@ export async function GET(request: Request) {
       .from("organizations")
       .select("name")
       .eq("id", orgId)
-      .single();
+      .maybeSingle();
 
     // Check brain availability (non-blocking)
     let brainMetadata: Record<string, unknown> = { connected: false };
@@ -815,7 +826,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       analysis,
-      company: org?.name || "Unknown Workspace",
+      company: org?.name || "Unknown",
       organizationId: orgId,
       brainMetadata,
       summary: {
@@ -826,8 +837,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -890,7 +900,7 @@ export async function POST(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this workspace.",
+        error: "No GL data found.",
       }, { status: 400 });
     }
 
@@ -1003,8 +1013,7 @@ export async function POST(request: Request) {
         send("[DONE]");
         controller!.close();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Agent execution failed";
-        send(JSON.stringify({ type: 'error', error: msg }));
+        send(JSON.stringify({ type: 'error', error: "Agent execution failed" }));
         send("[DONE]");
         controller!.close();
       }
@@ -1018,7 +1027,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

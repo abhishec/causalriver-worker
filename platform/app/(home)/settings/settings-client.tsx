@@ -91,11 +91,12 @@ export function SettingsClient({
   const searchParams = useSearchParams();
   const { switchWorkspace, currentRole, isPlatformAdmin, currentCustomer, workspaces } = useWorkspace();
   // Default to "customers" tab, but respect URL param; map legacy "general" to "workspace"
-  const rawTab = searchParams?.get("tab") || "overview";
+  // Safety: searchParams can be null during SSR/hydration in Next.js 15
+  const rawTab = (searchParams ? searchParams.get("tab") : null) || "overview";
   // Map legacy tab names to merged tabs
   const tabMap: Record<string, string> = { general: "overview", workspace: "overview", customers: "overview", operations: "brain" };
   const initialTab = tabMap[rawTab] || rawTab;
-  const initialAction = searchParams?.get("action") ?? null;
+  const initialAction = (searchParams ? searchParams.get("action") : null) ?? null;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -114,13 +115,19 @@ export function SettingsClient({
     return currentCustId ? new Set([currentCustId]) : new Set();
   });
 
+  // AI Worker context (read from localStorage — set when launching from dashboard)
+  const [aiWorkerName, setAiWorkerName] = useState<string | null>(null);
+  useEffect(() => {
+    setAiWorkerName(localStorage.getItem("nexus_ai_worker_name"));
+  }, []);
+
   // Mutable local copy of allCustomers so we can append workspaces without page reload
   const [localCustomers, setLocalCustomers] = useState(allCustomers);
-  const connectedTypes = new Set(connectors.map((c) => c.connector_type));
+  const connectedTypes = new Set((connectors || []).map((c) => c.connector_type));
 
   // Sync activeTab with URL search params on navigation (fixes stale tab state)
   useEffect(() => {
-    const raw = searchParams?.get("tab") || "overview";
+    const raw = (searchParams ? searchParams.get("tab") : null) || "overview";
     const mapped = tabMap[raw] || raw;
     setActiveTab(mapped);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,7 +148,7 @@ export function SettingsClient({
   }, []);
 
   const handleCreateWorkspace = useCallback(async (custId: string, custName: string) => {
-    if (!createName.trim()) { setCreateError("Workspace name is required."); return; }
+    if (!createName.trim()) { setCreateError("Name is required."); return; }
     setCreating(true);
     setCreateError("");
     try {
@@ -150,8 +157,8 @@ export function SettingsClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerId: custId, workspaceName: createName.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) { setCreateError(data.error || "Failed to create workspace."); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setCreateError(data?.error || "Failed to create."); return; }
 
       // Append the new workspace to local state instead of full page reload
       const newWs: SiblingWorkspace & { customer_id?: string } = {
@@ -168,12 +175,12 @@ export function SettingsClient({
           : c
       ));
 
-      showToast(`Workspace "${data.workspace.name}" created!`);
+      showToast(`AI Worker "${data.workspace.name}" created!`);
       setShowCreateWorkspace(false);
       setCreateName("");
       setCreateCustomerId(null);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Unexpected error.");
+      setCreateError("Failed to create AI Worker");
     } finally {
       setCreating(false);
     }
@@ -192,14 +199,14 @@ export function SettingsClient({
         // Find workspace name from localCustomers or siblingWorkspaces
         const wsName = localCustomers.flatMap(c => c.workspaces).find(w => w.id === wsId)?.name
           ?? siblingWorkspaces.find(w => w.id === wsId)?.name
-          ?? "Workspace";
-        showToast(`"${wsName}" set as default workspace`);
+          ?? "AI Worker";
+        showToast(`"${wsName}" set as default`);
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to set default");
       }
     } catch {
-      showToast("Failed to set default workspace");
+      showToast("Failed to set default");
     } finally {
       setSettingDefault(null);
     }
@@ -262,13 +269,13 @@ export function SettingsClient({
         body: JSON.stringify({ workspaceId: orgId, name: editName.trim() }),
       });
       if (res.ok) {
-        showToast("Workspace name updated");
+        showToast("Name updated");
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to update name");
       }
     } catch {
-      showToast("Failed to update workspace name");
+      showToast("Failed to update name");
     } finally {
       setSavingName(false);
     }
@@ -306,13 +313,13 @@ export function SettingsClient({
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
           </div>
-          <h2 className="text-sm font-semibold">Unable to load workspace settings</h2>
+          <h2 className="text-sm font-semibold">Unable to load settings</h2>
           <p className="text-xs text-muted-foreground">
-            The current workspace could not be found. This can happen if you don&apos;t have access to this workspace.
+            The current AI Worker could not be found. This can happen if you don&apos;t have access.
           </p>
           {workspaces.length > 0 && (
             <div className="space-y-2 pt-2">
-              <p className="text-[11px] text-muted font-medium">Switch to an available workspace:</p>
+              <p className="text-[11px] text-muted font-medium">Switch to an available AI Worker:</p>
               <div className="space-y-1">
                 {workspaces.slice(0, 5).map((ws) => (
                   <button
@@ -337,7 +344,7 @@ export function SettingsClient({
       {/* ── Sidebar Navigation (Claude-style vertical tabs) ──────────── */}
       <nav className="w-52 shrink-0 py-1 flex flex-col">
         <h1 className="text-xl font-semibold tracking-tight px-3 mb-1">Settings</h1>
-        <p className="text-[11px] text-muted px-3 mb-5">Manage your account</p>
+        <p className="text-[11px] text-muted px-3 mb-5">{aiWorkerName ? `Configure ${aiWorkerName}` : "Manage your AI Worker"}</p>
         <div className="space-y-0.5 flex-1">
           {tabs.map((tab) => (
             <button
@@ -394,12 +401,11 @@ export function SettingsClient({
           <Badge variant={isPlatformAdmin ? "accent" : "default"} size="xs">
             {roleLabel}
           </Badge>
-          {currentCustomer && (
+          {(aiWorkerName || currentCustomer) && (
             <>
               <span className="text-muted text-[10px]">&middot;</span>
               <span className="text-[11px] text-muted-foreground">
-                {currentCustomer.name}
-                {org?.name && <> &rsaquo; {org.name}</>}
+                {aiWorkerName || currentCustomer?.name}
               </span>
             </>
           )}
@@ -410,12 +416,12 @@ export function SettingsClient({
         {/* ══════════════════════════════════════════════════════════════ */}
         {activeTab === "overview" && (
           <div>
-            {/* ── Current Workspace Info ── */}
-            <h2 className="text-sm font-medium mb-1">Current Workspace</h2>
+            {/* ── Current AI Worker Info ── */}
+            <h2 className="text-sm font-medium mb-1">{aiWorkerName || "AI Worker"}</h2>
             <p className="text-xs text-muted mb-4">
               {customer
-                ? <>Active workspace under <span className="font-medium text-foreground">{customer.name}</span></>
-                : "Workspace overview and customer accounts"
+                ? <>Active under <span className="font-medium text-foreground">{customer.name}</span></>
+                : "AI Worker overview and configuration"
               }
             </p>
             <div className="rounded-xl border border-border-subtle bg-surface/50 p-5 mb-8">
@@ -478,14 +484,14 @@ export function SettingsClient({
 
             {/* ── Customer Accounts ── */}
             <h3 className="text-sm font-medium mb-1">Customer Accounts</h3>
-            <p className="text-xs text-muted mb-4">Your customer accounts and their workspaces</p>
+            <p className="text-xs text-muted mb-4">Your customer accounts and their AI Workers</p>
             {localCustomers.length > 0 && (
               <div className="flex items-center gap-2 mb-6 px-3 py-2 rounded-lg bg-surface/50 border border-border-subtle">
                 <svg className="w-3.5 h-3.5 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                 </svg>
                 <span className="text-[11px] text-muted-foreground">
-                  You belong to <span className="font-medium text-foreground">{localCustomers.length}</span> customer account{localCustomers.length !== 1 ? "s" : ""} with <span className="font-medium text-foreground">{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0)}</span> total workspace{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0) !== 1 ? "s" : ""}
+                  You belong to <span className="font-medium text-foreground">{localCustomers.length}</span> customer account{localCustomers.length !== 1 ? "s" : ""} with <span className="font-medium text-foreground">{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0)}</span> AI Worker{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0) !== 1 ? "s" : ""}
                 </span>
               </div>
             )}
@@ -517,7 +523,7 @@ export function SettingsClient({
                           <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground">
                             <span className="font-mono">{cust.slug}</span>
                             {cust.industry && <span className="capitalize">{cust.industry}</span>}
-                            <span>{cust.workspaces.length} workspace{cust.workspaces.length !== 1 ? "s" : ""}</span>
+                            <span>{cust.workspaces.length} AI Worker{cust.workspaces.length !== 1 ? "s" : ""}</span>
                             {totalConnectors > 0 && <span>{totalConnectors} connector{totalConnectors !== 1 ? "s" : ""}</span>}
                           </div>
                         </div>
@@ -532,7 +538,7 @@ export function SettingsClient({
                       {/* Expanded: workspace list */}
                       {isExpanded && (
                         <div className="border-t border-border-subtle px-5 py-3">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-2">Workspaces</div>
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted mb-2">AI Workers</div>
                           <div className="space-y-1.5">
                             {cust.workspaces.map((ws) => {
                               const isCurrent = ws.id === orgId;
@@ -634,7 +640,7 @@ export function SettingsClient({
                           {/* Create workspace under this customer */}
                           {showCreateWorkspace && createCustomerId === cust.id ? (
                             <div className="mt-3 p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-3">
-                              <div className="text-[12px] font-medium">New workspace under {cust.name}</div>
+                              <div className="text-[12px] font-medium">New AI Worker under {cust.name}</div>
                               <input
                                 type="text"
                                 value={createName}
@@ -671,7 +677,7 @@ export function SettingsClient({
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                               </svg>
-                              <span className="font-medium">Create Workspace</span>
+                              <span className="font-medium">Create AI Worker</span>
                             </button>
                           )}
                         </div>
@@ -695,7 +701,7 @@ export function SettingsClient({
                         <span className="text-[10px] text-muted font-mono">{customer.slug}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        {siblingWorkspaces.length} workspace{siblingWorkspaces.length !== 1 ? "s" : ""}
+                        {siblingWorkspaces.length} AI Worker{siblingWorkspaces.length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
@@ -864,8 +870,8 @@ export function SettingsClient({
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl border border-danger/10 bg-danger/5">
                 <div>
-                  <div className="text-sm font-medium">Delete Workspace</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Permanently delete this workspace and all data</div>
+                  <div className="text-sm font-medium">Delete AI Worker</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Permanently delete this AI Worker and all data</div>
                 </div>
                 <button
                   disabled

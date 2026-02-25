@@ -187,7 +187,7 @@ export function AuthLeftPanel({ stats }: AuthLeftPanelProps) {
 
       <h1 className="text-2xl font-bold text-foreground">Brain OS</h1>
       <p className="text-muted text-center text-sm max-w-xs">
-        The causal memory for organisations — it perceives your data, discovers
+        The AI Worker platform for organisations — it perceives your data, discovers
         cause-and-effect, and gets smarter every cycle.
       </p>
 

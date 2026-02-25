@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can access any org
     const { data: adminCheck } = !membership
@@ -90,12 +90,12 @@ export async function POST(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     const conn = gatewayManager.getConnection(workspaceId);
     if (!conn) {
       return NextResponse.json(
-        { error: "No OpenClaw gateway configured for this workspace. Connect one via /api/openclaw/connect" },
+        { error: "No OpenClaw gateway configured. Connect one via the Connectors page." },
         { status: 404 }
       );
     }
@@ -131,9 +131,8 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (err) {
-          const errMsg = err instanceof Error ? err.message : "Stream error";
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`)
+            encoder.encode(`data: ${JSON.stringify({ error: "Stream error" })}\n\n`)
           );
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } finally {
@@ -153,8 +152,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const errMessage = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Trigger] Error:", errMessage);
-    return NextResponse.json({ error: errMessage }, { status: 500 });
+    logger.error("[OpenClaw/Trigger] Error:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

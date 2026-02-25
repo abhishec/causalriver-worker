@@ -116,6 +116,7 @@ export function createBrainFeedbackBus(config: BrainFeedbackBusConfig): BrainFee
         source_domain: signal.sourceDomain,
         signal_type: signal.signalType,
         signal_value: signal.signalValue,
+        signal_timestamp: new Date().toISOString(),
         entity_type: signal.entityType,
         entity_id: signal.entityId,
         signal_metadata: signal.metadata,
@@ -193,6 +194,7 @@ export function createBrainFeedbackBus(config: BrainFeedbackBusConfig): BrainFee
         source_domain: `brain.insight.${insight.type}`,
         signal_type: 'cross_service_insight',
         signal_value: insight.importance,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain_insight',
         entity_id: `insight_${Date.now()}`,
         signal_metadata: {

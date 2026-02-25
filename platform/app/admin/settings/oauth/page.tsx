@@ -89,7 +89,7 @@ export default function OAuthSettingsPage() {
         .from('organizations')
         .select('custom_oauth_apps')
         .eq('id', currentOrgId)
-        .single();
+        .maybeSingle();
 
       if (org?.custom_oauth_apps) {
         setOAuthApps(org.custom_oauth_apps);
@@ -219,7 +219,7 @@ export default function OAuthSettingsPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">OAuth Settings</h1>
         <p className="text-xs text-muted mt-0.5">
-          Configure custom OAuth applications for your workspace
+          Configure custom OAuth applications for your organization
         </p>
       </div>
 
@@ -424,7 +424,7 @@ export default function OAuthSettingsPage() {
         <div className="space-y-1.5">
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
             <span className="text-accent mt-0.5">●</span>
-            <span><strong className="text-foreground">Workspace-Level OAuth:</strong> Configure your own OAuth apps for full control</span>
+            <span><strong className="text-foreground">Organization-Level OAuth:</strong> Configure your own OAuth apps for full control</span>
           </div>
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
             <span className="text-accent mt-0.5">●</span>

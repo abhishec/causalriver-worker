@@ -42,10 +42,9 @@ export function VelocityTrendChart({ snapshots }: VelocityTrendChartProps) {
     .reverse()
     .map((s) => ({
       ...s,
-      dateLabel: new Date(s.snapshot_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
+      dateLabel: s.snapshot_date
+        ? new Date(s.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : 'N/A',
       cycleTimeDays: s.mean_pr_cycle_time_hours
         ? Number((s.mean_pr_cycle_time_hours / 24).toFixed(1))
         : null,

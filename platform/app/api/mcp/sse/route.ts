@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
       jsonrpc: "2.0",
       error: {
         code: -32603,
-        message: err instanceof Error ? err.message : "Internal error",
+        message: "Internal error",
       },
       id,
     };
@@ -416,7 +416,7 @@ async function handleToolCall(
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: `Error: ${err instanceof Error ? err.message : "Tool execution failed"}` }],
+        content: [{ type: "text", text: `Error: Tool execution failed` }],
         isError: true,
       },
       id,
@@ -666,7 +666,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       domains: String(args.domains || ""),
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_forecast: async (args, orgId) => {
@@ -677,7 +677,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "forecast",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_simulate: async (args, orgId) => {
@@ -688,7 +688,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "simulate",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_diagnose: async (args, orgId) => {
@@ -699,7 +699,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "diagnose",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_explain: async (args, orgId) => {
@@ -710,7 +710,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "explain",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   // ── SE-aaS Tools ────────────────────────────────────────────────────
@@ -996,7 +996,7 @@ async function executeAasTool(
 
   if (!transactions?.length) {
     return {
-      error: "No GL transactions found for this workspace. Connect Xero via the Connectors page first.",
+      error: "No GL transactions found. Connect Xero via the Connectors page first.",
       action,
     };
   }

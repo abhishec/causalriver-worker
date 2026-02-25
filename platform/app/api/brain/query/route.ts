@@ -19,7 +19,7 @@ const BrainQuerySchema = z.object({
     organizationId: z.string().uuid(),
     timeRange: z.string().optional(),
   }).optional(),
-  anthropicApiKey: z.string().optional(),
+  // anthropicApiKey removed — always use server-side key for security
 });
 
 export async function POST(request: NextRequest) {
@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
     const requestedOrgId = validated.context?.organizationId;
     const resolvedOrgId = requestedOrgId || await getCurrentWorkspaceId();
 
-    // Verify user is a member of the target organization
-    if (requestedOrgId) {
+    // Verify user is a member of the target organization (always, not just when explicitly provided)
+    {
       const { data: membership } = await supabase
         .from('org_members')
         .select('role')
         .eq('user_id', user.id)
-        .eq('organization_id', requestedOrgId)
-        .single();
+        .eq('organization_id', resolvedOrgId)
+        .maybeSingle();
 
       if (!membership) {
         // Check platform admin
@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
           .eq('user_id', user.id)
           .eq('is_platform_admin', true)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!admin) {
           return NextResponse.json(
-            { error: 'Not a member of this workspace' },
+            { error: 'Access denied' },
             { status: 403 }
           );
         }
@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
         ...validated.context,
         organizationId: resolvedOrgId,
       },
-      anthropicApiKey: validated.anthropicApiKey,
     });
 
     return NextResponse.json(result);

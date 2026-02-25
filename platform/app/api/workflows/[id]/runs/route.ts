@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: Props) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
-    const limit = Number(request.nextUrl.searchParams.get("limit")) || 20;
+    const limit = Math.min(Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 20), 100);
 
     const { data: runs, error } = await supabase
       .from("workflow_runs")
@@ -38,6 +38,6 @@ export async function GET(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ runs: runs || [] });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

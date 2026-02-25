@@ -23,9 +23,15 @@ export async function POST(request: Request) {
     const role = body.role;
     const organizationId = body.orgId || body.organizationId;
 
-    if (!email || !organizationId)
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !EMAIL_RE.test(email))
       return NextResponse.json(
-        { error: "email and orgId are required" },
+        { error: "Valid email is required" },
+        { status: 400 }
+      );
+    if (!organizationId)
+      return NextResponse.json(
+        { error: "orgId is required" },
         { status: 400 }
       );
 
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json(
@@ -57,7 +63,7 @@ export async function POST(request: Request) {
       .eq("organization_id", organizationId)
       .eq("invitee_email", email.toLowerCase())
       .eq("status", "pending")
-      .single();
+      .maybeSingle();
 
     if (existingInvite)
       return NextResponse.json(
@@ -78,7 +84,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     // Build invite URL
     const origin =
@@ -124,7 +130,7 @@ export async function DELETE(request: Request) {
       .from("org_invitations")
       .select("id, organization_id, status")
       .eq("id", inviteId)
-      .single();
+      .maybeSingle();
 
     if (!invite)
       return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
@@ -141,7 +147,7 @@ export async function DELETE(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", invite.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json(
@@ -156,7 +162,7 @@ export async function DELETE(request: Request) {
       .eq("id", inviteId);
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (err) {

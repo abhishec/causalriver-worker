@@ -157,7 +157,11 @@ export class OrgStorageProvider {
    */
   async downloadJSON<T = unknown>(orgId: string, key: string): Promise<T> {
     const buffer = await this.download(orgId, key);
-    return JSON.parse(buffer.toString("utf-8")) as T;
+    try {
+      return JSON.parse(buffer.toString("utf-8")) as T;
+    } catch {
+      throw new Error(`Failed to parse JSON from storage key: ${key}`);
+    }
   }
 
   /**

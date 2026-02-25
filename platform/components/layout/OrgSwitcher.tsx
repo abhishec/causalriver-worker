@@ -122,7 +122,7 @@ export function WorkspaceSwitcher() {
         core.push(m);
         continue;
       }
-      const key = m.workspace.customer_name ?? "My Workspaces";
+      const key = m.workspace.customer_name ?? "My AI Workers";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
@@ -175,7 +175,7 @@ export function WorkspaceSwitcher() {
           )}
           <div className="text-xs font-medium truncate">{currentWorkspace.name}</div>
           <div className={cn("text-[10px] capitalize", PLAN_COLORS[currentWorkspace.plan] ?? "text-muted")}>
-            {currentWorkspace.plan} workspace
+            {currentWorkspace.plan}
           </div>
         </div>
         <ChevronIcon open={open} />
@@ -249,7 +249,7 @@ export function WorkspaceSwitcher() {
                   onClick={() => setOpen(false)}
                   className="block px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
                 >
-                  Manage All Workspaces →
+                  Manage All AI Workers →
                 </Link>
               </>
             )}

@@ -34,7 +34,7 @@ export async function GET() {
         .select("organization_id")
         .eq("user_id", user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (membership?.organization_id) {
         const service = await createServiceClient();
@@ -59,7 +59,6 @@ export async function GET() {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

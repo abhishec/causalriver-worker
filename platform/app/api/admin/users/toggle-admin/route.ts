@@ -15,7 +15,8 @@ export async function PATCH(req: NextRequest) {
       .select("is_platform_admin")
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
-      .single();
+      .limit(1)
+      .maybeSingle();
     if (!adminCheck) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { memberId, isPlatformAdmin } = await req.json();
@@ -23,13 +24,19 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "memberId and isPlatformAdmin required" }, { status: 400 });
     }
 
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(memberId)) return NextResponse.json({ error: "Invalid memberId format" }, { status: 400 });
+
     const service = await createServiceClient();
     const { error } = await service
       .from("org_members")
       .update({ is_platform_admin: isPlatformAdmin })
       .eq("id", memberId);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      logger.error("[admin/users/toggle-admin] Update failed:", error.message);
+      return NextResponse.json({ error: "Failed to update admin status" }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

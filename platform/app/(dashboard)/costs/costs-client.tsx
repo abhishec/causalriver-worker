@@ -257,6 +257,9 @@ export function CostsClient({ costLogs, awsSnapshots, budget }: CostsClientProps
               </tr>
             </thead>
             <tbody>
+              {costLogs.length === 0 && (
+                <tr><td colSpan={7} className="py-8 text-center text-sm text-muted">No LLM calls recorded yet</td></tr>
+              )}
               {costLogs.slice(0, 20).map((l) => (
                 <tr key={l.id} className="border-b border-border-subtle hover:bg-surface-hover">
                   <td className="py-2 text-xs font-mono text-muted">

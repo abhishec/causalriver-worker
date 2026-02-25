@@ -339,7 +339,7 @@ export async function POST(request: Request) {
         .from("cross_domain_signals")
         .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
         .eq("organization_id", workspaceId)
-        .in("source_domain", ["product", "engineering", "support"])
+        .or("source_domain.like.product%,source_domain.like.engineering%,source_domain.like.support%")
         .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("signal_timestamp", { ascending: false })
         .limit(500);
@@ -393,7 +393,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("Jira sync error:", err);
     return NextResponse.json(
-      { error: err.message || "Sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -474,8 +474,9 @@ function transformIssueToSignal(
     source_domain: 'product.jira',
     signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
     signal_value: cycleTimeHours || 1,
+    signal_timestamp: fields.updated || fields.created || new Date().toISOString(),
     entity_type: 'jira_issue',
-    entity_id: `${pKey}-${issue.key}`,
+    entity_id: issue.key,
     signal_metadata: {
       project_key: pKey,
       project_name: pName,
@@ -613,8 +614,8 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
       domain: "product.projects",
       content: JSON.stringify({
         title: "Most Active Jira Projects",
-        insight: `The most active projects in the last 90 days: ${topProjects.map(([k, c]) => `${k} (${c} tickets, ${((c/total)*100).toFixed(0)}%)`).join(", ")}. ${topProjects[0]?.[1] / total > 0.5 ? `${topProjects[0][0]} dominates — this project carries the most delivery risk.` : "Work is spread across multiple projects."}`,
-        top_projects: topProjects.map(([key, count]) => ({ project_key: key, ticket_count: count, share: count / total })),
+        insight: `The most active projects in the last 90 days: ${topProjects.map(([k, c]) => `${k} (${c} tickets, ${total > 0 ? ((c/total)*100).toFixed(0) : '0'}%)`).join(", ")}. ${total > 0 && topProjects[0]?.[1] / total > 0.5 ? `${topProjects[0][0]} dominates — this project carries the most delivery risk.` : "Work is spread across multiple projects."}`,
+        top_projects: topProjects.map(([key, count]) => ({ project_key: key, ticket_count: count, share: total > 0 ? count / total : 0 })),
         total_tickets: total,
       }),
       importance: 0.70,

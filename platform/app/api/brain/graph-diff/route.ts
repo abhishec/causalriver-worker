@@ -47,10 +47,10 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!member) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -66,9 +66,8 @@ export async function GET(request: NextRequest) {
       count: snapshots.length,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[GraphDiff] GET error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -107,10 +106,10 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!postMember) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -168,8 +167,7 @@ export async function POST(request: NextRequest) {
       diff,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[GraphDiff] POST error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       );
 
     if (connErr) {
-      return NextResponse.json({ error: connErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     if (!connectors || connectors.length === 0) {
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
           .eq("id", connector.id);
       } catch (err: any) {
         logger.error(`[Freshworks sync] ${type} failed:`, err);
-        results[type] = { success: false, error: err.message };
+        results[type] = { success: false, error: "Sync failed" };
       }
     }
 
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Freshworks sync] Unexpected error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

@@ -76,7 +76,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ artifacts });
   } catch (err: any) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Auth: cron secret or admin session (never expose service_role key in headers)
+    // Auth: cron secret or admin session. Never use service_role key as HTTP auth token.
     const serviceKey = request.headers.get("x-service-key");
-    const expectedKey = process.env.CRON_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const expectedKey = process.env.CRON_SECRET;
 
     if (!serviceKey || serviceKey !== expectedKey) {
       // Fallback: check admin session
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json({ error: "Platform admin or service key required" }, { status: 403 });
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error("[health-alerts] Unhandled error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Health alert check failed" },
+      { error: "Health alert check failed" },
       { status: 500 }
     );
   }
@@ -146,7 +146,7 @@ async function checkOrgHealth(
     .from("health_alert_thresholds")
     .select("*")
     .eq("organization_id", orgId)
-    .single();
+    .maybeSingle();
 
   const thresholds: Thresholds = thresholdRow || DEFAULT_THRESHOLDS;
 
@@ -236,7 +236,7 @@ async function checkOrgHealth(
         is_read: false,
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
     // Create health_alert_log entry
     await supabase.from("health_alert_log").insert({

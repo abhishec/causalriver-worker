@@ -68,7 +68,7 @@ const CONNECTOR_TYPES: ConnectorTypeDef[] = [
     addLabel: "Add GitHub Repo",
     fields: [
       { key: "token", label: "Personal Access Token", placeholder: "ghp_xxxxxxxxxxxx", type: "password", required: true, helpUrl: "https://github.com/settings/tokens?type=beta", helpText: "Create a fine-grained token with repo & workflow permissions." },
-      { key: "owner", label: "Default Owner", placeholder: "your-org", type: "text", required: true, helpText: "Default workspace owner or username" },
+      { key: "owner", label: "Default Owner", placeholder: "your-org", type: "text", required: true, helpText: "GitHub organization or username" },
       { key: "repo", label: "Default Repository", placeholder: "your-repo", type: "text", required: true, helpText: "Default repository name" },
     ],
   },
@@ -76,7 +76,7 @@ const CONNECTOR_TYPES: ConnectorTypeDef[] = [
     type: "slack",
     label: "Slack",
     description: "Send notifications to Slack channels",
-    addLabel: "Add Slack Workspace",
+    addLabel: "Add Slack Integration",
     fields: [
       { key: "botToken", label: "Bot Token", placeholder: "xoxb-xxxxxxxxxxxx", type: "password", required: true, helpUrl: "https://api.slack.com/apps", helpText: "Bot User OAuth Token from your Slack app settings." },
       { key: "webhookUrl", label: "Webhook URL (Optional)", placeholder: "https://hooks.slack.com/services/...", type: "text", required: false, helpText: "Incoming webhook URL for simple notifications" },
@@ -144,7 +144,7 @@ function AddInstanceForm({
     try {
       await onSave({ ...values, displayName: displayName.trim() || "" });
     } catch (err: any) {
-      setError(err.message || "Failed to save");
+      setError("Failed to save");
     } finally {
       setSaving(false);
     }
@@ -169,7 +169,7 @@ function AddInstanceForm({
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          placeholder={`e.g. "Backend API", "Main Workspace"`}
+          placeholder={`e.g. "Backend API", "Main Repo"`}
           className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-input-focus"
         />
       </div>

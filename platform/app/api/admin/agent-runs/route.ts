@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
       .select("is_platform_admin")
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
-      .single();
+      .maybeSingle();
 
     if (!member) {
       return NextResponse.json({ error: "Forbidden — platform admin required" }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
-    const hours = parseInt(searchParams.get("hours") || "72");
+    const hours = parseInt(searchParams.get("hours") || "72", 10) || 72;
     const orgFilter = searchParams.get("org") || null;
     const agentFilter = searchParams.get("agent") || null;
 
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     logger.error("Admin agent runs API error:", error);
-    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

@@ -50,7 +50,7 @@ export async function GET(
 
     if (error) {
       logger.error("[/api/org/[orgId]/engagements] query error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     // Map to value/label pairs expected by the gathering UI
@@ -73,7 +73,7 @@ export async function GET(
   } catch (err) {
     logger.error("[/api/org/[orgId]/engagements] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal error" },
       { status: 500 },
     );
   }

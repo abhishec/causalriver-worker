@@ -30,7 +30,7 @@ export async function PATCH(
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin
@@ -39,7 +39,7 @@ export async function PATCH(
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role)) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -61,7 +61,7 @@ export async function PATCH(
       .select("id, organization_id, trigger_domain, is_read")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!alert) {
       return NextResponse.json({ error: "Alert not found" }, { status: 404 });
@@ -100,7 +100,7 @@ export async function PATCH(
   } catch (err) {
     logger.error("[alerts/:id] PATCH error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to update alert" },
+      { error: "Failed to update alert" },
       { status: 500 },
     );
   }

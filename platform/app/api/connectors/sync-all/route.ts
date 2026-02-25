@@ -40,6 +40,19 @@ export async function POST(request: Request) {
     const skipBrainCycle: boolean = body.skipBrainCycle === true;
 
     const workspaceId = body.organizationId || await getCurrentWorkspaceId();
+
+    // Verify caller is a member of this workspace
+    const { data: syncMembership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .maybeSingle();
+
+    if (!syncMembership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const service = await createServiceClient();
 
     // Find all active connectors for this org
@@ -67,10 +80,10 @@ export async function POST(request: Request) {
         // Determine the sync endpoint for each connector type
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+          || (process.env.NODE_ENV !== "production" ? "http://localhost:3001" : null);
 
         if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured — cannot self-fetch sync endpoints");
         }
 
         let syncUrl: string;
@@ -168,7 +181,7 @@ export async function POST(request: Request) {
         return {
           connector: type,
           success: false,
-          error: err.message || "Sync failed",
+          error: "Sync failed",
           durationMs: Date.now() - start,
         };
       }
@@ -207,10 +220,10 @@ export async function POST(request: Request) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+          || (process.env.NODE_ENV !== "production" ? "http://localhost:3001" : null);
 
         if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured — cannot trigger brain cycle");
         }
 
         const cookieHeader = request.headers.get("cookie") || "";
@@ -242,7 +255,7 @@ export async function POST(request: Request) {
       } catch (brainErr: any) {
         brainCycleResult = {
           triggered: false,
-          error: brainErr.message || "Brain cycle call failed",
+          error: "Brain cycle failed",
         };
         logger.warn("[sync-all] Brain cycle error:", brainErr.message);
       }
@@ -263,7 +276,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("Sync-all error:", err);
     return NextResponse.json(
-      { error: err.message || "Sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: Props) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
-    if (!workspaceId) return NextResponse.json({ error: "No workspace" }, { status: 401 });
+    if (!workspaceId) return NextResponse.json({ error: "Access denied" }, { status: 401 });
     const service = await createServiceClient();
 
     // Fetch the paused run
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", runId)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (runError || !run) {
       return NextResponse.json({ error: "Workflow run not found" }, { status: 404 });
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", run.workflow_id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!workflow) {
       return NextResponse.json({ error: "Workflow definition not found" }, { status: 404 });
@@ -83,6 +83,6 @@ export async function POST(request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[WorkflowResume] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

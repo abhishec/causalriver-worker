@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json(
-        { error: 'No workspace found' },
+        { error: 'No organization found' },
         { status: 400 }
       );
     }

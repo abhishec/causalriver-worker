@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(snapshot);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch metrics' },
       { status: 500 }
     );
   }

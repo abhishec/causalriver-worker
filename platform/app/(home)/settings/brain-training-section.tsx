@@ -190,7 +190,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
       logger.error('[Brain Training] Error:', error);
       setTrainingStatus({
         status: 'error',
-        error: error.message || 'Training failed. Please try again.',
+        error: 'Training failed. Please try again.',
       });
     }
   };

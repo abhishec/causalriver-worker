@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ templates });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Failed to load templates" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

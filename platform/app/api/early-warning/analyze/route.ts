@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       .select('role')
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       const { data: admin } = await authClient
@@ -87,11 +87,11 @@ export async function POST(req: NextRequest) {
         .eq('user_id', user.id)
         .eq('is_platform_admin', true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(
-          { error: 'Not a member of this workspace' },
+          { error: 'Access denied' },
           { status: 403 }
         );
       }
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         .eq('organization_id', organizationId)
         .eq('connector_type', 'github')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (githubConnector?.config) {
         resolvedBranchName = githubConnector.config.primaryBranch ?? undefined;
@@ -450,7 +450,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     logger.error('[Early Warning] Analysis error:', error);
     return NextResponse.json(
-      { error: error.message || 'Analysis failed' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -487,7 +487,7 @@ export async function GET(req: NextRequest) {
       .select('role')
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
-      .single();
+      .maybeSingle();
 
     if (!getMembership) {
       const { data: getAdmin } = await authClient
@@ -496,11 +496,11 @@ export async function GET(req: NextRequest) {
         .eq('user_id', user.id)
         .eq('is_platform_admin', true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!getAdmin) {
         return NextResponse.json(
-          { error: 'Not a member of this workspace' },
+          { error: 'Access denied' },
           { status: 403 }
         );
       }
@@ -544,7 +544,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     logger.error('[Early Warning] GET error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch snapshots' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

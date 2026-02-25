@@ -17,14 +17,14 @@ export default function AdminCopilotPage() {
       persona={{
         name: "Admin Brain",
         description:
-          "Platform-wide intelligence — query the core brain across all workspaces",
+          "Platform-wide intelligence — query the core brain across all AI Workers",
         color: "red",
       }}
       examplePrompts={[
-        "What did the brain learn across all workspaces this week?",
+        "What did the brain learn across all AI Workers this week?",
         "Show me the strongest causal relationships in the core brain",
         "Why did AWS costs spike?",
-        "Which workspace has the highest anomaly rate?",
+        "Which AI Worker has the highest anomaly rate?",
       ]}
       showHeader={true}
     />

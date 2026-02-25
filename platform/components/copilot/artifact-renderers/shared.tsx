@@ -75,16 +75,16 @@ export function HealthRing({ score, size = 48 }: { score: number; size?: number 
 // ─── Severity Badge ──────────────────────────────────────────────────────────
 
 export function SeverityBadge({ level, label }: { level: "critical" | "high" | "medium" | "low"; label?: string }) {
-  const styles = {
+  const styles: Record<string, string> = {
     critical: "bg-danger/8 text-danger border-danger/15",
     high: "bg-warning/8 text-warning border-warning/15",
     medium: "bg-yellow-600/8 text-yellow-600 border-yellow-600/15",
     low: "bg-info/8 text-info border-info/15",
   };
-  const labels = { critical: "CRITICAL", high: "HIGH", medium: "MEDIUM", low: "LOW" };
+  const labels: Record<string, string> = { critical: "CRITICAL", high: "HIGH", medium: "MEDIUM", low: "LOW" };
   return (
-    <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide border shrink-0", styles[level])}>
-      {label || labels[level]}
+    <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide border shrink-0", styles[level] ?? styles.low)}>
+      {label || labels[level] || level?.toUpperCase() || "INFO"}
     </span>
   );
 }
@@ -103,7 +103,7 @@ export function FindingRow({ severity, text, file, detail, label }: {
     <div className="flex items-start gap-2 py-2 border-b border-border-subtle last:border-b-0">
       <SeverityBadge level={severity} label={label} />
       <div className="min-w-0">
-        <div className="text-[13px] text-muted-foreground leading-snug" dangerouslySetInnerHTML={{ __html: text }} />
+        <div className="text-[13px] text-muted-foreground leading-snug">{text}</div>
         {detail && <div className="text-[11px] text-muted mt-0.5">{detail}</div>}
         {file && <FileChip file={file} />}
       </div>

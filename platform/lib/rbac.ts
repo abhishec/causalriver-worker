@@ -96,7 +96,7 @@ export async function getCurrentRole(): Promise<Role> {
       .select("role")
       .eq("organization_id", workspaceId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     return (member?.role as Role) || "viewer";
   } catch {

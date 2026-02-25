@@ -58,8 +58,8 @@ export async function GET(request: Request) {
     // ── List entities ─────────────────────────────────────────────────────────
     const entityType = url.searchParams.get("type");
     const query = url.searchParams.get("q");
-    const limit = Math.min(Number(url.searchParams.get("limit") || "50"), 200);
-    const offset = Number(url.searchParams.get("offset") || "0");
+    const limit = Math.min(Math.max(1, Number(url.searchParams.get("limit") || "50") || 50), 200);
+    const offset = Math.max(0, Number(url.searchParams.get("offset") || "0") || 0);
 
     let dbQuery = service
       .from("resolved_entities")
@@ -75,15 +75,14 @@ export async function GET(request: Request) {
       dbQuery = dbQuery.eq("entity_type", entityType);
     }
 
-    if (query) {
-      // Supabase ilike for basic fuzzy search on name
+    if (query && query.length <= 200) {
       dbQuery = dbQuery.ilike("canonical_name", `%${query}%`);
     }
 
     const { data: entities, error, count } = await dbQuery;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -95,7 +94,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     logger.error("[Entities API] GET error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -162,7 +161,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Entities API] POST error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -208,7 +207,7 @@ export async function PATCH(request: Request) {
       .select("id, metadata")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (fetchErr || !existing) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
@@ -233,17 +232,17 @@ export async function PATCH(request: Request) {
       .eq("id", id)
       .eq("organization_id", workspaceId)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    if (updateErr || !updated) {
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ entity: updated });
   } catch (err: any) {
     logger.error("[Entities API] PATCH error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

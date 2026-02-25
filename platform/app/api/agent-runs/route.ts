@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     const { searchParams } = new URL(request.url);
-    const hours = parseInt(searchParams.get("hours") || "72");
+    const hours = parseInt(searchParams.get("hours") || "72", 10) || 72;
     const agentFilter = searchParams.get("agent") || null;
 
     const since = new Date(Date.now() - hours * 3600 * 1000).toISOString();
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error("Agent runs API error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

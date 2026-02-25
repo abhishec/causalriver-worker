@@ -7,6 +7,7 @@ import { useShikiHighlight } from "@/lib/shiki";
 import { useTheme } from "@/lib/theme-context";
 import dynamic from "next/dynamic";
 import { parseChartSpec } from "@/components/copilot/chart-utils";
+import DOMPurify from "dompurify";
 
 // Lazy-load InlineChart — recharts (150+ KB) is only loaded when a chart is rendered
 const InlineChart = dynamic(
@@ -20,6 +21,8 @@ import { COMMAND_GATHERING_MAP } from "./command-gathering";
 import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
 import { SmartSuggestionCard } from "./SmartSuggestionCard";
+import { MessageFeedback } from "./MessageFeedback";
+import { MemoryUsageIndicator } from "./MemoryUsageIndicator";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -189,7 +192,7 @@ function CodeBlock({ code, language, blockKey }: { code: string; language: strin
         {shikiHtml ? (
           <div
             className="shiki-container px-4 py-3 text-[13px] leading-relaxed font-mono [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent [&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-8 [&_.line::before]:text-right [&_.line::before]:pr-3 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-xs [&_.line::before]:tabular-nums [&_.line::before]:shrink-0"
-            dangerouslySetInnerHTML={{ __html: shikiHtml }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(shikiHtml) }}
           />
         ) : (
           <pre className="px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground whitespace-pre">
@@ -249,7 +252,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
         const { svg: rendered } = await mermaid.render(safeId, code);
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+        if (!cancelled) setError("Failed to render diagram");
       }
     })();
 
@@ -280,7 +283,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
         {svg ? (
           <div
             className="[&_svg]:max-w-full [&_svg]:h-auto"
-            dangerouslySetInnerHTML={{ __html: svg }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ["foreignObject"] }) }}
           />
         ) : (
           <div className="flex items-center gap-2 py-8 text-xs text-muted">
@@ -1094,6 +1097,10 @@ export async function consumeSSEStream(
             if (parsed.workflowProgress) {
               callbacks.onWorkflowProgress?.(parsed.workflowProgress);
             }
+            // Brain learning pulse indicator
+            if (parsed.learningPulse) {
+              callbacks.onLearningPulse?.(parsed.learningPulse);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1828,6 +1835,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     // Reset agent state for new message
     setAgentSteps([]);
     setAgentStatus(null);
+    setWorkflowProgress(null);
 
     // Bug fix #2: Read history from ref to avoid stale closure
     const currentMessages = messagesRef.current;
@@ -1933,10 +1941,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 }
 
                 // Persist conversation via onSave callback
+                // Use finalAssistantContent (closure) so we don't depend on stale messagesRef
                 const saveCb = onSaveRef.current;
-                if (saveCb) {
-                  // Auto-generate title from first user message
-                  const allMsgs = messagesRef.current;
+                if (saveCb && finalAssistantContent) {
+                  const refMsgs = messagesRef.current;
+                  // Ensure last assistant message has the final content (ref may lag one render)
+                  const allMsgs = refMsgs.length > 0 && refMsgs[refMsgs.length - 1]?.role === "assistant"
+                    ? [...refMsgs.slice(0, -1), { role: "assistant" as const, content: finalAssistantContent }]
+                    : refMsgs;
                   const firstUser = allMsgs.find((m) => m.role === "user");
                   const title = firstUser
                     ? firstUser.content.length > 60
@@ -2022,8 +2034,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       );
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      const errorText =
-        err instanceof Error ? err.message : "Something went wrong";
+      const errorText = "Something went wrong";
       // Store the user prompt for retry
       const userMsg = messagesRef.current[messagesRef.current.length - 2];
       if (userMsg?.role === "user") setLastFailedPrompt(userMsg.content);
@@ -2150,41 +2161,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
       <div className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.length === 0 && !gathering.isActive ? (
-          /* Empty state — ✦ spark + service-specific text + example prompts */
-          <div className="flex flex-col items-center justify-center h-full text-center px-6 py-16">
-            <div className="text-accent text-[28px] mb-4">✦</div>
-            <h4 className="text-base font-medium text-muted-foreground">
-              {activeService === "seaas" ? "How can I help with your engineering?" :
-               activeService === "aas" ? "How can I help with your finances?" :
-               "How can I help you today?"}
-            </h4>
-            <p className="text-xs text-muted mt-1.5">
-              {activeService === "seaas" ? "Ask anything about your codebase, or type / for commands" :
-               activeService === "aas" ? "Ask anything about your finances, or type / for commands" :
-               "Just start typing — ask questions, brainstorm ideas, or get analysis"}
+          /* Empty state — domain commands in sidebar */
+          <div data-testid="empty-state-v2" className="flex flex-col items-center justify-center h-full text-center px-6 pt-24 pb-16">
+            <div className="text-accent/80 text-4xl mb-5 select-none" aria-hidden="true">✦</div>
+            <p className="text-[13px] text-muted-foreground/50 tracking-tight">
+              Type <kbd className="px-1.5 py-0.5 rounded-md bg-surface-hover border border-border-subtle text-[11px] font-mono">/</kbd> for commands, or just ask
             </p>
-            {activeService === "general" && (
-              <p className="text-[11px] text-muted/60 mt-1">
-                Type <kbd className="px-1.5 py-0.5 rounded bg-surface-hover border border-border-subtle text-[10px] font-mono">/</kbd> for advanced commands
-              </p>
-            )}
-
-            {/* Example prompt chips — click to start a conversation immediately */}
-            <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-[540px]">
-              {examplePrompts.slice(0, 4).map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handlePromptClick(prompt)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px]
-                             font-medium border border-border-subtle bg-card hover:bg-surface-hover
-                             hover:border-accent/20 text-foreground/70 hover:text-foreground
-                             transition-all cursor-pointer shadow-sm hover:shadow-md"
-                >
-                  <span className="text-accent text-[10px]">✦</span>
-                  {prompt}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */
@@ -2296,7 +2278,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <div className="mt-2 h-1 bg-surface-hover rounded-full overflow-hidden">
                             <div
                               className="h-full bg-accent rounded-full transition-all duration-300"
-                              style={{ width: `${(workflowProgress.currentStep / workflowProgress.totalSteps) * 100}%` }}
+                              style={{ width: `${workflowProgress.totalSteps > 0 ? Math.round((workflowProgress.currentStep / workflowProgress.totalSteps) * 100) : 0}%` }}
                             />
                           </div>
                           <div className="text-[10px] text-muted mt-1">
@@ -2460,6 +2442,16 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           ))}
                         </div>
                       )}
+
+                      {/* RL Feedback — thumbs up/down per assistant message */}
+                      {msg.content && !msg.content.startsWith("__ERROR__") && !isLoading && organizationId && (
+                        <MessageFeedback
+                          messageIndex={i}
+                          organizationId={organizationId}
+                          conversationId={conversationId}
+                          serviceMode={activeService || "general"}
+                        />
+                      )}
                     </div>
                   )}
                 </motion.div>
@@ -2568,6 +2560,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
       {/* Input bar — matches HTML .chat-input-area */}
       <div className="shrink-0 flex flex-col items-center px-4 sm:px-6 pt-3 pb-5">
+        {/* Memory usage indicator — shows context window usage when conversation is long */}
+        <div className="max-w-[680px] w-full">
+          <MemoryUsageIndicator
+            messageCount={messages.length}
+            conversationId={conversationId}
+          />
+        </div>
         <form onSubmit={handleSubmit} className="relative max-w-[680px] w-full" role="search" aria-label="Chat input">
 
           {/* Slash command picker — floating above the input */}

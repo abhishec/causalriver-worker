@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
 const STEPS = [
-  { id: 1, label: "Workspace" },
+  { id: 1, label: "AI Worker" },
   { id: 2, label: "Connect Data" },
   { id: 3, label: "Initializing" },
   { id: 4, label: "First Results" },
@@ -215,7 +215,7 @@ export default function OnboardingPage() {
       logger.debug("[Onboarding] Provisioning complete:", result.provisioned);
     } catch (err) {
       clearInterval(progressInterval);
-      const msg = err instanceof Error ? err.message : "Network error";
+      const msg = "Network error";
       setProvisionError(msg);
       setBrainProgress(0);
       provisionStarted.current = false;
@@ -240,7 +240,7 @@ export default function OnboardingPage() {
 
   // ── Fetch first results for Step 4 ──────────────────────────────────
   useEffect(() => {
-    if (step !== 4 || !githubConnected || loadingResults) return;
+    if (step !== 4 || !githubConnected || !orgId || loadingResults) return;
 
     async function loadFirstResults() {
       setLoadingResults(true);
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
 
   async function handleOrgSubmit() {
     if (!orgName.trim()) {
-      setError("Workspace name is required");
+      setError("Name is required");
       return;
     }
     setLoading(true);
@@ -306,9 +306,9 @@ export default function OnboardingPage() {
         .select("organization_id, organizations(id, name, slug)")
         .eq("user_id", user.id)
         .eq("role", "owner")
-        .single();
+        .maybeSingle();
 
-      if (memberError) throw memberError;
+      if (memberError || !membership) throw memberError || new Error("No membership found");
 
       const currentOrgId = membership.organization_id;
       setOrgId(currentOrgId);
@@ -330,7 +330,7 @@ export default function OnboardingPage() {
 
       setStep(2);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong — please try again");
     } finally {
       setLoading(false);
     }
@@ -339,11 +339,18 @@ export default function OnboardingPage() {
   async function handleFinish() {
     setLoading(true);
     try {
-      await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         data: { onboarding_complete: true, org_name: orgName.trim() },
       });
+      if (error) {
+        logger.warn("[Onboarding] updateUser failed:", error.message);
+      }
+      // Refresh session so middleware sees updated user_metadata immediately
+      // Without this, middleware still sees onboarding_complete=false and redirects back
+      await supabase.auth.refreshSession();
       router.push("/dashboard");
     } catch {
+      // Even on failure, attempt to proceed — user can retry from dashboard
       router.push("/dashboard");
     }
   }
@@ -406,11 +413,11 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Welcome, {userName}!</h2>
-            <p className="text-muted">Set up your workspace to get started.</p>
+            <p className="text-muted">Set up your organization to get started.</p>
           </div>
           <div className="space-y-4">
             <div>
-              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Workspace name</label>
+              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
               <input id="org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Acme Inc." className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus transition-colors" required autoFocus />
             </div>
             <div>
@@ -472,7 +479,7 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Connect Your Data</h2>
-            <p className="text-muted">Choose data sources to feed the causal memory. You can add more later.</p>
+            <p className="text-muted">Choose data sources to feed your AI Worker. You can add more later.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {CONNECTORS.map((conn) => {
@@ -788,7 +795,7 @@ export default function OnboardingPage() {
                     <span className="text-xs text-success font-medium">Brain OS thinking...</span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
+                    Great question! Once your data sources are connected and signals start flowing, the AI Worker will discover cause-and-effect relationships. Head to the Copilot to explore.
                   </p>
                 </div>
               )}

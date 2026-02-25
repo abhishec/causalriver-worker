@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     if (fetchErr) {
       return NextResponse.json(
-        { error: `Failed to fetch packs: ${fetchErr.message}` },
+        { error: "Failed to fetch packs" },
         { status: 500 }
       );
     }
@@ -167,7 +167,7 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Apply failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

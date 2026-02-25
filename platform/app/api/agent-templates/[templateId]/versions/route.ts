@@ -48,13 +48,35 @@ export async function GET(_request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify user belongs to the template's org before returning version history
+    const { data: template } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .maybeSingle();
+
+    if (!template) {
+      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    }
+
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", template.organization_id)
+      .maybeSingle();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
     const versions = await getVersionHistory(service, templateId);
 
     return NextResponse.json({ versions, count: versions.length });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] GET error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -97,7 +119,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .from("agent_templates")
       .select("organization_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return NextResponse.json({ error: "Template not found" }, { status: 404 });
@@ -108,7 +130,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", template.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
@@ -129,9 +151,8 @@ export async function POST(request: NextRequest, { params }: Props) {
       versionId: result.id,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] POST error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -156,6 +177,22 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify membership
+    const { data: template } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .maybeSingle();
+    if (!template) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", template.organization_id)
+      .maybeSingle();
+    if (!membership) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+
     const success = await rollbackToVersion(service, templateId, versionId, user.id);
 
     if (!success) {
@@ -164,9 +201,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ success: true, message: "Rolled back successfully" });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] PUT error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -191,6 +227,22 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     }
 
     const service = await createServiceClient();
+
+    // Verify membership
+    const { data: tmpl } = await service
+      .from("agent_templates")
+      .select("organization_id")
+      .eq("id", templateId)
+      .maybeSingle();
+    if (!tmpl) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    const { data: mem } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", tmpl.organization_id)
+      .maybeSingle();
+    if (!mem) return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+
     const success = await deprecateVersion(service, templateId, versionId);
 
     if (!success) {
@@ -199,8 +251,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ success: true, message: "Version deprecated" });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] PATCH error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

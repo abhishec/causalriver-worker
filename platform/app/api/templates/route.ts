@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       .order("usage_count", { ascending: false });
 
     if (orgError) {
-      return NextResponse.json({ error: orgError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     // Public templates from other orgs
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       .limit(50);
 
     if (pubError) {
-      return NextResponse.json({ error: pubError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to list templates" },
+      { error: "Failed to list templates" },
       { status: 500 }
     );
   }
@@ -148,17 +148,17 @@ export async function POST(req: NextRequest) {
       // Handle unique constraint violation
       if (error.code === "23505") {
         return NextResponse.json(
-          { error: "A command with this name already exists in your workspace." },
+          { error: "A command with this name already exists." },
           { status: 409 }
         );
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ id: data.id, commandId: data.command_id, template: { id: data.id, command_id: data.command_id } });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to create template" },
+      { error: "Failed to create template" },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface S3UploadModalProps {
@@ -32,6 +33,8 @@ const FILE_TYPE_OPTIONS: Array<{ value: FileType; label: string; description: st
 ];
 
 export function S3UploadModal({ isOpen, onClose, onUploaded }: S3UploadModalProps) {
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
   const [file, setFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType>("gl-data");
   const [uploading, setUploading] = useState(false);
@@ -107,16 +110,16 @@ export function S3UploadModal({ isOpen, onClose, onUploaded }: S3UploadModalProp
       setProgress(null);
       onClose();
     } catch (err: any) {
-      setError(err.message || "Upload failed");
+      setError("Upload failed");
       setProgress(null);
     } finally {
       setUploading(false);
     }
   }, [file, fileType, onClose, onUploaded]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !portalTarget) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -299,6 +302,7 @@ export function S3UploadModal({ isOpen, onClose, onUploaded }: S3UploadModalProp
           </div>
         </div>
       </div>
-    </>
+    </>,
+    portalTarget
   );
 }

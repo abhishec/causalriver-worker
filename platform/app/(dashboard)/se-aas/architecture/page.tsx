@@ -60,7 +60,7 @@ export default function ArchitecturePage() {
       const jobData = await pollJob(data.jobId);
       setResult(jobData);
     } catch (err: unknown) {
-      if (err instanceof Error && err.name !== "AbortError") setError(err.message);
+      if (err instanceof Error && err.name !== "AbortError") setError("Analysis failed");
     } finally {
       setLoading(false);
     }

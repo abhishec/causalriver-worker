@@ -18,10 +18,21 @@ import { logger } from "@/lib/logger";
  */
 async function resolveWorkspaceId(
   request: NextRequest,
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<string | null> {
   const fromParam = request.nextUrl.searchParams.get("organizationId");
-  if (fromParam) return fromParam;
+  if (fromParam) {
+    // Security: verify user is a member of the requested org (prevents IDOR)
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", userId)
+      .eq("organization_id", fromParam)
+      .maybeSingle();
+    if (membership) return fromParam;
+    // Fall through to cookie-based resolution if not a member
+  }
 
   try {
     return await getCurrentWorkspaceId();
@@ -36,7 +47,7 @@ async function resolveWorkspaceId(
         .eq("user_id", userId)
         .order("joined_at", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
       return data?.organization_id ?? null;
     } catch {
       return null;
@@ -53,14 +64,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaceId = await resolveWorkspaceId(request, user.id);
+    const workspaceId = await resolveWorkspaceId(request, user.id, supabase);
     if (!workspaceId) {
       return NextResponse.json({ tasks: [] });
     }
 
     const status = request.nextUrl.searchParams.get("status");
     const agentType = request.nextUrl.searchParams.get("agentType");
-    const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 200);
+    const limit = Math.min(Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 50), 200);
 
     const service = await createServiceClient();
 
@@ -92,6 +103,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ tasks: tasks || [] });
   } catch (error: any) {
     logger.error("[TaskQueue] Error:", error);
-    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

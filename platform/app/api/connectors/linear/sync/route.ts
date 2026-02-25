@@ -126,7 +126,7 @@ export async function POST(request: Request) {
           .from("cross_domain_signals")
           .select("source_domain, signal_type, signal_value, signal_timestamp, organization_id, entity_type, entity_id")
           .eq("organization_id", workspaceId)
-          .in("source_domain", ["product", "engineering", "support"])
+          .or("source_domain.like.product%,source_domain.like.engineering%,source_domain.like.support%")
           .gte("signal_timestamp", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
           .order("signal_timestamp", { ascending: false })
           .limit(500);
@@ -194,7 +194,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: syncErr.message,
+          error: "Sync failed",
           signalsGenerated,
           errors,
         },
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Linear Sync] Error:", err);
     return NextResponse.json(
-      { error: err.message || "Linear sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

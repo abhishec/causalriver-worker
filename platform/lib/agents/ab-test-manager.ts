@@ -173,7 +173,8 @@ export async function startABTest(
 
       if (records) {
         for (const r of records) {
-          const parsed = JSON.parse(r.content);
+          let parsed: any;
+          try { parsed = JSON.parse(r.content); } catch { continue; }
           if (parsed.id === testId && parsed.status === "draft") {
             parsed.status = "running";
             await supabase
@@ -224,7 +225,7 @@ export async function recordMetric(
       .from("ab_tests")
       .select("*")
       .eq("id", testId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       // Fallback: check ai_memory
@@ -237,7 +238,8 @@ export async function recordMetric(
 
       if (records) {
         for (const r of records) {
-          const parsed = JSON.parse(r.content);
+          let parsed: any;
+          try { parsed = JSON.parse(r.content); } catch { continue; }
           if (parsed.id === testId) {
             test = parsed;
             break;
@@ -303,7 +305,7 @@ export async function evaluateTest(
       .from("ab_tests")
       .select("*")
       .eq("id", testId)
-      .single();
+      .maybeSingle();
 
     if (!test) return "inconclusive";
 
@@ -411,8 +413,10 @@ export async function getTestsForTemplate(
 
       if (records) {
         return records
-          .map((r: { content: string }) => JSON.parse(r.content) as ABTest)
-          .filter((t: ABTest) => t.template_id === templateId);
+          .map((r: { content: string }) => {
+            try { return JSON.parse(r.content) as ABTest; } catch { return null; }
+          })
+          .filter((t): t is ABTest => t !== null && t.template_id === templateId);
       }
       return [];
     }
@@ -438,7 +442,7 @@ export async function getActiveTest(
       .eq("template_id", templateId)
       .eq("status", "running")
       .limit(1)
-      .single();
+      .maybeSingle();
 
     return data || null;
   } catch {

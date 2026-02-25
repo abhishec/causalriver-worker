@@ -42,7 +42,7 @@ export async function GET() {
         .from("cost_budget_config")
         .select("daily_llm_budget, alert_threshold_pct")
         .eq("organization_id", workspaceId)
-        .single(),
+        .maybeSingle(),
     ]);
 
     // Suppress unused variable warning — costResult reserved for future budget alerts

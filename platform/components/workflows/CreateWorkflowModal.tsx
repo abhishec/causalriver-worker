@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { ALL_WORKFLOW_TEMPLATES } from "@/lib/workflows/templates";
 import type { WorkflowTemplate } from "@/lib/workflows/types";
@@ -22,6 +23,8 @@ interface StepEntry {
 }
 
 export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCreated }: CreateWorkflowModalProps) {
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
   const [tab, setTab] = useState<Tab>(prefillSteps?.length ? "chain" : "template");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -123,7 +126,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -160,13 +163,15 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }
   }
 
-  return (
+  if (!portalTarget) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] overflow-hidden flex flex-col">
@@ -326,6 +331,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget
   );
 }

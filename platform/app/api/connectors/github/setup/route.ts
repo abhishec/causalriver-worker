@@ -160,7 +160,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("GitHub setup error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

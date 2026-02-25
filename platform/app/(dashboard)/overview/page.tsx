@@ -74,7 +74,7 @@ export default async function OverviewPage() {
       .from("cost_budget_config")
       .select("*")
       .eq("organization_id", workspaceId)
-      .single()),
+      .maybeSingle()),
 
     // Recent causal discoveries for intelligence stream
     safe(supabase
@@ -385,7 +385,7 @@ export default async function OverviewPage() {
 
   const orgMeta = orgMetaResult.data as { name?: string; is_design_partner?: boolean } | null;
   const isDesignPartner = orgMeta?.is_design_partner ?? false;
-  const orgDisplayName = orgMeta?.name ?? "your workspace";
+  const orgDisplayName = orgMeta?.name ?? "your AI Worker";
 
   const connectors = (connectorsResult.data || []).map((c: any) => ({
     type: c.connector_type,
@@ -414,7 +414,7 @@ export default async function OverviewPage() {
       totalEdges={totalEdges}
       signalsToday={signalsToday}
       predictionAccuracy={predictionAccuracy}
-      connectorsActive={latest?.regions_active?.length ?? 0}
+      connectorsActive={connectorsResult.data?.length ?? 0}
       costToday={costToday}
       dailyBudget={dailyBudget}
       monthlyBudget={monthlyBudget}

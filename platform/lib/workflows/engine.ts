@@ -302,7 +302,7 @@ export async function executeWorkflow(
       .from("workflows")
       .select("total_runs")
       .eq("id", workflow.id)
-      .single();
+      .maybeSingle();
 
     await supabase
       .from("workflows")
@@ -323,6 +323,7 @@ export async function executeWorkflow(
     source_domain: "brain.workflows",
     signal_type: "workflow_completed",
     signal_value: completedSteps / Math.max(workflow.steps.length, 1),
+    signal_timestamp: new Date().toISOString(),
     entity_type: "workflow_run",
     entity_id: runId,
     signal_metadata: {
@@ -423,7 +424,7 @@ async function executeStep(
       .from("agent_templates")
       .select("prompt, agent_config, service, command_id")
       .eq("id", step.agent_template_id)
-      .single();
+      .maybeSingle();
 
     // Resolve agent type from the template's command_id (maps to AGENT_TYPE_TO_BRAIN_AGENT)
     // Falls back to 'general' if not found
@@ -504,6 +505,7 @@ async function executeStep(
         source_domain: "brain.workflows",
         signal_type: "workflow_step_completed",
         signal_value: result.confidence || 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "workflow_run_step",
         entity_id: stepRecord.id || result.taskId,
         signal_metadata: {
@@ -619,6 +621,7 @@ async function executeStep(
         source_domain: "brain.workflows",
         signal_type: "workflow_step_failed",
         signal_value: -0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "workflow_run_step",
         entity_id: stepRecord.id || runId,
         signal_metadata: {

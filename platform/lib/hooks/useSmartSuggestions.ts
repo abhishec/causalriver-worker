@@ -58,7 +58,7 @@ export function useSmartSuggestions(
       setHealthScore(data.healthScore ?? null);
       setHealthStatus(data.healthStatus ?? "unknown");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to fetch suggestions";
+      const msg = "Failed to fetch suggestions";
       logger.warn("[useSmartSuggestions] Fetch error:", msg);
       setError(msg);
     } finally {

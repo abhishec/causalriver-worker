@@ -54,7 +54,7 @@ export function SimulatorClient({ entities, domains }: SimulatorClientProps) {
       if (!res.ok) throw new Error(data.error || "Simulation failed");
       setResults(data.cascade || []);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Simulation failed");
       setResults(null);
     } finally {
       setLoading(false);

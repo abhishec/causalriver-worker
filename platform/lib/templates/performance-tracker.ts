@@ -64,7 +64,7 @@ export async function recordTemplateExecution(
       .from("agent_templates")
       .select("usage_count, success_count, failure_count, avg_confidence")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) return;
 
@@ -104,7 +104,7 @@ export async function getTemplatePerformance(
     .from("agent_templates")
     .select("id, organization_id, usage_count, success_count, failure_count, avg_confidence, evolution_status")
     .eq("id", templateId)
-    .single();
+    .maybeSingle();
 
   if (!template) return null;
 
@@ -154,7 +154,7 @@ export async function evolveTemplate(
       .from("agent_templates")
       .select("*")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!original) {
       return { evolved: false, reason: "Template not found" };
@@ -210,6 +210,7 @@ export async function evolveTemplate(
       source_domain: "brain.templates",
       signal_type: "evolution_started",
       signal_value: 0.5,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "template_evolution",
       signal_metadata: {
         original_id: templateId,
@@ -231,7 +232,7 @@ export async function evolveTemplate(
     };
   } catch (err) {
     logger.error("[TemplateTracker] Evolution failed:", err);
-    return { evolved: false, reason: err instanceof Error ? err.message : "Unknown error" };
+    return { evolved: false, reason: "Evolution failed" };
   }
 }
 
@@ -252,7 +253,7 @@ export async function getTemplateForExecution(
     .eq("organization_id", organizationId)
     .eq("status", "running")
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (!abTest) {
     return { templateId, isVariant: false };
@@ -284,7 +285,7 @@ export async function recordABResult(
     .from("template_ab_tests")
     .select("*")
     .eq("id", abTestId)
-    .single();
+    .maybeSingle();
 
   if (!test || test.status !== "running") {
     return { concluded: false };

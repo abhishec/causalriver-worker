@@ -37,7 +37,7 @@ export async function PATCH(request: NextRequest) {
       .select("role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     const isAuthorized =
       membership?.is_platform_admin ||
@@ -52,7 +52,7 @@ export async function PATCH(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!adminCheck) {
         return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
 
       if (nameError) {
         logger.error("[workspace/update] Failed to update name:", nameError);
-        return NextResponse.json({ error: "Failed to update workspace name" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to update name" }, { status: 500 });
       }
     }
 
@@ -83,10 +83,11 @@ export async function PATCH(request: NextRequest) {
 
     if (hasBudgetUpdate) {
       const budgetUpdate: Record<string, number> = {};
-      if (daily_llm_budget !== undefined) budgetUpdate.daily_llm_budget = Number(daily_llm_budget);
-      if (monthly_llm_budget !== undefined) budgetUpdate.monthly_llm_budget = Number(monthly_llm_budget);
-      if (monthly_aws_budget !== undefined) budgetUpdate.monthly_aws_budget = Number(monthly_aws_budget);
-      if (alert_threshold_pct !== undefined) budgetUpdate.alert_threshold_pct = Number(alert_threshold_pct);
+      const safeNum = (v: unknown) => { const n = Number(v); return isNaN(n) ? 0 : n; };
+      if (daily_llm_budget !== undefined) budgetUpdate.daily_llm_budget = safeNum(daily_llm_budget);
+      if (monthly_llm_budget !== undefined) budgetUpdate.monthly_llm_budget = safeNum(monthly_llm_budget);
+      if (monthly_aws_budget !== undefined) budgetUpdate.monthly_aws_budget = safeNum(monthly_aws_budget);
+      if (alert_threshold_pct !== undefined) budgetUpdate.alert_threshold_pct = safeNum(alert_threshold_pct);
 
       const { error: budgetError } = await admin
         .from("cost_budget_config")

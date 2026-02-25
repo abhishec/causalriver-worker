@@ -353,8 +353,9 @@ export function createLongContextManager(config: LongContextConfig = {}) {
       }
 
       const totalUsed = systemTokens + sectionTokens + historyTokens;
-      const preservationScore = keptSections.length > 0
-        ? keptSections.reduce((sum, s) => sum + s.relevance, 0) / enrichedSections.reduce((sum, s) => sum + s.relevance, 0)
+      const totalRelevance = enrichedSections.reduce((sum, s) => sum + s.relevance, 0);
+      const preservationScore = keptSections.length > 0 && totalRelevance > 0
+        ? keptSections.reduce((sum, s) => sum + s.relevance, 0) / totalRelevance
         : 0;
 
       return {

@@ -42,7 +42,7 @@ export async function checkRateLimit(
     .from('organization_settings')
     .select('rate_limits')
     .eq('organization_id', organizationId)
-    .single();
+    .maybeSingle();
 
   const limits: RateLimitConfig = {
     ...DEFAULT_LIMITS,

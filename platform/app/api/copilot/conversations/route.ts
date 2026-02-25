@@ -45,13 +45,13 @@ export async function GET(req: NextRequest) {
       .limit(50);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ conversations: data });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to list conversations" },
+      { error: "Failed to list conversations" },
       { status: 500 }
     );
   }
@@ -110,13 +110,14 @@ export async function POST(req: NextRequest) {
         })
         .eq("id", conversationId)
         .eq("user_id", user.id)
+        .eq("org_id", workspaceId as string)
         .select("id")
-        .single();
+        .maybeSingle();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal error" }, { status: 500 });
       }
-      return NextResponse.json({ id: data.id });
+      return NextResponse.json({ id: data?.id ?? conversationId });
     }
 
     // Create new conversation
@@ -130,16 +131,16 @@ export async function POST(req: NextRequest) {
         messages: messages || [],
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error || !data) {
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ id: data.id });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to save conversation" },
+      { error: "Failed to save conversation" },
       { status: 500 }
     );
   }

@@ -25,16 +25,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
     }
 
+    // Security: verify user belongs to this workspace (prevents IDOR)
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .maybeSingle();
+    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
     const admin = getAdminClient();
     const { data, error } = await admin
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       logger.error("[/api/workspace/services] query error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to load services" }, { status: 500 });
     }
 
     const settings = (data?.settings as Record<string, unknown>) ?? {};
@@ -46,7 +55,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error("[/api/workspace/services] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -84,7 +93,7 @@ export async function PUT(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["admin", "owner"].includes(membership.role)) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
@@ -95,7 +104,7 @@ export async function PUT(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     const currentSettings = (org?.settings as Record<string, unknown>) ?? {};
     const updatedSettings = { ...currentSettings, active_services: validServices };
@@ -107,14 +116,14 @@ export async function PUT(request: NextRequest) {
 
     if (updateErr) {
       logger.error("[/api/workspace/services] update error:", updateErr);
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, services: validServices });
   } catch (err) {
     logger.error("[/api/workspace/services] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

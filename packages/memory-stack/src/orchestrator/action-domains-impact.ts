@@ -261,7 +261,7 @@ async function analyzeWithClaude(
   const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'impact-analyze');
 
   const prompt = `You are an expert Site Reliability Engineer operating within NexusBrain's cognitive stack, analyzing the impact of a change. Provide a comprehensive impact analysis.
-\${brainSection}
+${brainSection}
 
 ## Change Details:
 **Type:** ${request.changeType}

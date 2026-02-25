@@ -40,7 +40,7 @@ export default async function CostsPage() {
       .from("cost_budget_config")
       .select("*")
       .eq("organization_id", workspaceId)
-      .single()),
+      .maybeSingle()),
   ]);
 
   return (

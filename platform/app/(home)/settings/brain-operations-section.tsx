@@ -137,7 +137,7 @@ export function BrainOperationsSection({ orgId, connectors }: BrainOperationsPro
         setBrainCycle((prev) => ({
           ...prev,
           running: false,
-          error: err.message || "Brain cycle failed",
+          error: "Brain cycle failed. Please try again.",
         }));
       }
     },
@@ -161,7 +161,7 @@ export function BrainOperationsSection({ orgId, connectors }: BrainOperationsPro
       setSyncAll((prev) => ({
         ...prev,
         running: false,
-        error: err.message || "Sync failed",
+        error: "Sync failed. Please try again.",
       }));
     }
   }, [syncAll.lastRun]);

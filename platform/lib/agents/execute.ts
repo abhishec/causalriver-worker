@@ -178,7 +178,7 @@ export async function executeAgent(
     .from("brain_agent_tasks")
     .select("status, confidence_score, result_summary, result_artifacts, error_message, result_metadata")
     .eq("id", taskId)
-    .single();
+    .maybeSingle();
 
   const durationMs = Date.now() - startTime;
 
@@ -480,6 +480,7 @@ async function runBrainRuntime(
     source_domain: "brain.agents",
     signal_type: `agent_${agentType}_completed`,
     signal_value: confidence,
+    signal_timestamp: new Date().toISOString(),
     entity_type: "brain_agent_task",
     entity_id: taskId,
     signal_metadata: {

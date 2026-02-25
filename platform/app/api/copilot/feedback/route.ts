@@ -38,17 +38,24 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate correction length
+    if (correction && (typeof correction !== "string" || correction.length > 5000)) {
+      return NextResponse.json({
+        error: "correction must be a string under 5000 characters",
+      }, { status: 400 });
+    }
+
     // Verify user belongs to this org
     const { data: feedbackMembership } = await supabase
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!feedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -69,7 +76,8 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
+      logger.error("[feedback] DB insert error:", insertError.message);
+      return NextResponse.json({ error: "Failed to save feedback" }, { status: 500 });
     }
 
     // If correction provided, immediately learn from it
@@ -77,14 +85,35 @@ export async function POST(request: NextRequest) {
       await learnFromCorrection(service, organizationId, correction, domain, conversationId);
     }
 
+    // Map service domain for per-AI-Worker brain scoping
+    const domainPrefix = domain === "seaas" || domain?.startsWith("engineering")
+      ? "engineering" : domain === "aas" || domain?.startsWith("finance")
+        ? "finance" : "general";
+    const sourceDomain = `${domainPrefix}.copilot.feedback`;
+
+    // ── WIRE: Feedback → prediction_records → accuracy metrics → intelligence score
+    // Without this: accuracy.byDomain stays empty, intelligence score never reflects feedback quality
+    await Promise.resolve(service.from("prediction_records").insert({
+      organization_id: organizationId,
+      domain: sourceDomain,
+      predicted_outcome: "helpful_response",
+      actual_outcome: rating === "helpful" ? "helpful_response" : "unhelpful_response",
+      was_correct: rating === "helpful",
+      confidence: 0.7,
+      verified_at: new Date().toISOString(),
+    })).catch((err: unknown) => {
+      logger.warn("[feedback] prediction_records insert non-fatal:", err instanceof Error ? err.message : String(err));
+    });
+
     // Emit feedback signal to Brain (meta-learning)
     // Tagged as 'outcome' so Loop 1B (Embodied Grounding) picks it up
     // Non-blocking: feedback was already saved to copilot_response_feedback above
     await Promise.resolve(service.from("cross_domain_signals").insert({
       organization_id: organizationId,
-      source_domain: "brain.feedback",
+      source_domain: sourceDomain,
       signal_type: `copilot_feedback_${rating}`,
       signal_value: rating === "helpful" ? 1 : rating === "not_helpful" ? 0 : -1,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "copilot_conversation",
       entity_id: conversationId,
       signal_metadata: {
@@ -124,8 +153,8 @@ export async function POST(request: NextRequest) {
       learningImpact: rating === "incorrect" ? "high" : rating === "helpful" ? "medium" : "low",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[CopilotFeedback] POST Error:", error);
+    return NextResponse.json({ error: "Failed to process feedback" }, { status: 500 });
   }
 }
 
@@ -148,11 +177,11 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!getFeedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -197,8 +226,8 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[CopilotFeedback] GET Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

@@ -78,7 +78,7 @@ export interface BrainEvolutionState {
     totalRules: number;
     totalPredictions: number;
     verifiedPredictions: number;
-    cognitiveLayersActive: number; // Out of 15
+    cognitiveLayersActive: number; // Out of 30
     // Federation-aware knowledge metrics (THE NETWORK EFFECT)
     federatedCoreEdges: number;      // CORE brain edges available to this org
     isFederating: boolean;           // Is org contributing to collective learning?
@@ -281,6 +281,7 @@ export async function runBrainEvolutionCycle(
         source_domain: 'brain.evolution',
         signal_type: 'accuracy_degradation_alert',
         signal_value: accuracy.improvementRate, // Negative value = degrading
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain',
         entity_id: organizationId,
         signal_metadata: {
@@ -306,6 +307,7 @@ export async function runBrainEvolutionCycle(
         source_domain: 'brain.evolution',
         signal_type: 'overconfidence_correction',
         signal_value: calibration.overconfidenceRatio,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain',
         entity_id: organizationId,
         signal_metadata: {
@@ -374,7 +376,7 @@ async function verifyPendingPredictions(
       .from('cross_domain_signals')
       .select('signal_type, signal_value, created_at')
       .eq('organization_id', organizationId)
-      .eq('source_domain', prediction.domain)
+      .like('source_domain', `${prediction.domain}%`)
       .eq('entity_type', prediction.entity_type)
       .eq('entity_id', prediction.entity_id)
       .gt('created_at', prediction.created_at)
@@ -480,7 +482,7 @@ async function updateCausalWeightsBayesian(
       .from('prediction_records')
       .select('domain, entity_type, source_rule_id')
       .eq('id', v.predictionId)
-      .single();
+      .maybeSingle();
 
     if (!pred) continue;
 
@@ -507,44 +509,49 @@ async function updateCausalWeightsBayesian(
     if (!edges?.length) continue;
 
     for (const edge of edges) {
-      // Bayesian update: Beta(α, β) → Beta(α + correct, β + incorrect)
-      // Start with weak prior: Alpha=2, Beta=2 (uniform-ish)
-      const priorAlpha = Math.max(2, (edge.evidence_weight ?? 1) * 10);
-      const priorBeta = Math.max(2, (1 - (edge.evidence_weight ?? 0.5)) * 10);
+      try {
+        // Bayesian update: Beta(α, β) → Beta(α + correct, β + incorrect)
+        // Start with weak prior: Alpha=2, Beta=2 (uniform-ish)
+        const priorAlpha = Math.max(2, (edge.evidence_weight ?? 1) * 10);
+        const priorBeta = Math.max(2, (1 - (edge.evidence_weight ?? 0.5)) * 10);
 
-      const posteriorAlpha = priorAlpha + correct;
-      const posteriorBeta = priorBeta + incorrect;
+        const posteriorAlpha = priorAlpha + correct;
+        const posteriorBeta = priorBeta + incorrect;
 
-      // New weight is the posterior mean
-      const newWeight = posteriorAlpha / (posteriorAlpha + posteriorBeta);
-      const oldWeight = edge.evidence_weight ?? 0.5;
+        // New weight is the posterior mean
+        const newWeight = posteriorAlpha / (posteriorAlpha + posteriorBeta);
+        const oldWeight = edge.evidence_weight ?? 0.5;
 
-      // Only update if weight changed meaningfully
-      if (Math.abs(newWeight - oldWeight) < 0.001) continue;
+        // Only update if weight changed meaningfully
+        if (Math.abs(newWeight - oldWeight) < 0.001) continue;
 
-      // Update the edge
-      await supabase
-        .from('causal_relationships_statistical')
-        .update({
-          evidence_weight: newWeight,
-          updated_at: new Date().toISOString(),
-          last_validated_at: new Date().toISOString(),
-        })
-        .eq('id', edge.id);
+        // Update the edge
+        await supabase
+          .from('causal_relationships_statistical')
+          .update({
+            evidence_weight: newWeight,
+            updated_at: new Date().toISOString(),
+            last_validated_at: new Date().toISOString(),
+          })
+          .eq('id', edge.id);
 
-      // Record weight update history
-      await supabase
-        .from('weight_update_history')
-        .insert({
-          organization_id: organizationId,
-          relationship_id: edge.id,
-          old_weight: oldWeight,
-          new_weight: newWeight,
-          update_reason: `bayesian_update: ${correct} correct, ${incorrect} incorrect (alpha=${posteriorAlpha.toFixed(1)}, beta=${posteriorBeta.toFixed(1)})`,
-          prediction_accuracy: correct / (correct + incorrect),
-        });
+        // Record weight update history
+        await supabase
+          .from('weight_update_history')
+          .insert({
+            organization_id: organizationId,
+            relationship_id: edge.id,
+            old_weight: oldWeight,
+            new_weight: newWeight,
+            update_reason: `bayesian_update: ${correct} correct, ${incorrect} incorrect (alpha=${posteriorAlpha.toFixed(1)}, beta=${posteriorBeta.toFixed(1)})`,
+            prediction_accuracy: (correct + incorrect) > 0 ? correct / (correct + incorrect) : 0,
+          });
 
-      updatedCount++;
+        updatedCount++;
+      } catch {
+        // Single edge failure should not stop the entire weight update cycle
+        continue;
+      }
     }
   }
 
@@ -610,7 +617,7 @@ async function computeAccuracyMetrics(
       domain,
       totalPredictions: total,
       correctPredictions: correct,
-      accuracy: correct / total,
+      accuracy: total > 0 ? correct / total : 0,
       brierScore,
       trend: secondHalfAcc > firstHalfAcc + 0.05 ? 'improving'
         : secondHalfAcc < firstHalfAcc - 0.05 ? 'degrading'
@@ -621,7 +628,7 @@ async function computeAccuracyMetrics(
 
   // Overall accuracy
   const totalCorrect = predictions.filter(p => p.was_correct).length;
-  const overall = totalCorrect / predictions.length;
+  const overall = predictions.length > 0 ? totalCorrect / predictions.length : 0.5;
 
   // Week-over-week accuracy (last 12 weeks)
   const weekOverWeek: number[] = [];
@@ -874,7 +881,10 @@ async function computeKnowledgeGrowth(
     totalRules: rules.count ?? 0,
     totalPredictions: predictions.count ?? 0,
     verifiedPredictions: verified.count ?? 0,
-    cognitiveLayersActive: Math.min(15, cognitiveLayersActive + 9), // Add LEAP layers
+    // Scale 6 table-presence checks to 30 layers:
+    // Base 9 (L1-L9: sensory/routing always active) + each check activates ~3.5 more layers (L10-L30)
+    // 0 checks → 9/30, 3 checks → 20/30, 6 checks → 30/30
+    cognitiveLayersActive: Math.min(30, 9 + Math.round(cognitiveLayersActive * 3.5)),
     // Federation-aware knowledge metrics (THE NETWORK EFFECT)
     federatedCoreEdges: coreEdgesCount,
     isFederating,
@@ -970,11 +980,12 @@ function computeIntelligenceScore(
   velocity: BrainEvolutionState['learningVelocity']
 ): number {
   // Accuracy component (0-35 points)
-  const accuracyScore = Math.min(1, accuracy.overall) * 35;
+  const accuracyScore = Math.min(1, isFinite(accuracy.overall) ? accuracy.overall : 0.5) * 35;
 
   // Calibration component (0-25 points)
   // Brier score: 0 = perfect, 0.25 = no skill, 1 = worst
-  const calibrationNormalized = Math.max(0, 1 - calibration.brierScore * 4); // 0 → 1, 0.25 → 0
+  const brierScore = isFinite(calibration.brierScore) ? calibration.brierScore : 0.25;
+  const calibrationNormalized = Math.max(0, 1 - brierScore * 4); // 0 → 1, 0.25 → 0
   const calibrationScore = calibrationNormalized * 25;
 
   // Knowledge component (0-20 points)
@@ -991,8 +1002,10 @@ function computeIntelligenceScore(
   const velocityNormalized = Math.min(1, totalActivity / 50); // 50+ activities/week = max
   const velocityScore = velocityNormalized * 20;
 
-  // Total (0-100)
-  return Math.round(Math.min(100, accuracyScore + calibrationScore + knowledgeScore + velocityScore));
+  // Total (0-100) — guard against NaN from upstream bad data
+  const total = accuracyScore + calibrationScore + knowledgeScore + velocityScore;
+  if (!isFinite(total)) return 0;
+  return Math.round(Math.min(100, total));
 }
 
 // ============================================================================
@@ -1064,6 +1077,7 @@ async function emitEvolutionSignal(
     source_domain: 'brain.evolution',
     signal_type: 'brain_evolution_cycle',
     signal_value: state.intelligenceScore,
+    signal_timestamp: new Date().toISOString(),
     entity_type: 'brain',
     entity_id: organizationId,
     signal_metadata: {

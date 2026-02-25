@@ -116,7 +116,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
         core.push(m);
         continue;
       }
-      const key = m.workspace.customer_name ?? "My Workspaces";
+      const key = m.workspace.customer_name ?? "My AI Workers";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
@@ -127,7 +127,14 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
   if (isLoading || !currentWorkspace) {
     return (
       <div className={cn("shrink-0 border-t border-border-subtle", collapsed ? "px-2 py-3" : "px-3 py-3")}>
-        <div className={cn("flex items-center", collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5")}>
+        {/* Use <button> (not <div>) to match the loaded trigger and avoid hydration mismatch */}
+        <button
+          disabled
+          className={cn(
+            "flex items-center w-full rounded-lg",
+            collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5"
+          )}
+        >
           <div className="w-8 h-8 rounded-full bg-surface-hover animate-pulse shrink-0" />
           {!collapsed && (
             <div className="flex-1 min-w-0 space-y-1.5">
@@ -135,7 +142,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               <div className="h-2.5 w-14 bg-surface-hover rounded animate-pulse" />
             </div>
           )}
-        </div>
+        </button>
       </div>
     );
   }
@@ -273,7 +280,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                <span className="font-medium">Create Workspace</span>
+                <span className="font-medium">Create AI Worker</span>
               </Link>
 
               {isPlatformAdmin && (
@@ -285,7 +292,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                   </svg>
-                  <span>Manage All Workspaces</span>
+                  <span>Manage All AI Workers</span>
                 </Link>
               )}
             </div>

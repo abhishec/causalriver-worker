@@ -155,17 +155,17 @@ export function BRSBreakdown({
     },
     {
       label: 'Gatekeeper (Centrality)',
-      value: Math.min(maxBetweenness * 100, 10),
+      value: Math.min((maxBetweenness ?? 0) * 100, 10),
       max: 10,
-      raw: (maxBetweenness * 100).toFixed(1),
+      raw: ((maxBetweenness ?? 0) * 100).toFixed(1),
       color: '#a78bfa',
     },
     {
       label: 'Latency Spike',
-      value: Math.min(avgLatencyHours / 48, 1.0) * 10,
+      value: Math.min((avgLatencyHours ?? 0) / 48, 1.0) * 10,
       max: 10,
-      raw: `${avgLatencyHours.toFixed(1)}h avg`,
-      color: avgLatencyHours > 48 ? '#ef4444' : '#22c55e',
+      raw: `${(avgLatencyHours ?? 0).toFixed(1)}h avg`,
+      color: (avgLatencyHours ?? 0) > 48 ? '#ef4444' : '#22c55e',
     },
   ];
 

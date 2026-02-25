@@ -206,11 +206,11 @@ export function MembersTab({ orgId }: { orgId: string }) {
                         {(m.name || m.email || "?").charAt(0)}
                       </span>
                     </div>
-                    <div>
-                      <div className="font-medium text-sm">
-                        {m.name || m.email.split("@")[0]}
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">
+                        {m.name || m.email?.split("@")[0]}
                       </div>
-                      <div className="text-xs text-muted">{m.email}</div>
+                      <div className="text-xs text-muted truncate">{m.email}</div>
                     </div>
                     {m.is_platform_admin && (
                       <span className="text-[10px] font-medium uppercase tracking-wider bg-accent/10 text-accent px-1.5 py-0.5 rounded">
@@ -251,7 +251,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
                   )}
                 </td>
                 <td className="py-3 px-4 text-xs text-muted font-mono">
-                  {new Date(m.joined_at).toLocaleDateString()}
+                  {m.joined_at ? new Date(m.joined_at).toLocaleDateString() : "—"}
                 </td>
                 {canManage && (
                   <td className="py-3 px-4 text-right">
@@ -294,7 +294,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
                     key={inv.id}
                     className="border-b border-border-subtle hover:bg-surface-hover transition-colors"
                   >
-                    <td className="py-2.5 px-4 text-sm">{inv.invitee_email}</td>
+                    <td className="py-2.5 px-4 text-sm truncate max-w-[200px]">{inv.invitee_email}</td>
                     <td className="py-2.5 px-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
@@ -305,7 +305,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
                       </span>
                     </td>
                     <td className="py-2.5 px-4 text-xs text-muted font-mono">
-                      {new Date(inv.expires_at).toLocaleDateString()}
+                      {inv.expires_at ? new Date(inv.expires_at).toLocaleDateString() : "—"}
                     </td>
                     {canManage && (
                       <td className="py-2.5 px-4 text-right">

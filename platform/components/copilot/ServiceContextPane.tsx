@@ -45,7 +45,7 @@ function domainToCard(d: DomainEntry): ArtifactCard {
     id: d.id,
     label: d.label,
     emoji: d.icon,
-    description: d.description.split("·")[0].split("—")[0].trim().slice(0, 50),
+    description: (d.description || "").split("·")[0].split("—")[0].trim().slice(0, 50),
     category: d.category,
   };
 }

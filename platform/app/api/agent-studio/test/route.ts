@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[AgentStudioTest] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

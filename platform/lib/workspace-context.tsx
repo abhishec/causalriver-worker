@@ -256,6 +256,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setCurrentWorkspaceId(workspaceId);
       localStorage.setItem(STORAGE_KEY, workspaceId);
+      // Bust membership cache so next reload fetches fresh data
+      localStorage.removeItem(CACHE_KEY);
       // Set both new and old cookie for backward compat with server components
       document.cookie = `${STORAGE_KEY}=${workspaceId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
       document.cookie = `${OLD_STORAGE_KEY}=${workspaceId};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;

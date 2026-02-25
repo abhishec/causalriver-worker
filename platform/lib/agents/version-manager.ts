@@ -68,7 +68,7 @@ export async function createVersion(
       .from("agent_templates")
       .select("*")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (tplError || !template) {
       logger.error("[VersionManager] Template not found:", templateId);
@@ -164,7 +164,8 @@ export async function getVersionHistory(
       if (fallback) {
         return fallback
           .map((m: { content: string; created_at: string }) => {
-            const parsed = JSON.parse(m.content);
+            let parsed: any;
+            try { parsed = JSON.parse(m.content); } catch { return null; }
             if (parsed.templateId !== templateId) return null;
             return {
               id: m.created_at,
@@ -204,7 +205,7 @@ export async function rollbackToVersion(
       .select("snapshot, version")
       .eq("id", versionId)
       .eq("template_id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!versionRecord) return false;
 

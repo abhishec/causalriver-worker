@@ -11,6 +11,16 @@ export const dynamic = "force-dynamic";
 
 async function validateJira(domain: string, email: string, apiToken: string) {
   const baseUrl = domain.includes("://") ? domain.replace(/\/+$/, "") : `https://${domain}`;
+  // SSRF protection: block private/internal IP ranges
+  try {
+    const parsed = new URL(baseUrl);
+    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|localhost|::1)/i.test(parsed.hostname)) {
+      throw new Error("Private/internal domains are not allowed");
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("not allowed")) throw e;
+    throw new Error("Invalid domain URL");
+  }
   const auth = Buffer.from(`${email}:${apiToken}`).toString("base64");
   const res = await fetch(`${baseUrl}/rest/api/3/myself`, {
     headers: { Authorization: `Basic ${auth}`, Accept: "application/json" },
@@ -101,7 +111,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ instances: masked });
   } catch (err: any) {
     logger.error("[instances/GET]", err);
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -252,8 +262,8 @@ export async function POST(request: NextRequest) {
           signals_count: 0,
         })
         .select("id")
-        .single();
-      if (error) throw error;
+        .maybeSingle();
+      if (error || !inserted) throw error || new Error("Insert returned no rows");
       connectorId = inserted.id;
     }
 
@@ -265,7 +275,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[instances/POST]", err);
-    return NextResponse.json({ error: err.message || "Validation failed" }, { status: 400 });
+    return NextResponse.json({ error: "Internal error" }, { status: 400 });
   }
 }
 
@@ -303,7 +313,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     logger.error("[instances/PUT]", err);
-    return NextResponse.json({ error: err.message || "Update failed" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -337,6 +347,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     logger.error("[instances/DELETE]", err);
-    return NextResponse.json({ error: err.message || "Delete failed" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

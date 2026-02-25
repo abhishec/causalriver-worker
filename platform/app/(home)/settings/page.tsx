@@ -28,13 +28,13 @@ export default async function SettingsPage() {
       .from("organizations")
       .select("id, name, slug, plan, is_core_brain, customer_id")
       .eq("id", workspaceId)
-      .single()),
+      .maybeSingle()),
 
     safe(supabase
       .from("cost_budget_config")
       .select("*")
       .eq("organization_id", workspaceId)
-      .single()),
+      .maybeSingle()),
 
     safe(supabase
       .from("api_keys")
@@ -75,7 +75,7 @@ export default async function SettingsPage() {
         .from("organizations")
         .select("id, name, slug, plan, is_core_brain, customer_id")
         .eq("id", recoveryCustomer.primary_org_id)
-        .single());
+        .maybeSingle());
       if (recoveredOrg) {
         // Use recovered org data — reassign orgData
         (orgResult as any).data = recoveredOrg;

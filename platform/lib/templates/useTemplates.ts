@@ -74,7 +74,7 @@ export function useTemplates(organizationId?: string): UseTemplatesReturn {
       .catch((err) => {
         if (cancelled) return;
         // Silently handle abort/timeout — templates are optional
-        setError(err.name === "AbortError" ? null : err.message);
+        setError(err instanceof Error && err.name === "AbortError" ? null : "Failed to load templates");
         setLoading(false);
       })
       .finally(() => clearTimeout(timeout));

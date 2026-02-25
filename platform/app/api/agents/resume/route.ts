@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (memberOrgIds.length === 0) {
       return NextResponse.json(
-        { error: "Not a member of any workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       .select("id, organization_id, status, prompt, agent_type, auto_execute_threshold, created_by")
       .eq("id", taskId)
       .in("organization_id", memberOrgIds)
-      .single();
+      .maybeSingle();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       .eq("task_id", taskId)
       .order("step_number", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!checkpoint) {
       return NextResponse.json(
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         .from("brain_agent_tasks")
         .update({
           status: "failed",
-          error_message: `Resume failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+          error_message: "Resume failed",
           completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
       .from("brain_agent_tasks")
       .select("status")
       .eq("id", taskId)
-      .single();
+      .maybeSingle();
 
     return NextResponse.json({
       success: true,
@@ -172,9 +172,8 @@ export async function POST(request: NextRequest) {
       message: `Agent resumed from step ${resumeFromStep} (${phase}). GET /api/agents/tasks?taskId=${taskId}`,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[AgentResume] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[AgentResume] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -344,6 +343,7 @@ async function resumeAgentExecution(
       source_domain: "brain.agents",
       signal_type: `agent_${task.agent_type}_resumed_completed`,
       signal_value: brainResult.confidence,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "brain_agent_task",
       entity_id: taskId,
       signal_metadata: {

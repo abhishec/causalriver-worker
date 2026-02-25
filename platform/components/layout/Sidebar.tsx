@@ -4,7 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { UserMenu } from "./UserMenu";
+// Dynamic import with ssr: false prevents hydration mismatch caused by
+// WorkspaceProvider reading localStorage in useState lazy initializers.
+// Server renders null here; client renders the real menu after mount.
+import dynamic from "next/dynamic";
+const UserMenu = dynamic(
+  () => import("./UserMenu").then((m) => m.UserMenu),
+  { ssr: false }
+);
 import { useChatHistory, type ChatHistoryItem } from "@/lib/use-chat-history";
 import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/SlashCommandPicker";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";
@@ -70,34 +77,93 @@ const DEFAULT_CONTENT_WIDTH = 212;
 const MIN_CONTENT_WIDTH = 160;
 const MAX_CONTENT_WIDTH = 340;
 
-/* ── Service Tab Pills ─────────────────────────────────────────────────── */
+/* ── Service label map (for display) ─────────────────────────────────── */
 
-const SERVICE_TABS: { id: ServiceMode; label: string }[] = [
-  { id: "seaas", label: "SE-aaS" },
-  { id: "aas", label: "AAAS" },
-  { id: "general", label: "General" },
-];
+const SERVICE_LABELS: Record<ServiceMode, string> = {
+  seaas: "SE-aaS",
+  aas: "AAAS",
+  general: "General",
+};
 
-function ServiceTabsPills({ activeService, onServiceChange }: {
+/* ── Recommended connectors per service ──────────────────────────────── */
+
+const SERVICE_CONNECTORS: Record<ServiceMode, { type: string; label: string }[]> = {
+  seaas: [
+    { type: "github", label: "GitHub" },
+    { type: "jira", label: "Jira" },
+    { type: "slack", label: "Slack" },
+    { type: "linear", label: "Linear" },
+  ],
+  aas: [
+    { type: "s3-storage", label: "S3 Storage" },
+    { type: "slack", label: "Slack" },
+    { type: "hubspot", label: "HubSpot" },
+    { type: "stripe", label: "Stripe" },
+  ],
+  general: [
+    { type: "github", label: "GitHub" },
+    { type: "jira", label: "Jira" },
+    { type: "slack", label: "Slack" },
+    { type: "s3-storage", label: "S3 Storage" },
+  ],
+};
+
+/* ── Connections Section ─────────────────────────────────────────────── */
+
+function ConnectionsSection({ activeService, workspaceId }: {
   activeService: ServiceMode;
-  onServiceChange: (svc: ServiceMode) => void;
+  workspaceId: string | undefined;
 }) {
+  const [connectedTypes, setConnectedTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    let cancelled = false;
+    fetch(`/api/connectors/instances?type=all`)
+      .then((r) => (r.ok ? r.json() : { instances: [] }))
+      .then((json) => {
+        if (cancelled) return;
+        const types = (json.instances || []).map((c: { connector_type?: string }) => c.connector_type).filter(Boolean);
+        setConnectedTypes(types);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [workspaceId]);
+
+  const recommended = SERVICE_CONNECTORS[activeService] || [];
+
   return (
-    <div className="flex items-center gap-1 px-3 py-2 shrink-0">
-      {SERVICE_TABS.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onServiceChange(tab.id)}
-          className={cn(
-            "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all",
-            activeService === tab.id
-              ? "bg-accent/10 text-accent border border-accent/20"
-              : "text-muted-foreground hover:text-foreground hover:bg-surface-hover border border-transparent"
-          )}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="px-3 py-2 shrink-0">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted/70 mb-1.5">
+        Connections
+      </div>
+      <div className="space-y-1">
+        {recommended.map((conn) => {
+          const isConnected = connectedTypes.includes(conn.type);
+          return (
+            <div key={conn.type} className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center gap-1.5">
+                {isConnected ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full border border-muted-foreground/40 shrink-0" />
+                )}
+                <span className={isConnected ? "text-foreground" : "text-muted-foreground"}>
+                  {conn.label}
+                </span>
+              </div>
+              {!isConnected && (
+                <Link
+                  href={`/connectors?setup=${conn.type}`}
+                  className="text-[10px] text-accent hover:text-accent/80"
+                >
+                  Connect
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -112,14 +178,16 @@ interface BrainEvolution {
   interventions?: { totalActedOn: number; successRate: number };
 }
 
-function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined }) {
+function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string | undefined; serviceMode?: string }) {
   const [data, setData] = useState<BrainEvolution | null>(null);
 
   useEffect(() => {
     if (!workspaceId) return;
     let cancelled = false;
     const load = () => {
-      fetch(`/api/brain/evolution?organizationId=${workspaceId}`)
+      const params = new URLSearchParams({ organizationId: workspaceId });
+      if (serviceMode) params.set("serviceMode", serviceMode);
+      fetch(`/api/brain/evolution?${params.toString()}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((json) => {
           if (cancelled) return;
@@ -133,34 +201,34 @@ function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined })
     // Refresh every 60s to show live learning
     const interval = setInterval(load, 60_000);
     return () => { cancelled = true; clearInterval(interval); };
-  }, [workspaceId]);
+  }, [workspaceId, serviceMode]);
 
-  if (!data) return null;
+  if (!data || !data.accuracy || !data.knowledge) return null;
 
   const trendIcon = data.accuracy.trend === "improving" ? "\u2191" : data.accuracy.trend === "degrading" ? "\u2193" : "\u2192";
   const trendColor = data.accuracy.trend === "improving" ? "text-emerald-400" : data.accuracy.trend === "degrading" ? "text-red-400" : "text-muted-foreground";
 
   // Hours saved estimation: verified predictions × 2h + interventions × 4h
   const hoursSaved = Math.round(
-    (data.knowledge.verifiedPredictions * 2) + ((data.interventions?.totalActedOn ?? 0) * 4)
+    ((data.knowledge.verifiedPredictions ?? 0) * 2) + ((data.interventions?.totalActedOn ?? 0) * 4)
   );
 
   return (
     <div className="mx-3 px-3 py-2.5 rounded-lg bg-gradient-to-r from-accent/5 to-emerald-500/5 border border-accent/10 shrink-0">
       <div className="flex items-center gap-2 mb-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Brain Learning</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Worker Brain</span>
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
         <div className="flex items-baseline gap-1">
           <span className="text-sm font-bold text-accent">{data.intelligenceScore}</span>
           <span className="text-[9px] text-muted-foreground">IQ</span>
-          {data.accuracy.trend === "improving" && (
+          {data.accuracy?.trend === "improving" && (
             <span className="text-[9px] text-emerald-400">{"\u2191"}</span>
           )}
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{Math.round(data.accuracy.overall * 100)}%</span>
+          <span className="text-sm font-bold text-foreground">{Math.round(Number.isFinite(data.accuracy?.overall) ? data.accuracy.overall * 100 : 0)}%</span>
           <span className={`text-[9px] ${trendColor}`}>{trendIcon}</span>
           <span className="text-[9px] text-muted-foreground">accuracy</span>
         </div>
@@ -171,28 +239,28 @@ function BrainStatusBanner({ workspaceId }: { workspaceId: string | undefined })
           </div>
         )}
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{data.knowledge.verifiedPredictions}</span>
+          <span className="text-sm font-bold text-foreground">{data.knowledge?.verifiedPredictions ?? 0}</span>
           <span className="text-[9px] text-muted-foreground">predictions</span>
         </div>
       </div>
       {/* Learning velocity bar */}
-      {data.knowledge.cognitiveLayersActive > 0 && (
+      {(data.knowledge?.cognitiveLayersActive ?? 0) > 0 && (
         <div className="mt-2">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-0.5">
             <span>Cognitive Layers</span>
-            <span className="tabular-nums">{data.knowledge.cognitiveLayersActive}/15</span>
+            <span className="tabular-nums">{data.knowledge?.cognitiveLayersActive ?? 0}/30</span>
           </div>
           <div className="h-1 rounded-full bg-border-subtle overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
-              style={{ width: `${Math.round((data.knowledge.cognitiveLayersActive / 15) * 100)}%` }}
+              style={{ width: `${Math.round(Number.isFinite(data.knowledge?.cognitiveLayersActive) ? (data.knowledge.cognitiveLayersActive / 30) * 100 : 0)}%` }}
             />
           </div>
         </div>
       )}
-      {data.accuracy.improvementRate > 0 && (
+      {(data.accuracy?.improvementRate ?? 0) > 0 && (
         <div className="mt-1.5 text-[10px] text-emerald-400">
-          +{data.accuracy.improvementRate.toFixed(1)}% improvement this week
+          +{(Number.isFinite(data.accuracy?.improvementRate) ? data.accuracy.improvementRate : 0).toFixed(1)}% improvement this week
         </div>
       )}
     </div>
@@ -244,7 +312,7 @@ function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
 /* ── Commands Section ────────────────────────────────────────────────────── */
 
 const GENERAL_COMMANDS: SlashCommand[] = [
-  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis across the workspace", service: "general", category: "Intelligence" },
+  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis", service: "general", category: "Intelligence" },
   { id: "anomaly-gen", label: "anomaly-report", description: "Unusual patterns detection", icon: "⚠️", prompt: "What anomalies were detected today?", service: "general", category: "Intelligence" },
   { id: "intel-report", label: "intelligence-report", description: "Full org intelligence report", icon: "📄", prompt: "Give me the full intelligence report", service: "general", category: "Intelligence" },
   { id: "predict", label: "prediction", description: "Forecast business outcomes", icon: "📈", prompt: "Forecast key business metrics for next quarter", service: "general", category: "Intelligence" },
@@ -419,24 +487,47 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [activeService, setActiveService] = useState<ServiceMode>(() => {
-    if (typeof window === "undefined") return "seaas";
-    const stored = localStorage.getItem("nexus_service_mode");
-    if (stored === "aas" || stored === "general" || stored === "seaas") return stored;
-    return "seaas";
-  });
+  // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
+  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
   const router = useRouter();
-  const { groups, loading: historyLoading } = useChatHistory();
+  const { groups, loading: historyLoading } = useChatHistory(activeService);
   const { currentRole, isPlatformAdmin, currentWorkspace } = useWorkspace();
 
+  // Hydrate service mode from localStorage after mount (avoids SSR mismatch)
+  // BUG-08 FIX: Also listen for storage events so sidebar updates when worker is switched
+  useEffect(() => {
+    const syncFromStorage = () => {
+      const stored = localStorage.getItem("nexus_service_mode");
+      if (stored === "aas" || stored === "general" || stored === "seaas") {
+        setActiveService(stored);
+      }
+    };
+    syncFromStorage();
+
+    // Listen for cross-tab storage changes and custom in-tab events
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "nexus_service_mode") syncFromStorage();
+    };
+    const handleCustom = () => syncFromStorage();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("nexus-service-mode-changed", handleCustom);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("nexus-service-mode-changed", handleCustom);
+    };
+  }, []);
+
   // Role-based nav filtering: non-admin users don't see admin-only items
+  // Show all items during SSR to avoid hydration mismatch (workspace context resolves after mount)
   const isFullAccess = isPlatformAdmin || currentRole === "owner" || currentRole === "admin";
+  const [navReady, setNavReady] = useState(false);
+  useEffect(() => { setNavReady(true); }, []);
   const visibleNavItems = useMemo(
-    () => NAV_ITEMS.filter((item) => item.access === "standard" || isFullAccess),
-    [isFullAccess]
+    () => navReady ? NAV_ITEMS.filter((item) => item.access === "standard" || isFullAccess) : NAV_ITEMS,
+    [isFullAccess, navReady]
   );
 
   // Service-aware vocabulary for labels
@@ -462,16 +553,13 @@ export function Sidebar() {
     return () => window.removeEventListener("copilot-active-conversation-changed", handler);
   }, []);
 
-  // Listen for service-mode-changed from copilot (e.g. loading a saved conversation)
+  // AI Worker name from localStorage (set when launching from dashboard)
+  const [aiWorkerName, setAiWorkerName] = useState<string | null>(null);
   useEffect(() => {
-    const handler = (e: Event) => {
-      const svc = (e as CustomEvent).detail;
-      if (typeof svc === "string" && ["general", "aas", "seaas"].includes(svc)) {
-        setActiveService(svc as ServiceMode);
-      }
-    };
-    window.addEventListener("service-mode-changed", handler);
-    return () => window.removeEventListener("service-mode-changed", handler);
+    const sync = () => setAiWorkerName(localStorage.getItem("nexus_ai_worker_name"));
+    sync();
+    window.addEventListener("nexus-service-mode-changed", sync);
+    return () => window.removeEventListener("nexus-service-mode-changed", sync);
   }, []);
 
   // Restore persisted state
@@ -488,21 +576,14 @@ export function Sidebar() {
   const totalWidth = ICON_RAIL_WIDTH + contentWidth;
 
   function toggleCollapse() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
-      window.dispatchEvent(new CustomEvent("sidebar-collapse", {
-        detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
-      }));
-      return next;
-    });
+    const next = !collapsed;
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    window.dispatchEvent(new CustomEvent("sidebar-collapse", {
+      detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
+    }));
+    setCollapsed(next);
   }
 
-  function handleServiceChange(svc: ServiceMode) {
-    if (svc === activeService) return;
-    setActiveService(svc);
-    window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: svc }));
-  }
 
   // ── Resize drag handlers ──────────────────────────────────────────────
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -651,12 +732,12 @@ export function Sidebar() {
           style={{ width: contentWidth }}
           className="h-screen flex flex-col bg-background border-r border-border transition-[width] duration-200"
         >
-          {/* Header — shows active AI worker name */}
+          {/* Header — shows active AI Worker name */}
           <div className="flex items-center justify-between px-4 h-12 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-[14px] font-semibold tracking-tight text-foreground">
-                {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "AI Worker"}
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
+              <span className="text-[14px] font-semibold tracking-tight text-foreground truncate">
+                {aiWorkerName || SERVICE_LABELS[activeService] || "AI Worker"}
               </span>
             </div>
             <button
@@ -681,12 +762,12 @@ export function Sidebar() {
             </svg>
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors">
-                {currentWorkspace?.name ?? "No workspace"}
+                {currentWorkspace?.name ?? "No AI Worker"}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                 <span className="text-[10px] text-muted-foreground truncate">
-                  {SERVICE_TABS.find((t) => t.id === activeService)?.label ?? "SE-aaS"}
+                  {SERVICE_LABELS[activeService] || "SE-aaS"}
                 </span>
               </div>
             </div>
@@ -696,8 +777,13 @@ export function Sidebar() {
 
           {/* Brain Intelligence — live learning stats */}
           <div className="py-2 shrink-0">
-            <BrainStatusBanner workspaceId={currentWorkspace?.id} />
+            <BrainStatusBanner workspaceId={currentWorkspace?.id} serviceMode={activeService} />
           </div>
+
+          {/* Connections — recommended connectors for this AI Worker */}
+          <ConnectionsSection activeService={activeService} workspaceId={currentWorkspace?.id} />
+
+          <div className="h-px bg-border-subtle mx-3" />
 
           {/* New Chat — prominent action */}
           <div className="px-3 py-2 shrink-0">

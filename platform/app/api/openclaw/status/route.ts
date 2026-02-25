@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       .select("organization_id, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Platform admins can access any org
     const { data: adminCheck } = !membership
@@ -51,12 +51,12 @@ export async function GET(request: NextRequest) {
           .eq("user_id", user.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single()
+          .maybeSingle()
       : { data: null };
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -66,8 +66,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(status);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Status] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[OpenClaw/Status] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

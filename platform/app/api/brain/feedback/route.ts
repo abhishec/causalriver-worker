@@ -69,6 +69,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (correction && (typeof correction !== "string" || correction.length > 5000)) {
+      return NextResponse.json(
+        { error: "correction must be a string under 5000 characters" },
+        { status: 400 }
+      );
+    }
+
     const workspaceId = await getCurrentWorkspaceId();
 
     // ── Insert into brain_feedback_queue ─────────────────────────
@@ -108,7 +115,7 @@ export async function POST(request: NextRequest) {
         });
       } else {
         logger.error("[BrainFeedback] Insert error:", insertError);
-        return NextResponse.json({ error: insertError.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal error" }, { status: 500 });
       }
     }
 
@@ -130,6 +137,7 @@ export async function POST(request: NextRequest) {
         target_domain: domainId || "general",
         signal_type: signalType,
         signal_strength: signalStrength,
+        signal_timestamp: new Date().toISOString(),
         payload: {
           feedback_rating: rating,
           message_id: messageId,
@@ -156,8 +164,7 @@ export async function POST(request: NextRequest) {
           : "Noted. The Brain will adjust its approach.",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[BrainFeedback] Error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process feedback" }, { status: 500 });
   }
 }

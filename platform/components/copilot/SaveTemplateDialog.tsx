@@ -163,7 +163,7 @@ export function SaveTemplateDialog({
           onClose();
         }, 1200);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save");
+        setError("Failed to save");
       } finally {
         setSubmitting(false);
       }
@@ -358,7 +358,7 @@ export function SaveTemplateDialog({
                 Make public
               </span>
               <span className="text-[10px] text-muted">
-                (visible to all BrainOS workspaces)
+                (visible to all AI Workers)
               </span>
             </label>
 

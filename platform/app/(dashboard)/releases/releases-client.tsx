@@ -156,7 +156,7 @@ export default function ReleaseDashboardClient({
     setLoading(true);
     fetchQuery("readiness", selected.id)
       .then(setReadiness)
-      .catch(e => setError(e.message))
+      .catch(() => setError("Failed to load release data"))
       .finally(() => setLoading(false));
   }, [selected?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -176,7 +176,7 @@ export default function ReleaseDashboardClient({
         if (activeTab === "diff")     setDiff(data);
         if (activeTab === "velocity") setVelocity(data?.drops ?? data);
       })
-      .catch(e => setError(e.message))
+      .catch(() => setError("Failed to load tab data"))
       .finally(() => setLoading(false));
   }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -196,8 +196,8 @@ export default function ReleaseDashboardClient({
       const fresh = await fetchQuery("readiness", selected.id);
       setReadiness(fresh);
       setTickets(null); setDiff(null); setVelocity(null);
-    } catch (e: any) {
-      setError(e.message);
+    } catch {
+      setError("Sync failed — please try again");
     } finally {
       setSyncing(false);
     }

@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
       logger.error('Outcome webhook: NEXUS_WEBHOOK_SECRET not configured');
       return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
-    const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+    // Security: Only accept secret via header, not URL query param (prevents log exposure)
+    const provided = req.headers.get('x-webhook-secret');
     if (provided !== webhookSecret) {
       logger.warn('Outcome webhook: invalid secret');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
       .select('*')
       .eq('prediction_id', payload.predictionId)
       .eq('organization_id', organizationId)
-      .single();
+      .maybeSingle();
 
     if (predError || !prediction) {
       logger.warn('Prediction not found', { predictionId: payload.predictionId });
@@ -219,7 +220,8 @@ export async function GET(req: NextRequest) {
     if (!webhookSecret) {
       return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
-    const provided = req.headers.get('x-webhook-secret') || req.nextUrl.searchParams.get('secret');
+    // Security: Only accept secret via header, not URL query param (prevents log exposure)
+    const provided = req.headers.get('x-webhook-secret');
     if (provided !== webhookSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -250,13 +252,13 @@ export async function GET(req: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ outcomes: data });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

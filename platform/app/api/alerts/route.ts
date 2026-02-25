@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org membership
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status"); // open | resolved
     const severity = searchParams.get("severity");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10) || 20, 100);
+    const offset = Math.max(0, parseInt(searchParams.get("offset") || "0", 10) || 0);
 
     // Build query for health alerts from cascade_alerts
     let query = supabase
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error("[alerts] GET error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to fetch alerts" },
+      { error: "Failed to fetch alerts" },
       { status: 500 },
     );
   }

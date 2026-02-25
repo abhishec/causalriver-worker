@@ -99,7 +99,7 @@ const REGIONS = [
     status: "active" as const,
     icon: "\u{1F3AF}",
     description:
-      "Learns which signals and domains matter most for each workspace. Allocates processing budget to high-value signal streams and deprioritizes noise.",
+      "Learns which signals and domains matter most for each AI Worker. Allocates processing budget to high-value signal streams and deprioritizes noise.",
     color: "border-success/30",
     dotColor: "bg-success",
     badgeClass: "bg-success/10 text-success",
@@ -178,7 +178,7 @@ const REGIONS = [
     status: "sleeping" as const,
     icon: "\u{1F578}\u{FE0F}",
     description:
-      "Collective intelligence layer. Shares discovered patterns across workspaces (privacy-safe) and merges collective knowledge to accelerate learning for all tenants.",
+      "Collective intelligence layer. Shares discovered patterns across AI Workers (privacy-safe) and merges collective knowledge to accelerate learning for all tenants.",
     color: "border-rose-400/30",
     dotColor: "bg-rose-400",
     badgeClass: "bg-rose-400/10 text-rose-400",

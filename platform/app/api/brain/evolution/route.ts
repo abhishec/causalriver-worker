@@ -20,6 +20,8 @@ export const dynamic = "force-dynamic";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { runBrainEvolutionCycle } from "@nexus-ai/memory-stack";
+import { logger } from "@/lib/logger";
+import { getDomainsForService } from "@/lib/ai-worker-domains";
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,10 +42,10 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!member) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -51,19 +53,54 @@ export async function GET(request: NextRequest) {
     // Run lightweight evolution cycle (just compute, don't save snapshot)
     const state = await runBrainEvolutionCycle(service, organizationId, 'lightweight');
 
+    // Per-AI-Worker brain: filter accuracy to this worker's domain
+    const serviceMode = request.nextUrl.searchParams.get("serviceMode");
+    if (serviceMode && serviceMode !== "general") {
+      const domains = getDomainsForService(serviceMode);
+      if (domains.length > 0 && state.accuracy?.byDomain) {
+        const domainAccuracies = Object.entries(state.accuracy.byDomain)
+          .filter(([d]) => domains.some((prefix) => d.startsWith(prefix)));
+
+        if (domainAccuracies.length > 0) {
+          const totalPreds = domainAccuracies.reduce((s, [, v]) => s + (v as { totalPredictions: number }).totalPredictions, 0);
+          const correctPreds = domainAccuracies.reduce((s, [, v]) => s + (v as { correctPredictions: number }).correctPredictions, 0);
+          state.accuracy.overall = totalPreds > 0 ? correctPreds / totalPreds : 0;
+          state.accuracy.byDomain = Object.fromEntries(domainAccuracies);
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       evolution: state,
+      serviceMode: serviceMode || "all",
       // Human-readable summary for the dashboard
       summary: {
-        headline: getEvolutionHeadline(state.intelligenceScore, state.accuracy.trend),
+        headline: getEvolutionHeadline(state.intelligenceScore, state.accuracy?.trend ?? "stable"),
         subtitle: getEvolutionSubtitle(state),
         badges: getEvolutionBadges(state),
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Graceful degradation: return default brain state instead of 500
+    // Tables may not exist yet for new workspaces or the evolution cycle may fail
+    logger.warn("[brain/evolution] GET failed, returning defaults:", error);
+    return NextResponse.json({
+      success: true,
+      evolution: {
+        intelligenceScore: 0,
+        accuracy: { overall: 0, trend: "stable", improvementRate: 0 },
+        calibration: { isWellCalibrated: false, brierScore: 1 },
+        learningVelocity: { newEdgesPerWeek: 0, weightUpdatesPerWeek: 0, totalEvidence: 0 },
+        knowledge: { totalCausalEdges: 0, verifiedPredictions: 0, cognitiveLayersActive: 0, highConfidenceEdges: 0 },
+        interventions: { totalSuggested: 0, totalActedOn: 0, successRate: 0, avgImpactScore: 0 },
+      },
+      summary: {
+        headline: "Brain Initializing",
+        subtitle: "Connect data sources to start learning",
+        badges: [],
+      },
+    });
   }
 }
 
@@ -88,10 +125,10 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!evoMember) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -109,8 +146,8 @@ export async function POST(request: NextRequest) {
       message: `Brain evolution cycle complete. Intelligence score: ${state.intelligenceScore}/100`,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[BrainEvolution] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -160,7 +197,7 @@ function getEvolutionBadges(state: {
   if (state.calibration.isWellCalibrated) badges.push("⚖️ Well Calibrated");
   if (state.learningVelocity.weightUpdatesPerWeek > 10) badges.push("⚡ Actively Learning");
   if (state.knowledge.highConfidenceEdges > 20) badges.push("🔗 Deep Knowledge");
-  if (state.knowledge.cognitiveLayersActive >= 13) badges.push("🧬 Full Cognitive Stack");
+  if (state.knowledge.cognitiveLayersActive >= 25) badges.push("🧬 Full Cognitive Stack");
 
   return badges;
 }

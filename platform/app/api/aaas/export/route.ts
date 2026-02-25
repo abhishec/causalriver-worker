@@ -445,7 +445,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!orgId) {
-      return NextResponse.json({ error: "No GL data found for your workspace." }, { status: 404 });
+      return NextResponse.json({ error: "No GL data found. Please upload a GL file first." }, { status: 404 });
     }
 
     // Load GL transactions
@@ -463,7 +463,11 @@ export async function GET(request: NextRequest) {
       const svc = await createServiceClient();
       const { data } = await svc.storage.from("org-data").download(`${orgId}/gl-data.json`);
       if (data) {
-        transactions = JSON.parse(await data.text()) as GLTransaction[];
+        try {
+          transactions = JSON.parse(await data.text()) as GLTransaction[];
+        } catch {
+          // Malformed JSON in storage — leave transactions empty
+        }
       }
     }
 
@@ -473,7 +477,7 @@ export async function GET(request: NextRequest) {
 
     // Get company name
     const svc = await createServiceClient();
-    const { data: org } = await svc.from("organizations").select("name").eq("id", orgId).single();
+    const { data: org } = await svc.from("organizations").select("name").eq("id", orgId).maybeSingle();
     const company = org?.name || "Organisation";
 
     const csvContent = buildCSVExport(transactions, company);
@@ -490,6 +494,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[AAS Export] Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

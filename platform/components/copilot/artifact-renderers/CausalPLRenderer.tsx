@@ -56,6 +56,7 @@ interface CausalAttribution {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtCurrency(v: number): string {
+  if (!Number.isFinite(v)) return "$0";
   const abs = Math.abs(v);
   const prefix = v < 0 ? "-" : "";
   if (abs >= 1_000_000) return `${prefix}$${(abs / 1_000_000).toFixed(1)}M`;
@@ -64,6 +65,7 @@ function fmtCurrency(v: number): string {
 }
 
 function fmtPct(v: number): string {
+  if (!Number.isFinite(v)) return "—";
   const prefix = v > 0 ? "+" : "";
   return `${prefix}${v.toFixed(1)}%`;
 }
@@ -283,7 +285,7 @@ export function CausalPLRenderer({ data }: { data: Record<string, any> }) {
                       </div>
                       <div className="px-3 py-2 space-y-1">
                         {attr.attributions.map((a, i) => {
-                          const barWidth = Math.min(100, Math.abs(a.contributionPct));
+                          const barWidth = Math.min(100, Math.abs(a.contributionPct ?? 0));
                           return (
                             <div key={i}>
                               <div className="flex justify-between text-[10px] mb-0.5">

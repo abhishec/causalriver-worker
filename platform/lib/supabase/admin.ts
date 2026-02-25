@@ -48,7 +48,7 @@ export async function verifyWorkspaceMembership(
     .select("id, role, is_platform_admin")
     .eq("organization_id", workspaceId)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
   return data;
 }
 

@@ -28,7 +28,7 @@ import { useSmartSuggestions } from "@/lib/hooks/useSmartSuggestions";
 
 type ServiceMode = "general" | "aas" | "seaas";
 
-// Service tabs now live in the sidebar (Sidebar.tsx ServiceTabsPills)
+// Service mode is locked to the AI Worker launched from the dashboard
 
 const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string; color: string }> = {
   general: {
@@ -50,22 +50,22 @@ const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string;
 
 const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
   general: [
-    "Why is churn increasing this quarter?",
-    "Summarize the key risks facing our business right now",
     "What anomalies were detected today?",
-    "Help me prepare talking points for the board meeting",
+    "Summarize key business risks",
+    "Why is churn increasing?",
+    "Prepare board meeting talking points",
   ],
   aas: [
-    "Show me the P&L for 2025",
-    "Generate the balance sheet",
+    "Generate the P&L statement",
+    "Show me the balance sheet",
     "Check GST compliance",
-    "Analyze transaction anomalies",
+    "Detect transaction anomalies",
   ],
   seaas: [
-    "Analyse the branch — what's changed and what's the release risk?",
-    "Review the latest PR for security issues",
-    "What breaks if I change the auth session manager?",
-    "Who knows the most about our billing module?",
+    "What's the release risk?",
+    "Review the latest PR",
+    "Run early warning analysis",
+    "Find dead code in the repo",
   ],
 };
 
@@ -76,16 +76,43 @@ function CopilotPageInner() {
   const searchParams = useSearchParams();
 
   // ── Service mode ──────────────────────────────────────────────────────────
-  const [activeService, setActiveService] = useState<ServiceMode>(() => {
-    if (typeof window !== "undefined") {
+  // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
+  const [activeService, setActiveService] = useState<ServiceMode>("seaas");
+
+  // ── AI Worker identity from URL or localStorage ──────────────────────────
+  const [workerId, setWorkerId] = useState<string | null>(null);
+  const [workerName, setWorkerName] = useState<string | null>(null);
+
+  // Hydrate service mode + worker identity from URL params or localStorage after mount
+  useEffect(() => {
+    // URL params take priority (set by dashboard launch)
+    const urlService = searchParams?.get("service");
+    const urlWorkerId = searchParams?.get("workerId");
+
+    if (urlService === "general" || urlService === "aas" || urlService === "seaas") {
+      setActiveService(urlService);
+      localStorage.setItem("nexus_service_mode", urlService);
+    } else {
       const saved = localStorage.getItem("nexus_service_mode");
-      if (saved === "general" || saved === "aas" || saved === "seaas") return saved;
+      if (saved === "general" || saved === "aas" || saved === "seaas") {
+        setActiveService(saved);
+      }
     }
-    return "seaas";
-  });
+
+    if (urlWorkerId) {
+      setWorkerId(urlWorkerId);
+      localStorage.setItem("nexus_ai_worker_id", urlWorkerId);
+    } else {
+      const savedId = localStorage.getItem("nexus_ai_worker_id");
+      if (savedId) setWorkerId(savedId);
+    }
+
+    const savedName = localStorage.getItem("nexus_ai_worker_name");
+    if (savedName) setWorkerName(savedName);
+  }, [searchParams]);
   const persona = SERVICE_PERSONAS[activeService];
 
-  // Service tabs now live in the sidebar — copilot page only shows the active persona
+  // Service mode is locked to the AI Worker — no service switching in copilot
 
   // ── Layout state ──────────────────────────────────────────────────────────
   const [artifactPaneOpen, setArtifactPaneOpen] = useState(false);
@@ -255,9 +282,7 @@ function CopilotPageInner() {
     const svc = searchParams?.get("service") as ServiceMode | null;
     if (svc && ["general", "aas", "seaas"].includes(svc)) {
       setActiveService(svc);
-      if (svc !== "general") {
-        setArtifactPaneOpen(true);
-      }
+      // Don't auto-open artifact pane on fresh load — only open when artifacts arrive
     }
 
     // ?cmd=<commandId> — from sidebar command click on non-copilot page
@@ -464,24 +489,8 @@ function CopilotPageInner() {
     setArtifactPaneOpen(false);
   }, []);
 
-  // ── Listen for service-mode-changed from sidebar tab pills ─────────────
-  // This fires only on MANUAL tab switches (user clicks General/AAAS/SE-aaS pill).
-  // Command clicks go through handleCommandClick → copilot-inject-and-submit instead.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const svc = (e as CustomEvent).detail as ServiceMode;
-      if (svc && ["general", "aas", "seaas"].includes(svc) && svc !== activeService) {
-        // Save current messages before switching service mode
-        saveCurrentMessagesBeforeClear().finally(() => {
-          handleServiceChange(svc);
-          // Reset chat when manually switching service tabs
-          window.dispatchEvent(new CustomEvent("copilot-new-conversation"));
-        });
-      }
-    };
-    window.addEventListener("service-mode-changed", handler);
-    return () => window.removeEventListener("service-mode-changed", handler);
-  }, [activeService, handleServiceChange, saveCurrentMessagesBeforeClear]);
+  // Service mode is locked to the AI Worker — no service-mode-changed listener needed.
+  // When loading a saved conversation, the service mode is set from the conversation data.
 
   // ── Conversation actions ──────────────────────────────────────────────────
   const handleSelectConversation = useCallback(async (id: string) => {
@@ -496,8 +505,6 @@ function CopilotPageInner() {
       if (data) {
         if (data.service_mode && ["general", "aas", "seaas"].includes(data.service_mode)) {
           setActiveService(data.service_mode);
-          // Sync sidebar tab pills when loading a saved conversation
-          window.dispatchEvent(new CustomEvent("service-mode-changed", { detail: data.service_mode }));
         }
 
         try {
@@ -511,7 +518,7 @@ function CopilotPageInner() {
                 title: a.title || a.domain_type || "Artifact",
                 content: JSON.stringify(a.result_data || {}, null, 2),
                 rawData: a.result_data,
-                createdAt: new Date(a.created_at).getTime(),
+                createdAt: new Date(a.created_at || Date.now()).getTime(),
                 service: a.domain_type?.startsWith("aas-") ? "aas" as const : "seaas" as const,
                 domainId: a.domain_type,
                 pinned: false,
@@ -625,7 +632,7 @@ function CopilotPageInner() {
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
           </div>
-          <span className="text-xs text-muted-foreground">Loading workspace...</span>
+          <span className="text-xs text-muted-foreground">Loading...</span>
         </div>
       </div>
     );
@@ -640,11 +647,11 @@ function CopilotPageInner() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">No Workspace Selected</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No AI Worker Selected</h2>
           <p className="text-sm text-muted-foreground mb-4">
             {workspaces.length === 0
-              ? "You don't have any workspaces yet. Create one in Settings to start using Copilot."
-              : "Please select a workspace from the sidebar to start using Copilot."}
+              ? "You don't have any AI Workers yet. Create one from the Dashboard to get started."
+              : "Please select an AI Worker from the sidebar to start using Copilot."}
           </p>
           <div className="flex gap-3 justify-center">
             {workspaces.length === 0 ? (
@@ -652,7 +659,7 @@ function CopilotPageInner() {
                 href="/settings?tab=overview&action=create-workspace"
                 className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
               >
-                Create Workspace
+                Create AI Worker
               </Link>
             ) : (
               <Link
@@ -734,7 +741,7 @@ function CopilotPageInner() {
             <CopilotChat
               ref={chatRef}
               endpoint="/api/copilot/chat"
-              extraParams={{ workspaceId: currentWorkspace?.id }}
+              extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined }}
               activeService={activeService}
               persona={{
                 name: persona.name,

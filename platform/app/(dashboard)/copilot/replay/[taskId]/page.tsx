@@ -68,10 +68,10 @@ export default function AgentReplayPage() {
           .eq("user_id", user.id)
           .order("joined_at", { ascending: true })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!membership) {
-          setError("No workspace found");
+          setError("No AI Worker found");
           return;
         }
 
@@ -93,7 +93,7 @@ export default function AgentReplayPage() {
         setTask(data.task);
         setSteps(data.steps || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load");
+        setError("Failed to load task details");
       } finally {
         setLoading(false);
       }

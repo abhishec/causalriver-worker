@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { timingSafeEqual } from 'crypto';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 import { logger } from '@/lib/logger';
 
@@ -36,16 +37,27 @@ export async function POST(req: NextRequest) {
     // Jira Cloud webhooks can use a shared secret
     const webhookSecret = process.env.JIRA_WEBHOOK_SECRET;
 
-    if (webhookSecret) {
-      // If secret is configured, verify the request
-      const authHeader = req.headers.get('authorization');
-      if (authHeader !== `Bearer ${webhookSecret}`) {
-        logger.error('[Jira Webhook] Invalid authorization');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      logger.error('[Jira Webhook] JIRA_WEBHOOK_SECRET not configured — rejecting request');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    // Use constant-time comparison to prevent timing attacks
+    const authHeader = req.headers.get('authorization') ?? '';
+    const expected = `Bearer ${webhookSecret}`;
+    const authBuf = Buffer.from(authHeader, 'utf8');
+    const expBuf = Buffer.from(expected, 'utf8');
+    if (authBuf.length !== expBuf.length || !timingSafeEqual(authBuf, expBuf)) {
+      logger.error('[Jira Webhook] Invalid authorization');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = JSON.parse(body);
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      logger.warn('[Jira Webhook] Malformed JSON payload');
+      return NextResponse.json({ ok: true }); // Ack to prevent retries
+    }
     const webhookEvent = payload.webhookEvent || payload.issue_event_type_name || '';
 
     logger.info(`[Jira Webhook] Received event: ${webhookEvent}`);
@@ -197,9 +209,16 @@ export async function POST(req: NextRequest) {
 
     // ── Step 4: Insert signals to Brain ─────────────────────────────
     if (signals.length > 0) {
+      // Ensure all signals have signal_timestamp for sync query consistency
+      const now = new Date().toISOString();
+      const enrichedSignals = signals.map(s => ({
+        ...s,
+        created_at: s.created_at || now,
+        signal_timestamp: s.signal_timestamp || now,
+      }));
       const { error: insertError } = await service
         .from('cross_domain_signals')
-        .insert(signals);
+        .insert(enrichedSignals);
 
       if (insertError) {
         logger.warn('[Jira Webhook] Signal insert error:', insertError.message);
@@ -214,6 +233,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, signals: signals.length });
   } catch (error: any) {
     logger.error('[Jira Webhook] Error:', error.message);
-    return NextResponse.json({ ok: true, error: error.message });
+    return NextResponse.json({ ok: true, error: "Internal error" });
   }
 }

@@ -78,7 +78,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
       setNewKeyRateLimit(60);
       setShowCreateForm(false);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Failed to create key. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
       // Remove from local state
       setKeys((prev) => prev.filter((k) => k.id !== keyId));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Failed to revoke key. Please try again.");
     } finally {
       setLoading(false);
     }

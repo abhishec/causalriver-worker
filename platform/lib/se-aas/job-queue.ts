@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -119,7 +120,7 @@ export async function getJobStatus(
     .select("id, status, result, error_message, created_at, started_at, completed_at")
     .eq("id", jobId)
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
 
@@ -169,11 +170,12 @@ export async function executeAndCompleteJob(
       })
       .eq("id", jobId);
   } catch (err: any) {
+    logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, err?.message || err);
     await supabase
       .from("agent_queue")
       .update({
         status: "error",
-        error_message: err.message || "Unknown error",
+        error_message: "Job execution failed",
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
@@ -224,7 +226,7 @@ export async function getArtifact(
     .select("*")
     .eq("id", artifactId)
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as ArtifactRecord;
@@ -252,14 +254,14 @@ export async function listArtifacts(
     query = query.eq("domain_type", params.domainType);
   }
 
-  if (params.conversationId) {
-    query = query.eq("conversation_id", params.conversationId);
-  }
+  // Note: se_aas_artifacts links to jobs via job_id, not conversation_id.
+  // The conversationId filter is a no-op to avoid querying a non-existent column.
+  // Artifacts are fetched by org and optionally filtered by domainType.
 
   const { data, error, count } = await query;
 
   if (error) {
-    throw new Error(`Failed to list artifacts: ${error.message}`);
+    throw new Error("Failed to list artifacts");
   }
 
   return {

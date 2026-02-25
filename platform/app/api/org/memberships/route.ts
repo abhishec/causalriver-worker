@@ -37,14 +37,14 @@ export async function GET() {
 
     if (error) {
       logger.error("[/api/org/memberships] query error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to load memberships" }, { status: 500 });
     }
 
     return NextResponse.json({ memberships: rows ?? [] });
   } catch (err) {
     logger.error("[/api/org/memberships] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

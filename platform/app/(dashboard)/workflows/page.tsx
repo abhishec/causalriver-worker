@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { WorkflowsClient } from "./workflows-client";
@@ -40,12 +41,14 @@ export default async function WorkflowsPage() {
   const totalFailed = recentRuns.filter(r => r.status === "failed").length;
 
   return (
-    <WorkflowsClient
-      workflows={workflows}
-      recentRuns={recentRuns}
-      stats={{ total: workflows.length, running: runningCount, completed: totalCompleted, failed: totalFailed }}
-      workspaceId={workspaceId}
-      userId={user?.id || ""}
-    />
+    <Suspense fallback={<div className="flex items-center justify-center py-12"><div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>}>
+      <WorkflowsClient
+        workflows={workflows}
+        recentRuns={recentRuns}
+        stats={{ total: workflows.length, running: runningCount, completed: totalCompleted, failed: totalFailed }}
+        workspaceId={workspaceId}
+        userId={user?.id || ""}
+      />
+    </Suspense>
   );
 }

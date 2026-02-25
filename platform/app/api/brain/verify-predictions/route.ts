@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not a member" }, { status: 403 });
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           .select("*")
           .eq("id", verification.prediction_id)
           .eq("organization_id", organizationId)
-          .single();
+          .maybeSingle();
 
         if (!prediction || prediction.status !== "pending") {
           continue;
@@ -183,7 +183,6 @@ export async function POST(request: NextRequest) {
       automatedDomains: registry.getAutomatedDomains(),
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

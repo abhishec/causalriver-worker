@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
       .from("prediction_records")
       .select("domain, entity_type, entity_id, confidence")
       .eq("id", predictionId)
-      .single();
+      .eq("organization_id", organizationId)
+      .maybeSingle();
 
     // 4. Emit feedback signal to brain (for weight adjustment)
     // Tagged as outcome so the reinforcement loop picks it up
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
         source_domain: `verification.${prediction?.domain || "unknown"}`,
         signal_type: `prediction_verified_${userVerdict}`,
         signal_value: wasCorrect === true ? 1 : wasCorrect === false ? -1 : 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: prediction?.entity_type || "prediction",
         entity_id: predictionId,
         signal_metadata: {
@@ -167,7 +169,7 @@ export async function POST(request: NextRequest) {
       learningImpact: userVerdict === "incorrect" ? "high" : "medium",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[VerifyPrediction] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

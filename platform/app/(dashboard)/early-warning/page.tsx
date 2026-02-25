@@ -135,7 +135,7 @@ export default async function EarlyWarningPage() {
       {/* ── Workspace / Branch Context ──────────────────────────────────────── */}
       {(primaryBranch || githubRepo) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-muted">Workspace scope:</span>
+          <span className="text-muted">Scope:</span>
           {githubRepo && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono bg-surface border border-border-subtle text-muted">
               {githubRepo}
@@ -151,7 +151,7 @@ export default async function EarlyWarningPage() {
               v{releaseVersion}
             </span>
           )}
-          <span className="text-muted">· All metrics isolated to this workspace</span>
+          <span className="text-muted">· All metrics isolated to this AI Worker</span>
           <Link
             href="/se-aas"
             className="ml-auto text-accent hover:text-accent/80 transition-colors"
@@ -213,7 +213,7 @@ export default async function EarlyWarningPage() {
                                 driver.direction === 'decrease' ? 'bg-danger' :
                                 driver.direction === 'spike' ? 'bg-warning' : 'bg-accent'
                               }`}
-                              style={{ width: `${Math.round(driver.importance * 100)}%` }}
+                              style={{ width: `${Math.round((driver.importance ?? 0) * 100)}%` }}
                             />
                           </div>
                         </div>
@@ -537,7 +537,7 @@ export default async function EarlyWarningPage() {
                     <span className="text-[10px] text-muted flex-1">
                       <span className="font-semibold text-foreground">Condition B</span>{' '}
                       Review concentration (HHI) &gt; 0.25
-                      {latestBottleneck.reviewer_hhi
+                      {typeof latestBottleneck.reviewer_hhi === 'number' && isFinite(latestBottleneck.reviewer_hhi)
                         ? ` (currently ${latestBottleneck.reviewer_hhi.toFixed(3)})`
                         : ''}
                     </span>
@@ -645,7 +645,7 @@ export default async function EarlyWarningPage() {
             </div>
             <div>
               <div className="text-sm font-medium">
-                [{latestVelocity.prediction_lower_bound?.toFixed(1)} — {latestVelocity.prediction_upper_bound?.toFixed(1)}]
+                [{latestVelocity.prediction_lower_bound?.toFixed(1) ?? '—'} — {latestVelocity.prediction_upper_bound?.toFixed(1) ?? '—'}]
               </div>
               <div className="text-xs text-muted">Confidence interval</div>
             </div>

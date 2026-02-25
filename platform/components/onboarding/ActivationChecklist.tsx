@@ -38,8 +38,8 @@ const CHECKLIST_ITEMS: Array<{
 }> = [
   {
     id: "create_org",
-    label: "Create workspace",
-    description: "Your workspace is set up and ready",
+    label: "Create AI Worker",
+    description: "Your AI Worker is set up and ready",
   },
   {
     id: "connect_github",

@@ -52,7 +52,7 @@ export async function checkWorkspaceResources(
     .from("org_resource_usage")
     .select("*")
     .eq("organization_id", workspaceId)
-    .single();
+    .maybeSingle();
 
   if (!usage) {
     // No usage row yet — allow (first request creates it)
@@ -143,7 +143,7 @@ export async function incrementResource(
     .from("org_resource_usage")
     .select(field)
     .eq("organization_id", workspaceId)
-    .single();
+    .maybeSingle();
 
   const currentVal = (usage as any)?.[field] || 0;
 
@@ -174,7 +174,7 @@ export async function decrementResource(
     .from("org_resource_usage")
     .select(field)
     .eq("organization_id", workspaceId)
-    .single();
+    .maybeSingle();
 
   const currentVal = (usage as any)?.[field] || 0;
 

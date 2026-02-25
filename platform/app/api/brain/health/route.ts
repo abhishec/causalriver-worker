@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!adminCheck) {
       return NextResponse.json({ error: "Platform admin required" }, { status: 403 });
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json({
         status: "degraded",
-        error: error.message,
+        error: "Internal error",
         timestamp: new Date().toISOString(),
       }, { status: 500 });
     }
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     return NextResponse.json({
       status: "error",
-      message: err instanceof Error ? err.message : "Health check failed",
+      message: "Internal error",
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }
@@ -131,13 +131,15 @@ export async function GET(request: NextRequest) {
  * 6. Job execution health (are scheduled jobs running?)
  */
 async function handleLearningHealth(request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+  // Auth guard — outside the try/catch so auth failures return proper 401/403, not 200
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
@@ -147,7 +149,7 @@ async function handleLearningHealth(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       const { data: admin } = await supabase
@@ -156,11 +158,11 @@ async function handleLearningHealth(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this workspace" },
+          { error: "Access denied" },
           { status: 403 }
         );
       }
@@ -222,12 +224,17 @@ async function handleLearningHealth(request: NextRequest) {
       ),
       timestamp: new Date().toISOString(),
     });
-  } catch (err) {
+  } catch {
+    // Graceful degradation: return initializing state instead of 500
     return NextResponse.json({
-      status: "error",
-      message: err instanceof Error ? err.message : "Learning health check failed",
+      status: "initializing",
+      overall_score: 0,
+      organization_id: request.nextUrl.searchParams.get("organizationId") || "",
+      dimensions: {},
+      evolution: { status: "no_snapshots" },
+      recommendations: ["Connect data sources to start learning."],
       timestamp: new Date().toISOString(),
-    }, { status: 500 });
+    });
   }
 }
 
@@ -349,14 +356,14 @@ async function checkConnectorHealth(supabase: any, workspaceId: string): Promise
   try {
     const { data: connectors } = await supabase
       .from("org_connectors")
-      .select("connector_type, status, last_synced_at, credentials")
+      .select("connector_type, status, last_synced_at")
       .eq("organization_id", workspaceId);
 
     if (!connectors || connectors.length === 0) {
       return { score: 0, status: "no_connectors", details: { connected_count: 0 } };
     }
 
-    const connected = connectors.filter((c: any) => c.status === "connected" || c.credentials);
+    const connected = connectors.filter((c: any) => c.status === "connected" || c.status === "active");
     const recentlySynced = connectors.filter((c: any) => {
       if (!c.last_synced_at) return false;
       return Date.now() - new Date(c.last_synced_at).getTime() < 24 * 60 * 60 * 1000;
@@ -440,7 +447,7 @@ async function checkEvolutionState(supabase: any, workspaceId: string): Promise<
       .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!snapshot) {
       return { status: "no_snapshots", message: "Brain has not run an evolution cycle yet" };

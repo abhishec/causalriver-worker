@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 export const metadata = { title: "Connectors" };
 
 const CONNECTORS = [
-  { name: "AWS S3", type: "s3-storage", domain: "operations", icon: "📦", description: "Workspace-level file storage — CSV, JSON, reports, GL data", oauth: false },
+  { name: "AWS S3", type: "s3-storage", domain: "operations", icon: "📦", description: "File storage — CSV, JSON, reports, GL data", oauth: false },
   { name: "GitHub", type: "github", domain: "engineering", icon: "🐙", description: "Commits, PRs, issues, deployments, CI/CD events", oauth: true },
   { name: "Slack", type: "slack", domain: "communication", icon: "💬", description: "Channel activity, reaction patterns, thread engagement", oauth: true },
   { name: "Jira", type: "jira", domain: "engineering", icon: "📋", description: "Issues, comments, and project workflows", oauth: true },
@@ -19,7 +19,7 @@ const CONNECTORS = [
   { name: "Freshchat", type: "freshchat", domain: "support", icon: "💬", description: "Live-chat conversations, message threads, agent response times", oauth: false },
   { name: "Intercom", type: "intercom", domain: "support", icon: "💬", description: "Conversations, resolution times, customer satisfaction", oauth: false },
   { name: "Zendesk", type: "zendesk", domain: "support", icon: "🎫", description: "Tickets, escalations, SLA compliance, agent performance", oauth: false },
-  { name: "Notion", type: "notion", domain: "knowledge", icon: "📝", description: "Page updates, database changes, workspace activity", oauth: false },
+  { name: "Notion", type: "notion", domain: "knowledge", icon: "📝", description: "Page updates, database changes, content activity", oauth: false },
   { name: "Google Chat", type: "google_chat", domain: "operations", icon: "💼", description: "Space messages, direct messages, bot interactions", oauth: false },
   { name: "Google Calendar", type: "google_calendar", domain: "operations", icon: "📅", description: "Meeting patterns, scheduling conflicts, time allocation", oauth: false },
   { name: "Voice", type: "voice", domain: "cs", icon: "🎙️", description: "Call transcripts, sentiment analysis, topic extraction", oauth: false },

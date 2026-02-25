@@ -34,7 +34,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", workflowId)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (error || !workflow) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
@@ -61,6 +61,6 @@ export async function POST(request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[WorkflowRun] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

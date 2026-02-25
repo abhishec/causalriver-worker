@@ -25,8 +25,11 @@ function LoginForm() {
 
   const supabase = createClient();
 
-  // Where to redirect after login
-  const redirectTo = nextUrl || "/dashboard";
+  // Where to redirect after login — only allow same-origin relative paths
+  const redirectTo =
+    nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//")
+      ? nextUrl
+      : "/dashboard";
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -39,7 +42,7 @@ function LoginForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError("Sign in failed");
       setLoading(false);
     } else {
       window.location.href = redirectTo;
@@ -64,7 +67,7 @@ function LoginForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError("Sign in failed");
     } else {
       setMagicLinkSent(true);
     }
@@ -107,7 +110,7 @@ function LoginForm() {
       <p className="text-muted mb-8">
         {nextUrl?.startsWith("/invite/")
           ? "Sign in to accept your invitation"
-          : "Sign in to your workspace's causal memory"}
+          : "Sign in to your AI Worker Workspace"}
       </p>
 
       {error && (

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ workflows: workflows || [] });
   } catch (error: any) {
     logger.error("[Workflows] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -49,7 +49,12 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
-    const body = await request.json();
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
     const { name, description, steps, service_vertical, is_template, template_source, gathering_schema } = body;
 
     if (!name || !steps || !Array.isArray(steps) || steps.length < 2) {
@@ -83,6 +88,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ workflow });
   } catch (error: any) {
     logger.error("[Workflows] Create error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

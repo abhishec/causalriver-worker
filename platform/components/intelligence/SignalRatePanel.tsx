@@ -17,7 +17,7 @@ interface SignalRatePanelProps {
 }
 
 export function SignalRatePanel({ signals, totalRate, className }: SignalRatePanelProps) {
-  const maxCount = Math.max(...signals.map((s) => s.count), 1);
+  const maxCount = signals.length > 0 ? Math.max(...signals.map((s) => s.count), 1) : 1;
 
   return (
     <Card className={className}>

@@ -352,7 +352,7 @@ async function generateTestsWithClaude(
 ): Promise<string> {
   const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
   const prompt = `You are an expert in Test-Driven Development operating within NexusBrain's cognitive stack. Generate failing tests for the following requirements using ${request.testFramework}.
-\${brainSection}
+${brainSection}
 
 ## Requirements:
 ${request.requirements}
@@ -388,7 +388,7 @@ async function generateImplementationWithClaude(
 ): Promise<string> {
   const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
   const prompt = `You are an expert in Test-Driven Development operating within NexusBrain's cognitive stack. Generate MINIMAL implementation that makes the following tests pass.
-\${brainSection}
+${brainSection}
 
 ## Requirements:
 ${request.requirements}
@@ -427,7 +427,7 @@ async function generateRefactoringsWithClaude(
 ): Promise<RefactoringSuggestion[]> {
   const brainSection = formatBrainContextForDomain(brainContext, 'tdd-code-generator');
   const prompt = `You are an expert in code refactoring operating within NexusBrain's cognitive stack. Analyze this implementation and suggest improvements while keeping tests passing.
-\${brainSection}
+${brainSection}
 
 ## Current Implementation:
 \`\`\`${request.language}

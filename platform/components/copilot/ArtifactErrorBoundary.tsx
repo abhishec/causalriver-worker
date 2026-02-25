@@ -46,7 +46,7 @@ export class ArtifactErrorBoundary extends React.Component<
             {this.props.fallbackTitle || "Failed to render artifact"}
           </p>
           <p className="text-[11px] text-muted max-w-[240px]">
-            {this.state.error?.message || "An unexpected error occurred while rendering this content."}
+            An unexpected error occurred while rendering this content.
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}

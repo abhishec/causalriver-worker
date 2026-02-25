@@ -87,10 +87,14 @@ export async function maybeTriggerBrainCycle(
       return { triggered: false, reason: "NEXT_PUBLIC_APP_URL or VERCEL_URL not configured" };
     }
 
-    // Use service-level call (no user cookie needed — this is server-to-server)
+    // Use service-level call with cron auth (no user cookie needed — server-to-server)
     const response = await fetch(`${baseUrl}/api/brain/cycle`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-cron": "true",
+        ...(process.env.CRON_SECRET ? { authorization: `Bearer ${process.env.CRON_SECRET}` } : {}),
+      },
       body: JSON.stringify({
         organizationId: orgId,
         mode: "lightweight",
@@ -114,7 +118,8 @@ export async function maybeTriggerBrainCycle(
     }
   } catch (err: any) {
     // Never throw — this is fire-and-forget
-    logger.warn("[brain-trigger] Error:", err.message);
-    return { triggered: false, reason: err.message };
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn("[brain-trigger] Error:", msg);
+    return { triggered: false, reason: msg };
   }
 }

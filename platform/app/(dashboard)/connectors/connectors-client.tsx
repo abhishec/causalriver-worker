@@ -137,7 +137,7 @@ export function ConnectorsClient({
 
     if (success) {
       const messages: Record<string, string> = {
-        slack_connected: "Slack workspace connected successfully",
+        slack_connected: "Slack connected successfully",
         jira_connected: "Jira site connected successfully",
         github_connected: "GitHub account connected successfully",
       };
@@ -351,7 +351,7 @@ export function ConnectorsClient({
             {lastBrainTrainedAt ? (
               <div className="flex items-center gap-1.5 text-[11px] text-accent">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Brain learning from these connectors · last cycle {formatRelativeTime(new Date(lastBrainTrainedAt))}
+                Brain learning from these connectors · last cycle {(() => { const d = new Date(lastBrainTrainedAt); return isNaN(d.getTime()) ? "recently" : formatRelativeTime(d); })()}
               </div>
             ) : (
               <div className="text-[11px] text-muted">
@@ -433,7 +433,7 @@ export function ConnectorsClient({
                         </span>
                         {instance.metadata?.team_name && (
                           <span className="text-muted">
-                            Workspace: <span className="text-foreground">{instance.metadata.team_name}</span>
+                            Team: <span className="text-foreground">{instance.metadata.team_name}</span>
                           </span>
                         )}
                         {instance.metadata?.github_login && (
@@ -473,13 +473,13 @@ export function ConnectorsClient({
                           <div className="flex items-center justify-between text-xs mb-1">
                             <span className="text-muted">Syncing...</span>
                             <span className="text-accent font-mono tabular-nums">
-                              {progress.progressPct}%
+                              {progress.progressPct ?? 0}%
                             </span>
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-surface overflow-hidden">
                             <div
                               className="h-full bg-accent rounded-full transition-all duration-500"
-                              style={{ width: `${progress.progressPct}%` }}
+                              style={{ width: `${progress.progressPct ?? 0}%` }}
                             />
                           </div>
                           <p className="text-[10px] text-muted mt-1">

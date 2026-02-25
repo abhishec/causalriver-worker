@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       const { data: admin } = await supabase
@@ -83,10 +83,10 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
-        return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }
     }
 
@@ -99,9 +99,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Chain execution failed";
     logger.error("[AgentChainAPI] Error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -129,7 +128,6 @@ export async function GET() {
       })),
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to get patterns";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

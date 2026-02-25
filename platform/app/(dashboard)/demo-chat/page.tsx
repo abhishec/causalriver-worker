@@ -54,7 +54,7 @@ export default function DemoChatPage() {
       <div className="flex items-center justify-center h-[calc(100vh-7rem)]">
         <div className="text-center">
           <h2 className="text-lg font-semibold mb-2">Access Restricted</h2>
-          <p className="text-sm text-muted">This demo workspace is only available to platform admins.</p>
+          <p className="text-sm text-muted">This demo is only available to platform admins.</p>
         </div>
       </div>
     );
@@ -68,7 +68,7 @@ export default function DemoChatPage() {
           extraParams={{ organizationId: DEMO_ORG_ID }}
           persona={{
             name: "Brain OS Demo",
-            description: "Demo workspace — causal intelligence, SE-aaS, and accounting in one place",
+            description: "Demo AI Worker — causal intelligence, SE-aaS, and accounting in one place",
           }}
           examplePrompts={[
             "Why is churn increasing?",

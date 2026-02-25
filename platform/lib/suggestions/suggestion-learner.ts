@@ -74,6 +74,7 @@ export async function recordSuggestionFeedback(
         source_domain: "brain.suggestions",
         signal_type: signalType,
         signal_value: signalValue,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "suggestion_feedback",
         signal_metadata: {
           suggestion_type: input.suggestionType,
@@ -89,7 +90,7 @@ export async function recordSuggestionFeedback(
     return { success: true };
   } catch (err) {
     logger.error("[SuggestionLearner] Error:", err);
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+    return { success: false, error: "Failed to record suggestion feedback" };
   }
 }
 

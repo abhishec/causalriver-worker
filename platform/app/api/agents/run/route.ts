@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .order("joined_at", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
       workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
     }
 
@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!memberCheck) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -107,8 +107,7 @@ export async function POST(request: NextRequest) {
       message: "Agent task finished. GET /api/agents/tasks?taskId=" + result.taskId,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[AgentRun] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[AgentRun] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

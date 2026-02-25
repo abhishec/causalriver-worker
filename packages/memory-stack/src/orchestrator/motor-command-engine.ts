@@ -760,12 +760,12 @@ export function createMotorCommandEngine(config: MotorCommandEngineConfig = {}) 
     /** Get execution stats */
     getStats: () => ({
       totalExecuted: commandHistory.length,
-      successful: commandHistory.filter(h => h.result.success).length,
-      failed: commandHistory.filter(h => !h.result.success).length,
-      pendingApproval: commandHistory.filter(h => h.result.status === 'approved_pending').length,
-      dryRun: commandHistory.filter(h => h.result.status === 'dry_run').length,
+      successful: commandHistory.filter(h => h.result?.success).length,
+      failed: commandHistory.filter(h => !h.result?.success).length,
+      pendingApproval: commandHistory.filter(h => h.result?.status === 'approved_pending').length,
+      dryRun: commandHistory.filter(h => h.result?.status === 'dry_run').length,
       avgDurationMs: commandHistory.length > 0
-        ? Math.round(commandHistory.reduce((sum, h) => sum + h.result.durationMs, 0) / commandHistory.length)
+        ? Math.round(commandHistory.reduce((sum, h) => sum + (h.result?.durationMs ?? 0), 0) / commandHistory.length)
         : 0,
       connectorHealth: registry.health(),
     }),

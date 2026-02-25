@@ -246,7 +246,7 @@ async function analyzeWithClaude(
   const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'data-lineage');
 
   const prompt = `You are an expert database architect operating within NexusBrain's cognitive stack. Parse the following SQL schema and map all data model relationships and lineage.
-\${brainSection}
+${brainSection}
 
 ## SQL Schema:
 ${request.schema.slice(0, 8000)}

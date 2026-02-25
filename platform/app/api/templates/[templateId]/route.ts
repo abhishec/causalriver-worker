@@ -26,7 +26,7 @@ export async function GET(
       .select("*")
       .eq("id", templateId)
       .eq("is_archived", false)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -38,16 +38,16 @@ export async function GET(
       .select("id")
       .eq("organization_id", data.org_id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!member && !data.is_public) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json({ template: data });
-  } catch (err: unknown) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to get template" },
+      { error: "Failed to get template" },
       { status: 500 }
     );
   }
@@ -101,7 +101,7 @@ export async function PATCH(
       .from("agent_templates")
       .select("org_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -112,7 +112,7 @@ export async function PATCH(
       .select("id")
       .eq("organization_id", template.org_id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!member) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -124,13 +124,13 @@ export async function PATCH(
       .eq("id", templateId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to update template" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: unknown) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to update template" },
+      { error: "Failed to update template" },
       { status: 500 }
     );
   }
@@ -159,7 +159,7 @@ export async function DELETE(
       .from("agent_templates")
       .select("org_id")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -170,7 +170,7 @@ export async function DELETE(
       .select("id")
       .eq("organization_id", template.org_id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!member) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -182,13 +182,13 @@ export async function DELETE(
       .eq("id", templateId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to delete template" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: unknown) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to delete template" },
+      { error: "Failed to delete template" },
       { status: 500 }
     );
   }

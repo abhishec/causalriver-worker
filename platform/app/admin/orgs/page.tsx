@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CreateWorkspaceModal } from "./create-workspace-modal";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Admin — Customers & Workspaces" };
+export const metadata = { title: "Admin — Customers & AI Workers" };
 
 const PLAN_VARIANT: Record<string, "accent" | "info" | "success" | "default"> = {
   enterprise: "accent",
@@ -99,7 +99,8 @@ export default async function AdminOrgsPage() {
   // Build customer → workspaces map
   const customerWorkspaceMap = new Map<string, OrgRow[]>();
   customerOrgs.forEach((o) => {
-    const cid = o.customer_id!;
+    if (!o.customer_id) return;
+    const cid = o.customer_id;
     if (!customerWorkspaceMap.has(cid)) customerWorkspaceMap.set(cid, []);
     customerWorkspaceMap.get(cid)!.push(o);
   });
@@ -117,9 +118,9 @@ export default async function AdminOrgsPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Customers & Workspaces</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Customers & AI Workers</h1>
           <p className="text-xs text-muted mt-0.5">
-            Users belong to <strong>Customers</strong> — workspaces are isolated brain tracks within a customer
+            Users belong to <strong>Customers</strong> — AI Workers are isolated brain tracks within a customer
           </p>
         </div>
         <CreateWorkspaceModal customers={customers} />
@@ -128,10 +129,10 @@ export default async function AdminOrgsPage() {
       {/* ── Stats ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatValue label="Customers"      value={String(customers.length)} subtitle={`${designPartners} design partner${designPartners !== 1 ? "s" : ""}`} />
-        <StatValue label="Workspaces"     value={String(tenantOrgs.length)} subtitle="isolated brains" />
+        <StatValue label="AI Workers"     value={String(tenantOrgs.length)} subtitle="isolated brains" />
         <StatValue label="Enterprise"     value={String(enterpriseCount)} />
         <StatValue label="Total Users"    value={String(totalUsers)} subtitle="via customer_members" />
-        <StatValue label="Core Workspaces"      value={String(coreOrgs.length)} subtitle="platform brain" />
+        <StatValue label="Core AI Workers"      value={String(coreOrgs.length)} subtitle="platform brain" />
       </div>
 
       {/* ── Core Brain ──────────────────────────────────────────────────── */}
@@ -173,7 +174,7 @@ export default async function AdminOrgsPage() {
               )}
               <Badge variant={PLAN_VARIANT[customer.plan] ?? "default"} size="xs">{customer.plan}</Badge>
               <div className="text-[10px] text-muted/50 ml-1">
-                {members.length} member{members.length !== 1 ? "s" : ""} · {workspaces.length} workspace{workspaces.length !== 1 ? "s" : ""}
+                {members.length} member{members.length !== 1 ? "s" : ""} · {workspaces.length} AI Worker{workspaces.length !== 1 ? "s" : ""}
                 {activeCount > 0 && <span className="text-success ml-2">● {activeCount} active</span>}
               </div>
               <Link
@@ -226,8 +227,8 @@ export default async function AdminOrgsPage() {
               <div>
                 <div className="mb-2 px-3 py-2 rounded-lg bg-surface border border-border-subtle text-[11px] text-muted flex items-center gap-2">
                   <span className="text-success">●</span>
-                  Workspaces share a customer record for billing only.
-                  Brain state, signals, and causal graphs are completely isolated per workspace.
+                  AI Workers share a customer record for billing only.
+                  Brain state, signals, and causal graphs are completely isolated per AI Worker.
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {workspaces.map((org) => (
@@ -248,7 +249,7 @@ export default async function AdminOrgsPage() {
 
       {/* ── Unclaimed workspaces (no customer) ───────────────────────────── */}
       {standaloneOrgs.length > 0 && (
-        <Section label="Unclaimed Workspaces" sublabel="Not yet linked to a customer — run backfill migration">
+        <Section label="Unclaimed AI Workers" sublabel="Not yet linked to a customer — run backfill migration">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {standaloneOrgs.map((org) => (
               <WorkspaceCard
@@ -319,7 +320,7 @@ function WorkspaceCard({
           <div className="min-w-0">
             {showWorkspaceLabel && (
               <div className="text-[9px] uppercase tracking-wider text-muted/60 leading-none mb-0.5">
-                Workspace (brain)
+                AI Worker (brain)
               </div>
             )}
             <div className="text-sm font-semibold truncate">{org.name}</div>
@@ -335,13 +336,13 @@ function WorkspaceCard({
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
           </svg>
-          Brain workspace
+          Brain instance
         </span>
         <span className="flex items-center gap-1">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
-          {orgMembers.length} workspace access
+          {orgMembers.length} members
         </span>
         <span className="ml-auto text-[10px]">{new Date(org.created_at).toLocaleDateString()}</span>
       </div>

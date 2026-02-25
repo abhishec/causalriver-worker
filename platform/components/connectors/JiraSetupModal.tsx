@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useWorkspace } from "@/lib/workspace-context";
 
 interface JiraProjectInfo {
@@ -64,6 +65,8 @@ export function JiraSetupModal({
   onConnected,
 }: JiraSetupModalProps) {
   const { currentWorkspace } = useWorkspace();
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
 
   // Step 1 — credentials
   const [step, setStep] = useState<Step>("credentials");
@@ -216,14 +219,36 @@ export function JiraSetupModal({
       }));
 
       setSiteInfo({ siteUrl: normUrl, siteName: new URL(normUrl).hostname, projects });
-      // Pre-select all software-type projects (filter out service desks etc)
-      const softwareProjects = projects
-        .filter((p) => p.projectType === "software" || !p.projectType)
-        .map((p) => p.key);
-      setSelectedProjects(softwareProjects.length > 0 ? softwareProjects : projects.map((p) => p.key));
+
+      // Parse pasted sources and pre-load them into Step 2
+      const pastedSources = sourceInput.split(/[\n,]+/).map(u => u.trim()).filter(Boolean)
+        .map(u => parseJiraUrl(u)).filter(Boolean) as JiraSource[];
+      if (pastedSources.length > 0) {
+        setSources(pastedSources);
+      }
+
+      // Extract project keys from pasted URLs
+      const pastedProjectKeys = [...new Set(pastedSources.filter(s => s.projectKey).map(s => s.projectKey!.toUpperCase()))];
+
+      // Pre-select: pasted project keys first, then fall back to software-type projects
+      if (pastedProjectKeys.length > 0) {
+        // Select pasted projects that actually exist in the Jira site
+        const validPasted = pastedProjectKeys.filter(k => projects.some(p => p.key === k));
+        if (validPasted.length > 0) {
+          setSelectedProjects(validPasted);
+        } else {
+          // Pasted keys didn't match any projects — select all software projects
+          const softwareProjects = projects.filter(p => p.projectType === "software" || !p.projectType).map(p => p.key);
+          setSelectedProjects(softwareProjects.length > 0 ? softwareProjects : projects.map(p => p.key));
+        }
+      } else {
+        const softwareProjects = projects.filter(p => p.projectType === "software" || !p.projectType).map(p => p.key);
+        setSelectedProjects(softwareProjects.length > 0 ? softwareProjects : projects.map(p => p.key));
+      }
+
       setStep("projects");
     } catch (err: any) {
-      setError(err.message || "Network error — check the site URL");
+      setError("Network error — check the site URL");
       setStep("error");
     }
   };
@@ -293,9 +318,9 @@ export function JiraSetupModal({
       p.key.toLowerCase().includes(projectSearch.toLowerCase())
   );
 
-  if (!isOpen) return null;
+  if (!isOpen || !portalTarget) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg mx-4 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
 
@@ -343,6 +368,59 @@ export function JiraSetupModal({
           {/* ── Step 1: Credentials ── */}
           {(step === "credentials" || step === "validating" || step === "error") && (
             <>
+              {/* Quick paste: Jira links */}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Jira Links
+                  <span className="ml-1 text-[10px] font-normal text-muted">(paste board, dashboard, or project URLs)</span>
+                </label>
+                <textarea
+                  value={sourceInput}
+                  onChange={(e) => {
+                    setSourceInput(e.target.value);
+                    // Auto-detect site URL from pasted links
+                    const lines = e.target.value.split(/[\n,]+/).map(l => l.trim()).filter(Boolean);
+                    for (const line of lines) {
+                      const hostMatch = line.match(/https?:\/\/([^/]+\.atlassian\.net)/i) || line.match(/https?:\/\/([^/]+)/i);
+                      if (hostMatch && !siteUrl.trim()) {
+                        setSiteUrl(hostMatch[1]);
+                      }
+                    }
+                  }}
+                  placeholder={`Paste one or more Jira URLs, one per line:\nhttps://company.atlassian.net/jira/software/c/projects/FIN/boards/544\nhttps://company.atlassian.net/jira/dashboards/10431`}
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg bg-surface border border-border text-xs placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none font-mono"
+                  disabled={step === "validating"}
+                />
+                {/* Show parsed sources as preview chips */}
+                {sourceInput.trim() && (() => {
+                  const parsed = sourceInput.split(/[\n,]+/).map(u => u.trim()).filter(Boolean).map(u => parseJiraUrl(u)).filter(Boolean) as JiraSource[];
+                  return parsed.length > 0 ? (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {parsed.map((s, i) => (
+                        <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                          s.type === "board" ? "text-accent bg-accent/10" :
+                          s.type === "dashboard" ? "text-purple-500 bg-purple-500/10" :
+                          "text-amber-500 bg-amber-500/10"
+                        }`}>
+                          {s.type}: {s.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+                <p className="text-[10px] text-muted mt-1">
+                  The site URL, project keys, and board IDs are auto-detected from your links.
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border-subtle" />
+                <span className="text-[10px] text-muted uppercase tracking-wider">or enter manually</span>
+                <div className="flex-1 h-px bg-border-subtle" />
+              </div>
+
               {/* Site URL */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
@@ -717,6 +795,7 @@ export function JiraSetupModal({
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget
   );
 }

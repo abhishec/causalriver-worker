@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role)) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       .from("health_alert_thresholds")
       .select("*")
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     // Get notification preferences for this user
     const { data: notifPrefs } = await supabase
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       .select("*")
       .eq("organization_id", workspaceId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     return NextResponse.json({
       thresholds: thresholds || { ...DEFAULT_THRESHOLDS, organization_id: workspaceId },
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error("[alerts/config] GET error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to load config" },
+      { error: "Failed to load config" },
       { status: 500 },
     );
   }
@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role)) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -155,7 +155,7 @@ export async function PUT(request: NextRequest) {
   } catch (err) {
     logger.error("[alerts/config] PUT error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to save config" },
+      { error: "Failed to save config" },
       { status: 500 },
     );
   }

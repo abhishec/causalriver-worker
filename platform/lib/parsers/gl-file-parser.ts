@@ -507,7 +507,12 @@ function parseCSV(buffer: Buffer): ParseResult {
 
 function parseJSON(buffer: Buffer): ParseResult {
   const text = buffer.toString("utf-8");
-  const data = JSON.parse(text);
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Invalid JSON format — could not parse file.");
+  }
 
   if (!Array.isArray(data)) {
     throw new Error("JSON file must contain an array of transactions.");

@@ -31,15 +31,11 @@ export async function GET(request: NextRequest) {
 
   try {
     // ── Auth: Verify this is a legitimate cron call ──────────────────
-    const isVercelCron = request.headers.get(VERCEL_CRON_HEADER) === "1";
+    // Security: require CRON_SECRET. x-vercel-cron header alone is spoofable.
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    const isAuthorized =
-      isVercelCron ||
-      (cronSecret && authHeader === `Bearer ${cronSecret}`);
-
-    if (!isAuthorized) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(
         { error: "Unauthorized. Provide CRON_SECRET." },
         { status: 401 },
@@ -110,10 +106,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Health cron failed";
     logger.error("[HealthCron] Error:", error);
     return NextResponse.json(
-      { error: message, duration_ms: Date.now() - startTime },
+      { error: "Internal error", duration_ms: Date.now() - startTime },
       { status: 500 },
     );
   }

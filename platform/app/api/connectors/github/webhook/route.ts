@@ -26,7 +26,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { createPRAnalyzer } from '@nexus-ai/memory-stack';
 import { Octokit } from '@octokit/rest';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { ingestPRAsSignals } from '@/lib/p0/ingest-pr-signals';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
@@ -38,9 +38,7 @@ import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // 1. Verify webhook signature
+    // 1. Verify webhook signature FIRST — before any DB connections
     const signature = req.headers.get('x-hub-signature-256');
     const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -54,14 +52,23 @@ export async function POST(req: NextRequest) {
       .update(body)
       .digest('hex')}`;
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(signature || '', 'utf8');
+    const expBuf = Buffer.from(expectedSignature, 'utf8');
+    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
       logger.error('[GitHub Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    // 2. Parse event
+    // 2. Parse event — only after signature is verified
+    const supabase = await createClient();
     const event = req.headers.get('x-github-event');
-    const payload = JSON.parse(body);
+    let payload;
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      logger.warn('[GitHub Webhook] Malformed JSON payload');
+      return NextResponse.json({ ok: true }); // Ack to prevent retries
+    }
 
     logger.debug(`[GitHub Webhook] Received ${event} event`);
 
@@ -97,7 +104,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('[GitHub Webhook] Error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Webhook processing failed' },
       { status: 500 }
     );
   }
@@ -151,7 +158,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
     if (!connectorConfig) {
       logger.error('[PR Review] No workspace mapping found for repo');
       return NextResponse.json(
-        { error: 'Repository not connected to any workspace' },
+        { error: 'Repository not connected to any organization' },
         { status: 404 }
       );
     }
@@ -329,7 +336,7 @@ async function handlePullRequestEvent(payload: any, supabase: any) {
   } catch (error) {
     logger.error('[PR Review] Error analyzing PR:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Analysis failed' },
+      { error: 'Analysis failed' },
       { status: 500 }
     );
   }
@@ -360,7 +367,7 @@ async function handlePullRequestReviewEvent(payload: any, supabase: any) {
   ) ?? allReviewConfigs?.[0] ?? null;
 
   if (!connectorConfig) {
-    return NextResponse.json({ message: 'No workspace mapping' });
+    return NextResponse.json({ message: 'No organization mapping' });
   }
 
   // Record outcome for calibration
@@ -490,14 +497,14 @@ async function handlePushEvent(payload: any, supabase: any): Promise<void> {
       created_at: new Date().toISOString(),
     })
     .select('id')
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    logger.error('[Architecture Sync] Failed to queue job:', error.message);
+  if (error || !job) {
+    logger.error('[Architecture Sync] Failed to queue job:', error?.message ?? 'no data');
     return;
   }
 
-  logger.debug(`[Architecture Sync] Queued architecture-extractor job ${job?.id} for org ${organizationId} (push to ${primaryBranch})`);
+  logger.debug(`[Architecture Sync] Queued architecture-extractor job ${job.id} for org ${organizationId} (push to ${primaryBranch})`);
 
   // Log activity
   await supabase.from('agent_activity_log').insert({

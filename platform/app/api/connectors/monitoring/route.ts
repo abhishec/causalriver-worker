@@ -118,7 +118,7 @@ export async function GET(request: Request) {
       .order("connector_type");
 
     if (connErr) {
-      return NextResponse.json({ error: connErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     // 3. Load checkpoints (in-progress syncs)
@@ -249,7 +249,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     logger.error("[Connector Monitoring] Unexpected error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -298,7 +298,8 @@ function inferConnectorFromDomain(sourceDomain: string): string {
     "hubspot",
   ];
 
-  for (const part of parts.reverse()) {
+  const reversed = [...parts].reverse();
+  for (const part of reversed) {
     if (knownConnectors.includes(part)) return part;
   }
   return parts[parts.length - 1] || "unknown";

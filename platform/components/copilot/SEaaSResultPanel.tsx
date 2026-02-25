@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useId } from "react";
 import { cn } from "@/lib/utils";
+import DOMPurify from "dompurify";
 import type { SEaaSDomainData } from "@/components/copilot/types";
 
 // ─── Mermaid diagram renderer ─────────────────────────────────────────────────
@@ -40,7 +41,7 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
         const { svg: rendered } = await mermaid.render(safeId, code);
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+        if (!cancelled) setError("Failed to render diagram");
       }
     })();
     return () => { cancelled = true; };
@@ -68,7 +69,7 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
         {svg ? (
           <div
             className="[&_svg]:max-w-full [&_svg]:h-auto"
-            dangerouslySetInnerHTML={{ __html: svg }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ["foreignObject"] }) }}
           />
         ) : (
           <div className="flex items-center gap-2 py-8 text-xs text-muted">
@@ -558,7 +559,7 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                       <div className="px-4 py-2 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between">
                         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{snippet.title ?? snippet.language}</span>
                       </div>
-                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code}</code></pre>
+                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code ?? "// No code available"}</code></pre>
                     </div>
                   ))}
               </div>
@@ -605,10 +606,10 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                   className="flex items-start gap-2.5 p-2.5 rounded-lg border border-accent/20 bg-accent/5 cursor-pointer hover:bg-accent/10 transition-colors"
                   onClick={() => setActiveTab("recommendations")}
                 >
-                  <PriorityIcon priority={data.recommendations[0].priority} />
+                  <PriorityIcon priority={data.recommendations[0]?.priority} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-semibold text-foreground leading-snug">{data.recommendations[0].action}</p>
-                    <p className="text-[11px] text-muted mt-0.5 leading-snug line-clamp-2">{data.recommendations[0].rationale}</p>
+                    <p className="text-[12px] font-semibold text-foreground leading-snug">{data.recommendations[0]?.action ?? "Action recommended"}</p>
+                    <p className="text-[11px] text-muted mt-0.5 leading-snug line-clamp-2">{data.recommendations[0]?.rationale}</p>
                   </div>
                 </div>
                 {data.recommendations.length > 1 && (

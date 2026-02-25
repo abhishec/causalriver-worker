@@ -180,7 +180,30 @@ export function useCommandGathering(
         }
         const data = await res.json();
         const key = param.optionsKey || "items";
-        const items = data[key] || data || [];
+        let items = data[key] || data || [];
+
+        // Customer isolation: when fetching memberships, filter to only show
+        // workspaces belonging to the active customer. Prevents cross-customer
+        // data leakage in gathering flows.
+        if (
+          Array.isArray(items) &&
+          param.optionsEndpoint?.includes("/workspace/memberships")
+        ) {
+          const activeCustomerId =
+            typeof window !== "undefined"
+              ? localStorage.getItem("nexus_active_customer")
+              : null;
+          if (activeCustomerId) {
+            items = items.filter(
+              (m: Record<string, unknown>) => {
+                const org = m.organizations as Record<string, unknown> | undefined;
+                const custId = org?.customer_id ?? m.customer_id;
+                return custId === activeCustomerId;
+              }
+            );
+          }
+        }
+
         return Array.isArray(items)
           ? items.map((item: { id?: string; name?: string; slug?: string; label?: string; value?: string }) => ({
               value: String(item.id ?? item.slug ?? item.value ?? item.name ?? ""),

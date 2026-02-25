@@ -61,6 +61,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verify user is a member of the target organization
+    const { data: membership } = await authClient
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const supabase = await createServiceClient();
     const octokit = new Octokit({ auth: githubToken });
 
@@ -97,8 +109,8 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (repoError) {
-      results.errors.push(`Repository upsert error: ${repoError.message}`);
-      return NextResponse.json({ error: repoError.message }, { status: 500 });
+      results.errors.push("Repository upsert error");
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     results.repositories = 1;
@@ -146,7 +158,7 @@ export async function POST(req: NextRequest) {
 
         page++;
       } catch (error: any) {
-        results.errors.push(`PR fetch error (page ${page}): ${error.message}`);
+        results.errors.push(`PR fetch error (page ${page})`);
         hasMore = false;
       }
     }
@@ -304,10 +316,10 @@ export async function POST(req: NextRequest) {
               .eq('id', prId);
           }
         } catch (reviewError: any) {
-          results.errors.push(`Review fetch error (PR ${pr.number}): ${reviewError.message}`);
+          results.errors.push(`Review fetch error (PR ${pr.number})`);
         }
       } catch (error: any) {
-        results.errors.push(`PR processing error (${pr.number}): ${error.message}`);
+        results.errors.push(`PR processing error (${pr.number})`);
       }
     }
 
@@ -321,7 +333,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     logger.error('[P0 Ingest] Fatal error:', error);
     return NextResponse.json(
-      { error: error.message || 'Unknown error' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

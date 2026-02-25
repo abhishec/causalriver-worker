@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // 1. Handle OAuth errors
     if (error) {
       return NextResponse.redirect(
-        new URL(`/connectors?error=${error}`, request.url)
+        new URL(`/connectors?error=${encodeURIComponent(error)}`, request.url)
       );
     }
 
@@ -62,6 +62,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL('/login', request.url)
       );
+    }
+
+    // Verify caller is a member of the org from the state
+    const { data: orgMembership } = await supabase
+      .from('org_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('organization_id', orgId)
+      .maybeSingle();
+
+    if (!orgMembership) {
+      return NextResponse.redirect(new URL('/connectors?error=forbidden', request.url));
     }
 
     // 4. Get OAuth credentials (org-level or platform-level)
@@ -112,7 +124,7 @@ export async function GET(request: NextRequest) {
         error: tokenData.error,
       });
       return NextResponse.redirect(
-        new URL(`/connectors?error=${tokenData.error}`, request.url)
+        new URL(`/connectors?error=${encodeURIComponent(tokenData.error ?? 'oauth_error')}`, request.url)
       );
     }
 

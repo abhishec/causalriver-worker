@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
           .select("*")
           .eq("id", taskId)
           .eq("organization_id", organizationId)
-          .single(),
+          .maybeSingle(),
         service
           .from("brain_agent_steps")
           .select("*")
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     if (listError) {
       return NextResponse.json(
-        { error: listError.message },
+        { error: "Internal error" },
         { status: 500 }
       );
     }
@@ -168,8 +168,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -217,7 +216,7 @@ export async function PATCH(request: NextRequest) {
 
     if (memberOrgIds.length === 0) {
       return NextResponse.json(
-        { error: "Not a member of any workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -228,7 +227,7 @@ export async function PATCH(request: NextRequest) {
       .select("id, organization_id, status, prompt, result_artifacts, confidence_score")
       .eq("id", taskId)
       .in("organization_id", memberOrgIds)
-      .single();
+      .maybeSingle();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -259,6 +258,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: "agent_task_approved",
         signal_value: task.confidence_score || 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {
@@ -299,6 +299,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: "agent_task_rejected",
         signal_value: -1,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {
@@ -357,6 +358,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: `agent_feedback_${rating}`,
         signal_value: rating === "helpful" ? 1 : rating === "not_helpful" ? 0 : -1,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {
@@ -385,7 +387,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ cascade });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Simulation failed" },
+      { error: "Simulation failed" },
       { status: 500 }
     );
   }

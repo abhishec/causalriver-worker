@@ -425,10 +425,11 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
             : new Date(new Date(pred.created_at).getTime() + 7 * 86400_000);
 
           if (deadline < new Date()) {
-            // Expired — mark as such
+            // Expired — mark as false so it's excluded from future verification batches
+            // (was_correct: null is the filter for unverified predictions)
             await supabase
               .from('prediction_records')
-              .update({ was_correct: null, actual_outcome: 'expired', verified_at: new Date().toISOString() })
+              .update({ was_correct: false, actual_outcome: 'expired', verified_at: new Date().toISOString() })
               .eq('id', pred.id);
             result.expiredPredictions++;
           }
@@ -450,7 +451,10 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
         const magnitudeError = predictedValue != null
           ? Math.abs(actualValue - (predictedValue as number))
           : 0;
-        const wasCorrect = directionCorrect && magnitudeError < (predictedValue as number ?? 1) * 0.5;
+        const toleranceBase = (predictedValue != null && (predictedValue as number) !== 0)
+          ? Math.abs(predictedValue as number)
+          : 1;
+        const wasCorrect = directionCorrect && magnitudeError < toleranceBase * 0.5;
 
         // 4. Update the prediction record
         await supabase
@@ -1115,10 +1119,11 @@ export function createClosedLoopLearningEngine(config: ClosedLoopConfig): Closed
       result.layerCredits.push({ layerId, reward: avgReward });
 
       if (reinforcement) {
-        const signal = avgReward > 0 ? 'dopamine' : 'gaba';
+        // BUG-06 FIX: Pass actual reward value (can be negative) — not Math.abs()
+        // Negative outcomes must inject negative reward so brain learns to avoid bad actions
         reinforcement.injectExternalReward(
           layerId,
-          Math.abs(avgReward),
+          avgReward,
           `Agent outcome: ${count} executions, avg reward ${avgReward.toFixed(2)} for L${layerId}`
         );
       }

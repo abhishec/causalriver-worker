@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient }       from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { provisionWorkspace as provisionOrg } from "@/lib/workspace-provisioning";
 import { logger } from "@/lib/logger";
 
@@ -31,11 +31,12 @@ function slugify(name: string, suffix: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const service = await createServiceClient();
-
-    // ── Auth: platform admin only ──────────────────────────────────
-    const { data: { user }, error: authErr } = await service.auth.getUser();
+    // Use regular client for auth (service client doesn't read user session correctly)
+    const authClient = await createClient();
+    const { data: { user }, error: authErr } = await authClient.auth.getUser();
     if (authErr || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const service = await createServiceClient();
 
     const { data: adminCheck } = await service
       .from("customer_members")
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
       .from("customers")
       .select("id, name, slug")
       .eq("id", customerId)
-      .single();
+      .maybeSingle();
     if (custErr || !customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
     // ── Derive slug — ensure uniqueness ───────────────────────────
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (orgErr || !org) {
-      return NextResponse.json({ error: orgErr?.message || "Failed to create org" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to create organization" }, { status: 500 });
     }
 
     // ── 2. Full provision — verifies + backfills EVERYTHING ───────
@@ -146,7 +147,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     logger.error("[create-workspace]", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

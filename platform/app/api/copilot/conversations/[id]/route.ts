@@ -31,7 +31,7 @@ export async function GET(
       .select("*")
       .eq("id", id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -40,7 +40,7 @@ export async function GET(
     return NextResponse.json({ conversation: data });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to get conversation" },
+      { error: "Failed to get conversation" },
       { status: 500 }
     );
   }
@@ -71,8 +71,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
     const updates: Record<string, unknown> = {};
-    if (body.title !== undefined) updates.title = body.title;
-    if (body.messages !== undefined) updates.messages = body.messages;
+    if (body.title !== undefined) {
+      if (typeof body.title !== "string" || body.title.length > 500) {
+        return NextResponse.json({ error: "title must be a string under 500 chars" }, { status: 400 });
+      }
+      updates.title = body.title.trim();
+    }
+    if (body.messages !== undefined) {
+      if (!Array.isArray(body.messages)) {
+        return NextResponse.json({ error: "messages must be an array" }, { status: 400 });
+      }
+      updates.messages = body.messages;
+    }
     if (body.serviceMode !== undefined) updates.service_mode = body.serviceMode;
 
     if (Object.keys(updates).length === 0) {
@@ -87,13 +97,13 @@ export async function PATCH(
       .eq("user_id", user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to update conversation" },
+      { error: "Failed to update conversation" },
       { status: 500 }
     );
   }
@@ -125,13 +135,13 @@ export async function DELETE(
       .eq("user_id", user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to delete conversation" },
+      { error: "Failed to delete conversation" },
       { status: 500 }
     );
   }

@@ -22,7 +22,7 @@ export default async function OrgDetailPage({
     .from("organizations")
     .select("id, name, slug, plan, is_core_brain, created_at, settings")
     .eq("id", orgId)
-    .single();
+    .maybeSingle();
 
   if (!org) notFound();
 
@@ -62,7 +62,7 @@ export default async function OrgDetailPage({
     <div className="space-y-6 max-w-6xl">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted">
-        <Link href="/admin/workspaces" className="hover:text-foreground transition-colors">Workspaces</Link>
+        <Link href="/admin/workspaces" className="hover:text-foreground transition-colors">AI Workers</Link>
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
@@ -165,7 +165,7 @@ export default async function OrgDetailPage({
               );
             })}
             {members.length === 0 && (
-              <div className="px-5 py-10 text-center text-sm text-muted">No members in this workspace</div>
+              <div className="px-5 py-10 text-center text-sm text-muted">No members in this AI Worker</div>
             )}
           </div>
         </Card>
@@ -200,10 +200,10 @@ export default async function OrgDetailPage({
 
       {/* Org metadata */}
       <Card>
-        <CardTitle className="mb-3">Workspace Details</CardTitle>
+        <CardTitle className="mb-3">AI Worker Details</CardTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
-            { label: "Workspace ID", value: org.id },
+            { label: "AI Worker ID", value: org.id },
             { label: "Slug",       value: org.slug },
             { label: "Plan",       value: org.plan },
             { label: "Core Brain", value: org.is_core_brain ? "Yes" : "No" },

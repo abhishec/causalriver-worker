@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       .select("role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       // Check platform admin
@@ -117,11 +117,11 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this workspace" },
+          { error: "Access denied" },
           { status: 403 }
         );
       }
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[JobsTrigger] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error("[JobsTrigger] GET error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -258,7 +258,7 @@ async function executeViaEdgeFunction(
 
     return await response.json();
   } catch (err: any) {
-    return { error: `Edge Function unreachable: ${err.message}` };
+    return { error: "Edge Function unreachable" };
   }
 }
 
@@ -330,6 +330,6 @@ async function executeViaNodeJs(
         return { error: `Unknown job type: ${jobType}` };
     }
   } catch (err: any) {
-    return { error: `Node.js execution failed: ${err.message}` };
+    return { error: "Node.js execution failed" };
   }
 }

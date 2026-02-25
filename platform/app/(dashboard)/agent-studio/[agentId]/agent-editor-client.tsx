@@ -108,7 +108,7 @@ export function AgentEditorClient({ template, workspaceId, isOwner }: AgentEdito
         router.replace(`/agent-studio/${data.template.id}`);
       }
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Save failed");
+      setSaveError("Save failed");
     } finally {
       setSaving(false);
     }
@@ -132,7 +132,7 @@ export function AgentEditorClient({ template, workspaceId, isOwner }: AgentEdito
       const data = await res.json();
       setTestResult(data);
     } catch (err) {
-      setTestResult({ error: err instanceof Error ? err.message : "Test failed" });
+      setTestResult({ error: "Test failed" });
     } finally {
       setTesting(false);
     }

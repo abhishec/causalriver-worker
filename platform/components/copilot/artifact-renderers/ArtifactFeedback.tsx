@@ -82,9 +82,9 @@ export function ArtifactFeedback({
     }
     setFeedback("down");
     setShowCorrection(true);
-    sendFeedback("not_helpful");
+    // Don't send feedback yet — wait for correction submit or skip
     setTimeout(() => correctionRef.current?.focus(), 100);
-  }, [feedback, sendFeedback]);
+  }, [feedback]);
 
   const handleSubmitCorrection = useCallback(() => {
     const trimmed = correction.trim();
@@ -201,7 +201,7 @@ export function ArtifactFeedback({
                 </span>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setShowCorrection(false)}
+                    onClick={() => { sendFeedback("not_helpful"); setShowCorrection(false); }}
                     className="px-2.5 py-1 rounded-lg text-[10px] font-medium text-muted hover:text-foreground hover:bg-surface transition-colors"
                   >
                     Skip

@@ -50,7 +50,7 @@ export default function FinanceReportsPage() {
         setLoading(false);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to load reports");
+        setError("Failed to load reports");
         setLoading(false);
       });
   }, []);

@@ -488,7 +488,7 @@ function generateNaturalLanguage(
                           effectSize < 0.13 ? 'small' :
                           effectSize < 0.26 ? 'medium' : 'large';
   
-  const multiplier = 1 / (1 - effectSize);
+  const multiplier = effectSize >= 1 ? 999.9 : 1 / (1 - effectSize);
   
   if (pValue < 0.05) {
     return `Source domain Granger-causes target domain with ${effectMagnitude} effect ` +

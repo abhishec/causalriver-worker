@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
           source_domain: "brain.early_warning",
           signal_type: "early_warning_analysis",
           signal_value: report.velocityCollapse ? 1 : 0,
+          signal_timestamp: new Date().toISOString(),
           entity_type: "early_warning",
           entity_id: `ew_${new Date().toISOString().split("T")[0]}`,
           signal_metadata: {
@@ -154,7 +155,7 @@ export async function GET(request: NextRequest) {
     }
     return createSeAaSError(
       request,
-      err.message || "Internal server error",
+      "Internal error",
       500
     );
   }

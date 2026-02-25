@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     const workspaceId   = url.searchParams.get("org_id") || await getCurrentWorkspaceId();
     const service = url.searchParams.get("service");   // "aas" | "seaas" | null
     const domainFilter = url.searchParams.get("domain");
-    const limit   = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
+    const limit   = Math.min(parseInt(url.searchParams.get("limit") || "20", 10) || 20, 50);
     const sinceDefault = new Date(Date.now() - 7 * 86400000).toISOString();
     const since   = url.searchParams.get("since") || sinceDefault;
 
@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
   } catch (err: any) {
     logger.error("[anomalies/feed] Error:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error" },
+      { error: "Failed to fetch anomalies" },
       { status: 500 }
     );
   }

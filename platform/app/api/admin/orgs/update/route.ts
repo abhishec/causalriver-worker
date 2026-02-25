@@ -15,7 +15,7 @@ export async function PATCH(req: NextRequest) {
       .select("is_platform_admin")
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
-      .single();
+      .maybeSingle();
     if (!adminCheck) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { orgId, plan, name } = await req.json();
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest) {
 
     const service = await createServiceClient();
     const { error } = await service.from("organizations").update(updates).eq("id", orgId);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: "Failed to update" }, { status: 500 });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

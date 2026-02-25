@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         .select("role")
         .eq("user_id", user!.id)
         .eq("organization_id", workspaceId)
-        .single();
+        .maybeSingle();
 
       if (!membership) {
         const { data: admin } = await supabase
@@ -136,11 +136,11 @@ export async function POST(request: NextRequest) {
           .eq("user_id", user!.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!admin) {
           return NextResponse.json(
-            { error: "Not a member of this workspace" },
+            { error: "Access denied" },
             { status: 403 }
           );
         }
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
         let causalEdges: any[] = [];
         try {
           const { data: edges } = await service
-            .from("causal_relationships")
+            .from("causal_relationships_statistical")
             .select("source_domain, target_domain, correlation_strength, p_value, confidence, effect_size")
             .eq("organization_id", workspaceId)
             .gte("confidence", 0.3)
@@ -192,8 +192,8 @@ export async function POST(request: NextRequest) {
               confidence: e.confidence || 0.5,
             }));
           }
-        } catch {
-          // Non-critical: brain can run without causal edges
+        } catch (edgeErr) {
+          logger.warn("[BrainCycle] Failed to load causal edges (non-critical):", edgeErr instanceof Error ? edgeErr.message : edgeErr);
         }
 
         let patterns: string[] = [];
@@ -238,7 +238,10 @@ export async function POST(request: NextRequest) {
             streamHandle = controller.beginStreamingCycle(streamInput);
           }
 
-          while (true) {
+          const MAX_SIGNAL_PAGES = 200; // Safety: max 200 pages × 500 signals = 100K signals
+          let pageCount = 0;
+          while (pageCount < MAX_SIGNAL_PAGES) {
+            pageCount++;
             const { data: page } = await service
               .from("cross_domain_signals")
               .select("id, source_domain, signal_type, signal_value, entity_type, entity_id, signal_timestamp")
@@ -255,7 +258,7 @@ export async function POST(request: NextRequest) {
               entityType: s.entity_type || 'unknown',
               entityId: s.entity_id || 'unknown',
               value: s.signal_value || 0,
-              timestamp: new Date(s.signal_timestamp).getTime(),
+              timestamp: s.signal_timestamp ? new Date(s.signal_timestamp).getTime() || Date.now() : Date.now(),
               metadata: {},
             }));
 
@@ -309,7 +312,7 @@ export async function POST(request: NextRequest) {
                 entityType: s.entity_type || 'unknown',
                 entityId: s.entity_id || 'unknown',
                 value: s.signal_value || 0,
-                timestamp: new Date(s.signal_timestamp).getTime(),
+                timestamp: s.signal_timestamp ? new Date(s.signal_timestamp).getTime() || Date.now() : Date.now(),
                 metadata: {},
               }));
             }
@@ -348,21 +351,25 @@ export async function POST(request: NextRequest) {
 
     const durationMs = Date.now() - startTime;
 
-    // ── Log execution ────────────────────────────────────────────
-    await service.from("scheduled_job_runs").insert({
-      organization_id: workspaceId,
-      job_name: `brain-cycle-${mode}`,
-      job_type: `brain_cycle_${mode}`,
-      started_at: new Date(startTime).toISOString(),
-      completed_at: new Date().toISOString(),
-      status: "success",
-      result: JSON.stringify({
-        mode,
-        cycleCount: controller.getSnapshot?.()?.cycleCount,
-        durationMs,
-      }),
-      duration_ms: durationMs,
-    });
+    // ── Log execution (non-fatal) ──────────────────────────────────
+    try {
+      await service.from("scheduled_job_runs").insert({
+        organization_id: workspaceId,
+        job_name: `brain-cycle-${mode}`,
+        job_type: `brain_cycle_${mode}`,
+        started_at: new Date(startTime).toISOString(),
+        completed_at: new Date().toISOString(),
+        status: "success",
+        result: JSON.stringify({
+          mode,
+          cycleCount: controller.getSnapshot?.()?.cycleCount,
+          durationMs,
+        }),
+        duration_ms: durationMs,
+      });
+    } catch (logErr) {
+      logger.warn("[BrainCycle] Failed to log cycle run (non-fatal):", logErr);
+    }
 
     // ── Post-cycle: Health snapshot + evolution signal ────────────
     // After any brain cycle, run a lightweight health poll and emit
@@ -377,27 +384,33 @@ export async function POST(request: NextRequest) {
       const layerHealth = snap?.layerHealth ?? {};
 
       // Emit evolution signal with health + cycle metrics
+      const healthScore = healthResult?.snapshot?.overall_score ?? 0;
+      const healthStatus = healthResult?.snapshot?.status ?? "unknown";
+      const violationCount = healthResult?.violations?.length ?? 0;
+      const alertsCreated = healthResult?.alertsCreated ?? 0;
+
       await service.from("cross_domain_signals").insert({
         organization_id: workspaceId,
         source_domain: "brain.evolution",
         signal_type: "cycle_completed",
-        signal_value: healthResult.snapshot.overall_score / 100,
+        signal_value: healthScore / 100,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_cycle",
         signal_metadata: {
           mode,
           cycle_count: cycleCount,
           duration_ms: durationMs,
-          health_score: healthResult.snapshot.overall_score,
-          health_status: healthResult.snapshot.status,
-          violations: healthResult.violations.length,
-          alerts_created: healthResult.alertsCreated,
+          health_score: healthScore,
+          health_status: healthStatus,
+          violations: violationCount,
+          alerts_created: alertsCreated,
           layer_health_summary: typeof layerHealth === 'object' ? Object.keys(layerHealth).length : 0,
           completed_at: new Date().toISOString(),
         },
       });
 
-      logger.warn(
-        `[BrainCycle] Post-cycle health: score=${healthResult.snapshot.overall_score}, status=${healthResult.snapshot.status}, violations=${healthResult.violations.length}`,
+      logger.info(
+        `[BrainCycle] Post-cycle health: score=${healthScore}, status=${healthStatus}, violations=${violationCount}`,
       );
     } catch (healthErr) {
       // Non-critical: don't fail the cycle response if health polling errors
@@ -415,7 +428,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[BrainCycle] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Brain cycle failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -465,7 +478,7 @@ export async function GET(request: NextRequest) {
       .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     return NextResponse.json({
       status: "idle",
@@ -483,7 +496,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error("[BrainCycle] GET error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

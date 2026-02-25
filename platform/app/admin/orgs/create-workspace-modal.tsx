@@ -10,7 +10,8 @@
  *   <CreateWorkspaceModal customers={customers} onCreated={() => router.refresh()} />
  */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 interface Customer {
@@ -33,6 +34,8 @@ const AVAILABLE_CONNECTORS = [
 
 export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
   const router = useRouter();
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
   const [open, setOpen]             = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -55,7 +58,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
     setResult(null);
 
     if (!customerId || !workspaceName.trim()) {
-      setError("Customer and workspace name are required.");
+      setError("Customer and AI Worker name are required.");
       return;
     }
 
@@ -73,13 +76,13 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
           }),
         });
 
-        const data = await res.json();
-        if (!res.ok) { setError(data.error || "Failed to create workspace."); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data?.error || "Failed to create AI Worker."); return; }
 
         setResult({ workspace: data.workspace, membersAdded: data.membersAdded });
         router.refresh(); // Refresh server component data
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unexpected error");
+      } catch {
+        setError("Unexpected error — please try again.");
       }
     });
   }
@@ -106,11 +109,11 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        New Workspace
+        New AI Worker
       </button>
 
       {/* ── Modal overlay ────────────────────────────────────────── */}
-      {open && (
+      {open && portalTarget && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
           <div
@@ -124,9 +127,9 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
               <div>
-                <h2 className="text-sm font-semibold">New Workspace</h2>
+                <h2 className="text-sm font-semibold">New AI Worker</h2>
                 <p className="text-[11px] text-muted mt-0.5">
-                  Creates an isolated brain workspace under a customer
+                  Creates an isolated AI Worker brain under a customer
                 </p>
               </div>
               <button
@@ -147,7 +150,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="text-[12px]">
-                    <p className="font-semibold text-success">Workspace created!</p>
+                    <p className="font-semibold text-success">AI Worker created!</p>
                     <p className="text-muted mt-0.5">
                       <span className="text-foreground font-medium">{result.workspace.name}</span>
                       {" "}is live under{" "}
@@ -192,7 +195,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
                 {/* Workspace name */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-medium text-muted uppercase tracking-wider">
-                    Workspace Name <span className="text-accent">*</span>
+                    AI Worker Name <span className="text-accent">*</span>
                   </label>
                   <input
                     type="text"
@@ -258,7 +261,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
                 {/* What will happen */}
                 <div className="px-3 py-2.5 rounded-lg bg-surface border border-border-subtle text-[11px] text-muted space-y-1">
                   <p className="font-medium text-foreground">What gets created:</p>
-                  <p>✓ New isolated brain workspace (org) under <strong>{selectedCustomer?.name}</strong></p>
+                  <p>✓ New isolated AI Worker brain under <strong>{selectedCustomer?.name}</strong></p>
                   <p>✓ Brain state, cortex, federation, scheduled jobs auto-provisioned</p>
                   <p>✓ S3 storage prefix created</p>
                   <p>✓ All existing <strong>{selectedCustomer?.name}</strong> members added automatically</p>
@@ -286,13 +289,14 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
                     disabled={isPending || !workspaceName.trim()}
                     className="flex-1 px-4 py-2 rounded-lg text-xs font-semibold bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {isPending ? "Creating…" : "Create Workspace"}
+                    {isPending ? "Creating…" : "Create AI Worker"}
                   </button>
                 </div>
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        portalTarget
       )}
     </>
   );

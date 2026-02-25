@@ -110,13 +110,13 @@ export default async function AdminOverviewPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Mission Control</h1>
-        <p className="text-xs text-muted mt-0.5">Platform-wide health, workspaces, and system status</p>
+        <p className="text-xs text-muted mt-0.5">Platform-wide health, AI Workers, and system status</p>
       </div>
 
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatValue label="Workspaces" value={String(orgs.length)} subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
-        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All workspaces" />
+        <StatValue label="AI Workers" value={String(orgs.length)} subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
+        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All AI Workers" />
         <StatValue label="Online Now" value={String(onlineUsers.length)} pulse={onlineUsers.length > 0} />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} />
         <StatValue label="LLM Cost Today" value={formatUSD(costToday)} />
@@ -128,7 +128,7 @@ export default async function AdminOverviewPage() {
         {/* Customers & Workspaces */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <CardTitle>Customers &amp; Workspaces</CardTitle>
+            <CardTitle>Customers &amp; AI Workers</CardTitle>
             <Link href="/admin/workspaces" className="text-xs text-accent hover:text-accent/80">View all</Link>
           </div>
           <div className="space-y-3">
@@ -184,7 +184,7 @@ export default async function AdminOverviewPage() {
               </div>
             )}
             {orgs.length === 0 && (
-              <p className="text-sm text-muted text-center py-6">No workspaces</p>
+              <p className="text-sm text-muted text-center py-6">No AI Workers</p>
             )}
           </div>
         </Card>

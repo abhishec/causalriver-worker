@@ -15,12 +15,14 @@ export function PerfRenderer({ data }: { data: Record<string, any> }) {
         {findings.map((f: any, i: number) => (
           <FindingRow key={i} severity={f.severity} text={f.text} label={f.label} />
         ))}
-        <AlertBanner
-          type="critical"
-          badge="MEMORY LEAK"
-          title="CaseManager +12MB/hour"
-          description="Unreleased connections causing steady memory growth"
-        />
+        {(data?.alertBanner || data?.memoryAlert) && (
+          <AlertBanner
+            type="critical"
+            badge={data.alertBanner?.badge ?? "MEMORY LEAK"}
+            title={data.alertBanner?.title ?? "Memory Growth Detected"}
+            description={data.alertBanner?.description ?? "Unreleased connections causing steady memory growth"}
+          />
+        )}
       </div>
     </div>
   );

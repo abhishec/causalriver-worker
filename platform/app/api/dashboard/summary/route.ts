@@ -43,10 +43,11 @@ export async function GET() {
       has_brain: boolean;
       active_agents: number;
       active_services: string[];
+      ai_workers: { id: string; service: string; name: string; description?: string; status: string; created_at: string; created_by?: string }[];
     }> = {};
 
-    // Fetch workspace settings for active_services
-    let settingsMap: Record<string, string[]> = {};
+    // Fetch workspace settings for active_services + ai_workers
+    let settingsMap: Record<string, Record<string, unknown>> = {};
     try {
       const { data: orgs } = await admin
         .from("organizations")
@@ -55,41 +56,46 @@ export async function GET() {
 
       if (orgs) {
         for (const org of orgs as { id: string; settings: Record<string, unknown> | null }[]) {
-          const settings = org.settings ?? {};
-          settingsMap[org.id] = Array.isArray(settings.active_services)
-            ? (settings.active_services as string[])
-            : ["seaas", "aas", "general"]; // default: all
+          settingsMap[org.id] = org.settings ?? {};
         }
       }
     } catch {
-      // settings column may not have active_services yet
+      // settings column may not exist yet
     }
 
     // Initialize all orgs
     for (const orgId of orgIds) {
+      const settings = settingsMap[orgId] ?? {};
+      const activeServices = Array.isArray(settings.active_services)
+        ? (settings.active_services as string[])
+        : ["seaas", "aas", "general"];
+      const aiWorkers = Array.isArray(settings.ai_workers)
+        ? (settings.ai_workers as { id: string; service: string; name: string; description?: string; status: string; created_at: string; created_by?: string }[])
+        : [];
       result[orgId] = {
         connector_count: 0,
         connectors: [],
         has_brain: false,
         active_agents: 0,
-        active_services: settingsMap[orgId] ?? ["seaas", "aas", "general"],
+        active_services: activeServices,
+        ai_workers: aiWorkers,
       };
     }
 
-    // Connectors
+    // Connectors — try connector_type first (actual column name), fallback to provider
     try {
       const { data: connectors } = await admin
         .from("org_connectors")
-        .select("organization_id, provider")
+        .select("organization_id, connector_type")
         .in("organization_id", orgIds);
 
       if (connectors) {
-        for (const c of connectors as { organization_id: string; provider: string }[]) {
+        for (const c of connectors as { organization_id: string; connector_type: string }[]) {
           const ws = result[c.organization_id];
           if (ws) {
             ws.connector_count++;
-            if (!ws.connectors.includes(c.provider)) {
-              ws.connectors.push(c.provider);
+            if (c.connector_type && !ws.connectors.includes(c.connector_type)) {
+              ws.connectors.push(c.connector_type);
             }
           }
         }
@@ -123,7 +129,7 @@ export async function GET() {
   } catch (err) {
     logger.error("[/api/dashboard/summary] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

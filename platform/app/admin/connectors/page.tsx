@@ -103,7 +103,7 @@ export default function ConnectorsPageV2() {
 
     if (success) {
       const messages: Record<string, string> = {
-        slack_connected: 'Slack workspace connected successfully',
+        slack_connected: 'Slack connected successfully',
         jira_connected: 'Jira site connected successfully',
         github_connected: 'GitHub account connected successfully',
         freshdesk_connected: 'Freshdesk account connected successfully',
@@ -131,7 +131,7 @@ export default function ConnectorsPageV2() {
         .from('organizations')
         .select('name')
         .eq('id', currentOrgId)
-        .single();
+        .maybeSingle();
 
       if (org) setOrgName(org.name);
 
@@ -145,7 +145,7 @@ export default function ConnectorsPageV2() {
       setConnectors(data || []);
     } catch (err: any) {
       logger.error('Failed to load connectors:', err);
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: 'Failed to load connectors' });
     } finally {
       setLoading(false);
     }
@@ -195,7 +195,7 @@ export default function ConnectorsPageV2() {
       setMessage({ type: 'success', text: `${type} disconnected` });
       loadConnectors();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: 'Failed to disconnect connector' });
     }
   }
 
@@ -208,7 +208,7 @@ export default function ConnectorsPageV2() {
         setTimeout(loadSyncProgress, 1000);
       }
     } catch (err: any) {
-      setMessage({ type: 'error', text: `Sync failed: ${err.message}` });
+      setMessage({ type: 'error', text: 'Sync failed' });
     }
   }
 
@@ -224,7 +224,7 @@ export default function ConnectorsPageV2() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Connectors Config</h1>
           <p className="text-xs text-muted mt-0.5">
-            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'workspace'}</span>
+            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'AI Worker'}</span>
           </p>
         </div>
         <a

@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
       .select("organization_id")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
       .from("organizations")
       .select("customer_id")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!workspace?.customer_id) {
       return NextResponse.json(
-        { error: "Workspace has no customer association" },
+        { error: "No customer association found" },
         { status: 400 }
       );
     }
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error("[/api/workspace/set-default] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

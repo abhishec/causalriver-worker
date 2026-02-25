@@ -111,6 +111,6 @@ Please give me 3–4 specific, actionable bullet points.`;
     });
   } catch (err: any) {
     logger.error("[claude-baseline] Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       return NextResponse.json(
-        { exists: false, metadata: null, error: "No workspace found" },
+        { exists: false, metadata: null, error: "Not found" },
         { status: 200 }
       );
     }
@@ -144,7 +144,7 @@ export async function GET(request: Request) {
         .select("metadata, last_sync_at")
         .eq("organization_id", orgId)
         .eq("connector_type", "s3-storage")
-        .single();
+        .maybeSingle();
 
       if (connector) {
         const meta = connector.metadata as Record<string, unknown> | null;

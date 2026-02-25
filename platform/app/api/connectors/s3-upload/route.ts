@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       const { data: admin } = await supabase
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this workspace" },
+          { error: "Access denied" },
           { status: 403 }
         );
       }
@@ -108,13 +108,15 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Determine S3 key ───────────────────────────────────────────
+    // Sanitize file name to prevent path traversal (e.g. "../../other-org/data.json")
+    const safeName = (file.name || "upload").split(/[/\\]/).pop()!.replace(/[^a-zA-Z0-9._-]/g, "_");
     const keyMap: Record<string, string> = {
       "gl-data": "gl-data.json",
       "transactions": "transactions.json",
-      "report": `reports/${file.name}`,
-      "custom": file.name,
+      "report": `reports/${safeName}`,
+      "custom": safeName,
     };
-    const s3Key = keyMap[fileType] || file.name;
+    const s3Key = keyMap[fileType] || safeName;
 
     // ── Service client (needed for both storage fallback and DB writes) ────
     const service = await createServiceClient();
@@ -147,7 +149,7 @@ export async function POST(request: NextRequest) {
           upsert: true,
         });
       if (storageErr) {
-        return NextResponse.json({ error: `Storage upload failed: ${storageErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: "Storage upload failed" }, { status: 500 });
       }
       uploadResult = { key: storagePath, bucket: "org-data (Supabase)" };
       logger.debug(`[Upload] Supabase Storage: ${storagePath} for org ${workspaceId} (${buffer.length} bytes)`);
@@ -307,7 +309,8 @@ export async function POST(request: NextRequest) {
         logger.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);
         brainTriggerResult = {
           triggered: false,
-          error: "File uploaded but could not parse as GL data: " + parseErr.message,
+          // Security: don't expose raw parse error details to client
+          error: "File uploaded but GL data could not be parsed. Check the file format.",
         };
       }
     }
@@ -332,7 +335,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[S3Upload] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Upload failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -647,6 +650,6 @@ export async function GET() {
     });
   } catch (error: any) {
     logger.error("[S3Upload] GET error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -240,7 +240,7 @@ export async function enforceSessionSecurity(
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!admin) {
       return {

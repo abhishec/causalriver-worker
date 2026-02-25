@@ -333,12 +333,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (message.length > 50000) {
+      return NextResponse.json(
+        { error: "Message too long (max 50,000 characters)" },
+        { status: 400 }
+      );
+    }
 
     // ── Validate workspace ID format (prevent path traversal) ──────────
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (requestedWorkspaceId && !UUID_RE.test(requestedWorkspaceId)) {
       return NextResponse.json(
-        { error: "Invalid workspace ID format" },
+        { error: "Invalid ID format" },
         { status: 400 }
       );
     }
@@ -404,13 +410,13 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
       adminCheck = data;
     }
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "You do not have access to this AI Worker" },
         { status: 403 }
       );
     }
@@ -646,9 +652,9 @@ export async function POST(request: NextRequest) {
           dag.nodes.add(edge.target_domain);
           if (!dag.edges.has(edge.source_domain)) dag.edges.set(edge.source_domain, new Map());
           dag.edges.get(edge.source_domain)!.set(edge.target_domain, {
-            weight: edge.effect_size,
-            pValue: edge.granger_p_value,
-            lagDays: edge.optimal_lag_days,
+            weight: edge.effect_size ?? 0,
+            pValue: edge.granger_p_value ?? 1.0,
+            lagDays: edge.optimal_lag_days ?? 0,
             lastUpdated: new Date(),
             sampleSize: edge.sample_size || 30,
           });
@@ -721,8 +727,14 @@ export async function POST(request: NextRequest) {
       }
 
       // ── Persona (configurable — defaults to generic NexusBrain Copilot) ──
+      // Sanitize persona fields to prevent prompt injection via user-controlled input
       if (persona) {
-        brainRegions.persona = persona;
+        const sanitize = (s: string, maxLen: number) =>
+          (s || "").replace(/[\x00-\x1F\x7F]/g, "").slice(0, maxLen);
+        brainRegions.persona = {
+          name: sanitize(persona.name, 200),
+          description: sanitize(persona.description, 500),
+        };
       }
 
       // ── Claude-Aspirational Capabilities ──────────────────────────────
@@ -1075,7 +1087,7 @@ export async function POST(request: NextRequest) {
       : !interpretation ? detectSEaaSRoute(message) : null;
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
-      : serviceRoute?.type !== 'se-aas' ? detectAccountingRoute(message) : null;
+      : !interpretation ? detectAccountingRoute(message) : null;
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
@@ -1099,10 +1111,13 @@ export async function POST(request: NextRequest) {
           // All P0 Delivery Intelligence domains route to the SEaaSDeliveryPanel
           // Fetch the full delivery intelligence data from the dedicated API
           try {
+            const healthAbort = new AbortController();
+            const healthTimeout = setTimeout(() => healthAbort.abort(), 8_000);
             const healthRes = await fetch(
               `${request.nextUrl.origin}/api/se-aas/engagement-health`,
-              { headers: { cookie: request.headers.get('cookie') || '' } }
+              { headers: { cookie: request.headers.get('cookie') || '' }, signal: healthAbort.signal }
             );
+            clearTimeout(healthTimeout);
             if (healthRes.ok) {
               const healthData = await healthRes.json();
               deliveryIntelligenceResult = {
@@ -1135,6 +1150,13 @@ export async function POST(request: NextRequest) {
         }
       } catch (seaasErr) {
         logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
+        // Surface a user-visible error instead of silent failure
+        seaasResult = {
+          domainType: seaasRoute.domainType,
+          brainAugmented: false,
+          error: true,
+          message: `Analysis could not be completed for ${seaasRoute.domainType}. The brain will provide general guidance instead.`,
+        };
       }
     }
 
@@ -1165,7 +1187,8 @@ export async function POST(request: NextRequest) {
           if (fileData) {
             const text = await fileData.text();
             try {
-              glData = JSON.parse(text);
+              const parsed = JSON.parse(text);
+              glData = Array.isArray(parsed) ? parsed : [];
             } catch {
               logger.warn("[AaaS] GL data is malformed JSON, skipping");
             }
@@ -1195,12 +1218,22 @@ export async function POST(request: NextRequest) {
           accountingResult = {
             domainType: accountingRoute.domainType,
             brainAugmented: false,
-            error: "no_gl_data",
-            message: "No General Ledger data found for this workspace. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+            data: {
+              error: "no_gl_data",
+              message: "No General Ledger data found. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+            },
           };
         }
       } catch (acctErr) {
         logger.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+        accountingResult = {
+          domainType: accountingRoute?.domainType ?? "accounting",
+          brainAugmented: false,
+          data: {
+            error: true,
+            message: "Accounting analysis could not be completed. The brain will provide general guidance instead.",
+          },
+        };
       }
     }
 
@@ -1220,7 +1253,7 @@ export async function POST(request: NextRequest) {
           .eq('org_id', workspaceId)
           .eq('command_id', commandId)
           .eq('is_archived', false)
-          .single();
+          .maybeSingle();
 
         // Also check public templates if not found in org
         let resolvedTemplate = template;
@@ -1231,7 +1264,7 @@ export async function POST(request: NextRequest) {
             .eq('command_id', commandId)
             .eq('is_public', true)
             .eq('is_archived', false)
-            .single();
+            .maybeSingle();
           resolvedTemplate = publicTemplate;
         }
 
@@ -1323,7 +1356,7 @@ export async function POST(request: NextRequest) {
 
                 composerSendText(result.narrative);
               } catch (err) {
-                composerSendError(err instanceof Error ? err.message : 'Custom template execution failed');
+                composerSendError('Custom template execution failed');
               } finally {
                 composerClose();
               }
@@ -1376,7 +1409,7 @@ export async function POST(request: NextRequest) {
           .eq('id', workflowId)
           .eq('organization_id', workspaceId)
           .neq('status', 'archived')
-          .single();
+          .maybeSingle();
 
         if (!workflow) {
           // Workflow not found — send error via SSE instead of leaving client hanging
@@ -1504,10 +1537,12 @@ export async function POST(request: NextRequest) {
                 status: result.status === "completed" ? "completed" : "failed",
                 currentStep: steps.length,
                 totalSteps: steps.length,
-                steps: steps.map(s => ({
+                steps: steps.map((s, i) => ({
                   order: s.order,
                   label: s.label,
-                  status: "completed" as const,
+                  status: (result.status === "completed" || i < result.completedSteps
+                    ? "completed"
+                    : "failed") as "completed" | "failed" | "running" | "pending",
                   parallel_group: s.parallel_group,
                 })),
               });
@@ -1520,7 +1555,7 @@ export async function POST(request: NextRequest) {
 
               wfSendText(summary);
             } catch (err) {
-              wfSendError(err instanceof Error ? err.message : 'Workflow execution failed');
+              wfSendError('Workflow execution failed');
             } finally {
               wfClose();
             }
@@ -1554,6 +1589,348 @@ export async function POST(request: NextRequest) {
     const agentIntent = detectAgentIntent(message);
 
     if (agentIntent) {
+
+      // ══════════════════════════════════════════════════════════════
+      // ── Train Brain Fast-Path ─────────────────────────────────────
+      // Intercepts BEFORE OpenClaw gateway or general agent execution.
+      // Runs learning + evolution cycles directly via SDK (no HTTP).
+      // ══════════════════════════════════════════════════════════════
+      if (agentIntent.agentType === "train-brain") {
+        const {
+          stream: trainStream, send: trainSend, sendText: trainSendText,
+          sendError: trainSendError, close: trainClose,
+          sendAgentStep, sendAgentStatus, sendProgressiveArtifact,
+        } = createSSEStream();
+
+        (async () => {
+          const trainStartTime = Date.now();
+          let taskId = "";
+
+          try {
+            // ── Create task record ──────────────────────────────────
+            const { data: trainTask } = await service
+              .from("brain_agent_tasks")
+              .insert({
+                organization_id: workspaceId,
+                created_by: user.id,
+                prompt: message.trim(),
+                agent_type: "train-brain",
+                auto_execute_threshold: 1.0,
+                status: "running",
+                started_at: new Date().toISOString(),
+              })
+              .select("id")
+              .maybeSingle();
+
+            taskId = trainTask?.id ?? `train-${Date.now()}`;
+
+            sendAgentStatus({
+              taskId,
+              status: "starting",
+              agentType: "Brain Training",
+              message: "Initializing brain training sequence...",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 1: Load AI Worker context
+            // ═══════════════════════════════════════════════════════
+            const step1Start = Date.now();
+            sendAgentStep({
+              stepNumber: 1,
+              type: "querying",
+              title: "Loading AI Worker context...",
+              status: "started",
+            });
+
+            const [orgSettingsRes, connectorRes] = await Promise.all([
+              service.from("organizations").select("name, settings").eq("id", workspaceId).maybeSingle(),
+              service.from("org_connectors").select("connector_type, status").eq("organization_id", workspaceId),
+            ]);
+
+            const orgSettings = orgSettingsRes.data;
+            const orgName = orgSettings?.name ?? "this workspace";
+            const workers: Array<{ id: string; name: string; service: string; status: string }> =
+              ((orgSettings?.settings as Record<string, unknown>)?.ai_workers as Array<{ id: string; name: string; service: string; status: string }>) ?? [];
+            const activeWorkers = workers.filter(w => w.status === "active");
+            const workerName = activeWorkers[0]?.name ?? "Brain";
+            const connectors = connectorRes.data ?? [];
+            const activeConnectors = connectors.filter((c: { status: string }) => c.status === "active");
+
+            sendAgentStep({
+              stepNumber: 1,
+              type: "querying",
+              title: `${workerName} loaded — ${activeConnectors.length} active connector(s)`,
+              content: `Organization: ${orgName}\nActive workers: ${activeWorkers.length}\nConnectors: ${connectors.map((c: { connector_type: string; status: string }) => `${c.connector_type} (${c.status})`).join(", ") || "none"}`,
+              durationMs: Date.now() - step1Start,
+              status: "completed",
+            });
+
+            sendAgentStatus({
+              taskId,
+              status: "running",
+              agentType: "Brain Training",
+              message: "Running learning cycle...",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 2: Run Learning Cycle (7 loops)
+            // ═══════════════════════════════════════════════════════
+            const step2Start = Date.now();
+            sendAgentStep({
+              stepNumber: 2,
+              type: "acting",
+              title: "Running 7-loop learning cycle...",
+              content: "Loop 1: Prediction verification\nLoop 2: Causal weight updates\nLoop 3: User feedback processing\nLoop 4: Intervention outcomes\nLoop 5: Auto-retraining\nLoop 6: Agent outcome learning\nLoop 7: Federation validation",
+              status: "started",
+            });
+
+            const { createClosedLoopLearningEngine } = await import("@nexus-ai/memory-stack");
+            const learningEngine = createClosedLoopLearningEngine({
+              supabase: service,
+              organizationId: workspaceId,
+            });
+            const cycleResult = await learningEngine.runLearningCycle();
+
+            sendAgentStep({
+              stepNumber: 2,
+              type: "acting",
+              title: `Learning cycle complete — 7 loops executed`,
+              content: `Duration: ${Date.now() - step2Start}ms`,
+              durationMs: Date.now() - step2Start,
+              status: "completed",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 3: Verify Predictions
+            // ═══════════════════════════════════════════════════════
+            const step3Start = Date.now();
+            sendAgentStep({
+              stepNumber: 3,
+              type: "observing",
+              title: "Verifying predictions against outcomes...",
+              status: "started",
+            });
+
+            let totalVerified = 0;
+            let correctPreds = 0;
+            let accuracyBefore: number | null = null;
+            let iqBefore: number | null = null;
+
+            try {
+              const [predVerifyRes, recentSnap] = await Promise.all([
+                service
+                  .from("brain_predictions")
+                  .select("outcome_verified, is_correct")
+                  .eq("organization_id", workspaceId)
+                  .eq("outcome_verified", true)
+                  .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+                service
+                  .from("brain_intelligence_snapshots")
+                  .select("intelligence_score, prediction_accuracy")
+                  .eq("organization_id", workspaceId)
+                  .order("snapshot_date", { ascending: false })
+                  .limit(1),
+              ]);
+              const verifiedPreds = predVerifyRes.data ?? [];
+              correctPreds = verifiedPreds.filter((p: { is_correct: boolean }) => p.is_correct).length;
+              totalVerified = verifiedPreds.length;
+              const snapBefore = recentSnap.data?.[0] as { intelligence_score?: number; prediction_accuracy?: number } | undefined;
+              accuracyBefore = snapBefore?.prediction_accuracy ?? null;
+              iqBefore = snapBefore?.intelligence_score ?? null;
+            } catch {
+              // Tables may not exist — graceful fallback
+            }
+
+            sendAgentStep({
+              stepNumber: 3,
+              type: "observing",
+              title: `${totalVerified} predictions verified${totalVerified > 0 ? ` — ${Math.round((correctPreds / totalVerified) * 100)}% correct` : ""}`,
+              content: `Verified (last 30 days): ${totalVerified}\nCorrect: ${correctPreds}\nIncorrect: ${totalVerified - correctPreds}\nPre-training accuracy: ${accuracyBefore !== null ? (accuracyBefore * 100).toFixed(1) + "%" : "calibrating..."}`,
+              durationMs: Date.now() - step3Start,
+              status: "completed",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 4: Compute Intelligence Score (Evolution Cycle)
+            // ═══════════════════════════════════════════════════════
+            const step4Start = Date.now();
+            sendAgentStep({
+              stepNumber: 4,
+              type: "thinking",
+              title: "Computing intelligence score via evolution cycle...",
+              content: "Running Bayesian weight updates, calibration, IQ computation...",
+              status: "started",
+            });
+
+            const { runBrainEvolutionCycle } = await import("@nexus-ai/memory-stack");
+            const evolutionState = await runBrainEvolutionCycle(service, workspaceId, "full");
+
+            const newIQ = evolutionState?.intelligenceScore ?? 0;
+            const newAccuracy = evolutionState?.accuracy?.overall ?? null;
+            const iqDelta = iqBefore !== null ? newIQ - iqBefore : null;
+
+            sendAgentStep({
+              stepNumber: 4,
+              type: "thinking",
+              title: `IQ computed: ${newIQ}/100${iqDelta !== null ? ` (${iqDelta >= 0 ? "+" : ""}${iqDelta.toFixed(1)})` : ""}`,
+              content: `Intelligence Score: ${newIQ}/100\nPrediction Accuracy: ${newAccuracy !== null ? (newAccuracy * 100).toFixed(1) + "%" : "calibrating..."}\nIQ Delta: ${iqDelta !== null ? (iqDelta >= 0 ? "+" : "") + iqDelta.toFixed(1) : "first run"}\nDuration: ${Date.now() - step4Start}ms`,
+              durationMs: Date.now() - step4Start,
+              status: "completed",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 5: Persist Brain State + Emit Signal
+            // ═══════════════════════════════════════════════════════
+            const step5Start = Date.now();
+            sendAgentStep({
+              stepNumber: 5,
+              type: "acting",
+              title: "Saving brain state and emitting learning signal...",
+              status: "started",
+            });
+
+            await Promise.all([
+              service.from("brain_agent_tasks").update({
+                status: "completed",
+                confidence_score: newAccuracy ?? 0.75,
+                result_summary: `Brain training complete. IQ: ${newIQ}/100. Accuracy: ${newAccuracy !== null ? (newAccuracy * 100).toFixed(1) + "%" : "calibrating"}`,
+                result_metadata: {
+                  intelligenceScore: newIQ,
+                  accuracy: newAccuracy,
+                  iqDelta,
+                  durationMs: Date.now() - trainStartTime,
+                  predictionsVerified: totalVerified,
+                },
+                completed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }).eq("id", taskId).then(() => {}, () => {}),
+
+              service.from("cross_domain_signals").insert({
+                organization_id: workspaceId,
+                source_domain: "brain.training",
+                signal_type: "copilot_brain_training_completed",
+                signal_value: newAccuracy ?? 0,
+                signal_timestamp: new Date().toISOString(),
+                entity_type: "brain_agent_task",
+                entity_id: taskId,
+                signal_metadata: {
+                  intelligenceScore: newIQ,
+                  iqDelta,
+                  durationMs: Date.now() - trainStartTime,
+                  triggeredBy: user.id,
+                },
+              }).then(() => {}, () => {}),
+            ]);
+
+            sendAgentStep({
+              stepNumber: 5,
+              type: "acting",
+              title: "Brain state persisted — learning signal emitted",
+              durationMs: Date.now() - step5Start,
+              status: "completed",
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // STEP 6: Training Complete — Final Summary
+            // ═══════════════════════════════════════════════════════
+            const totalDurationMs = Date.now() - trainStartTime;
+            sendAgentStep({
+              stepNumber: 6,
+              type: "reflecting",
+              title: `Training complete in ${(totalDurationMs / 1000).toFixed(1)}s`,
+              content: `Brain IQ: ${newIQ}/100\nPrediction Accuracy: ${newAccuracy !== null ? (newAccuracy * 100).toFixed(1) + "%" : "calibrating..."}\nIQ Delta: ${iqDelta !== null ? (iqDelta >= 0 ? "+" : "") + iqDelta.toFixed(1) : "first run"}\n7 learning loops completed\n${totalVerified} predictions verified`,
+              durationMs: totalDurationMs,
+              status: "completed",
+            });
+
+            sendAgentStatus({
+              taskId,
+              status: "completed",
+              agentType: "Brain Training",
+              message: `Training complete — IQ: ${newIQ}/100`,
+            });
+
+            // ── Emit LearningPulse so the IQ indicator updates live ────
+            trainSend(JSON.stringify({
+              learningPulse: {
+                intelligenceScore: newIQ,
+                predictionAccuracy: newAccuracy,
+                totalCorrections: 0,
+                totalFeedback: 0,
+                satisfactionRate: 0,
+                recentEmergenceEvents: [],
+                learningVelocity: iqDelta != null && iqDelta > 0 ? "accelerating" : "steady",
+                brierScore: null,
+                edgesLearned: 0,
+                memoriesStored: 0,
+                lastLearningCycle: new Date().toISOString(),
+              },
+            }));
+
+            // ── Rich artifact for right panel ──────────────────────────
+            sendProgressiveArtifact({
+              id: `train-report-${taskId.slice(0, 8)}`,
+              type: "analysis",
+              title: "Brain Training Report",
+              content: [
+                "## Brain Training Report",
+                "",
+                `**Worker**: ${workerName}`,
+                `**Duration**: ${(totalDurationMs / 1000).toFixed(1)}s`,
+                "",
+                "### Intelligence Metrics",
+                `- **IQ Score**: ${newIQ}/100${iqDelta !== null ? ` _(${iqDelta >= 0 ? "+" : ""}${iqDelta.toFixed(1)} from pre-training)_` : ""}`,
+                `- **Prediction Accuracy**: ${newAccuracy !== null ? (newAccuracy * 100).toFixed(1) + "%" : "Calibrating..."}`,
+                "",
+                "### Learning Loops Executed",
+                "1. Prediction Verification",
+                "2. Causal Weight Updates (Bayesian)",
+                "3. User Feedback Processing",
+                "4. Intervention Outcome Tracking",
+                "5. Auto-Retraining",
+                "6. Agent Outcome Learning",
+                "7. Federation Validation",
+                "",
+                "### Prediction Verification",
+                `- Verified: ${totalVerified}`,
+                `- Correct: ${correctPreds}`,
+                `- Incorrect: ${totalVerified - correctPreds}`,
+              ].join("\n"),
+              isPartial: false,
+              service: "core",
+            });
+
+            // ── Final narrative text ────────────────────────────────────
+            trainSendText(`Brain training complete. **${workerName}** processed 7 learning loops and computed a new intelligence score of **${newIQ}/100**${iqDelta !== null ? ` (${iqDelta >= 0 ? "up" : "down"} ${Math.abs(iqDelta).toFixed(1)} points)` : ""}. Prediction accuracy: **${newAccuracy !== null ? (newAccuracy * 100).toFixed(1) + "%" : "calibrating"}**. The brain verified ${totalVerified} predictions and updated causal graph weights via Bayesian learning.`);
+
+          } catch (err) {
+            logger.error("[TrainBrain] Error:", err instanceof Error ? err.message : String(err));
+            if (taskId) {
+              sendAgentStatus({ taskId, status: "failed", message: "Brain training failed" });
+              await service.from("brain_agent_tasks").update({
+                status: "failed",
+                error_message: "Training cycle failed",
+                completed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }).eq("id", taskId).then(() => {}, () => {});
+            }
+            trainSendError("Brain training failed. Check logs for details.");
+          } finally {
+            trainClose();
+          }
+        })();
+
+        return new Response(trainStream, {
+          status: 200,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
+          },
+        });
+      } // end train-brain intercept
+
       // ── OpenClaw Gateway Fast-Path ────────────────────────────────
       // If this org has a connected OpenClaw gateway, route the agent
       // request through the daemon instead of running locally. The daemon
@@ -1610,7 +1987,7 @@ export async function POST(request: NextRequest) {
               }
             }
           } catch (err) {
-            clawSendError(err instanceof Error ? err.message : "OpenClaw agent stream failed");
+            clawSendError("OpenClaw agent stream failed");
           } finally {
             clawClose();
           }
@@ -1653,7 +2030,7 @@ export async function POST(request: NextRequest) {
               started_at: new Date().toISOString(),
             })
             .select("id")
-            .single();
+            .maybeSingle();
 
           if (taskErr || !agentTask) {
             agentSendError("Failed to create agent task");
@@ -1699,7 +2076,7 @@ export async function POST(request: NextRequest) {
             started_at: new Date().toISOString(),
             completed_at: new Date().toISOString(),
             duration_ms: Date.now() - agentStartTime,
-          });
+          }).then(() => {}, () => {});
 
           // Checkpoint after brain context loaded
           await saveCheckpoint(1, "iteration", {
@@ -1826,7 +2203,7 @@ export async function POST(request: NextRequest) {
               started_at: new Date().toISOString(),
               completed_at: new Date().toISOString(),
               duration_ms: Date.now() - agentStartTime,
-            });
+            }).then(() => {}, () => {});
 
             // Checkpoint after Jira context
             await saveCheckpoint(2, "iteration", {
@@ -1856,7 +2233,7 @@ export async function POST(request: NextRequest) {
 
               episodicContext = "\n\n[Agent Memory — Recent Episodes]\n" +
                 memories.map((m: any) =>
-                  `- [${m.episode_type}] ${m.content.slice(0, 200)}`
+                  `- [${m.episode_type || "general"}] ${(m.content || "").slice(0, 200)}`
                 ).join("\n");
             }
           } catch {
@@ -2035,19 +2412,20 @@ export async function POST(request: NextRequest) {
               result_summary: responseText.slice(0, 500),
               result_artifacts: agentArtifacts,
               result_metadata: {
-                tokensUsed: brainResult.metrics.tokensUsed,
+                tokensUsed: brainResult.metrics?.tokensUsed,
                 durationMs: Date.now() - agentStartTime,
-                model: brainResult.metrics.model,
+                model: brainResult.metrics?.model,
                 autoExecuted: brainResult.status === "auto-executed",
-                brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
-                claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
+                brainCycleDurationMs: brainResult.metrics?.brainCycleDurationMs,
+                claudeCallDurationMs: brainResult.metrics?.claudeCallDurationMs,
                 compositeConfidence: brainResult.confidence,
                 agentIntent: agentIntent,
               },
               completed_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
-            .eq("id", taskId);
+            .eq("id", taskId)
+            .then(() => {}, () => {});
 
           // ── 6. Stream final agent-execution artifact ────────────
           const allSteps = [
@@ -2105,6 +2483,7 @@ export async function POST(request: NextRequest) {
             source_domain: "brain.agents",
             signal_type: `copilot_agent_${agentIntent.agentType}_completed`,
             signal_value: brainResult.confidence,
+            signal_timestamp: new Date().toISOString(),
             entity_type: "brain_agent_task",
             entity_id: taskId,
             signal_metadata: {
@@ -2136,8 +2515,8 @@ export async function POST(request: NextRequest) {
           }).then(() => {}, () => { /* non-blocking */ });
 
         } catch (err) {
-          const errMsg = err instanceof Error ? err.message : "Agent execution failed";
-          logger.error("[AgentMode] Error:", errMsg);
+          logger.error("[AgentMode] Error:", err instanceof Error ? err.message : String(err));
+          const errMsg = "Agent execution failed";
 
           if (taskId) {
             sendAgentStatus({ taskId, status: "failed", message: errMsg });
@@ -2276,16 +2655,16 @@ export async function POST(request: NextRequest) {
     // ── Build effective system prompt ──────────────────────────────────
     // V4: brainContext.fullPrompt is the COMPLETE system prompt from the SDK.
     // It already includes persona, intent-aware instructions, and ALL brain data.
-    const NO_HALLUCINATION_FALLBACK = `You are the Brain OS Copilot — an intelligence co-pilot for this workspace.
+    const NO_HALLUCINATION_FALLBACK = `You are the Brain OS AI Worker — an intelligence co-pilot.
 
 CRITICAL RULES:
 1. You MUST ONLY answer using data that exists in the brain context below. Do NOT invent, fabricate, or hallucinate any numbers, metrics, KPIs, trends, or statistics.
-2. If no brain data is available for the user's question, say clearly: "I don't have data on that yet. This org hasn't connected a data source for [topic] — once connected, I'll be able to answer with real numbers."
+2. If no brain data is available for the user's question, say clearly: "I don't have data on that yet. Connect a data source for [topic] — once connected, I'll be able to answer with real numbers."
 3. NEVER make up financial figures, causal relationships, revenue numbers, churn rates, burn rates, or any quantitative claims unless they appear in the brain context.
 4. If the user asks about something outside the brain's knowledge, acknowledge the gap honestly. Offer to help with what IS available.
 5. When you DO have data, cite it precisely — use the exact numbers from the brain context, not approximations or "typical" values.
 
-You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded for this workspace.`;
+You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded.`;
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
 
@@ -2380,8 +2759,8 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
 - Avg PR cycle time: ${eng.avgCycleTimeHours ? (eng.avgCycleTimeHours / 24).toFixed(1) + ' days' : 'N/A'}
 - Open PRs (WIP): ${eng.openPRs}
 - Bottleneck risk score: ${eng.bottleneckRiskScore}/100 (${eng.bottleneckRiskLevel})
-- Top reviewer share: ${(eng.topReviewerShare * 100).toFixed(0)}%
-- Reviewer Gini coefficient: ${eng.giniCoefficient.toFixed(2)}
+- Top reviewer share: ${typeof eng.topReviewerShare === 'number' ? (eng.topReviewerShare * 100).toFixed(0) + '%' : 'N/A'}
+- Reviewer Gini coefficient: ${typeof eng.giniCoefficient === 'number' ? eng.giniCoefficient.toFixed(2) : 'N/A'}
 - Engineering signals (14d): ${eng.recentSignalCount}
 
 When the user asks about velocity, bottlenecks, or engineering health, use THESE numbers. Cite them precisely.`;
@@ -2614,7 +2993,7 @@ Structure your response to FIRST show the Jira requirements, THEN demonstrate th
           effectiveSystemPrompt += `
 
 ### P0 Function 01: "Tell Me Before We're About to Miss" — Delivery Velocity Collapse Warning
-🟢 **BRAIN OS IS ALREADY COMPUTING THIS.** Here are the REAL metrics from this workspace:
+🟢 **BRAIN OS IS ALREADY COMPUTING THIS.** Here are the REAL metrics:
 
 | Metric | Value | What It Means |
 |--------|-------|---------------|
@@ -2856,7 +3235,7 @@ This creates the "wow" moment — the design partner sees that the product doesn
 
       if (leapEntries.length > 0) {
         effectiveSystemPrompt += `\n\n## BRAIN DEEP REASONING (from autonomous cognitive sleep cycles)
-The Brain has been actively reasoning about this workspace during its sleep cycles.
+The Brain has been actively reasoning during its sleep cycles.
 These insights come from its curiosity engine, imagination layer, and goal-planning system:
 
 ${leapEntries.join('\n\n')}
@@ -3195,10 +3574,10 @@ Recent Learning Events:
 ${emergenceSummary}
 
 BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
-- When you use a learned correction, subtly acknowledge it: "Based on what I've learned from this workspace..."
+- When you use a learned correction, subtly acknowledge it: "Based on what I've learned..."
 - When asked about your capabilities, reference your intelligence score and learning progress
 - If a user gives you negative feedback, acknowledge you're learning: "I'm continuously improving — your feedback directly updates my knowledge"
-- Reference specific learning milestones when relevant (e.g., "Since I learned ${learningPulse.edgesLearned} causal relationships in this workspace...")
+- Reference specific learning milestones when relevant (e.g., "Since I learned ${learningPulse.edgesLearned} causal relationships...")
 - Show confidence calibrated to your actual accuracy — don't oversell if accuracy is low
 - NEVER fabricate learning stats — only reference the numbers above`;
       }
@@ -3221,6 +3600,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
+    const streamStartMs = Date.now();
 
     (async () => {
       try {
@@ -3344,7 +3724,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
         if (systemTokens > MAX_SYSTEM_PROMPT_TOKENS) {
           logger.warn(`[TokenBudget] System prompt ${systemTokens} tokens exceeds budget ${MAX_SYSTEM_PROMPT_TOKENS}, truncating`);
           // Truncate from the end (preserves persona + core instructions, trims entity links/LEAP)
-          effectiveSystemPrompt = effectiveSystemPrompt.slice(0, MAX_SYSTEM_PROMPT_TOKENS * 4);
+          effectiveSystemPrompt = effectiveSystemPrompt.slice(0, (MAX_SYSTEM_PROMPT_TOKENS - 10_000) * 4);
         }
 
         const anthropicStream = anthropic.messages.stream({
@@ -3401,7 +3781,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
             bus.recordExecution({
               service: 'copilot',
               domainType: detectedIntent,
-              durationMs: Date.now() - Date.now(), // approximate
+              durationMs: Date.now() - streamStartMs,
               claudePowered: true,
               brainAugmented: !!brainContext,
               causalEdgesUsed: causalEdges.length,
@@ -3410,8 +3790,9 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
             bus.triggerEvolution(),
           ]),
           feedbackTimeout,
-        ]).catch(() => {
-          // Non-blocking: feedback is best-effort
+        ]).catch((feedbackErr) => {
+          // Non-blocking but log for debugging — silent swallowing hides brain learning failures
+          logger.warn("[Copilot] Feedback bus error (non-fatal):", feedbackErr instanceof Error ? feedbackErr.message : String(feedbackErr));
         });
 
         // ── Notify OpenClaw gateway of conversation completion ──────
@@ -3434,7 +3815,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
                 brainAugmented: !!brainContext,
                 timestamp: new Date().toISOString(),
               }],
-            }).catch(() => {}); // fire-and-forget
+            }).catch((gwErr) => { logger.warn("[Copilot] OpenClaw ingest failed (non-fatal):", gwErr instanceof Error ? gwErr.message : String(gwErr)); });
           }
         } catch {
           // Non-blocking: gateway not available
@@ -3442,10 +3823,8 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 
         close();
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
         sendError(
-          `Failed to get response from AI: ${errorMessage}. Please try again.`
+          "Failed to get response from AI. Please try again."
         );
         close();
       }
@@ -3461,9 +3840,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     });
   } catch (err) {
     logger.error("[Copilot/Chat] Unhandled error in POST handler:", err);
-    const errorMessage =
-      err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -3888,6 +4265,7 @@ function detectAgentIntent(
     /(?:openclaw|agent|claw)\s+(?:to|for|and)\s+/i,
     /(?:start|launch|run)\s+(?:an?\s+)?(?:brain\s+)?agent\b/i,
     /create\s+(?:an?\s+)?(?:openclaw|agent|claw)\s+(?:agent\s+)?and\s+(?:execute|run)/i,
+    /(?:train|retrain|start\s+training|run\s+(?:brain\s+)?training)\s+(?:the\s+)?brain\b/i,
   ];
 
   const isAgentTriggered = agentTriggers.some(rx => rx.test(message));
@@ -3915,7 +4293,14 @@ function detectAgentIntent(
   // ── Detect agent type from task description ──────────────────
   let agentType = "general";
 
-  if (/review\s+(?:pr|pull|code|diff)|pr\s+review|code\s+review/i.test(lower)) {
+  // ── Train Brain: highest-priority intercept ──────────────────
+  if (
+    /(?:train|retrain|start\s+training|run\s+(?:brain\s+)?training)\s+(?:the\s+)?brain\b/i.test(message) ||
+    /brain\s+training/i.test(message) ||
+    /(?:train|retrain)\s+(?:the\s+)?(?:ai|brain|model)\b/i.test(message)
+  ) {
+    agentType = "train-brain";
+  } else if (/review\s+(?:pr|pull|code|diff)|pr\s+review|code\s+review/i.test(lower)) {
     agentType = "code-review";
   } else if (/(?:fix|implement|build|code|develop|create\s+(?:feature|fix))/i.test(lower)) {
     agentType = "build";

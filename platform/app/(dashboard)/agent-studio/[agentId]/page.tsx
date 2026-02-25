@@ -25,7 +25,7 @@ export default async function AgentEditorPage({ params }: Props) {
     .from("agent_templates")
     .select("*")
     .eq("id", agentId)
-    .single();
+    .maybeSingle();
 
   if (error || !template) {
     notFound();

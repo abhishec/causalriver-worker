@@ -34,7 +34,7 @@ export async function POST(_request: NextRequest, { params }: Props) {
       .select("id, status, workflow_id, organization_id")
       .eq("id", runId)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (runError || !run) {
       return NextResponse.json({ error: "Workflow run not found" }, { status: 404 });
@@ -126,6 +126,6 @@ export async function POST(_request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[WorkflowCancel] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

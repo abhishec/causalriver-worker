@@ -29,7 +29,7 @@ export async function GET() {
       .order("created_at", { ascending: false });
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ keys: keys || [] });
   } catch (err) {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
       return NextResponse.json(
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     });
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     // Return the raw key — this is the ONLY time it's visible
     return NextResponse.json({
@@ -132,7 +132,7 @@ export async function DELETE(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
       return NextResponse.json(
@@ -156,7 +156,7 @@ export async function DELETE(request: Request) {
       .eq("organization_id", workspaceId);
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (err) {

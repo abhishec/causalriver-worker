@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", userId)
         .order("joined_at", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
       workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
     }
 
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         .select("role")
         .eq("user_id", userId)
         .eq("organization_id", workspaceId)
-        .single();
+        .maybeSingle();
 
       if (!membership) {
         const { data: admin } = await supabase
@@ -137,9 +137,9 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single();
+          .maybeSingle();
         if (!admin) {
-          return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+          return NextResponse.json({ error: "Access denied" }, { status: 403 });
         }
       }
     }
@@ -213,9 +213,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal server error";
-    logger.error("[BrainExecute] Error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    logger.error("[BrainExecute] Error:", err instanceof Error ? err.message : String(err));
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

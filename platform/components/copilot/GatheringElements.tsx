@@ -798,7 +798,7 @@ function GLCheckElement({
       } catch (err: unknown) {
         logger.error("[GLCheck] Upload failed:", err);
         setErrorMsg(
-          err instanceof Error ? err.message : "Upload failed. Please try again."
+          "Upload failed. Please try again."
         );
         setPhase("error");
       }

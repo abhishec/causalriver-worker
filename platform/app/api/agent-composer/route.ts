@@ -114,10 +114,10 @@ export async function POST(request: NextRequest) {
       .select("id")
       .eq("user_id", user.id)
       .eq("organization_id", orgId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // ── Anthropic API Key ───────────────────────────────────────────────
@@ -244,8 +244,7 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : "Composition failed";
-        sendJSON({ error: errMsg });
+        sendJSON({ error: "Composition failed" });
       } finally {
         close();
       }
@@ -263,7 +262,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error("[AgentComposer] Route error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

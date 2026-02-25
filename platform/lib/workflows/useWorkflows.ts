@@ -75,7 +75,7 @@ export function useWorkflows(organizationId?: string): UseWorkflowsReturn {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err.name === "AbortError" ? null : err.message);
+        setError(err instanceof Error && err.name === "AbortError" ? null : "Failed to load workflows");
         setLoading(false);
       })
       .finally(() => clearTimeout(timeout));

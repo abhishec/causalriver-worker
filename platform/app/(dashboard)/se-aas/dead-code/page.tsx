@@ -59,11 +59,17 @@ export default function DeadCodePage() {
       });
       if (!res.ok) throw new Error(`Submit failed: ${res.status}`);
       const data = await res.json();
-      setJobId(data.jobId);
-      const jobData = await pollJob(data.jobId);
-      setResult(jobData);
+      if (data.result) {
+        setResult({ jobId: "", status: "success", result: data.result, artifactId: data.artifactId });
+      } else if (data.jobId) {
+        setJobId(data.jobId);
+        const jobData = await pollJob(data.jobId);
+        setResult(jobData);
+      } else {
+        throw new Error("Unexpected response");
+      }
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
+      if (err instanceof Error) setError("Analysis failed");
     } finally {
       setLoading(false);
     }

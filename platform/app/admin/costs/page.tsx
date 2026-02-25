@@ -57,7 +57,7 @@ export default async function AdminCostsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Consolidated Costs</h1>
-        <p className="text-xs text-muted mt-0.5">All costs across all workspaces + AWS infrastructure</p>
+        <p className="text-xs text-muted mt-0.5">All costs across all AI Workers + AWS infrastructure</p>
       </div>
 
       {/* Top metrics */}
@@ -71,7 +71,7 @@ export default async function AdminCostsPage() {
       {/* By Component + By Model */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardTitle className="mb-4">Cost by Component (All Workspaces)</CardTitle>
+          <CardTitle className="mb-4">Cost by Component (All AI Workers)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byComponent).sort((a, b) => b[1].cost - a[1].cost).map(([comp, data]) => (
               <div key={comp} className="flex items-center justify-between">
@@ -90,7 +90,7 @@ export default async function AdminCostsPage() {
         </Card>
 
         <Card>
-          <CardTitle className="mb-4">Cost by Model (All Workspaces)</CardTitle>
+          <CardTitle className="mb-4">Cost by Model (All AI Workers)</CardTitle>
           <div className="space-y-3">
             {Object.entries(byModel).sort((a, b) => b[1].cost - a[1].cost).map(([model, data]) => (
               <div key={model} className="flex items-center justify-between">
@@ -149,7 +149,7 @@ export default async function AdminCostsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[11px] text-muted uppercase tracking-wider border-b border-border-subtle">
-                  <th className="text-left py-2.5 px-3 font-medium">Workspace</th>
+                  <th className="text-left py-2.5 px-3 font-medium">AI Worker</th>
                   <th className="text-right py-2.5 px-3 font-medium">Monthly LLM</th>
                   <th className="text-right py-2.5 px-3 font-medium">Monthly AWS</th>
                   <th className="text-right py-2.5 px-3 font-medium">Daily LLM</th>
