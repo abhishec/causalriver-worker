@@ -1111,10 +1111,13 @@ export async function POST(request: NextRequest) {
           // All P0 Delivery Intelligence domains route to the SEaaSDeliveryPanel
           // Fetch the full delivery intelligence data from the dedicated API
           try {
+            const healthAbort = new AbortController();
+            const healthTimeout = setTimeout(() => healthAbort.abort(), 8_000);
             const healthRes = await fetch(
               `${request.nextUrl.origin}/api/se-aas/engagement-health`,
-              { headers: { cookie: request.headers.get('cookie') || '' } }
+              { headers: { cookie: request.headers.get('cookie') || '' }, signal: healthAbort.signal }
             );
+            clearTimeout(healthTimeout);
             if (healthRes.ok) {
               const healthData = await healthRes.json();
               deliveryIntelligenceResult = {
@@ -2412,8 +2415,8 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
 - Avg PR cycle time: ${eng.avgCycleTimeHours ? (eng.avgCycleTimeHours / 24).toFixed(1) + ' days' : 'N/A'}
 - Open PRs (WIP): ${eng.openPRs}
 - Bottleneck risk score: ${eng.bottleneckRiskScore}/100 (${eng.bottleneckRiskLevel})
-- Top reviewer share: ${(eng.topReviewerShare * 100).toFixed(0)}%
-- Reviewer Gini coefficient: ${eng.giniCoefficient.toFixed(2)}
+- Top reviewer share: ${typeof eng.topReviewerShare === 'number' ? (eng.topReviewerShare * 100).toFixed(0) + '%' : 'N/A'}
+- Reviewer Gini coefficient: ${typeof eng.giniCoefficient === 'number' ? eng.giniCoefficient.toFixed(2) : 'N/A'}
 - Engineering signals (14d): ${eng.recentSignalCount}
 
 When the user asks about velocity, bottlenecks, or engineering health, use THESE numbers. Cite them precisely.`;

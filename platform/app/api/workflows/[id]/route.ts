@@ -109,10 +109,10 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       .update(allowedFields)
       .eq("id", id)
       .select("id, name, status, updated_at")
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      logger.error("[Workflow] PATCH error:", error.message);
+    if (error || !updated) {
+      logger.error("[Workflow] PATCH error:", error?.message ?? "no rows returned");
       return NextResponse.json({ error: "Failed to update workflow" }, { status: 500 });
     }
 

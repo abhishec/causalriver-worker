@@ -232,9 +232,9 @@ export async function PATCH(request: Request) {
       .eq("id", id)
       .eq("organization_id", workspaceId)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (updateErr) {
+    if (updateErr || !updated) {
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
