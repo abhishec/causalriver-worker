@@ -99,7 +99,7 @@ export async function provisionWorkspace(
       .from("organizations")
       .select("storage_config")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     const hasConfig = ws?.storage_config && Object.keys(ws.storage_config).length > 0;
 

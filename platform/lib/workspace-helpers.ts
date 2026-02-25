@@ -49,7 +49,7 @@ export const getCurrentCustomer = cache(
         .eq("user_id", user.id)
         .order("joined_at", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!data) return null;
 
@@ -101,7 +101,7 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
         .select("organization_id")
         .eq("user_id", user.id)
         .eq("organization_id", saved)
-        .single();
+        .maybeSingle();
 
       if (membership) return saved;
 
@@ -112,7 +112,7 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (admin) return saved;
     }
@@ -151,7 +151,7 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (adminCheck) return CORE_WORKSPACE_ID;
 

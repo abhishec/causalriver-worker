@@ -107,7 +107,7 @@ export async function evaluateForPromotion(
       .select("*, organization_id")
       .eq("id", templateId)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!template) {
       return { eligible: false, currentTier: "org_private", nextTier: null, reason: "Template not found", metrics: null };
@@ -225,7 +225,7 @@ export async function promoteTemplate(
         .from("agent_templates")
         .select("*")
         .eq("id", templateId)
-        .single();
+        .maybeSingle();
 
       if (template) {
         await supabase.from("ai_memory").insert({
@@ -344,7 +344,7 @@ export async function forkTemplate(
       .select("*")
       .eq("id", sourceTemplateId)
       .eq("is_public", true)
-      .single();
+      .maybeSingle();
 
     if (!source) return null;
 

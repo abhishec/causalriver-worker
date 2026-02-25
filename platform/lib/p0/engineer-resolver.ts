@@ -196,7 +196,7 @@ export async function resolveTopReviewerEngineerId(
     .select('id')
     .eq('organization_id', organizationId)
     .eq('github_login', topReviewerGithubLogin)
-    .single();
+    .maybeSingle();
 
   return data?.id || null;
 }

@@ -224,7 +224,7 @@ export async function recordMetric(
       .from("ab_tests")
       .select("*")
       .eq("id", testId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       // Fallback: check ai_memory
@@ -303,7 +303,7 @@ export async function evaluateTest(
       .from("ab_tests")
       .select("*")
       .eq("id", testId)
-      .single();
+      .maybeSingle();
 
     if (!test) return "inconclusive";
 
@@ -438,7 +438,7 @@ export async function getActiveTest(
       .eq("template_id", templateId)
       .eq("status", "running")
       .limit(1)
-      .single();
+      .maybeSingle();
 
     return data || null;
   } catch {

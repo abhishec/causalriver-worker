@@ -205,7 +205,7 @@ export async function recordHealingOutcome(
       .from("error_patterns")
       .select("success_count, failure_count, success_rate")
       .eq("id", patternId)
-      .single();
+      .maybeSingle();
 
     if (pattern) {
       const newSuccessCount = (pattern.success_count || 0) + (success ? 1 : 0);

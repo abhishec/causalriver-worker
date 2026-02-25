@@ -64,7 +64,7 @@ export async function recordTemplateExecution(
       .from("agent_templates")
       .select("usage_count, success_count, failure_count, avg_confidence")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!template) return;
 
@@ -104,7 +104,7 @@ export async function getTemplatePerformance(
     .from("agent_templates")
     .select("id, organization_id, usage_count, success_count, failure_count, avg_confidence, evolution_status")
     .eq("id", templateId)
-    .single();
+    .maybeSingle();
 
   if (!template) return null;
 
@@ -154,7 +154,7 @@ export async function evolveTemplate(
       .from("agent_templates")
       .select("*")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!original) {
       return { evolved: false, reason: "Template not found" };

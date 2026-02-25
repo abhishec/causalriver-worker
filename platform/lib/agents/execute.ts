@@ -178,7 +178,7 @@ export async function executeAgent(
     .from("brain_agent_tasks")
     .select("status, confidence_score, result_summary, result_artifacts, error_message, result_metadata")
     .eq("id", taskId)
-    .single();
+    .maybeSingle();
 
   const durationMs = Date.now() - startTime;
 
