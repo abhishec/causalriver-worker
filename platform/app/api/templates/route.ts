@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       .order("usage_count", { ascending: false });
 
     if (orgError) {
-      return NextResponse.json({ error: orgError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     // Public templates from other orgs
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       .limit(50);
 
     if (pubError) {
-      return NextResponse.json({ error: pubError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
           { status: 409 }
         );
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ id: data.id, commandId: data.command_id, template: { id: data.id, command_id: data.command_id } });

@@ -156,8 +156,8 @@ export function SettingsClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customerId: custId, workspaceName: createName.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) { setCreateError(data.error || "Failed to create workspace."); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setCreateError(data?.error || "Failed to create."); return; }
 
       // Append the new workspace to local state instead of full page reload
       const newWs: SiblingWorkspace & { customer_id?: string } = {

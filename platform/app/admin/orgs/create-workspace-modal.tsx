@@ -76,13 +76,13 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
           }),
         });
 
-        const data = await res.json();
-        if (!res.ok) { setError(data.error || "Failed to create workspace."); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data?.error || "Failed to create AI Worker."); return; }
 
         setResult({ workspace: data.workspace, membersAdded: data.membersAdded });
         router.refresh(); // Refresh server component data
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unexpected error");
+      } catch {
+        setError("Unexpected error — please try again.");
       }
     });
   }

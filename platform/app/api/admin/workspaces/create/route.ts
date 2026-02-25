@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (orgErr || !org) {
-      return NextResponse.json({ error: orgErr?.message || "Failed to create org" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to create organization" }, { status: 500 });
     }
 
     // ── 2. Full provision — verifies + backfills EVERYTHING ───────

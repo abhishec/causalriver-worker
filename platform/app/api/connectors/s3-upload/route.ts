@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
           upsert: true,
         });
       if (storageErr) {
-        return NextResponse.json({ error: `Storage upload failed: ${storageErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: "Storage upload failed" }, { status: 500 });
       }
       uploadResult = { key: storagePath, bucket: "org-data (Supabase)" };
       logger.debug(`[Upload] Supabase Storage: ${storagePath} for org ${workspaceId} (${buffer.length} bytes)`);

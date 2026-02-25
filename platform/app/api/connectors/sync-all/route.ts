@@ -255,7 +255,7 @@ export async function POST(request: Request) {
       } catch (brainErr: any) {
         brainCycleResult = {
           triggered: false,
-          error: brainErr.message || "Brain cycle call failed",
+          error: "Brain cycle failed",
         };
         logger.warn("[sync-all] Brain cycle error:", brainErr.message);
       }

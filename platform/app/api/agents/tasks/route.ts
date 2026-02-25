@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     if (listError) {
       return NextResponse.json(
-        { error: listError.message },
+        { error: "Internal error" },
         { status: 500 }
       );
     }

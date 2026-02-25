@@ -235,7 +235,7 @@ export async function PATCH(request: Request) {
       .single();
 
     if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ entity: updated });

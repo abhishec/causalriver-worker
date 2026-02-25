@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
         });
       } else {
         logger.error("[BrainFeedback] Insert error:", insertError);
-        return NextResponse.json({ error: insertError.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal error" }, { status: 500 });
       }
     }
 

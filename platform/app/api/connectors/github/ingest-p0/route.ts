@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
     if (repoError) {
       results.errors.push(`Repository upsert error: ${repoError.message}`);
-      return NextResponse.json({ error: repoError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     results.repositories = 1;

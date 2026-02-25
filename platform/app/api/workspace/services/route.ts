@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
 
     if (updateErr) {
       logger.error("[/api/workspace/services] update error:", updateErr);
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, services: validServices });

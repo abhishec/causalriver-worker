@@ -99,7 +99,8 @@ export default async function AdminOrgsPage() {
   // Build customer → workspaces map
   const customerWorkspaceMap = new Map<string, OrgRow[]>();
   customerOrgs.forEach((o) => {
-    const cid = o.customer_id!;
+    if (!o.customer_id) return;
+    const cid = o.customer_id;
     if (!customerWorkspaceMap.has(cid)) customerWorkspaceMap.set(cid, []);
     customerWorkspaceMap.get(cid)!.push(o);
   });
