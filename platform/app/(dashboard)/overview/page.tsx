@@ -385,7 +385,7 @@ export default async function OverviewPage() {
 
   const orgMeta = orgMetaResult.data as { name?: string; is_design_partner?: boolean } | null;
   const isDesignPartner = orgMeta?.is_design_partner ?? false;
-  const orgDisplayName = orgMeta?.name ?? "your workspace";
+  const orgDisplayName = orgMeta?.name ?? "your AI Worker";
 
   const connectors = (connectorsResult.data || []).map((c: any) => ({
     type: c.connector_type,

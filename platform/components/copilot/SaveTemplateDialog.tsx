@@ -358,7 +358,7 @@ export function SaveTemplateDialog({
                 Make public
               </span>
               <span className="text-[10px] text-muted">
-                (visible to all BrainOS workspaces)
+                (visible to all AI Workers)
               </span>
             </label>
 

@@ -165,7 +165,7 @@ export function OverviewClient({
   brainLearningEvents = [],
   brainLearningMeta,
   isDesignPartner = false,
-  orgName = "your workspace",
+  orgName = "your AI Worker",
 }: OverviewClientProps) {
   const router = useRouter();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();

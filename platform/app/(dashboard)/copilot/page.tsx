@@ -632,7 +632,7 @@ function CopilotPageInner() {
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
           </div>
-          <span className="text-xs text-muted-foreground">Loading workspace...</span>
+          <span className="text-xs text-muted-foreground">Loading...</span>
         </div>
       </div>
     );
@@ -647,11 +647,11 @@ function CopilotPageInner() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">No Workspace Selected</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No AI Worker Selected</h2>
           <p className="text-sm text-muted-foreground mb-4">
             {workspaces.length === 0
-              ? "You don't have any workspaces yet. Create one in Settings to start using Copilot."
-              : "Please select a workspace from the sidebar to start using Copilot."}
+              ? "You don't have any AI Workers yet. Create one from the Dashboard to get started."
+              : "Please select an AI Worker from the sidebar to start using Copilot."}
           </p>
           <div className="flex gap-3 justify-center">
             {workspaces.length === 0 ? (
@@ -659,7 +659,7 @@ function CopilotPageInner() {
                 href="/settings?tab=overview&action=create-workspace"
                 className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
               >
-                Create Workspace
+                Create AI Worker
               </Link>
             ) : (
               <Link

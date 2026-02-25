@@ -465,13 +465,13 @@ export function DashboardClient() {
 
       // Launch the worker
       localStorage.setItem(SERVICE_MODE_KEY, wizardService);
-      localStorage.setItem("nexus_ai_worker_id", data.worker.id);
-      localStorage.setItem("nexus_ai_worker_name", data.worker.name);
+      localStorage.setItem("nexus_ai_worker_id", data.worker?.id ?? "");
+      localStorage.setItem("nexus_ai_worker_name", data.worker?.name ?? wizardWorkerName);
       switchWorkspace(targetWorkspaceId, { skipReload: true });
       window.dispatchEvent(new Event("nexus-service-mode-changed"));
       router.push(`/copilot?workerId=${encodeURIComponent(data.worker.id)}&service=${encodeURIComponent(wizardService)}`);
-    } catch {
-      setWizardError("Something went wrong");
+    } catch (err) {
+      setWizardError(err instanceof Error ? err.message : "Something went wrong");
       setWizardCreating(false);
     }
   }, [wizardService, wizardWorkspace, wizardWorkerName, wizardWorkerDesc, wizardNewWsName, activeCustomerId, switchWorkspace, router]);
@@ -801,7 +801,7 @@ export function DashboardClient() {
                       <div className="h-1.5 rounded-full bg-border-subtle overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
-                          style={{ width: `${Math.round((brainIntelligence.activeLayers / 30) * 100)}%` }}
+                          style={{ width: `${Math.min(100, Math.round((Math.min(brainIntelligence.activeLayers, 30) / 30) * 100))}%` }}
                         />
                       </div>
                     </div>
