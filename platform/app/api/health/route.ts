@@ -64,7 +64,7 @@ async function checkSupabase(): Promise<{
     return {
       status: "down",
       latencyMs: Date.now() - start,
-      error: err instanceof Error ? err.message : "Unknown error",
+      error: "Health check failed",
     };
   }
 }

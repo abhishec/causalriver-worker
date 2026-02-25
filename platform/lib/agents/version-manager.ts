@@ -164,7 +164,8 @@ export async function getVersionHistory(
       if (fallback) {
         return fallback
           .map((m: { content: string; created_at: string }) => {
-            const parsed = JSON.parse(m.content);
+            let parsed: any;
+            try { parsed = JSON.parse(m.content); } catch { return null; }
             if (parsed.templateId !== templateId) return null;
             return {
               id: m.created_at,

@@ -163,7 +163,7 @@ export function SaveTemplateDialog({
           onClose();
         }, 1200);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save");
+        setError("Failed to save");
       } finally {
         setSubmitting(false);
       }

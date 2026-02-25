@@ -144,7 +144,7 @@ function AddInstanceForm({
     try {
       await onSave({ ...values, displayName: displayName.trim() || "" });
     } catch (err: any) {
-      setError(err.message || "Failed to save");
+      setError("Failed to save");
     } finally {
       setSaving(false);
     }

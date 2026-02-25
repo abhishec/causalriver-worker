@@ -100,7 +100,7 @@ export async function PATCH(
   } catch (err) {
     logger.error("[alerts/:id] PATCH error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to update alert" },
+      { error: "Failed to update alert" },
       { status: 500 },
     );
   }

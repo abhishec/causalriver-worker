@@ -160,7 +160,7 @@ export function AgentComposerPanel({
         );
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setErrorMessage(err instanceof Error ? err.message : "Composition failed");
+        setErrorMessage("Composition failed");
         setPhase("error");
       }
     },
@@ -261,7 +261,7 @@ export function AgentComposerPanel({
         );
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setErrorMessage(err instanceof Error ? err.message : "Execution failed");
+        setErrorMessage("Execution failed");
         setPhase("error");
       }
     },

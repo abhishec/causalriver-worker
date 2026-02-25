@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to list templates" },
+      { error: "Failed to list templates" },
       { status: 500 }
     );
   }
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: data.id, commandId: data.command_id, template: { id: data.id, command_id: data.command_id } });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to create template" },
+      { error: "Failed to create template" },
       { status: 500 }
     );
   }

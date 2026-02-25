@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         services,
         source: "status_cache",
         message: !conn
-          ? "No OpenClaw gateway configured for this workspace"
+          ? "No OpenClaw gateway configured for this organization"
           : "Gateway not currently connected",
       });
     }

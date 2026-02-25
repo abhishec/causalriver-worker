@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error("[health-alerts] Unhandled error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Health alert check failed" },
+      { error: "Health alert check failed" },
       { status: 500 }
     );
   }

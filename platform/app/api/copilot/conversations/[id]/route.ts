@@ -40,7 +40,7 @@ export async function GET(
     return NextResponse.json({ conversation: data });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to get conversation" },
+      { error: "Failed to get conversation" },
       { status: 500 }
     );
   }

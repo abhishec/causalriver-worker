@@ -226,7 +226,7 @@ export function JiraSetupModal({
       setSelectedProjects(softwareProjects.length > 0 ? softwareProjects : projects.map((p) => p.key));
       setStep("projects");
     } catch (err: any) {
-      setError(err.message || "Network error — check the site URL");
+      setError("Network error — check the site URL");
       setStep("error");
     }
   };

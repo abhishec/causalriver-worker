@@ -119,7 +119,7 @@ export async function getJobStatus(
     .select("id, status, result, error_message, created_at, started_at, completed_at")
     .eq("id", jobId)
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
 
@@ -224,7 +224,7 @@ export async function getArtifact(
     .select("*")
     .eq("id", artifactId)
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as ArtifactRecord;

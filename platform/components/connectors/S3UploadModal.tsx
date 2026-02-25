@@ -110,7 +110,7 @@ export function S3UploadModal({ isOpen, onClose, onUploaded }: S3UploadModalProp
       setProgress(null);
       onClose();
     } catch (err: any) {
-      setError(err.message || "Upload failed");
+      setError("Upload failed");
       setProgress(null);
     } finally {
       setUploading(false);

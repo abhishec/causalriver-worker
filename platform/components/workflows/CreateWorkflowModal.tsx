@@ -126,7 +126,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }

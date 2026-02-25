@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id: data.id });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to save conversation" },
+      { error: "Failed to save conversation" },
       { status: 500 }
     );
   }

@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     if (error) {
       logger.error("Failed to save training pack:", error.message);
       return NextResponse.json(
-        { error: `Failed to save training pack: ${error.message}` },
+        { error: "Failed to save training pack" },
         { status: 500 }
       );
     }
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to save training pack" },
+      { error: "Failed to save training pack" },
       { status: 500 }
     );
   }
@@ -116,7 +116,7 @@ export async function GET() {
     return NextResponse.json({ packs: packs || [] });
   } catch (err: unknown) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to list training packs" },
+      { error: "Failed to list training packs" },
       { status: 500 }
     );
   }

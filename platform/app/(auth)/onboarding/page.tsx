@@ -215,7 +215,7 @@ export default function OnboardingPage() {
       logger.debug("[Onboarding] Provisioning complete:", result.provisioned);
     } catch (err) {
       clearInterval(progressInterval);
-      const msg = err instanceof Error ? err.message : "Network error";
+      const msg = "Network error";
       setProvisionError(msg);
       setBrainProgress(0);
       provisionStarted.current = false;

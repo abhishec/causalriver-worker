@@ -19,7 +19,7 @@ const CONNECTORS = [
   { name: "Freshchat", type: "freshchat", domain: "support", icon: "💬", description: "Live-chat conversations, message threads, agent response times", oauth: false },
   { name: "Intercom", type: "intercom", domain: "support", icon: "💬", description: "Conversations, resolution times, customer satisfaction", oauth: false },
   { name: "Zendesk", type: "zendesk", domain: "support", icon: "🎫", description: "Tickets, escalations, SLA compliance, agent performance", oauth: false },
-  { name: "Notion", type: "notion", domain: "knowledge", icon: "📝", description: "Page updates, database changes, workspace activity", oauth: false },
+  { name: "Notion", type: "notion", domain: "knowledge", icon: "📝", description: "Page updates, database changes, content activity", oauth: false },
   { name: "Google Chat", type: "google_chat", domain: "operations", icon: "💼", description: "Space messages, direct messages, bot interactions", oauth: false },
   { name: "Google Calendar", type: "google_calendar", domain: "operations", icon: "📅", description: "Meeting patterns, scheduling conflicts, time allocation", oauth: false },
   { name: "Voice", type: "voice", domain: "cs", icon: "🎙️", description: "Call transcripts, sentiment analysis, topic extraction", oauth: false },

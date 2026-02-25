@@ -40,7 +40,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
       const data = await res.json();
       onCreated(data.templateId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
       const data = await res.json();
       onCreated(data.template.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong");
     } finally {
       setLoading(false);
     }

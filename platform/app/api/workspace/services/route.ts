@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error("[/api/workspace/services] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
   } catch (err) {
     logger.error("[/api/workspace/services] error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

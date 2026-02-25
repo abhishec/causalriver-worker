@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error("[alerts] GET error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Failed to fetch alerts" },
+      { error: "Failed to fetch alerts" },
       { status: 500 },
     );
   }

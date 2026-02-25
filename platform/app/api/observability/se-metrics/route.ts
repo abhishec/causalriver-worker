@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch metrics' },
       { status: 500 }
     );
   }
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, type });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to fetch metrics' },
       { status: 500 }
     );
   }

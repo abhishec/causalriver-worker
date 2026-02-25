@@ -41,7 +41,7 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
         const { svg: rendered } = await mermaid.render(safeId, code);
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+        if (!cancelled) setError("Failed to render diagram");
       }
     })();
     return () => { cancelled = true; };

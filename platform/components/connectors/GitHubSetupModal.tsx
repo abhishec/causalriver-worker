@@ -165,7 +165,7 @@ export function GitHubSetupModal({
       setRepoInfo({ ...data.repo, branches });
       setStep("branches");
     } catch (err: any) {
-      setError(err.message || "Network error");
+      setError("Network error");
       setStep("error");
     }
   };

@@ -252,7 +252,7 @@ export async function getTemplateForExecution(
     .eq("organization_id", organizationId)
     .eq("status", "running")
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (!abTest) {
     return { templateId, isVariant: false };
@@ -284,7 +284,7 @@ export async function recordABResult(
     .from("template_ab_tests")
     .select("*")
     .eq("id", abTestId)
-    .single();
+    .maybeSingle();
 
   if (!test || test.status !== "running") {
     return { concluded: false };

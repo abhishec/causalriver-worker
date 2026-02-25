@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     logger.error("[AgentComposer] Route error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

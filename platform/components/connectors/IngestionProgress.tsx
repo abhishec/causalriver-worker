@@ -135,7 +135,7 @@ export function IngestionProgress({ onComplete }: IngestionProgressProps) {
       setIsIngesting(false);
       await fetchStatus();
     } catch (err: any) {
-      setError(err.message || "Ingestion failed");
+      setError("Ingestion failed");
       setIsIngesting(false);
     }
   };

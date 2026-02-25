@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
       jsonrpc: "2.0",
       error: {
         code: -32603,
-        message: err instanceof Error ? err.message : "Internal error",
+        message: "Internal error",
       },
       id,
     };
@@ -416,7 +416,7 @@ async function handleToolCall(
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: `Error: ${err instanceof Error ? err.message : "Tool execution failed"}` }],
+        content: [{ type: "text", text: `Error: Tool execution failed` }],
         isError: true,
       },
       id,

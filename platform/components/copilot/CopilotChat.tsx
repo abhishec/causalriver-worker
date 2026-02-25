@@ -251,7 +251,7 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
         const { svg: rendered } = await mermaid.render(safeId, code);
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+        if (!cancelled) setError("Failed to render diagram");
       }
     })();
 
@@ -2029,8 +2029,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       );
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      const errorText =
-        err instanceof Error ? err.message : "Something went wrong";
+      const errorText = "Something went wrong";
       // Store the user prompt for retry
       const userMsg = messagesRef.current[messagesRef.current.length - 2];
       if (userMsg?.role === "user") setLastFailedPrompt(userMsg.content);
