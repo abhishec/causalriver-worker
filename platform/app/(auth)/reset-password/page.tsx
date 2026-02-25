@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      setError(error.message);
+      setError("Password reset failed");
       setLoading(false);
     } else {
       setSuccess(true);

@@ -45,7 +45,7 @@ export function UserActionButton({
       setOpen(false);
       router.refresh();
     } catch (e: any) {
-      setError(e.message);
+      setError("Action failed");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function UserActionButton({
       setOpen(false);
       router.refresh();
     } catch (e: any) {
-      setError(e.message);
+      setError("Action failed");
     } finally {
       setLoading(false);
     }

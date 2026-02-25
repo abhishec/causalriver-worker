@@ -711,7 +711,13 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   }
 
   const text = await data.text();
-  const transactions = JSON.parse(text) as GLTransaction[];
+  let transactions: GLTransaction[];
+  try {
+    transactions = JSON.parse(text) as GLTransaction[];
+  } catch {
+    logger.warn(`[GL] Malformed JSON in storage for org ${orgId}`);
+    return [];
+  }
   glCache.set(orgId, transactions);
   logger.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;

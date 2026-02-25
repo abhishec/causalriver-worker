@@ -145,7 +145,7 @@ export default function ConnectorsPageV2() {
       setConnectors(data || []);
     } catch (err: any) {
       logger.error('Failed to load connectors:', err);
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: 'Failed to load connectors' });
     } finally {
       setLoading(false);
     }
@@ -195,7 +195,7 @@ export default function ConnectorsPageV2() {
       setMessage({ type: 'success', text: `${type} disconnected` });
       loadConnectors();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: 'Failed to disconnect connector' });
     }
   }
 
@@ -208,7 +208,7 @@ export default function ConnectorsPageV2() {
         setTimeout(loadSyncProgress, 1000);
       }
     } catch (err: any) {
-      setMessage({ type: 'error', text: `Sync failed: ${err.message}` });
+      setMessage({ type: 'error', text: 'Sync failed' });
     }
   }
 

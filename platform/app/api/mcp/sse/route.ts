@@ -666,7 +666,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       domains: String(args.domains || ""),
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_forecast: async (args, orgId) => {
@@ -677,7 +677,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "forecast",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_simulate: async (args, orgId) => {
@@ -688,7 +688,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "simulate",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_diagnose: async (args, orgId) => {
@@ -699,7 +699,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "diagnose",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   brain_explain: async (args, orgId) => {
@@ -710,7 +710,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       question: String(args.question || ""),
       action: "explain",
     });
-    return JSON.parse(result.content[0]?.text || "{}");
+    try { return JSON.parse(result.content[0]?.text || "{}"); } catch { return {}; }
   },
 
   // ── SE-aaS Tools ────────────────────────────────────────────────────

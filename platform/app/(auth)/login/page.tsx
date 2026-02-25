@@ -42,7 +42,7 @@ function LoginForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError("Sign in failed");
       setLoading(false);
     } else {
       window.location.href = redirectTo;
@@ -67,7 +67,7 @@ function LoginForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError("Sign in failed");
     } else {
       setMagicLinkSent(true);
     }

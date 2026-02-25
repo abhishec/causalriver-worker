@@ -463,7 +463,11 @@ export async function GET(request: NextRequest) {
       const svc = await createServiceClient();
       const { data } = await svc.storage.from("org-data").download(`${orgId}/gl-data.json`);
       if (data) {
-        transactions = JSON.parse(await data.text()) as GLTransaction[];
+        try {
+          transactions = JSON.parse(await data.text()) as GLTransaction[];
+        } catch {
+          // Malformed JSON in storage — leave transactions empty
+        }
       }
     }
 

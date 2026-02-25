@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError("Password reset request failed");
     } else {
       setSent(true);
     }

@@ -174,7 +174,7 @@ export function AgentsClient() {
       setData(json);
       setError(null);
     } catch (e: any) {
-      setError(e.message);
+      setError("Failed to load agents");
     } finally {
       setLoading(false);
     }

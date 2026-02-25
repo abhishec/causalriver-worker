@@ -179,7 +179,7 @@ export function SettingsClient({
       setCreateName("");
       setCreateCustomerId(null);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Unexpected error.");
+      setCreateError("Failed to create AI Worker");
     } finally {
       setCreating(false);
     }
