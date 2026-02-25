@@ -43,8 +43,14 @@ export async function POST(req: NextRequest) {
   try {
     // 1. Verify Linear webhook — header-based auth + HMAC signature
     // Security: Use header (x-webhook-secret) instead of URL query param to prevent log exposure
-    const headerSecret = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
+    // Fail closed: require at least one auth mechanism to be configured
     const configuredSecret = process.env.LINEAR_WEBHOOK_SECRET;
+    const signingSecret = process.env.LINEAR_SIGNING_SECRET;
+    if (!configuredSecret && !signingSecret) {
+      logger.error('Linear webhook: neither LINEAR_WEBHOOK_SECRET nor LINEAR_SIGNING_SECRET configured — rejecting');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+    }
+    const headerSecret = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
     if (configuredSecret && headerSecret !== configuredSecret) {
       logger.warn('Linear webhook: invalid webhook secret');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
