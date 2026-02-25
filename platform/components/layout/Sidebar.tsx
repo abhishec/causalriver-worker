@@ -4,7 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { UserMenu } from "./UserMenu";
+// Dynamic import with ssr: false prevents hydration mismatch caused by
+// WorkspaceProvider reading localStorage in useState lazy initializers.
+// Server renders null here; client renders the real menu after mount.
+import dynamic from "next/dynamic";
+const UserMenu = dynamic(
+  () => import("./UserMenu").then((m) => m.UserMenu),
+  { ssr: false }
+);
 import { useChatHistory, type ChatHistoryItem } from "@/lib/use-chat-history";
 import { ALL_SLASH_COMMANDS, type SlashCommand } from "@/components/copilot/SlashCommandPicker";
 import { DOMAIN_CATALOGUE } from "@/lib/se-aas/domain-catalogue";

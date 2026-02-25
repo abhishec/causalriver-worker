@@ -127,7 +127,14 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
   if (isLoading || !currentWorkspace) {
     return (
       <div className={cn("shrink-0 border-t border-border-subtle", collapsed ? "px-2 py-3" : "px-3 py-3")}>
-        <div className={cn("flex items-center", collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5")}>
+        {/* Use <button> (not <div>) to match the loaded trigger and avoid hydration mismatch */}
+        <button
+          disabled
+          className={cn(
+            "flex items-center w-full rounded-lg",
+            collapsed ? "justify-center p-2" : "gap-2.5 px-2 py-1.5"
+          )}
+        >
           <div className="w-8 h-8 rounded-full bg-surface-hover animate-pulse shrink-0" />
           {!collapsed && (
             <div className="flex-1 min-w-0 space-y-1.5">
@@ -135,7 +142,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               <div className="h-2.5 w-14 bg-surface-hover rounded animate-pulse" />
             </div>
           )}
-        </div>
+        </button>
       </div>
     );
   }
