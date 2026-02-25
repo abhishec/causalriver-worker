@@ -125,8 +125,25 @@ export function GitHubSetupModal({
   const handleConnect = async () => {
     if (!token.trim()) { setError("Please enter your GitHub Personal Access Token"); return; }
     if (!repoUrl.trim()) { setError("Please enter a repository URL or owner/repo"); return; }
-    const parsed = parseRepoUrl(repoUrl);
-    if (!parsed) { setError("Invalid format. Use: owner/repo or https://github.com/owner/repo"); return; }
+
+    // Parse all pasted repo URLs — first valid one is primary, rest become additional repos
+    const allLines = repoUrl.split(/[\n,]+/).map(l => l.trim()).filter(Boolean);
+    const allParsed = allLines.map(l => parseRepoUrl(l)).filter(Boolean) as { owner: string; repo: string }[];
+    if (allParsed.length === 0) { setError("Invalid format. Use: owner/repo or https://github.com/owner/repo"); return; }
+
+    const parsed = allParsed[0];
+    // Pre-load additional repos from pasted URLs (skip the primary)
+    if (allParsed.length > 1) {
+      const extras: GitHubRepoEntry[] = allParsed.slice(1).map(p => ({
+        owner: p.owner,
+        name: p.repo,
+        fullName: `${p.owner}/${p.repo}`,
+      }));
+      setAdditionalRepos(prev => {
+        const existing = new Set(prev.map(r => r.fullName));
+        return [...prev, ...extras.filter(e => !existing.has(e.fullName))];
+      });
+    }
 
     setError("");
     setStep("validating");
@@ -286,20 +303,36 @@ export function GitHubSetupModal({
                 </p>
               </div>
 
-              {/* Repo URL input */}
+              {/* Repo URL input — supports multiple repos (one per line or comma-separated) */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Repository
+                  Repositories
+                  <span className="ml-1 text-[10px] font-normal text-muted">(paste one or more repo URLs)</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
-                  placeholder="owner/repo or https://github.com/owner/repo"
-                  className="w-full px-3 py-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all"
+                  placeholder={`Paste GitHub repo URLs — one per line or comma-separated\nhttps://github.com/owner/repo1\nhttps://github.com/owner/repo2\nowner/repo3`}
+                  rows={3}
+                  className="w-full px-3 py-2.5 rounded-lg bg-surface border border-border text-sm font-mono placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 transition-all resize-none"
                   disabled={step === "validating"}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleConnect(); }}
                 />
+                {/* Preview parsed repos */}
+                {(() => {
+                  const lines = repoUrl.split(/[\n,]+/).map(l => l.trim()).filter(Boolean);
+                  const parsed = lines.map(l => parseRepoUrl(l)).filter(Boolean);
+                  if (parsed.length <= 1) return null;
+                  return (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {parsed.map((p, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-accent/5 border border-accent/20 text-[10px] font-mono">
+                          {i === 0 && <span className="text-accent font-semibold">Primary</span>}
+                          {p!.owner}/{p!.repo}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               {error && (
