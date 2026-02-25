@@ -474,6 +474,7 @@ function transformIssueToSignal(
     source_domain: 'product.jira',
     signal_type: isResolved ? 'ticket_resolved' : 'ticket_in_progress',
     signal_value: cycleTimeHours || 1,
+    signal_timestamp: fields.updated || fields.created || new Date().toISOString(),
     entity_type: 'jira_issue',
     entity_id: issue.key,
     signal_metadata: {

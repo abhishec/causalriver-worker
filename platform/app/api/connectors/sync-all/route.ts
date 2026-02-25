@@ -80,10 +80,10 @@ export async function POST(request: Request) {
         // Determine the sync endpoint for each connector type
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+          || (process.env.NODE_ENV !== "production" ? "http://localhost:3001" : null);
 
         if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured — cannot self-fetch sync endpoints");
         }
 
         let syncUrl: string;
@@ -220,10 +220,10 @@ export async function POST(request: Request) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL
           || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-          || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3001");
+          || (process.env.NODE_ENV !== "production" ? "http://localhost:3001" : null);
 
         if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured");
+          throw new Error("NEXT_PUBLIC_APP_URL or VERCEL_URL not configured — cannot trigger brain cycle");
         }
 
         const cookieHeader = request.headers.get("cookie") || "";

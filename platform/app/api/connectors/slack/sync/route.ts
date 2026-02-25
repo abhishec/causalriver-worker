@@ -237,6 +237,15 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Step 3: Batch insert signals ────────────────────────────────────
+    // Enrich all signals with signal_timestamp before insertion.
+    // The Oracle queries filter by signal_timestamp — signals without it are invisible.
+    const now = new Date().toISOString();
+    for (const sig of signals) {
+      if (!sig.signal_timestamp) {
+        sig.signal_timestamp = now;
+      }
+    }
+
     let signalsInserted = 0;
     for (let i = 0; i < signals.length; i += 100) {
       const batch = signals.slice(i, i + 100);
