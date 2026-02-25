@@ -469,9 +469,9 @@ export function DashboardClient() {
       localStorage.setItem("nexus_ai_worker_name", data.worker?.name ?? wizardWorkerName);
       switchWorkspace(targetWorkspaceId, { skipReload: true });
       window.dispatchEvent(new Event("nexus-service-mode-changed"));
-      router.push(`/copilot?workerId=${encodeURIComponent(data.worker.id)}&service=${encodeURIComponent(wizardService)}`);
+      router.push(`/copilot?workerId=${encodeURIComponent(data.worker?.id ?? "")}&service=${encodeURIComponent(wizardService)}`);
     } catch (err) {
-      setWizardError(err instanceof Error ? err.message : "Something went wrong");
+      setWizardError("Something went wrong — please try again");
       setWizardCreating(false);
     }
   }, [wizardService, wizardWorkspace, wizardWorkerName, wizardWorkerDesc, wizardNewWsName, activeCustomerId, switchWorkspace, router]);

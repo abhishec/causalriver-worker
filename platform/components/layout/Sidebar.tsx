@@ -196,14 +196,14 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
     return () => { cancelled = true; clearInterval(interval); };
   }, [workspaceId, serviceMode]);
 
-  if (!data) return null;
+  if (!data || !data.accuracy || !data.knowledge) return null;
 
   const trendIcon = data.accuracy.trend === "improving" ? "\u2191" : data.accuracy.trend === "degrading" ? "\u2193" : "\u2192";
   const trendColor = data.accuracy.trend === "improving" ? "text-emerald-400" : data.accuracy.trend === "degrading" ? "text-red-400" : "text-muted-foreground";
 
   // Hours saved estimation: verified predictions × 2h + interventions × 4h
   const hoursSaved = Math.round(
-    (data.knowledge.verifiedPredictions * 2) + ((data.interventions?.totalActedOn ?? 0) * 4)
+    ((data.knowledge.verifiedPredictions ?? 0) * 2) + ((data.interventions?.totalActedOn ?? 0) * 4)
   );
 
   return (
@@ -216,12 +216,12 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
         <div className="flex items-baseline gap-1">
           <span className="text-sm font-bold text-accent">{data.intelligenceScore}</span>
           <span className="text-[9px] text-muted-foreground">IQ</span>
-          {data.accuracy.trend === "improving" && (
+          {data.accuracy?.trend === "improving" && (
             <span className="text-[9px] text-emerald-400">{"\u2191"}</span>
           )}
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{Math.round(data.accuracy.overall * 100)}%</span>
+          <span className="text-sm font-bold text-foreground">{Math.round((data.accuracy?.overall ?? 0) * 100)}%</span>
           <span className={`text-[9px] ${trendColor}`}>{trendIcon}</span>
           <span className="text-[9px] text-muted-foreground">accuracy</span>
         </div>
@@ -232,28 +232,28 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
           </div>
         )}
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{data.knowledge.verifiedPredictions}</span>
+          <span className="text-sm font-bold text-foreground">{data.knowledge?.verifiedPredictions ?? 0}</span>
           <span className="text-[9px] text-muted-foreground">predictions</span>
         </div>
       </div>
       {/* Learning velocity bar */}
-      {data.knowledge.cognitiveLayersActive > 0 && (
+      {(data.knowledge?.cognitiveLayersActive ?? 0) > 0 && (
         <div className="mt-2">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-0.5">
             <span>Cognitive Layers</span>
-            <span className="tabular-nums">{data.knowledge.cognitiveLayersActive}/30</span>
+            <span className="tabular-nums">{data.knowledge?.cognitiveLayersActive ?? 0}/30</span>
           </div>
           <div className="h-1 rounded-full bg-border-subtle overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
-              style={{ width: `${Math.round((data.knowledge.cognitiveLayersActive / 30) * 100)}%` }}
+              style={{ width: `${Math.round(((data.knowledge?.cognitiveLayersActive ?? 0) / 30) * 100)}%` }}
             />
           </div>
         </div>
       )}
-      {data.accuracy.improvementRate > 0 && (
+      {(data.accuracy?.improvementRate ?? 0) > 0 && (
         <div className="mt-1.5 text-[10px] text-emerald-400">
-          +{data.accuracy.improvementRate.toFixed(1)}% improvement this week
+          +{(data.accuracy?.improvementRate ?? 0).toFixed(1)}% improvement this week
         </div>
       )}
     </div>
