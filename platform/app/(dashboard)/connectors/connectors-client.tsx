@@ -137,7 +137,7 @@ export function ConnectorsClient({
 
     if (success) {
       const messages: Record<string, string> = {
-        slack_connected: "Slack workspace connected successfully",
+        slack_connected: "Slack connected successfully",
         jira_connected: "Jira site connected successfully",
         github_connected: "GitHub account connected successfully",
       };

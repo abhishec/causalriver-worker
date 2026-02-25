@@ -433,13 +433,13 @@ export function DashboardClient() {
         });
         const data = await res.json();
         if (!res.ok) {
-          setWizardError(data.error || "Failed to create workspace");
+          setWizardError(data.error || "Failed to create AI Worker");
           setWizardCreating(false);
           return;
         }
         targetWorkspaceId = data.workspace?.id;
         if (!targetWorkspaceId) {
-          setWizardError("Failed to get workspace ID");
+          setWizardError("Failed to get AI Worker ID");
           setWizardCreating(false);
           return;
         }

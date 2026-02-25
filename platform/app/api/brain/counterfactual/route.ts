@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!cfMember) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });

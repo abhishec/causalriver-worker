@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
       adminCheck = data;
     }
 
@@ -1232,7 +1232,7 @@ export async function POST(request: NextRequest) {
           .eq('org_id', workspaceId)
           .eq('command_id', commandId)
           .eq('is_archived', false)
-          .single();
+          .maybeSingle();
 
         // Also check public templates if not found in org
         let resolvedTemplate = template;
@@ -1243,7 +1243,7 @@ export async function POST(request: NextRequest) {
             .eq('command_id', commandId)
             .eq('is_public', true)
             .eq('is_archived', false)
-            .single();
+            .maybeSingle();
           resolvedTemplate = publicTemplate;
         }
 
@@ -1388,7 +1388,7 @@ export async function POST(request: NextRequest) {
           .eq('id', workflowId)
           .eq('organization_id', workspaceId)
           .neq('status', 'archived')
-          .single();
+          .maybeSingle();
 
         if (!workflow) {
           // Workflow not found — send error via SSE instead of leaving client hanging

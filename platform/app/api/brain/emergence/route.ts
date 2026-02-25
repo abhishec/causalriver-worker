@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
       .eq("organization_id", workspaceId)
       .order("snapshot_date", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     // ── 4. Merge + sort ──────────────────────────────────────────────────────
     const allEvents = [...emergenceEvents, ...platformLearningEvents]

@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         .select("role")
         .eq("user_id", user!.id)
         .eq("organization_id", workspaceId)
-        .single();
+        .maybeSingle();
 
       if (!membership) {
         const { data: admin } = await supabase
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
           .eq("user_id", user!.id)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!admin) {
           return NextResponse.json(
@@ -472,7 +472,7 @@ export async function GET(request: NextRequest) {
       .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     return NextResponse.json({
       status: "idle",

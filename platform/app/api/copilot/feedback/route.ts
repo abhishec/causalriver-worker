@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!feedbackMembership) {
       return NextResponse.json(
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!getFeedbackMembership) {
       return NextResponse.json(

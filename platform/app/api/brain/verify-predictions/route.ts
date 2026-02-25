@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not a member" }, { status: 403 });
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           .select("*")
           .eq("id", verification.prediction_id)
           .eq("organization_id", organizationId)
-          .single();
+          .maybeSingle();
 
         if (!prediction || prediction.status !== "pending") {
           continue;

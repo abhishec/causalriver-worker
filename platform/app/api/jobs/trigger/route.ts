@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       .select("role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       // Check platform admin
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(

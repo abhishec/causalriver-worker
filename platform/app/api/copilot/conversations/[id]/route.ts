@@ -31,7 +31,7 @@ export async function GET(
       .select("*")
       .eq("id", id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId)
           .order("joined_at", { ascending: true })
           .limit(1)
-          .single();
+          .maybeSingle();
         workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
       }
     }
@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
         .select("role")
         .eq("user_id", userId)
         .eq("organization_id", workspaceId)
-        .single();
+        .maybeSingle();
 
       if (!toolsMembership) {
         const { data: toolsAdmin } = await supabase
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
           .eq("user_id", userId)
           .eq("is_platform_admin", true)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (!toolsAdmin) {
           return NextResponse.json(

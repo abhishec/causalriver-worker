@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       .select("domain, entity_type, entity_id, confidence")
       .eq("id", predictionId)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     // 4. Emit feedback signal to brain (for weight adjustment)
     // Tagged as outcome so the reinforcement loop picks it up

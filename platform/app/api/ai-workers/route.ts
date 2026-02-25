@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
     if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const admin = getAdminClient();
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     const settings = (org?.settings as Record<string, unknown>) ?? {};
     const workers: AIWorker[] = Array.isArray(settings.ai_workers)
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
     if (!postMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const admin = getAdminClient();
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -193,7 +193,7 @@ export async function PATCH(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
     if (!patchMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     if (status !== undefined && !["active", "paused"].includes(status)) {
@@ -209,7 +209,7 @@ export async function PATCH(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -263,7 +263,7 @@ export async function DELETE(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
     if (!delMembership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const admin = getAdminClient();
@@ -272,7 +272,7 @@ export async function DELETE(request: NextRequest) {
       .from("organizations")
       .select("settings")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

@@ -240,7 +240,7 @@ function AdminAgentsClient() {
             onClick={() => { setOrgFilter(null); setAgentFilter(null); }}
             className={cn("px-3 py-1 rounded-full text-xs font-medium transition-colors", !orgFilter ? "bg-amber-500/10 text-amber-400" : "bg-surface text-muted hover:text-foreground")}
           >
-            All Workspaces
+            All AI Workers
           </button>
           {data.orgs.map((org) => (
             <button
@@ -448,7 +448,7 @@ function TimelineView({
     <Card className="overflow-hidden p-0">
       <div className="grid grid-cols-[auto_120px_1fr_100px_100px_100px] gap-3 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-muted border-b border-border-subtle bg-surface/30">
         <div className="w-3" />
-        <div>Workspace</div>
+        <div>AI Worker</div>
         <div>Agent</div>
         <div>Time</div>
         <div>Duration</div>
@@ -486,7 +486,7 @@ function TimelineView({
                 <div className="px-5 pb-4 bg-surface/20 border-t border-border-subtle/50">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3">
                     <div>
-                      <div className="text-[10px] font-medium text-muted uppercase mb-1">Workspace</div>
+                      <div className="text-[10px] font-medium text-muted uppercase mb-1">AI Worker</div>
                       <div className="text-xs">{run.orgName} <span className="text-muted">({run.orgSlug})</span></div>
                     </div>
                     <div>

@@ -149,7 +149,7 @@ async function handleLearningHealth(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       const { data: admin } = await supabase
@@ -158,7 +158,7 @@ async function handleLearningHealth(request: NextRequest) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!admin) {
         return NextResponse.json(
@@ -447,7 +447,7 @@ async function checkEvolutionState(supabase: any, workspaceId: string): Promise<
       .eq("organization_id", workspaceId)
       .order("created_at", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!snapshot) {
       return { status: "no_snapshots", message: "Brain has not run an evolution cycle yet" };
