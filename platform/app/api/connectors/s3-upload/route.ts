@@ -334,7 +334,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[S3Upload] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Upload failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -649,6 +649,6 @@ export async function GET() {
     });
   } catch (error: any) {
     logger.error("[S3Upload] GET error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

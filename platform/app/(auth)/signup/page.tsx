@@ -107,7 +107,7 @@ function SignupForm() {
         {/* Only show org name field if NOT in invite flow */}
         {!isInviteFlow && (
           <div>
-            <label htmlFor="org" className="block text-sm font-medium mb-1.5">Workspace name</label>
+            <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
             <input
               id="org"
               type="text"

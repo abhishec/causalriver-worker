@@ -413,11 +413,11 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Welcome, {userName}!</h2>
-            <p className="text-muted">Set up your workspace to get started.</p>
+            <p className="text-muted">Set up your organization to get started.</p>
           </div>
           <div className="space-y-4">
             <div>
-              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Workspace name</label>
+              <label htmlFor="org" className="block text-sm font-medium mb-1.5">Organization name</label>
               <input id="org" type="text" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Acme Inc." className="w-full px-4 py-2.5 rounded-lg bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-input-focus transition-colors" required autoFocus />
             </div>
             <div>

@@ -57,7 +57,7 @@ export default async function AdminCostsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Consolidated Costs</h1>
-        <p className="text-xs text-muted mt-0.5">All costs across all workspaces + AWS infrastructure</p>
+        <p className="text-xs text-muted mt-0.5">All costs across all AI Workers + AWS infrastructure</p>
       </div>
 
       {/* Top metrics */}

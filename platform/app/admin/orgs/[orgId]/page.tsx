@@ -62,7 +62,7 @@ export default async function OrgDetailPage({
     <div className="space-y-6 max-w-6xl">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted">
-        <Link href="/admin/workspaces" className="hover:text-foreground transition-colors">Workspaces</Link>
+        <Link href="/admin/workspaces" className="hover:text-foreground transition-colors">AI Workers</Link>
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
@@ -165,7 +165,7 @@ export default async function OrgDetailPage({
               );
             })}
             {members.length === 0 && (
-              <div className="px-5 py-10 text-center text-sm text-muted">No members in this workspace</div>
+              <div className="px-5 py-10 text-center text-sm text-muted">No members in this AI Worker</div>
             )}
           </div>
         </Card>

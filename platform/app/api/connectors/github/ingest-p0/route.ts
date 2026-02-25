@@ -333,7 +333,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     logger.error('[P0 Ingest] Fatal error:', error);
     return NextResponse.json(
-      { error: error.message || 'Unknown error' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

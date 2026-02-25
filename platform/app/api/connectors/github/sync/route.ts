@@ -260,7 +260,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("GitHub sync error:", err);
     return NextResponse.json(
-      { error: err.message || "Sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

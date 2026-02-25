@@ -110,7 +110,7 @@ export default async function AdminOverviewPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Mission Control</h1>
-        <p className="text-xs text-muted mt-0.5">Platform-wide health, workspaces, and system status</p>
+        <p className="text-xs text-muted mt-0.5">Platform-wide health, AI Workers, and system status</p>
       </div>
 
       {/* Stats Strip */}
@@ -184,7 +184,7 @@ export default async function AdminOverviewPage() {
               </div>
             )}
             {orgs.length === 0 && (
-              <p className="text-sm text-muted text-center py-6">No workspaces</p>
+              <p className="text-sm text-muted text-center py-6">No AI Workers</p>
             )}
           </div>
         </Card>

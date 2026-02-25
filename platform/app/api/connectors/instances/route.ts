@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ instances: masked });
   } catch (err: any) {
     logger.error("[instances/GET]", err);
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[instances/POST]", err);
-    return NextResponse.json({ error: err.message || "Validation failed" }, { status: 400 });
+    return NextResponse.json({ error: "Internal error" }, { status: 400 });
   }
 }
 
@@ -313,7 +313,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     logger.error("[instances/PUT]", err);
-    return NextResponse.json({ error: err.message || "Update failed" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -347,6 +347,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err: any) {
     logger.error("[instances/DELETE]", err);
-    return NextResponse.json({ error: err.message || "Delete failed" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -151,7 +151,7 @@ export default async function EarlyWarningPage() {
               v{releaseVersion}
             </span>
           )}
-          <span className="text-muted">· All metrics isolated to this workspace</span>
+          <span className="text-muted">· All metrics isolated to this AI Worker</span>
           <Link
             href="/se-aas"
             className="ml-auto text-accent hover:text-accent/80 transition-colors"

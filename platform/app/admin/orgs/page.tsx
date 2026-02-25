@@ -117,9 +117,9 @@ export default async function AdminOrgsPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Customers & Workspaces</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Customers & AI Workers</h1>
           <p className="text-xs text-muted mt-0.5">
-            Users belong to <strong>Customers</strong> — workspaces are isolated brain tracks within a customer
+            Users belong to <strong>Customers</strong> — AI Workers are isolated brain tracks within a customer
           </p>
         </div>
         <CreateWorkspaceModal customers={customers} />

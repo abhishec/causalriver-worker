@@ -1072,10 +1072,10 @@ export function DashboardClient() {
                     </div>
                   )}
 
-                  {/* Step 2: Choose Workspace */}
+                  {/* Step 2: Choose Organization */}
                   {wizardStep === 2 && wizardService && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-4">Select a workspace for this {SERVICE_INFO[wizardService].label} worker:</p>
+                      <p className="text-sm text-muted-foreground mb-4">Select an organization for this {SERVICE_INFO[wizardService].label} worker:</p>
                       <div className="space-y-2">
                         {activeWorkspaces.map((m) => {
                           const ws = m.workspace;
@@ -1103,7 +1103,7 @@ export function DashboardClient() {
                           );
                         })}
 
-                        {/* Create new workspace option */}
+                        {/* Create new organization option */}
                         <button
                           onClick={() => handleWizardWorkspaceSelect("new")}
                           className="w-full flex items-center gap-3 rounded-lg border-2 border-dashed border-border-subtle p-3 text-left hover:border-accent/40 hover:bg-surface-hover transition-all"
@@ -1111,7 +1111,7 @@ export function DashboardClient() {
                           <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                           </svg>
-                          <span className="text-sm text-muted-foreground">Create new workspace</span>
+                          <span className="text-sm text-muted-foreground">Create new organization</span>
                         </button>
                       </div>
 
@@ -1131,7 +1131,7 @@ export function DashboardClient() {
 
                       {wizardWorkspace === "new" && (
                         <div className="mb-4">
-                          <label className="block text-xs font-medium text-muted-foreground mb-1.5">New Workspace Name</label>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Organization Name</label>
                           <input
                             type="text"
                             value={wizardNewWsName}

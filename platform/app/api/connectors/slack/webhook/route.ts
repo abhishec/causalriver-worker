@@ -257,6 +257,6 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     logger.error('[Slack Webhook] Error:', error.message);
     // Always return 200 to prevent Slack from retrying failed events
-    return NextResponse.json({ ok: true, error: error.message });
+    return NextResponse.json({ ok: true, error: "Internal error" });
   }
 }

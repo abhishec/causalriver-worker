@@ -126,6 +126,6 @@ export async function POST(_request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[WorkflowCancel] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -412,7 +412,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: err.message || "Ingestion failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

@@ -74,7 +74,7 @@ export async function GET() {
   } catch (err: any) {
     logger.error("GitHub status error:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to get status" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

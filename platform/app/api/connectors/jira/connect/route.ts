@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     logger.error("[Jira connect] Error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

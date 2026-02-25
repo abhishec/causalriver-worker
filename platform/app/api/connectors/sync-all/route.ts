@@ -181,7 +181,7 @@ export async function POST(request: Request) {
         return {
           connector: type,
           success: false,
-          error: err.message || "Sync failed",
+          error: "Sync failed",
           durationMs: Date.now() - start,
         };
       }
@@ -276,7 +276,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("Sync-all error:", err);
     return NextResponse.json(
-      { error: err.message || "Sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

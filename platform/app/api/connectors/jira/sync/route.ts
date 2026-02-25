@@ -393,7 +393,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("Jira sync error:", err);
     return NextResponse.json(
-      { error: err.message || "Sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

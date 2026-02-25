@@ -149,18 +149,18 @@ function ArtifactContent({ artifact }: { artifact: Artifact }) {
                 ? {
                     service: "aas" as const,
                     data: (artifact.rawData ||
-                      JSON.parse(artifact.content || "{}")) as any,
+                      (() => { try { return JSON.parse(artifact.content || "{}"); } catch { return {}; } })()) as any,
                   }
                 : artifact.domainId
                   ? {
                       service: "delivery-intelligence" as const,
                       data: (artifact.rawData ||
-                        JSON.parse(artifact.content || "{}")) as any,
+                        (() => { try { return JSON.parse(artifact.content || "{}"); } catch { return {}; } })()) as any,
                     }
                   : {
                       service: "seaas" as const,
                       data: (artifact.rawData ||
-                        JSON.parse(artifact.content || "{}")) as any,
+                        (() => { try { return JSON.parse(artifact.content || "{}"); } catch { return {}; } })()) as any,
                     }
             }
           />

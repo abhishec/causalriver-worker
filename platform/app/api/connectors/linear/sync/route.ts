@@ -194,7 +194,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: syncErr.message,
+          error: "Sync failed",
           signalsGenerated,
           errors,
         },
@@ -204,7 +204,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Linear Sync] Error:", err);
     return NextResponse.json(
-      { error: err.message || "Linear sync failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

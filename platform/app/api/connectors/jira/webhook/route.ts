@@ -221,6 +221,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, signals: signals.length });
   } catch (error: any) {
     logger.error('[Jira Webhook] Error:', error.message);
-    return NextResponse.json({ ok: true, error: error.message });
+    return NextResponse.json({ ok: true, error: "Internal error" });
   }
 }
