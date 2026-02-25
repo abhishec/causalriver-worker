@@ -72,7 +72,7 @@ function SignupForm() {
         <p className="text-sm text-muted">
           {isInviteFlow
             ? "Click the link to activate your account and join the workspace."
-            : "Click the link to activate your account and access your causal memory."}
+            : "Click the link to activate your account and access your AI Worker."}
         </p>
       </div>
     );
@@ -89,12 +89,12 @@ function SignupForm() {
       </div>
 
       <h2 className="text-2xl font-bold mb-1">
-        {isInviteFlow ? "Create your account" : "Create your causal memory"}
+        {isInviteFlow ? "Create your account" : "Create your AI Worker"}
       </h2>
       <p className="text-muted mb-8">
         {isInviteFlow
           ? "Sign up to accept your invitation"
-          : "Set up your workspace and start learning"}
+          : "Set up your AI Worker and start learning"}
       </p>
 
       {error && (

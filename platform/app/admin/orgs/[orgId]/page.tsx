@@ -200,10 +200,10 @@ export default async function OrgDetailPage({
 
       {/* Org metadata */}
       <Card>
-        <CardTitle className="mb-3">Workspace Details</CardTitle>
+        <CardTitle className="mb-3">AI Worker Details</CardTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
-            { label: "Workspace ID", value: org.id },
+            { label: "AI Worker ID", value: org.id },
             { label: "Slug",       value: org.slug },
             { label: "Plan",       value: org.plan },
             { label: "Core Brain", value: org.is_core_brain ? "Yes" : "No" },

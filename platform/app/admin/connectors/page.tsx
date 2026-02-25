@@ -224,7 +224,7 @@ export default function ConnectorsPageV2() {
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Connectors Config</h1>
           <p className="text-xs text-muted mt-0.5">
-            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'workspace'}</span>
+            Manage OAuth connectors for <span className="text-foreground font-medium">{orgName || 'AI Worker'}</span>
           </p>
         </div>
         <a

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: "Brain OS",
     template: "%s | Brain OS",
   },
-  description: "Your organisation's causal memory — monitor, configure, and interact with Brain OS's deep knowledge system.",
+  description: "The AI Worker platform — monitor, configure, and interact with Brain OS's intelligence system.",
 };
 
 export default function RootLayout({

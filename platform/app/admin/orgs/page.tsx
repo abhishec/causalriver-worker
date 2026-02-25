@@ -128,10 +128,10 @@ export default async function AdminOrgsPage() {
       {/* ── Stats ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <StatValue label="Customers"      value={String(customers.length)} subtitle={`${designPartners} design partner${designPartners !== 1 ? "s" : ""}`} />
-        <StatValue label="Workspaces"     value={String(tenantOrgs.length)} subtitle="isolated brains" />
+        <StatValue label="AI Workers"     value={String(tenantOrgs.length)} subtitle="isolated brains" />
         <StatValue label="Enterprise"     value={String(enterpriseCount)} />
         <StatValue label="Total Users"    value={String(totalUsers)} subtitle="via customer_members" />
-        <StatValue label="Core Workspaces"      value={String(coreOrgs.length)} subtitle="platform brain" />
+        <StatValue label="Core AI Workers"      value={String(coreOrgs.length)} subtitle="platform brain" />
       </div>
 
       {/* ── Core Brain ──────────────────────────────────────────────────── */}

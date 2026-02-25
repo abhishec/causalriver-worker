@@ -220,7 +220,7 @@ function AdminAgentsClient() {
           trend={stats.successRate >= 80 ? "up" : "down"}
         />
         <StatValue label="Failed" value={formatNumber(stats.failed)} />
-        <StatValue label="Workspaces" value={String(stats.uniqueOrgs)} />
+        <StatValue label="AI Workers" value={String(stats.uniqueOrgs)} />
         <StatValue label="Agent Types" value={String(stats.uniqueAgents)} />
         <StatValue label="LLM Cost" value={`$${stats.totalCost.toFixed(3)}`} />
       </div>

@@ -246,7 +246,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -304,7 +304,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -336,7 +336,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -370,7 +370,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -405,7 +405,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -441,7 +441,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -486,7 +486,7 @@ const AAS_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -527,7 +527,7 @@ const AAS_FULL_REVIEW: CommandGathering = {
   params: [
     {
       id: "org",
-      label: "Workspace",
+      label: "AI Worker",
       type: "select",
       required: true,
       optionsEndpoint: "/api/workspace/memberships",
@@ -565,7 +565,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -601,7 +601,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",
@@ -623,7 +623,7 @@ const AAS_INTELLIGENCE_GATHERING: CommandGathering[] = [
     params: [
       {
         id: "org",
-        label: "Workspace",
+        label: "AI Worker",
         type: "select",
         required: true,
         optionsEndpoint: "/api/workspace/memberships",

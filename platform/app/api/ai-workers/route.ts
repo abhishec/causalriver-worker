@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       .eq("id", workspaceId)
       .single();
 
-    if (!org) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const settings = (org.settings as Record<string, unknown>) ?? {};
     const workers: AIWorker[] = Array.isArray(settings.ai_workers)
@@ -211,7 +211,7 @@ export async function PATCH(request: NextRequest) {
       .eq("id", workspaceId)
       .single();
 
-    if (!org) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const settings = (org.settings as Record<string, unknown>) ?? {};
     const workers: AIWorker[] = Array.isArray(settings.ai_workers)
@@ -274,7 +274,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", workspaceId)
       .single();
 
-    if (!org) return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+    if (!org) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const settings = (org.settings as Record<string, unknown>) ?? {};
     const workers: AIWorker[] = Array.isArray(settings.ai_workers)

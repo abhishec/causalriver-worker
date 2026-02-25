@@ -206,7 +206,7 @@ export function CopilotOverlay() {
     setResponse("");
 
     if (!currentWorkspace?.id) {
-      setResponse("Workspace not loaded yet. Please try again.");
+      setResponse("AI Worker not loaded yet. Please try again.");
       setIsLoading(false);
       return;
     }

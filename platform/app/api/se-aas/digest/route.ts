@@ -215,7 +215,7 @@ async function buildDigest(
     metrics: [
       { label: "Analyses run (7d)", value: artifactCount },
       { label: "Top function", value: topDomain ? topDomain[0].replace(/-/g, " ") : "—" },
-      { label: "Workspace", value: primaryBranch },
+      { label: "Branch", value: primaryBranch },
     ],
     actions:
       artifactCount < 3

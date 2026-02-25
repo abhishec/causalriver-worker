@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
 const STEPS = [
-  { id: 1, label: "Workspace" },
+  { id: 1, label: "AI Worker" },
   { id: 2, label: "Connect Data" },
   { id: 3, label: "Initializing" },
   { id: 4, label: "First Results" },
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
 
   async function handleOrgSubmit() {
     if (!orgName.trim()) {
-      setError("Workspace name is required");
+      setError("Name is required");
       return;
     }
     setLoading(true);
@@ -479,7 +479,7 @@ export default function OnboardingPage() {
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-1">Connect Your Data</h2>
-            <p className="text-muted">Choose data sources to feed the causal memory. You can add more later.</p>
+            <p className="text-muted">Choose data sources to feed your AI Worker. You can add more later.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {CONNECTORS.map((conn) => {
@@ -795,7 +795,7 @@ export default function OnboardingPage() {
                     <span className="text-xs text-success font-medium">Brain OS thinking...</span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Great question! Once your data sources are connected and signals start flowing, the causal memory will discover cause-and-effect relationships. Head to the Copilot to explore.
+                    Great question! Once your data sources are connected and signals start flowing, the AI Worker will discover cause-and-effect relationships. Head to the Copilot to explore.
                   </p>
                 </div>
               )}

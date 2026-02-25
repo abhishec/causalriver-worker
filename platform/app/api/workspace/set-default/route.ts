@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     if (!workspace?.customer_id) {
       return NextResponse.json(
-        { error: "Workspace has no customer association" },
+        { error: "No customer association found" },
         { status: 400 }
       );
     }

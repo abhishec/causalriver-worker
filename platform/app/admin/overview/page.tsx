@@ -115,8 +115,8 @@ export default async function AdminOverviewPage() {
 
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatValue label="Workspaces" value={String(orgs.length)} subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
-        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All workspaces" />
+        <StatValue label="AI Workers" value={String(orgs.length)} subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
+        <StatValue label="Total Users" value={String(uniqueUserIds.length)} subtitle="All AI Workers" />
         <StatValue label="Online Now" value={String(onlineUsers.length)} pulse={onlineUsers.length > 0} />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} />
         <StatValue label="LLM Cost Today" value={formatUSD(costToday)} />
