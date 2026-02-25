@@ -36,7 +36,7 @@ async function resolveWorkspaceId(
         .eq("user_id", userId)
         .order("joined_at", { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
       return data?.organization_id ?? null;
     } catch {
       return null;

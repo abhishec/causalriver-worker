@@ -473,7 +473,7 @@ export async function GET(request: NextRequest) {
 
     // Get company name
     const svc = await createServiceClient();
-    const { data: org } = await svc.from("organizations").select("name").eq("id", orgId).single();
+    const { data: org } = await svc.from("organizations").select("name").eq("id", orgId).maybeSingle();
     const company = org?.name || "Organisation";
 
     const csvContent = buildCSVExport(transactions, company);

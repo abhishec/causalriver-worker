@@ -29,7 +29,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
         .select("*")
         .eq("id", runId)
         .eq("organization_id", workspaceId)
-        .single(),
+        .maybeSingle(),
       supabase
         .from("workflow_run_steps")
         .select("*")

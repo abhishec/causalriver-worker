@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       .select("organization_id")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       .from("organizations")
       .select("customer_id")
       .eq("id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!workspace?.customer_id) {
       return NextResponse.json(

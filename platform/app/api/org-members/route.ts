@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       .select("role, is_platform_admin")
       .eq("user_id", user.id)
       .eq("organization_id", orgId)
-      .single();
+      .maybeSingle();
 
     if (!myMembership) {
       // Check platform admin
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         .eq("user_id", user.id)
         .eq("is_platform_admin", true)
         .limit(1)
-        .single();
+        .maybeSingle();
       if (!admin)
         return NextResponse.json({ error: "Not a member" }, { status: 403 });
     }
@@ -126,7 +126,7 @@ export async function PATCH(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", orgId)
-      .single();
+      .maybeSingle();
 
     if (!myMembership || !["owner", "admin"].includes(myMembership.role))
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
@@ -184,7 +184,7 @@ export async function DELETE(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", orgId)
-      .single();
+      .maybeSingle();
 
     if (!deleteMembership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });

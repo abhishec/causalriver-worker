@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
       return NextResponse.json(
@@ -132,7 +132,7 @@ export async function DELETE(request: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!membership || !["owner", "admin"].includes(membership.role))
       return NextResponse.json(

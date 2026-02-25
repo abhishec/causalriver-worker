@@ -646,13 +646,18 @@ export function ArtifactsPanel({
                         onClick={async () => {
                           setExporting(true);
                           setShowExportMenu(false);
-                          await exportArtifact(format, {
-                            element: viewerContentRef.current || undefined,
-                            title: activeArtifact.title,
-                            content: activeArtifact.content,
-                            data: activeArtifact.rawData as Record<string, unknown> | undefined,
-                          });
-                          setExporting(false);
+                          try {
+                            await exportArtifact(format, {
+                              element: viewerContentRef.current || undefined,
+                              title: activeArtifact.title,
+                              content: activeArtifact.content,
+                              data: activeArtifact.rawData as Record<string, unknown> | undefined,
+                            });
+                          } catch {
+                            /* export failure is non-fatal */
+                          } finally {
+                            setExporting(false);
+                          }
                         }}
                         className="w-full text-left px-3 py-1.5 text-[11px] text-foreground hover:bg-surface-hover transition-colors flex items-center gap-2 disabled:opacity-40"
                       >
@@ -762,7 +767,7 @@ export function ArtifactsPanel({
 
           {/* Footer stats */}
           <div className="flex items-center justify-between px-4 py-2 border-t border-border-subtle text-[10px] text-muted">
-            <span className="tabular-nums">{activeArtifact.content.split("\n").length} lines</span>
+            <span className="tabular-nums">{(activeArtifact.content || "").split("\n").length} lines</span>
             <span>{timeAgo(activeArtifact.createdAt)}</span>
           </div>
         </div>

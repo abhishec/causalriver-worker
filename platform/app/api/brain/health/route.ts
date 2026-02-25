@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .eq("is_platform_admin", true)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!adminCheck) {
       return NextResponse.json({ error: "Platform admin required" }, { status: 403 });
