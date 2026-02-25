@@ -42,7 +42,7 @@ export default function InvitePage() {
           "invitee_email, role, status, expires_at, organizations:organization_id(name)"
         )
         .eq("token", token)
-        .single();
+        .maybeSingle();
 
       if (invite) {
         const org = (invite as any).organizations;

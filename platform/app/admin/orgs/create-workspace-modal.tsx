@@ -58,7 +58,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
     setResult(null);
 
     if (!customerId || !workspaceName.trim()) {
-      setError("Customer and workspace name are required.");
+      setError("Customer and AI Worker name are required.");
       return;
     }
 

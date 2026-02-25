@@ -306,9 +306,9 @@ export default function OnboardingPage() {
         .select("organization_id, organizations(id, name, slug)")
         .eq("user_id", user.id)
         .eq("role", "owner")
-        .single();
+        .maybeSingle();
 
-      if (memberError) throw memberError;
+      if (memberError || !membership) throw memberError || new Error("No membership found");
 
       const currentOrgId = membership.organization_id;
       setOrgId(currentOrgId);

@@ -103,7 +103,7 @@ export default function ConnectorsPageV2() {
 
     if (success) {
       const messages: Record<string, string> = {
-        slack_connected: 'Slack workspace connected successfully',
+        slack_connected: 'Slack connected successfully',
         jira_connected: 'Jira site connected successfully',
         github_connected: 'GitHub account connected successfully',
         freshdesk_connected: 'Freshdesk account connected successfully',
@@ -131,7 +131,7 @@ export default function ConnectorsPageV2() {
         .from('organizations')
         .select('name')
         .eq('id', currentOrgId)
-        .single();
+        .maybeSingle();
 
       if (org) setOrgName(org.name);
 

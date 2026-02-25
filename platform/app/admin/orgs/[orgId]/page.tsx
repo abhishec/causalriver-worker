@@ -22,7 +22,7 @@ export default async function OrgDetailPage({
     .from("organizations")
     .select("id, name, slug, plan, is_core_brain, created_at, settings")
     .eq("id", orgId)
-    .single();
+    .maybeSingle();
 
   if (!org) notFound();
 

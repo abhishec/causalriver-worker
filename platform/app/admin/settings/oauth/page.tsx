@@ -89,7 +89,7 @@ export default function OAuthSettingsPage() {
         .from('organizations')
         .select('custom_oauth_apps')
         .eq('id', currentOrgId)
-        .single();
+        .maybeSingle();
 
       if (org?.custom_oauth_apps) {
         setOAuthApps(org.custom_oauth_apps);
@@ -219,7 +219,7 @@ export default function OAuthSettingsPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">OAuth Settings</h1>
         <p className="text-xs text-muted mt-0.5">
-          Configure custom OAuth applications for your workspace
+          Configure custom OAuth applications for your organization
         </p>
       </div>
 

@@ -20,7 +20,7 @@ export default async function AdminLayout({
     .select("is_platform_admin")
     .eq("user_id", user.id)
     .eq("is_platform_admin", true)
-    .single();
+    .maybeSingle();
 
   if (!member) redirect("/overview");
 
