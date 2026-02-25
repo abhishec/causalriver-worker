@@ -192,8 +192,8 @@ export async function POST(request: NextRequest) {
               confidence: e.confidence || 0.5,
             }));
           }
-        } catch {
-          // Non-critical: brain can run without causal edges
+        } catch (edgeErr) {
+          logger.warn("[BrainCycle] Failed to load causal edges (non-critical):", edgeErr instanceof Error ? edgeErr.message : edgeErr);
         }
 
         let patterns: string[] = [];

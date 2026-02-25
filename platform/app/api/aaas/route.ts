@@ -322,13 +322,18 @@ function processGLData(transactions: GLTransaction[]) {
     if (d >= 1 && d <= 9) digitCounts[d - 1]++;
   }
   const totalAmounts = firstDigits.length;
-  const observed = digitCounts.map((c: number) => c / totalAmounts);
   const expected = [0.301, 0.176, 0.125, 0.097, 0.079, 0.067, 0.058, 0.051, 0.046];
   let chiSquare = 0;
-  for (let i = 0; i < 9; i++) {
-    chiSquare += Math.pow(digitCounts[i] - expected[i] * totalAmounts, 2) / (expected[i] * totalAmounts);
+  let benfordsConforming = true;
+  const observed = totalAmounts > 0
+    ? digitCounts.map((c: number) => c / totalAmounts)
+    : new Array(9).fill(0);
+  if (totalAmounts > 0) {
+    for (let i = 0; i < 9; i++) {
+      chiSquare += Math.pow(digitCounts[i] - expected[i] * totalAmounts, 2) / (expected[i] * totalAmounts);
+    }
+    benfordsConforming = chiSquare < 15.51;
   }
-  const benfordsConforming = chiSquare < 15.51;
 
   // Source type distribution
   const sourceTypes = new Map<string, number>();
