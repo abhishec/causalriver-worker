@@ -175,8 +175,14 @@ export async function ingestPRAsSignals(
     });
   }
 
+  // Ensure signal_timestamp consistency for sync/brain queries
+  const enrichedSignals = signals.map(s => ({
+    ...s,
+    signal_timestamp: s.created_at,
+  }));
+
   // Bulk insert all signals
-  const { error } = await supabase.from('cross_domain_signals').insert(signals);
+  const { error } = await supabase.from('cross_domain_signals').insert(enrichedSignals);
 
   if (error) {
     logger.error('[P0 Ingest] Error inserting signals:', error);

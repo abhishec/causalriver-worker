@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       description?: string;
     };
 
-    if (!workspaceId || !service || !name) {
+    if (!workspaceId || !service || !name || !name.trim()) {
       return NextResponse.json({ error: "workspaceId, service, and name required" }, { status: 400 });
     }
 

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const signingSecret = process.env.SLACK_SIGNING_SECRET;
     if (!signingSecret) {
       logger.error('[Slack Webhook] SLACK_SIGNING_SECRET not configured');
-      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+      return NextResponse.json({ ok: true }, { status: 200 });
     }
 
     const timestamp = req.headers.get('x-slack-request-timestamp');
@@ -238,9 +238,16 @@ export async function POST(req: NextRequest) {
 
     // ── Step 5: Insert signals to Brain ────────────────────────────
     if (signals.length > 0) {
+      // Ensure all signals have created_at + signal_timestamp for brain-trigger queries
+      const eventTime = event.ts ? new Date(parseFloat(event.ts) * 1000).toISOString() : new Date().toISOString();
+      const enrichedSignals = signals.map(s => ({
+        ...s,
+        created_at: s.created_at || eventTime,
+        signal_timestamp: s.signal_timestamp || eventTime,
+      }));
       const { error: insertError } = await service
         .from('cross_domain_signals')
-        .insert(signals);
+        .insert(enrichedSignals);
 
       if (insertError) {
         logger.warn('[Slack Webhook] Signal insert error:', insertError.message);

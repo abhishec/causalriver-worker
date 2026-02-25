@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     if (!webhookSecret) {
       logger.error('[GitHub Webhook] GITHUB_WEBHOOK_SECRET not configured');
-      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
+      return NextResponse.json({ ok: true }, { status: 200 });
     }
 
     const body = await req.text();
