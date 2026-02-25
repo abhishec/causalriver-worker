@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -118,6 +118,7 @@ export function DashboardClient() {
   const [wizardWorkerDesc, setWizardWorkerDesc] = useState("");
   const [wizardCreating, setWizardCreating] = useState(false);
   const [wizardError, setWizardError] = useState<string | null>(null);
+  const wizardRef = useRef<HTMLDivElement>(null);
 
   // Rename state
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -127,6 +128,18 @@ export function DashboardClient() {
     setMounted(true);
     setLaunchingId(null);
   }, []);
+
+  // Auto-scroll to wizard when it opens
+  useEffect(() => {
+    if (showWizard) {
+      // Double rAF ensures DOM is painted before scrolling
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          wizardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+  }, [showWizard]);
 
   // Workspaces grouped by customer for display
   const customerGroups = useMemo(() => {
@@ -405,7 +418,7 @@ export function DashboardClient() {
       // Create new workspace if needed
       if (wizardWorkspace === "new") {
         if (!wizardNewWsName.trim()) {
-          setWizardError("Workspace name is required");
+          setWizardError("Name is required");
           setWizardCreating(false);
           return;
         }
@@ -988,7 +1001,7 @@ export function DashboardClient() {
                CREATE AI WORKER WIZARD
                ═══════════════════════════════════════════════════════════ */}
             {showWizard && (
-              <div className="mt-6 rounded-xl border border-accent/30 bg-surface overflow-hidden">
+              <div ref={wizardRef} className="mt-6 rounded-xl border border-accent/30 bg-surface overflow-hidden">
                 <div className="px-5 py-4 border-b border-border-subtle bg-accent/5">
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-semibold text-foreground">Create AI Worker</h3>
@@ -1012,7 +1025,7 @@ export function DashboardClient() {
                           ) : s}
                         </div>
                         <span className={`text-[10px] ${wizardStep >= s ? "text-foreground" : "text-muted-foreground"}`}>
-                          {s === 1 ? "Service" : s === 2 ? "Workspace" : "Name"}
+                          {s === 1 ? "Service" : s === 2 ? "Account" : "Name"}
                         </span>
                         {s < 3 && <div className="w-8 h-px bg-border-subtle" />}
                       </div>

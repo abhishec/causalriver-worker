@@ -305,7 +305,7 @@ function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
 /* ── Commands Section ────────────────────────────────────────────────────── */
 
 const GENERAL_COMMANDS: SlashCommand[] = [
-  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis across the workspace", service: "general", category: "Intelligence" },
+  { id: "causal", label: "causal-analysis", description: "Cause and effect analysis", icon: "📊", prompt: "Run a causal analysis", service: "general", category: "Intelligence" },
   { id: "anomaly-gen", label: "anomaly-report", description: "Unusual patterns detection", icon: "⚠️", prompt: "What anomalies were detected today?", service: "general", category: "Intelligence" },
   { id: "intel-report", label: "intelligence-report", description: "Full org intelligence report", icon: "📄", prompt: "Give me the full intelligence report", service: "general", category: "Intelligence" },
   { id: "predict", label: "prediction", description: "Forecast business outcomes", icon: "📈", prompt: "Forecast key business metrics for next quarter", service: "general", category: "Intelligence" },
@@ -514,10 +514,13 @@ export function Sidebar() {
   }, []);
 
   // Role-based nav filtering: non-admin users don't see admin-only items
+  // Show all items during SSR to avoid hydration mismatch (workspace context resolves after mount)
   const isFullAccess = isPlatformAdmin || currentRole === "owner" || currentRole === "admin";
+  const [navReady, setNavReady] = useState(false);
+  useEffect(() => { setNavReady(true); }, []);
   const visibleNavItems = useMemo(
-    () => NAV_ITEMS.filter((item) => item.access === "standard" || isFullAccess),
-    [isFullAccess]
+    () => navReady ? NAV_ITEMS.filter((item) => item.access === "standard" || isFullAccess) : NAV_ITEMS,
+    [isFullAccess, navReady]
   );
 
   // Service-aware vocabulary for labels
@@ -754,7 +757,7 @@ export function Sidebar() {
             </svg>
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors">
-                {currentWorkspace?.name ?? "No workspace"}
+                {currentWorkspace?.name ?? "No AI Worker"}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />

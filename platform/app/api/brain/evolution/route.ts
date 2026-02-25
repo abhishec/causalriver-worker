@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!member) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!evoMember) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();

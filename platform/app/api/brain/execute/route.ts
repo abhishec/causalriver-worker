@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
           .limit(1)
           .single();
         if (!admin) {
-          return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+          return NextResponse.json({ error: "Access denied" }, { status: 403 });
         }
       }
     }

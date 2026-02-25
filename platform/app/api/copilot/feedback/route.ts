@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (!feedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
 
     if (!getFeedbackMembership) {
       return NextResponse.json(
-        { error: "Not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }

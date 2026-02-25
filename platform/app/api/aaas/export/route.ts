@@ -445,7 +445,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!orgId) {
-      return NextResponse.json({ error: "No GL data found for your workspace." }, { status: 404 });
+      return NextResponse.json({ error: "No GL data found. Please upload a GL file first." }, { status: 404 });
     }
 
     // Load GL transactions

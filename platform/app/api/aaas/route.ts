@@ -771,7 +771,7 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       return NextResponse.json({
-        error: "No GL data found. Upload Xero GL data for your workspace first.",
+        error: "No GL data found. Upload Xero GL data first.",
         analysis: null,
       }, { status: 200 });
     }
@@ -779,7 +779,7 @@ export async function GET(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this workspace in storage.",
+        error: "No GL data found in storage.",
         analysis: null,
       }, { status: 200 });
     }
@@ -890,7 +890,7 @@ export async function POST(request: Request) {
     const transactions = await getGLDataFromStorage(orgId);
     if (transactions.length === 0) {
       return NextResponse.json({
-        error: "No GL data found for this workspace.",
+        error: "No GL data found.",
       }, { status: 400 });
     }
 

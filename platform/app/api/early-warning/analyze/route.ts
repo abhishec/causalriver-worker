@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
       if (!admin) {
         return NextResponse.json(
-          { error: 'Not a member of this workspace' },
+          { error: 'Access denied' },
           { status: 403 }
         );
       }
@@ -500,7 +500,7 @@ export async function GET(req: NextRequest) {
 
       if (!getAdmin) {
         return NextResponse.json(
-          { error: 'Not a member of this workspace' },
+          { error: 'Access denied' },
           { status: 403 }
         );
       }

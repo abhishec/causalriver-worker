@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (memberOrgIds.length === 0) {
       return NextResponse.json(
-        { error: "Not a member of any workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }

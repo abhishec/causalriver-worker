@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this workspace" },
+          { error: "Access denied" },
           { status: 403 }
         );
       }

@@ -187,7 +187,7 @@ export async function DELETE(request: Request) {
       .single();
 
     if (!deleteMembership) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     // Non-admin/owner can only remove themselves

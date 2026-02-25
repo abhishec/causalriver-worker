@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     if (!orgId) {
       return NextResponse.json(
-        { exists: false, metadata: null, error: "No workspace found" },
+        { exists: false, metadata: null, error: "Not found" },
         { status: 200 }
       );
     }

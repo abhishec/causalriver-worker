@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!membership) {
-      return NextResponse.json({ error: "Not a member of this workspace" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const service = await createServiceClient();

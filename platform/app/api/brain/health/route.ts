@@ -162,7 +162,7 @@ async function handleLearningHealth(request: NextRequest) {
 
       if (!admin) {
         return NextResponse.json(
-          { error: "Not a member of this workspace" },
+          { error: "Access denied" },
           { status: 403 }
         );
       }

@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       // Handle unique constraint violation
       if (error.code === "23505") {
         return NextResponse.json(
-          { error: "A command with this name already exists in your workspace." },
+          { error: "A command with this name already exists." },
           { status: 409 }
         );
       }
