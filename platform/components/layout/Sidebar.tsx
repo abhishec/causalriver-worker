@@ -221,7 +221,7 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
           )}
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-sm font-bold text-foreground">{Math.round((data.accuracy?.overall ?? 0) * 100)}%</span>
+          <span className="text-sm font-bold text-foreground">{Math.round(Number.isFinite(data.accuracy?.overall) ? data.accuracy.overall * 100 : 0)}%</span>
           <span className={`text-[9px] ${trendColor}`}>{trendIcon}</span>
           <span className="text-[9px] text-muted-foreground">accuracy</span>
         </div>
@@ -246,14 +246,14 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
           <div className="h-1 rounded-full bg-border-subtle overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-1000"
-              style={{ width: `${Math.round(((data.knowledge?.cognitiveLayersActive ?? 0) / 30) * 100)}%` }}
+              style={{ width: `${Math.round(Number.isFinite(data.knowledge?.cognitiveLayersActive) ? (data.knowledge.cognitiveLayersActive / 30) * 100 : 0)}%` }}
             />
           </div>
         </div>
       )}
       {(data.accuracy?.improvementRate ?? 0) > 0 && (
         <div className="mt-1.5 text-[10px] text-emerald-400">
-          +{(data.accuracy?.improvementRate ?? 0).toFixed(1)}% improvement this week
+          +{(Number.isFinite(data.accuracy?.improvementRate) ? data.accuracy.improvementRate : 0).toFixed(1)}% improvement this week
         </div>
       )}
     </div>

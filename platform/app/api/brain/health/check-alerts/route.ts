@@ -236,7 +236,7 @@ async function checkOrgHealth(
         is_read: false,
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
     // Create health_alert_log entry
     await supabase.from("health_alert_log").insert({

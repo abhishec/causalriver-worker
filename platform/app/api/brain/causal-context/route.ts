@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
 
       // Build a simple outcome narrative from event_data context
       const eventData = lastAnomaly.event_data || {};
-      if (eventData.signalValue && eventData.historicalMean) {
+      if (eventData.signalValue && eventData.historicalMean && Number.isFinite(eventData.historicalMean)) {
         const ratio = (eventData.signalValue / eventData.historicalMean).toFixed(1);
         lastOutcome = `Spend was ${ratio}× normal. It normalised within 3–4 weeks after review.`;
       } else {

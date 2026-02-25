@@ -925,7 +925,7 @@ export function DashboardClient() {
                                 IQ {typeof worker.brain.score === "number" && isFinite(worker.brain.score) ? worker.brain.score : 0}
                                 {worker.brain.trend === "improving" && <span className="text-emerald-400">{"\u2191"}</span>}
                               </span>
-                              <span>{Math.min(100, Math.round((worker.brain.accuracy ?? 0) * 100))}% accuracy</span>
+                              <span>{Math.min(100, Math.round(Number.isFinite(worker.brain.accuracy) ? worker.brain.accuracy * 100 : 0))}% accuracy</span>
                             </>
                           )}
                           {worker.activeAgents > 0 && (

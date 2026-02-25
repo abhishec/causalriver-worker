@@ -48,7 +48,7 @@ function formatEmergenceEvent(row: Record<string, any>): LearningEvent {
         packs  > 0 ? `Generated ${packs} training pack${packs !== 1 ? "s" : ""}.` : null,
         rules  > 0 ? `Promoted ${rules} rule${rules !== 1 ? "s" : ""} to long-term memory.` : null,
         edges  > 0 ? `Discovered ${edges} new causal edge${edges !== 1 ? "s" : ""}.` : null,
-        accuracy != null ? `Prediction accuracy now at ${Number(accuracy).toFixed(1)}%.` : null,
+        accuracy != null && Number.isFinite(Number(accuracy)) ? `Prediction accuracy now at ${Number(accuracy).toFixed(1)}%.` : null,
       ].filter(Boolean).join(" ");
       break;
     }
@@ -64,7 +64,7 @@ function formatEmergenceEvent(row: Record<string, any>): LearningEvent {
       const accuracy = metrics.accuracy ?? metrics.predictionAccuracy;
       plain = [
         milestone ? `Brain crossed evolution milestone ${milestone}.` : "Brain reached a new evolution milestone.",
-        accuracy != null ? `Prediction accuracy: ${Number(accuracy).toFixed(1)}%.` : null,
+        accuracy != null && Number.isFinite(Number(accuracy)) ? `Prediction accuracy: ${Number(accuracy).toFixed(1)}%.` : null,
         score,
       ].filter(Boolean).join(" ");
       break;
@@ -74,7 +74,7 @@ function formatEmergenceEvent(row: Record<string, any>): LearningEvent {
       const confidence = metrics.confidence;
       plain = [
         `Promoted pattern "${pattern}" to long-term memory.`,
-        confidence != null ? `Confidence: ${(Number(confidence) * 100).toFixed(0)}%.` : null,
+        confidence != null && Number.isFinite(Number(confidence)) ? `Confidence: ${(Number(confidence) * 100).toFixed(0)}%.` : null,
       ].filter(Boolean).join(" ");
       break;
     }
@@ -90,7 +90,7 @@ function formatEmergenceEvent(row: Record<string, any>): LearningEvent {
       const delta = metrics.delta ?? metrics.shift;
       plain = [
         `Calibration updated for ${domain}.`,
-        delta != null ? `Confidence threshold shifted by ${Number(delta).toFixed(3)}.` : null,
+        delta != null && Number.isFinite(Number(delta)) ? `Confidence threshold shifted by ${Number(delta).toFixed(3)}.` : null,
       ].filter(Boolean).join(" ");
       break;
     }

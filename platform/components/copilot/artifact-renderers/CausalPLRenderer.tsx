@@ -56,6 +56,7 @@ interface CausalAttribution {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function fmtCurrency(v: number): string {
+  if (!Number.isFinite(v)) return "$0";
   const abs = Math.abs(v);
   const prefix = v < 0 ? "-" : "";
   if (abs >= 1_000_000) return `${prefix}$${(abs / 1_000_000).toFixed(1)}M`;
@@ -64,6 +65,7 @@ function fmtCurrency(v: number): string {
 }
 
 function fmtPct(v: number): string {
+  if (!Number.isFinite(v)) return "—";
   const prefix = v > 0 ? "+" : "";
   return `${prefix}${v.toFixed(1)}%`;
 }
