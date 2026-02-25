@@ -450,7 +450,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     logger.error('[Early Warning] Analysis error:', error);
     return NextResponse.json(
-      { error: error.message || 'Analysis failed' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -544,7 +544,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     logger.error('[Early Warning] GET error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch snapshots' },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

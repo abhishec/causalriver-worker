@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json({
         status: "degraded",
-        error: error.message,
+        error: "Internal error",
         timestamp: new Date().toISOString(),
       }, { status: 500 });
     }
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     return NextResponse.json({
       status: "error",
-      message: err instanceof Error ? err.message : "Health check failed",
+      message: "Internal error",
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }

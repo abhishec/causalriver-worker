@@ -422,7 +422,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error("[BrainCycle] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Brain cycle failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -490,7 +490,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error("[BrainCycle] GET error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

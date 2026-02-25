@@ -38,6 +38,6 @@ export async function GET(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ runs: runs || [] });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -158,6 +158,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[causal-context] Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

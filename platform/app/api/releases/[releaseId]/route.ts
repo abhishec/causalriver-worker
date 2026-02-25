@@ -71,6 +71,6 @@ export async function POST(
         return NextResponse.json({ error: `Unknown query: ${query}` }, { status: 400 });
     }
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

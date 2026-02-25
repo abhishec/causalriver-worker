@@ -473,13 +473,13 @@ export function ConnectorsClient({
                           <div className="flex items-center justify-between text-xs mb-1">
                             <span className="text-muted">Syncing...</span>
                             <span className="text-accent font-mono tabular-nums">
-                              {progress.progressPct}%
+                              {progress.progressPct ?? 0}%
                             </span>
                           </div>
                           <div className="w-full h-1.5 rounded-full bg-surface overflow-hidden">
                             <div
                               className="h-full bg-accent rounded-full transition-all duration-500"
-                              style={{ width: `${progress.progressPct}%` }}
+                              style={{ width: `${progress.progressPct ?? 0}%` }}
                             />
                           </div>
                           <p className="text-[10px] text-muted mt-1">

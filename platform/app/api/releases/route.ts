@@ -23,7 +23,7 @@ export async function GET() {
     const releases = await listActiveReleases(service, workspaceId);
     return NextResponse.json({ releases });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -121,6 +121,6 @@ export async function POST(request: Request) {
       syncResult,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

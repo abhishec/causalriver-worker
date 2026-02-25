@@ -858,7 +858,7 @@ export function DashboardClient() {
                 )}
 
                 {aiWorkers.map((worker) => {
-                  const svc = SERVICE_INFO[worker.service];
+                  const svc = SERVICE_INFO[worker.service] ?? SERVICE_INFO.general;
                   const isLaunching = launchingId === worker.id;
                   const isRenaming = renamingId === worker.id;
                   const recommendedConnectors = svc.connectors;

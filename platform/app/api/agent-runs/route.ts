@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     logger.error("Agent runs API error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal error" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

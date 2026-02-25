@@ -196,7 +196,7 @@ export async function GET() {
   } catch (err: any) {
     logger.error("Code intelligence error:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to load code intelligence" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

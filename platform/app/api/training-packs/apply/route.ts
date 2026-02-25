@@ -167,7 +167,7 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Apply failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

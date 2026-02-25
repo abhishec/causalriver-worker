@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     if (signalError) {
       logger.error("[Oracle] Signal fetch error:", signalError);
-      return NextResponse.json({ error: signalError.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     if (!signals || signals.length === 0) {
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Oracle] Process error:", err);
     return NextResponse.json(
-      { error: err.message || "Oracle processing failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }
@@ -214,7 +214,7 @@ export async function GET(_request: Request) {
   } catch (err: any) {
     logger.error("[Oracle] GET error:", err);
     return NextResponse.json(
-      { error: err.message || "Oracle stats failed" },
+      { error: "Internal error" },
       { status: 500 }
     );
   }

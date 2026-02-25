@@ -61,6 +61,6 @@ export async function POST(request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[WorkflowRun] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
