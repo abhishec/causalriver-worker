@@ -110,7 +110,7 @@ function LoginForm() {
       <p className="text-muted mb-8">
         {nextUrl?.startsWith("/invite/")
           ? "Sign in to accept your invitation"
-          : "Sign in to your AI Worker"}
+          : "Sign in to your AI Worker Workspace"}
       </p>
 
       {error && (
