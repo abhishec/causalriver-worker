@@ -71,7 +71,7 @@ function SignupForm() {
         </p>
         <p className="text-sm text-muted">
           {isInviteFlow
-            ? "Click the link to activate your account and join the workspace."
+            ? "Click the link to activate your account and join the AI Worker."
             : "Click the link to activate your account and access your AI Worker."}
         </p>
       </div>

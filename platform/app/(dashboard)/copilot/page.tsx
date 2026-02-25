@@ -518,7 +518,7 @@ function CopilotPageInner() {
                 title: a.title || a.domain_type || "Artifact",
                 content: JSON.stringify(a.result_data || {}, null, 2),
                 rawData: a.result_data,
-                createdAt: new Date(a.created_at).getTime(),
+                createdAt: new Date(a.created_at || Date.now()).getTime(),
                 service: a.domain_type?.startsWith("aas-") ? "aas" as const : "seaas" as const,
                 domainId: a.domain_type,
                 pinned: false,

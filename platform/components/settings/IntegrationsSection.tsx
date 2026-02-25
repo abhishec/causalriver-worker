@@ -169,7 +169,7 @@ function AddInstanceForm({
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          placeholder={`e.g. "Backend API", "Main Workspace"`}
+          placeholder={`e.g. "Backend API", "Main Repo"`}
           className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-input-focus"
         />
       </div>

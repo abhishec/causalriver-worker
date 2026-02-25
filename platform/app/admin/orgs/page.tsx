@@ -173,7 +173,7 @@ export default async function AdminOrgsPage() {
               )}
               <Badge variant={PLAN_VARIANT[customer.plan] ?? "default"} size="xs">{customer.plan}</Badge>
               <div className="text-[10px] text-muted/50 ml-1">
-                {members.length} member{members.length !== 1 ? "s" : ""} · {workspaces.length} workspace{workspaces.length !== 1 ? "s" : ""}
+                {members.length} member{members.length !== 1 ? "s" : ""} · {workspaces.length} AI Worker{workspaces.length !== 1 ? "s" : ""}
                 {activeCount > 0 && <span className="text-success ml-2">● {activeCount} active</span>}
               </div>
               <Link

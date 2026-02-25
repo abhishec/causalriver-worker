@@ -174,7 +174,7 @@ function AdminAgentsClient() {
   const failedRuns = runs.filter((r) => r.status === "failed");
 
   const tabs = [
-    { id: "by-org", label: "By Workspace" },
+    { id: "by-org", label: "By AI Worker" },
     { id: "by-agent", label: "By Agent Type" },
     { id: "timeline", label: "All Runs" },
     { id: "errors", label: "Errors", count: failedRuns.length },

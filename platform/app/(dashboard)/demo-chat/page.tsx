@@ -68,7 +68,7 @@ export default function DemoChatPage() {
           extraParams={{ organizationId: DEMO_ORG_ID }}
           persona={{
             name: "Brain OS Demo",
-            description: "Demo workspace — causal intelligence, SE-aaS, and accounting in one place",
+            description: "Demo AI Worker — causal intelligence, SE-aaS, and accounting in one place",
           }}
           examplePrompts={[
             "Why is churn increasing?",

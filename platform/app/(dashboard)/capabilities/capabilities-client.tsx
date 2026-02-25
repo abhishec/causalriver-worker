@@ -227,7 +227,7 @@ const CAPABILITIES: Capability[] = [
     status: "live", domainType: "log-query",
     examplePrompts: ["Show me errors for user X in the last hour", "Find all 500 errors in the payment service today", "Correlate auth failures with the deploy at 2pm"],
     dataRequired: ["Log infrastructure access", "Service metadata"],
-    brainIntegration: "Brain surfaces similar past incidents and learned root cause patterns from workspace history.",
+    brainIntegration: "Brain surfaces similar past incidents and learned root cause patterns from AI Worker history.",
     icon: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
   },
   {
@@ -259,7 +259,7 @@ const CAPABILITIES: Capability[] = [
     status: "copilot",
     examplePrompts: ["How does the payment processing pipeline work?", "Where is the user authentication logic implemented?", "Explain the order fulfillment state machine"],
     dataRequired: ["Codebase indexed via GitHub connector"],
-    brainIntegration: "Brain provides workspace context — who owns what code, historical change patterns, known issues.",
+    brainIntegration: "Brain provides AI Worker context — who owns what code, historical change patterns, known issues.",
     icon: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z",
   },
   {

@@ -337,7 +337,7 @@ export function PartnerDashboard({ orgId, orgName }: PartnerDashboardProps) {
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Invite Teammates", icon: "👥", href: "/settings?tab=members", desc: "Grow your workspace" },
+              { label: "Invite Teammates", icon: "👥", href: "/settings?tab=members", desc: "Grow your team" },
               { label: "Configure Alerts", icon: "🔔", href: "/settings?tab=notifications", desc: "Set up digest emails" },
               { label: "Open Copilot", icon: "💬", href: "/copilot?service=seaas", desc: "Ask the engineering AI" },
               { label: "Contact Support", icon: "📧", href: "mailto:support@monetiz3.com", desc: "We're here to help" },
