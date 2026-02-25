@@ -46,7 +46,7 @@ function SignupForm() {
     });
 
     if (signupError) {
-      setError(signupError.message);
+      setError("Sign up failed — please try again");
       setLoading(false);
       return;
     }

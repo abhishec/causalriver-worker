@@ -330,7 +330,7 @@ export default function OnboardingPage() {
 
       setStep(2);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError("Something went wrong — please try again");
     } finally {
       setLoading(false);
     }

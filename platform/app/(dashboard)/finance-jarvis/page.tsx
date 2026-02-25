@@ -62,7 +62,7 @@ export default function FinanceJarvisPage() {
         setLoading(false);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to load finance data");
+        setError("Failed to load finance data");
         setLoading(false);
       });
   }, []);

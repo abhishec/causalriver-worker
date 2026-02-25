@@ -141,7 +141,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
         setSavedPackId(data.id || null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save training pack. Please try again.");
+      setError("Failed to save training pack. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -163,7 +163,7 @@ export function BuilderClient({ entities, domains, orgId }: BuilderClientProps) 
         setError(data.error || "Failed to apply training pack");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to apply training pack");
+      setError("Failed to apply training pack");
     } finally {
       setApplying(false);
     }

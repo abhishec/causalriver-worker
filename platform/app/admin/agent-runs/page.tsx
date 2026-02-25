@@ -134,8 +134,8 @@ function AdminAgentsClient() {
       const json = await res.json();
       setData(json);
       setError(null);
-    } catch (e: any) {
-      setError(e.message);
+    } catch {
+      setError("Failed to load agent runs");
     } finally {
       setLoading(false);
     }
