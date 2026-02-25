@@ -108,9 +108,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Pipeline failed";
     logger.error("[CodePipelineAPI] Error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -136,7 +135,6 @@ export async function GET(request: NextRequest) {
       organization_id: workspaceId,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to get pipeline runs";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

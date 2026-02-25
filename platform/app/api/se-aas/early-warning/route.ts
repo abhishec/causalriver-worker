@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
     }
     return createSeAaSError(
       request,
-      err.message || "Internal server error",
+      "Internal error",
       500
     );
   }

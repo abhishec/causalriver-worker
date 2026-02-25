@@ -258,7 +258,7 @@ async function executeViaEdgeFunction(
 
     return await response.json();
   } catch (err: any) {
-    return { error: `Edge Function unreachable: ${err.message}` };
+    return { error: "Edge Function unreachable" };
   }
 }
 
@@ -330,6 +330,6 @@ async function executeViaNodeJs(
         return { error: `Unknown job type: ${jobType}` };
     }
   } catch (err: any) {
-    return { error: `Node.js execution failed: ${err.message}` };
+    return { error: "Node.js execution failed" };
   }
 }

@@ -183,7 +183,6 @@ export async function POST(request: NextRequest) {
       automatedDomains: registry.getAutomatedDomains(),
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

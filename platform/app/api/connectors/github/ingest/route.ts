@@ -399,7 +399,7 @@ export async function POST(request: Request) {
               ...connector.config,
               ingestion_progress: {
                 step: "error",
-                message: err.message || "Ingestion failed",
+                message: "Ingestion failed",
                 errorAt: new Date().toISOString(),
               },
             },

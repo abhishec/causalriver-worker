@@ -172,9 +172,8 @@ export async function POST(request: NextRequest) {
       message: `Agent resumed from step ${resumeFromStep} (${phase}). GET /api/agents/tasks?taskId=${taskId}`,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[AgentResume] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[AgentResume] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

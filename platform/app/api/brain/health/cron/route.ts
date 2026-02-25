@@ -110,10 +110,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Health cron failed";
     logger.error("[HealthCron] Error:", error);
     return NextResponse.json(
-      { error: message, duration_ms: Date.now() - startTime },
+      { error: "Internal error", duration_ms: Date.now() - startTime },
       { status: 500 },
     );
   }

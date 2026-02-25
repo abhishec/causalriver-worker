@@ -75,9 +75,8 @@ export async function GET(_request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ versions, count: versions.length });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] GET error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -152,9 +151,8 @@ export async function POST(request: NextRequest, { params }: Props) {
       versionId: result.id,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] POST error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -203,9 +201,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ success: true, message: "Rolled back successfully" });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] PUT error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -254,8 +251,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
 
     return NextResponse.json({ success: true, message: "Version deprecated" });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[VersionsAPI] PATCH error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

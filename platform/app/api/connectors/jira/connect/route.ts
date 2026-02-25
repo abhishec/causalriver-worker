@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
     if (upsertError) {
       logger.error("[Jira connect] Upsert error:", upsertError);
       return NextResponse.json(
-        { error: `Failed to store connector: ${upsertError.message}` },
+        { error: "Failed to store connector" },
         { status: 500 }
       );
     }

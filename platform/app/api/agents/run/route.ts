@@ -107,8 +107,7 @@ export async function POST(request: NextRequest) {
       message: "Agent task finished. GET /api/agents/tasks?taskId=" + result.taskId,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
-    logger.error("[AgentRun] Error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("[AgentRun] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

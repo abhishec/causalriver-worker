@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     if (fetchErr) {
       return NextResponse.json(
-        { error: `Failed to fetch packs: ${fetchErr.message}` },
+        { error: "Failed to fetch packs" },
         { status: 500 }
       );
     }

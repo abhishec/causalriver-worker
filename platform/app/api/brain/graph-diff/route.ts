@@ -66,9 +66,8 @@ export async function GET(request: NextRequest) {
       count: snapshots.length,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[GraphDiff] GET error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -168,8 +167,7 @@ export async function POST(request: NextRequest) {
       diff,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal error";
     logger.error("[GraphDiff] POST error:", error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

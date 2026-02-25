@@ -25,6 +25,6 @@ export async function GET(
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);
     }
-    return createSeAaSError(request, err.message || "Internal server error", 500);
+    return createSeAaSError(request, "Internal error", 500);
   }
 }
