@@ -2075,7 +2075,7 @@ export async function POST(request: NextRequest) {
             started_at: new Date().toISOString(),
             completed_at: new Date().toISOString(),
             duration_ms: Date.now() - agentStartTime,
-          });
+          }).then(() => {}, () => {});
 
           // Checkpoint after brain context loaded
           await saveCheckpoint(1, "iteration", {
@@ -2202,7 +2202,7 @@ export async function POST(request: NextRequest) {
               started_at: new Date().toISOString(),
               completed_at: new Date().toISOString(),
               duration_ms: Date.now() - agentStartTime,
-            });
+            }).then(() => {}, () => {});
 
             // Checkpoint after Jira context
             await saveCheckpoint(2, "iteration", {
@@ -2232,7 +2232,7 @@ export async function POST(request: NextRequest) {
 
               episodicContext = "\n\n[Agent Memory — Recent Episodes]\n" +
                 memories.map((m: any) =>
-                  `- [${m.episode_type}] ${m.content.slice(0, 200)}`
+                  `- [${m.episode_type || "general"}] ${(m.content || "").slice(0, 200)}`
                 ).join("\n");
             }
           } catch {
@@ -2411,19 +2411,20 @@ export async function POST(request: NextRequest) {
               result_summary: responseText.slice(0, 500),
               result_artifacts: agentArtifacts,
               result_metadata: {
-                tokensUsed: brainResult.metrics.tokensUsed,
+                tokensUsed: brainResult.metrics?.tokensUsed,
                 durationMs: Date.now() - agentStartTime,
-                model: brainResult.metrics.model,
+                model: brainResult.metrics?.model,
                 autoExecuted: brainResult.status === "auto-executed",
-                brainCycleDurationMs: brainResult.metrics.brainCycleDurationMs,
-                claudeCallDurationMs: brainResult.metrics.claudeCallDurationMs,
+                brainCycleDurationMs: brainResult.metrics?.brainCycleDurationMs,
+                claudeCallDurationMs: brainResult.metrics?.claudeCallDurationMs,
                 compositeConfidence: brainResult.confidence,
                 agentIntent: agentIntent,
               },
               completed_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
-            .eq("id", taskId);
+            .eq("id", taskId)
+            .then(() => {}, () => {});
 
           // ── 6. Stream final agent-execution artifact ────────────
           const allSteps = [

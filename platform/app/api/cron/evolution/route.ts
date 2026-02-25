@@ -118,8 +118,8 @@ async function runEvolutionForOrgs(
           service: "general",
           orgId, orgName,
           success: true,
-          intelligenceScore: state.intelligenceScore,
-          accuracy: Math.round(state.accuracy.overall * 100),
+          intelligenceScore: state.intelligenceScore ?? 0,
+          accuracy: Math.round((state.accuracy?.overall ?? 0.5) * 100),
           durationMs: Date.now() - start,
         });
         logger.info(`[CronEvolution] ${orgName} (org-level): score=${state.intelligenceScore}`);
@@ -145,8 +145,8 @@ async function runEvolutionForOrgs(
         const state = await runBrainEvolutionCycle(service, orgId, "full");
 
         // Filter to this worker's domain for per-worker intelligence
-        let workerAccuracy = state.accuracy.overall;
-        let workerScore = state.intelligenceScore;
+        let workerAccuracy = state.accuracy?.overall ?? 0.5;
+        let workerScore = state.intelligenceScore ?? 0;
 
         if (worker.service !== "general") {
           const domains = getDomainsForService(worker.service);

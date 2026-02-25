@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
               entityType: s.entity_type || 'unknown',
               entityId: s.entity_id || 'unknown',
               value: s.signal_value || 0,
-              timestamp: new Date(s.signal_timestamp).getTime(),
+              timestamp: s.signal_timestamp ? new Date(s.signal_timestamp).getTime() || Date.now() : Date.now(),
               metadata: {},
             }));
 
@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
                 entityType: s.entity_type || 'unknown',
                 entityId: s.entity_id || 'unknown',
                 value: s.signal_value || 0,
-                timestamp: new Date(s.signal_timestamp).getTime(),
+                timestamp: s.signal_timestamp ? new Date(s.signal_timestamp).getTime() || Date.now() : Date.now(),
                 metadata: {},
               }));
             }
@@ -384,27 +384,33 @@ export async function POST(request: NextRequest) {
       const layerHealth = snap?.layerHealth ?? {};
 
       // Emit evolution signal with health + cycle metrics
+      const healthScore = healthResult?.snapshot?.overall_score ?? 0;
+      const healthStatus = healthResult?.snapshot?.status ?? "unknown";
+      const violationCount = healthResult?.violations?.length ?? 0;
+      const alertsCreated = healthResult?.alertsCreated ?? 0;
+
       await service.from("cross_domain_signals").insert({
         organization_id: workspaceId,
         source_domain: "brain.evolution",
         signal_type: "cycle_completed",
-        signal_value: healthResult.snapshot.overall_score / 100,
+        signal_value: healthScore / 100,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_cycle",
         signal_metadata: {
           mode,
           cycle_count: cycleCount,
           duration_ms: durationMs,
-          health_score: healthResult.snapshot.overall_score,
-          health_status: healthResult.snapshot.status,
-          violations: healthResult.violations.length,
-          alerts_created: healthResult.alertsCreated,
+          health_score: healthScore,
+          health_status: healthStatus,
+          violations: violationCount,
+          alerts_created: alertsCreated,
           layer_health_summary: typeof layerHealth === 'object' ? Object.keys(layerHealth).length : 0,
           completed_at: new Date().toISOString(),
         },
       });
 
       logger.info(
-        `[BrainCycle] Post-cycle health: score=${healthResult.snapshot.overall_score}, status=${healthResult.snapshot.status}, violations=${healthResult.violations.length}`,
+        `[BrainCycle] Post-cycle health: score=${healthScore}, status=${healthStatus}, violations=${violationCount}`,
       );
     } catch (healthErr) {
       // Non-critical: don't fail the cycle response if health polling errors

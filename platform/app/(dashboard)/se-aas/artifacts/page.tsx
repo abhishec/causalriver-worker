@@ -143,9 +143,9 @@ export default async function SeAaSArtifactsPage({
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono bg-surface border border-border-subtle ${meta?.color ?? "text-muted"}`}>
                         {artifact.domain_type}
                       </span>
-                      {confidence != null && (
+                      {confidence != null && !isNaN(Number(confidence)) && (
                         <span className="ml-auto text-[10px] text-muted">
-                          {typeof confidence === "number" && confidence <= 1
+                          {typeof confidence === "number" && isFinite(confidence) && confidence <= 1
                             ? `${(confidence * 100).toFixed(0)}% confidence`
                             : `score ${confidence}`}
                         </span>
