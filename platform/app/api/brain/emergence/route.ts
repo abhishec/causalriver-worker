@@ -254,7 +254,7 @@ export async function GET(request: NextRequest) {
   } catch (err: any) {
     logger.error("[brain/emergence] Error:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

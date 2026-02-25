@@ -306,9 +306,8 @@ export async function POST(request: NextRequest) {
       oracle: oracleResult,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Sync failed";
-    logger.error("[Slack Sync] Error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    logger.error("[Slack Sync] Error:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Sync failed" }, { status: 500 });
   }
 }
 

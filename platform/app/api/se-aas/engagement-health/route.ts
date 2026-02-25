@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       generated_at:            new Date().toISOString(),
     });
   } catch (err: any) {
-    return createSeAaSError(request, err?.message || "Failed to fetch engagement health data");
+    return createSeAaSError(request, "Failed to fetch engagement health data");
   }
 }
 
@@ -129,11 +129,11 @@ export async function PATCH(request: NextRequest) {
       .eq("organization_id", auth.organizationId);
 
     if (error) {
-      return createSeAaSError(request, `Failed to acknowledge alert: ${error.message}`);
+      return createSeAaSError(request, "Failed to acknowledge alert");
     }
 
     return createSeAaSResponse(request, { acknowledged: true, alert_id: alertId });
   } catch (err: any) {
-    return createSeAaSError(request, err?.message || "Failed to acknowledge alert");
+    return createSeAaSError(request, "Failed to acknowledge alert");
   }
 }

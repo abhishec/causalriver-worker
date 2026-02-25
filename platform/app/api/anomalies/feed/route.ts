@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
   } catch (err: any) {
     logger.error("[anomalies/feed] Error:", err);
     return NextResponse.json(
-      { error: err?.message || "Internal server error" },
+      { error: "Failed to fetch anomalies" },
       { status: 500 }
     );
   }

@@ -152,8 +152,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const errMessage = error instanceof Error ? error.message : "Internal error";
-    logger.error("[OpenClaw/Trigger] Error:", errMessage);
-    return NextResponse.json({ error: errMessage }, { status: 500 });
+    logger.error("[OpenClaw/Trigger] Error:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

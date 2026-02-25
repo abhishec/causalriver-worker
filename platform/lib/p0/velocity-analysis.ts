@@ -699,7 +699,7 @@ export async function analyzeBottleneckRisk(
   // ── TOP-3 REVIEWER SHARE ──────────────────────────────────────────────────
   const sortedCounts = Array.from(reviewerCounts.values()).sort((a, b) => b - a);
   const top3Sum = sortedCounts.slice(0, 3).reduce((sum, c) => sum + c, 0);
-  const top3Share = top3Sum / totalReviews;
+  const top3Share = totalReviews > 0 ? top3Sum / totalReviews : 0;
 
   // ── AVERAGE REVIEW LATENCY ────────────────────────────────────────────────
   const allLatencies = reviews.map((r) => r.reviewLatencyHours);
@@ -732,7 +732,7 @@ export async function analyzeBottleneckRisk(
   riskScore += Math.min(giniCoefficient, 1.0) * 20;                  // Max 20
   riskScore += Math.min(hhi / 0.5, 1.0) * 15;                       // Max 15 (HHI=0.5 → max)
   riskScore += reviewShare * 15;                                      // Max 15
-  riskScore += Math.min((1 / reviewerCounts.size) * 10, 10);         // Max 10
+  riskScore += Math.min((1 / Math.max(reviewerCounts.size, 1)) * 10, 10); // Max 10
   riskScore += Math.min(maxBetweennessCentrality * 100, 10);         // Max 10 (centrality 0-1)
   riskScore += Math.min(avgReviewLatencyHours / 48, 1.0) * 10;      // Max 10 (48h+ = max risk)
   riskScore += Math.min(jiraAssigneeHHI / 0.5, 1.0) * 10;           // Max 10 (Jira concentration)

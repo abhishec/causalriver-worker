@@ -1147,6 +1147,13 @@ export async function POST(request: NextRequest) {
         }
       } catch (seaasErr) {
         logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
+        // Surface a user-visible error instead of silent failure
+        seaasResult = {
+          domainType: seaasRoute.domainType,
+          brainAugmented: false,
+          error: true,
+          message: `Analysis could not be completed for ${seaasRoute.domainType}. The brain will provide general guidance instead.`,
+        };
       }
     }
 
@@ -1208,12 +1215,22 @@ export async function POST(request: NextRequest) {
           accountingResult = {
             domainType: accountingRoute.domainType,
             brainAugmented: false,
-            error: "no_gl_data",
-            message: "No General Ledger data found. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+            data: {
+              error: "no_gl_data",
+              message: "No General Ledger data found. Please upload a GL file (Excel or CSV) using any accounting command (e.g. /aas-pl), then try again.",
+            },
           };
         }
       } catch (acctErr) {
         logger.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+        accountingResult = {
+          domainType: accountingRoute?.domainType ?? "accounting",
+          brainAugmented: false,
+          data: {
+            error: true,
+            message: "Accounting analysis could not be completed. The brain will provide general guidance instead.",
+          },
+        };
       }
     }
 
