@@ -1096,6 +1096,10 @@ export async function consumeSSEStream(
             if (parsed.workflowProgress) {
               callbacks.onWorkflowProgress?.(parsed.workflowProgress);
             }
+            // Brain learning pulse indicator
+            if (parsed.learningPulse) {
+              callbacks.onLearningPulse?.(parsed.learningPulse);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return createSeAaSError(request, "question is required", 400);
     }
 
-    const jobId = await submitSeAaSJob(auth.supabase, {
+    const { jobId } = await submitSeAaSJob(auth.supabase, {
       domainType: "codebase-qa",
       request: payload,
       organizationId: auth.organizationId,

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return createSeAaSError(request, "diff or code is required", 400);
     }
 
-    const jobId = await submitSeAaSJob(auth.supabase, {
+    const { jobId } = await submitSeAaSJob(auth.supabase, {
       domainType: "pr-review",
       request: payload,
       organizationId: auth.organizationId,
