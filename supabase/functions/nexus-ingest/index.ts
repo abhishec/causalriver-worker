@@ -35,6 +35,49 @@ serve(async (req: Request) => {
       );
     }
 
+    // ── Org Membership Auth Check ────────────────────────────────────────
+    // Service-to-service internal calls use the service_role key directly.
+    // Browser / external calls must pass a valid user JWT and belong to the org.
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const isServiceCall = authHeader === `Bearer ${serviceRoleKey}`;
+
+    if (!isServiceCall) {
+      if (!authHeader.startsWith('Bearer ')) {
+        return new Response(
+          JSON.stringify({ error: 'Authorization header required' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // Validate JWT and extract user
+      const userClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: { user }, error: authError } = await userClient.auth.getUser();
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid or expired token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      // Check org membership
+      const svcClient = createClient(Deno.env.get('SUPABASE_URL')!, serviceRoleKey);
+      const { data: membership } = await svcClient
+        .from('org_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('organization_id', organizationId)
+        .maybeSingle();
+      if (!membership) {
+        return new Response(
+          JSON.stringify({ error: 'Access denied: not a member of this organization' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     if (signals.length === 0) {
       return new Response(
         JSON.stringify({ success: true, signalsIngested: 0, eventsCreated: 0 }),

@@ -84,10 +84,17 @@ const TOOKITAKI_WORKSPACE = {
 };
 
 // Users: role applies to BOTH customer_members AND org_members
+// IMPORTANT: Passwords must be set via environment variables — never committed to source.
+// Usage: SEED_PW_ABHISHEK=xxx SEED_PW_JEETA=xxx SEED_PW_YUAN=xxx npx ts-node scripts/seed-users.ts
+// If env vars are missing, a random secure password is generated and printed to stdout.
+function randomPassword(): string {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
+  return Array.from({ length: 16 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
 const TOOKITAKI_USERS = [
-  { email: "abhishek@tookitaki.com", password: "Tookitaki@2025!", role: "owner"  as const },
-  { email: "jeeta@tookitaki.com",    password: "Tookitaki@Jeeta1", role: "admin"  as const },
-  { email: "yuan.luo@tookitaki.com", password: "Tookitaki@Yuan1!", role: "member" as const },
+  { email: "abhishek@tookitaki.com", password: process.env.SEED_PW_ABHISHEK ?? randomPassword(), role: "owner"  as const },
+  { email: "jeeta@tookitaki.com",    password: process.env.SEED_PW_JEETA    ?? randomPassword(), role: "admin"  as const },
+  { email: "yuan.luo@tookitaki.com", password: process.env.SEED_PW_YUAN     ?? randomPassword(), role: "member" as const },
 ];
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

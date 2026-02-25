@@ -569,14 +569,12 @@ export function Sidebar() {
   const totalWidth = ICON_RAIL_WIDTH + contentWidth;
 
   function toggleCollapse() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
-      window.dispatchEvent(new CustomEvent("sidebar-collapse", {
-        detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
-      }));
-      return next;
-    });
+    const next = !collapsed;
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    window.dispatchEvent(new CustomEvent("sidebar-collapse", {
+      detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
+    }));
+    setCollapsed(next);
   }
 
 
