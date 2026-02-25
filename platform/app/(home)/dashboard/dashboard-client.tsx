@@ -196,11 +196,13 @@ export function DashboardClient() {
     if (entries.length === 0) return null;
 
     const avgScore = Math.round(entries.reduce((s, b) => s + b.score, 0) / entries.length);
-    const avgAccuracy = Math.round(entries.reduce((s, b) => s + b.accuracy, 0) / entries.length * 100);
+    const rawAccuracy = entries.reduce((s, b) => s + (b.accuracy ?? 0), 0) / entries.length * 100;
+    const avgAccuracy = Math.min(100, Math.round(isFinite(rawAccuracy) ? rawAccuracy : 0));
     const totalPredictions = entries.reduce((s, b) => s + (b.knowledge?.verifiedPredictions ?? b.predictions ?? 0), 0);
     const totalEdges = entries.reduce((s, b) => s + (b.knowledge?.totalCausalEdges ?? 0), 0);
     const isImproving = entries.some((b) => b.trend === "improving");
-    const activeLayers = Math.max(...entries.map((b) => b.knowledge?.cognitiveLayersActive ?? 0));
+    const layerValues = entries.map((b) => b.knowledge?.cognitiveLayersActive ?? 0);
+    const activeLayers = layerValues.length > 0 ? Math.max(...layerValues) : 0;
     const hoursSaved = Math.round(totalPredictions * 2 + entries.reduce((s, b) => s + (b.interventions?.totalActedOn ?? 0), 0) * 4);
     const allBadges = [...new Set(entries.flatMap((b) => b.badges ?? []))];
 
@@ -889,7 +891,7 @@ export function DashboardClient() {
                                 IQ {worker.brain.score}
                                 {worker.brain.trend === "improving" && <span className="text-emerald-400">{"\u2191"}</span>}
                               </span>
-                              <span>{Math.round(worker.brain.accuracy * 100)}% accuracy</span>
+                              <span>{Math.min(100, Math.round((worker.brain.accuracy ?? 0) * 100))}% accuracy</span>
                             </>
                           )}
                           {worker.activeAgents > 0 && (
