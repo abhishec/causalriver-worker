@@ -47,7 +47,7 @@ export function AdminObservabilityClient({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Platform Observability</h1>
-          <p className="text-xs text-muted mt-0.5">Cross-workspace system monitoring</p>
+          <p className="text-xs text-muted mt-0.5">Platform-wide system monitoring</p>
         </div>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>

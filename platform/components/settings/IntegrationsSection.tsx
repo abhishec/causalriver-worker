@@ -76,7 +76,7 @@ const CONNECTOR_TYPES: ConnectorTypeDef[] = [
     type: "slack",
     label: "Slack",
     description: "Send notifications to Slack channels",
-    addLabel: "Add Slack Workspace",
+    addLabel: "Add Slack Integration",
     fields: [
       { key: "botToken", label: "Bot Token", placeholder: "xoxb-xxxxxxxxxxxx", type: "password", required: true, helpUrl: "https://api.slack.com/apps", helpText: "Bot User OAuth Token from your Slack app settings." },
       { key: "webhookUrl", label: "Webhook URL (Optional)", placeholder: "https://hooks.slack.com/services/...", type: "text", required: false, helpText: "Incoming webhook URL for simple notifications" },
