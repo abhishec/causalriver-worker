@@ -20,6 +20,7 @@ import dynamic from "next/dynamic";
 import { parseChartSpec } from "@/components/copilot/chart-utils";
 import { DomainResultRenderer } from "@/components/copilot/DomainResultRenderer";
 import { AgentExecutionCard } from "@/components/copilot/AgentExecutionCard";
+import DOMPurify from "dompurify";
 import type { Artifact } from "./ArtifactsPanel";
 
 const InlineChart = dynamic(
@@ -78,7 +79,7 @@ function ComparisonCodeViewer({
           "[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent",
           "[&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-8 [&_.line::before]:text-right [&_.line::before]:pr-3 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-[10px] [&_.line::before]:tabular-nums [&_.line::before]:shrink-0"
         )}
-        dangerouslySetInnerHTML={{ __html: shikiHtml }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(shikiHtml) }}
       />
     );
   }

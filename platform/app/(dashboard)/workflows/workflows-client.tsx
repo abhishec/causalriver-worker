@@ -71,7 +71,8 @@ export function WorkflowsClient({ workflows, recentRuns, stats, workspaceId, use
     return recentRuns.filter(r => r.workflow_id === workflowId);
   }
 
-  function getParallelGroupCount(steps: any[]): number {
+  function getParallelGroupCount(steps: any[] | undefined): number {
+    if (!steps) return 0;
     const groups = new Set(steps.filter(s => s.parallel_group).map(s => s.parallel_group));
     return groups.size;
   }
@@ -160,7 +161,7 @@ export function WorkflowsClient({ workflows, recentRuns, stats, workspaceId, use
                         <div className="flex items-center gap-2">
                           <h3 className="text-sm font-medium text-foreground truncate">{workflow.name}</h3>
                           <span className="text-[10px] text-muted px-1.5 py-0.5 bg-surface-hover rounded">
-                            {workflow.steps.length} steps{parallelGroups > 0 ? ` (${parallelGroups} parallel)` : ""}
+                            {(workflow.steps || []).length} steps{parallelGroups > 0 ? ` (${parallelGroups} parallel)` : ""}
                           </span>
                         </div>
                         {workflow.description && (
@@ -203,9 +204,9 @@ export function WorkflowsClient({ workflows, recentRuns, stats, workspaceId, use
 
                   {/* Step visualization */}
                   <div className="flex items-center gap-1.5 mt-3 overflow-x-auto">
-                    {workflow.steps.map((step: any, i: number) => {
+                    {(workflow.steps || []).map((step: any, i: number) => {
                       const isParallel = step.parallel_group;
-                      const nextStep = workflow.steps[i + 1] as any;
+                      const nextStep = (workflow.steps || [])[i + 1] as any;
                       const sameGroup = isParallel && nextStep?.parallel_group === step.parallel_group;
 
                       return (
@@ -216,7 +217,7 @@ export function WorkflowsClient({ workflows, recentRuns, stats, workspaceId, use
                           )}>
                             {step.label}
                           </div>
-                          {i < workflow.steps.length - 1 && !sameGroup && (
+                          {i < (workflow.steps || []).length - 1 && !sameGroup && (
                             <svg className="w-3 h-3 text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>

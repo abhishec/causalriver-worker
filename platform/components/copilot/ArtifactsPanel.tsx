@@ -277,7 +277,7 @@ function ShikiCodeViewer({ code, language, wordWrap }: { code: string; language:
           "[&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-10 [&_.line::before]:text-right [&_.line::before]:pr-4 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-xs [&_.line::before]:tabular-nums [&_.line::before]:shrink-0",
           wordWrap ? "[&_pre]:whitespace-pre-wrap [&_pre]:break-words" : ""
         )}
-        dangerouslySetInnerHTML={{ __html: shikiHtml }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(shikiHtml) }}
       />
     );
   }
