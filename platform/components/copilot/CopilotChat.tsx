@@ -2273,7 +2273,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <div className="mt-2 h-1 bg-surface-hover rounded-full overflow-hidden">
                             <div
                               className="h-full bg-accent rounded-full transition-all duration-300"
-                              style={{ width: `${(workflowProgress.currentStep / workflowProgress.totalSteps) * 100}%` }}
+                              style={{ width: `${workflowProgress.totalSteps > 0 ? Math.round((workflowProgress.currentStep / workflowProgress.totalSteps) * 100) : 0}%` }}
                             />
                           </div>
                           <div className="text-[10px] text-muted mt-1">

@@ -351,7 +351,7 @@ export function ConnectorsClient({
             {lastBrainTrainedAt ? (
               <div className="flex items-center gap-1.5 text-[11px] text-accent">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Brain learning from these connectors · last cycle {formatRelativeTime(new Date(lastBrainTrainedAt))}
+                Brain learning from these connectors · last cycle {(() => { const d = new Date(lastBrainTrainedAt); return isNaN(d.getTime()) ? "recently" : formatRelativeTime(d); })()}
               </div>
             ) : (
               <div className="text-[11px] text-muted">
