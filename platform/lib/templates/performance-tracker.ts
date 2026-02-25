@@ -231,7 +231,7 @@ export async function evolveTemplate(
     };
   } catch (err) {
     logger.error("[TemplateTracker] Evolution failed:", err);
-    return { evolved: false, reason: err instanceof Error ? err.message : "Unknown error" };
+    return { evolved: false, reason: "Evolution failed" };
   }
 }
 

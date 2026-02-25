@@ -1335,7 +1335,7 @@ export async function POST(request: NextRequest) {
 
                 composerSendText(result.narrative);
               } catch (err) {
-                composerSendError(err instanceof Error ? err.message : 'Custom template execution failed');
+                composerSendError('Custom template execution failed');
               } finally {
                 composerClose();
               }
@@ -1532,7 +1532,7 @@ export async function POST(request: NextRequest) {
 
               wfSendText(summary);
             } catch (err) {
-              wfSendError(err instanceof Error ? err.message : 'Workflow execution failed');
+              wfSendError('Workflow execution failed');
             } finally {
               wfClose();
             }
@@ -1622,7 +1622,7 @@ export async function POST(request: NextRequest) {
               }
             }
           } catch (err) {
-            clawSendError(err instanceof Error ? err.message : "OpenClaw agent stream failed");
+            clawSendError("OpenClaw agent stream failed");
           } finally {
             clawClose();
           }
@@ -2148,8 +2148,8 @@ export async function POST(request: NextRequest) {
           }).then(() => {}, () => { /* non-blocking */ });
 
         } catch (err) {
-          const errMsg = err instanceof Error ? err.message : "Agent execution failed";
-          logger.error("[AgentMode] Error:", errMsg);
+          logger.error("[AgentMode] Error:", err instanceof Error ? err.message : String(err));
+          const errMsg = "Agent execution failed";
 
           if (taskId) {
             sendAgentStatus({ taskId, status: "failed", message: errMsg });
@@ -3455,10 +3455,8 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 
         close();
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
         sendError(
-          `Failed to get response from AI: ${errorMessage}. Please try again.`
+          "Failed to get response from AI. Please try again."
         );
         close();
       }
@@ -3474,9 +3472,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     });
   } catch (err) {
     logger.error("[Copilot/Chat] Unhandled error in POST handler:", err);
-    const errorMessage =
-      err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

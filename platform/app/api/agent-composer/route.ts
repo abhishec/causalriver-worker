@@ -244,8 +244,7 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (err) {
-        const errMsg = err instanceof Error ? err.message : "Composition failed";
-        sendJSON({ error: errMsg });
+        sendJSON({ error: "Composition failed" });
       } finally {
         close();
       }

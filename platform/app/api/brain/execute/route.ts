@@ -213,9 +213,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal server error";
-    logger.error("[BrainExecute] Error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    logger.error("[BrainExecute] Error:", err instanceof Error ? err.message : String(err));
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

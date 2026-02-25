@@ -305,7 +305,6 @@ export async function POST(request: NextRequest) {
       organizationId: workspaceId,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

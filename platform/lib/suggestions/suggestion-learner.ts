@@ -89,7 +89,7 @@ export async function recordSuggestionFeedback(
     return { success: true };
   } catch (err) {
     logger.error("[SuggestionLearner] Error:", err);
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+    return { success: false, error: "Failed to record suggestion feedback" };
   }
 }
 

@@ -832,8 +832,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -1009,8 +1008,7 @@ export async function POST(request: Request) {
         send("[DONE]");
         controller!.close();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Agent execution failed";
-        send(JSON.stringify({ type: 'error', error: msg }));
+        send(JSON.stringify({ type: 'error', error: "Agent execution failed" }));
         send("[DONE]");
         controller!.close();
       }
@@ -1024,7 +1022,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

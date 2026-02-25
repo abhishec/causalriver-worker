@@ -131,9 +131,8 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (err) {
-          const errMsg = err instanceof Error ? err.message : "Stream error";
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`)
+            encoder.encode(`data: ${JSON.stringify({ error: "Stream error" })}\n\n`)
           );
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } finally {
