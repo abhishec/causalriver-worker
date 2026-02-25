@@ -58,8 +58,8 @@ export async function GET(request: Request) {
     // ── List entities ─────────────────────────────────────────────────────────
     const entityType = url.searchParams.get("type");
     const query = url.searchParams.get("q");
-    const limit = Math.min(Number(url.searchParams.get("limit") || "50"), 200);
-    const offset = Number(url.searchParams.get("offset") || "0");
+    const limit = Math.min(Math.max(1, Number(url.searchParams.get("limit") || "50") || 50), 200);
+    const offset = Math.max(0, Number(url.searchParams.get("offset") || "0") || 0);
 
     let dbQuery = service
       .from("resolved_entities")
@@ -75,8 +75,7 @@ export async function GET(request: Request) {
       dbQuery = dbQuery.eq("entity_type", entityType);
     }
 
-    if (query) {
-      // Supabase ilike for basic fuzzy search on name
+    if (query && query.length <= 200) {
       dbQuery = dbQuery.ilike("canonical_name", `%${query}%`);
     }
 

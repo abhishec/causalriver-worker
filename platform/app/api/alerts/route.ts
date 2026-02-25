@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status"); // open | resolved
     const severity = searchParams.get("severity");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10) || 20, 100);
+    const offset = Math.max(0, parseInt(searchParams.get("offset") || "0", 10) || 0);
 
     // Build query for health alerts from cascade_alerts
     let query = supabase

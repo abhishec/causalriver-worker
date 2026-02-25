@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     const status = request.nextUrl.searchParams.get("status");
     const agentType = request.nextUrl.searchParams.get("agentType");
-    const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 200);
+    const limit = Math.min(Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 50), 200);
 
     const service = await createServiceClient();
 

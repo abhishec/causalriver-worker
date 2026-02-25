@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get("limit") || "5", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "5", 10) || 5;
 
     const supabase = await createServiceClient();
     const result = await processSeAaSJobs(supabase, Math.min(limit, 20));

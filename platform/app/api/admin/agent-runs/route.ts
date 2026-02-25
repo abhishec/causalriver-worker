@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const hours = parseInt(searchParams.get("hours") || "72");
+    const hours = parseInt(searchParams.get("hours") || "72", 10) || 72;
     const orgFilter = searchParams.get("org") || null;
     const agentFilter = searchParams.get("agent") || null;
 
