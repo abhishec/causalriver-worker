@@ -259,7 +259,7 @@ export async function listArtifacts(
   const { data, error, count } = await query;
 
   if (error) {
-    throw new Error(`Failed to list artifacts: ${error.message}`);
+    throw new Error("Failed to list artifacts");
   }
 
   return {

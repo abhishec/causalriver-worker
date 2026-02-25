@@ -132,7 +132,7 @@ export async function pollHealthOnce(
     .from("health_alert_thresholds")
     .select("*")
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   const thresholds: Thresholds = thresholdRow || DEFAULT_THRESHOLDS;
 

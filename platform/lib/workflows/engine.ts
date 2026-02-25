@@ -302,7 +302,7 @@ export async function executeWorkflow(
       .from("workflows")
       .select("total_runs")
       .eq("id", workflow.id)
-      .single();
+      .maybeSingle();
 
     await supabase
       .from("workflows")
@@ -423,7 +423,7 @@ async function executeStep(
       .from("agent_templates")
       .select("prompt, agent_config, service, command_id")
       .eq("id", step.agent_template_id)
-      .single();
+      .maybeSingle();
 
     // Resolve agent type from the template's command_id (maps to AGENT_TYPE_TO_BRAIN_AGENT)
     // Falls back to 'general' if not found

@@ -74,7 +74,7 @@ export default async function OverviewPage() {
       .from("cost_budget_config")
       .select("*")
       .eq("organization_id", workspaceId)
-      .single()),
+      .maybeSingle()),
 
     // Recent causal discoveries for intelligence stream
     safe(supabase

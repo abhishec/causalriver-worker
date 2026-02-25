@@ -68,7 +68,7 @@ export async function createVersion(
       .from("agent_templates")
       .select("*")
       .eq("id", templateId)
-      .single();
+      .maybeSingle();
 
     if (tplError || !template) {
       logger.error("[VersionManager] Template not found:", templateId);
@@ -204,7 +204,7 @@ export async function rollbackToVersion(
       .select("snapshot, version")
       .eq("id", versionId)
       .eq("template_id", templateId)
-      .single();
+      .maybeSingle();
 
     if (!versionRecord) return false;
 

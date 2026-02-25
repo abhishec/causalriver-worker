@@ -29,7 +29,7 @@ export default async function WorkflowDetailPage({ params, searchParams }: Props
       .select("*")
       .eq("id", workflowId)
       .eq("organization_id", workspaceId)
-      .single()),
+      .maybeSingle()),
     safe(supabase
       .from("workflow_runs")
       .select("*")

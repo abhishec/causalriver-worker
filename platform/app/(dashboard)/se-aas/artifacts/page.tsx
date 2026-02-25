@@ -22,7 +22,7 @@ export default async function SeAaSArtifactsPage({
   const supabase = await createClient();
   const workspaceId = await getCurrentWorkspaceId();
   const { domainType, page: pageStr } = await searchParams;
-  const page = Math.max(1, parseInt(pageStr ?? "1", 10));
+  const page = Math.max(1, parseInt(pageStr ?? "1", 10) || 1);
   const limit = 20;
   const offset = (page - 1) * limit;
 

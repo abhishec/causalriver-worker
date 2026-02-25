@@ -433,7 +433,7 @@ export function ConnectorsClient({
                         </span>
                         {instance.metadata?.team_name && (
                           <span className="text-muted">
-                            Workspace: <span className="text-foreground">{instance.metadata.team_name}</span>
+                            Team: <span className="text-foreground">{instance.metadata.team_name}</span>
                           </span>
                         )}
                         {instance.metadata?.github_login && (

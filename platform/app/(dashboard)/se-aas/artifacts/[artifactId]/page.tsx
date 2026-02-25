@@ -2372,7 +2372,7 @@ export default async function ArtifactDetailPage({
     .select("*")
     .eq("id", artifactId)
     .eq("organization_id", workspaceId)
-    .single();
+    .maybeSingle();
 
   if (!artifact) notFound();
 

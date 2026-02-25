@@ -135,7 +135,7 @@ export default async function EarlyWarningPage() {
       {/* ── Workspace / Branch Context ──────────────────────────────────────── */}
       {(primaryBranch || githubRepo) && (
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-muted">Workspace scope:</span>
+          <span className="text-muted">Scope:</span>
           {githubRepo && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono bg-surface border border-border-subtle text-muted">
               {githubRepo}

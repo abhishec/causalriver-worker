@@ -110,7 +110,7 @@ export async function runCodePipeline(
     .gte("created_at", fourHoursAgo)
     .not("stage", "in", '("completed","failed")')
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (existingRun) {
     logger.warn(`[CodePipeline] Duplicate run detected (${existingRun.id}), skipping`);
@@ -381,7 +381,7 @@ export async function updatePipelinePRStatus(
     .select("id")
     .eq("organization_id", organizationId)
     .eq("pr_number", prNumber)
-    .single();
+    .maybeSingle();
 
   if (!run) return;
 
@@ -482,7 +482,7 @@ async function getGitHubCredentials(
       .eq("organization_id", organizationId)
       .eq("connector_type", "github")
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (!data?.credentials) return null;
 
