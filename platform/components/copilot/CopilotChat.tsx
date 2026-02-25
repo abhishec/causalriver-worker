@@ -2157,41 +2157,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
       <div className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.length === 0 && !gathering.isActive ? (
-          /* Empty state — ✦ spark + service-specific text + example prompts */
-          <div className="flex flex-col items-center justify-center h-full text-center px-6 py-16">
-            <div className="text-accent text-[28px] mb-4">✦</div>
-            <h4 className="text-base font-medium text-muted-foreground">
-              {activeService === "seaas" ? "How can I help with your engineering?" :
-               activeService === "aas" ? "How can I help with your finances?" :
-               "How can I help you today?"}
-            </h4>
-            <p className="text-xs text-muted mt-1.5">
-              {activeService === "seaas" ? "Ask anything about your codebase, or type / for commands" :
-               activeService === "aas" ? "Ask anything about your finances, or type / for commands" :
-               "Just start typing — ask questions, brainstorm ideas, or get analysis"}
+          /* Empty state — domain commands in sidebar */
+          <div data-testid="empty-state-v2" className="flex flex-col items-center justify-center h-full text-center px-6 pt-24 pb-16">
+            <div className="text-accent/80 text-4xl mb-5 select-none" aria-hidden="true">✦</div>
+            <p className="text-[13px] text-muted-foreground/50 tracking-tight">
+              Type <kbd className="px-1.5 py-0.5 rounded-md bg-surface-hover border border-border-subtle text-[11px] font-mono">/</kbd> for commands, or just ask
             </p>
-            {activeService === "general" && (
-              <p className="text-[11px] text-muted/60 mt-1">
-                Type <kbd className="px-1.5 py-0.5 rounded bg-surface-hover border border-border-subtle text-[10px] font-mono">/</kbd> for advanced commands
-              </p>
-            )}
-
-            {/* Example prompt chips — click to start a conversation immediately */}
-            <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-[540px]">
-              {examplePrompts.slice(0, 4).map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handlePromptClick(prompt)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px]
-                             font-medium border border-border-subtle bg-card hover:bg-surface-hover
-                             hover:border-accent/20 text-foreground/70 hover:text-foreground
-                             transition-all cursor-pointer shadow-sm hover:shadow-md"
-                >
-                  <span className="text-accent text-[10px]">✦</span>
-                  {prompt}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           /* Message list — matches HTML prototype: .msg max-width 680px, no avatars */

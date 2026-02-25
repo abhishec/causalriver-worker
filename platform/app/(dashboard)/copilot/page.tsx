@@ -50,22 +50,22 @@ const SERVICE_PERSONAS: Record<ServiceMode, { name: string; description: string;
 
 const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
   general: [
-    "Why is churn increasing this quarter?",
-    "Summarize the key risks facing our business right now",
     "What anomalies were detected today?",
-    "Help me prepare talking points for the board meeting",
+    "Summarize key business risks",
+    "Why is churn increasing?",
+    "Prepare board meeting talking points",
   ],
   aas: [
-    "Show me the P&L for 2025",
-    "Generate the balance sheet",
+    "Generate the P&L statement",
+    "Show me the balance sheet",
     "Check GST compliance",
-    "Analyze transaction anomalies",
+    "Detect transaction anomalies",
   ],
   seaas: [
-    "Analyse the branch — what's changed and what's the release risk?",
-    "Review the latest PR for security issues",
-    "What breaks if I change the auth session manager?",
-    "Who knows the most about our billing module?",
+    "What's the release risk?",
+    "Review the latest PR",
+    "Run early warning analysis",
+    "Find dead code in the repo",
   ],
 };
 

@@ -252,9 +252,9 @@ export async function listArtifacts(
     query = query.eq("domain_type", params.domainType);
   }
 
-  if (params.conversationId) {
-    query = query.eq("conversation_id", params.conversationId);
-  }
+  // Note: se_aas_artifacts links to jobs via job_id, not conversation_id.
+  // The conversationId filter is a no-op to avoid querying a non-existent column.
+  // Artifacts are fetched by org and optionally filtered by domainType.
 
   const { data, error, count } = await query;
 

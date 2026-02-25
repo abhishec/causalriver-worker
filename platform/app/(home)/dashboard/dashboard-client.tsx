@@ -41,7 +41,7 @@ interface BrainEvolution {
   subtitle?: string;
   badges?: string[];
   learningVelocity?: { newEdgesPerWeek: number; weightUpdatesPerWeek: number; totalEvidence: number };
-  knowledge?: { totalCausalEdges: number; verifiedPredictions: number; cognitiveLayersActive: number; highConfidenceEdges: number };
+  knowledge?: { totalCausalEdges: number; verifiedPredictions: number; totalPredictions?: number; totalPatterns?: number; totalRules?: number; cognitiveLayersActive: number; highConfidenceEdges: number };
   interventions?: { totalSuggested: number; totalActedOn: number; successRate: number; avgImpactScore: number };
 }
 
@@ -198,15 +198,29 @@ export function DashboardClient() {
     const avgScore = Math.round(entries.reduce((s, b) => s + b.score, 0) / entries.length);
     const rawAccuracy = entries.reduce((s, b) => s + (b.accuracy ?? 0), 0) / entries.length * 100;
     const avgAccuracy = Math.min(100, Math.round(isFinite(rawAccuracy) ? rawAccuracy : 0));
-    const totalPredictions = entries.reduce((s, b) => s + (b.knowledge?.verifiedPredictions ?? b.predictions ?? 0), 0);
+    const totalPredictions = entries.reduce((s, b) => s + (b.knowledge?.totalPredictions ?? b.knowledge?.verifiedPredictions ?? b.predictions ?? 0), 0);
     const totalEdges = entries.reduce((s, b) => s + (b.knowledge?.totalCausalEdges ?? 0), 0);
+    const totalPatterns = entries.reduce((s, b) => s + (b.knowledge?.totalPatterns ?? 0), 0);
+    const totalRules = entries.reduce((s, b) => s + (b.knowledge?.totalRules ?? 0), 0);
     const isImproving = entries.some((b) => b.trend === "improving");
     const layerValues = entries.map((b) => b.knowledge?.cognitiveLayersActive ?? 0);
     const activeLayers = layerValues.length > 0 ? Math.max(...layerValues) : 0;
-    const hoursSaved = Math.round(totalPredictions * 2 + entries.reduce((s, b) => s + (b.interventions?.totalActedOn ?? 0), 0) * 4);
+    const totalActedOn = entries.reduce((s, b) => s + (b.interventions?.totalActedOn ?? 0), 0);
+    const totalEvidence = entries.reduce((s, b) => s + (b.learningVelocity?.totalEvidence ?? 0), 0);
+    // Hours saved = value from every learning artifact:
+    // Active cognitive layers (2h each — automated capability)
+    // Causal edges (0.5h each — understanding learned)
+    // Patterns & rules (1h each — pattern recognition)
+    // Predictions verified (2h each — manual analysis avoided)
+    // Interventions acted on (4h each — manual fix avoided)
+    const hoursSaved = Math.round(
+      activeLayers * 2 + totalEdges * 0.5 + (totalPatterns + totalRules) * 1
+      + totalPredictions * 2 + totalActedOn * 4
+    );
+    const costSaved = Math.round(hoursSaved * 150); // $150/hr engineering rate
     const allBadges = [...new Set(entries.flatMap((b) => b.badges ?? []))];
 
-    return { avgScore, avgAccuracy, totalPredictions, totalEdges, isImproving, activeLayers, hoursSaved, badges: allBadges.slice(0, 4) };
+    return { avgScore, avgAccuracy, totalPredictions, totalEdges, totalPatterns, totalEvidence, isImproving, activeLayers, hoursSaved, costSaved, badges: allBadges.slice(0, 4) };
   }, [brainStats]);
 
   // Fetch user name
@@ -749,16 +763,20 @@ export function DashboardClient() {
                       <div className="text-[10px] text-muted-foreground mt-0.5">IQ Score</div>
                     </div>
                     <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
-                      <div className="text-2xl font-bold text-foreground tabular-nums">{brainIntelligence.avgAccuracy}%</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Accuracy</div>
-                    </div>
-                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
                       <div className="text-2xl font-bold text-emerald-400 tabular-nums">{brainIntelligence.hoursSaved}h</div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">Hours Saved</div>
                     </div>
                     <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
-                      <div className="text-2xl font-bold text-foreground tabular-nums">{brainIntelligence.totalPredictions}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">Predictions</div>
+                      <div className="text-2xl font-bold text-foreground tabular-nums">
+                        {brainIntelligence.costSaved >= 1000
+                          ? `$${(brainIntelligence.costSaved / 1000).toFixed(1)}K`
+                          : `$${brainIntelligence.costSaved}`}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Cost Saved</div>
+                    </div>
+                    <div className="rounded-lg bg-background/60 border border-border-subtle px-3 py-2.5">
+                      <div className="text-2xl font-bold text-foreground tabular-nums">{brainIntelligence.avgAccuracy}%</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Accuracy</div>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-3 flex-wrap">
