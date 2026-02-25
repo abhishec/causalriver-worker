@@ -52,7 +52,7 @@ export default function AlertSettingsPage() {
       setNotifPrefs(data.notification_preferences);
       setDefaults(data.defaults);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Load failed");
+      setError("Failed to load alert configuration. Please refresh.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export default function AlertSettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError("Failed to save alert configuration. Please try again.");
     } finally {
       setSaving(false);
     }

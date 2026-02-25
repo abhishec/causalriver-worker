@@ -65,7 +65,7 @@ export default function TestDataPage() {
       const jobData = await pollJob(data.jobId);
       setResult(jobData);
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
+      if (err instanceof Error) setError("Analysis failed");
     } finally {
       setLoading(false);
     }
