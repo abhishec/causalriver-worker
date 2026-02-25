@@ -10,7 +10,8 @@
  *   <CreateWorkspaceModal customers={customers} onCreated={() => router.refresh()} />
  */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 interface Customer {
@@ -33,6 +34,8 @@ const AVAILABLE_CONNECTORS = [
 
 export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
   const router = useRouter();
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
   const [open, setOpen]             = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -110,7 +113,7 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
       </button>
 
       {/* ── Modal overlay ────────────────────────────────────────── */}
-      {open && (
+      {open && portalTarget && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
           <div
@@ -292,7 +295,8 @@ export function CreateWorkspaceModal({ customers }: { customers: Customer[] }) {
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        portalTarget
       )}
     </>
   );

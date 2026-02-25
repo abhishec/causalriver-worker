@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 type CreationMode = "describe" | "blank";
@@ -12,6 +13,8 @@ interface CreateAgentModalProps {
 }
 
 export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgentModalProps) {
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
   const [mode, setMode] = useState<CreationMode>("describe");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -74,7 +77,9 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
     }
   }
 
-  return (
+  if (!portalTarget) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
@@ -167,6 +172,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget
   );
 }

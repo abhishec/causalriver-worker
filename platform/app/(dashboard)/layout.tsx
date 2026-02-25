@@ -21,11 +21,9 @@ export default function DashboardLayout({
         <DashboardShell>
           <TopBar />
           <main className="p-6 bg-gradient-brain min-h-[calc(100vh-3.5rem)]">
-            <div className="animate-fade-in-up">
-              <RoleGuard>
-                {children}
-              </RoleGuard>
-            </div>
+            <RoleGuard>
+              {children}
+            </RoleGuard>
           </main>
         </DashboardShell>
         <CopilotLazy />

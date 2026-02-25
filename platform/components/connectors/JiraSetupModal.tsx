@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useWorkspace } from "@/lib/workspace-context";
 
 interface JiraProjectInfo {
@@ -64,6 +65,8 @@ export function JiraSetupModal({
   onConnected,
 }: JiraSetupModalProps) {
   const { currentWorkspace } = useWorkspace();
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => { setPortalTarget(document.body); }, []);
 
   // Step 1 — credentials
   const [step, setStep] = useState<Step>("credentials");
@@ -293,9 +296,9 @@ export function JiraSetupModal({
       p.key.toLowerCase().includes(projectSearch.toLowerCase())
   );
 
-  if (!isOpen) return null;
+  if (!isOpen || !portalTarget) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg mx-4 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
 
@@ -717,6 +720,7 @@ export function JiraSetupModal({
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    portalTarget
   );
 }

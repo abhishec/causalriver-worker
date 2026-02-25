@@ -217,7 +217,7 @@ body {
 /* Fade in up — page content entry */
 @keyframes fade-in-up {
   0% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 1; transform: none; }
 }
 .animate-fade-in-up {
   animation: fade-in-up 0.3s ease-out forwards;
