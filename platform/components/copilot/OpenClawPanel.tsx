@@ -143,10 +143,22 @@ interface OpenClawPanelProps {
   className?: string;
 }
 
+interface RlStatus {
+  signalsThisHour: number;
+  signalsThisSession: number;
+  feedbackTotal: number;
+  feedbackHelpful: number;
+  feedbackNotHelpful: number;
+  learningVelocity: number;
+  recentSignals: { signal_type: string; source_domain: string; signal_value: number; signal_timestamp: string }[];
+  queueDepth: number;
+}
+
 export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps) {
   const [gatewayStatus, setGatewayStatus] = useState<GatewayStatusResponse | null>(null);
   const [services, setServices] = useState<ServiceInfo[]>([]);
   const [reinforcement, setReinforcement] = useState<ReinforcementStats | null>(null);
+  const [rlStatus, setRlStatus] = useState<RlStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -158,10 +170,11 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
   const fetchAll = useCallback(async () => {
     if (!organizationId) return;
     try {
-      // Fetch status and services in parallel
-      const [statusRes, servicesRes] = await Promise.all([
+      // Fetch status, services, and RL status in parallel
+      const [statusRes, servicesRes, rlRes] = await Promise.all([
         fetch(`/api/openclaw/status?organizationId=${organizationId}`),
         fetch(`/api/openclaw/services?organizationId=${organizationId}`),
+        fetch(`/api/brain/rl-status`),
       ]);
 
       if (statusRes.ok) {
@@ -172,6 +185,11 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
       if (servicesRes.ok) {
         const data = await servicesRes.json();
         setServices(data.services || []);
+      }
+
+      if (rlRes.ok) {
+        const data = await rlRes.json();
+        setRlStatus(data);
       }
     } catch {
       // Silent fail — panel is non-critical
@@ -346,7 +364,12 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
         <span className="text-[10px] text-muted-foreground">
           {totalServices > 0 ? `${runningCount}/${totalServices} services` : `${gatewayStatus.servicesRunning.length} registered`}
         </span>
-        {reinforcement && reinforcement.predictionsVerified > 0 && (
+        {rlStatus && rlStatus.signalsThisHour > 0 && (
+          <span className="ml-auto text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+            {rlStatus.signalsThisHour} signals/hr
+          </span>
+        )}
+        {!rlStatus && reinforcement && reinforcement.predictionsVerified > 0 && (
           <span className="ml-auto text-[10px] font-medium text-green-600 dark:text-green-400">
             {Math.round(reinforcement.accuracy * 100)}% accuracy
           </span>
@@ -359,6 +382,39 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
       {/* ── Expanded dashboard ───────────────────────────────────────── */}
       {expanded && (
         <div className="mt-2 space-y-3">
+          {/* ── Active Learning (RL Signal Bus) ─────────────────── */}
+          {rlStatus && (
+            <div className="p-2.5 rounded-lg bg-gradient-to-br from-emerald-500/5 to-accent/5 border border-emerald-500/10">
+              <h4 className="text-[11px] font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                Active Learning
+              </h4>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                <Stat label="Signals (1h)" value={rlStatus.signalsThisHour} positive={rlStatus.signalsThisHour > 0} />
+                <Stat label="Signals (24h)" value={rlStatus.signalsThisSession} />
+                <Stat label="Feedback ✓" value={rlStatus.feedbackHelpful} positive={rlStatus.feedbackHelpful > 0} />
+                <Stat label="Feedback ✗" value={rlStatus.feedbackNotHelpful} negative={rlStatus.feedbackNotHelpful > 0} />
+                <Stat label="Velocity" value={`${rlStatus.learningVelocity}/hr`} positive={rlStatus.learningVelocity > 0} />
+                <Stat label="Queue" value={rlStatus.queueDepth} />
+              </div>
+              {rlStatus.recentSignals.length > 0 && (
+                <div className="mt-2 space-y-0.5">
+                  <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Recent signals</div>
+                  {rlStatus.recentSignals.slice(0, 3).map((s, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                      <span className={cn(
+                        "w-1 h-1 rounded-full shrink-0",
+                        s.signal_value > 0 ? "bg-emerald-400" : "bg-amber-400"
+                      )} />
+                      <span className="text-muted-foreground truncate">{s.signal_type.replace(/_/g, " ")}</span>
+                      <span className="text-muted-foreground/60 ml-auto shrink-0">{s.source_domain}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── Brain Learning Stats ────────────────────────────── */}
           {reinforcement && reinforcement.predictionsVerified > 0 && (
             <div className="p-2.5 rounded-lg bg-gradient-to-br from-violet-500/5 to-blue-500/5 border border-violet-500/10">
