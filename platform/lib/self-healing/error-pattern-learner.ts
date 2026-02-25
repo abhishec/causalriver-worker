@@ -263,6 +263,7 @@ export async function recordHealingOutcome(
       source_domain: "brain.self_healing",
       signal_type: success ? "healing_success" : "healing_failure",
       signal_value: success ? 0.8 : -0.3,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "healing_outcome",
       signal_metadata: {
         pattern_id: patternId,

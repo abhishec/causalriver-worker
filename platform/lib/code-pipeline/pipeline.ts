@@ -422,6 +422,7 @@ async function emitPipelineSignal(
       source_domain: "brain.code_pipeline",
       signal_type: signalType,
       signal_value: value,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "code_pipeline_run",
       entity_id: runId,
       signal_metadata: {

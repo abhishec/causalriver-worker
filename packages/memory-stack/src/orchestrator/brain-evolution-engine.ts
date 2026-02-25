@@ -281,6 +281,7 @@ export async function runBrainEvolutionCycle(
         source_domain: 'brain.evolution',
         signal_type: 'accuracy_degradation_alert',
         signal_value: accuracy.improvementRate, // Negative value = degrading
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain',
         entity_id: organizationId,
         signal_metadata: {
@@ -306,6 +307,7 @@ export async function runBrainEvolutionCycle(
         source_domain: 'brain.evolution',
         signal_type: 'overconfidence_correction',
         signal_value: calibration.overconfidenceRatio,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain',
         entity_id: organizationId,
         signal_metadata: {
@@ -1075,6 +1077,7 @@ async function emitEvolutionSignal(
     source_domain: 'brain.evolution',
     signal_type: 'brain_evolution_cycle',
     signal_value: state.intelligenceScore,
+    signal_timestamp: new Date().toISOString(),
     entity_type: 'brain',
     entity_id: organizationId,
     signal_metadata: {

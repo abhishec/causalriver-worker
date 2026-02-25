@@ -205,6 +205,7 @@ export async function recordErrorPattern(
       source_domain: "brain.self_healing",
       signal_type: params.resolved ? "error_resolved" : "error_occurred",
       signal_value: params.resolved ? 0.5 : -0.5,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "workflow_error",
       entity_id: `${params.workflowId || "unknown"}_step_${params.stepOrder || 0}`,
       signal_metadata: {

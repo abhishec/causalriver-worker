@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
         target_domain: domainId || "general",
         signal_type: signalType,
         signal_strength: signalStrength,
+        signal_timestamp: new Date().toISOString(),
         payload: {
           feedback_rating: rating,
           message_id: messageId,

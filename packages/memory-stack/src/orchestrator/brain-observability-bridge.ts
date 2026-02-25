@@ -417,6 +417,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         source_domain: `brain.layer.${layer.layerNumber}`,
         signal_type: 'cognitive_layer_execution',
         signal_value: layer.didProduce ? 1 : 0,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'cognitive_layer',
         entity_id: `L${layer.layerNumber}_${LAYER_NAMES[layer.layerNumber]?.replace(/\s+/g, '_') ?? 'unknown'}`,
         signal_metadata: {
@@ -478,6 +479,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         source_domain: 'brain.layer.1',
         signal_type: 'cognitive_layer_execution',
         signal_value: data.signalsIngested > 0 ? 1 : 0,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'cognitive_layer',
         entity_id: 'L1_Episodic_Memory',
         signal_metadata: {
@@ -537,6 +539,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         source_domain: 'brain.layer.2',
         signal_type: 'cognitive_layer_execution',
         signal_value: data.edgesDiscovered > 0 ? 1 : 0,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'cognitive_layer',
         entity_id: 'L2_LLM_Reasoner',
         signal_metadata: {
@@ -615,6 +618,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         source_domain: 'brain.observability',
         signal_type: 'evolution_cycle_observed',
         signal_value: data.intelligenceScore,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'brain_evolution',
         entity_id: `evolution_${data.mode}_${new Date().toISOString().split('T')[0]}`,
         signal_metadata: {
@@ -668,6 +672,7 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
         source_domain: 'brain.federation',
         signal_type: `federation_${data.operationType}`,
         signal_value: data.itemsPromoted ?? data.itemsProcessed,
+        signal_timestamp: new Date().toISOString(),
         entity_type: 'federation_operation',
         entity_id: obsId('fed_' + data.operationType),
         signal_metadata: {

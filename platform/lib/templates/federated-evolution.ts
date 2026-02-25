@@ -251,6 +251,7 @@ export async function promoteTemplate(
       source_domain: "brain.templates",
       signal_type: "template_promoted",
       signal_value: nextTier === "platform_featured" ? 1.0 : 0.7,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "agent_template",
       entity_id: templateId,
       signal_metadata: {
@@ -380,6 +381,7 @@ export async function forkTemplate(
       source_domain: "brain.templates",
       signal_type: "template_forked",
       signal_value: 0.5,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "agent_template",
       entity_id: forked.id,
       signal_metadata: {

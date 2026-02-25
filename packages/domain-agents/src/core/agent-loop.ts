@@ -1097,6 +1097,7 @@ async function persistAgentLearnings(
     source_domain: domain,
     signal_type: 'agent_completion',
     signal_value: iterations.length,
+    signal_timestamp: new Date().toISOString(),
     entity_type: 'agent_run',
     metadata: {
       termination: terminationReason,

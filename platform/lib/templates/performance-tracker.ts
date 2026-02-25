@@ -210,6 +210,7 @@ export async function evolveTemplate(
       source_domain: "brain.templates",
       signal_type: "evolution_started",
       signal_value: 0.5,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "template_evolution",
       signal_metadata: {
         original_id: templateId,

@@ -191,6 +191,7 @@ export async function executeAgentChain(
       source_domain: "brain.agents",
       signal_type: "chain_completed",
       signal_value: result.status === "completed" ? 0.8 : -0.2,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "agent_chain",
       signal_metadata: {
         chain_id: chainId,
