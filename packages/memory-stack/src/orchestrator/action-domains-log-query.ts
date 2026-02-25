@@ -246,7 +246,7 @@ async function analyzeWithClaude(
   const brainSection = formatBrainContextForDomain(ctx.brain as Record<string, any>, 'log-query');
 
   const prompt = `You are an expert SRE operating within NexusBrain's cognitive stack, analyzing application logs. Answer the user's question and provide comprehensive analysis.
-\${brainSection}
+${brainSection}
 
 ## User Question:
 ${request.query}

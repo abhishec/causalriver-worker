@@ -32,7 +32,7 @@ const HEAVY_DOMAINS = new Set([
   "design-doc-generator",
   "architecture-extractor",
   "codebase-qa",
-  "hld-lld-generator",
+  "pr-review",
 ]);
 
 export type WorkerType = "light" | "heavy" | "mixed";
