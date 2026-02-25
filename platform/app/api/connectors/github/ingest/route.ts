@@ -327,7 +327,8 @@ export async function POST(request: Request) {
       organization_id: workspaceId,
       source_domain: "engineering",
       signal_type: "code_file_indexed",
-      signal_value: (fi.symbols?.length || 0) / 100, // normalized
+      signal_value: (fi.symbols?.length || 0) / 100,
+      signal_timestamp: new Date().toISOString(), // normalized
       entity_type: "code_file",
       entity_id: fi.filePath,
       signal_metadata: {

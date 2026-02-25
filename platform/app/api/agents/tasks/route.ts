@@ -258,6 +258,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: "agent_task_approved",
         signal_value: task.confidence_score || 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {
@@ -298,6 +299,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: "agent_task_rejected",
         signal_value: -1,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {
@@ -356,6 +358,7 @@ export async function PATCH(request: NextRequest) {
         source_domain: "brain.agents",
         signal_type: `agent_feedback_${rating}`,
         signal_value: rating === "helpful" ? 1 : rating === "not_helpful" ? 0 : -1,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "brain_agent_task",
         entity_id: taskId,
         signal_metadata: {

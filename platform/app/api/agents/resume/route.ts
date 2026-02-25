@@ -343,6 +343,7 @@ async function resumeAgentExecution(
       source_domain: "brain.agents",
       signal_type: `agent_${task.agent_type}_resumed_completed`,
       signal_value: brainResult.confidence,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "brain_agent_task",
       entity_id: taskId,
       signal_metadata: {
