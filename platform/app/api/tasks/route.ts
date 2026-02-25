@@ -18,10 +18,21 @@ import { logger } from "@/lib/logger";
  */
 async function resolveWorkspaceId(
   request: NextRequest,
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<string | null> {
   const fromParam = request.nextUrl.searchParams.get("organizationId");
-  if (fromParam) return fromParam;
+  if (fromParam) {
+    // Security: verify user is a member of the requested org (prevents IDOR)
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", userId)
+      .eq("organization_id", fromParam)
+      .maybeSingle();
+    if (membership) return fromParam;
+    // Fall through to cookie-based resolution if not a member
+  }
 
   try {
     return await getCurrentWorkspaceId();
@@ -53,7 +64,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaceId = await resolveWorkspaceId(request, user.id);
+    const workspaceId = await resolveWorkspaceId(request, user.id, supabase);
     if (!workspaceId) {
       return NextResponse.json({ tasks: [] });
     }

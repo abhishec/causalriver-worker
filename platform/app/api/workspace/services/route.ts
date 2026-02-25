@@ -25,6 +25,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
     }
 
+    // Security: verify user belongs to this workspace (prevents IDOR)
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("organization_id", workspaceId)
+      .maybeSingle();
+    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
     const admin = getAdminClient();
     const { data, error } = await admin
       .from("organizations")

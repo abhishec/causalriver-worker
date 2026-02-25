@@ -91,11 +91,12 @@ export function SettingsClient({
   const searchParams = useSearchParams();
   const { switchWorkspace, currentRole, isPlatformAdmin, currentCustomer, workspaces } = useWorkspace();
   // Default to "customers" tab, but respect URL param; map legacy "general" to "workspace"
-  const rawTab = searchParams?.get("tab") || "overview";
+  // Safety: searchParams can be null during SSR/hydration in Next.js 15
+  const rawTab = (searchParams ? searchParams.get("tab") : null) || "overview";
   // Map legacy tab names to merged tabs
   const tabMap: Record<string, string> = { general: "overview", workspace: "overview", customers: "overview", operations: "brain" };
   const initialTab = tabMap[rawTab] || rawTab;
-  const initialAction = searchParams?.get("action") ?? null;
+  const initialAction = (searchParams ? searchParams.get("action") : null) ?? null;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -122,11 +123,11 @@ export function SettingsClient({
 
   // Mutable local copy of allCustomers so we can append workspaces without page reload
   const [localCustomers, setLocalCustomers] = useState(allCustomers);
-  const connectedTypes = new Set(connectors.map((c) => c.connector_type));
+  const connectedTypes = new Set((connectors || []).map((c) => c.connector_type));
 
   // Sync activeTab with URL search params on navigation (fixes stale tab state)
   useEffect(() => {
-    const raw = searchParams?.get("tab") || "overview";
+    const raw = (searchParams ? searchParams.get("tab") : null) || "overview";
     const mapped = tabMap[raw] || raw;
     setActiveTab(mapped);
   // eslint-disable-next-line react-hooks/exhaustive-deps

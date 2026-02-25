@@ -309,7 +309,8 @@ export async function POST(request: NextRequest) {
         logger.warn("[S3Upload] GL parse/ingestion error:", parseErr.message);
         brainTriggerResult = {
           triggered: false,
-          error: "File uploaded but could not parse as GL data: " + parseErr.message,
+          // Security: don't expose raw parse error details to client
+          error: "File uploaded but GL data could not be parsed. Check the file format.",
         };
       }
     }

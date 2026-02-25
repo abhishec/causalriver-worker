@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { timingSafeEqual } from 'crypto';
 import { maybeTriggerBrainCycle } from '@/lib/brain-trigger';
 import { logger } from '@/lib/logger';
 
@@ -38,10 +39,14 @@ export async function POST(req: NextRequest) {
 
     if (!webhookSecret) {
       logger.error('[Jira Webhook] JIRA_WEBHOOK_SECRET not configured — rejecting request');
-      return NextResponse.json({ ok: true }, { status: 200 });
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${webhookSecret}`) {
+    // Use constant-time comparison to prevent timing attacks
+    const authHeader = req.headers.get('authorization') ?? '';
+    const expected = `Bearer ${webhookSecret}`;
+    const authBuf = Buffer.from(authHeader, 'utf8');
+    const expBuf = Buffer.from(expected, 'utf8');
+    if (authBuf.length !== expBuf.length || !timingSafeEqual(authBuf, expBuf)) {
       logger.error('[Jira Webhook] Invalid authorization');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

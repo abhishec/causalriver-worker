@@ -41,19 +41,24 @@ interface LinearWebhookEvent {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify Linear webhook — URL secret + optional signature
-    const urlSecret = req.nextUrl.searchParams.get('secret');
+    // 1. Verify Linear webhook — header-based auth + HMAC signature
+    // Security: Use header (x-webhook-secret) instead of URL query param to prevent log exposure
+    const headerSecret = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
     const configuredSecret = process.env.LINEAR_WEBHOOK_SECRET;
-    if (configuredSecret && urlSecret !== configuredSecret) {
-      logger.warn('Linear webhook: invalid URL secret');
+    if (configuredSecret && headerSecret !== configuredSecret) {
+      logger.warn('Linear webhook: invalid webhook secret');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const signature = req.headers.get('linear-signature');
     const body = await req.text();
 
-    // Verify HMAC signature if signing secret is configured
-    if (process.env.LINEAR_SIGNING_SECRET && signature) {
+    // Verify HMAC signature if signing secret is configured (mandatory when available)
+    if (process.env.LINEAR_SIGNING_SECRET) {
+      if (!signature) {
+        logger.warn('Linear webhook: missing HMAC signature');
+        return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+      }
       const { createHmac } = await import('crypto');
       const expected = createHmac('sha256', process.env.LINEAR_SIGNING_SECRET)
         .update(body)

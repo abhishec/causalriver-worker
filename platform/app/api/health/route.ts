@@ -11,17 +11,17 @@ const REQUIRED_ENV = [
   "ANTHROPIC_API_KEY",
 ] as const;
 
-/** Check which required env vars are present. */
+/** Check which required env vars are present. Never leak key names publicly. */
 function checkEnv() {
-  const missing: string[] = [];
+  let missingCount = 0;
   for (const key of REQUIRED_ENV) {
-    if (!process.env[key]) missing.push(key);
+    if (!process.env[key]) missingCount++;
   }
   return {
-    status: missing.length === 0 ? ("ok" as const) : ("missing" as const),
-    present: REQUIRED_ENV.length - missing.length,
-    missing: missing.length,
-    ...(missing.length > 0 ? { missingKeys: missing } : {}),
+    status: missingCount === 0 ? ("ok" as const) : ("missing" as const),
+    present: REQUIRED_ENV.length - missingCount,
+    missing: missingCount,
+    // Security: never expose secret key names in public endpoint response
   };
 }
 
@@ -32,7 +32,8 @@ async function checkSupabase(): Promise<{
   error?: string;
 }> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Security: use anon key for connectivity check — never expose service role key in HTTP requests
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
     return { status: "down", latencyMs: 0, error: "Missing env vars" };
@@ -45,7 +46,7 @@ async function checkSupabase(): Promise<{
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);
 
-    const res = await fetch(`${url}/rest/v1/?apikey=${key}`, {
+    const res = await fetch(`${url}/rest/v1/`, {
       method: "HEAD",
       headers: {
         Authorization: `Bearer ${key}`,

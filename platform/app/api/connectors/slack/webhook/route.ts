@@ -42,22 +42,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    // ── Step 1: Handle url_verification challenge ──────────────────
-    if (payload.type === 'url_verification') {
-      return NextResponse.json({ challenge: payload.challenge });
-    }
-
-    // ── Step 2: Verify Slack signature ─────────────────────────────
+    // ── Step 1: Verify Slack signature FIRST (security) ──────────
     const signingSecret = process.env.SLACK_SIGNING_SECRET;
     if (!signingSecret) {
       logger.error('[Slack Webhook] SLACK_SIGNING_SECRET not configured');
-      return NextResponse.json({ ok: true }, { status: 200 });
+      // Allow url_verification challenge during initial Slack App setup only
+      if (payload.type === 'url_verification') {
+        return NextResponse.json({ challenge: payload.challenge });
+      }
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
 
     const timestamp = req.headers.get('x-slack-request-timestamp');
     const slackSignature = req.headers.get('x-slack-signature');
 
     if (!timestamp || !slackSignature) {
+      // Allow url_verification without sig headers (initial Slack handshake)
+      if (payload.type === 'url_verification') {
+        return NextResponse.json({ challenge: payload.challenge });
+      }
       return NextResponse.json({ error: 'Missing signature headers' }, { status: 401 });
     }
 
@@ -78,6 +81,11 @@ export async function POST(req: NextRequest) {
     if (sigBuffer.length !== expectedBuffer.length || !timingSafeEqual(sigBuffer, expectedBuffer)) {
       logger.error('[Slack Webhook] Invalid signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    // ── Step 2: Handle url_verification challenge (after sig verified) ──
+    if (payload.type === 'url_verification') {
+      return NextResponse.json({ challenge: payload.challenge });
     }
 
     // ── Step 3: Process event ──────────────────────────────────────

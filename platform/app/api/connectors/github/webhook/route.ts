@@ -38,15 +38,13 @@ import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // 1. Verify webhook signature
+    // 1. Verify webhook signature FIRST — before any DB connections
     const signature = req.headers.get('x-hub-signature-256');
     const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
       logger.error('[GitHub Webhook] GITHUB_WEBHOOK_SECRET not configured');
-      return NextResponse.json({ ok: true }, { status: 200 });
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
 
     const body = await req.text();
@@ -61,7 +59,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    // 2. Parse event
+    // 2. Parse event — only after signature is verified
+    const supabase = await createClient();
     const event = req.headers.get('x-github-event');
     let payload;
     try {
