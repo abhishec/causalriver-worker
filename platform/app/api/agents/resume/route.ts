@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         .from("brain_agent_tasks")
         .update({
           status: "failed",
-          error_message: `Resume failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+          error_message: "Resume failed",
           completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

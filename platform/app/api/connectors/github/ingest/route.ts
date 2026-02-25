@@ -403,7 +403,7 @@ export async function POST(request: Request) {
                 errorAt: new Date().toISOString(),
               },
             },
-            error_message: err.message,
+            error_message: "Ingestion failed",
           })
           .eq("id", connector.id);
       }

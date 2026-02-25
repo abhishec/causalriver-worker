@@ -6,6 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -169,11 +170,12 @@ export async function executeAndCompleteJob(
       })
       .eq("id", jobId);
   } catch (err: any) {
+    logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, err?.message || err);
     await supabase
       .from("agent_queue")
       .update({
         status: "error",
-        error_message: err.message || "Unknown error",
+        error_message: "Job execution failed",
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);

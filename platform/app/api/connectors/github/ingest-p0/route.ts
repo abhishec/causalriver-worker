@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (repoError) {
-      results.errors.push(`Repository upsert error: ${repoError.message}`);
+      results.errors.push("Repository upsert error");
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
 
         page++;
       } catch (error: any) {
-        results.errors.push(`PR fetch error (page ${page}): ${error.message}`);
+        results.errors.push(`PR fetch error (page ${page})`);
         hasMore = false;
       }
     }
@@ -316,10 +316,10 @@ export async function POST(req: NextRequest) {
               .eq('id', prId);
           }
         } catch (reviewError: any) {
-          results.errors.push(`Review fetch error (PR ${pr.number}): ${reviewError.message}`);
+          results.errors.push(`Review fetch error (PR ${pr.number})`);
         }
       } catch (error: any) {
-        results.errors.push(`PR processing error (${pr.number}): ${error.message}`);
+        results.errors.push(`PR processing error (${pr.number})`);
       }
     }
 
