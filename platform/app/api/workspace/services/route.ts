@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error("[/api/workspace/services] query error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to load services" }, { status: 500 });
     }
 
     const settings = (data?.settings as Record<string, unknown>) ?? {};

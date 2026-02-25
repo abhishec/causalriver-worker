@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     });
 
     if (joinError)
-      return NextResponse.json({ error: joinError.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to join" }, { status: 500 });
 
     // Mark invitation as accepted
     await service

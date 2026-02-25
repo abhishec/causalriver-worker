@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ workflows: workflows || [] });
   } catch (error: any) {
     logger.error("[Workflows] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -83,6 +83,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ workflow });
   } catch (error: any) {
     logger.error("[Workflows] Create error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

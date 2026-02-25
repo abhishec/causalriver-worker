@@ -102,7 +102,7 @@ function MiniSparkline({ data, className }: { data: number[]; className?: string
   const range = max - min || 1;
   const h = 32;
   const w = 64;
-  const step = w / (data.length - 1);
+  const step = data.length > 1 ? w / (data.length - 1) : 0;
 
   const points = data
     .map((v, i) => `${i * step},${h - ((v - min) / range) * (h - 4) - 2}`)

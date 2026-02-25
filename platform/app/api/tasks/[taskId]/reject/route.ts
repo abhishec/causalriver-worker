@@ -28,7 +28,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .from("brain_agent_tasks")
       .select("id, status, organization_id, agent_type, confidence_score, prompt, auto_execute_threshold, result_metadata")
       .eq("id", taskId)
-      .single();
+      .maybeSingle();
 
     if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", task.organization_id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
@@ -97,6 +97,6 @@ export async function POST(request: NextRequest, { params }: Props) {
     return NextResponse.json({ success: true, status: "rejected" });
   } catch (error: any) {
     logger.error("[TaskReject] Error:", error);
-    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

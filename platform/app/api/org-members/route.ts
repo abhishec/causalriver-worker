@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       .order("joined_at", { ascending: true });
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     // Get user emails for all members
     const userIds = members?.map((m) => m.user_id) || [];
@@ -149,7 +149,7 @@ export async function PATCH(request: Request) {
       .eq("organization_id", orgId);
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (err) {
@@ -210,7 +210,7 @@ export async function DELETE(request: Request) {
       .eq("organization_id", orgId);
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (err) {

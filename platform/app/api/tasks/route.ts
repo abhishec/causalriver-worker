@@ -92,6 +92,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ tasks: tasks || [] });
   } catch (error: any) {
     logger.error("[TaskQueue] Error:", error);
-    return NextResponse.json({ error: error.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

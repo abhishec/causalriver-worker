@@ -46,6 +46,6 @@ export async function GET(_request: NextRequest, { params }: Props) {
       steps: stepsResult.data || [],
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

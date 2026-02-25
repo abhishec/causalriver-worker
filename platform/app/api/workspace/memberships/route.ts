@@ -41,7 +41,7 @@ export async function GET() {
 
     if (error) {
       logger.error("[/api/workspace/memberships] query error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to load memberships" }, { status: 500 });
     }
 
     // ── Query 2: Domain restrictions (optional — migration may not exist) ──

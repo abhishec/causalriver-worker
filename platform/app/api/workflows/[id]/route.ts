@@ -31,7 +31,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
       .select("*")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (error || !workflow) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
@@ -52,7 +52,7 @@ export async function GET(_request: NextRequest, { params }: Props) {
     });
   } catch (error: any) {
     logger.error("[Workflow] GET error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -72,7 +72,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
       .select("id, created_by")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!existing) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
@@ -119,7 +119,7 @@ export async function PATCH(request: NextRequest, { params }: Props) {
     return NextResponse.json({ workflow: updated });
   } catch (error: any) {
     logger.error("[Workflow] PATCH error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
@@ -139,7 +139,7 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
       .select("id, name")
       .eq("id", id)
       .eq("organization_id", workspaceId)
-      .single();
+      .maybeSingle();
 
     if (!existing) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
@@ -177,6 +177,6 @@ export async function DELETE(_request: NextRequest, { params }: Props) {
     return NextResponse.json({ success: true, archived: id });
   } catch (error: any) {
     logger.error("[Workflow] DELETE error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

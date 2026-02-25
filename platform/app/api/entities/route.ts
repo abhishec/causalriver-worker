@@ -83,7 +83,7 @@ export async function GET(request: Request) {
     const { data: entities, error, count } = await dbQuery;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     logger.error("[Entities API] GET error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     logger.error("[Entities API] POST error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -243,7 +243,7 @@ export async function PATCH(request: Request) {
   } catch (err: any) {
     logger.error("[Entities API] PATCH error:", err);
     return NextResponse.json(
-      { error: err.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

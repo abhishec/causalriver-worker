@@ -134,7 +134,7 @@ export function RoleGuard({ children }: RoleGuardProps) {
           </div>
 
           <p className="text-[10px] text-muted">
-            Contact your workspace admin to request elevated access.
+            Contact your admin to request elevated access.
           </p>
         </div>
       </div>

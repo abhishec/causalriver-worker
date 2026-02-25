@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     // Build invite URL
     const origin =
@@ -162,7 +162,7 @@ export async function DELETE(request: Request) {
       .eq("id", inviteId);
 
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (err) {
