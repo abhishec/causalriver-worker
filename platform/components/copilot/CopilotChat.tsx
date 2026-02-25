@@ -191,7 +191,7 @@ function CodeBlock({ code, language, blockKey }: { code: string; language: strin
         {shikiHtml ? (
           <div
             className="shiki-container px-4 py-3 text-[13px] leading-relaxed font-mono [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent [&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-8 [&_.line::before]:text-right [&_.line::before]:pr-3 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-xs [&_.line::before]:tabular-nums [&_.line::before]:shrink-0"
-            dangerouslySetInnerHTML={{ __html: shikiHtml }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(shikiHtml) }}
           />
         ) : (
           <pre className="px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground whitespace-pre">
