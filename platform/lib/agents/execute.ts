@@ -480,6 +480,7 @@ async function runBrainRuntime(
     source_domain: "brain.agents",
     signal_type: `agent_${agentType}_completed`,
     signal_value: confidence,
+    signal_timestamp: new Date().toISOString(),
     entity_type: "brain_agent_task",
     entity_id: taskId,
     signal_metadata: {

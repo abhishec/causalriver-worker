@@ -323,6 +323,7 @@ export async function executeWorkflow(
     source_domain: "brain.workflows",
     signal_type: "workflow_completed",
     signal_value: completedSteps / Math.max(workflow.steps.length, 1),
+    signal_timestamp: new Date().toISOString(),
     entity_type: "workflow_run",
     entity_id: runId,
     signal_metadata: {
@@ -504,6 +505,7 @@ async function executeStep(
         source_domain: "brain.workflows",
         signal_type: "workflow_step_completed",
         signal_value: result.confidence || 0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "workflow_run_step",
         entity_id: stepRecord.id || result.taskId,
         signal_metadata: {
@@ -619,6 +621,7 @@ async function executeStep(
         source_domain: "brain.workflows",
         signal_type: "workflow_step_failed",
         signal_value: -0.5,
+        signal_timestamp: new Date().toISOString(),
         entity_type: "workflow_run_step",
         entity_id: stepRecord.id || runId,
         signal_metadata: {

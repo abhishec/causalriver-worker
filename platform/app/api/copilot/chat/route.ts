@@ -3790,8 +3790,9 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
             bus.triggerEvolution(),
           ]),
           feedbackTimeout,
-        ]).catch(() => {
-          // Non-blocking: feedback is best-effort
+        ]).catch((feedbackErr) => {
+          // Non-blocking but log for debugging — silent swallowing hides brain learning failures
+          logger.warn("[Copilot] Feedback bus error (non-fatal):", feedbackErr instanceof Error ? feedbackErr.message : String(feedbackErr));
         });
 
         // ── Notify OpenClaw gateway of conversation completion ──────
@@ -3814,7 +3815,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
                 brainAugmented: !!brainContext,
                 timestamp: new Date().toISOString(),
               }],
-            }).catch(() => {}); // fire-and-forget
+            }).catch((gwErr) => { logger.warn("[Copilot] OpenClaw ingest failed (non-fatal):", gwErr instanceof Error ? gwErr.message : String(gwErr)); });
           }
         } catch {
           // Non-blocking: gateway not available

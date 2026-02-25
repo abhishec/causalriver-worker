@@ -71,6 +71,7 @@ export async function POST(request: NextRequest, { params }: Props) {
       source_domain: "brain.agents",
       signal_type: "task_approved",
       signal_value: task.confidence_score || 1,
+      signal_timestamp: new Date().toISOString(),
       entity_type: "brain_agent_task",
       entity_id: taskId,
       signal_metadata: {
