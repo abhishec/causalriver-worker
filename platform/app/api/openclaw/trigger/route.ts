@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     const conn = gatewayManager.getConnection(workspaceId);
     if (!conn) {
       return NextResponse.json(
-        { error: "No OpenClaw gateway configured for this workspace. Connect one via /api/openclaw/connect" },
+        { error: "No OpenClaw gateway configured. Connect one via the Connectors page." },
         { status: 404 }
       );
     }

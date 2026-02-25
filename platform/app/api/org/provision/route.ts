@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     if (!membership) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
     if (!canProvision) {
       return NextResponse.json(
-        { error: "Only owners and admins can provision a workspace" },
+        { error: "Only owners and admins can provision" },
         { status: 403 }
       );
     }

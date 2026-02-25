@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }

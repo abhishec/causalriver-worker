@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: Props) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
-    if (!workspaceId) return NextResponse.json({ error: "No workspace" }, { status: 401 });
+    if (!workspaceId) return NextResponse.json({ error: "Access denied" }, { status: 401 });
     const service = await createServiceClient();
 
     // Fetch the paused run

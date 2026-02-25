@@ -30,7 +30,7 @@ export async function PATCH(
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin

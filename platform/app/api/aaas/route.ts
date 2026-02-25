@@ -815,7 +815,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       analysis,
-      company: org?.name || "Unknown Workspace",
+      company: org?.name || "Unknown",
       organizationId: orgId,
       brainMetadata,
       summary: {

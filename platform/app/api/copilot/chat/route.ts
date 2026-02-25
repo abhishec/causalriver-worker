@@ -344,7 +344,7 @@ export async function POST(request: NextRequest) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (requestedWorkspaceId && !UUID_RE.test(requestedWorkspaceId)) {
       return NextResponse.json(
-        { error: "Invalid workspace ID format" },
+        { error: "Invalid ID format" },
         { status: 400 }
       );
     }

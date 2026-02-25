@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
 
       if (nameError) {
         logger.error("[workspace/update] Failed to update name:", nameError);
-        return NextResponse.json({ error: "Failed to update workspace name" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to update name" }, { status: 500 });
       }
     }
 

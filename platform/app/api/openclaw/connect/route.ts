@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     if (!isAdmin && !hasMemberRole) {
       return NextResponse.json(
-        { error: "Only workspace owners and admins can register connectors" },
+        { error: "Only owners and admins can register connectors" },
         { status: 403 }
       );
     }

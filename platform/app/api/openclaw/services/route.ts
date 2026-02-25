@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -235,7 +235,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!membership && !adminCheck) {
       return NextResponse.json(
-        { error: "You are not a member of this workspace" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -247,7 +247,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!isAdmin && !hasMemberRole) {
       return NextResponse.json(
-        { error: "Only workspace owners and admins can manage services" },
+        { error: "Only owners and admins can manage services" },
         { status: 403 }
       );
     }
@@ -257,7 +257,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!conn || !conn.isConnected()) {
       return NextResponse.json(
-        { error: "No active OpenClaw gateway connection for this workspace" },
+        { error: "No active OpenClaw gateway connection" },
         { status: 404 }
       );
     }

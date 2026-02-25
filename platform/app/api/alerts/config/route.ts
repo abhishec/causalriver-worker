@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin
@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest) {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json({ error: "No workspace selected" }, { status: 400 });
+      return NextResponse.json({ error: "No AI Worker selected" }, { status: 400 });
     }
 
     // Verify org admin
