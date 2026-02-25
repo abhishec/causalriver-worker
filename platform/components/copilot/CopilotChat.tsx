@@ -22,6 +22,7 @@ import { GatheringElement } from "./GatheringElements";
 import { VerificationPromptCard } from "./VerificationPromptCard";
 import { SmartSuggestionCard } from "./SmartSuggestionCard";
 import { MessageFeedback } from "./MessageFeedback";
+import { MemoryUsageIndicator } from "./MemoryUsageIndicator";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -2559,6 +2560,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
       {/* Input bar — matches HTML .chat-input-area */}
       <div className="shrink-0 flex flex-col items-center px-4 sm:px-6 pt-3 pb-5">
+        {/* Memory usage indicator — shows context window usage when conversation is long */}
+        <div className="max-w-[680px] w-full">
+          <MemoryUsageIndicator
+            messageCount={messages.length}
+            conversationId={conversationId}
+          />
+        </div>
         <form onSubmit={handleSubmit} className="relative max-w-[680px] w-full" role="search" aria-label="Chat input">
 
           {/* Slash command picker — floating above the input */}
