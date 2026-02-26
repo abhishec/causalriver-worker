@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
       domainType: "tdd-code-generator",
       request: payload,
       userId: auth.userId,
-      anthropicApiKey: auth.anthropicApiKey,
     });
 
     return createSeAaSResponse(request, {

@@ -21,8 +21,6 @@ export interface SubmitJobParams {
   /** Alias for `payload` — accepted by newer route files */
   request?: Record<string, unknown>;
   userId: string;
-  /** Anthropic API key to include in the job payload for Claude-powered domains */
-  anthropicApiKey?: string;
   priority?: number;
   /** Week 7: Domain weight classification for priority scheduling */
   weight?: "light" | "heavy";
@@ -89,7 +87,6 @@ export async function submitSeAaSJob(
       payload: {
         ...domainPayload,
         userId: params.userId,
-        ...(params.anthropicApiKey ? { anthropicApiKey: params.anthropicApiKey } : {}),
         ...(params.weight ? { weight: params.weight } : {}),
       },
       status: "pending",

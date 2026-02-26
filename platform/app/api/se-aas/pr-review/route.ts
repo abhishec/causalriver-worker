@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
       request: payload,
       organizationId: auth.organizationId,
       userId: auth.userId,
-      anthropicApiKey: auth.anthropicApiKey,
     });
 
     return createSeAaSResponse(request, {
