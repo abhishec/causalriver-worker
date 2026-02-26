@@ -30,6 +30,15 @@ export async function GET(req: NextRequest) {
       .order("sort_order", { ascending: true });
 
     if (error) {
+      // Graceful degradation: if table doesn't exist yet (migration pending),
+      // return empty templates rather than crashing the UI
+      const isTableMissing = error.message?.includes("does not exist") ||
+        error.code === "42P01" ||
+        error.code === "PGRST205";
+      if (isTableMissing) {
+        logger.warn("[/api/workspace/service-templates] table not yet migrated — returning empty");
+        return NextResponse.json({ templates: [] });
+      }
       logger.error("[/api/workspace/service-templates] query error:", error);
       return NextResponse.json({ error: "Failed to load templates" }, { status: 500 });
     }

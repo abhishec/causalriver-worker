@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 
 const MODEL_FAST = "claude-haiku-4-5-20251001";
 // Token threshold: summarize when conversation exceeds 80K tokens (Haiku 200K context)
-export const CLEANUP_THRESHOLD_TOKENS = 80_000;
+const CLEANUP_THRESHOLD_TOKENS = 80_000;
 // Rough estimate: average tokens per message (system + user + assistant combined)
 const AVG_TOKENS_PER_MESSAGE = 300;
 

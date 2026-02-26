@@ -2,8 +2,8 @@
 -- Supports PDF, Confluence pages, code files, markdown docs
 -- Uses pgvector for semantic similarity search
 
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
+-- Enable pgvector extension (must be in extensions schema for Supabase)
+CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA extensions;
 
 CREATE TABLE IF NOT EXISTS document_chunks (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS document_chunks (
   chunk_tokens     INT,            -- estimated token count
 
   -- Semantic embedding (1536 dims = voyage-3 / OpenAI ada-002 compatible)
-  embedding        vector(1536),   -- NULL until embedding job processes it
+  embedding        extensions.vector(1536),   -- NULL until embedding job processes it
 
   -- Full-text search (always populated — used when embedding is NULL)
   search_vector    tsvector GENERATED ALWAYS AS (to_tsvector('english', chunk_text)) STORED,
@@ -44,7 +44,7 @@ CREATE INDEX IF NOT EXISTS document_chunks_search
   ON document_chunks USING GIN(search_vector);
 
 CREATE INDEX IF NOT EXISTS document_chunks_embedding
-  ON document_chunks USING ivfflat(embedding vector_cosine_ops)
+  ON document_chunks USING ivfflat(embedding extensions.vector_cosine_ops)
   WITH (lists = 100)
   WHERE embedding IS NOT NULL;
 
