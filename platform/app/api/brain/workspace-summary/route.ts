@@ -73,6 +73,9 @@ export async function GET() {
 
   const admin = getAdminClient();
   const workspaceId = await getCurrentWorkspaceId();
+  if (!workspaceId) {
+    return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+  }
 
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
