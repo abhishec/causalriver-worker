@@ -230,6 +230,24 @@ export interface CompositionResult {
   complexity: "light" | "medium" | "heavy";
 }
 
+/**
+ * Orchestrator Queued Info — sent when a brain-dependent job is queued because
+ * the brain isn't ready yet (e.g. brain-population still running).
+ * The frontend shows a pulsing badge and polls the job status endpoint.
+ */
+export interface OrchestratorQueuedInfo {
+  type: "queued";
+  message: string;
+  jobId: string | null;
+  domain: string;
+  taskType: string;
+  estimatedWaitMs: number;
+  blockingJobId: string | null;
+  blockingJobType: string;
+  brainReadiness: "empty" | "populating" | "ready";
+  brainSignalCount: number;
+}
+
 /** Brain Learning Pulse — RL metrics streamed to frontend for visible learning indicator */
 export interface LearningPulse {
   intelligenceScore: number;
@@ -277,6 +295,12 @@ export interface SSECallbacks {
     memoryTracking?: boolean;
     createdAt?: string;
   }) => void;
+  /**
+   * Orchestrator queued: emitted when a brain-dependent job is queued because
+   * the brain isn't ready yet. The frontend should show a queued badge and poll
+   * GET /api/se-aas/jobs/:jobId every 5s until status === "success".
+   */
+  onOrchestratorQueued?: (info: OrchestratorQueuedInfo) => void;
   onDone: () => void;
 }
 

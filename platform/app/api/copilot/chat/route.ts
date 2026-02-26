@@ -997,13 +997,15 @@ export async function POST(request: NextRequest) {
             // Store result — injected into the system prompt so Claude tells the user
             // about the queued job. The SSE stream sends it as orchestratorQueued.
             orchestratorResult = {
+              type: "queued",
               message: _orchMsg,
               waiting: true,
               jobId: _waitingJob?.id ?? null,
+              domain: seaasRoute.domainType,
               taskType: seaasRoute.domainType,
               blockingJobId: _decision.blockingJobId ?? null,
               blockingJobType: _decision.blockingJobType ?? "brain-population",
-              estimatedWaitMs: _decision.estimatedWaitMs ?? null,
+              estimatedWaitMs: _decision.estimatedWaitMs ?? 120000,
               brainReadiness: _state.brainReadiness,
               brainSignalCount: _state.brainSignalCount,
             };

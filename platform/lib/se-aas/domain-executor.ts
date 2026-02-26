@@ -19,6 +19,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { selectModelForDomain } from "./model-router";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -217,12 +218,16 @@ export async function executeDomain(
   // domain execute() functions can access deep brain reasoning without having
   // to dig into ctx.brain internals. Mirrors the AAS executor pattern where
   // both are unpacked directly into the ctx for easy agent consumption.
+  // Select model based on domain complexity (haiku for light, sonnet for heavy)
+  const selectedModel = selectModelForDomain(params.domainType);
+
   const ctx = {
     organizationId: params.organizationId,
     userId: params.userId,
     input: {
       ...params.request,
       anthropicApiKey: params.anthropicApiKey,
+      model: selectedModel,  // domains use ctx.input.model ?? 'claude-sonnet-4-6'
     },
     brain: brainContext,
     // LEAP context: deep brain reasoning from cognitive sleep cycles

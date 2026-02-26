@@ -49,6 +49,7 @@ import type {
   AgentStatus,
   ProactiveInsight,
   WorkflowProgress,
+  OrchestratorQueuedInfo,
 } from "./types";
 
 interface Message {
@@ -1017,6 +1018,7 @@ export type {
   CompositionStep,
   CompositionResult,
   SSECallbacks,
+  OrchestratorQueuedInfo,
 } from "./types";
 
 export async function consumeSSEStream(
@@ -1111,6 +1113,10 @@ export async function consumeSSEStream(
             if (parsed.agentCreated) {
               callbacks.onAgentCreated?.(parsed.agentCreated);
             }
+            // Orchestrator queued — brain-dependent job queued while brain populates
+            if (parsed.orchestratorQueued) {
+              callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1151,6 +1157,7 @@ export async function consumeSSEStream(
             if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
             if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
+            if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
           } catch { /* skip */ }
         }
       }
@@ -1401,6 +1408,63 @@ function LearningPulseIndicator({ pulse }: { pulse: import("./types").LearningPu
   );
 }
 
+// ─── Queued Job Badge ────────────────────────────────────────────────────────
+// Shown beneath an assistant message when a brain-dependent job is queued.
+// Pulses while waiting, turns green when the job completes.
+// The user can open the Agent Monitor to see the full status.
+
+function QueuedJobBadge({
+  info,
+  isCompleted,
+}: {
+  info: OrchestratorQueuedInfo;
+  isCompleted: boolean;
+}) {
+  const etaMin = info.estimatedWaitMs
+    ? Math.ceil(info.estimatedWaitMs / 60_000)
+    : 2;
+
+  if (isCompleted) {
+    return (
+      <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-success/10 border border-success/20 text-xs text-success">
+        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+        <span className="font-medium">
+          Analysis ready — open Agent Monitor to view results
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/20 text-xs">
+      {/* Pulsing spinner */}
+      <svg
+        className="w-3.5 h-3.5 shrink-0 mt-px text-amber-600 animate-spin"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
+      </svg>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="font-semibold text-amber-700 dark:text-amber-400">
+          Queued — waiting for brain population (~{etaMin} min)
+        </span>
+        <span className="text-muted-foreground leading-snug">
+          {info.domain} analysis will auto-start once the brain is ready.
+          Track progress in the Agent Monitor.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
 export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(function CopilotChat({
@@ -1448,6 +1512,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   // ── Per-message agent created tracking (for AgentCreatedCard below each message) ──
   const [agentCreatedPerMessage, setAgentCreatedPerMessage] = useState<Map<number, AgentCreatedInfo>>(new Map());
+
+  // ── Per-message orchestrator queued tracking (for QueuedJobBadge + polling) ──
+  const [queuedJobPerMessage, setQueuedJobPerMessage] = useState<Map<number, OrchestratorQueuedInfo>>(new Map());
+  // Track completed queued jobs so we can swap the badge for a "ready" indicator
+  const [completedQueuedJobs, setCompletedQueuedJobs] = useState<Set<string>>(new Set());
 
   // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
@@ -1530,6 +1599,44 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const handleDismissVerification = useCallback((predictionId: string) => {
     setPendingVerifications((prev) => prev.filter((v) => v.predictionId !== predictionId));
   }, []);
+
+  // ── Poll queued job status every 5s until success ─────────────────────────
+  // When orchestratorQueued SSE arrives, we show a pulsing badge and poll
+  // GET /api/se-aas/jobs/:jobId until status === "success", then surface the result.
+  useEffect(() => {
+    // Collect all active (non-completed) queued job IDs
+    const activeJobs: Array<{ msgIdx: number; info: OrchestratorQueuedInfo }> = [];
+    for (const [msgIdx, info] of queuedJobPerMessage.entries()) {
+      if (info.jobId && !completedQueuedJobs.has(info.jobId)) {
+        activeJobs.push({ msgIdx, info });
+      }
+    }
+    if (activeJobs.length === 0) return;
+
+    let cancelled = false;
+
+    const pollAll = async () => {
+      for (const { info } of activeJobs) {
+        if (cancelled || !info.jobId) continue;
+        try {
+          const res = await fetch(`/api/se-aas/jobs/${info.jobId}`);
+          if (!res.ok || cancelled) continue;
+          const data = await res.json();
+          const status: string = data?.status ?? data?.jobStatus?.status ?? "";
+          if (status === "success") {
+            setCompletedQueuedJobs((prev) => new Set([...prev, info.jobId!]));
+          }
+        } catch {
+          // Non-fatal — polling is best-effort
+        }
+      }
+    };
+
+    // Poll immediately, then every 5s
+    pollAll();
+    const interval = setInterval(pollAll, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [queuedJobPerMessage, completedQueuedJobs]);
 
   // ── Fetch health-driven suggestions on mount (Phase 2) ──
   const [healthSuggestions, setHealthSuggestions] = useState<SmartSuggestion[]>([]);
@@ -1954,6 +2061,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentCreatedPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, agentInfo);
+              return next;
+            });
+          },
+          onOrchestratorQueued: (info) => {
+            if (controller.signal.aborted) return;
+            setQueuedJobPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, info);
               return next;
             });
           },
@@ -2486,6 +2601,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                       {/* Agent Created Card — shown when user asked Copilot to create an agent */}
                       {agentCreatedPerMessage.get(i) && (
                         <AgentCreatedCard agent={agentCreatedPerMessage.get(i)!} />
+                      )}
+
+                      {/* Queued Job Badge — shown when brain-dependent job is queued */}
+                      {queuedJobPerMessage.get(i) && (
+                        <QueuedJobBadge
+                          info={queuedJobPerMessage.get(i)!}
+                          isCompleted={completedQueuedJobs.has(queuedJobPerMessage.get(i)!.jobId ?? "")}
+                        />
                       )}
 
                       {/* RL Feedback + agent badge — inline row, shown after stream completes */}

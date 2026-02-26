@@ -28,7 +28,7 @@ export interface SubmitJobParams {
 
 export interface JobStatus {
   jobId: string;
-  status: "pending" | "running" | "success" | "error";
+  status: "pending" | "waiting" | "running" | "success" | "error";
   result?: Record<string, unknown>;
   error?: string;
   createdAt: string;
