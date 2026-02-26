@@ -572,8 +572,10 @@ export async function POST(request: NextRequest) {
       };
 
       // ── Conversation History ─────────────────────────────────────────
+      // Cap at 20 messages to prevent token overflow when brainRegions is serialized
+      // into the LLM context by createBrainContextBuilder (same cap as the messages[] array)
       if (conversationHistory && conversationHistory.length > 0) {
-        brainRegions.conversationHistory = conversationHistory;
+        brainRegions.conversationHistory = conversationHistory.slice(-20);
       }
 
       // ── Persona (configurable — defaults to generic NexusBrain Copilot) ──

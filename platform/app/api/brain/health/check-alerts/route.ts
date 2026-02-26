@@ -213,46 +213,50 @@ async function checkOrgHealth(
     return { org_id: orgId, org_name: orgName, violations, alerts_created: 0, delivered: { email: 0, slack: 0, in_app: 0 } };
   }
 
-  // 5. Create alerts
-  let alertsCreated = 0;
-  const delivered = { email: 0, slack: 0, in_app: 0 };
+  // 5. Create alerts — batch insert to avoid N+1 (2 queries instead of 2N)
+  const now = Date.now();
+  const cascadeRows = newViolations.map((violation, i) => ({
+    organization_id: orgId,
+    alert_id: `health-${violation.dimension}-${now + i}`,
+    alert_type: "health_monitor",
+    severity: violation.severity,
+    trigger_domain: violation.dimension,
+    trigger_signal_type: "health_score_below_threshold",
+    anomaly_score: (violation.threshold - violation.score) / Math.max(violation.threshold, 1),
+    predicted_path: [violation.dimension],
+    expected_impacts: [{ type: "degraded_performance", dimension: violation.dimension }],
+    recommended_interventions: [getRecommendation(violation.dimension)],
+    message: violation.message,
+    is_read: false,
+  }));
 
-  for (const violation of newViolations) {
-    // Create cascade_alert for in-app visibility
-    const { data: alertRow } = await supabase
-      .from("cascade_alerts")
-      .insert({
-        organization_id: orgId,
-        alert_id: `health-${violation.dimension}-${Date.now()}`,
-        alert_type: "health_monitor",
-        severity: violation.severity,
-        trigger_domain: violation.dimension,
-        trigger_signal_type: "health_score_below_threshold",
-        anomaly_score: (violation.threshold - violation.score) / Math.max(violation.threshold, 1),
-        predicted_path: [violation.dimension],
-        expected_impacts: [{ type: "degraded_performance", dimension: violation.dimension }],
-        recommended_interventions: [getRecommendation(violation.dimension)],
-        message: violation.message,
-        is_read: false,
-      })
-      .select("id")
-      .maybeSingle();
+  // Batch-insert all cascade_alerts and retrieve their IDs in one round-trip
+  const { data: insertedAlerts } = await supabase
+    .from("cascade_alerts")
+    .insert(cascadeRows)
+    .select("id, trigger_domain");
 
-    // Create health_alert_log entry
-    await supabase.from("health_alert_log").insert({
-      organization_id: orgId,
-      dimension: violation.dimension,
-      score: violation.score,
-      threshold: violation.threshold,
-      severity: violation.severity,
-      message: violation.message,
-      cascade_alert_id: alertRow?.id || null,
-      delivered_in_app: true,
-    });
-
-    alertsCreated++;
-    delivered.in_app++;
+  // Build a dimension→id map for linking health_alert_log entries
+  const alertIdByDimension: Record<string, string> = {};
+  for (const a of insertedAlerts ?? []) {
+    if (a.trigger_domain) alertIdByDimension[a.trigger_domain] = a.id;
   }
+
+  // Batch-insert all health_alert_log rows in one round-trip
+  const logRows = newViolations.map((violation) => ({
+    organization_id: orgId,
+    dimension: violation.dimension,
+    score: violation.score,
+    threshold: violation.threshold,
+    severity: violation.severity,
+    message: violation.message,
+    cascade_alert_id: alertIdByDimension[violation.dimension] ?? null,
+    delivered_in_app: true,
+  }));
+  await supabase.from("health_alert_log").insert(logRows);
+
+  const alertsCreated = newViolations.length;
+  const delivered = { email: 0, slack: 0, in_app: alertsCreated };
 
   // 6. Deliver via external channels (with error tracking for retry)
   const deliveryResult = await deliverAlerts(supabase, orgId, orgName, newViolations);
@@ -374,21 +378,20 @@ async function logDeliveryFailure(
   errorMsg: string,
   violations: AlertViolation[],
 ) {
-  // Log each violation's delivery failure for retry
-  for (const violation of violations) {
-    await supabase.from("health_alert_log").insert({
-      organization_id: orgId,
-      dimension: violation.dimension,
-      score: violation.score,
-      threshold: violation.threshold,
-      severity: violation.severity,
-      message: `Delivery failed (${channel}): ${violation.message}`,
-      delivered_email: channel === "email" ? false : undefined,
-      delivered_slack: channel === "slack" ? false : undefined,
-      delivery_error: errorMsg,
-      delivered_in_app: false,
-    });
-  }
+  // Batch-insert all delivery failure logs in one round-trip (was N+1)
+  const failureRows = violations.map((violation) => ({
+    organization_id: orgId,
+    dimension: violation.dimension,
+    score: violation.score,
+    threshold: violation.threshold,
+    severity: violation.severity,
+    message: `Delivery failed (${channel}): ${violation.message}`,
+    delivered_email: channel === "email" ? false : undefined,
+    delivered_slack: channel === "slack" ? false : undefined,
+    delivery_error: errorMsg,
+    delivered_in_app: false,
+  }));
+  await supabase.from("health_alert_log").insert(failureRows);
 }
 
 async function retryFailedDeliveries(
@@ -406,16 +409,14 @@ async function retryFailedDeliveries(
 
   if (!failedLogs || failedLogs.length === 0) return 0;
 
-  let processed = 0;
-  for (const log of failedLogs) {
-    // Mark as processed by clearing the error (prevents re-retry)
-    await supabase
-      .from("health_alert_log")
-      .update({ delivery_error: `retried: ${(log as { delivery_error: string }).delivery_error}` })
-      .eq("id", (log as { id: string }).id);
-    processed++;
-  }
+  // Bulk-update all failed logs in one query instead of N individual updates
+  const failedIds = failedLogs.map((log) => (log as { id: string }).id);
+  await supabase
+    .from("health_alert_log")
+    .update({ delivery_error: "retried" })
+    .in("id", failedIds);
 
+  const processed = failedIds.length;
   if (processed > 0) {
     logger.warn(`[health-alerts] Processed ${processed} failed delivery retries`);
   }

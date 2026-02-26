@@ -3,6 +3,14 @@ import { logger } from "@/lib/logger";
 import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
 import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
 
+// ── Module-level cache: 30s TTL per org ──────────────────────────────────────
+// getBrainContext() fires 5 DB queries on every copilot message. Under concurrent
+// users this causes a thundering herd. A 30s in-memory cache cuts load by ~10x.
+// TTL is short enough that brain state updates (new signals, RL outcomes) are
+// reflected quickly. Cache is per-org so org isolation is preserved.
+const _brainContextCache = new Map<string, { data: BrainContext; expiry: number }>();
+const BRAIN_CONTEXT_TTL_MS = 30_000; // 30 seconds
+
 export interface BrainContext {
   brainIq: number;                    // current Brain IQ score
   signalCount: number;                // total signals ingested
@@ -20,6 +28,12 @@ export async function getBrainContext(
   supabase: SupabaseClient,
   orgId: string,
 ): Promise<BrainContext> {
+  // ── Cache hit: return stale-within-30s data immediately ──────────────
+  const cached = _brainContextCache.get(orgId);
+  if (cached && cached.expiry > Date.now()) {
+    return cached.data;
+  }
+
   try {
     // Run all 5 fetches in parallel — non-blocking, fail gracefully
     const [workspaceRow, signalsRow, qualityRow, jobsRow, signalCountRow] = await Promise.allSettled([
@@ -123,7 +137,12 @@ export async function getBrainContext(
     // Build natural language summary for LLM system prompt injection
     const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, recentDocTitles });
 
-    return { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary, qualityPatterns, qualityPatternsSummary };
+    const result: BrainContext = { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary, qualityPatterns, qualityPatternsSummary };
+
+    // ── Cache store: 30s TTL per org ──────────────────────────────────
+    _brainContextCache.set(orgId, { data: result, expiry: Date.now() + BRAIN_CONTEXT_TTL_MS });
+
+    return result;
   } catch (err) {
     // getBrainContext must never throw — return safe defaults
     logger.warn("[brain-context] getBrainContext failed, returning defaults:", err);

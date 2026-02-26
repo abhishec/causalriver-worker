@@ -131,8 +131,13 @@ export async function GET(request: NextRequest) {
  * 6. Job execution health (are scheduled jobs running?)
  */
 async function handleLearningHealth(request: NextRequest) {
-  // Auth guard — outside the try/catch so auth failures return proper 401/403, not 200
-  const supabase = await createClient();
+  // Auth guard — isolate createClient() so failures return 401, not 500
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

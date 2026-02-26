@@ -82,20 +82,32 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export async function POST(request: NextRequest) {
+  // ── Auth (allow internal cron bypass) ──────────────────────────
+  const cronSecret = process.env.CRON_SECRET;
+  const isInternalCron =
+    request.headers.get("x-internal-cron") === "true" &&
+    cronSecret &&
+    request.headers.get("authorization") === `Bearer ${cronSecret}`;
+
+  // Isolate createClient() so env var failures return 401, not 500
+  let supabase;
   try {
-    // ── Auth (allow internal cron bypass) ──────────────────────────
-    const cronSecret = process.env.CRON_SECRET;
-    const isInternalCron =
-      request.headers.get("x-internal-cron") === "true" &&
-      cronSecret &&
-      request.headers.get("authorization") === `Bearer ${cronSecret}`;
-
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user && !isInternalCron) {
+    supabase = await createClient();
+  } catch {
+    if (!isInternalCron) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    // Internal cron can proceed without a user session
+  }
+  const user = supabase
+    ? (await supabase.auth.getUser()).data.user
+    : null;
+
+  if (!user && !isInternalCron) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     // ── Rate limit (skip for internal cron) ──────────────────────
     const rateLimit = !isInternalCron ? await checkSessionRateLimit(user!.id, "/api/brain/cycle") : { allowed: true };
@@ -122,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     // ── Verify membership (skip for internal cron) ────────────────
     if (!isInternalCron) {
-      const { data: membership } = await supabase
+      const { data: membership } = await supabase!
         .from("org_members")
         .select("role")
         .eq("user_id", user!.id)
@@ -130,7 +142,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!membership) {
-        const { data: admin } = await supabase
+        const { data: admin } = await supabase!
           .from("org_members")
           .select("is_platform_admin")
           .eq("user_id", user!.id)
@@ -435,14 +447,19 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  // Isolate createClient() so env var failures return 401, not 500
+  let supabase;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+  try {
     const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
     // Check if controller exists in cache

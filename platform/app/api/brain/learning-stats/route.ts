@@ -20,15 +20,21 @@ import { getLearningStats } from "@/lib/brain/agent-rl";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+  // ── Auth: isolate createClient() failures so they return 401, never 500 ──
+  let supabase;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  try {
 
     // Resolve org: if ?orgId provided, verify membership first (prevents cross-tenant read).
     // If not provided, use the user's current workspace from cookie context.

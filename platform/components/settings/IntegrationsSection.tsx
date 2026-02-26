@@ -504,7 +504,7 @@ export function IntegrationsSection({ connectors, orgId }: IntegrationsSectionPr
     // Refresh instances
     const listRes = await fetch(`/api/connectors/instances`);
     const listData = await listRes.json();
-    if (listRes.ok) setInstances(listData.instances);
+    if (listRes.ok) setInstances(listData.instances || []);
 
     showToast("success", `${displayName || result.instanceName} connected successfully`);
   };

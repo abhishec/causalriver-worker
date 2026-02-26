@@ -319,7 +319,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[instances/POST]", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 400 });
+    // Validation errors from helpers (invalid credentials, bad domain, etc.) have
+    // user-readable messages and no Supabase error code — surface as 400.
+    // DB/infra errors (Supabase PostgrestError has a .code property) return 500.
+    const isValidationError = !err.code && err.message && typeof err.message === "string";
+    const status = isValidationError ? 400 : 500;
+    return NextResponse.json({ error: err.message || "Internal error" }, { status });
   }
 }
 

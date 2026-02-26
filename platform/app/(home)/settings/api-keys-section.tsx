@@ -70,7 +70,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
       // Refresh key list
       const listRes = await fetch("/api/keys");
       const listData = await listRes.json();
-      if (listRes.ok) setKeys(listData.keys);
+      if (listRes.ok) setKeys(listData.keys || []);
 
       // Reset form
       setNewKeyName("");

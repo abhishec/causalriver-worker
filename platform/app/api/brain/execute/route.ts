@@ -221,7 +221,13 @@ export async function POST(request: NextRequest) {
  * GET /api/brain/execute — Health check (auth required)
  */
 export async function GET(req: NextRequest) {
-  const supabase = await createClient();
+  // Isolate createClient() so env var failures return 401, not 500
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
