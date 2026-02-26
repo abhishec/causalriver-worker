@@ -116,6 +116,18 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   // Load workspace config to get the IQ threshold (runs concurrently with other queries)
   const workspacePromise = getOrCreateAIWorkspace(orgId);
 
+  // Load Brain IQ from ai_workspace.orchestrator_config (same source as brain-context.ts)
+  const brainIqPromise: Promise<number> = Promise.resolve(
+    adminClient()
+      .from("ai_workspace")
+      .select("orchestrator_config")
+      .eq("organization_id", orgId)
+      .maybeSingle()
+  ).then(({ data }) => {
+    const config = (data?.orchestrator_config as Record<string, unknown>) ?? {};
+    return typeof config.brainIq === "number" ? config.brainIq : 0;
+  }).catch(() => 0); // non-fatal — default to 0 if unavailable
+
   // Parallel queries for efficiency
   const [runningRes, pendingRes, waitingRes, brainRes] = await Promise.all([
     // Running jobs for this org
@@ -181,9 +193,12 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   );
 
   // Resolve workspace config (may have been started concurrently above)
-  const workspace = await workspacePromise;
+  const [workspace, brainIq] = await Promise.all([workspacePromise, brainIqPromise]);
   const brainReadyThreshold =
     workspace.orchestratorConfig.brainReadinessMinIq ?? BRAIN_READY_THRESHOLD_DEFAULT;
+
+  /** Minimum viable Brain IQ for declaring brain "ready" */
+  const BRAIN_IQ_MIN_VIABLE = 10;
 
   // Find running brain-population job (if any)
   const brainPopJob = runningJobs.find((j) =>
@@ -192,11 +207,17 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   const brainPopulationRunning = !!brainPopJob;
   const brainPopulationJobId = brainPopJob?.id;
 
-  // Brain readiness
+  // Brain readiness — BOTH conditions must be met:
+  // 1. signal_count >= threshold  (enough data)
+  // 2. brainIq >= BRAIN_IQ_MIN_VIABLE  (minimum viable intelligence)
   let brainReadiness: OrgAgentState["brainReadiness"];
   if (brainSignalCount === 0) {
     brainReadiness = "empty";
-  } else if (brainSignalCount < brainReadyThreshold || brainPopulationRunning) {
+  } else if (
+    brainSignalCount < brainReadyThreshold ||
+    brainIq < BRAIN_IQ_MIN_VIABLE ||
+    brainPopulationRunning
+  ) {
     brainReadiness = "populating";
   } else {
     brainReadiness = "ready";

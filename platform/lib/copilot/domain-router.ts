@@ -11,7 +11,11 @@
  * VALID_SEAAS_DOMAINS is THE GATE — if a domain isn't here, LLM routing is ignored.
  */
 
-import { detectSEaaSRoute, detectAccountingRoute } from "@/lib/copilot/handlers/seaas-handler";
+import {
+  detectSEaaSRoute,
+  detectAccountingRoute,
+  detectPmAasRoute,
+} from "@/lib/copilot/handlers/seaas-handler";
 
 interface QueryInterpretation {
   source?: string;
@@ -21,6 +25,8 @@ interface QueryInterpretation {
     seaasInput?: Record<string, unknown>;
     aasDomain?: string;
     aasInput?: Record<string, unknown>;
+    pmaasDomain?: string;
+    pmaasInput?: Record<string, unknown>;
     agentSpec?: {
       name: string;
       description?: string;
@@ -72,6 +78,24 @@ export const VALID_SEAAS_DOMAINS = new Set([
 ]);
 
 /**
+ * All valid PM-aaS domain types.
+ *
+ * CRITICAL: When adding a new PM-aaS domain, add it here AND in:
+ *   1. CLASSIFIER_SYSTEM_PROMPT Available Services list (llm-query-interpreter.ts)
+ *   2. CLASSIFIER_SYSTEM_PROMPT PM-aaS Routing Guide (trigger keywords)
+ *   3. chat/route.ts PM-aaS execution block
+ */
+export const VALID_PM_AAS_DOMAINS = new Set([
+  "roadmap-planner",
+  "sprint-health",
+  "backlog-prioritizer",
+  "stakeholder-alignment",
+  "release-risk",
+  "feature-impact",
+  "capacity-planner",
+]);
+
+/**
  * Resolve the SE-aaS route from LLM interpretation or regex fallback.
  * Returns null if neither found a matching domain.
  */
@@ -93,6 +117,34 @@ export function resolveSeaasRoute(
   // Regex fallback — only when LLM wasn't used or returned regex-fallback source
   if (!interpretation || interpretation.source === "regex-fallback") {
     return detectSEaaSRoute(message);
+  }
+
+  return null;
+}
+
+/**
+ * Resolve the PM-aaS route from LLM interpretation or regex fallback.
+ * Returns null if neither found a matching domain.
+ */
+export function resolvePmAasRoute(
+  message: string,
+  interpretation: QueryInterpretation | undefined
+): DomainRoute | null {
+  const serviceRoute = interpretation?.serviceRoute;
+  const llmPmDomain =
+    serviceRoute?.type === "pm-aas" ? serviceRoute.pmaasDomain : null;
+
+  // LLM interpretation wins if the domain is valid
+  if (llmPmDomain && VALID_PM_AAS_DOMAINS.has(llmPmDomain)) {
+    return {
+      domainType: llmPmDomain,
+      extractedInput: serviceRoute?.pmaasInput || {},
+    };
+  }
+
+  // Regex fallback — only when LLM wasn't used or returned regex-fallback source
+  if (!interpretation || interpretation.source === "regex-fallback") {
+    return detectPmAasRoute(message);
   }
 
   return null;

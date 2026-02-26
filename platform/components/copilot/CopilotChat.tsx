@@ -1117,6 +1117,10 @@ export async function consumeSSEStream(
             if (parsed.orchestratorQueued) {
               callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
             }
+            // Brain IQ warning — brain not ready (IQ < 10)
+            if (parsed.brainWarning) {
+              callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1158,6 +1162,7 @@ export async function consumeSSEStream(
             if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
             if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
+            if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
           } catch { /* skip */ }
         }
       }
@@ -1517,6 +1522,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [queuedJobPerMessage, setQueuedJobPerMessage] = useState<Map<number, OrchestratorQueuedInfo>>(new Map());
   // Track completed queued jobs so we can swap the badge for a "ready" indicator
   const [completedQueuedJobs, setCompletedQueuedJobs] = useState<Set<string>>(new Set());
+
+  // ── Per-message Brain IQ warning tracking (amber banner when IQ < 10) ──
+  const [brainWarningPerMessage, setBrainWarningPerMessage] = useState<Map<number, string>>(new Map());
 
   // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
@@ -2072,6 +2080,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               return next;
             });
           },
+          onBrainWarning: (warning) => {
+            if (controller.signal.aborted) return;
+            setBrainWarningPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, warning);
+              return next;
+            });
+          },
           onDomainResult: (result) => {
             if (controller.signal.aborted) return;
             // Attach the message index so the parent can link this artifact to the chat message
@@ -2595,6 +2611,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                               View Artifact →
                             </button>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Brain IQ Warning Banner — shown when Brain IQ < 10 (brain not ready) */}
+                      {brainWarningPerMessage.get(i) && (
+                        <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-1 mb-2 flex items-center gap-2">
+                          <span>⚠</span>
+                          <span>{brainWarningPerMessage.get(i)}</span>
                         </div>
                       )}
 

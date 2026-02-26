@@ -263,6 +263,61 @@ export interface LearningPulse {
   lastLearningCycle: string | null;
 }
 
+// ─── Agent Communication Protocol ────────────────────────────────────────────
+// Types for the Heart / Mind / Speech communication layer used by every agent.
+// Full implementation in platform/lib/agents/agent-comms.ts
+
+export interface AgentHeart {
+  confidence: number;
+  energy: "focused" | "overloaded" | "idle" | "recovering";
+  signal: "curious" | "confident" | "cautious" | "stuck";
+  pulse: number;
+}
+
+export interface AgentMind {
+  currentStep: string;
+  progress: number;
+  reasoning: string;
+  planSteps: string[];
+  completedSteps: string[];
+}
+
+export interface AgentSpeech {
+  format: "artifact" | "report" | "answer" | "error" | "intro";
+  headline: string;
+  body: string;
+  tone: "analytical" | "advisory" | "empathetic" | "urgent";
+  artifacts?: string[];
+}
+
+export interface AgentCommsPayload {
+  agentId: string;
+  agentType: string;
+  orgId: string;
+  heart: AgentHeart;
+  mind: AgentMind;
+  speech: AgentSpeech;
+  timestamp: string;
+}
+
+// ─── Agent Input Request ──────────────────────────────────────────────────────
+// Emitted when the agent needs more information before it can execute.
+
+export interface AgentInputSpec {
+  key: string;
+  label: string;
+  type: "text" | "select" | "date" | "number";
+  required: boolean;
+  hint?: string;
+  options?: string[];
+}
+
+export interface AgentInputRequest {
+  agentType: string;
+  missing: AgentInputSpec[];
+  message: string;
+}
+
 export interface SSECallbacks {
   onText: (text: string, accumulated: string) => void;
   onError: (error: string) => void;
@@ -301,6 +356,15 @@ export interface SSECallbacks {
    * GET /api/se-aas/jobs/:jobId every 5s until status === "success".
    */
   onOrchestratorQueued?: (info: OrchestratorQueuedInfo) => void;
+  /**
+   * Brain IQ warning: emitted when Brain IQ is below 10 (not ready).
+   * The frontend shows an amber banner above the response.
+   */
+  onBrainWarning?: (warning: string, brainIq: number) => void;
+  /** Agent communications: heart/mind/speech payload for visible agent state */
+  onAgentComms?: (comms: AgentCommsPayload) => void;
+  /** Agent input request: agent needs more info before it can run */
+  onAgentInputRequest?: (request: AgentInputRequest) => void;
   onDone: () => void;
 }
 

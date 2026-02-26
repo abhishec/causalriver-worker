@@ -128,6 +128,14 @@ export const DOMAIN_AGENT_NAMES: Record<string, string> = {
   // Data
   "sql-analyzer": "SQL Analysis Agent",
   "data-lineage": "Data Lineage Agent",
+  // PM-aaS
+  "roadmap-planner": "Roadmap Planner Agent",
+  "sprint-health": "Sprint Health Agent",
+  "backlog-prioritizer": "Backlog Prioritizer Agent",
+  "stakeholder-alignment": "Stakeholder Alignment Agent",
+  "release-risk": "Release Risk Agent",
+  "feature-impact": "Feature Impact Agent",
+  "capacity-planner": "Capacity Planner Agent",
   // AAS
   "aas-pl": "Accounting Agent (P&L)",
   "aas-balance": "Accounting Agent (Balance Sheet)",

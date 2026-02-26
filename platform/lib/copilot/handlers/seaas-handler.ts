@@ -324,6 +324,148 @@ export function detectSEaaSRoute(
   return null;
 }
 
+// ============================================================================
+// PM-aaS NATURAL LANGUAGE ROUTING
+// ============================================================================
+
+/**
+ * Detect if user message should route to a PM-aaS domain.
+ *
+ * ROUTING TABLE:
+ *   "build roadmap" / "plan roadmap" / "product roadmap" → roadmap-planner
+ *   "sprint health" / "sprint status" / "sprint velocity" → sprint-health
+ *   "prioritize backlog" / "rank backlog" / "score stories" → backlog-prioritizer
+ *   "stakeholder update" / "write update for" / "PM update" → stakeholder-alignment
+ *   "release risk" / "release readiness" / "go no-go" → release-risk
+ *   "feature impact" / "feature analysis" / "effort estimate" → feature-impact
+ *   "capacity plan" / "team capacity" / "sprint capacity" → capacity-planner
+ */
+export function detectPmAasRoute(
+  message: string
+): { domainType: string; extractedInput: Record<string, unknown> } | null {
+  const lower = message.toLowerCase();
+
+  // ── Roadmap Planner ───────────────────────────────────────────────────
+  if (
+    /(?:build|create|generate|plan|draft|write|make)\s+(?:a\s+)?(?:product\s+)?roadmap|roadmap\s+(?:planning|plan|for|prioriti|quarter|annual)|product\s+roadmap|quarterly\s+roadmap|annual\s+roadmap|strategic\s+roadmap|roadmap\s+themes?|roadmap\s+initiatives?/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "roadmap-planner",
+      extractedInput: {
+        description: message,
+        goals: message,
+        timeframe: /annual|yearly|year/i.test(lower)
+          ? "Full Year"
+          : /half|h1|h2/i.test(lower)
+            ? "Half Year"
+            : "Q1-Q4",
+      },
+    };
+  }
+
+  // ── Sprint Health ─────────────────────────────────────────────────────
+  if (
+    /sprint\s+(?:health|status|review|report|velocity|progress|analysis|burn|blockers?)|how\s+is\s+(?:the\s+)?sprint|sprint\s+(?:is\s+)?(?:at.?risk|behind|on.?track)|current\s+sprint|active\s+sprint|sprint\s+burn.?down|sprint\s+completion|this\s+sprint/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "sprint-health",
+      extractedInput: {
+        description: message,
+        query: message,
+        analysisMode: "full",
+      },
+    };
+  }
+
+  // ── Backlog Prioritizer ───────────────────────────────────────────────
+  if (
+    /prioriti[sz]e\s+(?:the\s+)?backlog|rank\s+(?:the\s+)?backlog|backlog\s+(?:prioriti|rank|score|groom|refine|order)|score\s+(?:stories|tickets|issues|items)|wsjf\s+(?:score|analysis|prioriti)|ice\s+(?:score|framework)|rice\s+(?:score|framework)|backlog\s+(?:health|management|hygiene)|story\s+point|sprint\s+planning\s+backlog/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "backlog-prioritizer",
+      extractedInput: {
+        description: message,
+        criteria: "business value, effort, risk, dependencies",
+      },
+    };
+  }
+
+  // ── Stakeholder Alignment ─────────────────────────────────────────────
+  if (
+    /stakeholder\s+(?:update|communication|alignment|report|briefing)|write\s+(?:a\s+)?(?:stakeholder|executive|pm|product)\s+update|executive\s+(?:update|summary|briefing)|pm\s+(?:update|report|communication)|(?:draft|write|create|generate)\s+(?:a\s+)?(?:status\s+)?update\s+for|product\s+(?:newsletter|update|announcement)/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "stakeholder-alignment",
+      extractedInput: {
+        context: message,
+        description: message,
+        format: /executive/i.test(lower) ? "executive-update" : "stakeholder-update",
+        audience: /executive|c.suite|ceo|cto|board/i.test(lower)
+          ? "C-Suite / Executive Team"
+          : /engineer|dev|team/i.test(lower)
+            ? "Engineering Team"
+            : "Stakeholders",
+      },
+    };
+  }
+
+  // ── Release Risk ──────────────────────────────────────────────────────
+  if (
+    /release\s+(?:risk|readiness|assessment|go.no.go|checklist|health|confidence)|go\s+no.go\s+(?:decision|assessment|for)|launch\s+(?:risk|readiness|checklist)|are\s+we\s+(?:ready|on.track)\s+(?:to\s+)?(?:release|launch|ship|deploy)|can\s+we\s+(?:release|launch|ship)\s+(?:on|by)|pre.release\s+(?:check|assessment|risk)/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "release-risk",
+      extractedInput: {
+        releaseContext: message,
+        description: message,
+      },
+    };
+  }
+
+  // ── Feature Impact ────────────────────────────────────────────────────
+  if (
+    /feature\s+(?:impact|analysis|estimate|effort|scope|sizing|assessment|feasibility)|estimate\s+(?:the\s+)?(?:effort|impact|complexity|risk)\s+(?:for|of)\s+(?:this\s+)?feature|should\s+we\s+build|effort\s+estimate\s+for|is\s+this\s+feature\s+worth|feature\s+sizing|mvp\s+scope\s+for|product\s+feasibility/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "feature-impact",
+      extractedInput: {
+        feature: message,
+        description: message,
+      },
+    };
+  }
+
+  // ── Capacity Planner ──────────────────────────────────────────────────
+  if (
+    /capacity\s+(?:plan|planning|analysis|check|report|forecast)|team\s+capacity|sprint\s+capacity|bandwidth\s+(?:check|analysis|plan)|who\s+is\s+(?:available|free|over.allocated)|resource\s+(?:plan|allocation|availability)|are\s+we\s+(?:over|under).?staffed|team\s+availability|allocation\s+(?:plan|check|report)/i.test(
+      lower
+    )
+  ) {
+    return {
+      domainType: "capacity-planner",
+      extractedInput: {
+        description: message,
+        query: message,
+        sprintLength: 2,
+      },
+    };
+  }
+
+  return null;
+}
+
 /**
  * Simple language detection from message content.
  */

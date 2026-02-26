@@ -26,7 +26,7 @@ import {
 } from "@/lib/nexus-copilot-adapter";
 import { createSSEStream, SSE_HEADERS } from "@/lib/copilot/stream-utils";
 import { resolveSession } from "@/lib/copilot/session";
-import { resolveSeaasRoute, resolveAccountingRoute } from "@/lib/copilot/domain-router";
+import { resolveSeaasRoute, resolveAccountingRoute, resolvePmAasRoute } from "@/lib/copilot/domain-router";
 import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
 import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
 // Keep admin client import for the orchestration dynamic import path
@@ -910,6 +910,7 @@ export async function POST(request: NextRequest) {
     let seaasResult: Record<string, unknown> | null = null;
     let accountingResult: Record<string, unknown> | null = null;
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
+    let pmAasResult: Record<string, unknown> | null = null;
     let agentCreated: Record<string, unknown> | null = null;
     /** Set when orchestrator queues a job as waiting — injected into system prompt */
     let orchestratorResult: Record<string, unknown> | null = null;
@@ -920,10 +921,11 @@ export async function POST(request: NextRequest) {
     const COPILOT_NATIVE_DOMAINS = new Set(['codebase-qa']);
 
     // Determine service route from LLM interpretation or regex fallback.
-    // resolveSeaasRoute/resolveAccountingRoute handle VALID_SEAAS_DOMAINS gating and regex fallback.
+    // resolveSeaasRoute/resolveAccountingRoute/resolvePmAasRoute handle domain gating + regex fallback.
     const serviceRoute = interpretation?.serviceRoute;
     const seaasRoute = resolveSeaasRoute(message, interpretation as any);
     const accountingRoute = resolveAccountingRoute(message, interpretation as any);
+    const pmAasRoute = resolvePmAasRoute(message, interpretation as any);
 
     // ── Agent Creation Routing ────────────────────────────────────────────────
     // When the LLM classifier detects "create-agent" intent, delegate to handleAgentCreation().
@@ -1136,6 +1138,34 @@ export async function POST(request: NextRequest) {
             error: true,
             message: "Accounting analysis could not be completed. The brain will provide general guidance instead.",
           },
+        };
+      }
+    }
+
+    // ── PM-aaS ROUTING — Product Management queries via PM-aaS executor ──
+    if (pmAasRoute && !seaasResult && !accountingResult && process.env.ANTHROPIC_API_KEY) {
+      try {
+        const { executePmDomain } = await import("@/lib/pm-aas/domain-executor");
+        const pmDomainResult = await executePmDomain(service, {
+          domainType: pmAasRoute.domainType,
+          request: pmAasRoute.extractedInput,
+          organizationId: workspaceId,
+          userId: user.id,
+          anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+        });
+
+        pmAasResult = {
+          domainType: pmAasRoute.domainType,
+          artifactId: pmDomainResult.artifactId,
+          ...pmDomainResult.result,
+        };
+      } catch (pmErr) {
+        logger.warn("[PM-aaS NL] Non-fatal: PM domain execution failed:", pmErr);
+        pmAasResult = {
+          domainType: pmAasRoute.domainType,
+          brainAugmented: false,
+          error: true,
+          message: `PM-aaS analysis could not be completed for ${pmAasRoute.domainType}. The brain will provide general guidance instead.`,
         };
       }
     }
@@ -3424,6 +3454,19 @@ ${JSON.stringify(accountingResult.data, null, 2).slice(0, 5000)}
 Use this data to answer the user's accounting question with precision. Cite specific numbers.`;
     }
 
+    // ── PM-aaS domain result injection ────────────────────────────────
+    if (pmAasResult) {
+      const pmDomainType = pmAasResult.domainType as string;
+      const pmResultData = pmAasResult.data || pmAasResult;
+      effectiveSystemPrompt += `\n\n## PM-aaS DOMAIN RESULT: ${pmDomainType.toUpperCase()} (AI-powered PM analysis)
+This is the result from the PM-aaS ${pmDomainType} domain execution. Present this to the user with context and actionable guidance.
+Result data:
+${JSON.stringify(pmResultData, null, 2).slice(0, 3000)}
+
+Artifact ID: ${pmAasResult.artifactId || 'N/A'}
+Use this data to give a comprehensive, actionable PM answer. The analysis was performed by BrainOS's AI PM-aaS ${pmDomainType} engine.`;
+    }
+
     // ── Agent Creation result injection ───────────────────────────────
     if (agentCreated) {
       const agentName = agentCreated.name as string;
@@ -3628,25 +3671,38 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 
     // ── Brain Context Injection — pre-enrich every LLM call with brain state ──
     // Non-fatal: if getBrainContext fails, proceed without enrichment.
+    // brainIqForRouting is captured here and used by Brain IQ model-routing gate below.
+    let brainIqForRouting = 0;
+    let brainWarning: string | null = null;
     try {
       const { getBrainContext } = await import("@/lib/brain/brain-context");
       const brainCtx = await getBrainContext(service, workspaceId);
+      brainIqForRouting = brainCtx.brainIq;
+
       if (brainCtx.brainState !== "empty") {
         effectiveSystemPrompt += `\n\n## Brain Context\n${brainCtx.contextSummary}`;
+      }
+
+      // Brain IQ gate: warn the user when brain is not ready
+      if (brainCtx.brainState === "empty" || brainCtx.brainIq < 10) {
+        brainWarning = `Brain IQ is low (${brainCtx.brainIq}). Connect more data sources for better results.`;
       }
     } catch {
       // non-fatal — proceed without brain context
     }
 
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
+    // Brain IQ gates the final model choice: IQ < 10 → Haiku regardless of query complexity.
     const { selectModel: selectSmartModel } = memStack;
-    const v4SmartModel = selectSmartModel(message, {
+    const v4SmartModelBase = selectSmartModel(message, {
       commanderComplexity: commandResult?.dispatch?.complexityScore,
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
       conversationTurns: conversationHistory?.length,
       hasBrainArtifacts: !!actionArtifact,
-      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!agentCreated || !!orchestratorResult,
+      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult,
     });
+    // Apply Brain IQ gate: if brain is not ready, downgrade general copilot queries to Haiku
+    const v4SmartModel = brainIqForRouting < 10 ? "claude-haiku-4-5-20251001" : v4SmartModelBase;
 
     // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
@@ -3740,15 +3796,36 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           send(JSON.stringify({ deliveryIntelligenceResult }));
         }
 
+        // Send PM-aaS domain result to frontend for structured display
+        if (pmAasResult) {
+          send(JSON.stringify({ pmAasResult }));
+        }
+
         // Send agent created event so the frontend can render AgentCreatedCard
         if (agentCreated) {
           send(JSON.stringify({ agentCreated }));
+        }
+
+        // ── Brain IQ warning — emitted when brain is not ready (IQ < 10) ──
+        // Lets the frontend show an amber banner above the response.
+        if (brainWarning) {
+          send(JSON.stringify({ brainWarning, brainIq: brainIqForRouting }));
         }
 
         // ── Agent Name: tell the frontend which agent handled this query ──────
         // Provides "Handled by: [Agent Name]" indicator in the chat UI.
         {
           // DOMAIN_AGENT_NAMES — imported from @/lib/copilot/handlers/agent-handler
+
+          const PM_AAS_AGENT_NAMES: Record<string, string> = {
+            "roadmap-planner": "Roadmap Planner Agent",
+            "sprint-health": "Sprint Health Agent",
+            "backlog-prioritizer": "Backlog Prioritizer Agent",
+            "stakeholder-alignment": "Stakeholder Alignment Agent",
+            "release-risk": "Release Risk Agent",
+            "feature-impact": "Feature Impact Agent",
+            "capacity-planner": "Capacity Planner Agent",
+          };
 
           let agentName: string | null = null;
           if (agentCreated) {
@@ -3758,6 +3835,8 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           } else if (deliveryIntelligenceResult) {
             const dt = (deliveryIntelligenceResult._domainType as string) || "delivery-intelligence";
             agentName = DOMAIN_AGENT_NAMES[dt] || "Delivery Intelligence Agent";
+          } else if (pmAasResult) {
+            agentName = PM_AAS_AGENT_NAMES[pmAasResult.domainType as string] || "PM-aaS Agent";
           } else if (accountingResult) {
             agentName = DOMAIN_AGENT_NAMES[accountingResult.domainType as string] || "Accounting Agent";
           } else if (brainContext) {
