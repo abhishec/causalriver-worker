@@ -1491,6 +1491,22 @@ function QueuedJobBadge({
   );
 }
 
+// ─── Per-message Map pruning helper ──────────────────────────────────────────
+// Prevents unbounded memory growth during very long conversations (50+ messages
+// without a reset). Keeps the most recent `keepLast` entries by key order.
+const MAX_PER_MESSAGE_ENTRIES = 60;
+const PRUNE_KEEP_ENTRIES = 50;
+
+function pruneMap<V>(m: Map<number, V>): Map<number, V> {
+  if (m.size <= MAX_PER_MESSAGE_ENTRIES) return m;
+  // Keys are message indices — sort ascending and drop the oldest
+  const keys = Array.from(m.keys()).sort((a, b) => a - b);
+  const toDelete = keys.slice(0, keys.length - PRUNE_KEEP_ENTRIES);
+  const pruned = new Map(m);
+  for (const k of toDelete) pruned.delete(k);
+  return pruned;
+}
+
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
 export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(function CopilotChat({
@@ -1743,14 +1759,23 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setInput("");
       setIsLoading(false);
       setBrainMeta(null);
+      setLearningPulse(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setAgentCommsPerMessage(new Map());
+      setAgentInputRequestPerMessage(new Map());
+      setQueuedJobPerMessage(new Map());
+      setCompletedQueuedJobs(new Set());
+      setBrainWarningPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
       setAgentStatus(null);
+      setAgentRunningDomain(null);
+      setAgentRunningMessage(null);
+      setWorkflowProgress(null);
       setProactiveInsights([]);
       setInsightsDismissed(false);
       setAttachments([]);
@@ -1909,12 +1934,23 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setInput("");
       setIsLoading(false);
       setBrainMeta(null);
+      setLearningPulse(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setAgentCommsPerMessage(new Map());
+      setAgentInputRequestPerMessage(new Map());
+      setQueuedJobPerMessage(new Map());
+      setCompletedQueuedJobs(new Set());
+      setBrainWarningPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
+      setAgentSteps([]);
+      setAgentStatus(null);
+      setAgentRunningDomain(null);
+      setAgentRunningMessage(null);
+      setWorkflowProgress(null);
       setAttachments([]);
       inputRef.current?.focus();
     };
@@ -1935,12 +1971,23 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setInput("");
       setIsLoading(false);
       setBrainMeta(null);
+      setLearningPulse(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setAgentCommsPerMessage(new Map());
+      setAgentInputRequestPerMessage(new Map());
+      setQueuedJobPerMessage(new Map());
+      setCompletedQueuedJobs(new Set());
+      setBrainWarningPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
+      setAgentSteps([]);
+      setAgentStatus(null);
+      setAgentRunningDomain(null);
+      setAgentRunningMessage(null);
+      setWorkflowProgress(null);
       setAttachments([]);
       // Cancel any active gathering when loading a saved conversation
       gatheringRef.current.cancel();
@@ -2076,11 +2123,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           onBrainMeta: (meta) => {
             if (controller.signal.aborted) return;
             setBrainMeta(meta);
-            // Store brainMeta for this specific assistant message index
+            // Store brainMeta for this specific assistant message index (pruned to avoid unbounded growth)
             setBrainMetaPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, meta);
-              return next;
+              return pruneMap(next);
             });
             // Bug fix #7: Forward brain meta to parent via callback
             onBrainMetaRef.current?.(meta);
@@ -2094,7 +2141,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentNamePerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, name);
-              return next;
+              return pruneMap(next);
             });
           },
           onAgentCreated: (agentInfo) => {
@@ -2102,7 +2149,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentCreatedPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, agentInfo);
-              return next;
+              return pruneMap(next);
             });
           },
           onAgentComms: (comms) => {
@@ -2117,7 +2164,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               if (!existing || existing.agentId === comms.agentId || comms.mind.progress >= (existing.mind.progress ?? 0)) {
                 next.set(messageIdx, comms);
               }
-              return next;
+              return pruneMap(next);
             });
           },
           onAgentInputRequest: (inputRequest) => {
@@ -2133,7 +2180,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setQueuedJobPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, info);
-              return next;
+              return pruneMap(next);
             });
           },
           onBrainWarning: (warning) => {
@@ -2141,7 +2188,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setBrainWarningPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, warning);
-              return next;
+              return pruneMap(next);
             });
           },
           onDomainResult: (result) => {
@@ -2862,11 +2909,20 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               )}
             </AnimatePresence>
 
-            {/* SE-aaS Agent Running Indicator — shown while domain agent processes request */}
+            {/* SE-aaS Agent Running Indicator — lightweight pulse while domain agent processes */}
             {agentRunningDomain && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground px-4 py-2 bg-muted/30 rounded-lg animate-pulse">
-                <span className="text-base">🔄</span>
-                <span>{agentRunningMessage || `Running ${agentRunningDomain} agent...`}</span>
+              <div className="flex items-center gap-2 px-4 py-2 text-xs text-muted-foreground">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
+                </span>
+                <span className="font-medium text-foreground/60">
+                  {agentRunningDomain.replace(/-/g, ' ')}
+                </span>
+                <span className="text-muted-foreground/50">·</span>
+                <span className="text-muted-foreground/70">
+                  {agentRunningMessage || 'processing...'}
+                </span>
               </div>
             )}
 

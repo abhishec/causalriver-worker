@@ -3805,11 +3805,18 @@ Additional context:
         // We emit a "complete" status here so the frontend knows which agent ran.
         // The "running" status is emitted first so the UI can show a transitional state.
         if (executedSeaasDomain) {
+          const domainStatusMessages: Record<string, string> = {
+            'pod-match': 'matching pods against tech stack and velocity...',
+            'early-warning': 'analysing velocity signals and flight risk...',
+            'scope-creep': 'scanning sprint boundaries for scope drift...',
+            'delivery-intelligence': 'computing engagement health score...',
+          };
+          const domainMessage = domainStatusMessages[executedSeaasDomain] ?? 'running agent...';
           send(JSON.stringify({
             type: 'agent_status',
             status: 'running',
             domain: executedSeaasDomain,
-            message: `🔄 Starting ${executedSeaasDomain} agent... checking your engineering data`,
+            message: domainMessage,
           }));
           // Immediately follow with complete since execution already finished
           send(JSON.stringify({
