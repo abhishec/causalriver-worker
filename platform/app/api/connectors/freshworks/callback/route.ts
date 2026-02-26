@@ -43,6 +43,20 @@ export async function GET(request: NextRequest) {
   // domain may contain dots so take everything after the 4th colon
   const freshdeskDomain = parts.slice(4).join(":");
 
+  // Re-validate domain from state against the same allowlist used in /auth.
+  // Without this check an attacker could craft a state with an arbitrary domain
+  // and trigger an SSRF fetch to an internal host.
+  const cleanedDomain = freshdeskDomain.trim().toLowerCase().replace(/^https?:\/\//, "");
+  if (
+    !cleanedDomain ||
+    (!cleanedDomain.endsWith(".freshdesk.com") && !cleanedDomain.endsWith(".freshservice.com"))
+  ) {
+    logger.warn("[Freshworks Callback] Domain in state failed allowlist check:", cleanedDomain);
+    return NextResponse.redirect(
+      `${redirectBase}/connectors?error=${encodeURIComponent("Invalid domain in state — please try again")}`
+    );
+  }
+
   // Verify timestamp freshness
   const ts = parseInt(parts[2], 10);
   if (Date.now() - ts > 10 * 60 * 1000) {
@@ -86,8 +100,8 @@ export async function GET(request: NextRequest) {
 
     const redirectUri = `${redirectBase}/api/connectors/freshworks/callback`;
 
-    // Exchange code for tokens
-    const tokenResp = await fetch(`https://${freshdeskDomain}/auth/oauth/token`, {
+    // Exchange code for tokens — use cleanedDomain (allowlist-validated) to prevent SSRF
+    const tokenResp = await fetch(`https://${cleanedDomain}/auth/oauth/token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -115,7 +129,7 @@ export async function GET(request: NextRequest) {
     let agentEmail = "";
     let agentName = "";
     try {
-      const profileResp = await fetch(`https://${freshdeskDomain}/api/v2/agents/me`, {
+      const profileResp = await fetch(`https://${cleanedDomain}/api/v2/agents/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (profileResp.ok) {
@@ -134,11 +148,11 @@ export async function GET(request: NextRequest) {
       p_credentials: {
         access_token: accessToken,
         ...(refreshToken ? { refresh_token: refreshToken } : {}),
-        domain: freshdeskDomain,
+        domain: cleanedDomain,
         auth_method: "oauth",
       },
       p_metadata: {
-        domain: freshdeskDomain,
+        domain: cleanedDomain,
         agent_email: agentEmail,
         agent_name: agentName,
         auth_method: "oauth",
@@ -148,7 +162,7 @@ export async function GET(request: NextRequest) {
     });
 
     logger.info(
-      `[Freshworks OAuth] Connected for org ${orgId} — domain: ${freshdeskDomain}`
+      `[Freshworks OAuth] Connected for org ${orgId} — domain: ${cleanedDomain}`
     );
 
     const response = NextResponse.redirect(
