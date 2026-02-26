@@ -24,6 +24,7 @@ import { executeAndCompleteJob } from "./job-queue";
 import { executeDomain } from "./domain-executor";
 import { recordJobOutcome } from "@/lib/rl/outcome-recorder";
 import { attemptRecovery } from "@/lib/brain/recovery-agent";
+import { checkAndQueueWriteback } from "@/lib/connectors/writeback-dispatcher";
 import {
   checkAndStartWaitingJobs,
   checkAndStartBrainDependentJobs,
@@ -242,6 +243,17 @@ export async function processSeAaSJobs(
           executionMs,
           artifactGenerated: !!artifactId,
           artifactId: artifactId ?? null,
+        }).catch(() => { /* non-fatal */ });
+
+        // ── Write-back Dispatch ──────────────────────────────────────────
+        // Fire-and-forget: queue write-back actions for any matching rules.
+        // MUST NOT block the job result.
+        checkAndQueueWriteback(supabase, {
+          jobId: job.id,
+          artifactId: artifactId ?? null,
+          domainType: job.task_type,
+          organizationId: job.organization_id,
+          artifactData: domainResult,
         }).catch(() => { /* non-fatal */ });
 
         return {

@@ -128,6 +128,7 @@ export default async function ConnectorsPage() {
       syncProgressMap={syncProgressMap}
       totalSignals={signals.length}
       lastBrainTrainedAt={lastBrainTrainedAt}
+      organizationId={workspaceId}
     />
   );
 }

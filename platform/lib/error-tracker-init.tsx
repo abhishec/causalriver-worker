@@ -57,14 +57,8 @@ function createErrorTracker(): ErrorTracker {
       if (errors.length >= MAX_ERRORS) errors.shift();
       errors.push(entry);
 
-      // Always log in dev; in prod, log as collapsible group
-      if (process.env.NODE_ENV === "development") {
-        console.error(`[ErrorTracker] ${entry.message}`, entry.component ? `(${entry.component})` : "", error);
-      } else {
-        console.groupCollapsed(`[ErrorTracker] ${entry.message}`);
-        console.error(entry);
-        console.groupEnd();
-      }
+      // Always log in dev and prod using console.error (only warn/error are allowed by ESLint rule)
+      console.error(`[ErrorTracker] ${entry.message}`, entry.component ? `(${entry.component})` : "", error);
     },
     getErrors() {
       return [...errors];

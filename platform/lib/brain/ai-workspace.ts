@@ -9,6 +9,7 @@
  * All functions are safe by default: never throw, always return a usable result.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
@@ -41,6 +42,7 @@ export interface AIWorkspace {
     brainReadinessMinIq: number;
     autoStartWaitingJobs: boolean;
   };
+  writebackEnabled: boolean;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -93,6 +95,7 @@ function buildDefault(orgId: string, name?: string): AIWorkspace {
       brainReadinessMinIq: 10,
       autoStartWaitingJobs: true,
     },
+    writebackEnabled: false,
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -134,6 +137,7 @@ function rowToWorkspace(row: Record<string, any>): AIWorkspace {
       brainReadinessMinIq: orch.brain_readiness_min_iq ?? 10,
       autoStartWaitingJobs: orch.auto_start_waiting_jobs ?? true,
     },
+    writebackEnabled: row.writeback_enabled ?? false,
     status: row.status ?? "active",
     createdAt: row.created_at ?? new Date().toISOString(),
     updatedAt: row.updated_at ?? new Date().toISOString(),
@@ -268,6 +272,8 @@ export async function updateWorkspaceConfig(
     if (patch.status !== undefined) dbPatch.status = patch.status;
     if (patch.activatedServices !== undefined)
       dbPatch.activated_services = patch.activatedServices;
+    if (patch.writebackEnabled !== undefined)
+      dbPatch.writeback_enabled = patch.writebackEnabled;
 
     if (patch.seaasConfig !== undefined) {
       dbPatch.seaas_config = {
@@ -315,5 +321,29 @@ export async function updateWorkspaceConfig(
     }
   } catch (err) {
     logger.warn("[ai-workspace] updateWorkspaceConfig unexpected error:", err);
+  }
+}
+
+/**
+ * Toggle writeback_enabled for an org's AI Workspace.
+ * Enables or disables automatic post-execution dispatch to connected systems.
+ * Never throws — logs and swallows errors.
+ */
+export async function updateWritebackEnabled(
+  supabase: SupabaseClient,
+  orgId: string,
+  enabled: boolean
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from("ai_workspace")
+      .update({ writeback_enabled: enabled })
+      .eq("organization_id", orgId);
+
+    if (error) {
+      logger.warn("[ai-workspace] updateWritebackEnabled failed:", error.message);
+    }
+  } catch (err) {
+    logger.warn("[ai-workspace] updateWritebackEnabled unexpected error:", err);
   }
 }

@@ -35,11 +35,13 @@ function shouldLog(level: LogLevel): boolean {
 export const logger = {
   /** Verbose detail — only visible with LOG_LEVEL=debug */
   debug: (...args: unknown[]) => {
+    // eslint-disable-next-line no-console
     if (shouldLog("debug")) console.log(...args);
   },
 
   /** Normal operational messages — visible in production, hidden in dev by default */
   info: (...args: unknown[]) => {
+    // eslint-disable-next-line no-console
     if (shouldLog("info")) console.log(...args);
   },
 

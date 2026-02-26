@@ -11,6 +11,7 @@ import { GitHubSetupModal, type GitHubReleaseConfig } from "@/components/connect
 import { JiraSetupModal, type JiraConfig } from "@/components/connectors/JiraSetupModal";
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
 import { S3UploadModal } from "@/components/connectors/S3UploadModal";
+import { WritebackRulesPanel } from "@/components/connectors/WritebackRulesPanel";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -51,6 +52,8 @@ interface ConnectorsClientProps {
   totalSignals: number;
   /** Timestamp of the last successful full or sleep brain cycle — null if never trained */
   lastBrainTrainedAt: string | null;
+  /** Organization ID for scoping write-back rules */
+  organizationId: string;
 }
 
 /* ── Domain colors ─────────────────────────────────────────────── */
@@ -109,6 +112,7 @@ export function ConnectorsClient({
   syncProgressMap,
   totalSignals,
   lastBrainTrainedAt,
+  organizationId,
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
@@ -840,6 +844,19 @@ export function ConnectorsClient({
             Each signal feeds the causal graph. More connectors = deeper cross-domain intelligence.
           </p>
         </Card>
+      </div>
+
+      {/* ── AI Worker Automation — Write-back Rules ─────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
+            AI Worker Automation — Write-back Rules
+          </div>
+          <span className="text-[10px] text-muted/60">
+            Automatically push AI Worker results to Slack, Jira, or GitHub
+          </span>
+        </div>
+        <WritebackRulesPanel organizationId={organizationId} />
       </div>
 
       {/* GitHub Setup Modal — token + branch selection + data lookback */}

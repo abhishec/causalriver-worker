@@ -18,6 +18,7 @@
  *     seaasConfig?: Partial<AIWorkspace['seaasConfig']>,
  *     name?: string,
  *     status?: string,
+ *     writeback_enabled?: boolean,   — toggle AI Worker write-back dispatch
  *   }
  */
 
@@ -82,7 +83,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const patch = body as Partial<AIWorkspace>;
+    const patch = body as Partial<AIWorkspace> & { writeback_enabled?: boolean };
 
     // Only allow safe fields — strip id, organizationId, createdAt, updatedAt
     const safePatch: Partial<AIWorkspace> = {};
@@ -95,6 +96,10 @@ export async function PATCH(req: NextRequest) {
     if (patch.brainConfig !== undefined) safePatch.brainConfig = patch.brainConfig;
     if (patch.orchestratorConfig !== undefined)
       safePatch.orchestratorConfig = patch.orchestratorConfig;
+    // Accept both camelCase (AIWorkspace interface) and snake_case (REST convention)
+    const writebackEnabledRaw = patch.writebackEnabled ?? patch.writeback_enabled;
+    if (typeof writebackEnabledRaw === "boolean")
+      safePatch.writebackEnabled = writebackEnabledRaw;
 
     await updateWorkspaceConfig(workspaceId, safePatch);
 
