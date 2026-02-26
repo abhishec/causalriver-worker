@@ -563,3 +563,52 @@ Failing any one = domain silently dead.
 - [KEY PATTERN] DOMAIN_CATALOGUE ids ≠ DOMAIN_MAP keys (e.g. tdd ≠ tdd-code-generator) — always add both-direction aliases
 
 
+
+---
+
+## Retro 022: Tookitaki Demo Night — All 16 Tasks Before 12 AM (2026-02-26)
+
+- **Session**: Full-night sprint. Demo at 11 AM SGT. 16 tasks, parallel agents, ~8h window.
+- **Model used**: Sonnet (main), Haiku (explore/bash agents), Sonnet (feature agents). ✅ Correct — Opus not needed.
+
+### Completed (16/16)
+1. ✅ Hardcoded passwords → env vars (`e0cbe0167`)
+2. ✅ connector_signals RLS scoped (`862756f54`)
+3. ✅ se_aas_artifacts INSERT RLS + GRANT (`862756f54`)
+4. ✅ Edge function org validation (already in place — no change needed)
+5. ✅ Sidebar setState bug (prior commit `ab54e12d9`)
+6. ✅ WorkerMemoryBanner (prior commit `13617c4ac`)
+7. ✅ RL status API — `totalSignals24h` + `learningVelocity` aliases (`10c2affd7`)
+8. ✅ Active Learning indicator in Sidebar — pulses when `learningVelocity > 0` (`10c2affd7`)
+9. ✅ MessageFeedback → `/api/brain/feedback` primary + legacy secondary (`10c2affd7`)
+10. ✅ Settings crash null guards — connectors, apiKeys, customer name/role (`10c2affd7`)
+11. ✅ detectSEaaSRoute regex — 'which delivery pod' match (`b07d4c5c2`)
+12. ✅ fallbackToRegex() routing fix — check `source === 'regex-fallback'` (`bcd81165b`)
+13. 🔄 Dashboard agent card (agent running)
+14. 🔄 GitHub connector integration (agent running)
+15. 🔄 Slack/Jira/Confluence connectors (agent running)
+16. 🔄 Memory container token counter (agent running)
+
+### Key Patterns Discovered (NEW — not in prior retros)
+- **`fallbackToRegex()` is non-null**: Never check `!interpretation` — always check `interpretation.source === 'regex-fallback'`. This caused SE-aaS domains to be completely unreachable despite all regex fixes being correct.
+- **GRANT INSERT ≠ RLS INSERT**: Adding `GRANT SELECT` only lets users read, not write. Always add both GRANT INSERT and a FOR INSERT RLS policy scoped to org_members.
+- **Array props null crash**: Server component props can arrive null despite `|| []` in page.tsx. Always guard `arr.length`, `arr.map()` with `(arr || [])`.
+- **Parallel agent orchestration**: 5 agents simultaneously on non-overlapping file sets = ~5x throughput. Git rebase conflicts manageable if agents check for conflicts before push.
+
+### What Went Well
+- Parallel agent strategy worked extremely well — 5 agents covering different file sets simultaneously
+- Security migration idempotent design (DROP IF EXISTS before CREATE) = zero-conflict migration stack
+- Root cause chain: symptom → `!interpretation` always false → `fallbackToRegex()` always returns object → fix in 1 line. Clean.
+
+### What Went Wrong / Lessons Learned
+- **Settings agent** reported commit as `10c2affd7` but that was the RL agent's commit. Agent got confused about commit hash. Always verify with `git log --oneline -1` after commit.
+- **Parallel push conflicts**: Multiple agents pushing to `main` simultaneously caused push failures. Agents need `git pull --rebase origin main && git push` pattern. Fixed in agent prompts going forward.
+
+### Model Correctness
+- Main context: Sonnet ✅
+- Feature agents: Sonnet ✅ (multi-file code generation — correct)  
+- Explore agents: Haiku ✅
+- No Opus used — not needed for any task tonight
+
+### Cost Assessment
+- Could parallel tasks be cheaper? Yes — some feature agents could have been Haiku for pure code-gen from clear specs. But under time pressure, Sonnet correct choice.

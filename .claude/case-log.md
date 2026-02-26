@@ -248,3 +248,29 @@
 - **Pattern**: Product vocabulary → AI Worker space. DB/code internals → organization_id (in code only, never spoken)
 - **Immediate correction**: All seed scripts, health checks, and retro entries going forward use "AI worker space" not "org"
 
+
+## Case 024: detectSEaaSRoute Unreachable — fallbackToRegex() Always Non-Null (2026-02-26)
+- **Symptom**: Queries like "which delivery pod should we assign" never route to SE-aaS domains even with correct regex. The regex fix in Case 019/020 worked in tests but not live.
+- **Root cause**: `LLMQueryInterpreter.fallbackToRegex()` (line ~359 in `llm-query-interpreter.ts`) always returns a non-null object `{ serviceRoute: { type: 'copilot' }, source: 'regex-fallback', ... }`. The routing condition in `chat/route.ts` was `!interpretation ? detectSEaaSRoute(message) : null` — since `interpretation` was never null, `detectSEaaSRoute()` was never called.
+- **Fix**: Changed condition to `(!interpretation || interpretation.source === 'regex-fallback') ? detectSEaaSRoute(message) : null` — now regex fallback also triggers SE-aaS detection.
+- **Key insight**: `fallbackToRegex()` returns an object (not null) so TypeScript won't warn you. The bug is invisible at compile time.
+- **Pattern**: When an LLM interpreter "fails", it still returns a non-null fallback object. Always check `.source === 'regex-fallback'` not just truthiness.
+
+## Case 025: se_aas_artifacts — GRANT INSERT Missing From Migrations (2026-02-26)
+- **Symptom**: `new row violates row-level security policy for table "se_aas_artifacts"` — artifact saves silently fail, SE-aaS domains produce no stored artifacts.
+- **Root cause**: Both artifact migrations only granted `SELECT` to `authenticated`. No `INSERT` grant + no INSERT RLS policy. Service role could write (it has ALL), but authenticated user client (used by the API route) could not.
+- **Fix**: Added INSERT RLS policy scoped to `org_members` + `GRANT INSERT ON se_aas_artifacts TO authenticated`.
+- **Pattern**: When creating a new table, always check both GRANT and RLS policy for INSERT separately. RLS FOR ALL (service_role bypass) does NOT help authenticated users.
+- **Checklist for new tables**: `GRANT SELECT, INSERT, UPDATE, DELETE ON table TO authenticated` + separate `FOR INSERT WITH CHECK (organization_id IN (SELECT organization_id FROM org_members WHERE user_id = auth.uid()))` policy.
+
+## Case 026: connector_signals INSERT — WITH CHECK (true) Cross-Tenant Write Injection (2026-02-26)
+- **Symptom**: Security audit revealed any authenticated user could INSERT a connector_signal with any `organization_id` — cross-tenant data pollution.
+- **Root cause**: Original migration had `CREATE POLICY "connector_signals_insert_service_role" FOR INSERT WITH CHECK (true)` — no org scoping. A partial fix migration existed but didn't drop all conflicting policy names.
+- **Fix**: Drop all 3 possible policy name variants → recreate single org-scoped `WITH CHECK (organization_id IN (SELECT organization_id FROM org_members WHERE user_id = auth.uid()))`.
+- **Pattern**: `WITH CHECK (true)` on any public table = any user can write to any org. Always scope INSERT policies to org membership. Run audit: `grep -r "WITH CHECK (true)" supabase/migrations/` — each result needs review.
+
+## Case 027: Settings Page Crash — Null Guards Missing on Array Props (2026-02-26)
+- **Symptom**: Settings page triggers error boundary in production. In dev, recovery UI shows. Error boundary is in `platform/app/(home)/settings/error.tsx`.
+- **Root cause**: `settings-client.tsx` used `connectors.length` and `apiKeys.length` in the `tabs` array definition before the `if (!org)` guard. If these props arrive as `null` at runtime, `.length` throws. Also `cust.name.charAt(0)` and `cust.role.charAt(0)` crash on null customer data.
+- **Fix**: `(connectors || []).length`, `(apiKeys || []).length`, `cust.name?.charAt(0) || "?"`, `cust.role ? cust.role.charAt(0)... : "Member"`, `<ApiKeysSection initialKeys={apiKeys || []} />`.
+- **Pattern**: Array props from server components can be null even with `|| []` fallback in page.tsx if RSC hydration or Suspense boundary has edge cases. Always guard array operations with `|| []`.
