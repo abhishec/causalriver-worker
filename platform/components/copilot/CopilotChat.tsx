@@ -2260,7 +2260,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                             </span>
                           </div>
                           <div className="space-y-1">
-                            {workflowProgress.steps.map((step) => (
+                            {(workflowProgress.steps ?? []).map((step) => (
                               <div key={step.order} className="flex items-center gap-2 text-[11px]">
                                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                   step.status === "completed" ? "bg-emerald-500" :
@@ -2278,11 +2278,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <div className="mt-2 h-1 bg-surface-hover rounded-full overflow-hidden">
                             <div
                               className="h-full bg-accent rounded-full transition-all duration-300"
-                              style={{ width: `${workflowProgress.totalSteps > 0 ? Math.round((workflowProgress.currentStep / workflowProgress.totalSteps) * 100) : 0}%` }}
+                              style={{ width: `${(workflowProgress.totalSteps ?? 0) > 0 ? Math.round(((workflowProgress.currentStep ?? 0) / workflowProgress.totalSteps) * 100) : 0}%` }}
                             />
                           </div>
                           <div className="text-[10px] text-muted mt-1">
-                            {workflowProgress.currentStep}/{workflowProgress.totalSteps} steps
+                            {workflowProgress.currentStep ?? 0}/{workflowProgress.totalSteps ?? 0} steps
                           </div>
                         </div>
                       )}

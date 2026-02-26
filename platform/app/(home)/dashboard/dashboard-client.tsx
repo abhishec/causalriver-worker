@@ -467,12 +467,18 @@ export function DashboardClient() {
       }
 
       // Launch the worker
+      const newWorkerId = data.worker?.id;
+      if (!newWorkerId) {
+        setWizardError("Worker was created but ID is missing — please refresh and try again.");
+        setWizardCreating(false);
+        return;
+      }
       localStorage.setItem(SERVICE_MODE_KEY, wizardService);
-      localStorage.setItem("nexus_ai_worker_id", data.worker?.id ?? "");
+      localStorage.setItem("nexus_ai_worker_id", newWorkerId);
       localStorage.setItem("nexus_ai_worker_name", data.worker?.name ?? wizardWorkerName);
       switchWorkspace(targetWorkspaceId, { skipReload: true });
       window.dispatchEvent(new Event("nexus-service-mode-changed"));
-      router.push(`/copilot?workerId=${encodeURIComponent(data.worker?.id ?? "")}&service=${encodeURIComponent(wizardService)}`);
+      router.push(`/copilot?workerId=${encodeURIComponent(newWorkerId)}&service=${encodeURIComponent(wizardService)}`);
     } catch (err) {
       setWizardError("Something went wrong — please try again");
       setWizardCreating(false);

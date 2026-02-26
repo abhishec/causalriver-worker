@@ -1135,21 +1135,21 @@ export async function POST(request: NextRequest) {
               deliveryIntelligenceResult = {
                 _domainType: seaasRoute.domainType, // Preserve which P0 domain triggered
                 ...healthData,
-                podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+                podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
                 // Pass through domain-specific results (e.g. velocity predictions, bottleneck data)
                 domainResult: domainResult.result,
               };
             } else {
               deliveryIntelligenceResult = {
                 _domainType: seaasRoute.domainType,
-                podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+                podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
                 domainResult: domainResult.result,
               };
             }
           } catch {
             deliveryIntelligenceResult = {
               _domainType: seaasRoute.domainType,
-              podRecommendation: (domainResult.result as any)?.data?.recommendation ?? (domainResult.result as any)?.recommendation,
+              podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
               domainResult: domainResult.result,
             };
           }
@@ -3452,6 +3452,36 @@ Artifact ID: ${seaasResult.artifactId || 'N/A'}
 Use this data to give a comprehensive answer. The analysis was performed by Brain OS's AI ${domainType} engine.`;
     }
 
+    // ── SE-aaS Delivery Intelligence injection ────────────────────────
+    // deliveryIntelligenceResult is set by P0 delivery domains (pod-match, early-warning,
+    // scope-creep, delivery-intelligence). It is DIFFERENT from seaasResult and must be
+    // injected separately so Claude can answer delivery-domain questions with live data.
+    if (deliveryIntelligenceResult) {
+      const delivDomainType = (deliveryIntelligenceResult._domainType as string) || 'delivery-intelligence';
+      const healthScores = (deliveryIntelligenceResult.health_scores as unknown[]) ?? [];
+      const scopeAlerts = (deliveryIntelligenceResult.scope_alerts as unknown[]) ?? [];
+      const podMatches = (deliveryIntelligenceResult.pod_matches as unknown[]) ?? [];
+      const engineerHealthSummary = deliveryIntelligenceResult.engineer_health_summary ?? null;
+      const podRecommendation = deliveryIntelligenceResult.podRecommendation ?? null;
+      const domainSpecificResult = deliveryIntelligenceResult.domainResult ?? null;
+      effectiveSystemPrompt += `\n\n## SE-aaS DELIVERY INTELLIGENCE: ${delivDomainType.toUpperCase()}
+Live delivery data fetched for this organization. Use these REAL numbers when answering.
+
+Active engagement health scores (${healthScores.length} engagements):
+${healthScores.length > 0 ? JSON.stringify(healthScores, null, 2).slice(0, 2000) : 'No health score data available.'}
+
+Unacknowledged scope creep alerts (${scopeAlerts.length} alerts):
+${scopeAlerts.length > 0 ? JSON.stringify(scopeAlerts, null, 2).slice(0, 1000) : 'No active scope alerts.'}
+
+Recent pod match recommendations (${podMatches.length} records):
+${podMatches.length > 0 ? JSON.stringify(podMatches, null, 2).slice(0, 1000) : 'No pod match data available.'}
+${engineerHealthSummary ? `\nEngineer health summary:\n${JSON.stringify(engineerHealthSummary, null, 2)}` : ''}
+${podRecommendation ? `\nLatest pod recommendation from ${delivDomainType}:\n${JSON.stringify(podRecommendation, null, 2).slice(0, 1500)}` : ''}
+${domainSpecificResult ? `\nDomain-specific analysis result:\n${JSON.stringify(domainSpecificResult, null, 2).slice(0, 1500)}` : ''}
+
+Answer the user's question using this live delivery data with specific insights about their engagements.`;
+    }
+
     // ── AaaS domain result injection ──────────────────────────────────
     if (accountingResult) {
       const acctDomain = accountingResult.domainType as string;
@@ -3622,7 +3652,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
       conversationTurns: conversationHistory?.length,
       hasBrainArtifacts: !!actionArtifact,
-      hasDomainResults: !!seaasResult || !!accountingResult,
+      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult,
     });
 
     // ── Stream via Anthropic ──────────────────────────────────────────

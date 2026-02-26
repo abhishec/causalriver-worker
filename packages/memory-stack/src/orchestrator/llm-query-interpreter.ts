@@ -610,6 +610,33 @@ function extractSeaasInput(query: string, domain: string): Record<string, unknow
       return { description: query, template: codeMatch?.[1]?.trim(), language, includeTests: true, includeLogging: true };
     case 'codebase-qa':
       return { question: query, includeGitHistory: true };
+    // ── SE-aaS Delivery Intelligence domains ────────────────────────────
+    case 'pod-match':
+      return {
+        description: query,
+        requirements: query,
+        urgency: /urgent|critical|asap|immediate/i.test(query) ? 'high' : 'normal',
+      };
+    case 'early-warning':
+      return {
+        description: query,
+        checkVelocityCollapse: /velocity|collapse|slow|decline|sprint/i.test(query),
+        checkBottleneck: /bottleneck|review.{0,20}load|block/i.test(query),
+        checkFlightRisk: /flight.?risk|leaving|quit|attrition/i.test(query),
+      };
+    case 'scope-creep':
+      return {
+        description: query,
+        checkAlerts: true,
+      };
+    case 'delivery-intelligence':
+      return {
+        description: query,
+        includeHealthScores: true,
+        includePodMatches: true,
+        includeScopeAlerts: true,
+        includeEngineerHealth: true,
+      };
     default:
       return { description: query };
   }

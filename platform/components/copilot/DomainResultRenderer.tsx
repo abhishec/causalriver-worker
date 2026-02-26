@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
-import type { DomainResult } from "@/components/copilot/types";
+import type { DomainResult, DeliveryIntelligenceData } from "@/components/copilot/types";
 import { FinancialStatementsPanel, AAS_DOMAIN_TO_TAB } from "@/components/copilot/FinancialStatementsPanel";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
 import { SEaaSDeliveryPanel } from "@/components/copilot/SEaaSDeliveryPanel";
@@ -151,7 +151,9 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
 
   // ── 4. delivery-intelligence service → SEaaSDeliveryPanel (legacy)
   if (result.service === "delivery-intelligence") {
-    return withFeedback(<SEaaSDeliveryPanel data={result.data} />);
+    // Use rawData (already null-safe) instead of result.data directly to prevent crashes
+    // when the streaming response is truncated or result.data is null/non-object
+    return withFeedback(<SEaaSDeliveryPanel data={rawData as unknown as DeliveryIntelligenceData} />);
   }
 
   // ── 5. SE-aaS service → SEaaSResultPanel (legacy generic panel)

@@ -30,7 +30,11 @@ export async function GET() {
       .select("organization_id")
       .eq("user_id", user.id);
 
-    if (memErr || !memberships || memberships.length === 0) {
+    if (memErr) {
+      logger.error("[/api/dashboard/summary] memberships query error:", memErr);
+      return NextResponse.json({ error: "Failed to load workspace summaries" }, { status: 500 });
+    }
+    if (!memberships || memberships.length === 0) {
       return NextResponse.json({ workspaces: {} });
     }
 

@@ -256,8 +256,8 @@ function PodMatchCard({ match }: { match: PodMatchData }) {
                 <span className="text-muted truncate">{p?.clientName ?? "Client"}</span>
                 <span className={cn(
                   "font-semibold tabular-nums",
-                  p.healthScore >= 75 ? "text-green-400" : p.healthScore >= 50 ? "text-yellow-400" : "text-red-400"
-                )}>{p.healthScore}/100</span>
+                  (p?.healthScore ?? 0) >= 75 ? "text-green-400" : (p?.healthScore ?? 0) >= 50 ? "text-yellow-400" : "text-red-400"
+                )}>{p?.healthScore ?? 0}/100</span>
               </div>
             ))}
           </div>
