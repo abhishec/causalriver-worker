@@ -75,7 +75,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 /* ── Service grouping: maps connector types to Brain OS services ────── */
 
 const SERVICE_MAP: Record<string, string> = {
-  github: "seaas", jira: "seaas", slack: "seaas", notion: "seaas", linear: "seaas",
+  github: "seaas", jira: "seaas", confluence: "seaas", slack: "seaas", notion: "seaas", linear: "seaas",
   cloudwatch: "seaas", datadog: "seaas", elk: "seaas", logs: "seaas",
   xero: "aaas", quickbooks: "aaas", stripe: "aaas", "s3-storage": "aaas",
 };
@@ -171,6 +171,7 @@ export function ConnectorsClient({
       const messages: Record<string, string> = {
         slack_connected: "Slack connected successfully",
         jira_connected: "Jira site connected successfully",
+        confluence_connected: "Confluence site connected successfully",
         github_connected: "GitHub account connected via OAuth",
         github_app_installed: "GitHub App installed — org-level access enabled",
         freshdesk_connected: "Freshdesk connected successfully",

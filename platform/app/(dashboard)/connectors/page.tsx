@@ -11,6 +11,7 @@ const CONNECTORS = [
   { name: "GitHub", type: "github", domain: "engineering", icon: "🐙", description: "Commits, PRs, issues, deployments, CI/CD events", oauth: true },
   { name: "Slack", type: "slack", domain: "communication", icon: "💬", description: "Channel activity, reaction patterns, thread engagement", oauth: true },
   { name: "Jira", type: "jira", domain: "engineering", icon: "📋", description: "Issues, comments, and project workflows", oauth: true },
+  { name: "Confluence", type: "confluence", domain: "knowledge", icon: "📄", description: "Sync user stories, pages, and requirements from Confluence spaces", oauth: true },
   { name: "Stripe", type: "stripe", domain: "finance", icon: "💳", description: "Payment events, subscription changes, invoices, disputes", oauth: false },
   { name: "HubSpot", type: "hubspot", domain: "sales", icon: "🎯", description: "Deal stage changes, contact activity, pipeline metrics", oauth: false },
   // Freshworks suite (NB-020)

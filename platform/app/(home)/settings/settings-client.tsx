@@ -12,6 +12,7 @@ import { ApiKeysSection } from "./api-keys-section";
 import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
+import { BrainLearningThresholdSection } from "./brain-learning-threshold-section";
 import { HealthScoreWidget } from "@/components/brain/HealthScoreWidget";
 
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
@@ -900,6 +901,13 @@ export function SettingsClient({
             {/* Brain Training Section */}
             <div className="mb-8">
               <BrainTrainingSection orgId={orgId} connectors={connectors || []} />
+            </div>
+
+            {/* Brain Learning Threshold */}
+            <div className="mb-8 pt-6 border-t border-border-subtle">
+              <h3 className="text-sm font-semibold mb-1">Learning Configuration</h3>
+              <p className="text-xs text-muted mb-4">Configure how many signals the brain needs before activating query responses</p>
+              <BrainLearningThresholdSection orgId={orgId} />
             </div>
 
             {/* Brain Operations Section */}
