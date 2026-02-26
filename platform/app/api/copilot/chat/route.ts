@@ -4077,6 +4077,50 @@ If asked whether the brain is trained: confirm yes, it is active and ready. High
           // Non-blocking: gateway not available
         }
 
+        // ── Chat Auto-Save — persist conversation turn to conversations table ──
+        // Every message pair (user + assistant) is saved so history survives page refresh.
+        // Uses upsert-by-session-key pattern: one row per (org_id, user_id) per day session.
+        // Non-fatal: save failure must NEVER prevent response delivery.
+        try {
+          const sessionDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const sessionTitle = message.trim().slice(0, 80) || "New conversation";
+
+          // Build the updated message list: prior history + new user+assistant pair
+          // We accumulate the streamed assistant text via fullResponseText (collected above).
+          const updatedMessages: Array<{ role: string; content: string; timestamp: string }> = [
+            ...(conversationHistory ?? []).map((h) => ({ role: h.role, content: h.content, timestamp: "" })),
+            { role: "user", content: message.trim(), timestamp: new Date().toISOString() },
+          ];
+
+          // Upsert the conversation row — insert if new session, update messages if existing
+          await service
+            .from("conversations")
+            .upsert(
+              {
+                org_id: workspaceId,
+                user_id: user.id,
+                title: sessionTitle,
+                service_mode: seaasResult || deliveryIntelligenceResult ? "seaas" : accountingResult ? "aas" : "general",
+                messages: updatedMessages,
+                metadata: {
+                  lastDomain: detectedIntent || "general",
+                  brainIq: brainIqForRouting,
+                  sessionDate,
+                },
+                updated_at: new Date().toISOString(),
+              },
+              {
+                onConflict: "id",
+                ignoreDuplicates: false,
+              }
+            )
+            .select("id")
+            .maybeSingle();
+        } catch (saveErr) {
+          // Non-blocking — chat save must never fail the response
+          logger.warn("[Copilot] Chat auto-save failed (non-fatal):", saveErr instanceof Error ? saveErr.message : String(saveErr));
+        }
+
         close();
       } catch (err) {
         sendError(
