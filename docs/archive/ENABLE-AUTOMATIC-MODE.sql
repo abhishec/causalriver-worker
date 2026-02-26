@@ -11,7 +11,7 @@
 -- ============================================================================
 
 ALTER DATABASE postgres SET app.supabase_service_role_key =
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptbHF2dXpvb2RjZ21rZ2tpdmZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDUzMTc4NSwiZXhwIjoyMDg2MTA3Nzg1fQ.iINHn-d1hwGBbW0zE2VUiTYE6RdgSuvtDrnukRTj7k0';
+'REDACTED_SERVICE_ROLE_KEY_SEE_SUPABASE_DASHBOARD';
 
 -- Verification
 SELECT

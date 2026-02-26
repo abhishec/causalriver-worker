@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://zmlqvuzoodcgmkgkivfw.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptbHF2dXpvb2RjZ21rZ2tpdmZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5MjYxODIsImV4cCI6MjA1NDUwMjE4Mn0.4OXwqx1fAU_pPM4fEKJv_dzzVU7F6s_Ep_wXO_EY8NI'
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://zmlqvuzoodcgmkgkivfw.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? (() => { throw new Error("Set NEXT_PUBLIC_SUPABASE_ANON_KEY"); })()
 );
 
 const DEMO_ORG_ID = '00000000-0000-4000-b000-000000000001';

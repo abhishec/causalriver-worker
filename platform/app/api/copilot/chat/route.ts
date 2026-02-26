@@ -52,6 +52,7 @@ function getMemoryStackSync() {
 
 import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -1623,6 +1624,7 @@ export async function POST(request: NextRequest) {
               .maybeSingle();
 
             taskId = trainTask?.id ?? `train-${Date.now()}`;
+            const caseLogCtx = getCaseLogContext({ agentType: "train-brain", prompt: message.trim(), orgId: workspaceId });
 
             sendAgentStatus({
               taskId,
@@ -2015,6 +2017,9 @@ export async function POST(request: NextRequest) {
       (async () => {
         const agentStartTime = Date.now();
         let taskId = "";
+        let agentFinalStatus: "completed" | "failed" | "partial" = "failed";
+        let agentOutputSummary = "";
+        let agentModelUsed = "claude-sonnet-4-20250514";
 
         try {
           // ── 1. Create brain_agent_tasks record ──────────────────
@@ -2039,6 +2044,7 @@ export async function POST(request: NextRequest) {
           }
 
           taskId = agentTask.id;
+          const caseLogCtx = getCaseLogContext({ agentType: agentIntent.agentType, prompt: message.trim(), orgId: workspaceId });
 
           sendAgentStatus({
             taskId,
@@ -2300,8 +2306,8 @@ export async function POST(request: NextRequest) {
 
           // Compose prompt with episodic context if available
           const agentPrompt = episodicContext
-            ? `${message.trim()}${episodicContext}`
-            : message.trim();
+            ? `${message.trim()}${episodicContext}${caseLogCtx}`
+            : `${message.trim()}${caseLogCtx}`;
 
           const brainResult = await brainRuntime.execute({
             agentId: brainAgentId,
@@ -2392,6 +2398,9 @@ export async function POST(request: NextRequest) {
 
           // ── 5. Update task to completed/awaiting_approval ──────
           const finalStatus = brainResult.status === "auto-executed" ? "completed" : "awaiting_approval";
+          agentFinalStatus = finalStatus === "completed" ? "completed" : "partial";
+          agentOutputSummary = responseText.slice(0, 200);
+          agentModelUsed = brainResult.metrics?.model ?? "claude-sonnet-4-20250514";
 
           const agentArtifacts = [
             {
@@ -2534,6 +2543,16 @@ export async function POST(request: NextRequest) {
 
           agentSendError(`Agent failed: ${errMsg}`);
         }
+
+        logAgentRetro({
+          taskId,
+          agentType: agentIntent?.agentType ?? "general",
+          prompt: message.trim().slice(0, 200),
+          status: agentFinalStatus,
+          durationMs: Date.now() - agentStartTime,
+          modelUsed: agentModelUsed,
+          outputSummary: agentOutputSummary || "Agent completed",
+        }).catch(() => {}); // non-blocking
 
         agentClose();
       })();

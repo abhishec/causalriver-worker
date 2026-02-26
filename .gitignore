@@ -68,8 +68,13 @@ pnpm-debug.log*
 *.swp
 *.swo
 
-# CDK lock files
-infrastructure/cdk/cdk.out/*.lock
+# CDK output directories (may contain hardcoded secrets/synthesized configs)
+infrastructure/cdk/cdk.out/
+infrastructure/cdk/cdk.out.*/
+infrastructure/cdk/cdk.out*.json
+
+# Archive SQL files (may contain hardcoded keys)
+docs/archive/
 
 # Backup files
 *.bak
