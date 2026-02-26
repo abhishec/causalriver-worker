@@ -4,8 +4,23 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
+import { getConnectorTokenWithId, markConnectorError } from "@/lib/connectors/get-connector-token";
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Thrown when the Jira API returns 401 or 403.
+ * Caught by the outer fetchErr handler to mark the connector as errored
+ * and return a 401 to the caller so the UI shows a "Reconnect" button.
+ */
+class JiraAuthError extends Error {
+  readonly statusCode: number;
+  constructor(status: number, statusText: string) {
+    super(`Jira API authentication failed: ${status} ${statusText}`);
+    this.name = "JiraAuthError";
+    this.statusCode = status;
+  }
+}
 
 /**
  * POST /api/connectors/jira/sync
@@ -95,8 +110,27 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    // credentials is guaranteed non-null at this point (either isBasicAuth or isOAuth is true)
-    const nonNullCreds = credentials!;
+
+    // For OAuth connectors: use token-aware client to auto-refresh if expired.
+    // getConnectorTokenWithId checks expires_at and calls refreshJiraToken() if needed.
+    let freshAccessToken: string | null = null;
+    if (isOAuth) {
+      const tokenResult = await getConnectorTokenWithId(service, workspaceId, "jira");
+      freshAccessToken = tokenResult.token;
+      if (!freshAccessToken) {
+        return NextResponse.json(
+          { error: "Jira token expired and could not be refreshed. Please reconnect Jira." },
+          { status: 401 }
+        );
+      }
+    }
+
+    // credentials is guaranteed non-null at this point (either isBasicAuth or isOAuth is true).
+    // For OAuth connectors, patch access_token with the fresh (possibly refreshed) value.
+    const nonNullCreds = {
+      ...credentials!,
+      ...(freshAccessToken ? { access_token: freshAccessToken } : {}),
+    };
 
     const { projectKeys, fixVersionFilter, dataLookback } = body;
 
@@ -335,6 +369,23 @@ export async function POST(request: Request) {
         }
       }
     } catch (fetchErr: any) {
+      // JiraAuthError (401/403): token is invalid/revoked — mark connector errored
+      // so the health indicator turns red and the UI shows a reconnect button.
+      if (fetchErr instanceof JiraAuthError) {
+        logger.error("[Jira sync] Auth failed — marking connector errored", {
+          connectorId: connector.id,
+          status: fetchErr.statusCode,
+        });
+        await markConnectorError(
+          service,
+          connector.id,
+          "Token expired or revoked — reconnect required"
+        );
+        return NextResponse.json(
+          { error: "Jira token expired or revoked. Please reconnect Jira in the Connectors page." },
+          { status: 401 }
+        );
+      }
       errors.push(`Jira API: ${fetchErr.message}`);
     }
 
@@ -415,6 +466,8 @@ export async function POST(request: Request) {
 /**
  * Jira API fetch helper — supports both OAuth (Bearer) and Basic Auth (email:apiToken).
  * Basic Auth is used for design-partner connections made via the admin /connect route.
+ *
+ * Throws JiraAuthError on 401/403 so callers can mark the connector as errored.
  */
 async function jiraFetch(
   credentials: {
@@ -446,6 +499,10 @@ async function jiraFetch(
   });
 
   if (!response.ok) {
+    // 401/403 = token invalid or revoked — throw typed error for caller to handle
+    if (response.status === 401 || response.status === 403) {
+      throw new JiraAuthError(response.status, response.statusText);
+    }
     throw new Error(`Jira API error: ${response.status} ${response.statusText}`);
   }
 

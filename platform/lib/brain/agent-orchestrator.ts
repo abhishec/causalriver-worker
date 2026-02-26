@@ -356,10 +356,18 @@ export async function orchestrateJob(params: {
     };
   }
 
-  // Default: safe to execute immediately
+  // Default: safe to execute immediately.
+  // If per-domain quality data exists and avg quality for this task type is below 0.6,
+  // surface a note so the user knows more data sources would improve results.
+  const domainAvgQuality = state.domainQualityMap[params.taskType];
+  const lowQualityNote =
+    domainAvgQuality !== undefined && domainAvgQuality < 0.6
+      ? ` Note: quality for ${params.taskType} has been moderate (avg ${domainAvgQuality.toFixed(2)}) — consider connecting more data sources.`
+      : "";
+
   return {
     action: "execute-now",
-    reason: `Brain is ${state.brainReadiness} with ${state.brainSignalCount} signal(s). Ready to execute ${params.taskType}.`,
+    reason: `Brain is ${state.brainReadiness} with ${state.brainSignalCount} signal(s). Ready to execute ${params.taskType}.${lowQualityNote}`,
   };
 }
 

@@ -13,6 +13,7 @@ import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
 import { BrainLearningThresholdSection } from "./brain-learning-threshold-section";
+import { KnowledgeBaseSection } from "./knowledge-base-section";
 import { HealthScoreWidget } from "@/components/brain/HealthScoreWidget";
 
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
@@ -904,6 +905,13 @@ export function SettingsClient({
             {/* Brain Training Section */}
             <div className="mb-8">
               <BrainTrainingSection orgId={orgId} connectors={connectors || []} />
+            </div>
+
+            {/* Knowledge Base — Document Ingestion */}
+            <div className="mb-8 pt-6 border-t border-border-subtle">
+              <h3 className="text-sm font-semibold mb-1">Knowledge Base</h3>
+              <p className="text-xs text-muted mb-4">Upload PDFs, runbooks, and compliance docs so the Brain can answer questions about them</p>
+              <KnowledgeBaseSection orgId={orgId} />
             </div>
 
             {/* Brain Learning Threshold */}
