@@ -176,6 +176,15 @@
 - **Fix**: Created new `(home)` route group with minimal layout (WorkspaceProvider only, no Sidebar/TopBar). Full-screen design with step-by-step flow.
 - **Pattern**: Before building any new page, ask: "What is the USER's mental model here?" Landing pages need clean layouts. Operational pages need the sidebar. Don't default to putting everything in the sidebar.
 
+## Case 018: se_aas_artifacts Migration Applied But Table Missing (2026-02-26)
+- **Symptom**: `PGRST205 — Could not find the table 'public.se_aas_artifacts' in the schema cache`. HTTP 404 on REST API. Supabase JS client returns `count=null` with no error.
+- **Root cause**: Migration `20260218000001` was recorded as applied in `supabase_migrations` history but the DDL never executed against the DB. Table was genuinely absent (PostgREST hints "Perhaps you meant 'public.ai_agent_activity'" — only happens when table doesn't exist).
+- **Diagnose**: Don't trust `supabase migration list` — a migration being "applied" means the history row was inserted, NOT that the DDL succeeded. Always verify with a direct REST API call: `GET /rest/v1/table_name?limit=0` with service role key. HTTP 200 = exists. HTTP 404 = missing.
+- **Fix**: Created remediation migration `20260226000001_recreate_se_aas_artifacts.sql` with `CREATE TABLE IF NOT EXISTS` + `DROP POLICY IF EXISTS` before policy recreation. Idempotent and safe to re-run.
+- **Saved by**: `saveArtifact()` was already wrapped in try/catch (non-blocking) from same session — table missing didn't crash domain execution.
+- **Pattern**: Always verify critical tables with a REST ping after migration push. Don't assume applied = exists.
+- **Prevention**: Add table existence checks to health-check scripts for any table that's in the critical execution path.
+
 ## Case 017: [USER CORRECTION] Terminology — "AI Worker Space" not "Org" (2026-02-26)
 - **Trigger**: User said "why org - it has to be AI worker space..can u relearein in ur reinforcement learning..so that everywhere u can refer AI worker and not org only"
 - **Lesson**: **Never say "org" when referring to a customer's workspace/tenant.** Always say **"AI worker space"** in:
