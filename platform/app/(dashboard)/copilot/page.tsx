@@ -62,10 +62,10 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
     "Detect transaction anomalies",
   ],
   seaas: [
-    "What's the release risk?",
-    "Review the latest PR",
-    "Run early warning analysis",
-    "Find dead code in the repo",
+    "Which delivery pod should handle the Fincense AML Detection engagement?",
+    "Show me the health scores for all active engagements",
+    "Are there any engineers at flight risk?",
+    "Summarize this week's scope creep alerts",
   ],
 };
 

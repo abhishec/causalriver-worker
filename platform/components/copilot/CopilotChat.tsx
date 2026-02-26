@@ -2462,26 +2462,32 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                         </div>
                       )}
 
-                      {/* "Handled by" agent indicator — shows which agent processed this query */}
-                      {agentNamePerMessage.get(i) && !isLoading && (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <svg className="w-3 h-3 text-muted opacity-50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                          </svg>
-                          <span className="text-[10px] text-muted-foreground opacity-60">
-                            {agentNamePerMessage.get(i)}
-                          </span>
+                      {/* RL Feedback + agent badge — inline row, shown after stream completes */}
+                      {!isLoading && (msg.content && !msg.content.startsWith("__ERROR__") && organizationId || agentNamePerMessage.get(i)) && (
+                        <div className="flex items-center justify-between gap-3 mt-1">
+                          {/* Agent name badge — subtle, left-aligned */}
+                          {agentNamePerMessage.get(i) ? (
+                            <div className="flex items-center gap-1 min-w-0">
+                              <svg className="w-2.5 h-2.5 text-muted-foreground opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                              </svg>
+                              <span className="text-[10px] text-muted-foreground opacity-50 truncate">
+                                {agentNamePerMessage.get(i)}
+                              </span>
+                            </div>
+                          ) : (
+                            <div />
+                          )}
+                          {/* Thumbs up/down feedback — right-aligned */}
+                          {msg.content && !msg.content.startsWith("__ERROR__") && organizationId && (
+                            <MessageFeedback
+                              messageIndex={i}
+                              organizationId={organizationId}
+                              conversationId={conversationId}
+                              serviceMode={activeService || "general"}
+                            />
+                          )}
                         </div>
-                      )}
-
-                      {/* RL Feedback — thumbs up/down per assistant message */}
-                      {msg.content && !msg.content.startsWith("__ERROR__") && !isLoading && organizationId && (
-                        <MessageFeedback
-                          messageIndex={i}
-                          organizationId={organizationId}
-                          conversationId={conversationId}
-                          serviceMode={activeService || "general"}
-                        />
                       )}
                     </div>
                   )}
