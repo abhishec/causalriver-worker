@@ -34,6 +34,8 @@ export async function POST(request: NextRequest) {
       message: "Scaffolding job queued. Poll pollUrl for results.",
     });
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);
     }

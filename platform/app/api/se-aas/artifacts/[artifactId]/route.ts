@@ -25,6 +25,8 @@ export async function GET(
       artifact,
     });
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);
     }

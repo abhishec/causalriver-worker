@@ -100,6 +100,12 @@ export async function GET(request: NextRequest) {
       generated_at:            new Date().toISOString(),
     });
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
+    // authenticateSeAaSRequest throws { status, error } for 401/429 — propagate correctly
+    if (err?.status && typeof err.status === "number") {
+      return NextResponse.json({ error: err.error ?? "Unauthorized" }, { status: err.status });
+    }
     return createSeAaSError(request, "Failed to fetch engagement health data");
   }
 }
@@ -134,6 +140,11 @@ export async function PATCH(request: NextRequest) {
 
     return createSeAaSResponse(request, { acknowledged: true, alert_id: alertId });
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
+    if (err?.status && typeof err.status === "number") {
+      return NextResponse.json({ error: err.error ?? "Unauthorized" }, { status: err.status });
+    }
     return createSeAaSError(request, "Failed to acknowledge alert");
   }
 }

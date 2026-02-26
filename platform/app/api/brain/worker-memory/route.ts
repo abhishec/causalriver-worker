@@ -30,16 +30,22 @@ const MAX_TOKENS = 200_000;
 const CLEANUP_THRESHOLD = 0.6; // 60%
 
 export async function GET(req: NextRequest) {
+  // ── Auth: isolate failures so auth errors always return 401, never 500 ──
+  let supabase;
+  let user = null;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  } catch (authErr) {
+    logger.warn("[worker-memory] Auth failed:", authErr);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user || !supabase) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const workspaceId = await getCurrentWorkspaceId();
 
     // Fetch active tasks from the last 24 hours

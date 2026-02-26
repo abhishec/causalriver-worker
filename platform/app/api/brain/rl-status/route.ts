@@ -26,13 +26,23 @@ export const dynamic = "force-dynamic";
  *   }
  */
 export async function GET(req: NextRequest) {
+  // ── Auth: isolate failures so auth errors always return 401, never 500 ──
+  let supabase;
+  let user = null;
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  } catch (authErr) {
+    // createClient() or getUser() threw (e.g. network error, no request context)
+    logger.warn("[rl-status] Auth failed:", authErr);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user || !supabase) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const workspaceId = await getCurrentWorkspaceId();
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();

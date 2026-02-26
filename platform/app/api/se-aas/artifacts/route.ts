@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);
     }

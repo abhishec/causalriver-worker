@@ -25,7 +25,10 @@ export interface SeAaSAuthResult {
 /**
  * Authenticate an SE-aaS request.
  * Supports: Supabase session cookie OR API key (Bearer nxb_...)
- * Returns auth context or throws an object with { status, error }.
+ * Returns auth context or throws a NextResponse with the correct status.
+ *
+ * IMPORTANT: catch blocks in route handlers must check:
+ *   if (err instanceof Response) return err as NextResponse;
  */
 export async function authenticateSeAaSRequest(
   request: NextRequest
@@ -33,8 +36,20 @@ export async function authenticateSeAaSRequest(
   let workspaceId: string | null = null;
   let userId: string | null = null;
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // Isolate auth setup — if createClient()/getUser() throws (e.g. Lambda context
+  // issue, network error), treat as unauthorized rather than 500.
+  let supabase;
+  let user = null;
+  try {
+    supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  } catch {
+    throw NextResponse.json(
+      { error: "Unauthorized. Provide session cookie or API key (Bearer nxb_...)" },
+      { status: 401, headers: corsHeaders(request) }
+    );
+  }
 
   if (user) {
     userId = user.id;
@@ -42,7 +57,10 @@ export async function authenticateSeAaSRequest(
     // Session rate limit
     const sessionRL = await checkSessionRateLimit(user.id, "/api/se-aas");
     if (!sessionRL.allowed) {
-      throw { status: 429, error: "Too many requests. Please slow down." };
+      throw NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: corsHeaders(request) }
+      );
     }
 
     // Resolve workspace from user's currently selected workspace (cookie-based)
@@ -53,13 +71,19 @@ export async function authenticateSeAaSRequest(
     const apiKeyResult = await validateApiKey(authHeader);
 
     if (!apiKeyResult) {
-      throw { status: 401, error: "Unauthorized. Provide session cookie or API key (Bearer nxb_...)" };
+      throw NextResponse.json(
+        { error: "Unauthorized. Provide session cookie or API key (Bearer nxb_...)" },
+        { status: 401, headers: corsHeaders(request) }
+      );
     }
 
     workspaceId = apiKeyResult.organizationId;
 
     if (!apiKeyResult.permissions.includes("read")) {
-      throw { status: 403, error: "API key lacks read permission" };
+      throw NextResponse.json(
+        { error: "API key lacks read permission" },
+        { status: 403, headers: corsHeaders(request) }
+      );
     }
 
     // Rate limit
@@ -67,7 +91,10 @@ export async function authenticateSeAaSRequest(
     const rateLimitResult = await checkRateLimit(hashKey(rawKey), apiKeyResult.rateLimitPerMinute);
 
     if (!rateLimitResult.allowed) {
-      throw { status: 429, error: rateLimitResult.error };
+      throw NextResponse.json(
+        { error: rateLimitResult.error },
+        { status: 429, headers: corsHeaders(request) }
+      );
     }
 
     // API key users get a synthetic userId
@@ -76,7 +103,10 @@ export async function authenticateSeAaSRequest(
 
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicApiKey) {
-    throw { status: 503, error: "AI service unavailable: ANTHROPIC_API_KEY not configured" };
+    throw NextResponse.json(
+      { error: "AI service unavailable: ANTHROPIC_API_KEY not configured" },
+      { status: 503, headers: corsHeaders(request) }
+    );
   }
 
   return {

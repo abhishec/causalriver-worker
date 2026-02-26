@@ -22,6 +22,8 @@ export async function GET(
 
     return createSeAaSResponse(request, status as unknown as Record<string, unknown>);
   } catch (err: any) {
+    // authenticateSeAaSRequest throws NextResponse for auth errors — return directly
+    if (err instanceof Response) return err as Response;
     if (err.status) {
       return createSeAaSError(request, err.error, err.status);
     }
