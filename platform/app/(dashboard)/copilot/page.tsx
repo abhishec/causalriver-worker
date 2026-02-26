@@ -738,6 +738,15 @@ function CopilotPageInner() {
       <div className="flex items-center justify-between h-12 px-4 border-b border-border-subtle bg-background shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground">{persona.name}</span>
+          {/* Model routing indicator — shows Haiku vs Sonnet based on service */}
+          {activeService === "seaas" && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              Multi-model routing
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button

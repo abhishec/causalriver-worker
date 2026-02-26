@@ -16,6 +16,7 @@ import { BrainLearningThresholdSection } from "./brain-learning-threshold-sectio
 import { HealthScoreWidget } from "@/components/brain/HealthScoreWidget";
 
 import { IntegrationsSection } from "@/components/settings/IntegrationsSection";
+import { ServicesSection } from "@/components/settings/ServicesSection";
 import { useWorkspace } from "@/lib/workspace-context";
 import { createClient } from "@/lib/supabase/client";
 
@@ -80,6 +81,7 @@ const TAB_ICONS: Record<string, string> = {
   api:           "M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z",
   danger:        "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
   operations:    "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 15.828a5 5 0 010-7.072m5.656 0a5 5 0 010 7.072M13 12a1 1 0 11-2 0 1 1 0 012 0z",
+  services:      "M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5",
   partner:       "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
   signout:       "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9",
 };
@@ -277,6 +279,7 @@ export function SettingsClient({
     { id: "members", label: "Members" },
     { id: "connections", label: "Connections", count: (connectors || []).length },
     { id: "brain", label: "Brain" },
+    { id: "services", label: "Services" },
     { id: "notifications", label: "Notifications" },
     { id: "api", label: "API Keys", count: (apiKeys || []).length },
     ...((currentRole === "owner" || isPlatformAdmin) ? [{ id: "danger", label: "Danger Zone" }] : []),
@@ -990,6 +993,15 @@ export function SettingsClient({
                 <span className="text-xs text-success font-medium">Within budget limits</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Services Tab */}
+        {activeTab === "services" && (
+          <div>
+            <h2 className="text-sm font-medium mb-1">Services</h2>
+            <p className="text-xs text-muted mb-6">Activate AI Worker service templates — SE-aaS, AAAS, and more</p>
+            <ServicesSection workspaceId={orgId} />
           </div>
         )}
 
