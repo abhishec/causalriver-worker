@@ -89,10 +89,13 @@ export interface AuditEventParams {
 export async function logAuditEvent(params: AuditEventParams): Promise<string | null> {
   try {
     // Create Supabase client with service role (required for audit logging)
-    const supabase = createClient(
-      (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceKey) {
+      logger.warn('[Audit] Missing Supabase env vars — audit event not logged');
+      return null;
+    }
+    const supabase = createClient(supabaseUrl, serviceKey);
 
     // ── Validate UUID fields ──
     // PostgreSQL log_audit_event() expects UUID type for p_user_id, p_organization_id,
@@ -242,10 +245,13 @@ export async function getAuditTrail(
   resourceId: string,
   limit: number = 100
 ) {
-  const supabase = createClient(
-    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    logger.warn('[Audit] Missing Supabase env vars — cannot retrieve audit trail');
+    return [];
+  }
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   const { data, error } = await supabase.rpc('get_audit_trail', {
     p_resource_type: resourceType,
@@ -265,10 +271,13 @@ export async function getAuditTrail(
  * Get user activity
  */
 export async function getUserActivity(limit: number = 50) {
-  const supabase = createClient(
-    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    logger.warn('[Audit] Missing Supabase env vars — cannot retrieve user activity');
+    return [];
+  }
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   const { data, error } = await supabase.rpc('get_user_activity', {
     p_limit: limit,
@@ -286,10 +295,13 @@ export async function getUserActivity(limit: number = 50) {
  * Get security events
  */
 export async function getSecurityEvents(organizationId: string, hours: number = 24) {
-  const supabase = createClient(
-    (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL)!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    logger.warn('[Audit] Missing Supabase env vars — cannot retrieve security events');
+    return [];
+  }
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   const { data, error } = await supabase.rpc('get_security_events', {
     p_organization_id: organizationId,

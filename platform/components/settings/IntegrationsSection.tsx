@@ -339,8 +339,8 @@ function InstanceCard({
         </div>
         <div className="flex items-center gap-3 mt-0.5">
           <span className="text-[10px] text-muted font-mono truncate">{getDetail()}</span>
-          {instance.signals_count > 0 && (
-            <span className="text-[10px] text-muted">{instance.signals_count.toLocaleString()} signals</span>
+          {(instance.signals_count ?? 0) > 0 && (
+            <span className="text-[10px] text-muted">{(instance.signals_count ?? 0).toLocaleString()} signals</span>
           )}
           {instance.last_sync_at && (
             <span className="text-[10px] text-muted">Synced {timeAgo(instance.last_sync_at)}</span>
@@ -482,7 +482,7 @@ function ConnectorTypeSection({
 // ============================================================================
 
 export function IntegrationsSection({ connectors, orgId }: IntegrationsSectionProps) {
-  const [instances, setInstances] = useState<ConnectorInstance[]>(connectors);
+  const [instances, setInstances] = useState<ConnectorInstance[]>(connectors || []);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {

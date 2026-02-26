@@ -125,7 +125,7 @@ export function SettingsClient({
   }, []);
 
   // Mutable local copy of allCustomers so we can append workspaces without page reload
-  const [localCustomers, setLocalCustomers] = useState(allCustomers);
+  const [localCustomers, setLocalCustomers] = useState(allCustomers || []);
   const connectedTypes = new Set((connectors || []).map((c) => c.connector_type));
 
   // GitHub Quick Connect modal state

@@ -33,7 +33,7 @@ const RATE_LIMIT_OPTIONS = [
 ];
 
 export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
-  const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
+  const [keys, setKeys] = useState<ApiKey[]>(initialKeys || []);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyPermissions, setNewKeyPermissions] = useState<string[]>(["read"]);
@@ -197,7 +197,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="text-[10px] text-muted">
-                    {key.permissions.join(", ")}
+                    {(key.permissions || []).join(", ")}
                   </span>
                   <span className="text-[10px] text-muted">
                     {key.rate_limit_per_minute}/min

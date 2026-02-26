@@ -54,7 +54,14 @@ export async function GET(request: NextRequest) {
       durationMs,
     });
   } catch (err) {
+    const durationMs = Date.now() - startMs;
     logger.error("[cron/process-jobs] Error:", err);
-    return NextResponse.json({ error: "Worker failed" }, { status: 500 });
+    // Return 200 even on unexpected failure — cron schedulers that see 5xx may
+    // retry immediately or back off exponentially, causing thundering herd.
+    // The error is captured in logs; retrying a broken job every 2 min is safer.
+    return NextResponse.json(
+      { ok: false, error: "Worker failed", workerType, durationMs },
+      { status: 200 }
+    );
   }
 }
