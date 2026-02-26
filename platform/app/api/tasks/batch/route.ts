@@ -131,6 +131,7 @@ export async function POST(request: NextRequest) {
         ? task.auto_execute_threshold - task.confidence_score
         : null;
 
+      const _signalNow = new Date().toISOString();
       signalInserts.push({
         organization_id: task.organization_id,
         source_domain: "brain.agents",
@@ -152,6 +153,9 @@ export async function POST(request: NextRequest) {
           ...(action === "reject" && note ? { rejectionNote: note.slice(0, 500) } : {}),
           closedLoopTrackingId: task.result_metadata?.closedLoopTrackingId || null,
         },
+        // signal_timestamp required for rl-status hourly/daily/weekly window queries
+        signal_timestamp: _signalNow,
+        created_at: _signalNow,
       });
     }
 

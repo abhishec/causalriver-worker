@@ -168,6 +168,7 @@ export async function dispatch(
 
     // ── Persist trace to cross_domain_signals ──────────────
     if (message.context?.organizationId) {
+      const _now = new Date().toISOString();
       await supabase.from("cross_domain_signals").insert({
         organization_id: message.context.organizationId,
         source_domain: "brain.agent_bus",
@@ -185,6 +186,8 @@ export async function dispatch(
           depth,
           responseStrategy: message.responseStrategy,
         },
+        signal_timestamp: _now,
+        created_at: _now,
       });
       // Fire-and-forget: non-critical signal
     }

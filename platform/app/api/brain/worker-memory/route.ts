@@ -48,6 +48,15 @@ export async function GET(req: NextRequest) {
   try {
     const workspaceId = await getCurrentWorkspaceId();
 
+    if (!workspaceId) {
+      return NextResponse.json({
+        workers: [],
+        totalActiveWorkers: 0,
+        workersNeedingCleanup: 0,
+        systemMemoryPercent: 0,
+      });
+    }
+
     // Fetch active tasks from the last 24 hours
     const { data: tasks, error: tasksError } = await supabase
       .from("brain_agent_tasks")

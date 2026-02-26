@@ -361,6 +361,7 @@ export async function evaluateTest(
       .eq("id", testId);
 
     // Emit RL signal for test completion
+    const _abNow = new Date().toISOString();
     await supabase.from("cross_domain_signals").insert({
       organization_id: test.organization_id,
       source_domain: "brain.ab_testing",
@@ -379,6 +380,9 @@ export async function evaluateTest(
         bScore,
         improvementPct: aScore > 0 ? ((bScore - aScore) / aScore * 100).toFixed(1) : "N/A",
       },
+      // signal_timestamp required for rl-status hourly/daily/weekly window queries
+      signal_timestamp: _abNow,
+      created_at: _abNow,
     });
 
     return winner;

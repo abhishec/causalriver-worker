@@ -102,6 +102,7 @@ export async function POST(_request: NextRequest, { params }: Props) {
 
     // Emit cancellation signal for RL learning
     try {
+      const _cancelNow = new Date().toISOString();
       await service.from("cross_domain_signals").insert({
         organization_id: run.organization_id,
         source_domain: "brain.workflows",
@@ -114,6 +115,9 @@ export async function POST(_request: NextRequest, { params }: Props) {
           cancelledBy: user.id,
           previousStatus: run.status,
         },
+        // signal_timestamp required for rl-status hourly/daily/weekly window queries
+        signal_timestamp: _cancelNow,
+        created_at: _cancelNow,
       });
     } catch {
       // Non-critical — don't fail the cancellation

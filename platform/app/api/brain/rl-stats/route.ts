@@ -71,6 +71,19 @@ export async function GET(req: NextRequest) {
     );
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({
+        totalOutcomes: 0,
+        overallSuccessRate: 0,
+        overallAvgQuality: 0,
+        byDomain: [],
+        recentOutcomes: [],
+        evolutionToday: null,
+        evolutionYesterday: null,
+        lookbackDays,
+        updatedAt: new Date().toISOString(),
+      });
+    }
     const admin = getAdminClient();
 
     // ── RL summary (per-domain accuracy + recent outcomes) ──────────────
