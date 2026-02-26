@@ -3964,6 +3964,8 @@ Additional context:
     // "Show me our Slack standup notes" with "Slack is not connected — go to /connectors"
     // rather than a generic "I don't have data on that."
     // We only fetch the lightweight (connector_type, status) projection — no credentials.
+    // _activeConnectors is hoisted so the decision record (below) can reference it.
+    let _activeConnectors: string[] = [];
     try {
       const { data: orgConnectors } = await service
         .from("org_connectors")
@@ -3972,6 +3974,7 @@ Additional context:
 
       if (orgConnectors && orgConnectors.length > 0) {
         const activeC = orgConnectors.filter((c: { status: string }) => c.status === "active").map((c: { connector_type: string }) => c.connector_type);
+        _activeConnectors = activeC;
         const inactiveC = orgConnectors.filter((c: { status: string }) => c.status !== "active").map((c: { connector_type: string }) => c.connector_type);
 
         effectiveSystemPrompt += `\n\n## CONNECTED DATA SOURCES
@@ -4026,6 +4029,33 @@ No connectors are configured yet. When the user asks for data from any source (S
     });
     // Apply Brain IQ gate: if brain is not ready, downgrade general copilot queries to Haiku
     const v4SmartModel = brainIqForRouting < 10 ? "claude-haiku-4-5-20251001" : v4SmartModelBase;
+
+    // ── Decision Record: capture routing intelligence for brain training ──
+    // Initialized before the stream so it's accessible in the post-stream RL block.
+    // responseQuality and durationMs are backfilled after computeAgentQuality().
+    const _sessionId = `copilot_${workspaceId}_${Date.now()}`;
+    const _decisionRecord = {
+      sessionId: _sessionId,
+      orgId: workspaceId,
+      userId: user.id,
+      query: message.trim().slice(0, 200),
+      detectedIntent: detectedIntent ?? 'general',
+      routedDomain: seaasRoute?.domainType ?? null,
+      modelSelected: v4SmartModel,
+      modelRationale: brainIqForRouting < 10
+        ? `Brain IQ ${brainIqForRouting} < 10: downgraded to Haiku`
+        : `Brain IQ ${brainIqForRouting}: selected ${v4SmartModel}`,
+      brainContextUsed: !!brainContext,
+      brainIqAtDecision: brainIqForRouting ?? 0,
+      causalEdgesAvailable: causalEdges?.length ?? 0,
+      activeConnectors: _activeConnectors,
+      // seaasRoute present + executedSeaasDomain set = executed. seaasRoute present but no execution = queued/blocked.
+      orchestrationDecision: (!seaasRoute ? 'not-applicable' : (executedSeaasDomain ? 'execute-now' : 'queue-waiting')) as 'execute-now' | 'queue-waiting' | 'not-applicable',
+      responseQuality: 0,  // backfilled post-stream
+      durationMs: 0,       // backfilled post-stream
+      timestamp: new Date().toISOString(),
+    };
+    logger.debug(`[Copilot] Decision record init: intent=${_decisionRecord.detectedIntent} domain=${_decisionRecord.routedDomain} model=${v4SmartModel} iq=${brainIqForRouting}`);
 
     // ── Stream via Anthropic ──────────────────────────────────────────
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
@@ -4424,6 +4454,57 @@ No connectors are configured yet. When the user asks for data from any source (S
             organizationId: workspaceId,
             userId: user.id,
           }).catch((rlErr: unknown) => logger.warn('[Copilot] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr)));
+
+          // ── Decision Pattern Training: backfill quality + write brain training data ──
+          // Now that we have the computed quality, backfill the pre-initialized decision
+          // record and write it to ai_memory (positive examples only, quality >= 0.6) and
+          // cross_domain_signals (all examples — brain needs negative examples too).
+          _decisionRecord.responseQuality = _rlQuality;
+          _decisionRecord.durationMs = _rlExecutionMs;
+          logger.debug(`[Copilot] Decision quality: intent=${_decisionRecord.detectedIntent} quality=${_rlQuality.toFixed(2)} model=${_decisionRecord.modelSelected}`);
+
+          // Write high-quality decisions to ai_memory as pattern training data.
+          // Uses upsert on (organization_id, memory_type, domain) unique index so rows
+          // don't grow unboundedly — each intent gets one row, updated on each interaction.
+          if (_rlQuality >= 0.6) {
+            Promise.resolve(
+              service.from('ai_memory').upsert({
+                organization_id: workspaceId,
+                domain: `routing.${_decisionRecord.detectedIntent}`,
+                memory_type: 'pattern',
+                content: `Query: "${_decisionRecord.query}" → Intent: ${_decisionRecord.detectedIntent}, Domain: ${_decisionRecord.routedDomain ?? 'none'}, Quality: ${(_rlQuality * 100).toFixed(0)}%`,
+                importance: _rlQuality,
+                metadata: {
+                  type: 'claude_decision_pattern',
+                  record: _decisionRecord,
+                },
+              }, {
+                onConflict: 'organization_id,memory_type,domain',
+                ignoreDuplicates: false,
+              })
+            ).catch(() => {}); // fire-and-forget
+          }
+
+          // Emit llm_decision signal for ALL queries (including low-quality — brain needs
+          // negative training examples to learn what routing patterns to avoid).
+          const { createBrainFeedbackBus: _decisionFeedbackBus } = memStack;
+          const _decisionBus = _decisionFeedbackBus({ supabase: service, organizationId: workspaceId });
+          _decisionBus.emitSignal({
+            sourceDomain: 'copilot.routing',
+            signalType: 'llm_decision',
+            signalValue: _rlQuality,
+            entityType: 'routing_decision',
+            entityId: _sessionId,
+            metadata: {
+              intent: _decisionRecord.detectedIntent,
+              domain: _decisionRecord.routedDomain,
+              model: _decisionRecord.modelSelected,
+              brainIq: _decisionRecord.brainIqAtDecision,
+              causalEdges: _decisionRecord.causalEdgesAvailable,
+              orchestration: _decisionRecord.orchestrationDecision,
+              activeConnectors: _decisionRecord.activeConnectors,
+            },
+          }).catch(() => {}); // fire-and-forget
         } catch (rlErr: unknown) {
           logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
         }
