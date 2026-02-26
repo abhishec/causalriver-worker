@@ -54,6 +54,8 @@ interface ConnectorsClientProps {
   lastBrainTrainedAt: string | null;
   /** Organization ID for scoping write-back rules */
   organizationId: string;
+  /** User role from org_members — used to gate write-back rule management */
+  userRole?: string | null;
 }
 
 /* ── Domain colors ─────────────────────────────────────────────── */
@@ -113,6 +115,7 @@ export function ConnectorsClient({
   totalSignals,
   lastBrainTrainedAt,
   organizationId,
+  userRole,
 }: ConnectorsClientProps) {
   const router = useRouter();
   const [showSetupModal, setShowSetupModal] = useState(false);
@@ -125,8 +128,9 @@ export function ConnectorsClient({
   const [freshworksDomain, setFreshworksDomain] = useState("");
   const [showFreshworksInput, setShowFreshworksInput] = useState(false);
 
-  // Health data: per-type polling every 60s to show live last-sync + auth method
+  // Health data: per-type polling every 60s to show live last-sync + auth method + status
   const [healthMap, setHealthMap] = useState<Record<string, {
+    status: string;
     lastSyncAt: string | null;
     signalsCount: number;
     errorMessage: string | null;
@@ -137,10 +141,10 @@ export function ConnectorsClient({
     const fetchHealth = () => {
       fetch("/api/connectors/health")
         .then((r) => r.ok ? r.json() : [])
-        .then((rows: Array<{ type: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null }>) => {
+        .then((rows: Array<{ type: string; status: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null }>) => {
           const m: typeof healthMap = {};
           for (const row of rows) {
-            m[row.type] = { lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod };
+            m[row.type] = { status: row.status, lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod };
           }
           setHealthMap(m);
         })
@@ -451,13 +455,16 @@ export function ConnectorsClient({
                         <span className="text-muted">
                           Signals:{" "}
                           <span className="text-foreground font-mono tabular-nums">
-                            {formatNumber(instance.signalsCount || signalCount)}
+                            {formatNumber(health?.signalsCount ?? instance.signalsCount ?? signalCount)}
                           </span>
                         </span>
                         <span className="text-muted">
                           Last sync:{" "}
                           <span className="text-foreground font-medium">
-                            {instance.lastSyncAt ? formatRelativeTime(new Date(instance.lastSyncAt)) : "Never"}
+                            {(() => {
+                              const ts = health?.lastSyncAt ?? instance.lastSyncAt;
+                              return ts ? formatRelativeTime(new Date(ts)) : "Never synced";
+                            })()}
                           </span>
                         </span>
                         <span className="text-muted flex items-center gap-1">
@@ -553,7 +560,7 @@ export function ConnectorsClient({
 
                     {/* Actions */}
                     <div className="flex flex-col gap-1.5 shrink-0">
-                      {instance.status === "error" && (
+                      {(instance.status === "error" || health?.status === "error") && (
                         <button
                           onClick={() => handleOAuthConnect(instance.connectorType)}
                           className="px-3 py-1.5 rounded-lg bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 transition-colors flex items-center gap-1.5"
@@ -857,7 +864,7 @@ export function ConnectorsClient({
             Automatically push AI Worker results to Slack, Jira, or GitHub
           </span>
         </div>
-        <WritebackRulesPanel organizationId={organizationId} />
+        <WritebackRulesPanel organizationId={organizationId} userRole={userRole} />
       </div>
 
       {/* GitHub Setup Modal — token + branch selection + data lookback */}

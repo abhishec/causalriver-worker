@@ -46,8 +46,11 @@ export default async function ConnectorsPage() {
       return { data: null as T | null, error: err };
     });
 
-  // Fetch signal counts, all connectors, sync progress, and last brain training run in parallel
-  const [signalsResult, connectorsResult, checkpointsResult, lastBrainRunResult] = await Promise.all([
+  // Fetch the current user so we can look up their role
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Fetch signal counts, all connectors, sync progress, last brain training run, and user role in parallel
+  const [signalsResult, connectorsResult, checkpointsResult, lastBrainRunResult, membershipResult] = await Promise.all([
     safe(supabase
       .from("cross_domain_signals")
       .select("source_domain")
@@ -70,6 +73,15 @@ export default async function ConnectorsPage() {
       .in("job_type", ["brain_cycle_full", "brain_cycle_sleep"])
       .order("completed_at", { ascending: false })
       .limit(1)),
+    // User role — used to gate write-back rule management (admin/owner only)
+    user
+      ? safe(supabase
+          .from("org_members")
+          .select("role")
+          .eq("organization_id", workspaceId)
+          .eq("user_id", user.id)
+          .maybeSingle())
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
   const signals = signalsResult.data || [];
@@ -78,6 +90,7 @@ export default async function ConnectorsPage() {
   const lastBrainRuns = lastBrainRunResult.data || [];
   const lastBrainTrainedAt: string | null =
     lastBrainRuns.length > 0 ? (lastBrainRuns[0] as { completed_at: string }).completed_at : null;
+  const userRole: string | null = (membershipResult.data as { role: string } | null)?.role ?? null;
 
   // Count signals by domain
   const domainCounts: Record<string, number> = {};
@@ -130,6 +143,7 @@ export default async function ConnectorsPage() {
       totalSignals={signals.length}
       lastBrainTrainedAt={lastBrainTrainedAt}
       organizationId={workspaceId}
+      userRole={userRole}
     />
   );
 }

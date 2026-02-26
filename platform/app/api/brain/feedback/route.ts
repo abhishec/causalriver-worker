@@ -24,6 +24,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +117,30 @@ export async function POST(request: NextRequest) {
           created_at: new Date().toISOString(),
         });
       } catch { /* non-critical */ }
+    })();
+
+    // ── Close the RL flywheel: user feedback → prediction_records ──────────
+    // Maps 👍/👎 into a quality score and writes to prediction_records so
+    // getBrainContext() can read it back and inform every subsequent LLM decision.
+    void (async () => {
+      try {
+        // Map rating → quality score: helpful=1.0, not_helpful=0.2, incorrect=0.0
+        const qualityFromFeedback =
+          rating === "helpful" ? 1.0 : rating === "incorrect" ? 0.0 : 0.2;
+
+        await recordAgentOutcome(service, {
+          agentId: messageId,
+          domain: domainId ?? "copilot",
+          taskDescription: `User feedback on message ${messageId}`,
+          resultSummary: correction
+            ? `${rating}: ${correction.slice(0, 200)}`
+            : rating,
+          quality: qualityFromFeedback,
+          executionMs: 0,
+          organizationId: workspaceId,
+          userId: user.id,
+        });
+      } catch { /* non-critical — feedback already saved above */ }
     })();
 
     if (insertError) {

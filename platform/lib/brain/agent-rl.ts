@@ -184,6 +184,54 @@ export async function recordAgentOutcome(
   }
 }
 
+// ── Recent Quality Patterns ────────────────────────────────────────────────
+
+/**
+ * Returns recent quality patterns for brain context injection.
+ * Called by getBrainContext() to inform every LLM decision with RL history.
+ *
+ * Uses the actual prediction_records schema:
+ *   - "confidence" column (not "quality_score" — that column does not exist)
+ *   - "domain" column (not "task_type" — that column is on agent_queue)
+ */
+export async function getRecentQualityPatterns(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<{ avgQuality: number; topPatterns: string[]; sampleSize: number }> {
+  try {
+    const { data } = await supabase
+      .from("prediction_records")
+      .select("confidence, domain, metadata")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (!data || data.length === 0) {
+      return { avgQuality: 0, topPatterns: [], sampleSize: 0 };
+    }
+
+    const avgQuality =
+      data.reduce((sum, r) => sum + (typeof r.confidence === "number" ? r.confidence : 0), 0) /
+      data.length;
+
+    // Extract patterns from high-quality (>= 0.75) responses using domain as the pattern key
+    const highQuality = data.filter(r => (typeof r.confidence === "number" ? r.confidence : 0) >= 0.75);
+    const patternMap = new Map<string, number>();
+    for (const r of highQuality) {
+      const key = (r.domain as string | null) ?? "general";
+      patternMap.set(key, (patternMap.get(key) ?? 0) + 1);
+    }
+    const topPatterns = [...patternMap.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([pattern]) => pattern);
+
+    return { avgQuality, topPatterns, sampleSize: data.length };
+  } catch {
+    return { avgQuality: 0, topPatterns: [], sampleSize: 0 };
+  }
+}
+
 // ── Learning Stats ─────────────────────────────────────────────────────────
 
 /**

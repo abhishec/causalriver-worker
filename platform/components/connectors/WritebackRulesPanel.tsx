@@ -748,9 +748,12 @@ function QueueEntryRow({ entry }: { entry: QueueEntry }) {
 
 export interface WritebackRulesPanelProps {
   organizationId: string;
+  /** User role from org_members — "admin" and "owner" can create/delete rules; others can only view */
+  userRole?: string | null;
 }
 
-export function WritebackRulesPanel({ organizationId: _organizationId }: WritebackRulesPanelProps) {
+export function WritebackRulesPanel({ organizationId: _organizationId, userRole }: WritebackRulesPanelProps) {
+  const canManageRules = userRole === "admin" || userRole === "owner";
   const [rules, setRules] = useState<WritebackRule[]>([]);
   const [queueEntries, setQueueEntries] = useState<QueueEntry[]>([]);
   const [rulesLoading, setRulesLoading] = useState(true);
@@ -864,21 +867,23 @@ export function WritebackRulesPanel({ organizationId: _organizationId }: Writeba
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              disabled={showAddForm}
-              className="px-3 py-1.5 bg-accent text-white text-xs font-medium rounded-lg hover:bg-accent/90 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Add Rule
-            </button>
+            {canManageRules && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                disabled={showAddForm}
+                className="px-3 py-1.5 bg-accent text-white text-xs font-medium rounded-lg hover:bg-accent/90 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Add Rule
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Add rule form */}
-        {showAddForm && (
+        {/* Add rule form — only rendered when role permits */}
+        {canManageRules && showAddForm && (
           <AddRuleForm
             onCreated={handleCreated}
             onCancel={() => setShowAddForm(false)}
@@ -929,12 +934,14 @@ export function WritebackRulesPanel({ organizationId: _organizationId }: Writeba
             <p className="text-xs text-muted max-w-xs">
               Add one to start automating your AI Worker&apos;s outputs — push pod matches to Slack, open Jira tickets on scope creep, and more.
             </p>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="mt-3 px-3 py-1.5 bg-accent/10 text-accent text-xs font-medium rounded-lg hover:bg-accent/20 transition-colors"
-            >
-              Add First Rule
-            </button>
+            {canManageRules && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="mt-3 px-3 py-1.5 bg-accent/10 text-accent text-xs font-medium rounded-lg hover:bg-accent/20 transition-colors"
+              >
+                Add First Rule
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
