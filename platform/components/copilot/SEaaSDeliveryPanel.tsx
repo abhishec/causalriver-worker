@@ -253,7 +253,7 @@ function PodMatchCard({ match }: { match: PodMatchData }) {
           <div className="flex flex-col gap-1">
             {pastEng.slice(0, 2).map((p, i) => (
               <div key={i} className="flex items-center justify-between text-[11px]">
-                <span className="text-muted truncate">{p.clientName}</span>
+                <span className="text-muted truncate">{p?.clientName ?? "Client"}</span>
                 <span className={cn(
                   "font-semibold tabular-nums",
                   p.healthScore >= 75 ? "text-green-400" : p.healthScore >= 50 ? "text-yellow-400" : "text-red-400"
