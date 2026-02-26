@@ -3626,6 +3626,18 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       // Non-fatal: learning context is enrichment
     }
 
+    // ── Brain Context Injection — pre-enrich every LLM call with brain state ──
+    // Non-fatal: if getBrainContext fails, proceed without enrichment.
+    try {
+      const { getBrainContext } = await import("@/lib/brain/brain-context");
+      const brainCtx = await getBrainContext(service, workspaceId);
+      if (brainCtx.brainState !== "empty") {
+        effectiveSystemPrompt += `\n\n## Brain Context\n${brainCtx.contextSummary}`;
+      }
+    } catch {
+      // non-fatal — proceed without brain context
+    }
+
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModel = selectSmartModel(message, {

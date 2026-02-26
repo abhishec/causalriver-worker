@@ -160,6 +160,20 @@ export async function executeDomain(
     (params.request as Record<string, unknown>)["_caseLogContext"] = caseLogContext;
   }
 
+  // ── Step -1b: Brain Context Priming — inject live brain state into every domain ──
+  // Non-blocking: if getBrainContext fails, domain execution continues unaffected.
+  let brainContextStr = "";
+  try {
+    const { getBrainContext } = await import("@/lib/brain/brain-context");
+    const brainCtx = await getBrainContext(supabase, params.organizationId);
+    brainContextStr = brainCtx.contextSummary;
+    if (brainContextStr) {
+      (params.request as Record<string, unknown>)["_brainContextStr"] = brainContextStr;
+    }
+  } catch {
+    // non-fatal — domain proceeds without brain context enrichment
+  }
+
   // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
   // NB-063: Mirrors AAS executor Step 0. We capture the org's causal graph
   // state RIGHT NOW, before the domain runs and before the feedback bus fires
