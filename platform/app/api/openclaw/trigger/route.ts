@@ -14,7 +14,7 @@
  *
  *   Body: {
  *     message: string,            // The user's message / command
- *     organizationId?: string,    // defaults to CORE_WORKSPACE_ID
+ *     organizationId: string,     // required — workspace scoping enforced
  *     sessionKey?: string,        // optional session key for conversation continuity
  *     agentId?: string,           // optional: target a specific agent
  *   }
@@ -22,7 +22,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager, triggerOpenClawAgent } from "@/lib/openclaw/gateway-client";
 import type { AgentStreamEvent } from "@/lib/openclaw/gateway-client";
 import { logger } from "@/lib/logger";

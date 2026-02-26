@@ -24,7 +24,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager } from "@/lib/openclaw/gateway-client";
 import { logger } from "@/lib/logger";
 
@@ -63,7 +62,10 @@ export async function GET(request: NextRequest) {
 
     // ── Resolve org ──────────────────────────────────────────────
     const params = request.nextUrl.searchParams;
-    const workspaceId = params.get("organizationId") || CORE_WORKSPACE_ID;
+    const workspaceId = params.get("organizationId");
+    if (!workspaceId) {
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase
@@ -211,7 +213,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const workspaceId = organizationId || CORE_WORKSPACE_ID;
+    if (!organizationId) {
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
+    const workspaceId = organizationId;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase

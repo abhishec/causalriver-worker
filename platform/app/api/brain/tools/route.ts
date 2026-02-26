@@ -19,7 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+
 
 export const dynamic = 'force-dynamic';
 
@@ -255,7 +255,7 @@ export async function POST(request: NextRequest) {
           .order("joined_at", { ascending: true })
           .limit(1)
           .maybeSingle();
-        workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
+        workspaceId = membership?.organization_id ?? null;
       }
     }
 

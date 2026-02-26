@@ -11,7 +11,7 @@
  *   Body: {
  *     gatewayUrl: string,       // e.g. "wss://openclaw.mycompany.dev:18789"
  *     authToken: string,        // Bearer token for gateway auth
- *     organizationId?: string,  // defaults to CORE_WORKSPACE_ID
+ *     organizationId: string,   // required — workspace scoping enforced
  *     webhookUrl?: string,      // optional callback URL for async events
  *     webhookToken?: string,    // optional token for webhook auth
  *   }
@@ -21,7 +21,6 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { gatewayManager } from "@/lib/openclaw/gateway-client";
 import type { GatewayConfig } from "@/lib/openclaw/gateway-client";
 import { logger } from "@/lib/logger";
@@ -89,7 +88,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const workspaceId = organizationId || CORE_WORKSPACE_ID;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: "organizationId is required" },
+        { status: 400 }
+      );
+    }
+    const workspaceId = organizationId;
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase

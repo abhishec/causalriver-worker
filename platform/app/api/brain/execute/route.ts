@@ -32,7 +32,6 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {

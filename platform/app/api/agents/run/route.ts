@@ -21,7 +21,6 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { executeAgent } from "@/lib/agents/execute";
 
