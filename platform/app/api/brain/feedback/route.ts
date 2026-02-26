@@ -182,7 +182,11 @@ export async function POST(request: NextRequest) {
         source_domain: "user_feedback",
         target_domain: domainId || "general",
         signal_type: signalType,
+        // signal_value is NOT NULL — use the strength as the numeric value for RL signals
+        signal_value: signalStrength,
         signal_strength: signalStrength,
+        entity_type: "feedback",
+        entity_id: messageId,
         signal_timestamp: new Date().toISOString(),
         payload: {
           feedback_rating: rating,

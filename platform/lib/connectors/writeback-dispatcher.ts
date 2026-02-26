@@ -544,7 +544,11 @@ export async function processWritebackQueue(
               source_domain: "writeback",
               target_domain: item.connector_type,
               signal_type: "gaba",
+              // signal_value is NOT NULL — use the strength as numeric RL value
+              signal_value: -0.4,
               signal_strength: -0.4,
+              entity_type: "writeback",
+              entity_id: item.id,
               signal_timestamp: new Date().toISOString(),
               payload: {
                 reason: "write_back_dead_letter",

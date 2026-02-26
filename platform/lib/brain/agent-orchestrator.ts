@@ -436,7 +436,11 @@ export async function checkAndStartWaitingJobs(
             source_domain: "orchestrator",
             target_domain: (entry.depends_on_type as string) ?? "unknown",
             signal_type: signalType,
+            // signal_value is NOT NULL — use strength as the numeric RL value
+            signal_value: signalStrength,
             signal_strength: signalStrength,
+            entity_type: "job",
+            entity_id: entry.job_id,
             signal_timestamp: new Date().toISOString(),
             payload: {
               reason: "job_unblocked",
@@ -537,7 +541,11 @@ export async function checkAndStartBrainDependentJobs(
             source_domain: "orchestrator",
             target_domain: "brain-population",
             signal_type: signalType,
+            // signal_value is NOT NULL — use strength as the numeric RL value
+            signal_value: signalStrength,
             signal_strength: signalStrength,
+            entity_type: "job",
+            entity_id: entry.job_id,
             signal_timestamp: new Date().toISOString(),
             payload: {
               reason: "brain_dependent_job_unblocked",
