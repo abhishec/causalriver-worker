@@ -15,11 +15,17 @@ export async function POST(request: NextRequest) {
     }
     const payload = bodyResult.data as Record<string, unknown>;
 
+    // Validate required fields for TDD generation
+    if (!payload.code && !payload.requirements && !payload.spec) {
+      return createSeAaSError(request, "code, requirements, or spec is required for TDD generation", 400);
+    }
+
     const { jobId } = await submitSeAaSJob(auth.supabase, {
       organizationId: auth.organizationId,
       domainType: "tdd-code-generator",
-      payload,
+      request: payload,
       userId: auth.userId,
+      anthropicApiKey: auth.anthropicApiKey,
     });
 
     return createSeAaSResponse(request, {
