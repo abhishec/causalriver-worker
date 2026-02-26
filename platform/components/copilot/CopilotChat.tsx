@@ -1095,6 +1095,10 @@ export async function consumeSSEStream(
             if (parsed.agentStatus) {
               callbacks.onAgentStatus?.(parsed.agentStatus);
             }
+            // SE-aaS domain running indicator (type discriminator pattern)
+            if (parsed.type === 'agent_status') {
+              callbacks.onSeaasDomainStatus?.(parsed as { type: 'agent_status'; status: 'running' | 'complete'; domain: string; message?: string });
+            }
             if (parsed.progressiveArtifact) {
               callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
             }
@@ -1556,6 +1560,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
   const agentStepsRef = useRef(agentSteps);
   agentStepsRef.current = agentSteps;
+
+  // ── SE-aaS domain running indicator — shown while agent processes request ──
+  const [agentRunningDomain, setAgentRunningDomain] = useState<string | null>(null);
+  const [agentRunningMessage, setAgentRunningMessage] = useState<string | null>(null);
 
   // ── Workflow progress state ─────────────────────────────────────────────
   const [workflowProgress, setWorkflowProgress] = useState<WorkflowProgress | null>(null);
@@ -2207,6 +2215,16 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               });
             }
           },
+          onSeaasDomainStatus: (event) => {
+            if (controller.signal.aborted) return;
+            if (event.status === 'running') {
+              setAgentRunningDomain(event.domain);
+              setAgentRunningMessage(event.message ?? null);
+            } else if (event.status === 'complete') {
+              setAgentRunningDomain(null);
+              setAgentRunningMessage(null);
+            }
+          },
           onProgressiveArtifact: (artifact) => {
             if (controller.signal.aborted) return;
             // Forward progressive artifacts to the parent as copilot artifacts
@@ -2843,6 +2861,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* SE-aaS Agent Running Indicator — shown while domain agent processes request */}
+            {agentRunningDomain && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground px-4 py-2 bg-muted/30 rounded-lg animate-pulse">
+                <span className="text-base">🔄</span>
+                <span>{agentRunningMessage || `Running ${agentRunningDomain} agent...`}</span>
+              </div>
+            )}
 
             <div ref={messagesEndRef} />
           </div>

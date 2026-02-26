@@ -366,6 +366,8 @@ export interface SSECallbacks {
   onAgentComms?: (comms: AgentCommsPayload) => void;
   /** Agent input request: agent needs more info before it can run */
   onAgentInputRequest?: (request: AgentInputRequest) => void;
+  /** SE-aaS domain status: emitted when a domain agent starts/completes execution */
+  onSeaasDomainStatus?: (event: { type: 'agent_status'; status: 'running' | 'complete'; domain: string; message?: string }) => void;
   onDone: () => void;
 }
 

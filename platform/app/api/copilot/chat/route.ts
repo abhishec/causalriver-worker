@@ -921,6 +921,8 @@ export async function POST(request: NextRequest) {
     // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
     // Uses LLM interpretation for semantic service routing (replaces 350+ lines of regex).
     // Falls back to regex detectSEaaSRoute/detectAccountingRoute if interpretation unavailable.
+    // Track which domain was executed so SSE can emit agent_status events at stream start.
+    let executedSeaasDomain: string | null = null;
     let seaasResult: Record<string, unknown> | null = null;
     let accountingResult: Record<string, unknown> | null = null;
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
@@ -1070,6 +1072,8 @@ export async function POST(request: NextRequest) {
             ...domainResult.result,
           };
         }
+        // Track which domain completed so SSE IIFE can emit agent_status events
+        executedSeaasDomain = seaasRoute.domainType;
       } catch (seaasErr) {
         logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
         // Surface a user-visible error instead of silent failure
@@ -3711,29 +3715,52 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       // ── Brain Status Guidance — injected into every LLM call so the AI can answer
       // "Is my brain trained?" / "What should I do to start?" correctly.
       // This supplements the brainWarning SSE banner with actionable LLM guidance.
+      //
+      // Intent triggers: "is my brain trained", "check brain", "what should I do",
+      // "how do I start", "is my AI ready", "brain status", "train my brain", "am I ready"
       if (brainCtx.brainState === "empty") {
-        effectiveSystemPrompt += `\n\n## BRAIN STATUS: NOT STARTED (IQ: 0)
-The user's Brain has ZERO signals. No connectors have been set up.
-If the user asks whether their brain is trained, or what they should do to get started, respond:
-- Their brain has not started learning yet (Brain IQ: 0 / 100)
-- They need to connect data sources first. The most impactful starting points are:
-  1. GitHub — go to /connectors → click "Connect GitHub" to install the BrainOS GitHub App. This enables PR velocity, review burden, and code change signals.
-  2. Jira — go to /connectors → click "Connect Jira" to link their Atlassian workspace. This enables sprint health, ticket drift, and scope-creep signals.
-- Once connected, the brain will automatically start ingesting signals and Brain IQ will begin rising.
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS GUIDANCE (CRITICAL)
+Brain IQ: ${brainCtx.brainIq}/100 | Signals: ${brainCtx.signalCount}
+
+When the user asks about brain status, training, readiness, or "what should I do to start":
+Respond: "🧠 I've checked your AI Worker Brain — it's still in early learning mode (IQ: ${brainCtx.brainIq}/100). To accelerate training, connect your GitHub and Jira data sources from the Connections panel on the left. Once connected, your brain will automatically start processing engineering signals and building intelligence within minutes."
+
+Intent triggers for brain status check: "is my brain trained", "check brain", "what should I do", "how do I start", "is my AI ready", "brain status", "train my brain", "am I ready"
+
+Additional context:
+- Their brain has not started learning yet (Brain IQ: ${brainCtx.brainIq} / 100)
+- They need to connect data sources first:
+  1. GitHub — go to /connectors → click "Connect GitHub"
+  2. Jira — go to /connectors → click "Connect Jira"
+- Once connected, Brain IQ will begin rising automatically.
 - Brain IQ >= 10 means the brain is learning. Brain IQ >= 20 means it is ready for full SE-aaS analysis.
 Be encouraging and specific. Do NOT say "I don't know" — give them the exact next steps above.`;
       } else if (brainCtx.brainIq < 10) {
-        effectiveSystemPrompt += `\n\n## BRAIN STATUS: LEARNING — LOW IQ (IQ: ${brainCtx.brainIq})
-The user's Brain is learning but still building its model (${brainCtx.signalCount} signals collected so far).
-If the user asks whether their brain is trained or ready:
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS GUIDANCE (CRITICAL)
+Brain IQ: ${brainCtx.brainIq}/100 | Signals: ${brainCtx.signalCount}
+
+When the user asks about brain status, training, readiness, or "what should I do to start":
+Respond: "🧠 Your brain is actively learning (IQ: ${brainCtx.brainIq}/100, ${brainCtx.signalCount} signals processed). You can start using SE-aaS commands now — accuracy will improve as more data flows in."
+
+Intent triggers for brain status check: "is my brain trained", "check brain", "what should I do", "how do I start", "is my AI ready", "brain status", "train my brain", "am I ready"
+
+Additional context:
 - Brain IQ is ${brainCtx.brainIq}/100 — the brain is learning but needs more signals.
 - They can start using SE-aaS commands (delivery intelligence, pod match, early warning) but accuracy improves as more signals accumulate.
 - Encourage them to connect more data sources from /connectors if they haven't already (GitHub, Jira).
 - Brain IQ >= 20 unlocks full prediction accuracy. They are ${Math.max(0, 20 - brainCtx.brainIq)} IQ points away.`;
       } else {
-        effectiveSystemPrompt += `\n\n## BRAIN STATUS: ACTIVE AND READY (IQ: ${brainCtx.brainIq})
-The brain is fully active with ${brainCtx.signalCount} signals (IQ: ${brainCtx.brainIq}/100).
-If asked whether the brain is trained: confirm yes, it is active and ready. Highlight the IQ score and top signal domains.`;
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS GUIDANCE (CRITICAL)
+Brain IQ: ${brainCtx.brainIq}/100 | Signals: ${brainCtx.signalCount}
+
+When the user asks about brain status, training, readiness, or "what should I do to start":
+Respond: "🧠 Your brain is trained and ready (IQ: ${brainCtx.brainIq}/100). I have ${brainCtx.signalCount} engineering signals processed. Try /early-warning or /delivery-intelligence to get started."
+
+Intent triggers for brain status check: "is my brain trained", "check brain", "what should I do", "how do I start", "is my AI ready", "brain status", "train my brain", "am I ready"
+
+Additional context:
+- The brain is fully active with ${brainCtx.signalCount} signals (IQ: ${brainCtx.brainIq}/100).
+- If asked whether the brain is trained: confirm yes, it is active and ready. Highlight the IQ score and top signal domains.`;
       }
     } catch {
       // non-fatal — proceed without brain context
@@ -3765,6 +3792,25 @@ If asked whether the brain is trained: confirm yes, it is active and ready. High
         // This must be sent BEFORE any text so the frontend can update state.
         if (orchestratorResult) {
           send(JSON.stringify({ orchestratorQueued: orchestratorResult }));
+        }
+
+        // ── Agent Status: emit domain execution events for SE-aaS domains ──
+        // Domain execution happens before the SSE stream is created (it's synchronous prep).
+        // We emit a "complete" status here so the frontend knows which agent ran.
+        // The "running" status is emitted first so the UI can show a transitional state.
+        if (executedSeaasDomain) {
+          send(JSON.stringify({
+            type: 'agent_status',
+            status: 'running',
+            domain: executedSeaasDomain,
+            message: `🔄 Starting ${executedSeaasDomain} agent... checking your engineering data`,
+          }));
+          // Immediately follow with complete since execution already finished
+          send(JSON.stringify({
+            type: 'agent_status',
+            status: 'complete',
+            domain: executedSeaasDomain,
+          }));
         }
 
         // ── Proactive Insights: "While you were away" (Week 6) ──
@@ -4000,11 +4046,14 @@ If asked whether the brain is trained: confirm yes, it is active and ready. High
           } catch { /* already closed */ }
         }, 120_000);
 
+        // Accumulate the streamed assistant text for auto-save (BUILD 4)
+        let streamedAssistantText = "";
         for await (const event of anthropicStream) {
           if (
             event.type === "content_block_delta" &&
             event.delta.type === "text_delta"
           ) {
+            streamedAssistantText += event.delta.text;
             sendText(event.delta.text);
           }
         }
@@ -4086,10 +4135,13 @@ If asked whether the brain is trained: confirm yes, it is active and ready. High
           const sessionTitle = message.trim().slice(0, 80) || "New conversation";
 
           // Build the updated message list: prior history + new user+assistant pair
-          // We accumulate the streamed assistant text via fullResponseText (collected above).
+          // streamedAssistantText was accumulated during the LLM stream loop above.
           const updatedMessages: Array<{ role: string; content: string; timestamp: string }> = [
             ...(conversationHistory ?? []).map((h) => ({ role: h.role, content: h.content, timestamp: "" })),
             { role: "user", content: message.trim(), timestamp: new Date().toISOString() },
+            ...(streamedAssistantText
+              ? [{ role: "assistant", content: streamedAssistantText.trim(), timestamp: new Date().toISOString() }]
+              : []),
           ];
 
           // Upsert the conversation row — insert if new session, update messages if existing
