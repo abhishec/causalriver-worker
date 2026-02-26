@@ -141,6 +141,19 @@ export async function executeAccountingAgent(
     throw new Error(`Unknown accounting action: ${action}`);
   }
 
+  // ── Step -1: Brain Context Priming — inject live brain state into every AAS execution ──
+  // Non-blocking: if getBrainContext fails, agent execution continues unaffected.
+  let brainContextStr = "";
+  try {
+    const brainContextModule = await import("@/lib/brain/brain-context").catch(() => null);
+    if (brainContextModule) {
+      const brainCtx = await brainContextModule.getBrainContext(supabase, organizationId);
+      brainContextStr = brainCtx.contextSummary;
+    }
+  } catch {
+    // non-fatal — proceed without brain context enrichment
+  }
+
   // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
   // Federation: we capture the org's causal graph state before the agent runs,
   // then compute deltas afterward so we can promote only what CHANGED to CORE.
@@ -175,9 +188,14 @@ export async function executeAccountingAgent(
   // ── Step 1: Assemble Brain Context via Mesh ─────────────────────────────
   // Phase 3: When interpretation is provided, mesh.assemble() uses requiredData
   // signals to skip unneeded DB queries for targeted context retrieval.
+  // Step -1 brain context summary is appended to the assembly query so the mesh
+  // can use it to weight relevant causal edges and patterns.
   const mesh = createBrainContextMesh({ supabase, organizationId });
+  const meshQuery = brainContextStr
+    ? `accounting ${action} for ${jurisdiction} jurisdiction. ${brainContextStr}`
+    : `accounting ${action} for ${jurisdiction} jurisdiction`;
   const brainContext = await mesh.assemble(
-    `accounting ${action} for ${jurisdiction} jurisdiction`,
+    meshQuery,
     'aas',
     params.interpretation,
   );

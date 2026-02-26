@@ -120,6 +120,7 @@ export async function ingestDocument(
 /**
  * Search document chunks using full-text search.
  * Falls back to this when embeddings are not available.
+ * Called by getBrainContext() to include document knowledge in every LLM decision.
  */
 export async function searchDocumentChunks(
   supabase: SupabaseClient,
@@ -127,7 +128,23 @@ export async function searchDocumentChunks(
   query: string,
   limit = 5
 ): Promise<Array<{ chunk_text: string; document_title: string | null; chunk_index: number; source_type: string }>> {
-  // Use PostgreSQL full-text search
+  // Empty query: return most recently ingested chunks (used by getBrainContext for context priming)
+  if (!query.trim()) {
+    const { data, error } = await supabase
+      .from("document_chunks")
+      .select("chunk_text, document_title, chunk_index, source_type")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      logger.warn("[document-ingester] searchDocumentChunks (recent) failed", { error: error.message });
+      return [];
+    }
+    return data ?? [];
+  }
+
+  // Non-empty query: use PostgreSQL full-text search
   const { data, error } = await supabase
     .from("document_chunks")
     .select("chunk_text, document_title, chunk_index, source_type")

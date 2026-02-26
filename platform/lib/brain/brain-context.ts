@@ -1,5 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
+import { getRecentQualityPatterns } from "@/lib/brain/agent-rl";
 
 export interface BrainContext {
   brainIq: number;                    // current Brain IQ score
@@ -7,6 +9,7 @@ export interface BrainContext {
   brainState: "empty" | "populating" | "ready";
   topSignals: { domain: string; summary: string; strength: number }[];  // top 3 recent signals
   recentQuality: number;              // avg quality from last 10 prediction_records
+  topPatterns: string[];              // top domains from high-quality recent records
   activeJobCount: number;             // jobs currently running
   contextSummary: string;             // 2-3 sentence natural language summary for LLM injection
 }
@@ -31,10 +34,10 @@ export async function getBrainContext(
         .eq("organization_id", orgId)
         .order("created_at", { ascending: false })
         .limit(3),
-      // Recent RL quality
+      // Recent RL quality — uses "confidence" column (the actual prediction_records schema)
       supabase
         .from("prediction_records")
-        .select("quality_score")
+        .select("confidence")
         .eq("organization_id", orgId)
         .order("created_at", { ascending: false })
         .limit(10),
@@ -63,17 +66,35 @@ export async function getBrainContext(
       strength: typeof s.signal_strength === "number" ? s.signal_strength : 0,
     }));
 
+    // "confidence" is the actual column name in prediction_records (not "quality_score")
     const qualityRows = qualityRow.status === "fulfilled" ? (qualityRow.value.data ?? []) : [];
     const recentQuality = qualityRows.length > 0
-      ? qualityRows.reduce((sum, r) => sum + (typeof r.quality_score === "number" ? r.quality_score : 0), 0) / qualityRows.length
+      ? qualityRows.reduce((sum, r) => sum + (typeof r.confidence === "number" ? r.confidence : 0), 0) / qualityRows.length
       : 0;
 
     const activeJobCount = jobsRow.status === "fulfilled" ? (jobsRow.value.count ?? 0) : 0;
 
-    // Build natural language summary for LLM system prompt injection
-    const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, activeJobCount });
+    // Fetch recent quality patterns from prediction_records (RL flywheel — closes the loop)
+    // getRecentQualityPatterns is fire-and-forget safe — never throws
+    const qualityPatterns = await getRecentQualityPatterns(supabase, orgId);
+    const topPatterns = qualityPatterns.topPatterns;
 
-    return { brainIq, signalCount, brainState, topSignals, recentQuality, activeJobCount, contextSummary };
+    // Fetch the 3 most recently ingested document chunks (empty query = latest by created_at)
+    // Called by getBrainContext() to include document knowledge in every LLM decision
+    let recentDocTitles: string[] = [];
+    try {
+      const docChunks = await searchDocumentChunks(supabase, orgId, "", 3);
+      recentDocTitles = docChunks
+        .map(c => c.document_title)
+        .filter((t): t is string => typeof t === "string" && t.length > 0);
+    } catch {
+      // non-fatal — document chunks are best-effort
+    }
+
+    // Build natural language summary for LLM system prompt injection
+    const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, recentDocTitles });
+
+    return { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary };
   } catch (err) {
     // getBrainContext must never throw — return safe defaults
     logger.warn("[brain-context] getBrainContext failed, returning defaults:", err);
@@ -83,13 +104,14 @@ export async function getBrainContext(
       brainState: "empty",
       topSignals: [],
       recentQuality: 0,
+      topPatterns: [],
       activeJobCount: 0,
       contextSummary: "",
     };
   }
 }
 
-function buildContextSummary(ctx: Omit<BrainContext, "contextSummary">): string {
+function buildContextSummary(ctx: Omit<BrainContext, "contextSummary"> & { recentDocTitles?: string[] }): string {
   const parts: string[] = [];
 
   if (ctx.brainState === "empty") {
@@ -110,8 +132,17 @@ function buildContextSummary(ctx: Omit<BrainContext, "contextSummary">): string 
     parts.push(`Recent response quality: ${qualityLabel} (${Math.round(ctx.recentQuality * 100)}%).`);
   }
 
+  // RL flywheel: inject top-performing domains into the LLM context summary
+  if (ctx.topPatterns && ctx.topPatterns.length > 0) {
+    parts.push(`High-quality domains recently: ${ctx.topPatterns.join(", ")}.`);
+  }
+
   if (ctx.activeJobCount > 0) {
     parts.push(`${ctx.activeJobCount} agent job(s) currently running.`);
+  }
+
+  if (ctx.recentDocTitles && ctx.recentDocTitles.length > 0) {
+    parts.push(`Recent document context: ${ctx.recentDocTitles.join(", ")}.`);
   }
 
   return parts.join(" ");
