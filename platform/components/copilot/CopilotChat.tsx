@@ -56,7 +56,7 @@ import type {
 } from "./types";
 
 interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
@@ -1541,7 +1541,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [learningPulse, setLearningPulse] = useState<import("./types").LearningPulse | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const hasStreamErrorRef = useRef(false);
@@ -1802,7 +1804,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       return !!sendMessageRef.current && !isLoadingRef.current;
     },
     getCurrentMessages() {
-      return messagesRef.current.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+      // Filter out system divider messages — only user/assistant turns are meaningful outside this component
+      return messagesRef.current
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
     },
     getActiveService() {
       return activeServiceRef.current;
@@ -1813,11 +1818,30 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollToBottom(false);
   }, []);
 
+  // Auto-scroll only when user is near the bottom (within 150px)
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (distanceFromBottom < 150) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  // Track scroll position to show/hide "scroll to bottom" button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      setShowScrollToBottom(distanceFromBottom > 200);
+    };
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -2090,6 +2114,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       });
 
       if (!response.ok) {
+        // 401 = session expired — surface a specific, actionable message
+        if (response.status === 401) {
+          throw new Error("SESSION_EXPIRED");
+        }
         throw new Error(`HTTP ${response.status}`);
       }
 
@@ -2318,10 +2346,15 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       );
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      const errorText = "Something went wrong";
-      // Store the user prompt for retry
-      const userMsg = messagesRef.current[messagesRef.current.length - 2];
-      if (userMsg?.role === "user") setLastFailedPrompt(userMsg.content);
+      const isSessionExpired = err instanceof Error && err.message === "SESSION_EXPIRED";
+      const errorText = isSessionExpired
+        ? "Your session has expired. Please refresh the page to continue."
+        : "Something went wrong";
+      // Store the user prompt for retry (only for non-auth errors)
+      if (!isSessionExpired) {
+        const userMsg = messagesRef.current[messagesRef.current.length - 2];
+        if (userMsg?.role === "user") setLastFailedPrompt(userMsg.content);
+      }
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
@@ -2442,8 +2475,25 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
         </div>
       )}
 
+      {/* Scroll to bottom button — appears when user scrolls up during streaming */}
+      {showScrollToBottom && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border shadow-md text-xs text-foreground/70 hover:text-foreground hover:bg-surface transition-colors"
+            aria-label="Scroll to bottom"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+            Scroll to bottom
+          </button>
+        </div>
+      )}
+
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
-      <div className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.length === 0 && !gathering.isActive ? (
           /* Empty state — domain commands in sidebar */
           <div data-testid="empty-state-v2" className="flex flex-col items-center justify-center h-full text-center px-6 pt-24 pb-16">
@@ -2504,6 +2554,26 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             {messages.map((msg, i) => {
               const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
               const artifacts = messageArtifacts?.get(i);
+
+              // ── Memory compression divider — whisper-level system note ──────────
+              if (msg.role === "system" && msg.content?.startsWith("__MEMORY_COMPACTED__")) {
+                const turnCount = msg.content.split(":")[1] ?? "0";
+                return (
+                  <motion.div
+                    key={`system-compacted-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex items-center justify-center py-3"
+                  >
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/40 select-none">
+                      <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
+                      <span>memory optimized · {turnCount} turns condensed</span>
+                      <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
+                    </div>
+                  </motion.div>
+                );
+              }
 
               return (
                 <motion.div

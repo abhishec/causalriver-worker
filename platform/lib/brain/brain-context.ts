@@ -4,7 +4,7 @@ import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
 import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
 
 // ── Module-level cache: 30s TTL per org ──────────────────────────────────────
-// getBrainContext() fires 5 DB queries on every copilot message. Under concurrent
+// getBrainContext() fires DB queries on every copilot message. Under concurrent
 // users this causes a thundering herd. A 30s in-memory cache cuts load by ~10x.
 // TTL is short enough that brain state updates (new signals, RL outcomes) are
 // reflected quickly. Cache is per-org so org isolation is preserved.
@@ -20,9 +20,9 @@ export interface BrainContext {
   topPatterns: string[];              // top domains from high-quality recent records
   activeJobCount: number;             // jobs currently running (Layer 4: Orchestrator State)
   pendingJobCount: number;            // jobs queued but not started (Layer 4: Orchestrator State)
-  lastJobStatus: string | null;       // status of the most recently completed job (Layer 4)
+  lastJobStatus: string | null;       // task_type + status of last completed job (Layer 4)
   smartRouterRecommendation: string;  // recommended model tier for this org (Layer 5: Smart Router)
-  contextSummary: string;             // 2-3 sentence natural language summary for LLM injection
+  contextSummary: string;             // natural language summary for LLM system prompt injection
   qualityPatterns: QualityPattern[];  // per-domain quality breakdown (RL flywheel)
   qualityPatternsSummary: string;     // single-line summary for direct LLM prompt injection
 }
@@ -40,7 +40,15 @@ export async function getBrainContext(
 
   try {
     // Run all fetches in parallel — non-blocking, fail gracefully
-    const [workspaceRow, signalsRow, qualityRow, jobsRow, signalCountRow, pendingJobsRow, lastJobRow] = await Promise.allSettled([
+    const [
+      workspaceRow,
+      signalsRow,
+      qualityRow,
+      jobsRow,
+      signalCountRow,
+      pendingJobsRow,
+      lastJobRow,
+    ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
         .from("ai_workspace")
@@ -79,7 +87,7 @@ export async function getBrainContext(
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .eq("status", "pending"),
-      // Layer 4: Orchestrator State — last completed job status
+      // Layer 4: Orchestrator State — last completed job (success or error)
       supabase
         .from("agent_queue")
         .select("status, task_type, completed_at")
@@ -121,9 +129,8 @@ export async function getBrainContext(
       ? qualityRows.reduce((sum, r) => sum + (typeof r.confidence === "number" ? r.confidence : 0), 0) / qualityRows.length
       : 0;
 
+    // Layer 4: Orchestrator State — running jobs, pending jobs, last completed job
     const activeJobCount = jobsRow.status === "fulfilled" ? (jobsRow.value.count ?? 0) : 0;
-
-    // Layer 4: Orchestrator State — pending + last job
     const pendingJobCount = pendingJobsRow.status === "fulfilled" ? (pendingJobsRow.value.count ?? 0) : 0;
     const lastJobData = lastJobRow.status === "fulfilled" ? (lastJobRow.value.data ?? []) : [];
     const lastJobStatus: string | null = lastJobData.length > 0
@@ -147,8 +154,9 @@ export async function getBrainContext(
         ).join("; ")
       : "No recent domain quality data";
 
-    // Layer 5: Smart Router — recommend model tier based on Brain IQ + signal volume
-    // IQ < 10  → brain not ready → Haiku (cheap, data lookup only)
+    // Layer 5: Smart Router — recommend model tier based on Brain IQ + signal volume.
+    // Mirrors the Brain IQ gate logic in model-router.ts (routeModelWithIq):
+    // IQ < 10  → brain not ready → Haiku (cheap, data lookup only, no heavy reasoning)
     // IQ 10-29 → brain learning → Haiku for delivery domains, Sonnet for code domains
     // IQ >= 30 → brain ready    → Sonnet for all heavy domains (full reasoning unlocked)
     const smartRouterRecommendation: string =
@@ -169,9 +177,35 @@ export async function getBrainContext(
     }
 
     // Build natural language summary for LLM system prompt injection
-    const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, pendingJobCount, lastJobStatus, smartRouterRecommendation, recentDocTitles });
+    const contextSummary = buildContextSummary({
+      brainIq,
+      signalCount,
+      brainState,
+      topSignals,
+      recentQuality,
+      topPatterns,
+      activeJobCount,
+      pendingJobCount,
+      lastJobStatus,
+      smartRouterRecommendation,
+      recentDocTitles,
+    });
 
-    const result: BrainContext = { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, pendingJobCount, lastJobStatus, smartRouterRecommendation, contextSummary, qualityPatterns, qualityPatternsSummary };
+    const result: BrainContext = {
+      brainIq,
+      signalCount,
+      brainState,
+      topSignals,
+      recentQuality,
+      topPatterns,
+      activeJobCount,
+      pendingJobCount,
+      lastJobStatus,
+      smartRouterRecommendation,
+      contextSummary,
+      qualityPatterns,
+      qualityPatternsSummary,
+    };
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
     _brainContextCache.set(orgId, { data: result, expiry: Date.now() + BRAIN_CONTEXT_TTL_MS });
@@ -198,9 +232,12 @@ export async function getBrainContext(
   }
 }
 
-function buildContextSummary(ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[] }): string {
+function buildContextSummary(
+  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[] }
+): string {
   const parts: string[] = [];
 
+  // Layer 2: Brain Signals — state and signal count
   if (ctx.brainState === "empty") {
     parts.push("The Brain has no data yet — no connectors have synced.");
   } else if (ctx.brainState === "populating") {
@@ -214,20 +251,33 @@ function buildContextSummary(ctx: Omit<BrainContext, "contextSummary" | "quality
     parts.push(`Recent intelligence: ${signalList}.`);
   }
 
+  // Layer 3: RL Quality — recent response quality and top-performing domains
   if (ctx.recentQuality > 0) {
     const qualityLabel = ctx.recentQuality >= 0.8 ? "high" : ctx.recentQuality >= 0.6 ? "moderate" : "low";
     parts.push(`Recent response quality: ${qualityLabel} (${Math.round(ctx.recentQuality * 100)}%).`);
   }
 
-  // RL flywheel: inject top-performing domains into the LLM context summary
   if (ctx.topPatterns && ctx.topPatterns.length > 0) {
     parts.push(`High-quality domains recently: ${ctx.topPatterns.join(", ")}.`);
   }
 
-  if (ctx.activeJobCount > 0) {
-    parts.push(`${ctx.activeJobCount} agent job(s) currently running.`);
+  // Layer 4: Orchestrator State — running + pending jobs and last job outcome
+  if (ctx.activeJobCount > 0 || ctx.pendingJobCount > 0) {
+    const orchParts: string[] = [];
+    if (ctx.activeJobCount > 0) orchParts.push(`${ctx.activeJobCount} running`);
+    if (ctx.pendingJobCount > 0) orchParts.push(`${ctx.pendingJobCount} pending`);
+    parts.push(`Orchestrator: ${orchParts.join(", ")} agent job(s).`);
+  }
+  if (ctx.lastJobStatus) {
+    parts.push(`Last completed job: ${ctx.lastJobStatus}.`);
   }
 
+  // Layer 5: Smart Router — model tier recommendation for this org
+  if (ctx.smartRouterRecommendation) {
+    parts.push(`Smart Router: ${ctx.smartRouterRecommendation}.`);
+  }
+
+  // Layer 1: Context Engine — recent document knowledge
   if (ctx.recentDocTitles && ctx.recentDocTitles.length > 0) {
     parts.push(`Recent document context: ${ctx.recentDocTitles.join(", ")}.`);
   }

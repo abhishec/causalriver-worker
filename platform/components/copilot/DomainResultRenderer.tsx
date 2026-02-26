@@ -8,6 +8,49 @@ import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
 import { SEaaSDeliveryPanel } from "@/components/copilot/SEaaSDeliveryPanel";
 import { ArtifactFeedback } from "@/components/copilot/artifact-renderers/ArtifactFeedback";
 
+// ── Data Mode Indicator ───────────────────────────────────────────────────────
+// Whisper-level badge shown at the top of delivery intelligence panels to
+// communicate data provenance: live data, partial data, or AI-reasoned analysis.
+function DataModeIndicator({
+  dataMode,
+  connectedSources,
+  missingData,
+}: {
+  dataMode?: "live" | "partial" | "ai-reasoned";
+  connectedSources?: string[];
+  missingData?: string[];
+}) {
+  if (!dataMode || dataMode === "live") return null;
+
+  if (dataMode === "partial") {
+    const missing = (missingData ?? []).join(", ");
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-amber-500/70 mb-3">
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
+        <span>
+          Partial data
+          {missing ? ` · ${missing} unavailable` : ""}
+          {(connectedSources ?? []).length > 0 ? ` · ${connectedSources!.join(", ")} connected` : ""}
+        </span>
+      </div>
+    );
+  }
+
+  // ai-reasoned
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 mb-3">
+      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
+      <span>
+        Framework analysis ·{" "}
+        <a href="/connectors" className="underline underline-offset-2 hover:text-muted-foreground/80">
+          Connect data sources
+        </a>{" "}
+        for live insights
+      </span>
+    </div>
+  );
+}
+
 // ── Lazy-loaded artifact renderers ──────────────────────────────────────────
 // Each renderer is code-split into its own chunk and only loaded when needed.
 // This prevents bundling all 22 renderers into the initial page load.

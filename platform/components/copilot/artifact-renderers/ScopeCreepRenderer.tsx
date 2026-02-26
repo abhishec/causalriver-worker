@@ -2,22 +2,37 @@
 import { StatGrid, StatCard, AlertBanner, ScoreBar, InsightBox, ArtifactHeader, ActionItem } from "./shared";
 
 export function ScopeCreepRenderer({ data }: { data: Record<string, any> }) {
+  // Empty data guard — show a clear empty state instead of mock data
+  const hasData = data && (
+    Array.isArray(data.alerts) ||
+    Array.isArray(data.engagements) ||
+    Array.isArray(data.allDrifts) ||
+    data.rootCause !== undefined ||
+    data.root_cause !== undefined
+  );
+  if (!hasData) {
+    return (
+      <div className="flex flex-col h-full">
+        <ArtifactHeader icon="📏" title="Scope Creep Alerts" />
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <div className="space-y-2">
+            <div className="text-2xl opacity-30">✅</div>
+            <p className="text-sm text-muted-foreground">No scope creep alerts for this AI worker space.</p>
+            <p className="text-xs text-muted-foreground/60">All engagements are within scope thresholds, or no scope data has been loaded yet.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Alerts ────────────────────────────────────────────────────────────────
-  const alerts = data?.alerts ?? [
-    { name: "OCBC — FRAML 6.2", drift: 34, baseline: 89, current: 119, level: "critical" as const },
-    { name: "MAS — Regulatory", drift: 18, baseline: 45, current: 53, level: "warning" as const },
-  ];
+  const alerts = data?.alerts ?? [];
 
   // ── Drift bars (all engagements) ──────────────────────────────────────────
-  const driftItems = data?.engagements ?? data?.allDrifts ?? [
-    { name: "OCBC drift", value: 34 },
-    { name: "MAS drift", value: 18 },
-    { name: "DBS drift", value: 2 },
-    { name: "StanChart drift", value: 5 },
-  ];
+  const driftItems = data?.engagements ?? data?.allDrifts ?? [];
 
   // ── Root cause & recommendations ──────────────────────────────────────────
-  const rootCause = data?.rootCause ?? data?.root_cause ?? "12 new requirements added after client stakeholder change. Recommend scope freeze.";
+  const rootCause = data?.rootCause ?? data?.root_cause ?? "";
   const recommendations = data?.recommendations ?? [];
 
   // ── Derived KPIs ──────────────────────────────────────────────────────────
@@ -57,7 +72,7 @@ export function ScopeCreepRenderer({ data }: { data: Record<string, any> }) {
         </div>
 
         {/* ── Root Cause ───────────────────────────────────────────── */}
-        <InsightBox><strong>Root Cause:</strong> {rootCause}</InsightBox>
+        {rootCause && <InsightBox><strong>Root Cause:</strong> {rootCause}</InsightBox>}
 
         {/* ── Recommendations (if provided by data) ────────────────── */}
         {recommendations.length > 0 && (

@@ -605,6 +605,8 @@ export default function CopilotPageInner() {
 
   // ── Context Monitor: track messages for token display ─────────────────────
   const [contextMessages, setContextMessages] = useState<Array<{ role: string; content: string }>>([]);
+  // Stores the latest compressed summary so it can be injected into subsequent chat requests
+  const [compressedSummary, setCompressedSummary] = useState<string | null>(null);
 
   // Sync messages from chatRef every 2s — lightweight, no component changes needed
   useEffect(() => {
@@ -622,10 +624,13 @@ export default function CopilotPageInner() {
 
   // Also sync immediately after every save (stream completes) via handleSave override below
 
-  const handleCompress = useCallback(async () => {
+  const handleCompress = useCallback(async (compressedMessageCount?: number) => {
     if (!currentWorkspace?.id || contextMessages.length === 0) return;
+    // Capture count at call time — fall back to full contextMessages count
+    const turnCount = compressedMessageCount ?? contextMessages.length;
     try {
-      const res = await fetch("/api/copilot/context/compress", {
+      // POST to /api/copilot/context (the POST handler — not a /compress sub-route)
+      const res = await fetch("/api/copilot/context", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -637,15 +642,25 @@ export default function CopilotPageInner() {
         logger.error("[CopilotPage] Context compress API error:", res.status);
         return;
       }
-      const { compressed } = await res.json() as {
+      const { compressed, summary } = await res.json() as {
         compressed: Array<{ role: string; content: string }>;
         summary: string;
         tokensSaved: number;
       };
+      // Store the summary so subsequent chat requests can include it for unlimited memory
+      if (summary) {
+        setCompressedSummary(summary);
+      }
       if (compressed && compressed.length > 0) {
-        // Reload the chat with compressed messages via the existing load-conversation event
+        // Append a whisper divider so the user sees compression happened in-thread
+        const dividerMsg = {
+          role: "system",
+          content: `__MEMORY_COMPACTED__:${turnCount}`,
+        };
+        const messagesWithDivider = [...compressed, dividerMsg];
+        // Reload the chat with compressed messages + divider via the existing load-conversation event
         window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
-          detail: { messages: compressed, title: "Compressed conversation" },
+          detail: { messages: messagesWithDivider, title: "Compressed conversation" },
         }));
         setContextMessages(compressed);
       }
@@ -836,7 +851,7 @@ export default function CopilotPageInner() {
               key={currentWorkspace?.id}
               ref={chatRef}
               endpoint="/api/copilot/chat"
-              extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined }}
+              extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined, ...(compressedSummary ? { compressedSummary } : {}) }}
               activeService={activeService}
               persona={{
                 name: persona.name,

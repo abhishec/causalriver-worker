@@ -4,26 +4,49 @@ import { useState } from "react";
 
 export function GenericIntelRenderer({ data }: { data: Record<string, any> }) {
   const [activeTab, setActiveTab] = useState("summary");
+
+  // Empty data guard — show a clear empty state instead of injecting mock data
+  const hasData = data && (
+    data.score !== undefined ||
+    data.signals !== undefined ||
+    data.keyInsight !== undefined ||
+    data.title !== undefined ||
+    Array.isArray(data.findings) ||
+    Array.isArray(data.actionItems) ||
+    Array.isArray(data.recommendations) ||
+    // Accept any non-empty data object with at least one non-underscore key
+    Object.keys(data).some((k) => !k.startsWith("_"))
+  );
+
+  if (!hasData) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border-subtle shrink-0">
+          <span className="text-base">✦</span>
+          <span className="text-sm font-semibold flex-1 text-foreground">Intelligence Analysis</span>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <div className="space-y-2">
+            <div className="text-2xl opacity-30">🧠</div>
+            <p className="text-sm text-muted-foreground">No intelligence data available for this AI worker space.</p>
+            <p className="text-xs text-muted-foreground/60">Connect data sources and run an analysis to see results here.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const score = data?.score ?? 72;
-  const signals = data?.signals ?? 8;
-  const insightCount = data?.insightCount ?? data?.insights ?? 5;
-  const riskCount = data?.riskCount ?? data?.risks ?? 3;
-  const actionCount = data?.actionCount ?? data?.actions ?? 4;
-  const keyInsight = data?.keyInsight ?? "Engineering velocity decline → delayed implementations → revenue delay → cash flow pressure.";
+  const signals = data?.signals ?? 0;
+  const insightCount = data?.insightCount ?? data?.insights ?? 0;
+  const riskCount = data?.riskCount ?? data?.risks ?? 0;
+  const actionCount = data?.actionCount ?? data?.actions ?? 0;
+  const keyInsight = data?.keyInsight ?? "";
   const title = data?.title ?? "Intelligence Analysis";
 
-  const findings = data?.findings ?? [
-    { severity: "critical" as const, text: "Engineering velocity declined 33% — FRAML rule engine stalled" },
-    { severity: "high" as const, text: "Software expense anomaly: $890K in November (3.2x average)" },
-    { severity: "medium" as const, text: "2 engineers at burnout risk based on commit patterns" },
-  ];
+  const findings = data?.findings ?? [];
 
-  const actionItems = data?.actionItems ?? data?.recommendations ?? [
-    { priority: "high" as const, title: "Address FRAML velocity decline", description: "Assign pair-programming to unblock rule engine module" },
-    { priority: "high" as const, title: "Investigate November AWS spike", description: "Verify $890K software charge — possible billing error" },
-    { priority: "medium" as const, title: "Monitor burnout indicators", description: "Schedule 1:1s with flagged engineers" },
-    { priority: "low" as const, title: "Review Q2 forecast assumptions", description: "OCBC renewal uncertainty affects revenue projections" },
-  ];
+  const actionItems = data?.actionItems ?? data?.recommendations ?? [];
 
   const tabs = [
     { id: "summary", label: "Summary" },
@@ -50,7 +73,7 @@ export function GenericIntelRenderer({ data }: { data: Record<string, any> }) {
               <StatCard label="Risks" value={riskCount} color="amber" />
               <StatCard label="Actions" value={actionCount} color="purple" />
             </StatGrid>
-            <InsightBox><strong>Key:</strong> {keyInsight}</InsightBox>
+            {keyInsight && <InsightBox><strong>Key:</strong> {keyInsight}</InsightBox>}
           </>
         )}
 

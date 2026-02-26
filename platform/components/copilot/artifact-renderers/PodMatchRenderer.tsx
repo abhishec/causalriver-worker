@@ -13,20 +13,34 @@ interface PodMatch {
 
 export function PodMatchRenderer({ data }: { data: Record<string, any> }) {
   // ── Normalise to array of pod matches ─────────────────────────────────────
-  const matches: PodMatch[] = data?.pod_matches
-    ?? data?.podMatches
-    ?? data?.matches
-    ?? [{
-      podName: data?.podName ?? "Pod Alpha",
-      matchScore: data?.matchScore ?? 87,
-      avgCycleTime: data?.avgCycleTime ?? "18h",
-      prsPerWeek: data?.prsPerWeek ?? 24,
-      techStack: data?.techStack ?? ["TypeScript", "Python", "PostgreSQL", "Redis", "Kafka", "React"],
-      pastEngagements: data?.pastEngagements ?? [
-        { name: "DBS FRAML 5.x", score: 88 },
-        { name: "UOB AML", score: 79 },
-      ],
-    }];
+  // Empty data guard — only use real data, never inject mock fallback
+  const rawMatches = data?.pod_matches ?? data?.podMatches ?? data?.matches;
+  const hasSinglePod = data?.podName !== undefined || data?.matchScore !== undefined;
+  const hasData = (Array.isArray(rawMatches) && rawMatches.length > 0) || hasSinglePod;
+
+  if (!hasData) {
+    return (
+      <div className="flex flex-col h-full">
+        <ArtifactHeader icon="🎯" title="Pod Match" />
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <div className="space-y-2">
+            <div className="text-2xl opacity-30">🔍</div>
+            <p className="text-sm text-muted-foreground">No pod match data available for this AI worker space.</p>
+            <p className="text-xs text-muted-foreground/60">Pod match history is required. Ensure pods are configured in your workspace.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const matches: PodMatch[] = rawMatches ?? [{
+    podName: data?.podName,
+    matchScore: data?.matchScore,
+    avgCycleTime: data?.avgCycleTime ?? "—",
+    prsPerWeek: data?.prsPerWeek ?? 0,
+    techStack: data?.techStack ?? [],
+    pastEngagements: data?.pastEngagements ?? [],
+  }];
 
   return (
     <div className="flex flex-col h-full">

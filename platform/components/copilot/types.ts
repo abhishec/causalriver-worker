@@ -151,6 +151,13 @@ export interface DeliveryIntelligenceData {
   pod_matches: PodMatchData[];
   engineer_health_summary?: EngineerHealthSummary | null;
   generated_at?: string;
+  /** Data provenance mode: live = real connector data, partial = some connectors connected,
+   *  ai-reasoned = no connector data, response is framework-based reasoning */
+  dataMode?: "live" | "partial" | "ai-reasoned";
+  /** Names of data sources that are connected and contributing data */
+  connectedSources?: string[];
+  /** Human-readable list of data that is unavailable due to missing connectors */
+  missingData?: string[];
 }
 
 // ─── Domain Result Union ────────────────────────────────────────────────────

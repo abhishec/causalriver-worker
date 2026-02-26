@@ -25,7 +25,13 @@ import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    // ── Auth: isolate createClient() failures so env var errors return 401, never 500 ──
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const {
       data: { user },
     } = await supabase.auth.getUser();

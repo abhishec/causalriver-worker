@@ -8,37 +8,47 @@ import {
 export function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
   const [activeTab, setActiveTab] = useState("summary");
 
+  // Empty data guard — show a clear empty state instead of mock data
+  const hasData = data && (
+    data.currentVelocity !== undefined ||
+    data.previousVelocity !== undefined ||
+    data.declinePct !== undefined ||
+    Array.isArray(data.findings) ||
+    Array.isArray(data.sprintHistory)
+  );
+  if (!hasData) {
+    return (
+      <div className="flex flex-col h-full">
+        <ArtifactHeader icon="⚡" title="Early Warning — Velocity" badge="NO DATA" />
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <div className="space-y-2">
+            <div className="text-2xl opacity-30">📉</div>
+            <p className="text-sm text-muted-foreground">No early warning data available for this AI worker space.</p>
+            <p className="text-xs text-muted-foreground/60">Engineer health snapshots are required for velocity analysis.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Summary data ────────────────────────────────────────────────────────────
-  const current = data?.currentVelocity ?? 28;
-  const previous = data?.previousVelocity ?? 42;
-  const decline = data?.declinePct ?? -33;
-  const riskWindow = data?.riskWindow ?? "2 sprints";
-  const branch = data?.branch ?? "feature/framl-6.2-rule-engine";
-  const uncommitted = data?.uncommittedChanges ?? 847;
-  const spofAlert = data?.spofAlert ?? 'Senior engineer "Raj K." owns 67% of FRAML rule engine commits.';
-  const sprintHistory = data?.sprintHistory ?? [
-    { name: "Sprint 23", value: 28 },
-    { name: "Sprint 22", value: 35 },
-    { name: "Sprint 21", value: 42 },
-  ];
+  const current = data?.currentVelocity ?? 0;
+  const previous = data?.previousVelocity ?? 0;
+  const decline = data?.declinePct ?? 0;
+  const riskWindow = data?.riskWindow ?? "—";
+  const branch = data?.branch ?? "";
+  const uncommitted = data?.uncommittedChanges ?? 0;
+  const spofAlert = data?.spofAlert ?? "";
+  const sprintHistory = data?.sprintHistory ?? [];
 
   // ── Findings data ───────────────────────────────────────────────────────────
-  const findings = data?.findings ?? [
-    { severity: "critical" as const, text: "Velocity collapsed 33% in 2 sprints — FRAML rule engine module", detail: "Sprint 23 → 28 pts (was 42)" },
-    { severity: "critical" as const, text: 'SPOF risk — "Raj K." owns 67% of commits in rule-engine/', detail: "Bus factor = 1 for critical path" },
-    { severity: "high" as const, text: "847 uncommitted changes on feature branch — merge conflict risk", detail: "feature/framl-6.2-rule-engine" },
-    { severity: "medium" as const, text: "Review turnaround increased 2.4x in last sprint", detail: "Avg 18h → 43h" },
-  ];
+  const findings = data?.findings ?? [];
 
   // ── Actions data ────────────────────────────────────────────────────────────
-  const actions = data?.actions ?? data?.recommendations ?? [
-    { priority: "high" as const, title: "Pair-program SPOF mitigation", description: "Assign second engineer to rule-engine module to reduce bus-factor risk" },
-    { priority: "high" as const, title: "Break up feature branch", description: "Split 847-change branch into 3-4 smaller PRs to reduce merge conflict risk" },
-    { priority: "medium" as const, title: "Sprint scope adjustment", description: "Reduce Sprint 24 commitment by 30% to stabilize velocity" },
-  ];
+  const actions = data?.actions ?? data?.recommendations ?? [];
 
   // ── Metrics data ────────────────────────────────────────────────────────────
-  const confidence = data?.confidence ?? data?.predictionConfidence ?? 78;
+  const confidence = data?.confidence ?? data?.predictionConfidence ?? 0;
 
   const tabs = [
     { id: "summary", label: "Summary" },
@@ -63,17 +73,21 @@ export function EarlyWarningRenderer({ data }: { data: Record<string, any> }) {
               <StatCard label="Risk Window" value={riskWindow} color="red" />
             </StatGrid>
 
-            <InsightBox><strong>⚡ SPOF Alert:</strong> {spofAlert}</InsightBox>
+            {spofAlert && <InsightBox><strong>⚡ SPOF Alert:</strong> {spofAlert}</InsightBox>}
 
-            <div className="mt-2">
-              <BranchPill branch={branch} detail={`${uncommitted} uncommitted changes`} />
-            </div>
+            {branch && (
+              <div className="mt-2">
+                <BranchPill branch={branch} detail={`${uncommitted} uncommitted changes`} />
+              </div>
+            )}
 
-            <div className="mt-3">
-              {sprintHistory.map((s: any) => (
-                <ScoreBar key={s.name} value={s.value} label={s.name} max={50} />
-              ))}
-            </div>
+            {sprintHistory.length > 0 && (
+              <div className="mt-3">
+                {sprintHistory.map((s: any) => (
+                  <ScoreBar key={s.name} value={s.value} label={s.name} max={50} />
+                ))}
+              </div>
+            )}
           </>
         )}
 

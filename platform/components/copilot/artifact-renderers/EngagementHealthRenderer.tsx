@@ -15,12 +15,29 @@ interface Engagement {
 }
 
 export function EngagementHealthRenderer({ data }: { data: Record<string, any> }) {
-  const engagements: Engagement[] = data?.engagements ?? [
-    { name: "OCBC", project: "FRAML 6.2 Migration", score: 58, velocity: 45, jira: 52, scope: 35, sentiment: 62, atRisk: true, daysRemaining: 45, confidence: 42 },
-    { name: "DBS", project: "Transaction Screening", score: 82, velocity: 88, jira: 85, scope: 90, sentiment: 78, atRisk: false, daysRemaining: 12, confidence: 91 },
-    { name: "Standard Chartered", project: "CRS Integration", score: 71, velocity: 70, jira: 74, scope: 65, sentiment: 75, atRisk: false, daysRemaining: 28, confidence: 68 },
-    { name: "MAS", project: "Regulatory Compliance", score: 44, velocity: 30, jira: 38, scope: 22, sentiment: 55, atRisk: true, daysRemaining: 60, confidence: 28 },
-  ];
+  // Empty data guard — show a clear empty state instead of mock data
+  const hasData = data && (
+    Array.isArray(data.engagements) ||
+    data.total !== undefined ||
+    data.activeCount !== undefined ||
+    data.health_score !== undefined
+  );
+  if (!hasData) {
+    return (
+      <div className="flex flex-col h-full">
+        <ArtifactHeader icon="💊" title="Delivery Intelligence" />
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <div className="space-y-2">
+            <div className="text-2xl opacity-30">📊</div>
+            <p className="text-sm text-muted-foreground">No delivery intelligence data available for this AI worker space.</p>
+            <p className="text-xs text-muted-foreground/60">Run the Delivery Intelligence command to populate engagement health data.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const engagements: Engagement[] = data?.engagements ?? [];
 
   // ── Derived KPIs ──────────────────────────────────────────────────────────
   const total = engagements.length;

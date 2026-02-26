@@ -15,7 +15,13 @@ export const dynamic = "force-dynamic";
  */
 export async function GET() {
   try {
-    const supabase = await createClient();
+    // Isolate createClient() so env var failures return 401, never 500
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const {
       data: { user },
     } = await supabase.auth.getUser();

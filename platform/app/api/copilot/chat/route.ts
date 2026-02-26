@@ -2683,6 +2683,16 @@ You currently have: ${causalEdges.length} causal edges, ${rules.length} business
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
 
+    // ── Memory compression injection ──────────────────────────────────────────
+    // When the user compressed earlier conversation turns, prepend the summary so
+    // the LLM has context from ALL prior messages — not just the last 10.
+    // This is the "unlimited memory" mechanism: summary + recent turns = full continuity.
+    if (compressedSummary && compressedSummary.trim().length > 0) {
+      effectiveSystemPrompt =
+        `## CONVERSATION MEMORY (earlier turns summarized)\n${compressedSummary}\n\n---\n\n` +
+        effectiveSystemPrompt;
+    }
+
     // ── Zero-data guard: even when brainContext exists, if the org has NO data,
     // inject an explicit "don't hallucinate" instruction so the LLM doesn't invent metrics.
     const totalDataPoints = causalEdges.length + rules.length + patterns.length + cascadeRules.length;

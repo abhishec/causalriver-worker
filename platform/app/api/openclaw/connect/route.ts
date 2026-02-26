@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
         },
         { onConflict: "organization_id,connector_type,instance_name" }
       )
-      .then(() => {}, () => {});
+      .then(({ error: e }: { error: unknown }) => { if (e) logger.warn("[OpenClaw/Connect] upsert org_connectors failed:", e); }, (e: unknown) => { logger.warn("[OpenClaw/Connect] upsert org_connectors rejected:", e); });
 
     // ── Log platform event ───────────────────────────────────────
     service
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
           services: status.servicesRunning,
         },
       })
-      .then(() => {}, () => {});
+      .then(({ error: e }: { error: unknown }) => { if (e) logger.warn("[OpenClaw/Connect] platform_events insert failed:", e); }, (e: unknown) => { logger.warn("[OpenClaw/Connect] platform_events insert rejected:", e); });
 
     return NextResponse.json({
       success: true,
