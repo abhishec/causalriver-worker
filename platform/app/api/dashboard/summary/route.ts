@@ -24,16 +24,24 @@ export async function GET() {
 
     const admin = getAdminClient();
 
-    // Get user's org memberships
-    const { data: memberships, error: memErr } = await admin
-      .from("org_members")
-      .select("organization_id")
-      .eq("user_id", user.id);
+    // Get user's org memberships — guard against missing/broken org_members table
+    let memberships: { organization_id: string }[] = [];
+    try {
+      const { data, error: memErr } = await admin
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id);
 
-    if (memErr) {
-      logger.error("[/api/dashboard/summary] memberships query error:", memErr);
-      return NextResponse.json({ error: "Failed to load workspace summaries" }, { status: 500 });
+      if (memErr) {
+        logger.warn("[/api/dashboard/summary] memberships query error:", memErr.message);
+        return NextResponse.json({ workspaces: {} });
+      }
+      memberships = (data ?? []) as { organization_id: string }[];
+    } catch (e) {
+      logger.warn("[/api/dashboard/summary] org_members unavailable:", e);
+      return NextResponse.json({ workspaces: {} });
     }
+
     if (!memberships || memberships.length === 0) {
       return NextResponse.json({ workspaces: {} });
     }

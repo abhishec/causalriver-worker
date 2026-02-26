@@ -48,50 +48,77 @@ export async function GET() {
     const admin = getAdminClient();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-    // Run all queries in parallel
-    const [pendingResult, runningResult, recentResult, artifactResult] = await Promise.all([
-      // Pending count
-      admin
+    // Pending count — guard against missing agent_queue table
+    let pendingCount = 0;
+    try {
+      const { count, error } = await admin
         .from("agent_queue")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", workspaceId)
-        .eq("status", "pending"),
+        .eq("status", "pending");
+      if (!error) pendingCount = count ?? 0;
+      else logger.warn("[worker-health] pending query error:", error.message);
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (pending) unavailable:", e);
+    }
 
-      // Running count
-      admin
+    // Running count
+    let runningCount = 0;
+    try {
+      const { count, error } = await admin
         .from("agent_queue")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", workspaceId)
-        .eq("status", "running"),
+        .eq("status", "running");
+      if (!error) runningCount = count ?? 0;
+      else logger.warn("[worker-health] running query error:", error.message);
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (running) unavailable:", e);
+    }
 
-      // Recent jobs (last 10, including all statuses)
-      admin
-        .from("agent_queue")
-        .select("id, task_type, status, created_at, started_at, completed_at")
-        .eq("organization_id", workspaceId)
-        .order("created_at", { ascending: false })
-        .limit(10),
-
-      // Artifact counts for recent jobs (keyed by job_id)
-      admin
-        .from("se_aas_artifacts")
-        .select("job_id")
-        .eq("organization_id", workspaceId)
-        .gte("created_at", oneHourAgo),
-    ]);
-
-    const jobsWithArtifacts = new Set(
-      (artifactResult.data ?? []).map((a: { job_id: string | null }) => a.job_id).filter(Boolean)
-    );
-
-    const recentJobs = (recentResult.data ?? []).map((j: {
+    // Recent jobs (last 10)
+    type QueueRow = {
       id: string;
       task_type: string;
       status: string;
       created_at: string;
       started_at: string | null;
       completed_at: string | null;
-    }) => {
+    };
+    let recentRows: QueueRow[] = [];
+    try {
+      const { data, error } = await admin
+        .from("agent_queue")
+        .select("id, task_type, status, created_at, started_at, completed_at")
+        .eq("organization_id", workspaceId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (!error) recentRows = (data ?? []) as QueueRow[];
+      else logger.warn("[worker-health] recent jobs query error:", error.message);
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (recent) unavailable:", e);
+    }
+
+    // Artifact job IDs — guard against missing se_aas_artifacts table
+    let jobsWithArtifacts = new Set<string>();
+    try {
+      const { data, error } = await admin
+        .from("se_aas_artifacts")
+        .select("job_id")
+        .eq("organization_id", workspaceId)
+        .gte("created_at", oneHourAgo);
+      if (!error) {
+        jobsWithArtifacts = new Set(
+          (data ?? []).map((a: { job_id: string | null }) => a.job_id).filter(Boolean) as string[]
+        );
+      } else {
+        logger.warn("[worker-health] se_aas_artifacts query error:", error.message);
+      }
+    } catch (e) {
+      logger.warn("[worker-health] se_aas_artifacts unavailable:", e);
+    }
+
+    const recentJobs = recentRows.map((j) => {
       const durationMs =
         j.completed_at && j.started_at
           ? new Date(j.completed_at).getTime() - new Date(j.started_at).getTime()
@@ -107,19 +134,16 @@ export async function GET() {
       };
     });
 
-    const allRecent = recentResult.data ?? [];
-    const succeededLast1h = allRecent.filter(
-      (j: { status: string; completed_at: string | null }) =>
-        j.status === "success" && j.completed_at && j.completed_at >= oneHourAgo
+    const succeededLast1h = recentRows.filter(
+      (j) => j.status === "success" && j.completed_at && j.completed_at >= oneHourAgo
     ).length;
-    const failedLast1h = allRecent.filter(
-      (j: { status: string; completed_at: string | null }) =>
-        j.status === "error" && j.completed_at && j.completed_at >= oneHourAgo
+    const failedLast1h = recentRows.filter(
+      (j) => j.status === "error" && j.completed_at && j.completed_at >= oneHourAgo
     ).length;
 
     return NextResponse.json({
-      pendingJobs: pendingResult.count ?? 0,
-      runningJobs: runningResult.count ?? 0,
+      pendingJobs: pendingCount,
+      runningJobs: runningCount,
       succeededLast1h,
       failedLast1h,
       recentJobs,
