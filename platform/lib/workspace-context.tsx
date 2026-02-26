@@ -126,19 +126,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Run migration on first mount
   useState(() => { migrateLocalStorage(); return null; });
 
-  // Hydrate from localStorage immediately (synchronous, no loading flash)
-  // NOTE: isLoading, currentWorkspaceId, activeCustomerId are always null/true on both
-  // server and client to prevent hydration mismatch. The useEffect below resolves them
-  // from localStorage on the client after the first render.
-  const [memberships, setMemberships] = useState<WorkspaceMembership[]>(() => {
-    const cached = readCache();
-    return cached?.memberships ?? [];
-  });
+  // HYDRATION-SAFE: All state starts with the same value on both server and client.
+  // localStorage is NEVER read during initial render (useState initializer) to prevent
+  // hydration mismatches. All localStorage reads happen exclusively in useEffect.
+  const [memberships, setMemberships] = useState<WorkspaceMembership[]>([]);
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(() => {
-    const cached = readCache();
-    return cached?.isPlatformAdmin ?? false;
-  });
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   // Always start true on both server and client — avoids hydration mismatch.
   // The useEffect below sets it to false immediately if cache is fresh.
   const [isLoading, setIsLoading] = useState(true);
@@ -245,22 +238,36 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Hydrate client-only localStorage state after mount (SSR-safe: runs only on client)
+    // Hydrate client-only localStorage state after mount (SSR-safe: runs only on client).
+    // NOTE: All localStorage reads are in this useEffect — never in useState initializers —
+    // to ensure SSR and client first-render produce identical HTML (prevents hydration mismatch).
     const savedWorkspaceId = localStorage.getItem(STORAGE_KEY);
-    if (savedWorkspaceId) setCurrentWorkspaceId(savedWorkspaceId);
     const savedCustomerId = localStorage.getItem(CUSTOMER_KEY);
     if (savedCustomerId) setActiveCustomerIdRaw(savedCustomerId);
 
     // Skip background fetch if localStorage cache is very fresh (< 60s).
     // Prevents redundant /api/workspace/memberships calls on rapid navigations.
-    // Also resolve isLoading immediately from cache to prevent flash-of-loading-state.
     const cached = readCache();
     const isFresh = cached && (Date.now() - cached.timestamp < 60_000);
     if (isFresh) {
-      // Auto-select first workspace if no saved selection exists in localStorage.
-      // Prevents "No AI Worker Selected" when workspaces exist but no selection is persisted
-      // (e.g., fresh browser, cleared localStorage, or first login after cache population).
-      if (!savedWorkspaceId && cached.memberships.length > 0) {
+      // Hydrate memberships + admin flag from cache immediately
+      setMemberships(cached.memberships);
+      setIsPlatformAdmin(cached.isPlatformAdmin);
+
+      // Restore saved workspace selection or auto-select first non-core
+      if (savedWorkspaceId) {
+        const validSaved = cached.memberships.find((m) => m.organization_id === savedWorkspaceId);
+        if (validSaved) {
+          setCurrentWorkspaceId(savedWorkspaceId);
+        } else if (cached.memberships.length > 0) {
+          // Saved workspace no longer valid — auto-select first non-core
+          const firstNonCore =
+            cached.memberships.find((m) => !m.workspace.is_core_brain) ?? cached.memberships[0];
+          setCurrentWorkspaceId(firstNonCore.organization_id);
+          try { localStorage.setItem(STORAGE_KEY, firstNonCore.organization_id); } catch { /* ignore */ }
+        }
+      } else if (cached.memberships.length > 0) {
+        // No saved workspace selection — auto-select first non-core
         const firstNonCore =
           cached.memberships.find((m) => !m.workspace.is_core_brain) ?? cached.memberships[0];
         setCurrentWorkspaceId(firstNonCore.organization_id);
@@ -268,6 +275,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       }
       setIsLoading(false);
     } else {
+      // No fresh cache — restore saved workspace ID first (API call will validate it)
+      if (savedWorkspaceId) setCurrentWorkspaceId(savedWorkspaceId);
       loadWorkspaces();
     }
   }, [loadWorkspaces]);

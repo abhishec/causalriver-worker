@@ -35,8 +35,9 @@ export async function POST(request: Request) {
     const supabase = await createClient();
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -103,10 +104,15 @@ export async function POST(request: Request) {
         results[conn.connector_type] = result;
         totalSignals += result.signalsIngested || 0;
 
-        // Update last_sync_at (correct column name on org_connectors)
+        // Update last_sync_at and accumulate signals_count
+        const prevCount = conn.signals_count || 0;
+        const newSignals = (result?.signalsIngested || 0) as number;
         await service
           .from("org_connectors")
-          .update({ last_sync_at: new Date().toISOString() })
+          .update({
+            last_sync_at: new Date().toISOString(),
+            signals_count: prevCount + newSignals,
+          })
           .eq("id", conn.id);
       } catch (err: any) {
         logger.error(`[Logs sync] ${conn.connector_type} failed:`, err);
