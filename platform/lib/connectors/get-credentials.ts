@@ -79,7 +79,7 @@ export async function getConnectorWithCredentials(
     .select("id, connector_type, config, status, signals_count")
     .eq("organization_id", organizationId)
     .eq("connector_type", connectorType)
-    .eq("status", "active")
+    .in("status", ["active", "connected"])
     .maybeSingle();
 
   if (error || !row) return null;
