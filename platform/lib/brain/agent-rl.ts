@@ -191,48 +191,78 @@ export async function recordAgentOutcome(
 // ── Recent Quality Patterns ────────────────────────────────────────────────
 
 /**
- * Returns recent quality patterns for brain context injection.
+ * Per-domain quality breakdown for RL flywheel injection into brain context.
+ */
+export interface QualityPattern {
+  domain: string;
+  avgQuality: number;
+  sampleCount: number;
+  trend: "improving" | "degrading" | "stable";
+}
+
+/**
+ * Returns per-domain quality patterns for brain context injection.
  * Called by getBrainContext() to inform every LLM decision with RL history.
  *
  * Uses the actual prediction_records schema:
  *   - "confidence" column (not "quality_score" — that column does not exist)
  *   - "domain" column (not "task_type" — that column is on agent_queue)
+ *   - "domain" column (not "domain_type" — that column does not exist on prediction_records)
+ *
+ * Trend detection: compares first half vs second half of time-ordered scores per domain.
+ * Requires >= 4 samples for a reliable trend; falls back to "stable" below that threshold.
  */
 export async function getRecentQualityPatterns(
   supabase: SupabaseClient,
-  orgId: string
-): Promise<{ avgQuality: number; topPatterns: string[]; sampleSize: number }> {
+  organizationId: string,
+  windowHours = 24
+): Promise<QualityPattern[]> {
   try {
-    const { data } = await supabase
+    const since = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await supabase
       .from("prediction_records")
-      .select("confidence, domain, metadata")
-      .eq("organization_id", orgId)
-      .order("created_at", { ascending: false })
-      .limit(20);
+      .select("domain, confidence, created_at")
+      .eq("organization_id", organizationId)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true });
 
-    if (!data || data.length === 0) {
-      return { avgQuality: 0, topPatterns: [], sampleSize: 0 };
+    if (error || !data || data.length === 0) return [];
+
+    // Group by domain (time-ordered for trend detection)
+    const byDomain = new Map<string, number[]>();
+    for (const row of data) {
+      const domain = (row.domain as string | null) ?? "unknown";
+      if (!byDomain.has(domain)) byDomain.set(domain, []);
+      byDomain.get(domain)!.push(typeof row.confidence === "number" ? row.confidence : 0.5);
     }
 
-    const avgQuality =
-      data.reduce((sum, r) => sum + (typeof r.confidence === "number" ? r.confidence : 0), 0) /
-      data.length;
+    const patterns: QualityPattern[] = [];
+    for (const [domain, scores] of byDomain.entries()) {
+      if (scores.length === 0) continue;
+      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-    // Extract patterns from high-quality (>= 0.75) responses using domain as the pattern key
-    const highQuality = data.filter(r => (typeof r.confidence === "number" ? r.confidence : 0) >= 0.75);
-    const patternMap = new Map<string, number>();
-    for (const r of highQuality) {
-      const key = (r.domain as string | null) ?? "general";
-      patternMap.set(key, (patternMap.get(key) ?? 0) + 1);
+      // Trend: compare first half vs second half (requires >= 4 samples)
+      let trend: QualityPattern["trend"] = "stable";
+      if (scores.length >= 4) {
+        const mid = Math.floor(scores.length / 2);
+        const firstHalf = scores.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+        const secondHalf = scores.slice(mid).reduce((a, b) => a + b, 0) / (scores.length - mid);
+        if (secondHalf - firstHalf > 0.05) trend = "improving";
+        else if (firstHalf - secondHalf > 0.05) trend = "degrading";
+      }
+
+      patterns.push({
+        domain,
+        avgQuality: Math.round(avg * 100) / 100,
+        sampleCount: scores.length,
+        trend,
+      });
     }
-    const topPatterns = [...patternMap.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([pattern]) => pattern);
 
-    return { avgQuality, topPatterns, sampleSize: data.length };
+    return patterns.sort((a, b) => b.avgQuality - a.avgQuality);
   } catch {
-    return { avgQuality: 0, topPatterns: [], sampleSize: 0 };
+    return [];
   }
 }
 

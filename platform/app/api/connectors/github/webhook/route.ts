@@ -24,6 +24,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { createPRAnalyzer } from '@nexus-ai/memory-stack';
 import { Octokit } from '@octokit/rest';
 import { createHmac, timingSafeEqual } from 'crypto';
@@ -87,7 +88,16 @@ export async function POST(req: NextRequest) {
       return handleIssuesEvent(payload, supabase);
     }
 
-    // 6. Handle push events — auto-trigger Architecture Extractor (P1-15 spec)
+    // 6. Handle installation events — GitHub App installed/uninstalled
+    if (event === 'installation') {
+      // Fire-and-forget — installation sync is non-blocking best effort
+      handleInstallationEvent(payload).catch((err) => {
+        logger.warn('[GitHub Webhook] installation event handling failed (non-fatal):', err?.message);
+      });
+      return NextResponse.json({ message: 'installation event received' });
+    }
+
+    // 7. Handle push events — auto-trigger Architecture Extractor (P1-15 spec)
     // "Diagrams auto-update when code changes are merged"
     if (event === 'push') {
       // Fire-and-forget — architecture sync is non-blocking best effort
@@ -414,6 +424,93 @@ async function handleIssuesEvent(payload: any, supabase: any) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+// ============================================================================
+// INSTALLATION EVENT — GitHub App installed / reinstalled
+// Handles the case where GitHub sends an `installation` webhook event
+// (e.g., app re-installed from the GitHub UI or Marketplace).
+// The primary install flow is handled by /app-install/callback; this is a
+// supplementary sync to keep org_connectors current if the installation_id
+// changes (e.g., user uninstalls + reinstalls the app).
+// ============================================================================
+
+async function handleInstallationEvent(payload: any): Promise<void> {
+  const { action, installation } = payload;
+
+  // Only process `created` (new install) and `new_permissions_accepted`
+  if (!['created', 'new_permissions_accepted'].includes(action)) {
+    logger.debug(`[GitHub Installation] Action "${action}" — no DB update needed`);
+    return;
+  }
+
+  const installationId = installation?.id;
+  const accountLogin: string = installation?.account?.login ?? '';
+  const accountType: string = installation?.account?.type ?? '';
+
+  if (!installationId) {
+    logger.warn('[GitHub Installation] Missing installation.id — skipping');
+    return;
+  }
+
+  logger.debug(
+    `[GitHub Installation] action=${action}, installation_id=${installationId}, account=${accountLogin}`
+  );
+
+  // Use admin client so we can query org_connectors across all orgs (no RLS context)
+  const admin = getAdminClient();
+
+  // Find matching org connector by stored account_login.
+  // The callback flow stores metadata.account_login on first install.
+  // On reinstall, we update the installation_id to the new one.
+  const { data: existingConnectors, error: lookupError } = await admin
+    .from('org_connectors')
+    .select('id, organization_id, metadata')
+    .eq('connector_type', 'github')
+    .eq('metadata->>account_login', accountLogin)
+    .limit(10);
+
+  if (lookupError) {
+    logger.warn('[GitHub Installation] Lookup error:', lookupError.message);
+    return;
+  }
+
+  if (!existingConnectors || existingConnectors.length === 0) {
+    // No existing connector for this GitHub account — the callback flow will
+    // handle the initial insert when the user completes the state-verified redirect.
+    logger.debug(`[GitHub Installation] No existing connector for account "${accountLogin}" — skipping (callback flow will handle)`);
+    return;
+  }
+
+  // Update installation_id on all matching connectors (in case of org with multiple workspaces)
+  for (const connector of existingConnectors) {
+    const updatedMetadata = {
+      ...(connector.metadata || {}),
+      installation_id: installationId,
+      account_login: accountLogin,
+      account_type: accountType,
+      reinstalled_at: new Date().toISOString(),
+    };
+
+    // Use store_connector_credentials RPC to keep credentials encrypted at rest
+    const { error: rpcError } = await admin.rpc('store_connector_credentials', {
+      p_organization_id: connector.organization_id,
+      p_connector_type: 'github',
+      p_credentials: { installation_id: String(installationId), auth_method: 'github_app' },
+      p_metadata: updatedMetadata,
+    });
+
+    if (rpcError) {
+      logger.warn(
+        `[GitHub Installation] Failed to update connector for org ${connector.organization_id}:`,
+        rpcError.message
+      );
+    } else {
+      logger.debug(
+        `[GitHub Installation] Updated org ${connector.organization_id} connector with new installation_id=${installationId}`
+      );
+    }
+  }
 }
 
 // ============================================================================

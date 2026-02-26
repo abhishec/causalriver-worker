@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
-import { getRecentQualityPatterns } from "@/lib/brain/agent-rl";
+import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
 
 export interface BrainContext {
   brainIq: number;                    // current Brain IQ score
@@ -12,6 +12,8 @@ export interface BrainContext {
   topPatterns: string[];              // top domains from high-quality recent records
   activeJobCount: number;             // jobs currently running
   contextSummary: string;             // 2-3 sentence natural language summary for LLM injection
+  qualityPatterns: QualityPattern[];  // per-domain quality breakdown (RL flywheel)
+  qualityPatternsSummary: string;     // single-line summary for direct LLM prompt injection
 }
 
 export async function getBrainContext(
@@ -89,10 +91,22 @@ export async function getBrainContext(
 
     const activeJobCount = jobsRow.status === "fulfilled" ? (jobsRow.value.count ?? 0) : 0;
 
-    // Fetch recent quality patterns from prediction_records (RL flywheel — closes the loop)
-    // getRecentQualityPatterns is fire-and-forget safe — never throws
-    const qualityPatterns = await getRecentQualityPatterns(supabase, orgId);
-    const topPatterns = qualityPatterns.topPatterns;
+    // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
+    // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
+    const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
+
+    // Derive topPatterns (domain names with high quality) for backwards-compat contextSummary
+    const topPatterns = qualityPatterns
+      .filter(p => p.avgQuality >= 0.75)
+      .slice(0, 3)
+      .map(p => p.domain);
+
+    // Build a single-line summary for direct LLM prompt injection
+    const qualityPatternsSummary = qualityPatterns.length > 0
+      ? qualityPatterns.slice(0, 5).map(p =>
+          `${p.domain}: ${Math.round(p.avgQuality * 100)}% quality (${p.sampleCount} run${p.sampleCount !== 1 ? "s" : ""}, ${p.trend})`
+        ).join("; ")
+      : "No recent domain quality data";
 
     // Fetch the 3 most recently ingested document chunks (empty query = latest by created_at)
     // Called by getBrainContext() to include document knowledge in every LLM decision
@@ -109,7 +123,7 @@ export async function getBrainContext(
     // Build natural language summary for LLM system prompt injection
     const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, recentDocTitles });
 
-    return { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary };
+    return { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary, qualityPatterns, qualityPatternsSummary };
   } catch (err) {
     // getBrainContext must never throw — return safe defaults
     logger.warn("[brain-context] getBrainContext failed, returning defaults:", err);
@@ -122,11 +136,13 @@ export async function getBrainContext(
       topPatterns: [],
       activeJobCount: 0,
       contextSummary: "",
+      qualityPatterns: [],
+      qualityPatternsSummary: "No recent domain quality data",
     };
   }
 }
 
-function buildContextSummary(ctx: Omit<BrainContext, "contextSummary"> & { recentDocTitles?: string[] }): string {
+function buildContextSummary(ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[] }): string {
   const parts: string[] = [];
 
   if (ctx.brainState === "empty") {

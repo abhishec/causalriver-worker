@@ -3686,7 +3686,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       brainIqForRouting = brainCtx.brainIq;
 
       if (brainCtx.brainState !== "empty") {
-        effectiveSystemPrompt += `\n\n## Brain Context\n${brainCtx.contextSummary}`;
+        effectiveSystemPrompt += `\n\n## Brain Context\n- IQ Score: ${brainCtx.brainIq}\n- Quality Patterns (last 24h): ${brainCtx.qualityPatternsSummary ?? "No data"}\n- Active Signals: ${brainCtx.signalCount}\n${brainCtx.contextSummary}`;
       }
 
       // Brain IQ gate: warn the user when brain is not ready
