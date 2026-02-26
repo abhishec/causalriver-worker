@@ -369,9 +369,23 @@ export async function POST(request: NextRequest) {
       // does not abort the classification mid-flight.
       timeoutMs: 8000,
     });
+    // ── Brain state prefix: lightweight signal count for classifier routing ──
+    // Gives the LLM classifier awareness of brain data availability before routing.
+    // Avoids routing to data-heavy SE-aaS domains when brain is empty.
+    let _classifierBrainPrefix = '';
+    try {
+      const { count } = await supabase
+        .from('cross_domain_signals')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', workspaceId);
+      const _sigCount = count ?? 0;
+      const _brainReady = _sigCount > 10;
+      _classifierBrainPrefix = `[Brain: ${_sigCount} signals, ${_brainReady ? 'data available' : 'limited data'}] `;
+    } catch { /* non-fatal — classifier runs without prefix if this fails */ }
+
     let interpretation: QueryInterpretation | undefined;
     try {
-      interpretation = await interpreter.interpret(message);
+      interpretation = await interpreter.interpret(_classifierBrainPrefix + message);
     } catch (interpErr) {
       logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
     }
@@ -4293,6 +4307,35 @@ No connectors are configured yet. When the user asks for data from any source (S
           // Non-blocking but log for debugging — silent swallowing hides brain learning failures
           logger.warn("[Copilot] Feedback bus error (non-fatal):", feedbackErr instanceof Error ? feedbackErr.message : String(feedbackErr));
         });
+
+        // ── RL Quality Recording: close the RL flywheel for copilot LLM responses ──
+        // recordAgentOutcome() was only called from domain-executor (SE-aaS path).
+        // For standard copilot responses, prediction_records was never written.
+        // This fire-and-forget call closes that gap.
+        try {
+          const { computeAgentQuality, recordAgentOutcome } = await import('@/lib/brain/agent-rl');
+          const _rlDomain = detectedIntent ?? 'general';
+          const _rlExecutionMs = Date.now() - streamStartMs;
+          const _rlResultText = streamedAssistantText ?? '';
+          const _rlQuality = computeAgentQuality(
+            _rlResultText,
+            null,
+            _rlExecutionMs,
+            _rlDomain
+          );
+          recordAgentOutcome(service, {
+            agentId: `copilot_${workspaceId}_${Date.now()}`,
+            domain: _rlDomain,
+            taskDescription: message.trim().slice(0, 200),
+            resultSummary: _rlResultText.slice(0, 500),
+            quality: _rlQuality,
+            executionMs: _rlExecutionMs,
+            organizationId: workspaceId,
+            userId: user.id,
+          }).catch((rlErr: unknown) => logger.warn('[Copilot] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr)));
+        } catch (rlErr: unknown) {
+          logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
+        }
 
         // ── Notify OpenClaw gateway of conversation completion ──────
         // This lets the Signal Harvester process the conversation for
