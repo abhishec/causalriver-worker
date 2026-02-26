@@ -20,6 +20,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from "@/lib/logger";
+import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import {
   brainBookkeeperAgent,
   brainReconcilerAgent,
@@ -451,6 +453,39 @@ export async function executeAccountingAgent(
       // Non-fatal — CAS injection is best-effort
     }
   }
+
+  // ── Step 8: RL Outcome Recording ─────────────────────────────────────────
+  // Mirror SE-aaS pattern: record quality signal to prediction_records +
+  // emit dopamine/gaba to cross_domain_signals for the RL feedback loop.
+  // Both are fire-and-forget — NEVER block the agent response.
+  const rlQuality = computeAgentQuality(
+    JSON.stringify(finalResult),
+    null,
+    durationMs,
+    `aas_${action}`,
+  );
+  const rlTaskId = `aas_${action}_${organizationId.slice(0, 8)}_${Date.now()}`;
+
+  recordAgentOutcome(supabase, {
+    agentId: rlTaskId,
+    domain: `aas.${action}`,
+    taskDescription: `AAS ${action} agent (${jurisdiction}, ${transactions.length} txns)`,
+    resultSummary: JSON.stringify(finalResult).slice(0, 500),
+    quality: rlQuality,
+    executionMs: durationMs,
+    organizationId,
+    userId,
+  }).catch(() => {/* non-fatal */});
+
+  logAgentRetro({
+    taskId: rlTaskId,
+    agentType: `aas_${action}`,
+    prompt: `AAS ${action} (${jurisdiction}, ${transactions.length} txns, ${period ? `${period.from}–${period.to}` : 'no period'})`,
+    status: rlQuality >= 0.5 ? "completed" : "partial",
+    durationMs,
+    modelUsed: "claude-sonnet-4-6",
+    outputSummary: JSON.stringify(finalResult).slice(0, 200),
+  }).catch(() => {/* non-fatal */});
 
   return {
     result: finalResult,
