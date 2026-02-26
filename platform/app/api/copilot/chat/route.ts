@@ -3940,6 +3940,33 @@ No connectors are configured yet. When the user asks for data from any source (S
     const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
     const streamStartMs = Date.now();
 
+    // ── Brain RL: Fire pre-stream interaction signal ────────────────────────
+    // Must fire BEFORE the async IIFE so signal is captured even if the client
+    // disconnects mid-stream (post-stream code is bypassed on AbortError).
+    {
+      const { createBrainFeedbackBus: _preFeedbackBus } = memStack;
+      const _preBus = _preFeedbackBus({ supabase: service, organizationId: workspaceId });
+      _preBus.emitSignal({
+        sourceDomain: 'copilot.chat',
+        signalType: 'copilot_interaction',
+        signalValue: brainContext?.confidence ?? 0.5,
+        entityType: 'copilot_chat',
+        entityId: `copilot_${Date.now()}`,
+        metadata: {
+          intent: detectedIntent,
+          domains: detectedDomains,
+          model: v4SmartModel,
+          hadBrainContext: !!brainContext,
+          hadSeaasResult: !!seaasResult,
+          hadActionArtifact: !!actionArtifact,
+          userId: user.id,
+          phase: 'pre_stream',
+        },
+      }).catch((e: unknown) =>
+        logger.warn('[Copilot] Pre-stream RL signal failed:', e instanceof Error ? e.message : String(e))
+      );
+    }
+
     (async () => {
       try {
         // ── Orchestrator: emit queued job event so UI can show Agent Monitor ──
