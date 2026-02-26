@@ -96,6 +96,9 @@ export async function POST(request: NextRequest) {
     await Promise.resolve(service.from("prediction_records").insert({
       organization_id: organizationId,
       domain: sourceDomain,
+      prediction_type: "copilot_response_quality",
+      entity_type: "copilot_conversation",
+      entity_id: conversationId,
       predicted_outcome: "helpful_response",
       actual_outcome: rating === "helpful" ? "helpful_response" : "unhelpful_response",
       was_correct: rating === "helpful",

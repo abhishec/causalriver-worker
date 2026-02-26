@@ -84,11 +84,12 @@ export async function GET(request: NextRequest) {
           await service.from("prediction_records").insert({
             organization_id: orgId,
             domain: "velocity",
+            prediction_type: "velocity_collapse",
+            entity_type: "early_warning",
+            entity_id: `velocity_${new Date().toISOString().split("T")[0]}`,
             predicted_outcome: `Velocity collapse predicted: ${vc.predictedDrop}% drop in ${vc.daysUntilCollapse} days`,
             predicted_value: vc.predictedDrop ?? null,
             confidence: report.confidence,
-            entity_type: "early_warning",
-            entity_id: `velocity_${new Date().toISOString().split("T")[0]}`,
           });
         }
 
@@ -98,11 +99,12 @@ export async function GET(request: NextRequest) {
             await service.from("prediction_records").insert({
               organization_id: orgId,
               domain: risk.domain ?? "bottleneck",
+              prediction_type: "bottleneck_risk",
+              entity_type: "early_warning",
+              entity_id: `bottleneck_${risk.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
               predicted_outcome: `Bottleneck risk in ${risk.domain}: Gini ${risk.giniCoefficient.toFixed(2)}, bus factor ${risk.busFactor}`,
               predicted_value: risk.giniCoefficient,
               confidence: report.confidence,
-              entity_type: "early_warning",
-              entity_id: `bottleneck_${risk.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
             });
           }
         }
