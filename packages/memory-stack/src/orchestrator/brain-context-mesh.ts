@@ -770,9 +770,10 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         .limit(50)
       ).catch(() => ({ data: [] as any[] })),
 
-      // CODE INTELLIGENCE: top exported symbols for this branch (NB-017/NB-018)
-      // Scoped by branch via metadata->>'branch' filter.
-      // Only runs when a branch is configured — skipped for cold-start.
+      // CODE INTELLIGENCE: top exported symbols (NB-017/NB-018)
+      // When branch is configured: scoped to that branch via metadata->>'branch' filter.
+      // When branch is null (pre-OAuth, demo, or cold-start): fall back to unfiltered query
+      // so pre-seeded symbols still inject into prompts — graceful degradation.
       branch
         ? Promise.resolve(supabase
             .from('entity_embeddings')
@@ -784,15 +785,29 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
             .order('importance_score', { ascending: false })
             .limit(50)
           ).catch(() => ({ data: [] as any[] }))
-        : Promise.resolve(emptyRes),
+        : Promise.resolve(supabase
+            .from('entity_embeddings')
+            .select('entity_id, content, metadata, importance_score')
+            .eq('organization_id', organizationId)
+            .eq('entity_type', 'code_symbol')
+            .order('importance_score', { ascending: false })
+            .limit(50)
+          ).catch(() => ({ data: [] as any[] })),
     ]);
 
     const signals = (signalsRes.data || []) as SignalRow[];
 
-    // Build code intelligence context when branch is configured
+    // Build code intelligence context — either branch-scoped or fallback (pre-OAuth / demo)
     let codeIntelligence: CodeIntelligenceContext | null = null;
+    const rawSymbolsData = (symbolsRes.data || []) as Array<{
+      entity_id: string;
+      content: string;
+      metadata: Record<string, any>;
+      importance_score: number;
+    }>;
+
     if (branch) {
-      // Build dependency graph + get real total symbol count in parallel
+      // Branch configured: build full code intelligence with dependency graph
       const [depGraph, totalCountRes] = await Promise.all([
         buildCodeDependencyGraph(supabase, organizationId, branch).catch(
           () => ({ branch, dependencies: {}, dependents: {}, edgeCount: 0, fileCount: 0 }) as CodeDependencyGraph
@@ -808,27 +823,16 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         ).catch(() => ({ count: null })),
       ]);
 
-      // Shape top symbols for injection into prompts
-      const rawSymbols = (symbolsRes.data || []) as Array<{
-        entity_id: string;
-        content: string;
-        metadata: Record<string, any>;
-        importance_score: number;
-      }>;
-
-      const topSymbols = rawSymbols.slice(0, 20).map(row => ({
+      const topSymbols = rawSymbolsData.slice(0, 20).map(row => ({
         name: row.metadata?.name ?? row.entity_id,
         kind: row.metadata?.kind ?? 'unknown',
         filePath: row.metadata?.filePath ?? '',
-        // Read signature directly from metadata (stored by github-connector).
-        // Avoids fragile line-index parsing of the content string.
         signature: (row.metadata?.signature as string | null) ?? undefined,
         isExported: row.metadata?.isExported === true,
         language: row.metadata?.language ?? 'unknown',
       }));
 
-      // Use real total count; fall back to batch size if count query fails
-      const symbolCount = (totalCountRes as any)?.count ?? rawSymbols.length;
+      const symbolCount = (totalCountRes as any)?.count ?? rawSymbolsData.length;
 
       codeIntelligence = {
         branch,
@@ -836,6 +840,34 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
         topSymbols,
         dependencyGraphSummary: summariseCodeDependencyGraph(depGraph),
         dependencyGraph: depGraph,
+      };
+    } else if (rawSymbolsData.length > 0) {
+      // No branch configured but pre-seeded symbols exist (demo / pre-OAuth cold-start).
+      // Build lightweight codeIntelligence without dependency graph so the AI Worker
+      // still gets code symbol context injected into prompts.
+      const topSymbols = rawSymbolsData.slice(0, 20).map(row => ({
+        name: row.metadata?.name ?? row.entity_id,
+        kind: row.metadata?.kind ?? 'unknown',
+        filePath: row.metadata?.filePath ?? '',
+        signature: (row.metadata?.signature as string | null) ?? undefined,
+        isExported: row.metadata?.isExported === true,
+        language: row.metadata?.language ?? 'unknown',
+      }));
+
+      const emptyDepGraph: CodeDependencyGraph = {
+        branch: 'default',
+        dependencies: {},
+        dependents: {},
+        edgeCount: 0,
+        fileCount: 0,
+      };
+
+      codeIntelligence = {
+        branch: 'default',
+        symbolCount: rawSymbolsData.length,
+        topSymbols,
+        dependencyGraphSummary: '',
+        dependencyGraph: emptyDepGraph,
       };
     }
 

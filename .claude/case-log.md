@@ -175,3 +175,14 @@
 - **Lesson**: **The dashboard is a LANDING PAGE, not a sidebar page.** Users need a clean, focused selection experience: pick workspace → pick service → launch. No distractions.
 - **Fix**: Created new `(home)` route group with minimal layout (WorkspaceProvider only, no Sidebar/TopBar). Full-screen design with step-by-step flow.
 - **Pattern**: Before building any new page, ask: "What is the USER's mental model here?" Landing pages need clean layouts. Operational pages need the sidebar. Don't default to putting everything in the sidebar.
+
+## Case 017: [USER CORRECTION] Terminology — "AI Worker Space" not "Org" (2026-02-26)
+- **Trigger**: User said "why org - it has to be AI worker space..can u relearein in ur reinforcement learning..so that everywhere u can refer AI worker and not org only"
+- **Lesson**: **Never say "org" when referring to a customer's workspace/tenant.** Always say **"AI worker space"** in:
+  - Comments, console logs, seed scripts, commit messages, retros, UI-facing copy
+  - Verbal responses to user in chat
+  - Health check output, demo scenario descriptions
+- **The distinction matters**: "org" is an internal DB concept. "AI Worker space" is the product concept — it's what Tookitaki/customers actually understand and buy. Using internal DB jargon in the product narrative breaks the demo story.
+- **Pattern**: Product vocabulary → AI Worker space. DB/code internals → organization_id (in code only, never spoken)
+- **Immediate correction**: All seed scripts, health checks, and retro entries going forward use "AI worker space" not "org"
+
