@@ -113,13 +113,24 @@ export async function GET(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { data: { user } } = await supabase.auth.getUser();
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
     const type = request.nextUrl.searchParams.get("type");
 
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     let query = service
       .from("org_connectors")
       .select("id, connector_type, instance_name, display_name, status, last_sync_at, config, metadata, signals_count, error_message, created_at")
@@ -157,7 +168,13 @@ export async function POST(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { data: { user } } = await supabase.auth.getUser();
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
@@ -168,7 +185,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "connectorType is required" }, { status: 400 });
     }
 
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     let instanceName: string;
     let credentials: Record<string, any>;
     let config: Record<string, any>;
@@ -351,7 +373,13 @@ export async function PUT(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { data: { user } } = await supabase.auth.getUser();
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
@@ -360,7 +388,12 @@ export async function PUT(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const updates: Record<string, any> = { updated_at: new Date().toISOString() };
     if (displayName !== undefined) updates.display_name = displayName;
@@ -394,7 +427,13 @@ export async function DELETE(request: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { data: { user } } = await supabase.auth.getUser();
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
@@ -403,7 +442,12 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { error } = await service
       .from("org_connectors")
