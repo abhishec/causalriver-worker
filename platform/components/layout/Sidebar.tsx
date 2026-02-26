@@ -761,7 +761,7 @@ export function Sidebar() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors">
+              <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors" suppressHydrationWarning>
                 {currentWorkspace?.name ?? "No AI Worker"}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">

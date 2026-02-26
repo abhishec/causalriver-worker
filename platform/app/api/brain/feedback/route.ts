@@ -92,13 +92,31 @@ export async function POST(request: NextRequest) {
       correction: correction || null,
       command_id: commandId || null,
       domain_id: domainId || null,
-      processed: false,
+      status: "pending" as const,
       created_at: new Date().toISOString(),
     };
 
     const { error: insertError } = await service
       .from("brain_feedback_queue")
       .insert(feedbackEntry);
+
+    // Also write to copilot_response_feedback for RL stats queries
+    // (fire-and-forget — never block the response on this)
+    void (async () => {
+      try {
+        await service.from("copilot_response_feedback").insert({
+          organization_id: workspaceId,
+          user_id: user.id,
+          message_id: messageId,
+          conversation_id: conversationId || null,
+          rating: rating as Rating,
+          correction: correction || null,
+          command_id: commandId || null,
+          domain_id: domainId || null,
+          created_at: new Date().toISOString(),
+        });
+      } catch { /* non-critical */ }
+    })();
 
     if (insertError) {
       // If brain_feedback_queue doesn't exist yet, fall back to ai_memory
