@@ -267,6 +267,37 @@ function BrainStatusBanner({ workspaceId, serviceMode }: { workspaceId: string |
   );
 }
 
+/* ── Active Learning Indicator ───────────────────────────────────────────── */
+
+function ActiveLearningIndicator() {
+  const [rlStatus, setRlStatus] = useState<{ learningVelocity: number; totalSignals24h: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchRLStatus = async () => {
+      try {
+        const res = await fetch("/api/brain/rl-status");
+        if (res.ok && !cancelled) setRlStatus(await res.json());
+      } catch { /* non-critical */ }
+    };
+    fetchRLStatus();
+    const interval = setInterval(fetchRLStatus, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  if (!rlStatus || rlStatus.learningVelocity <= 0) return null;
+
+  return (
+    <div className="mx-3 mt-2 px-3 py-2 rounded-lg bg-accent/5 border border-accent/20">
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+        <span className="text-[11px] font-medium text-accent">Active Learning</span>
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-0.5">{rlStatus.learningVelocity} signals processed today</p>
+    </div>
+  );
+}
+
 /* ── Chat History Group ──────────────────────────────────────────────────── */
 
 function ChatHistoryGroup({ label, items, activePath, activeConversationId }: {
@@ -778,6 +809,7 @@ export function Sidebar() {
           {/* Brain Intelligence — live learning stats */}
           <div className="py-2 shrink-0">
             <BrainStatusBanner workspaceId={currentWorkspace?.id} serviceMode={activeService} />
+            <ActiveLearningIndicator />
           </div>
 
           {/* Connections — recommended connectors for this AI Worker */}

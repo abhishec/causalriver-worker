@@ -12,7 +12,8 @@ interface MessageFeedbackProps {
 
 /**
  * Thumbs up/down feedback on assistant messages.
- * Sends RL signals (dopamine/gaba) to the brain via /api/copilot/feedback.
+ * Sends RL signals to the brain via /api/brain/feedback (dopamine/gaba).
+ * Also fires /api/copilot/feedback for legacy stats compatibility.
  *
  * FIX BUG-12: Don't set submitted=true until fetch succeeds
  * FIX BUG-13: Don't fire not_helpful immediately on thumbs-down — wait for correction flow
@@ -27,7 +28,23 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
   const submitFeedback = useCallback(async (r: "helpful" | "not_helpful" | "incorrect", correctionText?: string) => {
     setError(false);
     try {
-      const res = await fetch("/api/copilot/feedback", {
+      // Primary: /api/brain/feedback — feeds the RL loop with dopamine/gaba signals
+      const messageId = conversationId
+        ? `${conversationId}-msg-${messageIndex}`
+        : `msg-${messageIndex}`;
+      const brainRes = await fetch("/api/brain/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageId,
+          conversationId: conversationId || undefined,
+          rating: r === "helpful" ? 1 : r === "not_helpful" ? 0 : -1,
+          context: correctionText || undefined,
+        }),
+      });
+
+      // Secondary (fire-and-forget): /api/copilot/feedback for legacy stats
+      fetch("/api/copilot/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -38,8 +55,9 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
           correction: correctionText || undefined,
           domain: serviceMode,
         }),
-      });
-      if (!res.ok) {
+      }).catch(() => { /* non-critical */ });
+
+      if (!brainRes.ok) {
         setError(true);
         setRating(null);
         return;
@@ -97,7 +115,7 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
           </svg>
         )}
         <span className="text-[10px] text-muted-foreground">
-          {error ? "Failed to send — try again" : "Feedback recorded"}
+          {error ? "Failed to send — try again" : rating === "helpful" ? "Brain updated" : "Brain updated"}
         </span>
       </div>
     );

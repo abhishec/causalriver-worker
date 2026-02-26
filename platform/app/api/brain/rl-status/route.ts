@@ -112,13 +112,19 @@ export async function GET(req: NextRequest) {
     const feedbackHelpful = feedbackRows.filter((r) => r.rating === "helpful").length;
     const feedbackNotHelpful = feedbackRows.filter((r) => r.rating !== "helpful").length;
 
+    const improvementThisSession = feedbackTotal > 0 ? Math.round((feedbackHelpful / feedbackTotal) * 100) : 0;
+
     return NextResponse.json({
       signalsThisHour,
       signalsThisSession,
+      // Aliases used by the Active Learning indicator and spec consumers
+      totalSignals24h: signalsThisSession,
+      learningVelocity,
+      improvementThisSession,
       feedbackTotal,
       feedbackHelpful,
       feedbackNotHelpful,
-      learningVelocity,
+      positiveFeedbacks: feedbackHelpful,
       recentSignals: recentSignalsResult.data ?? [],
       queueDepth: queueResult.count ?? 0,
     });

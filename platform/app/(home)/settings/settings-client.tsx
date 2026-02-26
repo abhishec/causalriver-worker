@@ -234,10 +234,10 @@ export function SettingsClient({
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "members", label: "Members" },
-    { id: "connections", label: "Connections", count: connectors.length },
+    { id: "connections", label: "Connections", count: (connectors || []).length },
     { id: "brain", label: "Brain" },
     { id: "notifications", label: "Notifications" },
-    { id: "api", label: "API Keys", count: apiKeys.length },
+    { id: "api", label: "API Keys", count: (apiKeys || []).length },
     ...((currentRole === "owner" || isPlatformAdmin) ? [{ id: "danger", label: "Danger Zone" }] : []),
   ];
 
@@ -509,13 +509,13 @@ export function SettingsClient({
                         className="w-full flex items-start gap-4 p-5 text-left hover:bg-surface-hover/30 transition-colors"
                       >
                         <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-sm font-bold text-accent">{cust.name.charAt(0).toUpperCase()}</span>
+                          <span className="text-sm font-bold text-accent">{cust.name?.charAt(0)?.toUpperCase() || "?"}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{cust.name}</span>
                             <Badge variant="accent" size="xs">{cust.plan}</Badge>
-                            <Badge variant="default" size="xs">{cust.role.charAt(0).toUpperCase() + cust.role.slice(1)}</Badge>
+                            <Badge variant="default" size="xs">{cust.role ? cust.role.charAt(0).toUpperCase() + cust.role.slice(1) : "Member"}</Badge>
                             {cust.is_design_partner && (
                               <Badge variant="default" size="xs">Design Partner</Badge>
                             )}
@@ -692,7 +692,7 @@ export function SettingsClient({
                 <div className="rounded-xl border border-border-subtle bg-surface/50 p-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-accent">{customer.name.charAt(0).toUpperCase()}</span>
+                      <span className="text-sm font-bold text-accent">{customer.name?.charAt(0)?.toUpperCase() || "?"}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold">{customer.name}</div>
@@ -846,7 +846,7 @@ export function SettingsClient({
           <div>
             <h2 className="text-sm font-medium mb-1">API Keys</h2>
             <p className="text-xs text-muted mb-6">Manage API keys for SDK and REST API access</p>
-            <ApiKeysSection initialKeys={apiKeys} orgId={orgId} />
+            <ApiKeysSection initialKeys={apiKeys || []} orgId={orgId} />
           </div>
         )}
 
