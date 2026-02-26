@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { requireOrgRole } from "@/lib/auth/check-org-role";
 
 // ---------------------------------------------------------------------------
 // PATCH /api/connectors/writeback/rules/[id]
@@ -37,6 +38,15 @@ export async function PATCH(
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace found" }, { status: 403 });
+    }
+
+    // Only admin or owner may update write-back rules
+    const { allowed: patchAllowed } = await requireOrgRole(supabase, user.id, workspaceId, ["admin", "owner"]);
+    if (!patchAllowed) {
+      return NextResponse.json(
+        { error: "Only workspace admins can manage write-back rules" },
+        { status: 403 }
+      );
     }
 
     const { id } = await params;
@@ -210,6 +220,15 @@ export async function DELETE(
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace found" }, { status: 403 });
+    }
+
+    // Only admin or owner may delete write-back rules
+    const { allowed: deleteAllowed } = await requireOrgRole(supabase, user.id, workspaceId, ["admin", "owner"]);
+    if (!deleteAllowed) {
+      return NextResponse.json(
+        { error: "Only workspace admins can manage write-back rules" },
+        { status: 403 }
+      );
     }
 
     const { id } = await params;

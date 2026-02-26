@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { requireOrgRole } from "@/lib/auth/check-org-role";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -136,6 +137,15 @@ export async function POST(request: NextRequest) {
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace found" }, { status: 403 });
+    }
+
+    // Only admin or owner may create write-back rules
+    const { allowed } = await requireOrgRole(supabase, user.id, workspaceId, ["admin", "owner"]);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Only workspace admins can manage write-back rules" },
+        { status: 403 }
+      );
     }
 
     let body: Record<string, unknown>;

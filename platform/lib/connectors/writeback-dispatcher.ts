@@ -437,24 +437,62 @@ export async function processWritebackQueue(
           .eq("id", item.id);
       } else {
         failed++;
-        const nextStatus = newAttempts >= 3 ? "failed" : "pending";
+        const isDead = newAttempts >= 3;
+        const nextStatus = isDead ? "dead_letter" : "pending";
 
-        await supabase
-          .from("writeback_queue")
-          .update({
-            status: nextStatus,
-            last_error: result.error ?? "Unknown error",
-          })
-          .eq("id", item.id);
-
-        logger.warn("[writeback-dispatcher] Action failed:", {
-          itemId: item.id,
-          connectorType: item.connector_type,
-          actionType: item.action_type,
+        // Build the update object
+        const updateObj: Record<string, unknown> = {
+          status: nextStatus,
           attempts: newAttempts,
-          nextStatus,
-          error: result.error,
-        });
+          last_error: result.error ?? "Unknown error",
+        };
+        if (isDead) {
+          updateObj.dead_letter_at = new Date().toISOString();
+        }
+
+        await supabase.from("writeback_queue").update(updateObj).eq("id", item.id);
+
+        // If dead letter: emit gaba signal + structured warning for ops alerting
+        if (isDead) {
+          logger.warn("[writeback-dispatcher] DEAD LETTER — write-back permanently failed", {
+            itemId: item.id,
+            organizationId: item.organization_id,
+            ruleId: item.rule_id,
+            connectorType: item.connector_type,
+            actionType: item.action_type,
+            attempts: newAttempts,
+            lastError: result.error,
+            deadLetterAt: updateObj.dead_letter_at,
+          });
+
+          // Emit gaba (inhibitory) signal so brain knows this connector path is unreliable
+          void Promise.resolve(
+            supabase.from("cross_domain_signals").insert({
+              organization_id: item.organization_id,
+              source_domain: "writeback",
+              target_domain: item.connector_type,
+              signal_type: "gaba",
+              signal_strength: -0.4,
+              signal_timestamp: new Date().toISOString(),
+              payload: {
+                reason: "write_back_dead_letter",
+                connector_type: item.connector_type,
+                action_type: item.action_type,
+                writeback_item_id: item.id,
+              },
+              created_at: new Date().toISOString(),
+            })
+          ); // fire-and-forget
+        } else {
+          logger.warn("[writeback-dispatcher] Action failed:", {
+            itemId: item.id,
+            connectorType: item.connector_type,
+            actionType: item.action_type,
+            attempts: newAttempts,
+            nextStatus,
+            error: result.error,
+          });
+        }
       }
 
       // Always insert an audit log entry
