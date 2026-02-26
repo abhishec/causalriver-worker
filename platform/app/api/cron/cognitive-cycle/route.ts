@@ -1,0 +1,436 @@
+/**
+ * Cron: Cognitive Cycle Cache
+ * ============================
+ *
+ * GET /api/cron/cognitive-cycle
+ *   Runs L3-L15 cognitive stack for orgs with recent brain activity and
+ *   persists key insights to ai_memory, where getUniversalContext() /
+ *   createBrainContextBuilder() will pick them up automatically for every
+ *   copilot query.
+ *
+ * Why this exists:
+ *   Standard copilot queries only have L1-L7 data via getBrainContext().
+ *   Running L3-L15 inline per request is too expensive (~500ms-2s per cycle).
+ *   This cron runs the deep cognitive stack on a schedule and caches outputs
+ *   in ai_memory so every copilot response benefits from the full cognitive
+ *   stack without blocking the request path.
+ *
+ * Schedule recommendation:
+ *   Every 30 minutes: GET /api/cron/cognitive-cycle
+ *   (Add to Amplify scheduler or external cron — same pattern as /api/cron/evolution)
+ *
+ * Security: Protected by Bearer CRON_SECRET header.
+ *
+ * What it persists to ai_memory:
+ *   - memory_type: 'insight'  domain: 'cognitive_cycle'
+ *     → Top imagination insight from L8 Causal Imagination
+ *   - memory_type: 'insight'  domain: 'cognitive_dream'
+ *     → Deep dreaming associations from L3 (cross-domain connections found)
+ *   - memory_type: 'insight'  domain: 'cognitive_curiosity'
+ *     → Knowledge gaps and hypotheses from L5 Curiosity Engine
+ *   - memory_type: 'insight'  domain: 'cognitive_planning'
+ *     → Top recommendation from L14 Goal-Backward Planning
+ *   - memory_type: 'pattern'  domain: 'cognitive_self_model'
+ *     → Calibration score + weaknesses from L6 Self-Modifying Cognition
+ *   - memory_type: 'insight'  domain: 'cognitive_narrative'
+ *     → Narrative summary from L15 (executive communication layer)
+ *
+ * Conflict strategy: ON CONFLICT (organization_id, memory_type, domain) DO UPDATE
+ *   → Bounded growth: only 6 rows per org, updated each cycle.
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
+
+// Max orgs to process per run — prevents Lambda timeout
+const MAX_ORGS_PER_RUN = 5;
+
+// Only process orgs with signals in the last 7 days (active orgs only)
+const ACTIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export async function GET(request: NextRequest) {
+  // ── Auth ──────────────────────────────────────────────────────────────
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const startMs = Date.now();
+
+  try {
+    const service = await createServiceClient();
+
+    // ── Find orgs with recent brain activity ──────────────────────────
+    // Query cross_domain_signals for distinct org IDs with signals in the last 7 days.
+    // This ensures we only run the cognitive stack for orgs where the brain has data.
+    const since = new Date(Date.now() - ACTIVE_WINDOW_MS).toISOString();
+
+    const { data: activeOrgRows, error: orgError } = await service
+      .from("cross_domain_signals")
+      .select("organization_id")
+      .gte("created_at", since)
+      .limit(MAX_ORGS_PER_RUN * 20); // over-fetch to deduplicate
+
+    if (orgError) {
+      logger.error("[CronCognitiveCycle] Failed to fetch active orgs:", orgError);
+      return NextResponse.json({ error: "Failed to fetch active orgs" }, { status: 500 });
+    }
+
+    if (!activeOrgRows || activeOrgRows.length === 0) {
+      logger.info("[CronCognitiveCycle] No orgs with recent brain activity — skipping");
+      return NextResponse.json({ ok: true, processed: 0, skipped: 0, message: "No active orgs" });
+    }
+
+    // Deduplicate org IDs and cap at MAX_ORGS_PER_RUN
+    const seenOrgIds = new Set<string>();
+    const activeOrgIds: string[] = [];
+    for (const row of activeOrgRows) {
+      if (!seenOrgIds.has(row.organization_id) && activeOrgIds.length < MAX_ORGS_PER_RUN) {
+        seenOrgIds.add(row.organization_id);
+        activeOrgIds.push(row.organization_id);
+      }
+    }
+
+    logger.info(
+      `[CronCognitiveCycle] Running cognitive cycle for ${activeOrgIds.length} orgs` +
+      ` (${activeOrgRows.length} total active signals found)`
+    );
+
+    // ── Import cognitive stack ────────────────────────────────────────
+    const { createCognitiveStack } = await import("@nexus-ai/memory-stack");
+
+    let processed = 0;
+    let skipped = 0;
+    const results: Array<{
+      orgId: string;
+      success: boolean;
+      insightsPersisted: number;
+      error?: string;
+      durationMs: number;
+    }> = [];
+
+    // ── Process each org ──────────────────────────────────────────────
+    for (const orgId of activeOrgIds) {
+      const orgStart = Date.now();
+
+      try {
+        // ── Load signals (last 7 days, up to 500) ──────────────────
+        const { data: rawSignals } = await service
+          .from("cross_domain_signals")
+          .select("id, source, domain, entity_type, entity_id, signal_value, created_at, signal_metadata")
+          .eq("organization_id", orgId)
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .limit(500);
+
+        const signals = (rawSignals ?? []).map((s) => ({
+          id: s.id,
+          source: String(s.source ?? "unknown"),
+          domain: String(s.domain ?? "unknown"),
+          entityType: String(s.entity_type ?? "unknown"),
+          entityId: String(s.entity_id ?? "unknown"),
+          value: typeof s.signal_value === "number" ? s.signal_value : 0,
+          timestamp: new Date(s.created_at).getTime(),
+          metadata: s.signal_metadata as Record<string, unknown> | undefined,
+        }));
+
+        if (signals.length === 0) {
+          skipped++;
+          results.push({ orgId, success: true, insightsPersisted: 0, durationMs: Date.now() - orgStart });
+          continue;
+        }
+
+        // ── Load causal edges ───────────────────────────────────────
+        const { data: edgeRows } = await service
+          .from("causal_relationships_statistical")
+          .select("source_domain, target_domain, effect_size, confidence_level")
+          .eq("organization_id", orgId)
+          .order("effect_size", { ascending: false })
+          .limit(200);
+
+        const causalEdges = (edgeRows ?? []).map((e) => ({
+          source: String(e.source_domain ?? ""),
+          target: String(e.target_domain ?? ""),
+          weight: typeof e.effect_size === "number" ? e.effect_size : 0.5,
+          confidence: typeof e.confidence_level === "number" ? e.confidence_level : 0.5,
+        }));
+
+        // ── Load patterns from brain_grammar_rules ──────────────────
+        const { data: ruleRows } = await service
+          .from("brain_grammar_rules")
+          .select("rule_body")
+          .eq("organization_id", orgId)
+          .eq("is_active", true)
+          .limit(100);
+
+        const patterns = (ruleRows ?? []).map((r) => String(r.rule_body ?? "")).filter(Boolean);
+
+        // ── Load pending predictions ────────────────────────────────
+        const { data: predRows } = await service
+          .from("prediction_records")
+          .select("id, domain, predicted_outcome, confidence, evidence, method")
+          .eq("organization_id", orgId)
+          .is("was_correct", null)
+          .limit(50);
+
+        const predictions = (predRows ?? []).map((p) => ({
+          id: String(p.id),
+          domain: String(p.domain ?? "unknown"),
+          claim: String(p.predicted_outcome ?? ""),
+          confidence: typeof p.confidence === "number" ? p.confidence : 0.5,
+          evidence: Array.isArray(p.evidence) ? (p.evidence as string[]) : [],
+          method: String(p.method ?? "unknown"),
+        }));
+
+        // ── Run cognitive stack (L3-L15) ────────────────────────────
+        const stack = createCognitiveStack({ organizationId: orgId });
+        const result = stack.runCycle({
+          signals,
+          causalEdges,
+          patterns,
+          predictions,
+          metrics: [],
+        });
+
+        // ── Extract insights to persist ─────────────────────────────
+        // Each insight maps to a unique (organization_id, memory_type, domain)
+        // so upsert with ON CONFLICT gives us bounded growth: 6 rows max per org.
+
+        const insightRows: Array<{
+          organization_id: string;
+          memory_type: string;
+          domain: string;
+          content: string;
+          importance: number;
+          metadata: Record<string, unknown>;
+        }> = [];
+
+        // L8 Causal Imagination — top hypothesis/insight
+        if (result.imagination.topInsight) {
+          insightRows.push({
+            organization_id: orgId,
+            memory_type: "insight",
+            domain: "cognitive_cycle",
+            content: result.imagination.topInsight,
+            importance: 0.75,
+            metadata: {
+              layer: 8,
+              layerName: "Causal Imagination",
+              hypothesesGenerated: result.imagination.hypothesesGenerated,
+              scenariosPlanned: result.imagination.scenariosPlanned,
+              analogiesFound: result.imagination.analogiesFound,
+              cycleTimestamp: result.timestamp,
+            },
+          });
+        }
+
+        // L3 Deep Dreaming — cross-domain connections found
+        if (result.dreaming.associationsFound > 0 || result.dreaming.surfacedInsights > 0) {
+          insightRows.push({
+            organization_id: orgId,
+            memory_type: "insight",
+            domain: "cognitive_dream",
+            content: `Deep dreaming cycle: found ${result.dreaming.associationsFound} associations, ` +
+              `surfaced ${result.dreaming.surfacedInsights} insights, ` +
+              `${result.dreaming.crossDomainConnections} cross-domain connections.`,
+            importance: Math.min(0.9, 0.5 + result.dreaming.surfacedInsights * 0.05),
+            metadata: {
+              layer: 3,
+              layerName: "Deep Dreaming",
+              associationsFound: result.dreaming.associationsFound,
+              surfacedInsights: result.dreaming.surfacedInsights,
+              crossDomainConnections: result.dreaming.crossDomainConnections,
+              cycleTimestamp: result.timestamp,
+            },
+          });
+        }
+
+        // L5 Curiosity Engine — knowledge gaps and hypotheses
+        if (result.curiosity.hypothesesGenerated > 0 || result.curiosity.knowledgeGaps > 0) {
+          insightRows.push({
+            organization_id: orgId,
+            memory_type: "insight",
+            domain: "cognitive_curiosity",
+            content: `Curiosity cycle: generated ${result.curiosity.hypothesesGenerated} hypotheses, ` +
+              `identified ${result.curiosity.knowledgeGaps} knowledge gaps ` +
+              `(exploration budget used: ${Math.round(result.curiosity.explorationBudgetUsed * 100)}%).`,
+            importance: 0.7,
+            metadata: {
+              layer: 5,
+              layerName: "Curiosity Engine",
+              hypothesesGenerated: result.curiosity.hypothesesGenerated,
+              knowledgeGaps: result.curiosity.knowledgeGaps,
+              explorationBudgetUsed: result.curiosity.explorationBudgetUsed,
+              cycleTimestamp: result.timestamp,
+            },
+          });
+        }
+
+        // L14 Goal-Backward Planning — top recommendation
+        if (result.planning.topRecommendation) {
+          insightRows.push({
+            organization_id: orgId,
+            memory_type: "insight",
+            domain: "cognitive_planning",
+            content: result.planning.topRecommendation,
+            importance: 0.8,
+            metadata: {
+              layer: 14,
+              layerName: "Goal-Backward Planning",
+              goalsPlanned: result.planning.goalsPlanned,
+              feasiblePaths: result.planning.feasiblePaths,
+              cycleTimestamp: result.timestamp,
+            },
+          });
+        }
+
+        // L6 Self-Modifying Cognition — calibration + weaknesses
+        {
+          const { calibrationScore, weaknesses, suggestedModifications } = result.selfModel;
+          const weaknessSummary = weaknesses.length > 0
+            ? `Identified weaknesses: ${weaknesses.slice(0, 3).join("; ")}.`
+            : "No critical weaknesses detected.";
+
+          insightRows.push({
+            organization_id: orgId,
+            memory_type: "pattern",
+            domain: "cognitive_self_model",
+            content: `Self-model calibration: ${Math.round(calibrationScore * 100)}% accurate. ` +
+              weaknessSummary +
+              ` Suggested ${suggestedModifications} cognitive modifications.`,
+            importance: calibrationScore,
+            metadata: {
+              layer: 6,
+              layerName: "Self-Modifying Cognition",
+              calibrationScore,
+              weaknesses,
+              suggestedModifications,
+              cycleTimestamp: result.timestamp,
+            },
+          });
+        }
+
+        // L15 Narrative Intelligence — executive summary (if generated)
+        if (result.narrative) {
+          const narrativeObj = result.narrative as unknown as Record<string, unknown>;
+          const narrativeText = typeof result.narrative === "object" && result.narrative !== null
+            ? (
+                narrativeObj.executiveSummary as string ||
+                narrativeObj.summary as string ||
+                JSON.stringify(result.narrative).slice(0, 500)
+              )
+            : String(result.narrative).slice(0, 500);
+
+          if (narrativeText) {
+            insightRows.push({
+              organization_id: orgId,
+              memory_type: "insight",
+              domain: "cognitive_narrative",
+              content: narrativeText,
+              importance: 0.85,
+              metadata: {
+                layer: 15,
+                layerName: "Narrative Intelligence",
+                cycleTimestamp: result.timestamp,
+                durationMs: result.durationMs,
+              },
+            });
+          }
+        }
+
+        // ── Upsert to ai_memory ─────────────────────────────────────
+        // ON CONFLICT (organization_id, memory_type, domain) → UPDATE content + metadata.
+        // This is bounded: max 6 rows per org, refreshed each cycle.
+        let insightsPersisted = 0;
+        for (const row of insightRows) {
+          const { error: upsertError } = await service
+            .from("ai_memory")
+            .upsert(
+              {
+                ...row,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "organization_id,memory_type,domain", ignoreDuplicates: false }
+            );
+
+          if (upsertError) {
+            logger.warn(
+              `[CronCognitiveCycle] Failed to upsert insight for org=${orgId} domain=${row.domain}:`,
+              upsertError
+            );
+          } else {
+            insightsPersisted++;
+          }
+        }
+
+        processed++;
+        const orgDurationMs = Date.now() - orgStart;
+        results.push({ orgId, success: true, insightsPersisted, durationMs: orgDurationMs });
+
+        logger.info(
+          `[CronCognitiveCycle] org=${orgId}: ` +
+          `signals=${signals.length} ` +
+          `insights=${insightsPersisted} ` +
+          `dreaming=${result.dreaming.associationsFound} ` +
+          `hypotheses=${result.curiosity.hypothesesGenerated} ` +
+          `durationMs=${orgDurationMs}`
+        );
+      } catch (err) {
+        const orgDurationMs = Date.now() - orgStart;
+        logger.error(`[CronCognitiveCycle] org=${orgId} failed:`, err);
+        results.push({
+          orgId,
+          success: false,
+          insightsPersisted: 0,
+          error: err instanceof Error ? err.message : String(err),
+          durationMs: orgDurationMs,
+        });
+        skipped++;
+      }
+    }
+
+    const durationMs = Date.now() - startMs;
+
+    // ── Log run to scheduled_job_runs ─────────────────────────────────
+    try {
+      await service.from("scheduled_job_runs").insert({
+        organization_id: activeOrgIds[0] ?? "system",
+        job_name: "cron-cognitive-cycle",
+        job_type: "cognitive_cycle",
+        started_at: new Date(startMs).toISOString(),
+        completed_at: new Date().toISOString(),
+        status: skipped > 0 && processed === 0 ? "failed" : skipped > 0 ? "partial" : "success",
+        result: JSON.stringify({ processed, skipped, activeOrgIds, results }),
+        duration_ms: durationMs,
+      });
+    } catch {
+      // Non-fatal: logging failure shouldn't break the cron
+    }
+
+    logger.info(
+      `[CronCognitiveCycle] Complete: processed=${processed} skipped=${skipped} durationMs=${durationMs}`
+    );
+
+    return NextResponse.json({
+      ok: true,
+      processed,
+      skipped,
+      durationMs,
+      results,
+    });
+  } catch (err) {
+    const durationMs = Date.now() - startMs;
+    logger.error("[CronCognitiveCycle] Fatal error:", err);
+    // Return 200 — cron schedulers that see 5xx may retry immediately (thundering herd)
+    return NextResponse.json(
+      { ok: false, error: "Cognitive cycle failed", durationMs },
+      { status: 200 }
+    );
+  }
+}

@@ -2730,18 +2730,43 @@ You currently have: ${causalEdges.length} causal edges, ${rules.length} business
         effectiveSystemPrompt;
     }
 
+    // ── Command-Center Persona: always-intelligent, proactive, orchestration-aware ──
+    // Injected after base prompt so it ALWAYS applies regardless of brain state.
+    effectiveSystemPrompt += `\n\n## Your Role: AI Worker Intelligence Commander
+
+You are BrainOS Copilot — an autonomous AI that manages delivery intelligence for software engineering organizations. You operate like a senior principal engineer running a command center.
+
+BEHAVIORAL RULES (follow these always, regardless of brain data state):
+1. Always orchestrate: When a query needs data you're still collecting, kick off the agent AND answer with what you know now. Never make users wait empty-handed.
+2. Always be specific: Name the domains, metrics, and signals you're analyzing. "I'm analyzing velocity from your GitHub commits and Jira sprint data" not "analyzing your data."
+3. Always give status: Reference what agents are running, what completed recently, what the brain currently knows.
+4. Always add value even with no brain data: Use industry benchmarks, best practices, and your reasoning about what the data WOULD show based on the organization's context.
+5. Async-first communication: "I've started X — here's what I know now, and here's what X will tell us in Y minutes."
+6. Never passive: If you see a pattern or risk, surface it proactively. Don't wait for the user to ask.
+7. Command-center tone: Decisive, specific, action-oriented. Not chatbot-generic.
+8. Anti-silence rule: You NEVER respond with just "I don't have data on that." Always follow any gap acknowledgment with something substantive — a framework, a benchmark, a question that helps diagnose the situation, or a concrete next step.`;
+
     // ── Zero-data guard: even when brainContext exists, if the org has NO data,
-    // inject an explicit "don't hallucinate" instruction so the LLM doesn't invent metrics.
+    // instruct the LLM to reason intelligently using expertise — not to stay silent.
     const totalDataPoints = causalEdges.length + rules.length + patterns.length + cascadeRules.length;
     if (totalDataPoints === 0) {
-      effectiveSystemPrompt += `\n\n## ⚠️ EMPTY BRAIN — NO DATA LOADED FOR THIS ORGANIZATION
-This organization has not connected any data sources yet (no Xero, Volopay, GitHub, or other connectors).
-You have ZERO causal edges, ZERO business rules, ZERO patterns, and ZERO cascade rules.
-DO NOT invent any data. Instead:
-- Tell the user that no data sources have been connected yet
-- Suggest they connect their data sources (Xero, Volopay, GitHub, etc.) from the Settings page
-- You can still answer general questions about Brain OS's capabilities
-- NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
+      effectiveSystemPrompt += `\n\n## Brain State: Initializing — Operate as Expert Consultant
+
+The brain is still collecting organizational signals. Causal graph data is not yet loaded.
+
+You have access to:
+- Deep software engineering and delivery intelligence expertise
+- Industry benchmarks, SRE/DevOps best practices, and delivery frameworks
+- General knowledge about the organization's structure based on this conversation
+
+Behavioral rules for this state:
+1. ALWAYS provide substantive value — never say "I don't have data" without offering something useful as a substitute
+2. Be specific about what data you would normally analyze (e.g., "Once your GitHub connector is active, I'd look at PR cycle time, reviewer distribution, and commit velocity")
+3. Offer concrete recommendations grounded in industry best practices and the context you DO have
+4. Tell the user exactly what data collection steps are needed and what insights will unlock
+5. Behave like a senior delivery consultant who just joined the team — you have expertise even before the monitoring is fully set up
+6. DO NOT fabricate specific numbers (commit counts, ticket counts, etc.) — but DO give frameworks, benchmarks, and directional guidance
+7. When suggesting setup steps, be precise: "Connect GitHub at /connectors — once active, the brain ingests PR and commit data automatically"`;
     }
 
     // ── Delivery Intelligence exemption — overrides zero-data restriction ──
@@ -3642,24 +3667,34 @@ The user requested to create an AI agent but there was a technical error. Tell t
 
     // ── ORCHESTRATOR: Inject queued job notification into system prompt ────
     // When brain isn't ready, the orchestrator queues the job and sets
-    // orchestratorResult so Claude tells the user about the wait.
+    // orchestratorResult so Claude tells the user about the orchestration AND gives immediate value.
     if (orchestratorResult) {
-      const _orchMsg = orchestratorResult.message as string;
       const _orchJobType = orchestratorResult.taskType as string;
+      const _orchJobId = orchestratorResult.jobId as string | null;
       const _orchEta = orchestratorResult.estimatedWaitMs
         ? `~${Math.ceil((orchestratorResult.estimatedWaitMs as number) / 60_000)} minutes`
-        : null;
-      effectiveSystemPrompt += `\n\n## ORCHESTRATOR: JOB QUEUED — BRAIN NOT READY
-The user requested a "${_orchJobType}" analysis but it has been queued because the brain is not ready yet.
+        : "a few minutes";
+      const _orchBrainReadiness = orchestratorResult.brainReadiness as string | undefined;
+      effectiveSystemPrompt += `\n\n## Active Agent Orchestration — Job Queued
 
-Your response to the user MUST:
-1. Acknowledge their request warmly
-2. Explain the analysis is queued: "${_orchMsg}"
-${_orchEta ? `3. Give the estimated wait: ${_orchEta}` : '3. Tell them you\'ll notify them when it\'s ready'}
-4. Suggest they can track progress in the Agent Monitor (open from the sidebar)
-5. Keep it concise — 2-3 sentences max
+I have just initiated a background analysis job for this query. The job is now queued and will auto-start once the brain is ready.
 
-Do NOT attempt to answer the analysis question with placeholder or made-up data.`;
+Job details:
+- Domain: ${_orchJobType}
+- Status: queued (brain population in progress${_orchBrainReadiness ? ` — brain readiness: ${_orchBrainReadiness}` : ""})
+- Estimated ready: ${_orchEta}${_orchJobId ? `\n- Job ID: ${_orchJobId}` : ""}
+
+Response instructions — you MUST do ALL of these:
+1. Acknowledge the orchestration naturally in active voice: "I've kicked off a full ${_orchJobType} analysis — it will be ready in ${_orchEta}."
+2. IMMEDIATELY provide substantive value using your expertise, industry knowledge, and any brain data already available. Do NOT make the user wait empty-handed.
+3. Tell the user specifically what the ${_orchJobType} analysis will reveal once complete (name the metrics, signals, and insights that domain produces).
+4. Reference the Agent Monitor panel for live progress tracking.
+5. DO NOT just say "waiting" or "please wait" — give them expert-level guidance NOW, then tell them the deep analysis is incoming.
+
+Your response should be structured as:
+- First: "I've kicked off your ${_orchJobType} analysis (${_orchEta})..."
+- Then: Immediate expert value — frameworks, benchmarks, current best practices relevant to their question
+- Then: "Once the analysis completes, you'll see [specific outputs from this domain]..."`;
     }
 
     // ── LEARNING LOOP: Inject ai_memory corrections into system prompt ─────
@@ -3954,6 +3989,29 @@ No connectors are configured yet. When the user asks for data from any source (S
       }
     } catch {
       // Non-fatal: connector awareness is enrichment only
+    }
+
+    // ── Live Agent Status: inject running/pending jobs so copilot has command-center awareness ──
+    // This enables the copilot to naturally reference what's running, what completed,
+    // and surface agent activity without waiting for the user to ask.
+    try {
+      const { data: _activeJobs } = await service
+        .from("agent_queue")
+        .select("agent_type, task_type, status, created_at")
+        .eq("organization_id", workspaceId)
+        .in("status", ["running", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (_activeJobs && _activeJobs.length > 0) {
+        const _jobLines = _activeJobs.map((j: { task_type: string; status: string; created_at: string }) => {
+          const ageMin = Math.round((Date.now() - new Date(j.created_at).getTime()) / 60_000);
+          return `- ${j.task_type} (${j.status}) — started ${ageMin}m ago`;
+        }).join("\n");
+        effectiveSystemPrompt += `\n\n## Active Agent Jobs\n${_jobLines}\n\nReference these naturally when relevant to the user's question. If the user asks about running agents or analysis progress, tell them specifically what's running and for how long. Use active voice: "Your ${_activeJobs[0].task_type} analysis has been running for X minutes."`;
+      }
+    } catch {
+      // Non-fatal: agent status is enrichment only
     }
 
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
