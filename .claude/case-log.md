@@ -185,6 +185,22 @@
 - **Pattern**: Always verify critical tables with a REST ping after migration push. Don't assume applied = exists.
 - **Prevention**: Add table existence checks to health-check scripts for any table that's in the critical execution path.
 
+## Case 019: LLM Classifier Missing Delivery Intelligence Domains (2026-02-26)
+- **Symptom**: Queries like "which pod should handle this?" or "what's the health of this engagement?" get classified as `copilot` instead of routing to `pod-match` / `delivery-intelligence` / `early-warning` / `scope-creep`.
+- **Root cause**: `CLASSIFIER_SYSTEM_PROMPT` in `llm-query-interpreter.ts` listed only 15 SE-aaS domains. The 4 delivery intelligence domains (`pod-match`, `early-warning`, `scope-creep`, `delivery-intelligence`) were missing from both the Available Services list AND the SE-aaS Routing Guide examples.
+- **Routing logic trap**: When LLM runs and returns no `seaasDomain`, `seaasRoute = null` and the regex fallback in `detectSEaaSRoute()` **never fires** — it only fires when `!interpretation` (i.e., LLM failed entirely). So the classifier is the only gate for SE-aaS routing when LLM is healthy.
+- **Fix**: Added 4 missing domains to both:
+  1. The Available Services list in the prompt header (comma-separated)
+  2. The SE-aaS Routing Guide with trigger keywords per domain
+- **File**: `packages/memory-stack/src/orchestrator/llm-query-interpreter.ts`
+- **Trigger keywords added**:
+  - `pod-match`: "Recommend / assign / which pod or team"
+  - `early-warning`: "Velocity collapse / sprint velocity / at-risk engagement / bottleneck risk"
+  - `scope-creep`: "Scope creep / scope drift / story point drift / unplanned work / scope integrity"
+  - `delivery-intelligence`: "Engagement health / delivery intelligence / health score / RAG status / forecast"
+- **Pattern**: Whenever a new SE-aaS domain is added, it MUST be added to CLASSIFIER_SYSTEM_PROMPT in TWO places: domain list + routing guide. Adding the domain handler without updating the classifier = domain is dead.
+- **Prevention**: Add a unit test that verifies all known SE-aaS domain keys appear in CLASSIFIER_SYSTEM_PROMPT.
+
 ## Case 017: [USER CORRECTION] Terminology — "AI Worker Space" not "Org" (2026-02-26)
 - **Trigger**: User said "why org - it has to be AI worker space..can u relearein in ur reinforcement learning..so that everywhere u can refer AI worker and not org only"
 - **Lesson**: **Never say "org" when referring to a customer's workspace/tenant.** Always say **"AI worker space"** in:
