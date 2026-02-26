@@ -325,10 +325,11 @@ export async function checkAndStartWaitingJobs(
 ): Promise<string[]> {
   const supabase = adminClient();
 
-  // Find all waiting entries that depend on this completed job
+  // Find all waiting entries that depend on this completed job.
+  // created_at is fetched to compute wait_duration_ms for RL signal emission.
   const { data: waitingEntries, error: fetchErr } = await supabase
     .from("agent_orchestration")
-    .select("id, job_id, depends_on_type, auto_start")
+    .select("id, job_id, depends_on_type, auto_start, created_at")
     .eq("depends_on_job_id", completedJobId)
     .eq("status", "waiting");
 
@@ -381,6 +382,49 @@ export async function checkAndStartWaitingJobs(
       logger.warn(
         `[orchestrator] Auto-started job ${entry.job_id} (was waiting on ${completedJobId})`
       );
+
+      // ── RL signal: teach brain whether the readiness threshold was calibrated well ──
+      // dopamine (<30s): fast unblock — threshold is well-calibrated
+      // serotonin (30s–5min): neutral, acceptable wait
+      // gaba (>5min): slow unblock — threshold may be too conservative
+      const waitDurationMs: number = entry.created_at
+        ? Date.now() - new Date(entry.created_at as string).getTime()
+        : 0;
+
+      const signalType: string =
+        waitDurationMs < 30_000
+          ? "dopamine"
+          : waitDurationMs < 300_000
+            ? "serotonin"
+            : "gaba";
+
+      const signalStrength: number =
+        waitDurationMs < 30_000
+          ? 0.2
+          : waitDurationMs < 300_000
+            ? 0.0
+            : -0.3;
+
+      // Fire-and-forget — RL must never crash orchestration
+      void Promise.resolve(
+        supabase
+          .from("cross_domain_signals")
+          .insert({
+            organization_id: orgId,
+            source_domain: "orchestrator",
+            target_domain: (entry.depends_on_type as string) ?? "unknown",
+            signal_type: signalType,
+            signal_strength: signalStrength,
+            signal_timestamp: new Date().toISOString(),
+            payload: {
+              reason: "job_unblocked",
+              wait_duration_ms: waitDurationMs,
+              blocking_job_id: completedJobId,
+              unblocked_job_id: entry.job_id,
+            },
+            created_at: new Date().toISOString(),
+          })
+      ).catch(() => {});
     } catch (err: any) {
       logger.warn(
         `[orchestrator] Error starting waiting job ${entry.job_id}:`,
@@ -403,10 +447,11 @@ export async function checkAndStartBrainDependentJobs(
 ): Promise<string[]> {
   const supabase = adminClient();
 
-  // Find waiting jobs that depend on brain-population type but have no specific job ID
+  // Find waiting jobs that depend on brain-population type but have no specific job ID.
+  // created_at is fetched to compute wait_duration_ms for RL signal emission.
   const { data: orphanEntries, error: fetchErr } = await supabase
     .from("agent_orchestration")
-    .select("id, job_id, auto_start")
+    .select("id, job_id, auto_start, created_at")
     .eq("organization_id", orgId)
     .eq("depends_on_type", "brain-population")
     .eq("status", "waiting")
@@ -445,6 +490,41 @@ export async function checkAndStartBrainDependentJobs(
       logger.warn(
         `[orchestrator] Auto-started brain-dependent job ${entry.job_id} (brain now populated)`
       );
+
+      // ── RL signal: teach brain whether the readiness threshold was calibrated well ──
+      const waitDurationMs: number = entry.created_at
+        ? Date.now() - new Date(entry.created_at as string).getTime()
+        : 0;
+
+      const signalType: string =
+        waitDurationMs < 30_000
+          ? "dopamine"
+          : waitDurationMs < 300_000
+            ? "serotonin"
+            : "gaba";
+
+      const signalStrength: number =
+        waitDurationMs < 30_000 ? 0.2 : waitDurationMs < 300_000 ? 0.0 : -0.3;
+
+      // Fire-and-forget — RL must never crash orchestration
+      void Promise.resolve(
+        supabase
+          .from("cross_domain_signals")
+          .insert({
+            organization_id: orgId,
+            source_domain: "orchestrator",
+            target_domain: "brain-population",
+            signal_type: signalType,
+            signal_strength: signalStrength,
+            signal_timestamp: new Date().toISOString(),
+            payload: {
+              reason: "brain_dependent_job_unblocked",
+              wait_duration_ms: waitDurationMs,
+              unblocked_job_id: entry.job_id,
+            },
+            created_at: new Date().toISOString(),
+          })
+      ).catch(() => {});
     } catch (err: any) {
       logger.warn(
         `[orchestrator] Error starting brain-dependent job ${entry.job_id}:`,
