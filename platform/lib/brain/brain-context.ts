@@ -19,9 +19,9 @@ export async function getBrainContext(
   orgId: string,
 ): Promise<BrainContext> {
   try {
-    // Run all 4 fetches in parallel — non-blocking, fail gracefully
-    const [workspaceRow, signalsRow, qualityRow, jobsRow] = await Promise.allSettled([
-      // Brain IQ + signal count
+    // Run all 5 fetches in parallel — non-blocking, fail gracefully
+    const [workspaceRow, signalsRow, qualityRow, jobsRow, signalCountRow] = await Promise.allSettled([
+      // Workspace config (for threshold settings)
       supabase
         .from("ai_workspace")
         .select("orchestrator_config")
@@ -47,17 +47,32 @@ export async function getBrainContext(
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .eq("status", "running"),
+      // Live signal count — the actual source of truth for Brain IQ
+      // orchestrator_config.brainIq is never written, so derive IQ from real signal data
+      supabase
+        .from("cross_domain_signals")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId),
     ]);
 
     // Extract values safely
     const workspace = workspaceRow.status === "fulfilled" ? workspaceRow.value.data : null;
     const config = (workspace?.orchestrator_config as Record<string, unknown>) ?? {};
-    const brainIq = typeof config.brainIq === "number" ? config.brainIq : 0;
-    const signalCount = typeof config.signalCount === "number" ? config.signalCount : 0;
+
+    // signalCount: use live DB count (orchestrator_config.signalCount is never written)
+    const signalCount = signalCountRow.status === "fulfilled"
+      ? (signalCountRow.value.count ?? 0)
+      : 0;
+
+    // brainIq: derive from signal count using a simple log scale.
+    // 0 signals → IQ 0, 10 signals → IQ 10, 50 signals → IQ ~18, 100 → ~23, 500 → ~31
+    // Threshold for "ready" is BRAIN_IQ_MIN_VIABLE = 10, which requires ~10 signals.
+    // This replaces the dead orchestrator_config.brainIq field that was never populated.
+    const brainIq = signalCount === 0 ? 0 : Math.min(100, Math.round(Math.log(signalCount + 1) * 6.5));
 
     const threshold = typeof config.brainReadinessMinIq === "number" ? config.brainReadinessMinIq : 10;
     const brainState: BrainContext["brainState"] =
-      signalCount === 0 ? "empty" : signalCount < threshold ? "populating" : "ready";
+      signalCount === 0 ? "empty" : brainIq < threshold ? "populating" : "ready";
 
     const signals = signalsRow.status === "fulfilled" ? (signalsRow.value.data ?? []) : [];
     const topSignals = signals.map(s => ({

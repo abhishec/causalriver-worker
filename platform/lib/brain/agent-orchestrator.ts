@@ -116,16 +116,17 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   // Load workspace config to get the IQ threshold (runs concurrently with other queries)
   const workspacePromise = getOrCreateAIWorkspace(orgId);
 
-  // Load Brain IQ from ai_workspace.orchestrator_config (same source as brain-context.ts)
+  // Derive Brain IQ from the live cross_domain_signals count.
+  // orchestrator_config.brainIq is never written to the DB, so reading it always yields 0.
+  // The log-scale formula matches brain-context.ts: ~10 signals → IQ 10 (min viable).
   const brainIqPromise: Promise<number> = Promise.resolve(
     adminClient()
-      .from("ai_workspace")
-      .select("orchestrator_config")
+      .from("cross_domain_signals")
+      .select("id", { count: "exact", head: true })
       .eq("organization_id", orgId)
-      .maybeSingle()
-  ).then(({ data }) => {
-    const config = (data?.orchestrator_config as Record<string, unknown>) ?? {};
-    return typeof config.brainIq === "number" ? config.brainIq : 0;
+  ).then(({ count }) => {
+    const n = count ?? 0;
+    return n === 0 ? 0 : Math.min(100, Math.round(Math.log(n + 1) * 6.5));
   }).catch(() => 0); // non-fatal — default to 0 if unavailable
 
   // Parallel queries for efficiency

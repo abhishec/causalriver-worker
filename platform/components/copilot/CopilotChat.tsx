@@ -1077,6 +1077,9 @@ export async function consumeSSEStream(
             if (parsed.deliveryIntelligenceResult) {
               callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
             }
+            if (parsed.pmAasResult) {
+              callbacks.onDomainResult({ service: "seaas", data: parsed.pmAasResult });
+            }
             // Agent Communications Protocol (Heart/Mind/Speech)
             if (parsed.agentComms) {
               callbacks.onAgentComms?.(parsed.agentComms);
@@ -1161,6 +1164,7 @@ export async function consumeSSEStream(
             if (parsed.accountingResult) callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
             if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
             if (parsed.deliveryIntelligenceResult) callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
+            if (parsed.pmAasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.pmAasResult });
             if (parsed.agentComms) callbacks.onAgentComms?.(parsed.agentComms);
             if (parsed.agentInputRequest) callbacks.onAgentInputRequest?.(parsed.agentInputRequest);
             if (parsed.agentStep) callbacks.onAgentStep?.(parsed.agentStep);
