@@ -32,7 +32,7 @@ export async function getBrainContext(
       // Top 3 recent signals
       supabase
         .from("cross_domain_signals")
-        .select("source_domain, signal_type, signal_strength, metadata")
+        .select("source_domain, signal_type, signal_strength, signal_metadata")
         .eq("organization_id", orgId)
         .order("created_at", { ascending: false })
         .limit(3),
@@ -79,7 +79,7 @@ export async function getBrainContext(
     const signals = signalsRow.status === "fulfilled" ? (signalsRow.value.data ?? []) : [];
     const topSignals = signals.map(s => ({
       domain: String(s.source_domain ?? ""),
-      summary: String((s.metadata as Record<string, unknown>)?.summary ?? s.signal_type ?? ""),
+      summary: String((s.signal_metadata as Record<string, unknown>)?.summary ?? s.signal_type ?? ""),
       strength: typeof s.signal_strength === "number" ? s.signal_strength : 0,
     }));
 
