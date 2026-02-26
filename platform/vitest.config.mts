@@ -19,6 +19,30 @@ export default defineConfig({
     globals: true,
     css: false,
     include: ["test/**/*.test.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov", "json-summary"],
+      include: [
+        "lib/**/*.ts",
+        "lib/**/*.tsx",
+      ],
+      exclude: [
+        "**/*.d.ts",
+        "**/node_modules/**",
+        "lib/supabase/**",     // server-side clients need DB
+        "lib/redis.ts",        // needs Redis connection
+        "lib/env.ts",          // env var bootstrapping
+        "lib/error-tracker-init.tsx", // Sentry init
+      ],
+      // Thresholds are intentionally low because most lib/ files are server-side
+      // (Supabase, Redis, AWS) and can only be covered by integration/e2e tests.
+      // Per-file coverage for tested modules (utils, rate-limiter, agent-rl, parsers)
+      // is tracked via the text reporter output.
+      thresholds: {
+        lines: 3,
+        functions: 5,
+      },
+    },
     server: {
       deps: {
         // Force these into the same module graph so React deduplicates
