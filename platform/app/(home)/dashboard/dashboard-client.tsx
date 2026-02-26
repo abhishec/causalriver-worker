@@ -107,6 +107,7 @@ export function DashboardClient() {
   const [userName, setUserName] = useState("");
   const [launchingId, setLaunchingId] = useState<string | null>(null);
   const [brainStats, setBrainStats] = useState<Record<string, BrainEvolution>>({});
+  const [learningStats, setLearningStats] = useState<{ totalTasks: number; successRate: number; avgQuality: number; topDomain: string | null; learningVelocity: number; helpfulFeedback: number; notHelpfulFeedback: number } | null>(null);
 
   // Create wizard state
   const [showWizard, setShowWizard] = useState(false);
@@ -249,6 +250,14 @@ export function DashboardClient() {
       const email = data.user?.email ?? "";
       setUserName(data.user?.user_metadata?.full_name ?? email.split("@")[0] ?? "");
     });
+  }, []);
+
+  // Fetch RL learning stats (agent task outcomes, feedback distribution)
+  useEffect(() => {
+    fetch("/api/brain/learning-stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => { if (json) setLearningStats(json); })
+      .catch(() => {/* non-critical */});
   }, []);
 
   // Fetch workspace summaries
@@ -891,6 +900,28 @@ export function DashboardClient() {
                       <div className="text-[10px] text-muted-foreground mt-0.5">Accuracy</div>
                     </div>
                   </div>
+                  {/* RL Learning Stats Row */}
+                  {learningStats && learningStats.totalTasks > 0 && (
+                    <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="rounded-lg bg-background/40 border border-border-subtle px-3 py-2">
+                        <div className="text-lg font-bold text-foreground tabular-nums">{learningStats.totalTasks}</div>
+                        <div className="text-[10px] text-muted-foreground">Agent Tasks</div>
+                      </div>
+                      <div className="rounded-lg bg-background/40 border border-border-subtle px-3 py-2">
+                        <div className="text-lg font-bold text-emerald-400 tabular-nums">{Math.round(learningStats.successRate * 100)}%</div>
+                        <div className="text-[10px] text-muted-foreground">Success Rate</div>
+                      </div>
+                      <div className="rounded-lg bg-background/40 border border-border-subtle px-3 py-2">
+                        <div className="text-lg font-bold text-accent tabular-nums">{learningStats.learningVelocity}</div>
+                        <div className="text-[10px] text-muted-foreground">Tasks (24h)</div>
+                      </div>
+                      <div className="rounded-lg bg-background/40 border border-border-subtle px-3 py-2">
+                        <div className="text-lg font-bold text-foreground tabular-nums truncate">{learningStats.topDomain ?? "—"}</div>
+                        <div className="text-[10px] text-muted-foreground">Top Domain</div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mt-3 flex items-center gap-3 flex-wrap">
                     <div className="flex-1 min-w-[120px]">
                       <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
