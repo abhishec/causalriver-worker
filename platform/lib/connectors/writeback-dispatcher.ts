@@ -13,8 +13,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
+import { getConnectorToken, markConnectorError } from "@/lib/connectors/get-connector-token";
 import { executeWritebackAction } from "@/lib/connectors/writeback/index";
 import { getBrainContext } from "@/lib/brain/brain-context";
+
+/** Connector types that support token-aware refresh (Jira, Confluence) */
+const REFRESHABLE_WRITE_BACK_TYPES = new Set(["jira", "confluence"]);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -439,22 +443,44 @@ export async function processWritebackQueue(
       let result: Awaited<ReturnType<typeof executeWritebackAction>>;
 
       try {
-        // Get decrypted credentials via RPC
-        const credentials = await getConnectorCredentials(
-          supabase,
-          item.organization_id,
-          item.connector_type
-        );
-
-        // Get connector config from org_connectors
+        // Get connector config from org_connectors (needed for domain, site_url, etc.)
         const { data: connectorRow } = await supabase
           .from("org_connectors")
-          .select("config")
+          .select("id, config")
           .eq("organization_id", item.organization_id)
           .eq("connector_type", item.connector_type)
           .maybeSingle();
 
         const config = (connectorRow?.config as Record<string, unknown>) ?? {};
+        const connectorRowId = connectorRow?.id as string | undefined;
+
+        // For token-refreshable connectors (Jira, Confluence): use getConnectorToken()
+        // to auto-refresh expired OAuth tokens before executing the write-back.
+        // For other connectors: fall back to raw credentials via RPC.
+        let credentials: Record<string, unknown> | null = null;
+        if (REFRESHABLE_WRITE_BACK_TYPES.has(item.connector_type)) {
+          const freshToken = await getConnectorToken(
+            supabase,
+            item.organization_id,
+            item.connector_type as "jira" | "confluence"
+          );
+          if (freshToken) {
+            // Build a credentials object with the fresh (possibly refreshed) token
+            // plus any other fields from the raw credentials (api_token, email, etc.)
+            const rawCreds = await getConnectorCredentials(
+              supabase,
+              item.organization_id,
+              item.connector_type
+            );
+            credentials = { ...(rawCreds ?? {}), access_token: freshToken };
+          }
+        } else {
+          credentials = await getConnectorCredentials(
+            supabase,
+            item.organization_id,
+            item.connector_type
+          );
+        }
 
         if (!credentials) {
           result = {
@@ -469,6 +495,26 @@ export async function processWritebackQueue(
             credentials,
             config
           );
+
+          // Detect 401/403 auth failures in the result error message.
+          // When detected, mark the connector as errored so the UI shows a reconnect button.
+          if (
+            !result.success &&
+            result.error &&
+            /\b(401|403)\b/.test(result.error) &&
+            connectorRowId
+          ) {
+            logger.warn("[writeback-dispatcher] Auth failure detected — marking connector errored", {
+              connectorType: item.connector_type,
+              connectorId: connectorRowId,
+              error: result.error,
+            });
+            await markConnectorError(
+              supabase,
+              connectorRowId,
+              "Token expired or revoked during write-back — reconnect required"
+            );
+          }
         }
       } catch (execErr) {
         result = {
