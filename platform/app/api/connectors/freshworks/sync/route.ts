@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
     const service = await createServiceClient();
 
     // 2. Parse body

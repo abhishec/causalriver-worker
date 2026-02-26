@@ -35,6 +35,9 @@ export async function POST(request: Request) {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
 
     // 2. Load connector config + credentials
     // Supports connectorId for multi-instance; falls back to first active instance

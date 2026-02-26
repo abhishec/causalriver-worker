@@ -914,6 +914,8 @@ export async function POST(request: NextRequest) {
     let agentCreated: Record<string, unknown> | null = null;
     /** Set when orchestrator queues a job as waiting — injected into system prompt */
     let orchestratorResult: Record<string, unknown> | null = null;
+    /** Collected Agent Communication Protocol payloads — emitted to frontend via SSE */
+    const agentCommsBuffer: import("@/lib/agents/agent-comms").AgentCommsPayload[] = [];
 
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors).
     // All SE-aaS domains now route through executeDomain() for full WOW artifact generation.
@@ -1033,6 +1035,8 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
           interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
+          // Agent Communication Protocol: collect payloads for SSE emission
+          onComms: (payload) => { agentCommsBuffer.push(payload); },
         });
 
         const isDeliveryDomain = DELIVERY_DOMAINS.has(seaasRoute.domainType);
@@ -1111,6 +1115,8 @@ export async function POST(request: NextRequest) {
             transactions: glData,
             jurisdiction: 'SG',
             interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
+            // Agent Communication Protocol: collect payloads for SSE emission
+            onComms: (payload) => { agentCommsBuffer.push(payload); },
           });
 
           accountingResult = {

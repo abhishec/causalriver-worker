@@ -23,6 +23,12 @@ import { logger } from "@/lib/logger";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import {
+  buildAgentCommsPayload,
+  buildIntroSpeech,
+  buildCompletionSpeech,
+} from "@/lib/agents/agent-comms";
+import type { AgentCommsPayload } from "@/lib/agents/agent-comms";
+import {
   brainBookkeeperAgent,
   brainReconcilerAgent,
   brainStatementGeneratorAgent,
@@ -81,6 +87,11 @@ export interface ExecuteAccountingParams {
   onProgress?: (progress: number, message: string) => void;
   /** Phase 3: LLM query interpretation for targeted context retrieval */
   interpretation?: import("@nexus-ai/memory-stack").QueryInterpretation;
+  /**
+   * Agent Communication Protocol callback.
+   * Called at intro and completion with Heart/Mind/Speech payloads.
+   */
+  onComms?: (payload: AgentCommsPayload) => void;
 }
 
 export interface ExecuteAccountingResult {
@@ -141,6 +152,43 @@ export async function executeAccountingAgent(
   const info = getAccountingAgentInfo(action);
   if (!info) {
     throw new Error(`Unknown accounting action: ${action}`);
+  }
+
+  // ── Agent Communication Protocol setup ──────────────────────────────────
+  const aasAgentId = `aas_${action}_${organizationId.slice(0, 8)}_${Date.now()}`;
+  const aasAgentType = `aas:${action}`;
+  const aasExecutionStartMs = Date.now();
+
+  const AAS_PLAN_STEPS = [
+    "Step 0: Loading brain context and causal priors",
+    "Step 1: Assembling accounting context via mesh",
+    "Step 2: Building agent execution context",
+    "Step 3: Running accounting agent",
+    "Step 4: Persisting result and artifact",
+    "Step 5: Running brain feedback loop",
+    "Step 6: Federating causal deltas to core",
+  ];
+
+  // Emit intro comms at startup
+  if (params.onComms) {
+    try {
+      params.onComms(buildAgentCommsPayload({
+        agentId: aasAgentId,
+        agentType: aasAgentType,
+        orgId: organizationId,
+        completedSteps: 0,
+        totalSteps: AAS_PLAN_STEPS.length,
+        currentStepName: AAS_PLAN_STEPS[0],
+        completedStepNames: [],
+        planSteps: AAS_PLAN_STEPS,
+        progress: 5,
+        hasError: false,
+        elapsedMs: Date.now() - aasExecutionStartMs,
+        speech: buildIntroSpeech(aasAgentType, { action, jurisdiction, transactionCount: transactions.length }),
+      }));
+    } catch {
+      // Non-fatal
+    }
   }
 
   // ── Step -1: Brain Context Priming — inject live brain state into every AAS execution ──
@@ -486,6 +534,29 @@ export async function executeAccountingAgent(
     modelUsed: "claude-sonnet-4-6",
     outputSummary: JSON.stringify(finalResult).slice(0, 200),
   }).catch(() => {/* non-fatal */});
+
+  // ── Final: Emit completion comms ──────────────────────────────────────────
+  if (params.onComms) {
+    try {
+      const aasElapsed = Date.now() - aasExecutionStartMs;
+      params.onComms(buildAgentCommsPayload({
+        agentId: aasAgentId,
+        agentType: aasAgentType,
+        orgId: organizationId,
+        completedSteps: AAS_PLAN_STEPS.length,
+        totalSteps: AAS_PLAN_STEPS.length,
+        currentStepName: AAS_PLAN_STEPS[AAS_PLAN_STEPS.length - 1],
+        completedStepNames: [...AAS_PLAN_STEPS],
+        planSteps: AAS_PLAN_STEPS,
+        progress: 100,
+        hasError: false,
+        elapsedMs: aasElapsed,
+        speech: buildCompletionSpeech(aasAgentType, finalResult, [], aasElapsed),
+      }));
+    } catch {
+      // Non-fatal
+    }
+  }
 
   return {
     result: finalResult,

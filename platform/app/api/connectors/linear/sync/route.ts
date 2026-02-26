@@ -27,6 +27,9 @@ export async function POST(request: Request) {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
 
     // 2. Load connector config + credentials
     const service = await createServiceClient();
@@ -144,13 +147,14 @@ export async function POST(request: Request) {
         logger.warn("[Linear sync] Oracle error (non-fatal):", oracleErr.message);
       }
 
-      // 6. Update connector status
+      // 6. Update connector status (accumulate signals_count — never reset to current batch only)
+      const previousSignalsCount = (connector as any).signals_count || 0;
       const durationMs = Date.now() - startMs;
       await service
         .from("org_connectors")
         .update({
           last_sync_at: new Date().toISOString(),
-          signals_count: signalsGenerated,
+          signals_count: previousSignalsCount + signalsGenerated,
           config: {
             ...config,
             ingestion_progress: {

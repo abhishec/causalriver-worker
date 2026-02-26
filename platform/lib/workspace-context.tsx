@@ -127,28 +127,26 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   useState(() => { migrateLocalStorage(); return null; });
 
   // Hydrate from localStorage immediately (synchronous, no loading flash)
+  // NOTE: isLoading, currentWorkspaceId, activeCustomerId are always null/true on both
+  // server and client to prevent hydration mismatch. The useEffect below resolves them
+  // from localStorage on the client after the first render.
   const [memberships, setMemberships] = useState<WorkspaceMembership[]>(() => {
     const cached = readCache();
     return cached?.memberships ?? [];
   });
-  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(STORAGE_KEY);
-  });
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(() => {
     const cached = readCache();
     return cached?.isPlatformAdmin ?? false;
   });
-  // If we have cached data, skip the loading state entirely (instant UI)
-  const [isLoading, setIsLoading] = useState(() => readCache() === null);
+  // Always start true on both server and client — avoids hydration mismatch.
+  // The useEffect below sets it to false immediately if cache is fresh.
+  const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const retryCountRef = useRef(0);
 
-  // Customer-first navigation state
-  const [activeCustomerId, setActiveCustomerIdRaw] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(CUSTOMER_KEY);
-  });
+  // Customer-first navigation state — null on SSR, hydrated from localStorage in useEffect
+  const [activeCustomerId, setActiveCustomerIdRaw] = useState<string | null>(null);
 
   /* Load user's workspaces via API route (bypasses RLS recursion issue) */
   const loadWorkspaces = useCallback(async () => {
@@ -245,11 +243,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Hydrate client-only localStorage state after mount (SSR-safe: runs only on client)
+    const savedWorkspaceId = localStorage.getItem(STORAGE_KEY);
+    if (savedWorkspaceId) setCurrentWorkspaceId(savedWorkspaceId);
+    const savedCustomerId = localStorage.getItem(CUSTOMER_KEY);
+    if (savedCustomerId) setActiveCustomerIdRaw(savedCustomerId);
+
     // Skip background fetch if localStorage cache is very fresh (< 60s).
     // Prevents redundant /api/workspace/memberships calls on rapid navigations.
+    // Also resolve isLoading immediately from cache to prevent flash-of-loading-state.
     const cached = readCache();
     const isFresh = cached && (Date.now() - cached.timestamp < 60_000);
-    if (!isFresh) loadWorkspaces();
+    if (isFresh) {
+      setIsLoading(false);
+    } else {
+      loadWorkspaces();
+    }
   }, [loadWorkspaces]);
 
   /* Switch workspace: persist in localStorage + cookie (for server components)

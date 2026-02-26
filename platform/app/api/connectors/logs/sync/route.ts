@@ -41,6 +41,9 @@ export async function POST(request: Request) {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
     const service = await createServiceClient();
 
     // 2. Parse body
@@ -100,10 +103,10 @@ export async function POST(request: Request) {
         results[conn.connector_type] = result;
         totalSignals += result.signalsIngested || 0;
 
-        // Update last_synced_at
+        // Update last_sync_at (correct column name on org_connectors)
         await service
           .from("org_connectors")
-          .update({ last_synced_at: new Date().toISOString() })
+          .update({ last_sync_at: new Date().toISOString() })
           .eq("id", conn.id);
       } catch (err: any) {
         logger.error(`[Logs sync] ${conn.connector_type} failed:`, err);

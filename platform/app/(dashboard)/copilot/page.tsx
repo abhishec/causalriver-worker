@@ -73,8 +73,14 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
 function CopilotPageInner() {
-  const { currentWorkspace, isLoading: workspaceLoading, workspaces } = useWorkspace();
+  const { currentWorkspace, isLoading: workspaceLoading, workspaces, switchWorkspace } = useWorkspace();
   const searchParams = useSearchParams();
+
+  // Guard against SSR/client hydration mismatch: WorkspaceProvider reads localStorage
+  // which is unavailable on the server, so workspace state is indeterminate until mounted.
+  // We always render the loading state until after first mount to guarantee SSR/client match.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
 
   // ── Service mode ──────────────────────────────────────────────────────────
   // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
@@ -679,7 +685,9 @@ function CopilotPageInner() {
   const serviceArtifacts = artifacts.filter((a) => a.service === activeService);
 
   // ── Workspace guard: prevent 500 errors when no workspace is selected ──
-  if (workspaceLoading) {
+  // Use isMounted to ensure SSR and client first-render both show the loading state,
+  // preventing hydration mismatch from localStorage reads in WorkspaceProvider.
+  if (!isMounted || workspaceLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <div className="flex flex-col items-center gap-3">

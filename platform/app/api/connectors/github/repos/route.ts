@@ -23,6 +23,9 @@ export async function GET() {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
     const service = await createServiceClient();
 
     // Load GitHub connector credentials
