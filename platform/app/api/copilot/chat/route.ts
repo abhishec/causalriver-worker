@@ -1590,7 +1590,10 @@ export async function POST(request: NextRequest) {
 
     const agentIntent = detectAgentIntent(message);
 
-    if (agentIntent) {
+    // Skip regex agent path when LLM already handled create-agent via handleAgentCreation().
+    // Without this guard, both paths run: handleAgentCreation succeeds, then detectAgentIntent
+    // also fires and hits the brain_agent_tasks path which emits "Failed to create agent task".
+    if (agentIntent && !agentCreated) {
 
       // ══════════════════════════════════════════════════════════════
       // ── Train Brain Fast-Path ─────────────────────────────────────
@@ -2594,12 +2597,23 @@ export async function POST(request: NextRequest) {
           entityState
         );
 
-        const artifact = await engine.execute(message, knowledgeCtx);
-        actionArtifact = artifact as unknown as Record<string, unknown>;
-
-        // Store formatted prompt text for system prompt augmentation
-        (actionArtifact as Record<string, unknown>).__promptText =
-          formatArtifactForPrompt(artifact);
+        // Wrap in a 10s timeout — engine.execute() calls the LLM amplifier which can
+        // take up to 30s. Without a timeout this blocks the entire handler synchronously
+        // before the SSE stream is returned, causing client-visible hangs (e.g. Q5:
+        // "Analyse delivery velocity and predict risk" → detectedIntent="predict").
+        const engineTimeout = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 10_000)
+        );
+        const engineResult = await Promise.race([
+          engine.execute(message, knowledgeCtx).then((a: unknown) => a).catch(() => null),
+          engineTimeout,
+        ]);
+        if (engineResult) {
+          actionArtifact = engineResult as unknown as Record<string, unknown>;
+          // Store formatted prompt text for system prompt augmentation
+          (actionArtifact as Record<string, unknown>).__promptText =
+            formatArtifactForPrompt(engineResult);
+        }
       } catch (err) {
         logger.warn(
           "[ActionEngine] Non-fatal failure, falling back to LLM-only:",
