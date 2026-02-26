@@ -67,6 +67,40 @@ const MAX_OUTPUT_TOKENS = 8_192;
 const RESERVED_TOKENS = MAX_OUTPUT_TOKENS + 5_000; // output + safety margin
 const MAX_HISTORY_TOKENS = MAX_CONTEXT_TOKENS - MAX_SYSTEM_PROMPT_TOKENS - RESERVED_TOKENS;
 
+// ── Module-level hot-path caches ─────────────────────────────────────────
+// These two query blocks fire on EVERY copilot chat request. Both return stable
+// aggregate/config data that is safe to cache for 30s. Cache key = orgId so
+// cross-org isolation is preserved.
+
+const HOT_PATH_TTL_MS = 30_000; // 30 seconds — matches brain-context cache
+
+// ai_memory corrections cache (top-8 user corrections per org)
+interface CachedCorrections {
+  data: Array<{ content: string; importance: number; domain: string; created_at: string }>;
+  expiry: number;
+}
+const _correctionsCache = new Map<string, CachedCorrections>();
+
+// learningPulse cache (brain intelligence snapshot + feedback stats)
+interface LearningPulse {
+  intelligenceScore: number;
+  predictionAccuracy: number | null;
+  totalCorrections: number;
+  totalFeedback: number;
+  satisfactionRate: number;
+  recentEmergenceEvents: Array<{ event_type: string; summary: string; created_at: string }>;
+  learningVelocity: string;
+  brierScore: number | null;
+  edgesLearned: number;
+  memoriesStored: number;
+  lastLearningCycle: string | null;
+}
+interface CachedLearningPulse {
+  data: LearningPulse;
+  expiry: number;
+}
+const _learningPulseCache = new Map<string, CachedLearningPulse>();
+
 /** Rough token estimate: ~4 chars per token for English text */
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
@@ -204,7 +238,7 @@ export async function POST(request: NextRequest) {
       organizationId,
       workspaceId: bodyWorkspaceId,
       entityState,
-      conversationHistory,
+      conversationHistory: rawConversationHistory,
       useFramework,
       // V4: Optional persona override from frontend
       persona,
@@ -213,6 +247,8 @@ export async function POST(request: NextRequest) {
       // Phase 7: Custom template command execution
       commandId,
       commandParams,
+      // Memory compression: narrative summary of earlier turns for unlimited memory
+      compressedSummary,
     } = body as {
       message: string;
       organizationId?: string;
@@ -224,7 +260,14 @@ export async function POST(request: NextRequest) {
       branch?: string;
       commandId?: string;
       commandParams?: Record<string, unknown>;
+      compressedSummary?: string;
     };
+
+    // When a compressed summary exists, cap history to the 10 most recent turns.
+    // The LLM sees: [compressed memory block] + [last 10 turns] = unlimited memory feel.
+    const conversationHistory = compressedSummary && rawConversationHistory
+      ? rawConversationHistory.slice(-10)
+      : rawConversationHistory;
 
     // Accept both workspaceId (new) and organizationId (legacy) from request body
     const requestedWorkspaceId = bodyWorkspaceId || organizationId;
@@ -3428,6 +3471,34 @@ Use this data to give a comprehensive answer. The analysis was performed by Brai
       const domainSpecificResult = deliveryIntelligenceResult.domainResult ?? null;
       const hasLiveData = healthScores.length > 0 || podMatches.length > 0 || scopeAlerts.length > 0 || (engineerHealthSummary as any)?.total_engineers > 0;
 
+      // ── Compute dataMode for frontend provenance indicator ───────────────
+      // Determines which badge the DomainResultRenderer will show.
+      const hasHealthData = healthScores.length > 0 || (engineerHealthSummary as any)?.total_engineers > 0;
+      const hasPodData = podMatches.length > 0;
+      const hasScopeData = scopeAlerts.length > 0;
+      const liveSourceCount = (hasHealthData ? 1 : 0) + (hasPodData ? 1 : 0) + (hasScopeData ? 1 : 0);
+      // A "partial" result means some data arrived but not all expected for this domain
+      const expectedSources = delivDomainType === 'pod-match' ? 1 : delivDomainType === 'scope-creep' ? 1 : 2;
+      const dataMode: "live" | "partial" | "ai-reasoned" = !hasLiveData
+        ? "ai-reasoned"
+        : liveSourceCount < expectedSources
+          ? "partial"
+          : "live";
+
+      const connectedSources: string[] = [];
+      const missingData: string[] = [];
+      if (hasHealthData) connectedSources.push("GitHub");
+      else missingData.push("engineer velocity");
+      if (hasPodData) connectedSources.push("pod signals");
+      else if (delivDomainType === 'pod-match' || delivDomainType === 'delivery-intelligence') missingData.push("pod match history");
+      if (hasScopeData) connectedSources.push("Jira");
+      else if (delivDomainType === 'scope-creep' || delivDomainType === 'delivery-intelligence') missingData.push("sprint health");
+
+      // Tag the result object so it flows to the frontend via SSE
+      deliveryIntelligenceResult.dataMode = dataMode;
+      deliveryIntelligenceResult.connectedSources = connectedSources;
+      deliveryIntelligenceResult.missingData = missingData;
+
       if (hasLiveData) {
         // ── Live data available: inject real numbers ────────────────────────
         effectiveSystemPrompt += `\n\n## SE-aaS DELIVERY INTELLIGENCE: ${delivDomainType.toUpperCase()}
@@ -3549,17 +3620,32 @@ Do NOT attempt to answer the analysis question with placeholder or made-up data.
     // These are REAL corrections saved by /api/copilot/feedback when users
     // click thumbs-down and provide corrected information.
     // This closes the loop: user corrects → stored in ai_memory → next answer uses correction.
+    // CACHED: corrections are stable config data — 30s TTL cuts DB queries by ~10x under load.
     {
       const correctionDomain = brainContext?.domains?.[0] || "general";
-      const { data: corrections } = await Promise.resolve(service
-        .from("ai_memory")
-        .select("content, importance, domain, created_at")
-        .eq("organization_id", workspaceId)
-        .eq("memory_type", "correction")
-        .order("importance", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(8))
-        .catch(() => ({ data: null as any[] | null }));
+
+      // Cache hit: return stale-within-30s corrections immediately
+      let corrections: Array<{ content: string; importance: number; domain: string; created_at: string }> | null = null;
+      const cachedCorrections = _correctionsCache.get(workspaceId);
+      if (cachedCorrections && cachedCorrections.expiry > Date.now()) {
+        corrections = cachedCorrections.data;
+      } else {
+        const { data: freshCorrections } = await Promise.resolve(service
+          .from("ai_memory")
+          .select("content, importance, domain, created_at")
+          .eq("organization_id", workspaceId)
+          .eq("memory_type", "correction")
+          .order("importance", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(8))
+          .catch(() => ({ data: null as any[] | null }));
+        corrections = freshCorrections;
+        // Store in cache (even null/empty result — avoids repeated DB round-trips for orgs with no corrections)
+        _correctionsCache.set(workspaceId, {
+          data: corrections ?? [],
+          expiry: Date.now() + HOT_PATH_TTL_MS,
+        });
+      }
 
       if (corrections && corrections.length > 0) {
         // Prioritize domain-relevant corrections, but include cross-domain ones too
@@ -3587,81 +3673,78 @@ RULES FOR CORRECTIONS:
     // ── REINFORCEMENT LEARNING CONTEXT: Visible Learning Loop ──────────
     // Fetch brain intelligence metrics so the copilot can reference its own
     // learning journey. This is the "wow" factor — users SEE the AI getting smarter.
-    let learningPulse: {
-      intelligenceScore: number;
-      predictionAccuracy: number | null;
-      totalCorrections: number;
-      totalFeedback: number;
-      satisfactionRate: number;
-      recentEmergenceEvents: Array<{ event_type: string; summary: string; created_at: string }>;
-      learningVelocity: string;
-      brierScore: number | null;
-      edgesLearned: number;
-      memoriesStored: number;
-      lastLearningCycle: string | null;
-    } | null = null;
+    // CACHED: 5 DB queries → 0 on cache hit. 30s TTL — acceptable staleness for display stats.
+    let learningPulse: LearningPulse | null = null;
 
     try {
-      const [
-        intelligenceSnap,
-        feedbackStats,
-        correctionCount,
-        emergenceEvents,
-        rlState,
-      ] = await Promise.all([
-        // Latest intelligence snapshot
-        service
-          .from("brain_intelligence_snapshots")
-          .select("intelligence_score, prediction_accuracy, brier_score, causal_edges_total, memories_total, feedback_processed, created_at")
-          .eq("organization_id", workspaceId)
-          .order("snapshot_date", { ascending: false })
-          .limit(1),
-        // Feedback stats (last 30 days)
-        service
-          .from("copilot_response_feedback")
-          .select("rating")
-          .eq("organization_id", workspaceId)
-          .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-        // Correction count
-        service
-          .from("ai_memory")
-          .select("id", { count: "exact", head: true })
-          .eq("organization_id", workspaceId)
-          .eq("memory_type", "correction"),
-        // Recent emergence events (learning milestones)
-        service
-          .from("brain_emergence_log")
-          .select("event_type, summary, created_at")
-          .eq("organization_id", workspaceId)
-          .order("created_at", { ascending: false })
-          .limit(3),
-        // RL state — get exploration rate and reward trend
-        service
-          .from("brain_rl_state")
-          .select("cumulative_reward, reward_trend, exploration_rate")
-          .eq("organization_id", workspaceId)
-          .limit(1),
-      ]);
+      // Cache hit: return stale-within-30s learning stats immediately
+      const cachedPulse = _learningPulseCache.get(workspaceId);
+      if (cachedPulse && cachedPulse.expiry > Date.now()) {
+        learningPulse = cachedPulse.data;
+      } else {
+        const [
+          intelligenceSnap,
+          feedbackStats,
+          correctionCount,
+          emergenceEvents,
+          rlState,
+        ] = await Promise.all([
+          // Latest intelligence snapshot
+          service
+            .from("brain_intelligence_snapshots")
+            .select("intelligence_score, prediction_accuracy, brier_score, causal_edges_total, memories_total, feedback_processed, created_at")
+            .eq("organization_id", workspaceId)
+            .order("snapshot_date", { ascending: false })
+            .limit(1),
+          // Feedback stats (last 30 days)
+          service
+            .from("copilot_response_feedback")
+            .select("rating")
+            .eq("organization_id", workspaceId)
+            .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+          // Correction count
+          service
+            .from("ai_memory")
+            .select("id", { count: "exact", head: true })
+            .eq("organization_id", workspaceId)
+            .eq("memory_type", "correction"),
+          // Recent emergence events (learning milestones)
+          service
+            .from("brain_emergence_log")
+            .select("event_type, summary, created_at")
+            .eq("organization_id", workspaceId)
+            .order("created_at", { ascending: false })
+            .limit(3),
+          // RL state — get exploration rate and reward trend
+          service
+            .from("brain_rl_state")
+            .select("cumulative_reward, reward_trend, exploration_rate")
+            .eq("organization_id", workspaceId)
+            .limit(1),
+        ]);
 
-      const snap = intelligenceSnap.data?.[0];
-      const feedbackRows = feedbackStats.data || [];
-      const helpfulCount = feedbackRows.filter((r: any) => r.rating === "helpful").length;
-      const totalFeedback = feedbackRows.length;
-      const rewardTrend = rlState.data?.[0]?.reward_trend || "stable";
+        const snap = intelligenceSnap.data?.[0];
+        const feedbackRows = feedbackStats.data || [];
+        const helpfulCount = feedbackRows.filter((r: any) => r.rating === "helpful").length;
+        const totalFeedback = feedbackRows.length;
+        const rewardTrend = rlState.data?.[0]?.reward_trend || "stable";
 
-      learningPulse = {
-        intelligenceScore: snap?.intelligence_score ?? 0,
-        predictionAccuracy: snap?.prediction_accuracy ?? null,
-        totalCorrections: correctionCount.count ?? 0,
-        totalFeedback,
-        satisfactionRate: totalFeedback > 0 ? helpfulCount / totalFeedback : 0,
-        recentEmergenceEvents: (emergenceEvents.data || []) as any[],
-        learningVelocity: rewardTrend === "improving" ? "accelerating" : rewardTrend === "declining" ? "recalibrating" : "steady",
-        brierScore: snap?.brier_score ?? null,
-        edgesLearned: snap?.causal_edges_total ?? 0,
-        memoriesStored: snap?.memories_total ?? 0,
-        lastLearningCycle: snap?.created_at ?? null,
-      };
+        learningPulse = {
+          intelligenceScore: snap?.intelligence_score ?? 0,
+          predictionAccuracy: snap?.prediction_accuracy ?? null,
+          totalCorrections: correctionCount.count ?? 0,
+          totalFeedback,
+          satisfactionRate: totalFeedback > 0 ? helpfulCount / totalFeedback : 0,
+          recentEmergenceEvents: (emergenceEvents.data || []) as any[],
+          learningVelocity: rewardTrend === "improving" ? "accelerating" : rewardTrend === "declining" ? "recalibrating" : "steady",
+          brierScore: snap?.brier_score ?? null,
+          edgesLearned: snap?.causal_edges_total ?? 0,
+          memoriesStored: snap?.memories_total ?? 0,
+          lastLearningCycle: snap?.created_at ?? null,
+        };
+        // Store in cache: 30s TTL — DB load reduction ~10x under concurrent users
+        _learningPulseCache.set(workspaceId, { data: learningPulse, expiry: Date.now() + HOT_PATH_TTL_MS });
+      }
 
       // Inject learning awareness into system prompt
       if (learningPulse.intelligenceScore > 0 || learningPulse.totalFeedback > 0) {

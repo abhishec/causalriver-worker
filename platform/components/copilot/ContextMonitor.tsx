@@ -27,6 +27,7 @@ interface ContextMessage {
 
 interface ContextMonitorProps {
   messages: ContextMessage[];
+  /** Called to trigger compression — parent component handles the API call */
   onCompress: () => void;
   className?: string;
 }
@@ -132,7 +133,7 @@ export function ContextMonitor({ messages, onCompress, className }: ContextMonit
       {/* Manual compress button */}
       {showCompressButton && autoCompressCountdown === null && (
         <button
-          onClick={onCompress}
+          onClick={() => onCompress()}
           className={cn(
             "inline-flex items-center gap-1 px-1.5 py-0.5 rounded border transition-colors shrink-0",
             usagePct > 0.75

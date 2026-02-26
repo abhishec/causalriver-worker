@@ -18,7 +18,10 @@ export interface BrainContext {
   topSignals: { domain: string; summary: string; strength: number }[];  // top 3 recent signals
   recentQuality: number;              // avg quality from last 10 prediction_records
   topPatterns: string[];              // top domains from high-quality recent records
-  activeJobCount: number;             // jobs currently running
+  activeJobCount: number;             // jobs currently running (Layer 4: Orchestrator State)
+  pendingJobCount: number;            // jobs queued but not started (Layer 4: Orchestrator State)
+  lastJobStatus: string | null;       // status of the most recently completed job (Layer 4)
+  smartRouterRecommendation: string;  // recommended model tier for this org (Layer 5: Smart Router)
   contextSummary: string;             // 2-3 sentence natural language summary for LLM injection
   qualityPatterns: QualityPattern[];  // per-domain quality breakdown (RL flywheel)
   qualityPatternsSummary: string;     // single-line summary for direct LLM prompt injection
@@ -27,16 +30,17 @@ export interface BrainContext {
 export async function getBrainContext(
   supabase: SupabaseClient,
   orgId: string,
+  { forceRefresh = false }: { forceRefresh?: boolean } = {},
 ): Promise<BrainContext> {
   // ── Cache hit: return stale-within-30s data immediately ──────────────
   const cached = _brainContextCache.get(orgId);
-  if (cached && cached.expiry > Date.now()) {
+  if (!forceRefresh && cached && cached.expiry > Date.now()) {
     return cached.data;
   }
 
   try {
-    // Run all 5 fetches in parallel — non-blocking, fail gracefully
-    const [workspaceRow, signalsRow, qualityRow, jobsRow, signalCountRow] = await Promise.allSettled([
+    // Run all fetches in parallel — non-blocking, fail gracefully
+    const [workspaceRow, signalsRow, qualityRow, jobsRow, signalCountRow, pendingJobsRow, lastJobRow] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
         .from("ai_workspace")
@@ -57,7 +61,7 @@ export async function getBrainContext(
         .eq("organization_id", orgId)
         .order("created_at", { ascending: false })
         .limit(10),
-      // Active jobs
+      // Layer 4: Orchestrator State — running jobs count
       supabase
         .from("agent_queue")
         .select("id", { count: "exact", head: true })
@@ -69,6 +73,20 @@ export async function getBrainContext(
         .from("cross_domain_signals")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId),
+      // Layer 4: Orchestrator State — pending jobs count (queued but not started)
+      supabase
+        .from("agent_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .eq("status", "pending"),
+      // Layer 4: Orchestrator State — last completed job status
+      supabase
+        .from("agent_queue")
+        .select("status, task_type, completed_at")
+        .eq("organization_id", orgId)
+        .in("status", ["success", "error"])
+        .order("completed_at", { ascending: false })
+        .limit(1),
     ]);
 
     // Extract values safely
@@ -105,6 +123,13 @@ export async function getBrainContext(
 
     const activeJobCount = jobsRow.status === "fulfilled" ? (jobsRow.value.count ?? 0) : 0;
 
+    // Layer 4: Orchestrator State — pending + last job
+    const pendingJobCount = pendingJobsRow.status === "fulfilled" ? (pendingJobsRow.value.count ?? 0) : 0;
+    const lastJobData = lastJobRow.status === "fulfilled" ? (lastJobRow.value.data ?? []) : [];
+    const lastJobStatus: string | null = lastJobData.length > 0
+      ? `${lastJobData[0].task_type}: ${lastJobData[0].status}`
+      : null;
+
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -122,6 +147,15 @@ export async function getBrainContext(
         ).join("; ")
       : "No recent domain quality data";
 
+    // Layer 5: Smart Router — recommend model tier based on Brain IQ + signal volume
+    // IQ < 10  → brain not ready → Haiku (cheap, data lookup only)
+    // IQ 10-29 → brain learning → Haiku for delivery domains, Sonnet for code domains
+    // IQ >= 30 → brain ready    → Sonnet for all heavy domains (full reasoning unlocked)
+    const smartRouterRecommendation: string =
+      brainIq < 10  ? "haiku (brain not ready — use cheap model until IQ >= 10)" :
+      brainIq < 30  ? "haiku for data domains (pod-match, early-warning); sonnet for code domains" :
+                      "sonnet for all domains (Brain IQ >= 30, full reasoning unlocked)";
+
     // Fetch the 3 most recently ingested document chunks (empty query = latest by created_at)
     // Called by getBrainContext() to include document knowledge in every LLM decision
     let recentDocTitles: string[] = [];
@@ -135,9 +169,9 @@ export async function getBrainContext(
     }
 
     // Build natural language summary for LLM system prompt injection
-    const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, recentDocTitles });
+    const contextSummary = buildContextSummary({ brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, pendingJobCount, lastJobStatus, smartRouterRecommendation, recentDocTitles });
 
-    const result: BrainContext = { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, contextSummary, qualityPatterns, qualityPatternsSummary };
+    const result: BrainContext = { brainIq, signalCount, brainState, topSignals, recentQuality, topPatterns, activeJobCount, pendingJobCount, lastJobStatus, smartRouterRecommendation, contextSummary, qualityPatterns, qualityPatternsSummary };
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
     _brainContextCache.set(orgId, { data: result, expiry: Date.now() + BRAIN_CONTEXT_TTL_MS });
@@ -154,6 +188,9 @@ export async function getBrainContext(
       recentQuality: 0,
       topPatterns: [],
       activeJobCount: 0,
+      pendingJobCount: 0,
+      lastJobStatus: null,
+      smartRouterRecommendation: "haiku (brain not ready — use cheap model until IQ >= 10)",
       contextSummary: "",
       qualityPatterns: [],
       qualityPatternsSummary: "No recent domain quality data",
