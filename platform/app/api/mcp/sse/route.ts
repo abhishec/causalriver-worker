@@ -35,9 +35,13 @@ export const maxDuration = 300; // 5 minutes for long-running tools
 // SESSION MANAGEMENT
 // ============================================================================
 
-// In-memory session store — maps sessionId to transport state.
-// In a single Vercel function instance, this persists across requests
-// within the same invocation. For distributed deployments, replace with Redis.
+// WARNING: In-memory session Map is NOT safe on multi-instance Lambda.
+// SSE subscriptions only work if POST and GET land on the same Lambda instance.
+// On AWS Amplify (multi-instance), a POST can land on a different instance than
+// the GET that created the session — silently dropping SSE responses to the client.
+// For production multi-instance deployments, move session state to Supabase KV.
+// The stateless POST mode (no sessionId / no SSE) works correctly across all instances
+// and is the recommended path for production MCP integrations.
 const sessions = new Map<
   string,
   {
@@ -150,6 +154,14 @@ export async function GET(request: NextRequest) {
     messageEndpoint,
     createdAt: Date.now(),
   });
+
+  // Warn operators: SSE session state is in-memory. On Amplify multi-instance Lambda,
+  // a subsequent POST for this sessionId may land on a different instance and lose the
+  // SSE controller reference. Clients should use stateless POST mode for reliability.
+  console.warn(
+    `[mcp/sse] SSE session created (${sessionId}). ` +
+    `In-memory sessions are NOT safe on multi-instance Lambda — use stateless POST mode for production.`
+  );
 
   // Periodic cleanup
   cleanupSessions();

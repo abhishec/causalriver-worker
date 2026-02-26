@@ -816,8 +816,11 @@ export const gatewayManager: GatewayManager = getGlobalManager();
  * Send a copilot query through OpenClaw and yield SSE-compatible events.
  *
  * Strategy:
- *   1. If the org has an active WebSocket connection, use it (real-time path).
- *   2. Otherwise, fall back to the webhook POST path (/hooks/agent).
+ *   1. Webhook-first: if a webhookUrl is configured, use it — stateless and cold-start safe.
+ *      Lambda cold starts kill the in-process WebSocket singleton silently; the webhook path
+ *      is stateless and works correctly across all Lambda instances.
+ *   2. WebSocket fallback: if no webhookUrl, try the WebSocket connection (only safe in
+ *      single-instance deployments where the singleton survives between requests).
  *   3. If neither is available, yield an error.
  *
  * Yields:
@@ -832,32 +835,36 @@ export async function* triggerOpenClawAgent(
 ): AsyncGenerator<AgentStreamEvent, void, undefined> {
   const { orgId, message, sessionKey, agentId, model } = params;
   const conn = gatewayManager.getConnection(orgId);
+  const config = conn?.getConfig();
 
-  // Try WebSocket path first
+  // Webhook-first: stateless, cold-start safe — preferred for production Lambda deployments.
+  // WebSocket singleton is killed on Lambda cold start and is only reliable in single-instance
+  // deployments. If webhookUrl is configured, always use it regardless of WebSocket state.
+  const webhookUrl = config?.webhookUrl;
+  const webhookToken = config?.webhookToken ?? config?.authToken;
+
+  if (webhookUrl) {
+    log('debug', `Delivering via webhook (cold-start safe)`, { orgId });
+    yield* streamViaWebhook(webhookUrl, webhookToken ?? '', {
+      message,
+      sessionKey,
+      agentId,
+      model,
+    });
+    return;
+  }
+
+  // WebSocket fallback: only safe in single-instance deployments.
   if (conn && conn.isConnected()) {
+    log('debug', `Delivering via WebSocket (single-instance only)`, { orgId });
     yield* streamViaWebSocket(conn, { message, sessionKey, agentId, model });
     return;
   }
 
-  // Fallback to webhook POST
-  const config = conn?.getConfig();
-  const webhookUrl = config?.webhookUrl;
-  const webhookToken = config?.webhookToken ?? config?.authToken;
-
-  if (!webhookUrl) {
-    yield {
-      error: `No gateway connection or webhook URL configured for org ${orgId}`,
-    };
-    yield '[DONE]';
-    return;
-  }
-
-  yield* streamViaWebhook(webhookUrl, webhookToken ?? '', {
-    message,
-    sessionKey,
-    agentId,
-    model,
-  });
+  yield {
+    error: `No gateway connection or webhook URL configured for org ${orgId}`,
+  };
+  yield '[DONE]';
 }
 
 // =========================================================================
