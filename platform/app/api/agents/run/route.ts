@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         .order("joined_at", { ascending: true })
         .limit(1)
         .maybeSingle();
-      workspaceId = membership?.organization_id || CORE_WORKSPACE_ID;
+      workspaceId = membership?.organization_id ?? null;
     }
 
     // Verify membership

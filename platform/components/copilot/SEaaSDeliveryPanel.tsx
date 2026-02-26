@@ -317,7 +317,6 @@ function EngineerHealthWidget({ summary }: { summary: EngineerHealthSummary }) {
 interface SEaaSDeliveryPanelProps {
   data: DeliveryIntelligenceData;
 }
-
 export function SEaaSDeliveryPanel({ data }: SEaaSDeliveryPanelProps) {
   const [alerts, setAlerts] = useState<ScopeCreepAlert[]>(data.scope_alerts || []);
 
@@ -335,6 +334,15 @@ export function SEaaSDeliveryPanel({ data }: SEaaSDeliveryPanelProps) {
     return () => { cancelled = true; };
   }, []);
 
+
+  // Guard: data can be null/undefined if streaming is truncated or domain returned no result
+  if (!data) {
+    return (
+      <div className="text-sm text-muted-foreground p-4 rounded-lg bg-surface-hover">
+        Delivery intelligence data is loading or unavailable. Try refreshing.
+      </div>
+    );
+  }
   const handleAcknowledge = async (alertId: string) => {
     try {
       const res = await fetch("/api/se-aas/engagement-health", {

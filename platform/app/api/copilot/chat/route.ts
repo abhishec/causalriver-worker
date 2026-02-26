@@ -511,7 +511,7 @@ export async function POST(request: NextRequest) {
     // (Xero, Volopay, etc.) that have the same shape as patterns. By including them
     // in the patterns array, the brain context builder naturally surfaces them to the LLM.
     const dbPatterns: TrainedPattern[] = intelligence.patterns as unknown as TrainedPattern[];
-    const dbInsights = intelligence.insights.map((row: { content: string; domain?: string; importance: number; metadata?: Record<string, unknown> }) => ({
+    const dbInsights = (intelligence.insights ?? []).map((row: { content: string; domain?: string; importance: number; metadata?: Record<string, unknown> }) => ({
       content: row.content,
       domain: row.domain || "general",
       importance: row.importance,

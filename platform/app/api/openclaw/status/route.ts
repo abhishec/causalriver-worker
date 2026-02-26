@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
 
     // ── Resolve org ──────────────────────────────────────────────
     const params = request.nextUrl.searchParams;
-    const workspaceId = params.get("organizationId") || CORE_WORKSPACE_ID;
+    const workspaceId = params.get("organizationId");
+    if (!workspaceId) {
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase

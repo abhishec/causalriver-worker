@@ -17,6 +17,7 @@ import { authenticateSeAaSRequest, createSeAaSResponse, createSeAaSError } from 
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30; // DB-only route: 30s is ample, explicit for Amplify Lambda
 
 export async function GET(request: NextRequest) {
   try {

@@ -72,7 +72,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const workspaceId = organizationId || CORE_WORKSPACE_ID;
+    const workspaceId = organizationId;
+    if (!workspaceId) {
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
 
     // ── Validate membership ──────────────────────────────────────
     const { data: membership } = await supabase

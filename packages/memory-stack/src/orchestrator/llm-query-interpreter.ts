@@ -157,6 +157,8 @@ const VALID_SEAAS_DOMAINS = new Set([
   'incident-diagnosis', 'impact-analysis', 'data-lineage', 'log-query',
   'dependency-upgrade', 'design-doc-generator', 'performance-profiler', 'dead-code-detector',
   'pr-review', 'boilerplate-scaffold', 'codebase-qa',
+  // SE-aaS Delivery Intelligence domains — MUST match classifier prompt + chat route list
+  'pod-match', 'early-warning', 'scope-creep', 'delivery-intelligence',
 ]);
 
 /** Valid AAS domains */

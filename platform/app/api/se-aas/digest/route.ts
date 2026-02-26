@@ -118,7 +118,7 @@ async function buildDigest(
   (recentArtifacts ?? []).forEach((a) => {
     domainUsage[a.domain_type] = (domainUsage[a.domain_type] ?? 0) + 1;
   });
-  const topDomain = Object.entries(domainUsage).sort((a, b) => b[1] - a[1])[0];
+  const topDomain = Object.entries(domainUsage).sort((a, b) => b[1] - a[1])[0] ?? null;
 
   // ── Build sections ───────────────────────────────────────────────────────
   const sections: DigestSection[] = [];
