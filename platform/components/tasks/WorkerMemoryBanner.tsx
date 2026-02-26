@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const WARN_THRESHOLD = 60;     // amber
 const CRITICAL_THRESHOLD = 80; // red
 
-interface WorkerSummary {
+export interface WorkerSummary {
   taskId: string;
   agentType: string;
   status: string;

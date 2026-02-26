@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { WorkerMemoryBanner } from "@/components/tasks/WorkerMemoryBanner";
+import type { WorkerSummary } from "@/components/tasks/WorkerMemoryBanner";
 
 type TaskStatus = "running" | "pending" | "awaiting_approval" | "completed" | "failed" | "rejected";
 type StatusFilter = "all" | TaskStatus;
@@ -100,22 +102,31 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
   const [approving, setApproving] = useState<string | null>(null);
+  const [workerMemory, setWorkerMemory] = useState<WorkerSummary[]>([]);
 
   // Poll for updates every 5s
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchAll = async () => {
       try {
-        const res = await fetch(`/api/tasks?limit=50&organizationId=${encodeURIComponent(workspaceId)}`);
-        if (res.ok) {
-          const data = await res.json();
+        const [tasksRes, memRes] = await Promise.allSettled([
+          fetch(`/api/tasks?limit=50&organizationId=${encodeURIComponent(workspaceId)}`),
+          fetch("/api/brain/worker-memory"),
+        ]);
+        if (tasksRes.status === "fulfilled" && tasksRes.value.ok) {
+          const data = await tasksRes.value.json();
           if (data.tasks) setTasks(data.tasks);
+        }
+        if (memRes.status === "fulfilled" && memRes.value.ok) {
+          const memData = await memRes.value.json();
+          if (memData.workers) setWorkerMemory(memData.workers);
         }
       } catch {
         // Non-fatal
       }
-    }, 5000);
+    };
+    const interval = setInterval(fetchAll, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [workspaceId]);
 
   const filtered = useMemo(() => {
     if (statusFilter === "all") return tasks;
@@ -195,6 +206,9 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
           Refresh
         </button>
       </div>
+
+      {/* Worker Memory Banner — shows context usage across all active AI workers */}
+      <WorkerMemoryBanner workers={workerMemory} className="mb-1" />
 
       {/* Stat Cards */}
       <div className="flex gap-3">
