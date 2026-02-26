@@ -187,7 +187,7 @@ const VALID_ROUTES = new Set<DispatchRoute>(['fast_query', 'action_domain', 'age
 const CLASSIFIER_SYSTEM_PROMPT = `You are NexusBrain's query classifier. Given a user query, classify it and output ONLY a JSON object (no markdown, no explanation).
 
 ## Available Services
-SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa
+SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa, pod-match, early-warning, scope-creep, delivery-intelligence
 AAS agents: bookkeeper, reconciler, statement-generator, tax-compliance, audit-preparer, anomaly-detective, causal-accountant
 Copilot: general intelligence queries about the business, strategy, metrics, forecasting
 
@@ -207,6 +207,10 @@ Copilot: general intelligence queries about the business, strategy, metrics, for
 - PR / code review → pr-review
 - Scaffold / boilerplate generation → boilerplate-scaffold
 - How does code work / explain codebase → codebase-qa
+- Recommend / assign / which pod or team → pod-match
+- Velocity collapse / sprint velocity / at-risk engagement / bottleneck risk → early-warning
+- Scope creep / scope drift / story point drift / unplanned work / scope integrity → scope-creep
+- Engagement health / delivery intelligence / health score / RAG status / forecast → delivery-intelligence
 
 ## AAS Routing Guide
 - P&L / income statement / revenue breakdown / expense analysis → statement-generator
