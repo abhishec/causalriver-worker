@@ -262,6 +262,12 @@ async function checkPredictionHealth(supabase: any, workspaceId: string): Promis
     const correct = correctResult.count || 0;
     const accuracy = verified > 0 ? correct / verified : 0;
 
+    // When no predictions yet (new brain), return neutral 50 — the brain hasn't had
+    // time to make predictions yet and this should not count as a failure.
+    if (total === 0) {
+      return { score: 50, status: "no_predictions", details: { total_predictions: 0, verified_predictions: 0, correct_predictions: 0, accuracy: 0, pending_verification: 0 } };
+    }
+
     // Score based on: having predictions (40%) + accuracy (60%)
     const volumeScore = Math.min(total / 10, 1) * 40; // Max at 10+ predictions
     const accuracyScore = accuracy * 60;
@@ -269,7 +275,7 @@ async function checkPredictionHealth(supabase: any, workspaceId: string): Promis
 
     return {
       score,
-      status: total === 0 ? "no_predictions" : accuracy >= 0.7 ? "accurate" : accuracy >= 0.4 ? "learning" : "low_accuracy",
+      status: accuracy >= 0.7 ? "accurate" : accuracy >= 0.4 ? "learning" : "low_accuracy",
       details: {
         total_predictions: total,
         verified_predictions: verified,
@@ -298,14 +304,19 @@ async function checkCausalGraphHealth(supabase: any, workspaceId: string): Promi
     const recent = recentResult.count || 0;
 
     // Score: edges exist (30%) + significant ratio (30%) + freshness (40%)
+    // When no edges yet (new brain), return neutral 50 — causal discovery hasn't run yet,
+    // which is expected and should not count as a failure dragging overall score down.
+    if (total === 0) {
+      return { score: 50, status: "empty", details: { total_edges: 0, significant_edges: 0, edges_computed_last_7d: 0, freshness_ratio: 0 } };
+    }
     const edgeScore = Math.min(total / 20, 1) * 30;
-    const qualityScore = total > 0 ? (significant / total) * 30 : 0;
-    const freshnessScore = total > 0 ? (recent / total) * 40 : 0;
+    const qualityScore = (significant / total) * 30;
+    const freshnessScore = (recent / total) * 40;
     const score = Math.round(edgeScore + qualityScore + freshnessScore);
 
     return {
       score,
-      status: total === 0 ? "empty" : recent === 0 ? "stale" : significant > 5 ? "healthy" : "growing",
+      status: recent === 0 ? "stale" : significant > 5 ? "healthy" : "growing",
       details: {
         total_edges: total,
         significant_edges: significant,
@@ -331,6 +342,11 @@ async function checkSignalHealth(supabase: any, workspaceId: string): Promise<He
     const total = totalResult.count || 0;
     const recent24h = recentResult.count || 0;
     const uniqueDomains = new Set((domainResult.data || []).map((s: any) => s.source_domain)).size;
+
+    // When no signals at all, return neutral 50 — a new brain hasn't collected signals yet
+    if (total === 0) {
+      return { score: 50, status: "empty", details: { total_signals: 0, signals_last_24h: 0, unique_domains: 0 } };
+    }
 
     // Score: volume (30%) + freshness (40%) + diversity (30%)
     const volumeScore = Math.min(total / 1000, 1) * 30;
@@ -360,7 +376,8 @@ async function checkConnectorHealth(supabase: any, workspaceId: string): Promise
       .eq("organization_id", workspaceId);
 
     if (!connectors || connectors.length === 0) {
-      return { score: 0, status: "no_connectors", details: { connected_count: 0 } };
+      // No connectors is a normal state for a new brain — treat as neutral (not failed)
+      return { score: 50, status: "no_connectors", details: { connected_count: 0 } };
     }
 
     const connected = connectors.filter((c: any) => c.status === "connected" || c.status === "active");
@@ -404,7 +421,8 @@ async function checkJobHealth(supabase: any, workspaceId: string): Promise<Healt
       .limit(50);
 
     if (!recentJobs || recentJobs.length === 0) {
-      return { score: 10, status: "no_recent_jobs", details: { jobs_last_48h: 0 } };
+      // No jobs yet is normal for a new brain — treat as neutral (not failed)
+      return { score: 50, status: "no_recent_jobs", details: { jobs_last_48h: 0 } };
     }
 
     const succeeded = recentJobs.filter((j: any) => j.status === "success").length;
