@@ -125,6 +125,14 @@ export function SettingsClient({
   const [localCustomers, setLocalCustomers] = useState(allCustomers);
   const connectedTypes = new Set((connectors || []).map((c) => c.connector_type));
 
+  // GitHub Quick Connect modal state
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
+  const [githubToken, setGithubToken] = useState("");
+  const [githubRepoUrl, setGithubRepoUrl] = useState("");
+  const [githubSaving, setGithubSaving] = useState(false);
+  const [githubError, setGithubError] = useState<string | null>(null);
+  const [githubSuccess, setGithubSuccess] = useState(false);
+
   // Sync activeTab with URL search params on navigation (fixes stale tab state)
   useEffect(() => {
     const raw = (searchParams ? searchParams.get("tab") : null) || "overview";
@@ -146,6 +154,38 @@ export function SettingsClient({
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
+
+  // GitHub Quick Connect handler (defined after showToast)
+  const handleGithubConnect = useCallback(async () => {
+    setGithubError(null);
+    if (!githubToken.trim()) { setGithubError("GitHub token is required"); return; }
+    if (!githubRepoUrl.trim()) { setGithubError("Repository URL is required"); return; }
+    setGithubSaving(true);
+    try {
+      const res = await fetch("/api/integrations/github", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: githubToken.trim(), repoUrl: githubRepoUrl.trim(), organizationId: orgId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setGithubError(data?.error || "Failed to connect GitHub");
+        return;
+      }
+      setGithubSuccess(true);
+      showToast("GitHub connected successfully");
+      setTimeout(() => {
+        setShowGitHubModal(false);
+        setGithubToken("");
+        setGithubRepoUrl("");
+        setGithubSuccess(false);
+      }, 1500);
+    } catch {
+      setGithubError("Failed to connect GitHub");
+    } finally {
+      setGithubSaving(false);
+    }
+  }, [githubToken, githubRepoUrl, orgId, showToast]);
 
   const handleCreateWorkspace = useCallback(async (custId: string, custName: string) => {
     if (!createName.trim()) { setCreateError("Name is required."); return; }
@@ -729,6 +769,119 @@ export function SettingsClient({
           <div>
             <h2 className="text-sm font-medium mb-1">Integrations</h2>
             <p className="text-xs text-muted mb-6">Configure your integrations and preferences</p>
+
+            {/* GitHub Quick Connect Card */}
+            <div className="rounded-xl border border-border-subtle bg-surface/30 p-5 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center border border-border-subtle shrink-0">
+                    <svg className="w-5 h-5 text-foreground" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold">GitHub</h3>
+                      {connectedTypes.has("github") && (
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400">Connected</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted">Connect a GitHub repository for code intelligence</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowGitHubModal(true); setGithubError(null); setGithubSuccess(false); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 text-accent text-[11px] font-medium transition-colors shrink-0"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  {connectedTypes.has("github") ? "Add Repo" : "Connect GitHub"}
+                </button>
+              </div>
+            </div>
+
+            {/* GitHub Connect Modal */}
+            {showGitHubModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
+                <div className="w-full max-w-md rounded-xl border border-border-subtle bg-surface shadow-xl p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">Connect GitHub Repository</h3>
+                    <button
+                      onClick={() => { setShowGitHubModal(false); setGithubError(null); setGithubToken(""); setGithubRepoUrl(""); }}
+                      className="text-muted-foreground hover:text-foreground p-1 rounded transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {githubSuccess ? (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+                      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      GitHub connected successfully!
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                          Personal Access Token <span className="text-danger">*</span>
+                        </label>
+                        <p className="text-[10px] text-muted mb-1.5">
+                          Create a fine-grained token with repo permissions.{" "}
+                          <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                            Get one
+                          </a>
+                        </p>
+                        <input
+                          type="password"
+                          value={githubToken}
+                          onChange={(e) => setGithubToken(e.target.value)}
+                          placeholder="ghp_xxxxxxxxxxxx"
+                          className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                          Repository URL <span className="text-danger">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={githubRepoUrl}
+                          onChange={(e) => setGithubRepoUrl(e.target.value)}
+                          placeholder="https://github.com/your-org/your-repo"
+                          className="w-full rounded-lg bg-input border border-input-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                        />
+                      </div>
+                      {githubError && (
+                        <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs">
+                          {githubError}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={handleGithubConnect}
+                          disabled={githubSaving}
+                          className="px-4 py-2 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 disabled:opacity-50 transition-colors"
+                        >
+                          {githubSaving ? "Connecting..." : "Connect"}
+                        </button>
+                        <button
+                          onClick={() => { setShowGitHubModal(false); setGithubError(null); setGithubToken(""); setGithubRepoUrl(""); }}
+                          className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-surface-hover transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             <IntegrationsSection connectors={connectors as any} orgId={orgId} />
           </div>
         )}
