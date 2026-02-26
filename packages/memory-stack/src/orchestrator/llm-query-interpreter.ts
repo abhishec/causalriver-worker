@@ -210,7 +210,7 @@ Copilot: general intelligence queries about the business, strategy, metrics, for
 - Scaffold / boilerplate generation → boilerplate-scaffold
 - How does code work / explain codebase → codebase-qa
 - Recommend / assign / which pod or team → pod-match
-- Velocity collapse / sprint velocity / at-risk engagement / bottleneck risk → early-warning
+- Velocity collapse / sprint velocity / at-risk engagement / bottleneck risk / flight risk / overallocation / engineer capacity → early-warning
 - Scope creep / scope drift / story point drift / unplanned work / scope integrity → scope-creep
 - Engagement health / delivery intelligence / health score / RAG status / forecast → delivery-intelligence
 
