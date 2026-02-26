@@ -45,29 +45,86 @@ export interface LearningStats {
 
 /**
  * Compute a quality score (0–1) from execution results.
+ *
+ * Replaces the old heuristic that scored based on curly-brace presence,
+ * which caused nearly all executions to score ~0.95 regardless of result
+ * quality — corrupting all downstream RL signals.
+ *
+ * New approach:
+ * - Conservative baseline (0.5) — quality must be earned, not assumed
+ * - Rewards actual data records (non-empty `data` array)
+ * - Penalises empty `data` arrays (the most common failure mode)
+ * - Penalises known error patterns and recovery fallbacks
+ * - Optionally domain-aware for future per-domain calibration
+ *
  * Fast, synchronous — no DB calls needed.
  */
 export function computeAgentQuality(
   result: string,
   error: Error | null,
-  executionMs: number
+  executionMs: number,
+  domain?: string
 ): number {
   if (error) return 0;
   if (!result || result.length < 50) return 0.3;
 
-  let score = 0.8;
+  // Conservative baseline — prevents inflated RL signals from bare JSON wrappers
+  let score = 0.5;
 
-  // Penalise very slow execution (> 30s suggests something went wrong)
-  if (executionMs > 30_000) score *= 0.85;
+  // ── Execution speed ──────────────────────────────────────────────────────
+  if (executionMs < 5_000)       score += 0.1;   // Fast = likely cached or simple
+  else if (executionMs < 30_000) score += 0.05;  // Normal range
+  else if (executionMs > 60_000) score -= 0.1;   // Too slow = something went wrong
 
-  // Bonus: result contains structured data (JSON, numbers, table markers)
-  const hasStructure = /\{|\[|\d{2,}|\|/.test(result);
-  if (hasStructure) score = Math.min(1, score + 0.15);
+  // ── Result richness ──────────────────────────────────────────────────────
+  if (result.length > 500)  score += 0.1;
+  if (result.length > 1500) score += 0.05;
 
-  // Penalty: result is an error message
-  if (/"error"/.test(result.toLowerCase()) && result.length < 200) score *= 0.5;
+  // ── Structured data analysis ─────────────────────────────────────────────
+  // Parse the JSON result and check for meaningful content in the `data` field.
+  // An empty `data: []` is the most common false-positive in SE-aaS domains.
+  try {
+    const parsed: Record<string, unknown> = JSON.parse(result);
 
-  return Math.round(score * 100) / 100;
+    const data = parsed?.data;
+    if (Array.isArray(data)) {
+      if (data.length > 0) {
+        // Has actual records — core success indicator
+        score += 0.2;
+        if (data.length >= 3) score += 0.05; // Multiple records = richer result
+      } else {
+        // Empty array is a failure: domain ran but found nothing
+        score -= 0.25;
+      }
+    } else if (data && typeof data === "object" && Object.keys(data).length > 0) {
+      // Object result with fields (e.g. single-record domains)
+      score += 0.15;
+    }
+
+    // Recovery flag — acceptable but not ideal quality
+    if (parsed?._recoveryUsed) score -= 0.05;
+
+    // Domain-specific success signals
+    if (domain) {
+      if (domain === "pod-match" && parsed?.top_recommendation) score += 0.1;
+      if (domain === "early-warning" && Array.isArray(parsed?.alerts) && (parsed.alerts as unknown[]).length > 0) score += 0.1;
+      if (domain === "delivery-intelligence" && parsed?.summary) score += 0.1;
+    }
+  } catch {
+    // Non-JSON result — penalise (SE-aaS should always return structured data)
+    score -= 0.15;
+  }
+
+  // ── Error pattern detection ──────────────────────────────────────────────
+  const lower = result.toLowerCase();
+  if ((lower.includes('"error"') || lower.includes('"status":"error"')) && result.length < 300) {
+    score -= 0.3;
+  }
+  if (lower.includes("no data found") || lower.includes("no results") || lower.includes("not found")) {
+    score -= 0.15;
+  }
+
+  return Math.max(0, Math.min(1, Math.round(score * 100) / 100));
 }
 
 // ── Outcome Recording ──────────────────────────────────────────────────────

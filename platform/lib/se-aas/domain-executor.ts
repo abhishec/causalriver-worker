@@ -388,7 +388,7 @@ export async function executeDomain(
   // Record task quality to prediction_records + cross_domain_signals.
   // Also log a retro entry so the system accumulates learning history.
   // Both are fire-and-forget — NEVER block the domain response.
-  const rlQuality = computeAgentQuality(JSON.stringify(result), null, durationMs);
+  const rlQuality = computeAgentQuality(JSON.stringify(result), null, durationMs, params.domainType);
   const rlTaskId = `${params.domainType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
 
   recordAgentOutcome(supabase, {

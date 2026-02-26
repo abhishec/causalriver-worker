@@ -139,6 +139,11 @@ export async function getJobStatus(
 
 /**
  * Claim and execute a pending job, then update its status.
+ *
+ * Uses `claim_job()` PostgreSQL function with SELECT FOR UPDATE SKIP LOCKED
+ * to atomically claim the job. If two Lambda workers race on the same job,
+ * the second worker's claim returns null and execution is skipped safely.
+ *
  * After the job completes (success or error), automatically unblocks any jobs
  * that were waiting on this job via checkAndStartWaitingJobs.
  */
@@ -147,17 +152,22 @@ export async function executeAndCompleteJob(
   jobId: string,
   executor: () => Promise<Record<string, unknown>>
 ): Promise<void> {
-  // Claim the job (also read organization_id for orchestration)
-  const { data: jobRow, error: claimError } = await supabase
-    .from("agent_queue")
-    .update({ status: "running", started_at: new Date().toISOString() })
-    .eq("id", jobId)
-    .eq("status", "pending")
-    .select("organization_id")
-    .maybeSingle();
+  // Atomic claim via SKIP LOCKED — prevents double-execution under concurrent Lambda
+  const { data: claimedRows, error: claimError } = await supabase
+    .rpc("claim_job", { p_job_id: jobId });
 
   if (claimError) {
     throw new Error(`Failed to claim job: ${claimError.message}`);
+  }
+
+  // claim_job returns SETOF — grab the first (and only) row
+  const jobRow = Array.isArray(claimedRows) ? claimedRows[0] : claimedRows;
+
+  if (!jobRow) {
+    // Job was already claimed by another concurrent worker — safe to skip.
+    // This is the normal SKIP LOCKED outcome, not an error.
+    logger.warn(`[job-queue] Job ${jobId} already claimed by another worker — skipping`);
+    return;
   }
 
   const orgId: string | undefined = jobRow?.organization_id ?? undefined;

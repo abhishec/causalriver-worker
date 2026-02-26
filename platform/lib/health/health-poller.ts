@@ -394,14 +394,15 @@ export async function checkConnectorHealth(supabase: SupabaseClient, orgId: stri
   try {
     const { data: connectors } = await supabase
       .from("org_connectors")
-      .select("connector_type, status, last_synced_at, credentials")
+      .select("connector_type, status, last_synced_at, credentials_encrypted")
       .eq("organization_id", orgId);
 
     if (!connectors || connectors.length === 0) {
       return { score: 0, status: "no_connectors", details: { connected_count: 0 } };
     }
 
-    const connected = connectors.filter((c: { status: string; credentials: unknown }) => c.status === "connected" || c.credentials);
+    // Phase 2: check credentials_encrypted existence (NOT NULL) instead of reading plaintext
+    const connected = connectors.filter((c: { status: string; credentials_encrypted: unknown }) => c.status === "connected" || c.credentials_encrypted != null);
     const recentlySynced = connectors.filter((c: { last_synced_at: string | null }) => {
       if (!c.last_synced_at) return false;
       return Date.now() - new Date(c.last_synced_at).getTime() < 24 * 60 * 60 * 1000;
