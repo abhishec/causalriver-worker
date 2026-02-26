@@ -2082,7 +2082,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
     // Bug fix #2: Read history from ref to avoid stale closure
     const currentMessages = messagesRef.current;
-    const history = currentMessages.map((m) => ({ role: m.role, content: m.content }));
+    // Filter out system divider messages — they're UI-only and must not be sent to the API
+    const history = currentMessages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ role: m.role, content: m.content }));
     const messageIdx = currentMessages.length + 1; // +1 for the user message we just added
 
     let finalAssistantContent = "";
@@ -2251,13 +2254,15 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                   const allMsgs = refMsgs.length > 0 && refMsgs[refMsgs.length - 1]?.role === "assistant"
                     ? [...refMsgs.slice(0, -1), { role: "assistant" as const, content: finalAssistantContent }]
                     : refMsgs;
-                  const firstUser = allMsgs.find((m) => m.role === "user");
+                  // Filter out system divider messages — they're UI-only and must not be persisted
+                  const persistableMsgs = allMsgs.filter((m) => m.role === "user" || m.role === "assistant");
+                  const firstUser = persistableMsgs.find((m) => m.role === "user");
                   const title = firstUser
                     ? firstUser.content.length > 60
                       ? firstUser.content.slice(0, 57) + "..."
                       : firstUser.content
                     : "Untitled conversation";
-                  saveCb({ messages: allMsgs, title, serviceMode: activeServiceRef.current });
+                  saveCb({ messages: persistableMsgs, title, serviceMode: activeServiceRef.current });
                 }
               }
             }
