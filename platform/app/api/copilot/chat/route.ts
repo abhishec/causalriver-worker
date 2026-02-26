@@ -2712,6 +2712,26 @@ DO NOT invent any data. Instead:
 - NEVER fabricate numbers, metrics, or analysis — you have nothing to analyze`;
     }
 
+    // ── Delivery Intelligence exemption — overrides zero-data restriction ──
+    // Pod-match, early-warning, scope-creep, delivery-intelligence are AI-reasoned
+    // domains. They do NOT require pre-loaded causal graph data to be useful.
+    // The AI worker IS the intelligence — it reasons from the question + domain knowledge.
+    // This exemption MUST come AFTER the zero-data guard so it can override it.
+    if (deliveryIntelligenceResult) {
+      const delivExemptDomain = (deliveryIntelligenceResult._domainType as string) || 'delivery-intelligence';
+      effectiveSystemPrompt += `\n\n## ✅ DELIVERY INTELLIGENCE ACTIVE — EXEMPTION FROM ZERO-DATA RULES
+You are operating as a SE-aaS Delivery Intelligence AI for the "${delivExemptDomain}" domain.
+This OVERRIDES the "no data" restriction above. Delivery intelligence is AI-reasoned, not data-dependent.
+
+You MUST give a specific, helpful, expert response. Do NOT refuse. Do NOT list what data is missing.
+- For pod-match: Give a pod assignment framework, ask targeted questions about team/engagement
+- For early-warning: Give velocity/capacity analysis framework, ask about current sprint signals
+- For scope-creep: Give scope drift analysis, ask about story point changes
+- For delivery-intelligence: Give a delivery health overview, guide toward key risk areas
+
+This is your primary job as an SE-aaS Delivery Intelligence AI. Provide value even without live signals.`;
+    }
+
     // ── Visual output instruction: charts, diagrams, infographics ─────────
     effectiveSystemPrompt += `\n\n## VISUAL OUTPUT — Charts, Diagrams & Infographics
 You MUST use rich visual output whenever data supports it. The UI renders these as beautiful interactive artifacts that WOW users.
@@ -3464,22 +3484,46 @@ Use this data to give a comprehensive answer. The analysis was performed by Brai
       const engineerHealthSummary = deliveryIntelligenceResult.engineer_health_summary ?? null;
       const podRecommendation = deliveryIntelligenceResult.podRecommendation ?? null;
       const domainSpecificResult = deliveryIntelligenceResult.domainResult ?? null;
-      effectiveSystemPrompt += `\n\n## SE-aaS DELIVERY INTELLIGENCE: ${delivDomainType.toUpperCase()}
+      const hasLiveData = healthScores.length > 0 || podMatches.length > 0 || scopeAlerts.length > 0 || (engineerHealthSummary as any)?.total_engineers > 0;
+
+      if (hasLiveData) {
+        // ── Live data available: inject real numbers ────────────────────────
+        effectiveSystemPrompt += `\n\n## SE-aaS DELIVERY INTELLIGENCE: ${delivDomainType.toUpperCase()}
 Live delivery data fetched for this organization. Use these REAL numbers when answering.
 
 Active engagement health scores (${healthScores.length} engagements):
-${healthScores.length > 0 ? JSON.stringify(healthScores, null, 2).slice(0, 2000) : 'No health score data available.'}
+${JSON.stringify(healthScores, null, 2).slice(0, 2000)}
 
 Unacknowledged scope creep alerts (${scopeAlerts.length} alerts):
-${scopeAlerts.length > 0 ? JSON.stringify(scopeAlerts, null, 2).slice(0, 1000) : 'No active scope alerts.'}
+${scopeAlerts.length > 0 ? JSON.stringify(scopeAlerts, null, 2).slice(0, 1000) : 'None.'}
 
 Recent pod match recommendations (${podMatches.length} records):
-${podMatches.length > 0 ? JSON.stringify(podMatches, null, 2).slice(0, 1000) : 'No pod match data available.'}
+${podMatches.length > 0 ? JSON.stringify(podMatches, null, 2).slice(0, 1000) : 'None.'}
 ${engineerHealthSummary ? `\nEngineer health summary:\n${JSON.stringify(engineerHealthSummary, null, 2)}` : ''}
 ${podRecommendation ? `\nLatest pod recommendation from ${delivDomainType}:\n${JSON.stringify(podRecommendation, null, 2).slice(0, 1500)}` : ''}
 ${domainSpecificResult ? `\nDomain-specific analysis result:\n${JSON.stringify(domainSpecificResult, null, 2).slice(0, 1500)}` : ''}
 
 Answer the user's question using this live delivery data with specific insights about their engagements.`;
+      } else {
+        // ── No live data yet: AI-reasoned mode ──────────────────────────────
+        // Connectors (GitHub/Jira) may not be synced yet. The AI worker MUST
+        // still give intelligent delivery guidance — this IS the value of SE-aaS.
+        const domainNarrative = (domainSpecificResult as any)?.narrative || '';
+        effectiveSystemPrompt += `\n\n## SE-aaS DELIVERY INTELLIGENCE: ${delivDomainType.toUpperCase()} (AI-Reasoned Mode)
+This organization's AI worker hasn't ingested live connector data yet (GitHub/Jira sync pending).
+${domainNarrative ? `Domain analysis: ${domainNarrative}` : ''}
+
+You are an expert SE-aaS Delivery Intelligence AI. Even without live signal data, you MUST give a specific, valuable, actionable response. This is your core job.
+
+MANDATORY response approach for "${delivDomainType}" queries:
+- pod-match: Recommend a pod assignment framework based on the engagement type described. Ask 1-2 targeted questions about team capabilities and engagement tech stack. Be specific about what makes a strong match (velocity, tech overlap, past delivery success).
+- early-warning: Ask about specific risk signals the user is observing. Explain what velocity collapse, bottleneck, and flight-risk patterns look like. Offer a structured health check framework.
+- scope-creep: Explain how scope drift is measured (story point delta %). Ask about the current sprint state. Give 2-3 concrete scope management recommendations.
+- delivery-intelligence: Give an intelligent overview of delivery health factors. Ask clarifying questions to identify which engagement needs attention.
+
+NEVER say "I cannot answer" or list what data is missing. Be confident, helpful, and delivery-focused.
+End your response with ONE sentence: what connector data would be used to make this recommendation data-driven (e.g. "Connect GitHub to start tracking ${delivDomainType === 'pod-match' ? 'PR velocity and tech stack signals' : delivDomainType === 'early-warning' ? 'sprint velocity and review burden' : 'story point drift and sprint changes'} for this AI worker.").`;
+      }
     }
 
     // ── AaaS domain result injection ──────────────────────────────────
