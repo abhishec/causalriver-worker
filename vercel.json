@@ -10,6 +10,14 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/cognitive-cycle",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/process-jobs",
+      "schedule": "*/10 * * * *"
+    },
+    {
       "path": "/api/cron/learning",
       "schedule": "0 */4 * * *"
     },

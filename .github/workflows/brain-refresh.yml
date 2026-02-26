@@ -1,0 +1,107 @@
+name: Brain Refresh Cycles
+
+# ============================================================================
+# BRAIN REFRESH — SCHEDULED COGNITIVE CYCLES
+# ============================================================================
+#
+# Why this exists:
+#   BrainOS deploys on AWS Amplify, NOT Vercel. The vercel.json cron config
+#   is ignored in production. This workflow provides the scheduled triggers
+#   for all brain refresh cycles that would otherwise never run:
+#
+#   - /api/cron/cognitive-cycle  — runs L3-L15 cognitive stack, caches
+#                                   insights to ai_memory for copilot (every 30m)
+#   - /api/cron/process-jobs     — drains the SE-aaS agent_queue so brain
+#                                   agents don't sit stuck (every 10m)
+#   - /api/cron/learning         — learning cycle (every 4h)
+#   - /api/cron/evolution        — brain evolution cycle (every 6h)
+#
+# Schedule design:
+#   All four schedules share a single job. The 10-min and 30-min cycles run on
+#   every trigger. The 4-hour and 6-hour cycles are gated by
+#   `github.event.schedule` so they only fire on their respective triggers.
+#   workflow_dispatch runs all four unconditionally (for manual testing).
+#
+# Auth: All cron endpoints require "Authorization: Bearer <CRON_SECRET>".
+#   Set CRON_SECRET in GitHub → Settings → Secrets and variables → Actions.
+#   Optionally set APP_URL to override the default production URL.
+#
+# Failure handling:
+#   Each step uses `|| echo "::warning::..."` so a single endpoint failure
+#   never blocks the rest of the job or marks the workflow run red.
+# ============================================================================
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # Every 10 min  — process agent queue jobs
+    - cron: '*/30 * * * *'   # Every 30 min  — cognitive cycle (L3-L15 cache)
+    - cron: '0 */4 * * *'    # Every 4 hours — learning cycle
+    - cron: '0 */6 * * *'    # Every 6 hours — evolution cycle
+  workflow_dispatch: {}      # Manual trigger — runs all four endpoints
+
+# Minimal permissions: only needs to call HTTPS endpoints, nothing in the repo.
+permissions:
+  contents: read
+
+jobs:
+  brain-refresh:
+    name: Brain Refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── Process Agent Queue Jobs (every 10-min and 30-min trigger) ──────────
+      # Drains the SE-aaS agent_queue so brain agents don't sit stuck waiting
+      # for a user request to trigger them.
+      - name: Process Agent Queue Jobs
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/process-jobs ..."
+          curl -f -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60 \
+            "${BASE_URL}/api/cron/process-jobs" \
+            || echo "::warning::process-jobs endpoint failed (non-fatal — jobs will be retried on next trigger)"
+
+      # ── Cognitive Cycle (every 10-min and 30-min trigger) ───────────────────
+      # Runs L3-L15 cognitive stack for active orgs and persists insights to
+      # ai_memory so copilot responses benefit from the full cognitive stack
+      # without blocking the request path.
+      - name: Cognitive Cycle (L3-L15 cache)
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/cognitive-cycle ..."
+          curl -f -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/cognitive-cycle" \
+            || echo "::warning::cognitive-cycle endpoint failed (non-fatal — copilot falls back to cached insights)"
+
+      # ── Evolution Cycle (only on 6-hour trigger or manual dispatch) ─────────
+      # Brain evolution cycle: promotes patterns, prunes weak edges, advances
+      # cognitive architecture. Skipped on 10-min and 30-min triggers.
+      - name: Evolution Cycle (6-hour boundary only)
+        if: ${{ github.event.schedule == '0 */6 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/evolution ..."
+          curl -f -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/evolution" \
+            || echo "::warning::evolution endpoint failed (non-fatal — will retry at next 6-hour boundary)"
+
+      # ── Learning Cycle (only on 4-hour trigger or manual dispatch) ──────────
+      # Reinforcement learning cycle: updates prediction weights, processes
+      # feedback signals, adjusts UCB1 bandit scores. Skipped on 10-min and
+      # 30-min triggers.
+      - name: Learning Cycle (4-hour boundary only)
+        if: ${{ github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/learning ..."
+          curl -f -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/learning" \
+            || echo "::warning::learning endpoint failed (non-fatal — will retry at next 4-hour boundary)"
