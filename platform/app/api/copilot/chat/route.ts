@@ -3785,6 +3785,86 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           send(JSON.stringify({ deliveryIntelligenceResult }));
         }
 
+        // ── Agent Name: tell the frontend which agent handled this query ──────
+        // Provides "Handled by: [Agent Name]" indicator in the chat UI.
+        {
+          const DOMAIN_AGENT_NAMES: Record<string, string> = {
+            // Delivery Intelligence (P0)
+            "pod-match": "Pod Match Agent",
+            "early-warning": "Early Warning Agent",
+            "scope-creep": "Scope Creep Monitor",
+            "delivery-intelligence": "Delivery Intelligence Agent",
+            // Code Intelligence (P1)
+            "pr-review": "PR Review Agent",
+            "tdd": "TDD Agent",
+            "boilerplate-scaffold": "Scaffold Agent",
+            "dependency-upgrade": "Dependency Audit Agent",
+            "design-doc-generator": "Design Doc Agent",
+            // Test
+            "test-case-generator": "Test Case Agent",
+            "test-data-generator": "Test Data Agent",
+            // SWE Codebase
+            "codebase-qa": "Codebase Q&A Agent",
+            "dead-code-detector": "Dead Code Agent",
+            "impact-analysis": "Impact Analysis Agent",
+            "architecture-extractor": "Architecture Agent",
+            // Observability
+            "incident-diagnosis": "Incident RCA Agent",
+            "log-query": "Log Analysis Agent",
+            "performance-profiler": "Performance Profiler",
+            // Data
+            "sql-analyzer": "SQL Analysis Agent",
+            "data-lineage": "Data Lineage Agent",
+            // AAS
+            "aas-pl": "Accounting Agent (P&L)",
+            "aas-balance": "Accounting Agent (Balance Sheet)",
+            "aas-trial": "Accounting Agent (Trial Balance)",
+            "aas-gst": "Accounting Agent (GST)",
+            "aas-anomaly": "Anomaly Detective",
+            "aas-transactions": "Accounting Agent (Transactions)",
+            "aas-benchmark": "Benchmark Agent",
+            "statement-generator": "Accounting Agent",
+            "reconciler": "Reconciliation Agent",
+            "bookkeeper": "Bookkeeping Agent",
+            "tax-compliance": "Tax Compliance Agent",
+            "anomaly-detective": "Anomaly Detective",
+            "audit-preparer": "Audit Agent",
+            "cash-flow-prophet": "Cash Flow Agent",
+            "revenue-leakage-detector": "Revenue Leakage Agent",
+            "causal-pl-narrator": "Causal P&L Agent",
+          };
+
+          let agentName: string | null = null;
+          if (seaasResult) {
+            agentName = DOMAIN_AGENT_NAMES[seaasResult.domainType as string] || "SE-aaS Agent";
+          } else if (deliveryIntelligenceResult) {
+            const dt = (deliveryIntelligenceResult._domainType as string) || "delivery-intelligence";
+            agentName = DOMAIN_AGENT_NAMES[dt] || "Delivery Intelligence Agent";
+          } else if (accountingResult) {
+            agentName = DOMAIN_AGENT_NAMES[accountingResult.domainType as string] || "Accounting Agent";
+          } else if (brainContext) {
+            // General brain query — name by primary domain
+            const primaryDomain = brainContext.domains?.[0] || "general";
+            const BRAIN_DOMAIN_AGENTS: Record<string, string> = {
+              finance: "Finance Intelligence",
+              revenue: "Revenue Intelligence",
+              cs: "Customer Success Intelligence",
+              am: "Account Management Intelligence",
+              services: "Services Intelligence",
+              product: "Product Intelligence",
+              marketing: "Marketing Intelligence",
+              people: "People Intelligence",
+              engineering: "Engineering Intelligence",
+              executive: "Executive Intelligence",
+            };
+            agentName = BRAIN_DOMAIN_AGENTS[primaryDomain] || "Brain Copilot";
+          }
+
+          if (agentName) {
+            send(JSON.stringify({ agentName }));
+          }
+        }
+
         // Send brain context metadata to frontend for display
         if (brainContext) {
           send(JSON.stringify({

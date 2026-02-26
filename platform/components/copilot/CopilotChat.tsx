@@ -1101,6 +1101,10 @@ export async function consumeSSEStream(
             if (parsed.learningPulse) {
               callbacks.onLearningPulse?.(parsed.learningPulse);
             }
+            // Agent name indicator — which agent/domain handled this query
+            if (parsed.agentName) {
+              callbacks.onAgentName?.(parsed.agentName);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1139,6 +1143,7 @@ export async function consumeSSEStream(
             if (parsed.compositionResult) callbacks.onCompositionResult?.(parsed.compositionResult);
             if (parsed.workflowProgress) callbacks.onWorkflowProgress?.(parsed.workflowProgress);
             if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
+            if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
           } catch { /* skip */ }
         }
       }
@@ -1431,6 +1436,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   // ── Per-message brain meta tracking (for ThinkingBlock above each assistant msg) ──
   const [brainMetaPerMessage, setBrainMetaPerMessage] = useState<Map<number, BrainMeta>>(new Map());
 
+  // ── Per-message agent name tracking (for "Handled by: [Agent]" indicator) ──
+  const [agentNamePerMessage, setAgentNamePerMessage] = useState<Map<number, string>>(new Map());
+
   // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
@@ -1579,6 +1587,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMeta(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
+      setAgentNamePerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
@@ -1743,6 +1752,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMeta(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
+      setAgentNamePerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAttachments([]);
@@ -1767,6 +1777,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMeta(null);
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
+      setAgentNamePerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAttachments([]);
@@ -1916,6 +1927,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           onLearningPulse: (pulse) => {
             if (controller.signal.aborted) return;
             setLearningPulse(pulse);
+          },
+          onAgentName: (name) => {
+            if (controller.signal.aborted) return;
+            setAgentNamePerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, name);
+              return next;
+            });
           },
           onDomainResult: (result) => {
             if (controller.signal.aborted) return;
@@ -2440,6 +2459,18 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                               View Artifact →
                             </button>
                           ))}
+                        </div>
+                      )}
+
+                      {/* "Handled by" agent indicator — shows which agent processed this query */}
+                      {agentNamePerMessage.get(i) && !isLoading && (
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <svg className="w-3 h-3 text-muted opacity-50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                          </svg>
+                          <span className="text-[10px] text-muted-foreground opacity-60">
+                            {agentNamePerMessage.get(i)}
+                          </span>
                         </div>
                       )}
 

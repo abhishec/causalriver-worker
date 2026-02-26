@@ -84,6 +84,18 @@ const CONNECTOR_TYPES: ConnectorTypeDef[] = [
     ],
   },
   {
+    type: "confluence",
+    label: "Confluence",
+    description: "Connect to your Confluence wiki for knowledge base integration",
+    addLabel: "Add Confluence Space",
+    fields: [
+      { key: "baseUrl", label: "Confluence Base URL", placeholder: "your-company.atlassian.net/wiki", type: "text", required: true, helpText: "Your Confluence Cloud domain (e.g. your-company.atlassian.net/wiki)" },
+      { key: "email", label: "Email", placeholder: "you@company.com", type: "email", required: true, helpText: "The email associated with your Atlassian account" },
+      { key: "apiToken", label: "API Token", placeholder: "Your Atlassian API token", type: "password", required: true, helpUrl: "https://id.atlassian.com/manage-profile/security/api-tokens", helpText: "Create an API token from your Atlassian account." },
+      { key: "spaceKey", label: "Space Key (Optional)", placeholder: "ENG", type: "text", required: false, helpText: "Scope sync to a specific Confluence space key (leave blank for all spaces)" },
+    ],
+  },
+  {
     type: "freshdesk",
     label: "Freshdesk",
     description: "Connect to your Freshdesk helpdesk",
@@ -299,6 +311,8 @@ function InstanceCard({
         return c.repoFullName || `${c.owner}/${c.repo}` || "";
       case "slack":
         return m.team_name || c.team_name || "";
+      case "confluence":
+        return c.base_url || m.base_url || c.baseUrl || "";
       case "freshdesk":
         return c.domain ? `${c.domain}.freshdesk.com` : "";
       default:

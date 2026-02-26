@@ -62,6 +62,30 @@ async function validateSlack(botToken: string) {
   return { teamName: data.team, teamId: data.team_id, userId: data.user_id, botId: data.bot_id };
 }
 
+async function validateConfluence(baseUrl: string, email: string, apiToken: string) {
+  const normalUrl = baseUrl.startsWith("http") ? baseUrl.replace(/\/+$/, "") : `https://${baseUrl.replace(/\/+$/, "")}`;
+  // SSRF protection: block private/internal IP ranges
+  try {
+    const parsed = new URL(normalUrl);
+    if (/^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|0\.|localhost|::1)/i.test(parsed.hostname)) {
+      throw new Error("Private/internal domains are not allowed");
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes("not allowed")) throw e;
+    throw new Error("Invalid base URL");
+  }
+  const auth = Buffer.from(`${email}:${apiToken}`).toString("base64");
+  const res = await fetch(`${normalUrl}/rest/api/user/current`, {
+    headers: { Authorization: `Basic ${auth}`, Accept: "application/json" },
+  });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error("Invalid Confluence credentials. Check email and API token.");
+    throw new Error(`Confluence API error (${res.status})`);
+  }
+  const user = await res.json();
+  return { normalUrl, userName: user.displayName || user.username || email, accountId: user.accountId || user.key };
+}
+
 async function validateFreshdesk(domain: string, apiKey: string) {
   const baseUrl = `https://${domain}.freshdesk.com`;
   const auth = Buffer.from(`${apiKey}:X`).toString("base64");
@@ -200,6 +224,26 @@ export async function POST(request: NextRequest) {
           team_id: slackInfo.teamId,
           bot_id: slackInfo.botId,
           connected_at: new Date().toISOString(),
+        };
+        break;
+      }
+
+      case "confluence": {
+        const { baseUrl: confluenceBaseUrl, email: confEmail, apiToken: confToken, spaceKey } = body;
+        if (!confluenceBaseUrl || !confEmail || !confToken) {
+          return NextResponse.json({ error: "baseUrl, email, and apiToken are required for Confluence" }, { status: 400 });
+        }
+        const confInfo = await validateConfluence(confluenceBaseUrl, confEmail, confToken);
+        instanceName = confInfo.normalUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+        credentials = { auth_type: "basic", email: confEmail, api_token: confToken, base_url: confInfo.normalUrl };
+        config = { base_url: confInfo.normalUrl, site_name: instanceName, auth_type: "basic", ...(spaceKey ? { spaceKey } : {}) };
+        metadata = {
+          base_url: confInfo.normalUrl,
+          site_name: instanceName,
+          confluence_user_display_name: confInfo.userName,
+          confluence_account_id: confInfo.accountId,
+          connected_at: new Date().toISOString(),
+          connection_method: "basic_auth",
         };
         break;
       }

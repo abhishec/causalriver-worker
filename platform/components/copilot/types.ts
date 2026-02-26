@@ -263,6 +263,8 @@ export interface SSECallbacks {
   onWorkflowProgress?: (progress: WorkflowProgress) => void;
   /** Brain RL learning pulse — intelligence metrics for visible learning indicator */
   onLearningPulse?: (pulse: LearningPulse) => void;
+  /** Agent name: which agent/domain handled this query — shown as "Handled by: [name]" */
+  onAgentName?: (name: string) => void;
   onDone: () => void;
 }
 
