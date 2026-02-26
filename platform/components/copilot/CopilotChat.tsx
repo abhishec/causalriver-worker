@@ -26,6 +26,7 @@ import { MemoryUsageIndicator } from "./MemoryUsageIndicator";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 import { AgentCreatedCard } from "./AgentCreatedCard";
 import type { AgentCreatedInfo } from "./AgentCreatedCard";
+import { AgentSpeechBubble } from "./AgentSpeechBubble";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
 // All shared types live in ./types.ts. Re-export them here for backward compat.
@@ -50,6 +51,8 @@ import type {
   ProactiveInsight,
   WorkflowProgress,
   OrchestratorQueuedInfo,
+  AgentCommsPayload,
+  AgentInputRequest,
 } from "./types";
 
 interface Message {
@@ -1074,6 +1077,14 @@ export async function consumeSSEStream(
             if (parsed.deliveryIntelligenceResult) {
               callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
             }
+            // Agent Communications Protocol (Heart/Mind/Speech)
+            if (parsed.agentComms) {
+              callbacks.onAgentComms?.(parsed.agentComms);
+            }
+            // Agent Input Request — agent needs more inputs
+            if (parsed.agentInputRequest) {
+              callbacks.onAgentInputRequest?.(parsed.agentInputRequest);
+            }
             // Agent streaming events (OpenClaw / Brain agent integration)
             if (parsed.agentStep) {
               callbacks.onAgentStep?.(parsed.agentStep);
@@ -1150,6 +1161,8 @@ export async function consumeSSEStream(
             if (parsed.accountingResult) callbacks.onDomainResult({ service: "aas", data: parsed.accountingResult });
             if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
             if (parsed.deliveryIntelligenceResult) callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
+            if (parsed.agentComms) callbacks.onAgentComms?.(parsed.agentComms);
+            if (parsed.agentInputRequest) callbacks.onAgentInputRequest?.(parsed.agentInputRequest);
             if (parsed.agentStep) callbacks.onAgentStep?.(parsed.agentStep);
             if (parsed.agentStatus) callbacks.onAgentStatus?.(parsed.agentStatus);
             if (parsed.progressiveArtifact) callbacks.onProgressiveArtifact?.(parsed.progressiveArtifact);
@@ -1517,6 +1530,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   // ── Per-message agent created tracking (for AgentCreatedCard below each message) ──
   const [agentCreatedPerMessage, setAgentCreatedPerMessage] = useState<Map<number, AgentCreatedInfo>>(new Map());
+
+  // ── Per-message agent comms tracking (Heart/Mind/Speech for AgentSpeechBubble) ──
+  // We use the agentId as the key within the message to support in-place updates
+  // (later payloads for the same agent overwrite earlier ones).
+  const [agentCommsPerMessage, setAgentCommsPerMessage] = useState<Map<number, AgentCommsPayload>>(new Map());
+
+  // ── Per-message agent input request (when agent needs more info to proceed) ──
+  const [agentInputRequestPerMessage, setAgentInputRequestPerMessage] = useState<Map<number, AgentInputRequest>>(new Map());
 
   // ── Per-message orchestrator queued tracking (for QueuedJobBadge + polling) ──
   const [queuedJobPerMessage, setQueuedJobPerMessage] = useState<Map<number, OrchestratorQueuedInfo>>(new Map());
@@ -2069,6 +2090,29 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentCreatedPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, agentInfo);
+              return next;
+            });
+          },
+          onAgentComms: (comms) => {
+            if (controller.signal.aborted) return;
+            // Update in-place: later payloads for the same agentId overwrite earlier ones,
+            // so the bubble always shows the latest state (intro → mid → final).
+            setAgentCommsPerMessage((prev) => {
+              const next = new Map(prev);
+              // We keep the most recent comms payload per message index.
+              // If the same agentId sends multiple payloads, the final one wins.
+              const existing = next.get(messageIdx);
+              if (!existing || existing.agentId === comms.agentId || comms.mind.progress >= (existing.mind.progress ?? 0)) {
+                next.set(messageIdx, comms);
+              }
+              return next;
+            });
+          },
+          onAgentInputRequest: (inputRequest) => {
+            if (controller.signal.aborted) return;
+            setAgentInputRequestPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, inputRequest);
               return next;
             });
           },

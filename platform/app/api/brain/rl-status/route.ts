@@ -46,6 +46,23 @@ export async function GET(req: NextRequest) {
 
   try {
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      // No workspace context — return zeroed-out stats rather than running queries with null org
+      return NextResponse.json({
+        signalsThisHour: 0,
+        signalsThisSession: 0,
+        totalSignals24h: 0,
+        learningVelocity: 0,
+        improvementThisSession: 0,
+        feedbackTotal: 0,
+        feedbackHelpful: 0,
+        feedbackNotHelpful: 0,
+        positiveFeedbacks: 0,
+        recentSignals: [],
+        queueDepth: 0,
+        learningStats: null,
+      });
+    }
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();

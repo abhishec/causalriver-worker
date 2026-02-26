@@ -82,6 +82,16 @@ function CopilotPageInner() {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => { setIsMounted(true); }, []);
 
+  // ── Auto-select first AI worker if none is selected but workers exist ─────
+  // Prevents "No AI Worker Selected" state when workspaces load but no selection
+  // is persisted (fresh browser, cleared localStorage, workspace-context race condition).
+  useEffect(() => {
+    if (!currentWorkspace && workspaces.length > 0) {
+      const firstNonCore = workspaces.find((m) => !m.workspace.is_core_brain) ?? workspaces[0];
+      switchWorkspace(firstNonCore.organization_id, { skipReload: true });
+    }
+  }, [currentWorkspace, workspaces, switchWorkspace]);
+
   // ── Service mode ──────────────────────────────────────────────────────────
   // Always start with default to avoid hydration mismatch — sync from localStorage in useEffect
   const [activeService, setActiveService] = useState<ServiceMode>("seaas");
@@ -702,7 +712,26 @@ function CopilotPageInner() {
     );
   }
 
+  // If workspaces exist but none is selected, show loading while auto-select takes effect.
+  // This state is transient — the useEffect above will call switchWorkspace immediately.
+  // Only show the "no workers" empty state when the org genuinely has zero AI workers.
   if (!currentWorkspace) {
+    if (workspaces.length > 0) {
+      // Workers exist — auto-select is in flight. Show loading to prevent flash of error.
+      return (
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
+            </div>
+            <span className="text-xs text-muted-foreground">Loading AI Worker...</span>
+          </div>
+        </div>
+      );
+    }
+    // Genuinely no AI workers — show the create-worker prompt.
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <div className="text-center max-w-md">
@@ -711,28 +740,17 @@ function CopilotPageInner() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">No AI Worker Selected</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No AI Worker Found</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            {workspaces.length === 0
-              ? "You don't have any AI Workers yet. Create one from the Dashboard to get started."
-              : "Please select an AI Worker from the sidebar to start using Copilot."}
+            You don&apos;t have any AI Workers yet. Create one from the Dashboard to get started.
           </p>
           <div className="flex gap-3 justify-center">
-            {workspaces.length === 0 ? (
-              <Link
-                href="/settings?tab=overview&action=create-workspace"
-                className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
-              >
-                Create AI Worker
-              </Link>
-            ) : (
-              <Link
-                href="/settings?tab=overview"
-                className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
-              >
-                Go to Settings
-              </Link>
-            )}
+            <Link
+              href="/settings?tab=overview&action=create-workspace"
+              className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+            >
+              Create AI Worker
+            </Link>
           </div>
         </div>
       </div>
