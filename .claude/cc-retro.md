@@ -392,6 +392,50 @@ Honest model usage audit across the full session:
   - **Anti-pattern**: Brute-forcing the same approach (suppress/patch) instead of stepping back to look for a fundamentally different solution after 3 attempts. The 3-attempt circuit breaker rule was violated.
 - **[USER CORRECTION]**: "this is the old screen...think of it as a user...ur disappointing me" — **Always consider the user's mental model BEFORE implementing.** A landing page != a sidebar page. Ask: "What does the user expect to see here?"
 - **Cost assessment**: Opus was correct for this task — cross-system debugging (Next.js build, webpack workers, route groups, shell scripts) required deep reasoning. Haiku Explore agents were correctly scoped.
+
+## Retro 021: Tookitaki Demo Hardening — 24-Hour Hackathon (2026-02-26)
+- **Task**: Comprehensive pre-demo audit + fix all bugs before Tookitaki client demo at 1:15 PM SGT
+- **Time**: ~3 hours of active work (user in meetings), non-stop autonomous execution
+- **Model used**: Sonnet (main) + Haiku (all 7 Explore/Bash subagents) — correct split
+- **Commits**: 3 batches total — `a160a8135` (batch 1), `7cf254c1f` (batch 2), `5a608b04a` (batch 3)
+- **Total fixes**: 20+ issues across 3 batches
+
+### What went well
+- **Parallel agent strategy worked extremely well**: 6 simultaneous Haiku agents covering classifier, executors, UX flow, API routes, seed data, production — found issues faster than sequential analysis ever could
+- **VALID_SEAAS_DOMAINS catch**: Single-line fix that unblocked ALL 7 demo queries. Without the audit agents, this would have been missed entirely (Case 019 fix made us think the classifier was sorted)
+- **TypeScript zero errors on all 3 batches**: Pre-commit hook caught nothing, tsc --noEmit confirmed clean
+- **Seed script**: Created `seed-se-aas-artifacts.ts` filling 18 artifacts across 2 AI worker spaces — artifact gallery now looks healthy
+- **deliveryIntelligenceResult injection**: The most architecturally important fix — Claude was answering delivery questions completely blind. Now all 4 delivery data types (health_scores, scope_alerts, pod_matches, engineer_health) flow into the system prompt
+
+### What went wrong
+- **Commits weren't pushed for ~2 hours**: Production was running old code the entire time. Always push immediately after commit — Amplify auto-deploy is useless if push is delayed
+- **Missed VALID_SEAAS_DOMAINS in Case 019**: When adding delivery domains to the classifier prompt, should have simultaneously checked all validation gates. The dual-list problem caused a second session to fix what Case 019 thought was fixed
+- **Agent 3 (data integrity) hit CLAUDE.md and queued a task**: Bash/Haiku agents sometimes read CLAUDE.md and misinterpret it as a session-level instruction. Fixed by running data checks directly
+- **SEaaSDeliveryPanel null guard placed before hooks**: Linter (React Rules of Hooks) moved the null guard after hooks automatically. Need to remember: hooks must come before any early returns in React components
+
+### Subagent models used
+- Classifier audit: Haiku Explore ✅
+- Domain executor audit: Haiku Explore ✅
+- UX flow audit: Haiku Explore ✅
+- API routes audit: Haiku Explore ✅
+- Seed data audit: Haiku Explore ✅
+- Amplify deploy audit: Haiku Bash ✅
+- TS check: Haiku Bash ✅
+- Commit + push: Haiku Bash ✅
+- **All correct** — no Sonnet/Opus wasted on search/read/build tasks
+
+### Pattern: Three-Location Rule for New SE-aaS Domains
+When adding any new SE-aaS domain, MUST update ALL 3:
+1. `CLASSIFIER_SYSTEM_PROMPT` Available Services list
+2. `CLASSIFIER_SYSTEM_PROMPT` SE-aaS Routing Guide (with trigger keywords)
+3. `VALID_SEAAS_DOMAINS` Set (validation gate)
+4. `chat/route.ts` domain execution list
+Failing any one = domain silently dead.
+
+### Cost assessment
+- Main session: Sonnet — appropriate (multi-file edits + architectural decisions across 10+ files)
+- All 7+ subagents: Haiku — correct, they were all search/read/bash tasks
+- **Could this have been done cheaper?** Not really — Sonnet was needed for the synthesis and multi-file coordination. Haiku correctly handled all individual file searches and TS checks.
 - **Subagent models**: 2x Haiku Explore (correct — search-only tasks)
 - **Commits**: `77d5eb221` (dashboard redesign + build fix), `40db8bda0` (audit fixes)
 

@@ -201,6 +201,43 @@
 - **Pattern**: Whenever a new SE-aaS domain is added, it MUST be added to CLASSIFIER_SYSTEM_PROMPT in TWO places: domain list + routing guide. Adding the domain handler without updating the classifier = domain is dead.
 - **Prevention**: Add a unit test that verifies all known SE-aaS domain keys appear in CLASSIFIER_SYSTEM_PROMPT.
 
+## Case 020: VALID_SEAAS_DOMAINS Validation Gate Missing Delivery Domains (2026-02-26)
+- **Symptom**: ALL 7 Tookitaki demo queries silently fall through to Copilot (generic chat) — no delivery artifacts, no panel, no health scores. LLM classifier correctly returns `seaasDomain: "pod-match"` etc., but routing never fires.
+- **Root cause (TWO separate bugs, both required):**
+  1. (Case 019, previously fixed) `CLASSIFIER_SYSTEM_PROMPT` missing 4 delivery domains → LLM couldn't classify to them
+  2. **(This case)** `VALID_SEAAS_DOMAINS` Set in `llm-query-interpreter.ts` (line 155) had only 15 domains — missing all 4 delivery domains. Even after the LLM correctly classified to `pod-match`, the validation check `if (VALID_SEAAS_DOMAINS.has(seaasDomain))` REJECTED it, falling back to `copilot`.
+- **Routing trap**: The validation gate runs AFTER the LLM call. An invalid domain from the Set triggers a complete fallback to Copilot — the domain is silently discarded. No error, no log.
+- **Fix**: Added `'pod-match', 'early-warning', 'scope-creep', 'delivery-intelligence'` to `VALID_SEAAS_DOMAINS`.
+- **THE DUAL LIST PROBLEM**: There are now 3 places that must stay in sync when adding a new SE-aaS domain:
+  1. `CLASSIFIER_SYSTEM_PROMPT` Available Services list (so LLM knows about it)
+  2. `CLASSIFIER_SYSTEM_PROMPT` SE-aaS Routing Guide (so LLM knows when to use it)
+  3. **`VALID_SEAAS_DOMAINS` Set** (so the validation gate allows it)
+  4. `chat/route.ts` domain list (so the execution route accepts it)
+- **⚠️ WARNING**: This exact bug was missed during Case 019 fix because we updated the prompt (1+2) but not the gate (3). Always check ALL 3 locations.
+- **Pattern**: When adding a new domain, grep for `VALID_SEAAS_DOMAINS` AND `CLASSIFIER_SYSTEM_PROMPT` AND `VALID_SEAAS_DOMAINS` in chat/route.ts — all 3 must be updated.
+
+## Case 021: deliveryIntelligenceResult Never Injected Into Claude System Prompt (2026-02-26)
+- **Symptom**: Copilot answers delivery intelligence questions with generic/hallucinated responses even when domain executor runs successfully and returns real data. User sees "I don't have access to your specific engagement data" type responses.
+- **Root cause**: `deliveryIntelligenceResult` (set by pod-match/early-warning/scope-creep/delivery-intelligence domains) was sent to the frontend via SSE but was **never added to `effectiveSystemPrompt`**. `seaasResult` (used by non-delivery SE-aaS domains) had an injection block. `deliveryIntelligenceResult` did not. Claude was answering blind.
+- **Fix**: Added injection block after `seaasResult` injection in `chat/route.ts` that serializes all 4 delivery data fields (health_scores, scope_alerts, pod_matches, engineer_health_summary) plus the domain-specific result and pod recommendation into the system prompt.
+- **Pattern**: Any new result type added to the copilot route MUST have a corresponding injection into `effectiveSystemPrompt`. Sending it to the frontend for panel display is NOT sufficient — Claude also needs it in its context.
+- **Also fixed**: `hasDomainResults` flag was missing `|| !!deliveryIntelligenceResult` — Claude model selector was using Haiku when it should have used Sonnet (delivery data present = complex response needed).
+
+## Case 022: podRecommendation Always Null — Wrong Field Name (2026-02-26)
+- **Symptom**: `SEaaSDeliveryPanel` shows no pod recommendation even when pod-match domain runs successfully.
+- **Root cause**: `chat/route.ts` read `(domainResult.result as any)?.data?.recommendation` but the pod-match executor (`action-domain-pod-match.ts`) sets `result.data.top_recommendation`. The field name difference caused `podRecommendation` to always be `null`.
+- **Fix**: Changed all 3 occurrences (lines 1138, 1145, 1152) to read `.data?.top_recommendation ?? .top_recommendation ?? null`.
+- **Pattern**: When reading nested fields from domain executor results, verify the actual field name against the executor source. Use `top_` prefix convention for ranked recommendations.
+
+## Case 023: CORE_WORKSPACE_ID Fallback — Cross-Tenant Exposure Pattern (2026-02-26)
+- **Symptom**: `brain/execute`, `openclaw/trigger`, `openclaw/status`, `agents/run` all fell back to `CORE_WORKSPACE_ID` when `organizationId` was not provided. A user without any org membership could access the core workspace's data/actions.
+- **Pattern**: ANY route that uses `organizationId || CORE_WORKSPACE_ID` as a fallback is a cross-tenant exposure risk. The correct pattern is:
+  - If `organizationId` is in the request body/params: use it (membership check below will enforce access)
+  - If not provided AND user is authenticated: resolve from first membership row (or return 400)
+  - NEVER fall back to a hardcoded CORE_WORKSPACE_ID as a default
+- **Fix**: Changed all 4 routes to either `?? null` (letting downstream 400 fire) or explicit `return 400 if !workspaceId`.
+- **Check**: Run `grep -r "CORE_WORKSPACE_ID" platform/app/api/` — any result that isn't a comment or import is a potential vulnerability.
+
 ## Case 017: [USER CORRECTION] Terminology — "AI Worker Space" not "Org" (2026-02-26)
 - **Trigger**: User said "why org - it has to be AI worker space..can u relearein in ur reinforcement learning..so that everywhere u can refer AI worker and not org only"
 - **Lesson**: **Never say "org" when referring to a customer's workspace/tenant.** Always say **"AI worker space"** in:
