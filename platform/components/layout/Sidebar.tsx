@@ -525,7 +525,7 @@ export function Sidebar() {
   const startW = useRef(0);
   const router = useRouter();
   const { groups, loading: historyLoading } = useChatHistory(activeService);
-  const { currentRole, isPlatformAdmin, currentWorkspace } = useWorkspace();
+  const { currentRole, isPlatformAdmin, currentWorkspace, isLoading: workspaceLoading, workspaces } = useWorkspace();
 
   // Hydrate service mode from localStorage after mount (avoids SSR mismatch)
   // BUG-08 FIX: Also listen for storage events so sidebar updates when worker is switched
@@ -793,7 +793,7 @@ export function Sidebar() {
             </svg>
             <div className="min-w-0 flex-1">
               <div className="text-[11px] font-semibold text-foreground truncate group-hover:text-accent transition-colors" suppressHydrationWarning>
-                {currentWorkspace?.name ?? "No AI Worker"}
+                {currentWorkspace?.name ?? (workspaceLoading || workspaces.length > 0 ? "Loading..." : "No AI Worker")}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />

@@ -2666,6 +2666,39 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                         </div>
                       )}
 
+                      {/* Agent Communication Card — Heart/Mind/Speech from the executing agent */}
+                      {agentCommsPerMessage.get(i) && (
+                        <AgentSpeechBubble comms={agentCommsPerMessage.get(i)!} />
+                      )}
+
+                      {/* Agent Input Request — shown when the agent needs missing inputs */}
+                      {agentInputRequestPerMessage.get(i) && (() => {
+                        const req = agentInputRequestPerMessage.get(i)!;
+                        return (
+                          <div className="mt-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 space-y-2">
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                              </svg>
+                              <span>I need a bit more information</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{req.message}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {req.missing.map((spec) => (
+                                <span
+                                  key={spec.key}
+                                  className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 font-medium"
+                                >
+                                  {spec.required && <span className="text-red-500">*</span>}
+                                  {spec.label}
+                                  {spec.hint && <span className="text-muted-foreground font-normal opacity-70">({spec.hint})</span>}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Agent Created Card — shown when user asked Copilot to create an agent */}
                       {agentCreatedPerMessage.get(i) && (
                         <AgentCreatedCard agent={agentCreatedPerMessage.get(i)!} />

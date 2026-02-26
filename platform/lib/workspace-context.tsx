@@ -221,6 +221,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         const firstNonCore =
           mapped.find((m) => !m.workspace.is_core_brain) ?? mapped[0];
         setCurrentWorkspaceId(firstNonCore.organization_id);
+        // Persist so next reload doesn't re-run auto-select
+        try { localStorage.setItem(STORAGE_KEY, firstNonCore.organization_id); } catch { /* ignore */ }
       }
       // Success — reset retry state
       retryCountRef.current = 0;

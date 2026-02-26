@@ -164,6 +164,7 @@ export async function recordAgentOutcome(
     const signalType = wasSuccess ? "dopamine" : "gaba";
     const signalValue = wasSuccess ? params.quality : -(1 - params.quality);
 
+    const now = new Date().toISOString();
     await supabase.from("cross_domain_signals").insert({
       organization_id: params.organizationId,
       source_domain: `se-aas.${params.domain}`,
@@ -177,7 +178,10 @@ export async function recordAgentOutcome(
         taskDescription: params.taskDescription.slice(0, 100),
         wasSuccess,
       },
-      created_at: new Date().toISOString(),
+      // signal_timestamp is required for rl-status hourly/daily/weekly window queries.
+      // created_at alone is not sufficient — rl-status filters by signal_timestamp.
+      signal_timestamp: now,
+      created_at: now,
     });
   } catch (err) {
     logger.warn("[agent-rl] cross_domain_signals insert failed:", err);
