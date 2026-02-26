@@ -797,7 +797,17 @@ export function createLLMQueryInterpreter(config: LLMQueryInterpreterConfig): LL
       return interpretation;
     } catch (err) {
       // Any failure → graceful fallback to regex
-      console.warn('[LLMQueryInterpreter] LLM classification failed, falling back to regex:', (err as Error)?.message || err);
+      const errMsg = (err as Error)?.message || String(err);
+      const isAbort = (err as Error)?.name === 'AbortError' || errMsg.includes('aborted');
+      if (isAbort) {
+        // Distinguish between our own timeout abort and an external abort (e.g. request signal)
+        console.warn(
+          `[LLMQueryInterpreter] LLM classification aborted after ${timeoutMs}ms timeout, falling back to regex. ` +
+          'If this fires frequently, increase timeoutMs in createLLMQueryInterpreter config.'
+        );
+      } else {
+        console.warn('[LLMQueryInterpreter] LLM classification failed, falling back to regex:', errMsg);
+      }
       return fallbackToRegex(query, startMs);
     }
   }

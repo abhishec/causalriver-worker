@@ -321,6 +321,10 @@ export async function POST(request: NextRequest) {
     const { createLLMQueryInterpreter } = memStack;
     const interpreter = createLLMQueryInterpreter({
       anthropicApiKey,
+      // 500ms default was aborting Haiku calls under load — use 8s dedicated timeout.
+      // This controller is SEPARATE from request.signal so navigation/disconnect
+      // does not abort the classification mid-flight.
+      timeoutMs: 8000,
     });
     let interpretation: QueryInterpretation | undefined;
     try {
@@ -3702,6 +3706,34 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       // Brain IQ gate: warn the user when brain is not ready
       if (brainCtx.brainState === "empty" || brainCtx.brainIq < 10) {
         brainWarning = `Brain IQ is low (${brainCtx.brainIq}). Connect more data sources for better results.`;
+      }
+
+      // ── Brain Status Guidance — injected into every LLM call so the AI can answer
+      // "Is my brain trained?" / "What should I do to start?" correctly.
+      // This supplements the brainWarning SSE banner with actionable LLM guidance.
+      if (brainCtx.brainState === "empty") {
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS: NOT STARTED (IQ: 0)
+The user's Brain has ZERO signals. No connectors have been set up.
+If the user asks whether their brain is trained, or what they should do to get started, respond:
+- Their brain has not started learning yet (Brain IQ: 0 / 100)
+- They need to connect data sources first. The most impactful starting points are:
+  1. GitHub — go to /connectors → click "Connect GitHub" to install the BrainOS GitHub App. This enables PR velocity, review burden, and code change signals.
+  2. Jira — go to /connectors → click "Connect Jira" to link their Atlassian workspace. This enables sprint health, ticket drift, and scope-creep signals.
+- Once connected, the brain will automatically start ingesting signals and Brain IQ will begin rising.
+- Brain IQ >= 10 means the brain is learning. Brain IQ >= 20 means it is ready for full SE-aaS analysis.
+Be encouraging and specific. Do NOT say "I don't know" — give them the exact next steps above.`;
+      } else if (brainCtx.brainIq < 10) {
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS: LEARNING — LOW IQ (IQ: ${brainCtx.brainIq})
+The user's Brain is learning but still building its model (${brainCtx.signalCount} signals collected so far).
+If the user asks whether their brain is trained or ready:
+- Brain IQ is ${brainCtx.brainIq}/100 — the brain is learning but needs more signals.
+- They can start using SE-aaS commands (delivery intelligence, pod match, early warning) but accuracy improves as more signals accumulate.
+- Encourage them to connect more data sources from /connectors if they haven't already (GitHub, Jira).
+- Brain IQ >= 20 unlocks full prediction accuracy. They are ${Math.max(0, 20 - brainCtx.brainIq)} IQ points away.`;
+      } else {
+        effectiveSystemPrompt += `\n\n## BRAIN STATUS: ACTIVE AND READY (IQ: ${brainCtx.brainIq})
+The brain is fully active with ${brainCtx.signalCount} signals (IQ: ${brainCtx.brainIq}/100).
+If asked whether the brain is trained: confirm yes, it is active and ready. Highlight the IQ score and top signal domains.`;
       }
     } catch {
       // non-fatal — proceed without brain context
