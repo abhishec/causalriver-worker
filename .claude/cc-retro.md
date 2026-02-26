@@ -457,3 +457,65 @@ Honest model usage audit across the full session:
 4. Revoke GitHub token (ghp_ltNeGBWMRl...)
 5. Review 12 GitHub dependency vulnerabilities (7 high, 4 moderate, 1 low)
 
+---
+
+## Session: 2026-02-26 Morning Continuation (SE-aaS WOW Artifacts + Demo Hardening)
+**Date:** 2026-02-26
+**Model:** Sonnet (main), Haiku (all subagents)
+**Duration:** ~2 hours continuation after context window limit
+**Gate:** Extended to 12 PM SGT per user instruction
+**Commit:** `c86a9fc8a` — Amplify #98 SUCCEED at 09:36 SGT ✅
+
+### What Was Accomplished
+
+**SE-aaS copilotPrompt overhaul (all 20 domains):**
+- Rewrote every copilotPrompt from a 1-liner to a structured 300–500 word specification
+- Each prompt now describes specific deliverable sections, numbered outputs, and demo-quality depth
+- P0 domains: Early Warning (velocity + SPOF heat-map), Engagement Health (sub-score dashboard + 4-week forecast), Pod Match (top-3 comparison matrix with ramp-up plan), Scope Creep (drift velocity + burndown trajectory)
+- P1 Code Intelligence: PR Review (5-dimensional: Security/Performance/Correctness/Tests/Causal Business Impact), TDD (Red-Green-Refactor full cycle), Scaffolding (full enterprise scaffold with CI/CD), Dep Upgrade (CVE audit + migration guide), HLD/LLD (C4 L1/L2/L3 + ER + API contract + ADRs)
+- P1 Test Intelligence: Test Cases (unit + integration + E2E + security + perf), Test Data (synthetic + PII-safe + scenario datasets)
+- SWE: Codebase Q&A (arch overview + module map + debt inventory), Dead Code (bundle impact + removal plan), Impact Analysis (blast radius graph + deployment strategy), Architecture (C4 all levels + service ownership map)
+- Observability: Incident RCA (5-why + causal graph + prevention), Log Query (error clustering + anomaly timeline + user impact), Perf Profiler (slow endpoint ranking + N+1 + business impact score)
+- Data: SQL Analyzer (correctness + injection + index recommendations), Data Lineage (transformation chain + compliance lineage + OpenLineage JSON)
+
+**Domain routing fixes (critical — commands were silently failing):**
+- COPILOT_NATIVE_DOMAINS had stale entries `boilerplate-generator` + `pr-review-assistant` (old wrong names) — removed; now boilerplate-scaffold and pr-review correctly go through executeDomain()
+- Added architecture-extractor trigger in detectSEaaSRoute() — was in DOMAIN_MAP but had no regex trigger
+- Added dedicated P0 triggers: early-warning, scope-creep, pod-match, engagement-health (were all collapsing into single delivery-intelligence catch-all)
+- Fixed 7 domain regex triggers whose new copilotPrompt phrasing bypassed old patterns: sql-analyzer, test-case-generator, test-data-generator, dependency-upgrade, design-doc-generator, log-query, performance-profiler
+
+**Domain registry completeness:**
+- Added early-warning + scope-creep to DOMAIN_MAP (→ podMatchDomain) — were missing, executeDomain was throwing, deliveryIntelligenceResult was never populated for SEaaSDeliveryPanel
+- Added tdd alias (id='tdd' in DOMAIN_CATALOGUE vs key='tdd-code-generator' in DOMAIN_MAP) — was causing RL mismatch and missing artifact list chips
+- Added tdd-code-generator → {label: "TDD Agent"} alias in DOMAIN_LABEL_MAP + DOMAIN_LABELS
+
+**Route audit:**
+- Audited brain/health, rl-status, feedback, se-aas/engagement-health — all clean
+- No org_memberships (wrong table name) found anywhere in /api routes ✅
+
+### What Went Well
+- TypeScript clean on first pass — no errors
+- Pre-commit hook (lint + tsc) passed on first attempt
+- All 20 domain copilotPrompts now produce WOW demo artifacts with structured, detailed Claude analysis
+- Routing gaps found and fixed systematically — 8 triggers were silently broken
+
+### What Went Wrong / Lessons Learned
+- **Pattern**: copilotPrompt improvements broke the routing — when you change a copilotPrompt, ALWAYS grep detectSEaaSRoute for the new phrasing and verify it will match. The regex triggers must be updated in sync with the prompts.
+- **Root cause of silent failures**: domains in COPILOT_NATIVE_DOMAINS with old wrong names (boilerplate-generator, pr-review-assistant) — these were phantom entries that prevented debugging because nothing threw an error; they just never matched.
+- **Missing domains in DOMAIN_MAP**: early-warning and scope-creep listed in DELIVERY_DOMAINS (line 1110) but not in DOMAIN_MAP — caused executeDomain() to throw, silently caught, deliveryIntelligenceResult never set.
+
+### Anti-Patterns Avoided
+- Did NOT change DOMAIN_CATALOGUE ids to match DOMAIN_MAP keys (breaking change for existing artifacts) — used aliases instead
+- Did NOT refactor the routing architecture — added targeted triggers only
+
+### Model Correctness Assessment
+- Main: Sonnet ✅ (multi-file feature + routing fix, correct choice)
+- Subagents: Haiku ✅ (all Explore/Bash/TypeScript-check agents — appropriate)
+- No Opus needed — this was standard multi-file code work, not cross-system debugging
+
+### New Lessons for case-log.md
+- [KEY PATTERN] When updating copilotPrompts, always verify the new prompt text will match detectSEaaSRoute() regex triggers
+- [KEY PATTERN] When adding a domain to DELIVERY_DOMAINS (in chat/route.ts), always add it to DOMAIN_MAP too
+- [KEY PATTERN] DOMAIN_CATALOGUE ids ≠ DOMAIN_MAP keys (e.g. tdd ≠ tdd-code-generator) — always add both-direction aliases
+
+
