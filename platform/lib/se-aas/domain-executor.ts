@@ -126,7 +126,8 @@ export interface ExecuteDomainParams {
 
 export interface ExecuteDomainResult {
   result: Record<string, unknown>;
-  artifactId: string;
+  /** Artifact ID — null if persistence failed (non-blocking) */
+  artifactId: string | null;
 }
 
 /**
@@ -229,21 +230,28 @@ export async function executeDomain(
   const result = await info.domain.execute(ctx);
   const durationMs = Date.now() - startMs;
 
-  // ── Step 4: Save artifact ───────────────────────────────────────────────
-  const { artifactId } = await saveArtifact(supabase, {
-    organizationId: params.organizationId,
-    domainType: params.domainType,
-    artifactData: result,
-    metadata: {
-      durationMs,
-      userId: params.userId,
-      claudePowered: result.data?.claudePowered ?? false,
-      brainAugmented: result.data?.brainAugmented ?? brainContext.cognitiveStackAvailable,
-      brainCausalEdgesUsed: brainContext.causalEdges?.length ?? 0,
-      brainPatternsUsed: brainContext.patterns?.length ?? 0,
-    },
-    createdBy: params.userId,
-  });
+  // ── Step 4: Save artifact (non-blocking — artifact failure MUST NOT kill domain result) ──
+  let artifactId: string | null = null;
+  try {
+    const saved = await saveArtifact(supabase, {
+      organizationId: params.organizationId,
+      domainType: params.domainType,
+      artifactData: result,
+      metadata: {
+        durationMs,
+        userId: params.userId,
+        claudePowered: result.data?.claudePowered ?? false,
+        brainAugmented: result.data?.brainAugmented ?? brainContext.cognitiveStackAvailable,
+        brainCausalEdgesUsed: brainContext.causalEdges?.length ?? 0,
+        brainPatternsUsed: brainContext.patterns?.length ?? 0,
+      },
+      createdBy: params.userId,
+    });
+    artifactId = saved.artifactId;
+  } catch (artifactErr: any) {
+    logger.warn("[domain-executor] Artifact save failed (non-blocking):", artifactErr?.message);
+    // Domain result is returned regardless — artifact persistence is best-effort
+  }
 
   // ── Step 5: Brain Feedback Loop via Bus ─────────────────────────────────
   // All 5 channels in one shot — signal, prediction, evolution, observability
