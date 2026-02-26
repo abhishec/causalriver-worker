@@ -954,7 +954,9 @@ export function DashboardClient() {
 
             {/* Agent Live Monitor — real-time SE-aaS job tracker */}
             {activeWorkspaces.length > 0 && (
-              <AgentLiveMonitor orgId={activeWorkspaces[0].workspace.id} />
+              <div className="mb-6">
+                <AgentLiveMonitor orgId={activeWorkspaces[0].workspace.id} />
+              </div>
             )}
 
             {/* AI Worker Cards */}

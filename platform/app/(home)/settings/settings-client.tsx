@@ -886,7 +886,7 @@ export function SettingsClient({
               </div>
             )}
 
-            <IntegrationsSection connectors={connectors as any} orgId={orgId} />
+            <IntegrationsSection connectors={(connectors || []) as any} orgId={orgId} />
           </div>
         )}
 

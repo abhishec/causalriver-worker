@@ -143,6 +143,7 @@ export function ConnectorsClient({
       fetch("/api/connectors/health")
         .then((r) => r.ok ? r.json() : [])
         .then((rows: Array<{ type: string; status: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null }>) => {
+          if (!Array.isArray(rows)) return; // guard: API returned non-array on cold start or auth error
           const m: typeof healthMap = {};
           for (const row of rows) {
             m[row.type] = { status: row.status, lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod };

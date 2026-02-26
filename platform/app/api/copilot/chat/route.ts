@@ -3820,6 +3820,14 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 
       if (brainCtx.brainState !== "empty") {
         effectiveSystemPrompt += `\n\n## Brain Context\n- IQ Score: ${brainCtx.brainIq}\n- Quality Patterns (last 24h): ${brainCtx.qualityPatternsSummary ?? "No data"}\n- Active Signals: ${brainCtx.signalCount}\n${brainCtx.contextSummary}`;
+      } else if (brainCtx.activeJobCount > 0 || brainCtx.pendingJobCount > 0) {
+        // FM-01: Brain may be empty (no signals yet) but the orchestrator can still have
+        // active or pending jobs. Always surface job counts so the LLM can answer
+        // "How many agents are running?" correctly even before any signals are ingested.
+        const orchParts: string[] = [];
+        if (brainCtx.activeJobCount > 0) orchParts.push(`${brainCtx.activeJobCount} running`);
+        if (brainCtx.pendingJobCount > 0) orchParts.push(`${brainCtx.pendingJobCount} pending`);
+        effectiveSystemPrompt += `\n\n## Brain Context (Orchestrator State)\n- Orchestrator: ${orchParts.join(", ")} agent job(s).\n${brainCtx.lastJobStatus ? `- Last completed job: ${brainCtx.lastJobStatus}.` : ""}`;
       }
 
       // Brain IQ gate: warn the user when brain is not ready
@@ -3879,6 +3887,37 @@ Additional context:
       }
     } catch {
       // non-fatal — proceed without brain context
+    }
+
+    // ── FM-09: Connector Awareness — inject active connector list so LLM can answer
+    // "Show me our Slack standup notes" with "Slack is not connected — go to /connectors"
+    // rather than a generic "I don't have data on that."
+    // We only fetch the lightweight (connector_type, status) projection — no credentials.
+    try {
+      const { data: orgConnectors } = await service
+        .from("org_connectors")
+        .select("connector_type, status")
+        .eq("organization_id", workspaceId);
+
+      if (orgConnectors && orgConnectors.length > 0) {
+        const activeC = orgConnectors.filter((c: { status: string }) => c.status === "active").map((c: { connector_type: string }) => c.connector_type);
+        const inactiveC = orgConnectors.filter((c: { status: string }) => c.status !== "active").map((c: { connector_type: string }) => c.connector_type);
+
+        effectiveSystemPrompt += `\n\n## CONNECTED DATA SOURCES
+Active connectors (data is flowing): ${activeC.length > 0 ? activeC.join(", ") : "none"}
+${inactiveC.length > 0 ? `Inactive/pending connectors: ${inactiveC.join(", ")}` : ""}
+
+When the user asks about data from a specific source (e.g. Slack, GitHub, Jira, Xero):
+- If that source is in the ACTIVE list: the brain is ingesting data from it — answer from brain context or say data may still be processing.
+- If that source is NOT in ANY list: tell the user it is not connected yet and direct them to Settings > Connectors (path: /connectors) to add it.
+- If that source is inactive/pending: tell the user the connector exists but is not yet active — they should check the connector status in Settings > Connectors.`;
+      } else {
+        // No connectors at all — LLM already has the zero-data guard, but clarify no connectors configured
+        effectiveSystemPrompt += `\n\n## CONNECTED DATA SOURCES
+No connectors are configured yet. When the user asks for data from any source (Slack, GitHub, Jira, etc.), tell them to go to Settings > Connectors (path: /connectors) to connect that source.`;
+      }
+    } catch {
+      // Non-fatal: connector awareness is enrichment only
     }
 
     // ── Smart model selection: Haiku for simple, Sonnet for complex ──
