@@ -226,6 +226,7 @@ export default function CopilotPageInner() {
     setActiveArtifactId(null);
     setArtifactPaneOpen(false);
     setMessageArtifactMap(new Map());
+    setBrainLoading(false);
     chatRef.current?.resetChat();
   }, []);
 
@@ -441,6 +442,7 @@ export default function CopilotPageInner() {
       domainId: resolvedDomainId,
       pinned: false,
     };
+    setBrainLoading(false);
     setArtifacts((prev) => [...prev, newArtifact]);
     setActiveArtifactId(artifactId);
     setArtifactPaneOpen(true);
@@ -482,7 +484,8 @@ export default function CopilotPageInner() {
 
   // ── Handle brain meta ─────────────────────────────────────────────────────
   const handleBrainMeta = useCallback((_meta: BrainMeta) => {
-    setBrainLoading(false);
+    // Brain meta arriving means the stream is active but domain result hasn't landed yet.
+    // Keep brainLoading=true — it will be cleared when the domain result arrives.
   }, []);
 
   // ── Pin/unpin artifact ────────────────────────────────────────────────────
@@ -830,6 +833,7 @@ export default function CopilotPageInner() {
           )}
           <ErrorBoundary section="Copilot Chat">
             <CopilotChat
+              key={currentWorkspace?.id}
               ref={chatRef}
               endpoint="/api/copilot/chat"
               extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined }}
@@ -844,7 +848,7 @@ export default function CopilotPageInner() {
               onBrainMeta={handleBrainMeta}
               onDomainResult={handleDomainResult}
               onServiceChange={handleServiceChange}
-              onArtifactPaneOpen={() => setArtifactPaneOpen(true)}
+              onArtifactPaneOpen={() => { setArtifactPaneOpen(true); setBrainLoading(true); }}
               onSave={handleSave}
               messageArtifacts={messageArtifactMap}
               onOpenArtifact={(id) => {
@@ -884,11 +888,29 @@ export default function CopilotPageInner() {
         ) : (
           /* Empty artifact state — matches HTML .art-col > .art-empty */
           <div className="w-[440px] shrink-0 bg-card border-l border-border-subtle flex flex-col overflow-hidden">
-            <div className="flex-1 flex flex-col items-center justify-center text-center text-muted">
-              <div className="text-2xl mb-2 opacity-40">✦</div>
-              <h4 className="text-sm font-medium text-muted-foreground">No artifact yet</h4>
-              <p className="text-xs text-muted mt-1">Artifacts from analyses will appear here</p>
-            </div>
+            {brainLoading ? (
+              /* Loading skeleton — shown while domain query is in flight */
+              <div className="flex-1 flex flex-col gap-4 p-6">
+                <div className="h-5 rounded-lg bg-surface animate-pulse w-1/2" />
+                <div className="space-y-2">
+                  <div className="h-3 rounded bg-surface animate-pulse w-full" />
+                  <div className="h-3 rounded bg-surface animate-pulse w-4/5" />
+                  <div className="h-3 rounded bg-surface animate-pulse w-3/5" />
+                </div>
+                <div className="h-24 rounded-xl bg-surface animate-pulse w-full" />
+                <div className="space-y-2">
+                  <div className="h-3 rounded bg-surface animate-pulse w-full" />
+                  <div className="h-3 rounded bg-surface animate-pulse w-2/3" />
+                </div>
+                <div className="h-16 rounded-xl bg-surface animate-pulse w-full" />
+              </div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-muted">
+                <div className="text-2xl mb-2 opacity-40">✦</div>
+                <h4 className="text-sm font-medium text-muted-foreground">No artifact yet</h4>
+                <p className="text-xs text-muted mt-1">Artifacts from analyses will appear here</p>
+              </div>
+            )}
           </div>
         )}
       </div>

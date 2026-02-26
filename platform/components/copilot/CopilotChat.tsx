@@ -2172,7 +2172,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentInputRequestPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, inputRequest);
-              return next;
+              return pruneMap(next);
             });
           },
           onOrchestratorQueued: (info) => {
