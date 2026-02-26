@@ -639,16 +639,24 @@ export function DashboardClient() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">No AI Workers yet</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">No workspaces found</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                Create your first AI Worker to get started.
+                Your account isn&apos;t linked to any workspace yet, or there was a loading issue.
               </p>
-              <button
-                onClick={() => setShowWizard(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
-              >
-                Create AI Worker
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-surface-hover transition-colors"
+                >
+                  Refresh
+                </button>
+                <button
+                  onClick={() => setShowWizard(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+                >
+                  Create AI Worker
+                </button>
+              </div>
             </div>
           </div>
 

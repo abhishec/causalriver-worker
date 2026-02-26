@@ -162,16 +162,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeout);
 
       if (!res.ok) {
-        logger.warn("[WorkspaceProvider] memberships API returned", res.status);
-        setIsLoading(false);
-        return;
+        // 401 = session expired, not retryable — bail silently (middleware will redirect)
+        if (res.status === 401) {
+          setIsLoading(false);
+          return;
+        }
+        // 5xx / other errors are retryable — treat as network failure
+        throw new Error(`memberships API returned ${res.status}`);
       }
 
       const json = await res.json();
       const rows = json.memberships;
 
       if (!rows || rows.length === 0) {
-        logger.warn("[WorkspaceProvider] No workspace memberships found");
+        logger.warn("[WorkspaceProvider] No workspace memberships found for user");
+        setMemberships([]);
+        setIsPlatformAdmin(false);
         setIsLoading(false);
         return;
       }
