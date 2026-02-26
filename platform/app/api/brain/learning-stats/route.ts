@@ -41,7 +41,12 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const requestedOrgId = url.searchParams.get("orgId");
 
-    const admin = getAdminClient();
+    let admin;
+    try {
+      admin = getAdminClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     let organizationId: string | null = null;
 
     if (requestedOrgId) {

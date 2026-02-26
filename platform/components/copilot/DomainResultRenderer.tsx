@@ -147,10 +147,19 @@ interface DomainResultRendererProps {
  * 7. Custom commands → GenericIntelRenderer
  * 8. GenericIntelRenderer as final fallback
  */
+// ── Delivery domain IDs that can carry a dataMode badge ──────────────────────
+const DELIVERY_DOMAIN_IDS = new Set(["pod-match", "delivery-intelligence", "early-warning", "scope-creep"]);
+
 export function DomainResultRenderer({ result, domainId }: DomainResultRendererProps) {
   const rawData = (typeof result.data === "object" && result.data ? result.data : {}) as Record<string, any>;
   const resolvedDomainId = domainId || (rawData?._domainType as string) || "unknown";
   const artifactId = rawData?.artifactId || rawData?.id || `${resolvedDomainId}_${Date.now()}`;
+
+  // ── Data provenance indicator (only for delivery intelligence domains) ────
+  const isDeliveryDomain = DELIVERY_DOMAIN_IDS.has(resolvedDomainId) || result.service === "delivery-intelligence";
+  const dataMode = isDeliveryDomain ? (rawData?.dataMode as "live" | "partial" | "ai-reasoned" | undefined) : undefined;
+  const connectedSources = isDeliveryDomain ? (rawData?.connectedSources as string[] | undefined) : undefined;
+  const missingData = isDeliveryDomain ? (rawData?.missingData as string[] | undefined) : undefined;
 
   // Helper: wrap any renderer output with the feedback footer
   const withFeedback = (content: React.ReactNode) => (
@@ -164,11 +173,25 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
     </div>
   );
 
+  // Helper: wrap delivery domain renders with provenance badge + feedback footer
+  const withDeliveryFeedback = (content: React.ReactNode) => (
+    <div>
+      <DataModeIndicator dataMode={dataMode} connectedSources={connectedSources} missingData={missingData} />
+      {content}
+      <ArtifactFeedback
+        artifactId={artifactId}
+        domainId={resolvedDomainId}
+        service="seaas"
+      />
+    </div>
+  );
+
   // ── 1. Try specific domain renderer first ─────────────────────────────────
   if (domainId) {
     const SpecificRenderer = DOMAIN_RENDERER_MAP[domainId];
     if (SpecificRenderer) {
-      return withFeedback(
+      const wrapper = DELIVERY_DOMAIN_IDS.has(domainId) ? withDeliveryFeedback : withFeedback;
+      return wrapper(
         <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
           <SpecificRenderer data={rawData} />
         </Suspense>
@@ -187,7 +210,8 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
   if (embeddedDomainId) {
     const EmbeddedRenderer = DOMAIN_RENDERER_MAP[embeddedDomainId];
     if (EmbeddedRenderer) {
-      return withFeedback(
+      const wrapper = DELIVERY_DOMAIN_IDS.has(embeddedDomainId) ? withDeliveryFeedback : withFeedback;
+      return wrapper(
         <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
           <EmbeddedRenderer data={rawData} />
         </Suspense>
@@ -199,7 +223,7 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
   if (result.service === "delivery-intelligence") {
     // Use rawData (already null-safe) instead of result.data directly to prevent crashes
     // when the streaming response is truncated or result.data is null/non-object
-    return withFeedback(<SEaaSDeliveryPanel data={rawData as unknown as DeliveryIntelligenceData} />);
+    return withDeliveryFeedback(<SEaaSDeliveryPanel data={rawData as unknown as DeliveryIntelligenceData} />);
   }
 
   // ── 5. PM-aaS service → GenericIntelRenderer (PM domain results: roadmap, sprint-health, etc.)

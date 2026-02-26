@@ -63,7 +63,13 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ error: "No workspace found" }, { status: 400 });
     }
 
-    const state = await getOrgAgentState(workspaceId);
+    let state;
+    try {
+      state = await getOrgAgentState(workspaceId);
+    } catch {
+      // getAdminClient() may throw if SUPABASE_SERVICE_ROLE_KEY is unavailable
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json({ state });
   } catch (err: any) {
     logger.error("[orchestrator/GET] Unexpected error:", err?.message);
@@ -99,12 +105,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "taskType is required" }, { status: 400 });
     }
 
-    const decision = await orchestrateJob({
-      orgId: workspaceId,
-      taskType,
-      payload: payload ?? {},
-      priority,
-    });
+    let decision;
+    try {
+      decision = await orchestrateJob({
+        orgId: workspaceId,
+        taskType,
+        payload: payload ?? {},
+        priority,
+      });
+    } catch {
+      // getAdminClient() inside orchestrateJob may throw if SUPABASE_SERVICE_ROLE_KEY is unavailable
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // ── Reject ───────────────────────────────────────────────────────────────
     if (decision.action === "reject") {
@@ -126,7 +138,12 @@ export async function POST(req: NextRequest) {
     // ── Insert job to agent_queue ─────────────────────────────────────────────
     // For 'queue-waiting', we insert with status='waiting' so the job worker
     // does NOT pick it up until checkAndStartWaitingJobs() unblocks it.
-    const admin = getAdminClient();
+    let admin;
+    try {
+      admin = getAdminClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const jobStatus =
       decision.action === "queue-waiting" ? "waiting" : "pending";
 
