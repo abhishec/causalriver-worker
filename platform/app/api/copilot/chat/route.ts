@@ -3696,11 +3696,17 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     // ── Brain Context Injection — pre-enrich every LLM call with brain state ──
     // Non-fatal: if getBrainContext fails, proceed without enrichment.
     // brainIqForRouting is captured here and used by Brain IQ model-routing gate below.
+    // TIMEOUT: getBrainContext uses Promise.allSettled internally but individual Supabase
+    // queries can hang indefinitely on network issues. We race with a 5s timeout so a
+    // slow DB never stalls the entire request. Defaults are safe (IQ=0, brainState=empty).
     let brainIqForRouting = 0;
     let brainWarning: string | null = null;
     try {
       const { getBrainContext } = await import("@/lib/brain/brain-context");
-      const brainCtx = await getBrainContext(service, workspaceId);
+      const brainCtxTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5_000));
+      const brainCtx = await Promise.race([getBrainContext(service, workspaceId), brainCtxTimeout]);
+      // brainCtx is null only if the 5s timeout fires — skip enrichment, use safe defaults
+      if (!brainCtx) throw new Error("getBrainContext timed out");
       brainIqForRouting = brainCtx.brainIq;
 
       if (brainCtx.brainState !== "empty") {
@@ -4035,7 +4041,9 @@ Additional context:
           // Enable prompt caching — saves ~90% on repeated system prompts (brain context is often similar)
           system: [{ type: 'text' as const, text: effectiveSystemPrompt, cache_control: { type: 'ephemeral' as const } }],
           messages,
-        });
+          // Thread request abort signal so client disconnect cancels the Anthropic call
+          // and stops token consumption. Uses request.signal passed in from the outer scope.
+        }, { signal: request.signal as any });
 
         // Safety: hard timeout — close stream if Anthropic takes >120s
         const streamTimeout = setTimeout(() => {
@@ -4048,17 +4056,21 @@ Additional context:
 
         // Accumulate the streamed assistant text for auto-save (BUILD 4)
         let streamedAssistantText = "";
-        for await (const event of anthropicStream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            streamedAssistantText += event.delta.text;
-            sendText(event.delta.text);
+        try {
+          for await (const event of anthropicStream) {
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              streamedAssistantText += event.delta.text;
+              sendText(event.delta.text);
+            }
           }
+        } finally {
+          // Always clear the timeout — whether stream completed, errored, or client aborted.
+          // Without finally, a throw here leaks the 120s timer.
+          clearTimeout(streamTimeout);
         }
-
-        clearTimeout(streamTimeout);
 
         // ── Brain Feedback: teach the Brain from Copilot interaction (Phase 4: 5s timeout) ──
         const { createBrainFeedbackBus } = memStack;

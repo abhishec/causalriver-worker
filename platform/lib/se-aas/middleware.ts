@@ -11,7 +11,8 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { corsHeaders, checkSessionRateLimit, parseAndValidateBody } from "@/lib/security-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { CORE_WORKSPACE_ID, getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { verifyWorkspaceMembership } from "@/lib/supabase/admin";
 
 export interface SeAaSAuthResult {
   userId: string;
@@ -65,6 +66,26 @@ export async function authenticateSeAaSRequest(
 
     // Resolve workspace from user's currently selected workspace (cookie-based)
     workspaceId = await getCurrentWorkspaceId();
+
+    // Security gate: if workspaceId resolved to empty string or CORE fallback,
+    // the user has no valid workspace context — reject rather than serving CORE brain data.
+    if (!workspaceId) {
+      throw NextResponse.json(
+        { error: "No workspace context. Select a workspace first." },
+        { status: 400, headers: corsHeaders(request) }
+      );
+    }
+
+    // Verify the user is actually a member of the resolved workspace.
+    // getCurrentWorkspaceId() can fall back to CORE_WORKSPACE_ID for platform admins
+    // or return the first non-core membership — double-check to prevent privilege confusion.
+    const membership = await verifyWorkspaceMembership(userId!, workspaceId);
+    if (!membership) {
+      throw NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403, headers: corsHeaders(request) }
+      );
+    }
   } else {
     // Try API key
     const authHeader = request.headers.get("authorization");

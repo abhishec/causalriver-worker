@@ -11,7 +11,8 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { getAdminClient } from "@/lib/supabase/admin";
+import { getAdminClient, verifyWorkspaceMembership } from "@/lib/supabase/admin";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { getLearningStats } from "@/lib/brain/agent-rl";
@@ -29,22 +30,31 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get org from query param or first membership
+    // Resolve org: if ?orgId provided, verify membership first (prevents cross-tenant read).
+    // If not provided, use the user's current workspace from cookie context.
     const url = new URL(request.url);
-    let organizationId = url.searchParams.get("orgId");
+    const requestedOrgId = url.searchParams.get("orgId");
 
     const admin = getAdminClient();
+    let organizationId: string | null = null;
 
-    if (!organizationId) {
-      const { data: membership } = await admin
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: true })
-        .limit(1)
-        .single();
-
-      organizationId = membership?.organization_id ?? null;
+    if (requestedOrgId) {
+      // Verify the authenticated user is actually a member of the requested org
+      const membership = await verifyWorkspaceMembership(user.id, requestedOrgId);
+      if (!membership) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      organizationId = requestedOrgId;
+    } else {
+      // No orgId param — fall back to user's current workspace
+      organizationId = await getCurrentWorkspaceId() || null;
+      // Ensure the resolved workspace is non-empty and the user actually belongs to it
+      if (organizationId) {
+        const membership = await verifyWorkspaceMembership(user.id, organizationId);
+        if (!membership) {
+          organizationId = null;
+        }
+      }
     }
 
     if (!organizationId) {
