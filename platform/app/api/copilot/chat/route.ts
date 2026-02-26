@@ -1096,10 +1096,10 @@ export async function POST(request: NextRequest) {
     ]);
     const seaasRoute = llmSeaasDomain && VALID_SEAAS_DOMAINS.has(llmSeaasDomain)
       ? { domainType: llmSeaasDomain, extractedInput: serviceRoute?.seaasInput || {} }
-      : !interpretation ? detectSEaaSRoute(message) : null;
+      : (!interpretation || interpretation.source === 'regex-fallback') ? detectSEaaSRoute(message) : null;
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
-      : !interpretation ? detectAccountingRoute(message) : null;
+      : (!interpretation || interpretation.source === 'regex-fallback') ? detectAccountingRoute(message) : null;
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
