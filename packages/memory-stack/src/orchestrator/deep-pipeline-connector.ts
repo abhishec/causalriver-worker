@@ -373,6 +373,240 @@ export function createDeepPipeline(config: DeepPipelineConfig): DeepPipelineInst
   }
 
   /**
+   * PHASE 8: Persist L16-L30 deep layer outputs to ai_memory so
+   * Copilot's getUniversalContext() can surface them automatically.
+   *
+   * Writes one insight row per brain region (5 total), using
+   * ON CONFLICT upsert so the table never grows unboundedly.
+   * Scoped to organizationId — no cross-tenant exposure.
+   *
+   * memory_type='insight' is queried by:
+   *   - brain-context-mesh.ts getUniversalContext() patternsRes
+   *   - platform orchestrator.ts brainInsightsRes
+   *   - copilot chat/route.ts proactive insights ("while you were away")
+   */
+  async function _persistDeepLayerInsights(deepResult: DeepCycleResult): Promise<void> {
+    const now = new Date().toISOString();
+
+    // Build natural-language summaries for each of the 5 brain regions.
+    // Keep each under ~400 chars — just enough for LLM context injection.
+    const insights: Array<{
+      domain: string;
+      memory_type: string;
+      content: string;
+      importance: number;
+      cognitive_layer: string;
+      metadata: Record<string, unknown>;
+    }> = [
+      // SOMA (L16-L18): Org structure — topology, entity links, domain hierarchy
+      {
+        domain: 'deep_brain.soma',
+        memory_type: 'insight',
+        cognitive_layer: 'L16-L18',
+        importance: 0.75,
+        content: (() => {
+          const parts: string[] = [];
+          if (deepResult.orgTopology.teamsIdentified > 0) {
+            parts.push(`${deepResult.orgTopology.teamsIdentified} teams mapped`);
+          }
+          if (deepResult.orgTopology.silosDetected > 0) {
+            parts.push(`${deepResult.orgTopology.silosDetected} silo(s) detected`);
+          }
+          if (deepResult.orgTopology.bridgePeople.length > 0) {
+            parts.push(`bridge connectors: ${deepResult.orgTopology.bridgePeople.slice(0, 3).join(', ')}`);
+          }
+          if (deepResult.entityLinking.crossSystemLinks > 0) {
+            parts.push(`${deepResult.entityLinking.crossSystemLinks} cross-system entity links discovered`);
+          }
+          if (deepResult.domainHierarchy.domainsActive > 0) {
+            parts.push(`${deepResult.domainHierarchy.domainsActive} active domains classified`);
+          }
+          return parts.length > 0
+            ? `Org topology (L16-L18): ${parts.join('; ')}.`
+            : `Org topology (L16-L18): no structural changes this cycle.`;
+        })(),
+        metadata: {
+          teamsIdentified: deepResult.orgTopology.teamsIdentified,
+          silosDetected: deepResult.orgTopology.silosDetected,
+          bridgePeople: deepResult.orgTopology.bridgePeople.slice(0, 5),
+          crossSystemLinks: deepResult.entityLinking.crossSystemLinks,
+          domainsActive: deepResult.domainHierarchy.domainsActive,
+        },
+      },
+
+      // CORTEX (L19-L21): Strategic — cascades, synthesis, resource allocation
+      {
+        domain: 'deep_brain.cortex',
+        memory_type: 'insight',
+        cognitive_layer: 'L19-L21',
+        importance: 0.85,
+        content: (() => {
+          const parts: string[] = [];
+          if (deepResult.strategicSynthesis.strategicThemes.length > 0) {
+            parts.push(`strategic themes: ${deepResult.strategicSynthesis.strategicThemes.slice(0, 3).join('; ')}`);
+          }
+          if (deepResult.strategicSynthesis.blindSpots.length > 0) {
+            parts.push(`blind spots: ${deepResult.strategicSynthesis.blindSpots.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.resourceAllocation.bottlenecks.length > 0) {
+            parts.push(`resource bottlenecks: ${deepResult.resourceAllocation.bottlenecks.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.resourceAllocation.recommendations.length > 0) {
+            parts.push(`allocation suggestions: ${deepResult.resourceAllocation.recommendations.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.impactCascade.highRiskItems.length > 0) {
+            parts.push(`high-risk cascade items: ${deepResult.impactCascade.highRiskItems.slice(0, 2).join('; ')}`);
+          }
+          return parts.length > 0
+            ? `Strategic synthesis (L19-L21): ${parts.join('. ')}.`
+            : `Strategic synthesis (L19-L21): alignment score ${(deepResult.strategicSynthesis.alignmentScore * 100).toFixed(0)}%.`;
+        })(),
+        metadata: {
+          alignmentScore: deepResult.strategicSynthesis.alignmentScore,
+          strategicThemes: deepResult.strategicSynthesis.strategicThemes,
+          blindSpots: deepResult.strategicSynthesis.blindSpots,
+          bottlenecks: deepResult.resourceAllocation.bottlenecks,
+          recommendations: deepResult.resourceAllocation.recommendations,
+          cascadesModeled: deepResult.impactCascade.cascadesModeled,
+          highRiskItems: deepResult.impactCascade.highRiskItems,
+        },
+      },
+
+      // CEREBELLUM (L22-L24): Operations — knowledge transfer, process mining, staffing
+      {
+        domain: 'deep_brain.cerebellum',
+        memory_type: 'insight',
+        cognitive_layer: 'L22-L24',
+        importance: 0.80,
+        content: (() => {
+          const parts: string[] = [];
+          if (deepResult.knowledgeTransfer.knowledgeGaps.length > 0) {
+            parts.push(`knowledge gaps: ${deepResult.knowledgeTransfer.knowledgeGaps.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.processMining.bottleneckSteps.length > 0) {
+            parts.push(`process bottlenecks: ${deepResult.processMining.bottleneckSteps.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.predictiveStaffing.hiringNeeds.length > 0) {
+            parts.push(`hiring needs: ${deepResult.predictiveStaffing.hiringNeeds.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.predictiveStaffing.retentionRisks.length > 0) {
+            parts.push(`retention risks: ${deepResult.predictiveStaffing.retentionRisks.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.knowledgeTransfer.transferScore > 0) {
+            parts.push(`knowledge transfer score: ${(deepResult.knowledgeTransfer.transferScore * 100).toFixed(0)}%`);
+          }
+          return parts.length > 0
+            ? `Operational intelligence (L22-L24): ${parts.join('. ')}.`
+            : `Operational intelligence (L22-L24): ${deepResult.processMining.workflowsDiscovered} workflows discovered.`;
+        })(),
+        metadata: {
+          knowledgeGaps: deepResult.knowledgeTransfer.knowledgeGaps,
+          silosFound: deepResult.knowledgeTransfer.silosFound,
+          transferScore: deepResult.knowledgeTransfer.transferScore,
+          bottleneckSteps: deepResult.processMining.bottleneckSteps,
+          workflowsDiscovered: deepResult.processMining.workflowsDiscovered,
+          hiringNeeds: deepResult.predictiveStaffing.hiringNeeds,
+          retentionRisks: deepResult.predictiveStaffing.retentionRisks,
+          skillGaps: deepResult.predictiveStaffing.skillGaps,
+          capacityForecast: deepResult.predictiveStaffing.capacityForecast,
+        },
+      },
+
+      // PREFRONTAL (L25-L27): Meta-cognition — competitive intel, decision audit, learning rate
+      {
+        domain: 'deep_brain.prefrontal',
+        memory_type: 'insight',
+        cognitive_layer: 'L25-L27',
+        importance: 0.80,
+        content: (() => {
+          const parts: string[] = [];
+          if (deepResult.decisionAudit.lessonsLearned.length > 0) {
+            parts.push(`lessons learned: ${deepResult.decisionAudit.lessonsLearned.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.competitiveIntel.marketTrends.length > 0) {
+            parts.push(`market trends: ${deepResult.competitiveIntel.marketTrends.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.competitiveIntel.competitiveThreats.length > 0) {
+            parts.push(`competitive threats: ${deepResult.competitiveIntel.competitiveThreats.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.orgLearningRate.improvementAreas.length > 0) {
+            parts.push(`improvement areas: ${deepResult.orgLearningRate.improvementAreas.slice(0, 2).join('; ')}`);
+          }
+          return parts.length > 0
+            ? `Decision & learning meta (L25-L27): ${parts.join('. ')}. Org maturity: ${deepResult.orgLearningRate.maturityLevel}.`
+            : `Decision & learning meta (L25-L27): org maturity level ${deepResult.orgLearningRate.maturityLevel}, learning velocity ${deepResult.orgLearningRate.learningVelocity.toFixed(2)}.`;
+        })(),
+        metadata: {
+          maturityLevel: deepResult.orgLearningRate.maturityLevel,
+          learningVelocity: deepResult.orgLearningRate.learningVelocity,
+          repeatMistakes: deepResult.orgLearningRate.repeatMistakes,
+          improvementAreas: deepResult.orgLearningRate.improvementAreas,
+          lessonsLearned: deepResult.decisionAudit.lessonsLearned,
+          decisionQuality: deepResult.decisionAudit.decisionQuality,
+          marketTrends: deepResult.competitiveIntel.marketTrends,
+          competitiveThreats: deepResult.competitiveIntel.competitiveThreats,
+        },
+      },
+
+      // CORPUS CALLOSUM (L28-L30): Wisdom — cross-org patterns, interventions, principles
+      {
+        domain: 'deep_brain.corpus_callosum',
+        memory_type: 'insight',
+        cognitive_layer: 'L28-L30',
+        importance: 0.90,
+        content: (() => {
+          const parts: string[] = [];
+          if (deepResult.interventions.recommended.length > 0) {
+            const top = deepResult.interventions.recommended
+              .slice(0, 2)
+              .map(i => `${i.action} (${i.sourceDomain}→${i.targetDomain}, impact: ${(i.expectedImpact * 100).toFixed(0)}%)`);
+            parts.push(`interventions: ${top.join('; ')}`);
+          }
+          if (deepResult.wisdom.culturalPatterns.length > 0) {
+            parts.push(`cultural patterns: ${deepResult.wisdom.culturalPatterns.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.wisdom.longTermTrends.length > 0) {
+            parts.push(`long-term trends: ${deepResult.wisdom.longTermTrends.slice(0, 2).join('; ')}`);
+          }
+          if (deepResult.crossOrgTransfer.patternsAbsorbed > 0) {
+            parts.push(`${deepResult.crossOrgTransfer.patternsAbsorbed} cross-org patterns absorbed`);
+          }
+          return parts.length > 0
+            ? `Wisdom & interventions (L28-L30): ${parts.join('. ')}.`
+            : `Wisdom & interventions (L28-L30): ${deepResult.wisdom.principlesLearned} principles learned, ${deepResult.wisdom.organizationalMemories} org memories.`;
+        })(),
+        metadata: {
+          interventionsRecommended: deepResult.interventions.recommended.slice(0, 5),
+          culturalPatterns: deepResult.wisdom.culturalPatterns,
+          longTermTrends: deepResult.wisdom.longTermTrends,
+          principlesLearned: deepResult.wisdom.principlesLearned,
+          organizationalMemories: deepResult.wisdom.organizationalMemories,
+          crossOrgPatternsAbsorbed: deepResult.crossOrgTransfer.patternsAbsorbed,
+          transferEffectiveness: deepResult.crossOrgTransfer.transferEffectiveness,
+        },
+      },
+    ];
+
+    // Upsert all 5 insights. ON CONFLICT on (organization_id, memory_type, domain)
+    // keeps the table bounded — each region always has exactly 1 row per org.
+    await supabase
+      .from('ai_memory')
+      .upsert(
+        insights.map(insight => ({
+          organization_id: organizationId,
+          domain: insight.domain,
+          memory_type: insight.memory_type,
+          content: insight.content,
+          importance: insight.importance,
+          cognitive_layer: insight.cognitive_layer,
+          metadata: { ...insight.metadata, generatedAt: now },
+          updated_at: now,
+        })),
+        { onConflict: 'organization_id,memory_type,domain' }
+      );
+  }
+
+  /**
    * Build DeepCycleInput from CognitiveCycleResult + raw signals.
    * This bridges the output of L1-L15 into the input for L16-L30.
    */
@@ -564,6 +798,14 @@ export function createDeepPipeline(config: DeepPipelineConfig): DeepPipelineInst
           // Best-effort — never block the cycle on persistence failure
         }
       }
+
+      // ════════════════════════════════════════════════
+      // PHASE 8: PERSIST L16-L30 INSIGHTS TO ai_memory
+      // Makes deep layer outputs accessible to Copilot
+      // via getUniversalContext() without any code changes
+      // to the query path. Fire-and-forget — never blocks.
+      // ════════════════════════════════════════════════
+      _persistDeepLayerInsights(deepResult).catch(() => {});
 
       // ════════════════════════════════════════════════
       // RETURN COMPLETE FULL-CYCLE RESULT

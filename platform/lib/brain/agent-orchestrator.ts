@@ -84,6 +84,10 @@ export interface OrgAgentState {
   /** Brain signal count from brain_evolution_snapshots */
   brainSignalCount: number;
   waitingJobs: WaitingEntry[];
+  /** Active connector types for this org (e.g. ['github', 'jira']) */
+  activeConnectors: string[];
+  /** Average agent quality per domain from recent prediction_records (0–1 scale) */
+  domainQualityMap: Record<string, number>;
 }
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
@@ -130,7 +134,7 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   }).catch(() => 0); // non-fatal — default to 0 if unavailable
 
   // Parallel queries for efficiency
-  const [runningRes, pendingRes, waitingRes, brainRes] = await Promise.all([
+  const [runningRes, pendingRes, waitingRes, brainRes, connectorsRes, qualityRes] = await Promise.all([
     // Running jobs for this org
     supabase
       .from("agent_queue")
@@ -165,21 +169,39 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
       .eq("organization_id", orgId)
       .order("snapshot_date", { ascending: false })
       .limit(30),
+
+    // Active connectors for this org (non-fatal addition)
+    Promise.resolve(
+      supabase
+        .from("org_connectors")
+        .select("connector_type, status")
+        .eq("organization_id", orgId)
+    ).catch(() => ({ data: null, error: null })),
+
+    // Recent per-domain quality from prediction_records (non-fatal addition)
+    Promise.resolve(
+      supabase
+        .from("prediction_records")
+        .select("domain, confidence")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .limit(20)
+    ).catch(() => ({ data: null, error: null })),
   ]);
 
-  const runningJobs: RunningJob[] = (runningRes.data ?? []).map((j) => ({
+  const runningJobs: RunningJob[] = (runningRes.data ?? []).map((j: { id: string; task_type: string; started_at: string | null }) => ({
     id: j.id,
     taskType: j.task_type,
     startedAt: j.started_at ?? new Date().toISOString(),
   }));
 
-  const pendingJobs: PendingJob[] = (pendingRes.data ?? []).map((j) => ({
+  const pendingJobs: PendingJob[] = (pendingRes.data ?? []).map((j: { id: string; task_type: string; created_at: string | null }) => ({
     id: j.id,
     taskType: j.task_type,
     createdAt: j.created_at ?? new Date().toISOString(),
   }));
 
-  const waitingJobs: WaitingEntry[] = (waitingRes.data ?? []).map((w) => ({
+  const waitingJobs: WaitingEntry[] = (waitingRes.data ?? []).map((w: { job_id: string; depends_on_job_id: string; depends_on_type: string; created_at: string | null }) => ({
     jobId: w.job_id,
     dependsOnJobId: w.depends_on_job_id,
     dependsOnType: w.depends_on_type,
@@ -189,9 +211,43 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
   // Brain signal count
   const snapshots = brainRes.data ?? [];
   const brainSignalCount = snapshots.reduce(
-    (sum, s) => sum + (s.total_predictions ?? 0),
+    (sum: number, s: { total_predictions: number | null }) => sum + (s.total_predictions ?? 0),
     0
   );
+
+  // Active connectors — connector_type values where status is active/connected (non-fatal)
+  const activeConnectors: string[] = (() => {
+    try {
+      return (connectorsRes.data ?? [])
+        .filter((c: { connector_type: string; status: string }) =>
+          c.status === "active" || c.status === "connected"
+        )
+        .map((c: { connector_type: string; status: string }) => c.connector_type);
+    } catch {
+      return [];
+    }
+  })();
+
+  // Per-domain average quality from recent prediction_records (non-fatal)
+  const domainQualityMap: Record<string, number> = (() => {
+    try {
+      const rows = qualityRes.data ?? [];
+      const sums: Record<string, { total: number; count: number }> = {};
+      for (const row of rows as Array<{ domain: string; confidence: number }>) {
+        if (!row.domain) continue;
+        if (!sums[row.domain]) sums[row.domain] = { total: 0, count: 0 };
+        sums[row.domain].total += row.confidence ?? 0;
+        sums[row.domain].count += 1;
+      }
+      const result: Record<string, number> = {};
+      for (const [domain, { total, count }] of Object.entries(sums)) {
+        result[domain] = count > 0 ? total / count : 0;
+      }
+      return result;
+    } catch {
+      return {};
+    }
+  })();
 
   // Resolve workspace config (may have been started concurrently above)
   const [workspace, brainIq] = await Promise.all([workspacePromise, brainIqPromise]);
@@ -232,6 +288,8 @@ export async function getOrgAgentState(orgId: string): Promise<OrgAgentState> {
     brainReadiness,
     brainSignalCount,
     waitingJobs,
+    activeConnectors,
+    domainQualityMap,
   };
 }
 

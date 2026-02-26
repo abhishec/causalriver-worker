@@ -101,6 +101,15 @@ interface CachedLearningPulse {
 }
 const _learningPulseCache = new Map<string, CachedLearningPulse>();
 
+// ── NB-065/NB-063: Federated learning TTL guards (copilot path) ──────────────
+// Module-level so they persist across requests within the same Lambda instance.
+// _corePushLastMs: CORE → ORG insight injection (pushCoreInsightsToOrg)
+// _deltaLastMs:    ORG → CORE causal delta promotion (computeAndPromoteCausalDeltas)
+const _copilotCorePushLastMs = new Map<string, number>();
+const _copilotDeltaLastMs = new Map<string, number>();
+const COPILOT_CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes — matches domain-executor
+const COPILOT_DELTA_INTERVAL_MS = 5 * 60 * 1000;      // 5 minutes — max once per 5 min per org
+
 /** Rough token estimate: ~4 chars per token for English text */
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
@@ -3832,6 +3841,19 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       if (!brainCtx) throw new Error("getBrainContext timed out");
       brainIqForRouting = brainCtx.brainIq;
 
+      // ── NB-065: Pull CORE insights into this org (fire-and-forget) ──────────
+      // Ensures the copilot benefits from learnings across all orgs, same as the
+      // SE-aaS domain executor's Step 0.5. TTL guard: max once per 10 min per org.
+      if ((Date.now() - (_copilotCorePushLastMs.get(workspaceId) ?? 0)) >= COPILOT_CORE_PUSH_INTERVAL_MS) {
+        _copilotCorePushLastMs.set(workspaceId, Date.now()); // set before call to avoid races
+        try {
+          const { pushCoreInsightsToOrg } = await import("@nexus-ai/memory-stack");
+          pushCoreInsightsToOrg(workspaceId, service as any).catch((e: unknown) =>
+            logger.warn("[Copilot] Core insight pull failed (non-fatal):", e instanceof Error ? e.message : String(e))
+          );
+        } catch { /* non-fatal — federation never blocks the response */ }
+      }
+
       if (brainCtx.brainState !== "empty") {
         effectiveSystemPrompt += `\n\n## Brain Context\n- IQ Score: ${brainCtx.brainIq}\n- Quality Patterns (last 24h): ${brainCtx.qualityPatternsSummary ?? "No data"}\n- Active Signals: ${brainCtx.signalCount}\n${brainCtx.contextSummary}`;
       } else if (brainCtx.activeJobCount > 0 || brainCtx.pendingJobCount > 0) {
@@ -3953,6 +3975,17 @@ No connectors are configured yet. When the user asks for data from any source (S
 
     const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
     const streamStartMs = Date.now();
+
+    // ── NB-063: Snapshot causal weights BEFORE stream for federation delta ───
+    // Mirror of domain-executor Step 0: capture the org's causal graph state
+    // right now so that after the stream we can diff what changed and promote
+    // only the deltas to CORE. Fire-and-forget if it fails — never blocks stream.
+    let _copilotCausalWeightsBefore: Map<string, number> = new Map();
+    const _copilotFedCycleId = `copilot_${workspaceId.slice(0, 8)}_${Date.now()}`;
+    try {
+      const { snapshotCausalWeights } = await import("@nexus-ai/memory-stack");
+      _copilotCausalWeightsBefore = await snapshotCausalWeights(service, workspaceId);
+    } catch { /* non-fatal — federation is best-effort */ }
 
     // ── Brain RL: Fire pre-stream interaction signal ────────────────────────
     // Must fire BEFORE the async IIFE so signal is captured even if the client
@@ -4335,6 +4368,44 @@ No connectors are configured yet. When the user asks for data from any source (S
           }).catch((rlErr: unknown) => logger.warn('[Copilot] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr)));
         } catch (rlErr: unknown) {
           logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
+        }
+
+        // ── NB-063: Push causal learnings from this interaction to CORE ───────
+        // Mirror of domain-executor Step 7: after the feedback bus fires and
+        // triggerEvolution() has potentially updated causal edge weights, compute
+        // what changed vs the pre-stream snapshot and promote only the deltas to CORE.
+        // TTL guard: max once per 5 minutes per org to prevent per-request federation overhead.
+        if (
+          _copilotCausalWeightsBefore.size > 0 &&
+          (Date.now() - (_copilotDeltaLastMs.get(workspaceId) ?? 0)) >= COPILOT_DELTA_INTERVAL_MS
+        ) {
+          _copilotDeltaLastMs.set(workspaceId, Date.now());
+          (async () => {
+            try {
+              const { computeAndPromoteCausalDeltas } = await import("@nexus-ai/memory-stack");
+              const _fedResult = await computeAndPromoteCausalDeltas(
+                service,
+                workspaceId,
+                _copilotCausalWeightsBefore,
+                _copilotFedCycleId,
+                {
+                  fedAvgLearningRate: 0.3,
+                  maxDelta: 0.15,
+                  minDelta: 0.01,
+                  minSampleSize: 10,
+                  maxPairsPerRun: 20,
+                },
+              );
+              logger.debug(
+                `[Copilot federation] org=${workspaceId.slice(0, 8)} ` +
+                `applied=${_fedResult.deltasApplied} filtered=${_fedResult.deltasFiltered} ` +
+                `newPairs=${_fedResult.newPairsAdded} updatedPairs=${_fedResult.existingPairsUpdated} ` +
+                `took=${_fedResult.durationMs}ms`
+              );
+            } catch (e: unknown) {
+              logger.warn("[Copilot] Causal delta promotion failed (non-fatal):", e instanceof Error ? e.message : String(e));
+            }
+          })();
         }
 
         // ── Notify OpenClaw gateway of conversation completion ──────
