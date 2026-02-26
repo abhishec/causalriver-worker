@@ -59,6 +59,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${redirectBase}/login`);
     }
 
+    // Verify that orgId from state belongs to the authenticated user.
+    // Prevents CSRF-style attacks where a crafted state targets another org's ID.
+    const { data: membership, error: membershipError } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("organization_id", orgId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (membershipError || !membership) {
+      logger.warn(`[GitHub App Callback] User ${user.id} is not a member of org ${orgId}`);
+      return NextResponse.redirect(
+        `${redirectBase}/connectors?error=${encodeURIComponent("Invalid organization — please try again")}`
+      );
+    }
+
     const admin = getAdminClient();
 
     // Fetch installation info from GitHub
