@@ -99,11 +99,26 @@ empty    → No connector data ingested yet
            → Queue brain-population job first
 populating → Connector sync running
            → Queue domain job with dependency on brain-population
-ready    → signal_count ≥ brain_readiness_threshold (default 10)
+ready    → signal_count ≥ Brain Learning Threshold (default 10)
            → Execute domain immediately
 ```
 
 **Code location**: `platform/lib/brain/agent-orchestrator.ts` → `getBrainReadinessState()`
+
+### Brain Learning Threshold
+
+The **Brain Learning Threshold** is the minimum number of signals the brain must collect before it can execute domain queries. It is a per-workspace setting configurable by workspace admins.
+
+| Setting | Value | Effect |
+|---------|-------|--------|
+| **Brain Learning Threshold** = 5 | Minimum | Brain activates faster, may have lower initial accuracy |
+| **Brain Learning Threshold** = 10 | Default | Balanced: enough data for reliable first responses |
+| **Brain Learning Threshold** = 50 | Maximum | Highest accuracy before first response, longer ramp-up |
+
+- **API**: `GET /api/workspace/ai-worker-config` returns `{ brainReadinessMinIq, brainSignalCount }`
+- **PATCH** `{ brainReadinessMinIq: number }` updates the threshold (admin/owner only, clamped 5–50)
+- **UI**: Settings → Brain Learning Threshold slider (step: 5, range: 5–50)
+- **Storage**: `ai_workspace.orchestratorConfig.brainReadinessMinIq`
 
 ---
 
@@ -672,7 +687,7 @@ No raw data ever crosses org boundaries. Only aggregated statistical patterns (c
 File: platform/lib/aas/domain-executor.ts → pushCoreInsightsToOrg()
 
 Trigger: Every AaaS execution (throttled: max once per 10 min per org)
-Source:  CORE Brain (special org_id: 00000000-0000-0000-0000-000000000000)
+Source:  CORE Brain (special reserved org_id — the CORE Brain sentinel, set at deployment time via env var CORE_BRAIN_ORG_ID)
 Filter:  Only patterns with evidence_weight ≥ 10 AND effect_size ≥ 0.7
          (strong, proven patterns only — no noise)
 Method:  Upsert into org's causal_relationships_statistical with IS_CORE_PRIOR flag
