@@ -193,24 +193,40 @@ export async function saveArtifact(
   supabase: SupabaseClient,
   params: SaveArtifactParams
 ): Promise<{ artifactId: string }> {
+  const payload = {
+    organization_id: params.organizationId,
+    job_id: params.jobId ?? null,
+    domain_type: params.domainType,
+    artifact_data: params.artifactData,
+    metadata: params.metadata ?? {},
+    created_by: params.createdBy ?? null,
+  };
+
+  // Attempt 1
   const { data, error } = await supabase
     .from("se_aas_artifacts")
-    .insert({
-      organization_id: params.organizationId,
-      job_id: params.jobId ?? null,
-      domain_type: params.domainType,
-      artifact_data: params.artifactData,
-      metadata: params.metadata ?? {},
-      created_by: params.createdBy ?? null,
-    })
+    .insert(payload)
     .select("id")
     .single();
 
-  if (error || !data) {
-    throw new Error(`Failed to save artifact: ${error?.message || "no data"}`);
+  if (!error && data) {
+    return { artifactId: data.id };
   }
 
-  return { artifactId: data.id };
+  // Retry once after 1 second (handles transient DB hiccups)
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+  const { data: retryData, error: retryError } = await supabase
+    .from("se_aas_artifacts")
+    .insert(payload)
+    .select("id")
+    .single();
+
+  if (retryError || !retryData) {
+    throw new Error(`Failed to save artifact (after retry): ${retryError?.message || "no data"}`);
+  }
+
+  logger.info(`[saveArtifact] Saved on retry for job ${params.jobId ?? "none"}`);
+  return { artifactId: retryData.id };
 }
 
 /**

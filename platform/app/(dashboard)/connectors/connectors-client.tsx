@@ -118,6 +118,34 @@ export function ConnectorsClient({
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ type: string; success: boolean; message: string } | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
+  const [freshworksDomain, setFreshworksDomain] = useState("");
+  const [showFreshworksInput, setShowFreshworksInput] = useState(false);
+
+  // Health data: per-type polling every 60s to show live last-sync + auth method
+  const [healthMap, setHealthMap] = useState<Record<string, {
+    lastSyncAt: string | null;
+    signalsCount: number;
+    errorMessage: string | null;
+    authMethod: string | null;
+  }>>({});
+
+  useEffect(() => {
+    const fetchHealth = () => {
+      fetch("/api/connectors/health")
+        .then((r) => r.ok ? r.json() : [])
+        .then((rows: Array<{ type: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null }>) => {
+          const m: typeof healthMap = {};
+          for (const row of rows) {
+            m[row.type] = { lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod };
+          }
+          setHealthMap(m);
+        })
+        .catch(() => {/* non-fatal */});
+    };
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   const activeDomains = new Set(activeDomainsList);
   const activeInstances = connectorInstances.filter((c) => c.status === "active");
@@ -139,7 +167,9 @@ export function ConnectorsClient({
       const messages: Record<string, string> = {
         slack_connected: "Slack connected successfully",
         jira_connected: "Jira site connected successfully",
-        github_connected: "GitHub account connected successfully",
+        github_connected: "GitHub account connected via OAuth",
+        github_app_installed: "GitHub App installed — org-level access enabled",
+        freshdesk_connected: "Freshdesk connected successfully",
       };
       setMessage({ type: "success", text: messages[success] || "Connector connected!" });
       window.history.replaceState({}, "", "/connectors");
@@ -369,6 +399,7 @@ export function ConnectorsClient({
               const isTesting = testingConnection === instance.id;
               const currentTestResult = testResult?.type === instance.id ? testResult : null;
               const instanceLabel = instance.displayName || instance.instanceName;
+              const health = healthMap[instance.connectorType];
 
               return (
                 <Card key={instance.id} variant="interactive">
@@ -400,6 +431,11 @@ export function ConnectorsClient({
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium">
                             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                             RL Active
+                          </span>
+                        )}
+                        {health?.authMethod === "github_app" && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-medium">
+                            GitHub App
                           </span>
                         )}
                       </div>
@@ -512,6 +548,17 @@ export function ConnectorsClient({
 
                     {/* Actions */}
                     <div className="flex flex-col gap-1.5 shrink-0">
+                      {instance.status === "error" && (
+                        <button
+                          onClick={() => handleOAuthConnect(instance.connectorType)}
+                          className="px-3 py-1.5 rounded-lg bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 transition-colors flex items-center gap-1.5"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Reconnect
+                        </button>
+                      )}
                       <button
                         onClick={() => handleTestConnection(instance.connectorType, instance.id)}
                         disabled={isTesting}
@@ -641,22 +688,21 @@ export function ConnectorsClient({
                       {isGitHub ? (
                         <>
                           <button
-                            onClick={() => setShowSetupModal(true)}
-                            className="flex-1 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors flex items-center justify-center gap-1.5"
+                            onClick={() => { window.location.href = "/api/connectors/github/app-install"; }}
+                            className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                            title="Org-level access, no tokens needed"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            Token + Branches
+                            Install App
                           </button>
                           <button
-                            onClick={() => handleOAuthConnect("github")}
-                            className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                            onClick={() => setShowSetupModal(true)}
+                            className="py-2 px-3 rounded-lg bg-surface border border-border-subtle text-xs font-medium hover:bg-surface-hover transition-colors"
+                            title="Manual token + branch selection"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                            OAuth
+                            Token
                           </button>
                         </>
                       ) : connector.type === "jira" ? (
@@ -680,6 +726,54 @@ export function ConnectorsClient({
                             OAuth
                           </button>
                         </>
+                      ) : connector.type === "freshdesk" ? (
+                        showFreshworksInput ? (
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={freshworksDomain}
+                              onChange={(e) => setFreshworksDomain(e.target.value)}
+                              placeholder="acme.freshdesk.com"
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-surface border border-border text-xs placeholder:text-muted/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && freshworksDomain.trim()) {
+                                  window.location.href = `/api/connectors/freshworks/auth?domain=${encodeURIComponent(freshworksDomain.trim())}`;
+                                }
+                                if (e.key === "Escape") setShowFreshworksInput(false);
+                              }}
+                            />
+                            <div className="flex gap-1.5">
+                              <button
+                                onClick={() => {
+                                  if (freshworksDomain.trim()) {
+                                    window.location.href = `/api/connectors/freshworks/auth?domain=${encodeURIComponent(freshworksDomain.trim())}`;
+                                  }
+                                }}
+                                disabled={!freshworksDomain.trim()}
+                                className="flex-1 py-1.5 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
+                              >
+                                Connect →
+                              </button>
+                              <button
+                                onClick={() => setShowFreshworksInput(false)}
+                                className="py-1.5 px-2.5 rounded-lg bg-surface border border-border-subtle text-xs hover:bg-surface-hover transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setShowFreshworksInput(true)}
+                            className="w-full py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Connect with OAuth
+                          </button>
+                        )
                       ) : (
                         <button
                           onClick={() => handleOAuthConnect(connector.type)}

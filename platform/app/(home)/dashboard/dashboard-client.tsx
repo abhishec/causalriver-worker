@@ -7,6 +7,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import type { WorkspaceMembership, CustomerInfo } from "@/lib/workspace-context";
 import { createBrowserClient } from "@supabase/ssr";
 import { logger } from "@/lib/logger";
+import { AgentLiveMonitor } from "@/components/dashboard/AgentLiveMonitor";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -947,6 +948,11 @@ export function DashboardClient() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Agent Live Monitor — real-time SE-aaS job tracker */}
+            {activeWorkspaces.length > 0 && (
+              <AgentLiveMonitor orgId={activeWorkspaces[0].workspace.id} />
             )}
 
             {/* AI Worker Cards */}
