@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { getLearningStats } from "@/lib/brain/agent-rl";
 
 // Must be force-dynamic: reads cookies for auth + workspace context on every request.
 // Without this, Next.js 15 tries to statically prerender the route and fails.
@@ -114,6 +116,10 @@ export async function GET(req: NextRequest) {
 
     const improvementThisSession = feedbackTotal > 0 ? Math.round((feedbackHelpful / feedbackTotal) * 100) : 0;
 
+    // ── Learning stats from agent task outcomes ───────────────────────────
+    const admin = getAdminClient();
+    const learningStats = await getLearningStats(admin, workspaceId).catch(() => null);
+
     return NextResponse.json({
       signalsThisHour,
       signalsThisSession,
@@ -127,6 +133,8 @@ export async function GET(req: NextRequest) {
       positiveFeedbacks: feedbackHelpful,
       recentSignals: recentSignalsResult.data ?? [],
       queueDepth: queueResult.count ?? 0,
+      // Agent task learning stats (from prediction_records)
+      learningStats: learningStats ?? null,
     });
   } catch (err) {
     logger.error("[rl-status] Error:", err);

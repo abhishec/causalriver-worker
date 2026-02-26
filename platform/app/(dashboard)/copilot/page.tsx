@@ -23,6 +23,7 @@ import { COMMAND_GATHERING_MAP } from "@/components/copilot/command-gathering";
 import { SmartSuggestionCard } from "@/components/copilot/SmartSuggestionCard";
 import type { SmartSuggestion } from "@/components/copilot/SmartSuggestionCard";
 import { useSmartSuggestions } from "@/lib/hooks/useSmartSuggestions";
+import { ContextMonitor } from "@/components/copilot/ContextMonitor";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -583,9 +584,64 @@ function CopilotPageInner() {
     };
   }, []);
 
+  // ── Context Monitor: track messages for token display ─────────────────────
+  const [contextMessages, setContextMessages] = useState<Array<{ role: string; content: string }>>([]);
+
+  // Sync messages from chatRef every 2s — lightweight, no component changes needed
+  useEffect(() => {
+    const syncMessages = () => {
+      if (chatRef.current && typeof chatRef.current.getCurrentMessages === "function") {
+        const msgs = chatRef.current.getCurrentMessages();
+        if (msgs && msgs.length > 0) {
+          setContextMessages(msgs);
+        }
+      }
+    };
+    const intervalId = setInterval(syncMessages, 2_000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Also sync immediately after every save (stream completes) via handleSave override below
+
+  const handleCompress = useCallback(async () => {
+    if (!currentWorkspace?.id || contextMessages.length === 0) return;
+    try {
+      const res = await fetch("/api/copilot/context/compress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: contextMessages,
+          orgId: currentWorkspace.id,
+        }),
+      });
+      if (!res.ok) {
+        logger.error("[CopilotPage] Context compress API error:", res.status);
+        return;
+      }
+      const { compressed } = await res.json() as {
+        compressed: Array<{ role: string; content: string }>;
+        summary: string;
+        tokensSaved: number;
+      };
+      if (compressed && compressed.length > 0) {
+        // Reload the chat with compressed messages via the existing load-conversation event
+        window.dispatchEvent(new CustomEvent("copilot-load-conversation", {
+          detail: { messages: compressed, title: "Compressed conversation" },
+        }));
+        setContextMessages(compressed);
+      }
+    } catch (err) {
+      logger.error("[CopilotPage] handleCompress failed:", err);
+    }
+  }, [contextMessages, currentWorkspace?.id]);
+
   // ── Auto-save conversation after stream completes ─────────────────────────
   const handleSave = useCallback(async (opts: { messages: any[]; title: string; serviceMode: string }) => {
     const svcMode = (["general", "aas", "seaas"].includes(opts.serviceMode) ? opts.serviceMode : "general") as "general" | "aas" | "seaas";
+    // Sync context messages immediately on every save (stream end)
+    if (opts.messages && opts.messages.length > 0) {
+      setContextMessages(opts.messages);
+    }
     try {
       const id = await saveConversation({
         conversationId: activeConversationId || undefined,
@@ -765,6 +821,15 @@ function CopilotPageInner() {
               onCreateAgent={() => setShowComposer(true)}
             />
           </ErrorBoundary>
+          {/* ── Context Monitor: token usage + compress ────────────────── */}
+          {contextMessages.length >= 4 && (
+            <div className="shrink-0 border-t border-border-subtle bg-background/80 backdrop-blur-sm">
+              <ContextMonitor
+                messages={contextMessages}
+                onCompress={handleCompress}
+              />
+            </div>
+          )}
         </div>
 
         {/* ── Right: Artifact Pane OR Empty state ─────────────────────── */}

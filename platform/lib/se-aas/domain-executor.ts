@@ -17,6 +17,8 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
+import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -143,6 +145,18 @@ export async function executeDomain(
   const info = getDomainInfo(params.domainType);
   if (!info) {
     throw new Error(`Unknown domain: ${params.domainType}`);
+  }
+
+  // ── Step -1: RL Context Priming — inject learned patterns from case-log ──
+  // Non-blocking: if case-log read fails, execution continues unaffected.
+  const caseLogContext = getCaseLogContext({
+    agentType: params.domainType,
+    prompt: JSON.stringify(params.request).slice(0, 200),
+    orgId: params.organizationId,
+  });
+  if (caseLogContext) {
+    // Inject into request so domain Claude prompts can reference past patterns
+    (params.request as Record<string, unknown>)["_caseLogContext"] = caseLogContext;
   }
 
   // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
@@ -369,6 +383,34 @@ export async function executeDomain(
       logger.warn('[SE-AAS federation] Delta promotion failed (non-fatal):', err?.message);
     }
   })();
+
+  // ── Step 8: RL Outcome Recording ─────────────────────────────────────────
+  // Record task quality to prediction_records + cross_domain_signals.
+  // Also log a retro entry so the system accumulates learning history.
+  // Both are fire-and-forget — NEVER block the domain response.
+  const rlQuality = computeAgentQuality(JSON.stringify(result), null, durationMs);
+  const rlTaskId = `${params.domainType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
+
+  recordAgentOutcome(supabase, {
+    agentId: rlTaskId,
+    domain: params.domainType,
+    taskDescription: JSON.stringify(params.request).slice(0, 200),
+    resultSummary: JSON.stringify(result).slice(0, 500),
+    quality: rlQuality,
+    executionMs: durationMs,
+    organizationId: params.organizationId,
+    userId: params.userId,
+  }).catch(() => {/* non-fatal */});
+
+  logAgentRetro({
+    taskId: rlTaskId,
+    agentType: params.domainType,
+    prompt: JSON.stringify(params.request).slice(0, 100),
+    status: rlQuality >= 0.5 ? "completed" : "partial",
+    durationMs,
+    modelUsed: "claude-sonnet-4-6",
+    outputSummary: JSON.stringify(result).slice(0, 200),
+  }).catch(() => {/* non-fatal */});
 
   return {
     result: { ...result, timing: { totalMs: durationMs } },
