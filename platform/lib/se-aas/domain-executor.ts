@@ -19,7 +19,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
-import { selectModelForDomain } from "./model-router";
+import { selectModelForDomain, routeModelWithIq } from "./model-router";
+import {
+  buildAgentCommsPayload,
+  buildIntroSpeech,
+  buildCompletionSpeech,
+  buildErrorSpeech,
+} from "@/lib/agents/agent-comms";
+import type { AgentCommsPayload } from "@/lib/agents/agent-comms";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -125,6 +132,12 @@ export interface ExecuteDomainParams {
   anthropicApiKey?: string;
   /** Phase 3: LLM query interpretation for targeted context retrieval */
   interpretation?: import("@nexus-ai/memory-stack").QueryInterpretation;
+  /**
+   * Agent Communication Protocol callback.
+   * Called at key execution milestones with Heart/Mind/Speech payloads
+   * so the frontend can render live agent state updates.
+   */
+  onComms?: (payload: AgentCommsPayload) => void;
 }
 
 export interface ExecuteDomainResult {
@@ -146,6 +159,45 @@ export async function executeDomain(
   const info = getDomainInfo(params.domainType);
   if (!info) {
     throw new Error(`Unknown domain: ${params.domainType}`);
+  }
+
+  // ── Agent Communication Protocol setup ──────────────────────────────────
+  const agentId = `${params.domainType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
+  const agentType = `se-aas:${params.domainType}`;
+  const executionStartMs = Date.now();
+
+  const SE_AAS_PLAN_STEPS = [
+    "Step 0: Booting up — loading case-log priors and brain context",
+    "Step 1: Assembling brain context mesh",
+    "Step 2: Building domain execution context",
+    "Step 3: Executing domain analysis",
+    "Step 4: Saving artifact to workspace",
+    "Step 5: Running brain feedback loop",
+    "Step 6: Applying domain-specific side effects",
+    "Step 7: Federating causal learning to core brain",
+    "Step 8: Recording RL outcome and retro",
+  ];
+
+  // Emit intro comms — agent announces itself at startup
+  if (params.onComms) {
+    try {
+      params.onComms(buildAgentCommsPayload({
+        agentId,
+        agentType,
+        orgId: params.organizationId,
+        completedSteps: 0,
+        totalSteps: SE_AAS_PLAN_STEPS.length,
+        currentStepName: SE_AAS_PLAN_STEPS[0],
+        completedStepNames: [],
+        planSteps: SE_AAS_PLAN_STEPS,
+        progress: 5,
+        hasError: false,
+        elapsedMs: Date.now() - executionStartMs,
+        speech: buildIntroSpeech(agentType, params.request),
+      }));
+    } catch {
+      // Non-fatal — comms failure must never block domain execution
+    }
   }
 
   // ── Step -1: RL Context Priming — inject learned patterns from case-log ──
@@ -232,8 +284,17 @@ export async function executeDomain(
   // domain execute() functions can access deep brain reasoning without having
   // to dig into ctx.brain internals. Mirrors the AAS executor pattern where
   // both are unpacked directly into the ctx for easy agent consumption.
-  // Select model based on domain complexity (haiku for light, sonnet for heavy)
-  const selectedModel = selectModelForDomain(params.domainType);
+  //
+  // Brain IQ gate: downgrade to Haiku when Brain IQ < 10 (not enough signal
+  // for heavy reasoning). brainEvolution.intelligenceScore is 0–1; multiply
+  // by 100 to convert to the 0–100 IQ scale routeModelWithIq expects.
+  const rawIntelligenceScore = brainContext.brainEvolution?.intelligenceScore ?? 0;
+  const brainIqForRouting = Math.round(rawIntelligenceScore * 100);
+  const modelDecision = routeModelWithIq(params.domainType, brainIqForRouting);
+  const selectedModel = modelDecision.model;
+  if (modelDecision.brainCaveat) {
+    logger.debug(`[domain-executor] ${params.domainType}: ${modelDecision.brainCaveat}`);
+  }
 
   const ctx = {
     organizationId: params.organizationId,
@@ -259,9 +320,91 @@ export async function executeDomain(
   };
 
   // ── Step 3: Execute the domain ──────────────────────────────────────────
+  // Emit mid-execution comms — domain analysis is running
+  if (params.onComms) {
+    try {
+      params.onComms(buildAgentCommsPayload({
+        agentId,
+        agentType,
+        orgId: params.organizationId,
+        completedSteps: 3,
+        totalSteps: SE_AAS_PLAN_STEPS.length,
+        currentStepName: SE_AAS_PLAN_STEPS[3],
+        completedStepNames: SE_AAS_PLAN_STEPS.slice(0, 3),
+        planSteps: SE_AAS_PLAN_STEPS,
+        progress: 35,
+        hasError: false,
+        elapsedMs: Date.now() - executionStartMs,
+        speech: {
+          format: "intro",
+          headline: "Analyzing now.",
+          body: "Domain analysis is running with brain context.",
+          tone: "analytical",
+        },
+      }));
+    } catch {
+      // Non-fatal
+    }
+  }
+
   const startMs = Date.now();
-  const result = await info.domain.execute(ctx);
+  let result: Record<string, unknown>;
+  let domainError: string | null = null;
+  try {
+    result = await info.domain.execute(ctx);
+  } catch (domainExecErr: any) {
+    domainError = domainExecErr?.message ?? "Unknown domain execution error";
+    // Emit error comms before re-throwing
+    if (params.onComms) {
+      try {
+        params.onComms(buildAgentCommsPayload({
+          agentId,
+          agentType,
+          orgId: params.organizationId,
+          completedSteps: 3,
+          totalSteps: SE_AAS_PLAN_STEPS.length,
+          currentStepName: SE_AAS_PLAN_STEPS[3],
+          completedStepNames: SE_AAS_PLAN_STEPS.slice(0, 3),
+          planSteps: SE_AAS_PLAN_STEPS,
+          progress: 35,
+          hasError: true,
+          elapsedMs: Date.now() - executionStartMs,
+          speech: buildErrorSpeech(agentType, domainError ?? "Unknown error", SE_AAS_PLAN_STEPS.slice(0, 3)),
+        }));
+      } catch {
+        // Non-fatal
+      }
+    }
+    throw domainExecErr;
+  }
   const durationMs = Date.now() - startMs;
+
+  // Emit domain-complete comms — result ready, about to save artifact
+  if (params.onComms) {
+    try {
+      params.onComms(buildAgentCommsPayload({
+        agentId,
+        agentType,
+        orgId: params.organizationId,
+        completedSteps: 4,
+        totalSteps: SE_AAS_PLAN_STEPS.length,
+        currentStepName: SE_AAS_PLAN_STEPS[4],
+        completedStepNames: SE_AAS_PLAN_STEPS.slice(0, 4),
+        planSteps: SE_AAS_PLAN_STEPS,
+        progress: 60,
+        hasError: false,
+        elapsedMs: Date.now() - executionStartMs,
+        speech: {
+          format: "intro",
+          headline: "Domain answer ready. Saving artifact.",
+          body: "Analysis complete. Persisting the result to your workspace.",
+          tone: "analytical",
+        },
+      }));
+    } catch {
+      // Non-fatal
+    }
+  }
 
   // ── Step 4: Save artifact (non-blocking — artifact failure MUST NOT kill domain result) ──
   let artifactId: string | null = null;
@@ -273,8 +416,8 @@ export async function executeDomain(
       metadata: {
         durationMs,
         userId: params.userId,
-        claudePowered: result.data?.claudePowered ?? false,
-        brainAugmented: result.data?.brainAugmented ?? brainContext.cognitiveStackAvailable,
+        claudePowered: (result.data as Record<string, unknown>)?.claudePowered ?? false,
+        brainAugmented: (result.data as Record<string, unknown>)?.brainAugmented ?? brainContext.cognitiveStackAvailable,
         brainCausalEdgesUsed: brainContext.causalEdges?.length ?? 0,
         brainPatternsUsed: brainContext.patterns?.length ?? 0,
       },
@@ -430,6 +573,37 @@ export async function executeDomain(
     modelUsed: "claude-sonnet-4-6",
     outputSummary: JSON.stringify(result).slice(0, 200),
   }).catch(() => {/* non-fatal */});
+
+  // ── Final: Emit completion comms — full heart/mind/speech payload ─────────
+  // This is the most important comms emission: it gives the user the human-voice
+  // summary of what the agent found and a pointer to the artifact.
+  if (params.onComms) {
+    try {
+      const totalElapsed = Date.now() - executionStartMs;
+      const completionSpeech = buildCompletionSpeech(
+        agentType,
+        result,
+        artifactId ? [artifactId] : [],
+        totalElapsed,
+      );
+      params.onComms(buildAgentCommsPayload({
+        agentId,
+        agentType,
+        orgId: params.organizationId,
+        completedSteps: SE_AAS_PLAN_STEPS.length,
+        totalSteps: SE_AAS_PLAN_STEPS.length,
+        currentStepName: SE_AAS_PLAN_STEPS[SE_AAS_PLAN_STEPS.length - 1],
+        completedStepNames: [...SE_AAS_PLAN_STEPS],
+        planSteps: SE_AAS_PLAN_STEPS,
+        progress: 100,
+        hasError: false,
+        elapsedMs: totalElapsed,
+        speech: completionSpeech,
+      }));
+    } catch {
+      // Non-fatal — final comms must never block return
+    }
+  }
 
   return {
     result: { ...result, timing: { totalMs: durationMs } },

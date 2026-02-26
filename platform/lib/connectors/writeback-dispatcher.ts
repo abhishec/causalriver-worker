@@ -14,6 +14,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { executeWritebackAction } from "@/lib/connectors/writeback/index";
+import { getBrainContext } from "@/lib/brain/brain-context";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -206,6 +207,61 @@ function renderActionPayload(
     }
   }
   return result;
+}
+
+// ─── Brain-Context Retry Decision ─────────────────────────────────────────────
+
+/**
+ * Uses live brain signals to decide whether a failed write-back item is worth
+ * retrying, rather than relying solely on attempt count.
+ *
+ * Logic:
+ * - If Brain IQ is very low (<10) AND we've already tried once, the connector
+ *   data feeding the rule is likely stale — dead-letter early.
+ * - If the brain has active signals for the connector type, the connection is
+ *   probably live and worth another attempt (up to 3 total).
+ * - Falls back to simple attempt-count policy when brain context is unavailable.
+ *
+ * Never throws — returns a safe default on any error.
+ */
+export async function shouldRetryWriteback(
+  supabase: SupabaseClient,
+  orgId: string,
+  connectorType: string,
+  retryCount: number
+): Promise<{ shouldRetry: boolean; reason: string }> {
+  try {
+    const ctx = await getBrainContext(supabase, orgId);
+
+    // Brain IQ too low — connector data may be stale, don't retry aggressively
+    if (ctx.brainIq < 10 && retryCount >= 1) {
+      return {
+        shouldRetry: false,
+        reason: `Brain IQ ${ctx.brainIq} too low — connector data unreliable`,
+      };
+    }
+
+    // Active brain signals for this connector type suggest the connection is live
+    const hasConnectorSignals = ctx.topSignals.some(
+      s => s.domain.toLowerCase() === connectorType.toLowerCase()
+    );
+    if (hasConnectorSignals && retryCount < 3) {
+      return {
+        shouldRetry: true,
+        reason: `Active ${connectorType} signals suggest connection is live`,
+      };
+    }
+
+    return {
+      shouldRetry: retryCount < 2,
+      reason: "Default retry policy",
+    };
+  } catch {
+    return {
+      shouldRetry: retryCount < 2,
+      reason: "Brain context unavailable — default retry",
+    };
+  }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -437,8 +493,24 @@ export async function processWritebackQueue(
           .eq("id", item.id);
       } else {
         failed++;
-        const isDead = newAttempts >= 3;
+        // Brain-aware retry decision: consult brain signals before dead-lettering
+        const { shouldRetry, reason: retryReason } = await shouldRetryWriteback(
+          supabase,
+          item.organization_id,
+          item.connector_type,
+          newAttempts
+        );
+        const isDead = !shouldRetry;
         const nextStatus = isDead ? "dead_letter" : "pending";
+
+        logger.warn("[writeback-dispatcher] Retry decision:", {
+          itemId: item.id,
+          connectorType: item.connector_type,
+          attempts: newAttempts,
+          shouldRetry,
+          retryReason,
+          nextStatus,
+        });
 
         // Build the update object
         const updateObj: Record<string, unknown> = {

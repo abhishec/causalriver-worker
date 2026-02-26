@@ -19,6 +19,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
+import { getBrainContext } from "@/lib/brain/brain-context";
 import {
   CAPABILITIES_MANIFEST,
   findApplicableStrategies,
@@ -186,6 +187,9 @@ async function reExecuteDomain(
 
 /**
  * Ask Claude to reason about the best alternative approach given the failure.
+ * Accepts an optional recoveryContext string (brain state summary) injected
+ * into the system prompt so Claude can factor in brain readiness when choosing
+ * a recovery strategy.
  * Returns null if the API call fails or the response is unparseable.
  */
 async function consultClaude(
@@ -193,7 +197,8 @@ async function consultClaude(
   failureReason: string,
   emptyResult: boolean,
   connectedConnectors: Set<string>,
-  rlHistory: { avgQuality: number; successRate: number; totalOutcomes: number } | null
+  rlHistory: { avgQuality: number; successRate: number; totalOutcomes: number } | null,
+  recoveryContext?: string
 ): Promise<ClaudeSuggestion | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -213,6 +218,10 @@ async function consultClaude(
       ? `Past performance for this domain: ${rlHistory.totalOutcomes} executions, ${Math.round(rlHistory.successRate * 100)}% success rate, avg quality ${rlHistory.avgQuality}`
       : "No past RL history for this domain (new or rarely used)";
 
+    const brainContextSection = recoveryContext
+      ? `\n## Brain Context at Time of Failure\n${recoveryContext}\n\nUse this to understand if the failure was due to the brain not being ready, or if similar tasks succeeded recently.`
+      : "";
+
     const systemPrompt = `You are the Recovery Agent for BrainOS. Your job is to find the best alternative approach when an AI worker domain fails.
 You must respond with ONLY valid JSON matching this schema exactly:
 {
@@ -225,7 +234,7 @@ Where:
 - alternativeDomain: the domain ID to try instead (from the available domains list), or null if no good alternative exists
 - alternativeQuery: a brief description of what to query in the alternative domain (or "graceful degradation" if no alternative)
 - explanation: human-readable explanation of the recovery strategy (max 200 chars)
-- confidence: 0.0–1.0 probability this alternative will succeed`;
+- confidence: 0.0–1.0 probability this alternative will succeed${brainContextSection}`;
 
     const userPrompt = `FAILED DOMAIN: ${originalDomain}
 FAILURE TYPE: ${failureType}
@@ -238,6 +247,7 @@ Given this failure, what is the best alternative approach? Consider:
 1. Which alternative domain could answer a similar question?
 2. Are the required connectors available for that alternative?
 3. What is the realistic confidence this alternative will succeed?
+4. If the Brain IQ is low (from brain context above), factor that into your confidence — a low-IQ brain may not have enough data to support any domain reliably.
 
 If no viable alternative exists (confidence < 0.4), set alternativeDomain to null and use graceful-degradation.
 Respond with ONLY the JSON object.`;
@@ -391,10 +401,29 @@ export async function attemptRecovery(
     }
   }
 
-  // ── Step 2: Gather context (parallel) ─────────────────────────────────────
+  // ── Step 2: Gather context (parallel, including brain state) ─────────────
+  // Brain context is fetched alongside connector/RL data so all context is
+  // available in one round-trip before we consult Claude.
+  let recoveryContext = "";
   const [connectedConnectors, rlHistory] = await Promise.all([
     getConnectedConnectors(supabase, orgId),
     getDomainRLHistory(supabase, orgId, originalDomain),
+    // Fire-and-forget: populate recoveryContext as a side-effect
+    (async () => {
+      try {
+        const ctx = await getBrainContext(supabase, orgId);
+        recoveryContext =
+          `Brain state at failure: ${ctx.contextSummary}. ` +
+          `Active jobs: ${ctx.activeJobCount}. Brain IQ: ${ctx.brainIq}.`;
+        logger.warn("[recovery-agent] Brain context fetched:", {
+          brainIq: ctx.brainIq,
+          brainState: ctx.brainState,
+          activeJobCount: ctx.activeJobCount,
+        });
+      } catch {
+        // non-fatal — brain context is best-effort
+      }
+    })(),
   ]);
 
   // If RL history shows consistent failure (< 40% success), skip re-execution
@@ -412,13 +441,14 @@ export async function attemptRecovery(
     );
   }
 
-  // ── Step 3: Consult Claude ─────────────────────────────────────────────────
+  // ── Step 3: Consult Claude (with brain context injected) ──────────────────
   const claudeSuggestion = await consultClaude(
     originalDomain,
     failureReason,
     emptyResult,
     connectedConnectors,
-    rlHistory
+    rlHistory,
+    recoveryContext || undefined
   );
 
   // ── Step 4: Act on Claude's suggestion ────────────────────────────────────
