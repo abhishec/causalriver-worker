@@ -76,9 +76,19 @@ export interface QueryInterpretation {
   latencyMs: number;
 }
 
+/** Spec for an agent to be created via Copilot */
+export interface AgentSpec {
+  name: string;
+  description: string;
+  domain: 'delivery-intelligence' | 'early-warning' | 'pod-match' | 'scope-creep' | 'custom';
+  trigger: 'manual' | 'scheduled' | 'event';
+  schedule?: string; // cron expression
+  requiredInputs?: string[];
+}
+
 /** Service routing decision */
 export interface ServiceRouteDecision {
-  type: 'copilot' | 'se-aas' | 'aas' | 'general';
+  type: 'copilot' | 'se-aas' | 'aas' | 'create-agent' | 'general';
   /** SE-aaS domain to route to (e.g., 'sql-analyzer', 'test-case-generator') */
   seaasDomain?: string;
   /** Extracted input for SE-aaS domain execution */
@@ -87,6 +97,8 @@ export interface ServiceRouteDecision {
   aasDomain?: string;
   /** Extracted input for AAS agent execution */
   aasInput?: Record<string, unknown>;
+  /** Agent spec when type === 'create-agent' */
+  agentSpec?: AgentSpec;
 }
 
 /** An entity extracted from the query */
@@ -192,6 +204,16 @@ const CLASSIFIER_SYSTEM_PROMPT = `You are NexusBrain's query classifier. Given a
 SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa, pod-match, early-warning, scope-creep, delivery-intelligence
 AAS agents: bookkeeper, reconciler, statement-generator, tax-compliance, audit-preparer, anomaly-detective, causal-accountant
 Copilot: general intelligence queries about the business, strategy, metrics, forecasting
+Agent Creation: creating, deploying, setting up, or building AI agents/monitors/automations
+
+## Agent Creation Routing
+If user wants to CREATE, SET UP, BUILD, DEPLOY, or MAKE an AI agent, worker, automation, or monitor, return serviceRoute.type = "create-agent" with an agentSpec.
+Examples:
+- "Create an agent to monitor delivery health" → domain: delivery-intelligence, trigger: manual
+- "Set up alerts for flight risk engineers" → domain: early-warning, trigger: scheduled, schedule: "0 9 * * *"
+- "Build a weekly scope creep tracker" → domain: scope-creep, trigger: scheduled, schedule: "0 9 * * 1"
+- "Make an agent that recommends pods" → domain: pod-match, trigger: manual
+- "Deploy an automation to watch my engagements" → domain: delivery-intelligence, trigger: scheduled
 
 ## SE-aaS Routing Guide
 - SQL review/optimization → sql-analyzer
@@ -252,7 +274,7 @@ Set each flag based on what data the query actually needs:
 - needsFinancialEdges: query about financial causal relationships
 
 Output ONLY valid JSON matching this schema:
-{"intent":"<intent>","confidence":<0-1>,"domains":["<domain>"],"serviceRoute":{"type":"<copilot|se-aas|aas>","seaasDomain":"<optional>","aasDomain":"<optional>"},"complexity":{"score":<0-1>,"route":"<fast_query|action_domain|agent_orchestration>","reasoning":"<1 sentence>"},"entities":[{"type":"<pr|jira_ticket|person|metric|date_range|code_ref|account|domain>","value":"<extracted>","raw":"<span>"}],"requiredData":{"needsCausalEdges":<bool>,"needsPatterns":<bool>,"needsCascadeRules":<bool>,"needsEntityLinks":<bool>,"needsVelocityData":<bool>,"needsBottleneckData":<bool>,"needsSignals":<bool>,"needsPredictions":<bool>,"needsEvolution":<bool>,"needsCorrections":<bool>,"needsAccountingPatterns":<bool>,"needsFinancialEdges":<bool>}}`;
+{"intent":"<intent>","confidence":<0-1>,"domains":["<domain>"],"serviceRoute":{"type":"<copilot|se-aas|aas|create-agent>","seaasDomain":"<optional>","aasDomain":"<optional>","agentSpec":{"name":"<agent name if create-agent>","description":"<what it does>","domain":"<delivery-intelligence|early-warning|pod-match|scope-creep|custom>","trigger":"<manual|scheduled|event>","schedule":"<cron expression if scheduled, optional>"}},"complexity":{"score":<0-1>,"route":"<fast_query|action_domain|agent_orchestration>","reasoning":"<1 sentence>"},"entities":[{"type":"<pr|jira_ticket|person|metric|date_range|code_ref|account|domain>","value":"<extracted>","raw":"<span>"}],"requiredData":{"needsCausalEdges":<bool>,"needsPatterns":<bool>,"needsCascadeRules":<bool>,"needsEntityLinks":<bool>,"needsVelocityData":<bool>,"needsBottleneckData":<bool>,"needsSignals":<bool>,"needsPredictions":<bool>,"needsEvolution":<bool>,"needsCorrections":<bool>,"needsAccountingPatterns":<bool>,"needsFinancialEdges":<bool>}}`;
 
 // ============================================================================
 // LRU CACHE — Avoid repeat LLM calls for same queries
@@ -407,6 +429,14 @@ interface RawLLMResponse {
     type?: string;
     seaasDomain?: string;
     aasDomain?: string;
+    agentSpec?: {
+      name?: string;
+      description?: string;
+      domain?: string;
+      trigger?: string;
+      schedule?: string;
+      requiredInputs?: string[];
+    };
   };
   complexity?: {
     score?: number;
@@ -444,7 +474,22 @@ function validateAndNormalize(raw: RawLLMResponse, query: string, startMs: numbe
     const routeType = raw.serviceRoute?.type;
     const serviceRoute: ServiceRouteDecision = { type: 'copilot' };
 
-    if (routeType === 'se-aas' && raw.serviceRoute?.seaasDomain) {
+    if (routeType === 'create-agent') {
+      const rawSpec = raw.serviceRoute?.agentSpec;
+      const VALID_AGENT_DOMAINS = new Set(['delivery-intelligence', 'early-warning', 'pod-match', 'scope-creep', 'custom']);
+      const VALID_TRIGGERS = new Set(['manual', 'scheduled', 'event']);
+      const agentDomain = VALID_AGENT_DOMAINS.has(rawSpec?.domain || '') ? rawSpec?.domain as AgentSpec['domain'] : 'custom';
+      const agentTrigger = VALID_TRIGGERS.has(rawSpec?.trigger || '') ? rawSpec?.trigger as AgentSpec['trigger'] : 'manual';
+      serviceRoute.type = 'create-agent';
+      serviceRoute.agentSpec = {
+        name: rawSpec?.name || `${agentDomain} Agent`,
+        description: rawSpec?.description || query,
+        domain: agentDomain,
+        trigger: agentTrigger,
+        schedule: rawSpec?.schedule,
+        requiredInputs: rawSpec?.requiredInputs,
+      };
+    } else if (routeType === 'se-aas' && raw.serviceRoute?.seaasDomain) {
       const seaasDomain = raw.serviceRoute.seaasDomain;
       if (VALID_SEAAS_DOMAINS.has(seaasDomain)) {
         serviceRoute.type = 'se-aas';

@@ -24,6 +24,8 @@ import { SmartSuggestionCard } from "./SmartSuggestionCard";
 import { MessageFeedback } from "./MessageFeedback";
 import { MemoryUsageIndicator } from "./MemoryUsageIndicator";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
+import { AgentCreatedCard } from "./AgentCreatedCard";
+import type { AgentCreatedInfo } from "./AgentCreatedCard";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
 // All shared types live in ./types.ts. Re-export them here for backward compat.
@@ -1105,6 +1107,10 @@ export async function consumeSSEStream(
             if (parsed.agentName) {
               callbacks.onAgentName?.(parsed.agentName);
             }
+            // Agent created — emitted when user asked Copilot to create an agent
+            if (parsed.agentCreated) {
+              callbacks.onAgentCreated?.(parsed.agentCreated);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1144,6 +1150,7 @@ export async function consumeSSEStream(
             if (parsed.workflowProgress) callbacks.onWorkflowProgress?.(parsed.workflowProgress);
             if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
             if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
+            if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
           } catch { /* skip */ }
         }
       }
@@ -1439,6 +1446,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   // ── Per-message agent name tracking (for "Handled by: [Agent]" indicator) ──
   const [agentNamePerMessage, setAgentNamePerMessage] = useState<Map<number, string>>(new Map());
 
+  // ── Per-message agent created tracking (for AgentCreatedCard below each message) ──
+  const [agentCreatedPerMessage, setAgentCreatedPerMessage] = useState<Map<number, AgentCreatedInfo>>(new Map());
+
   // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
@@ -1588,6 +1598,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
+      setAgentCreatedPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
@@ -1753,6 +1764,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
+      setAgentCreatedPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAttachments([]);
@@ -1778,6 +1790,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setFollowUps([]);
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
+      setAgentCreatedPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAttachments([]);
@@ -1933,6 +1946,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentNamePerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, name);
+              return next;
+            });
+          },
+          onAgentCreated: (agentInfo) => {
+            if (controller.signal.aborted) return;
+            setAgentCreatedPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, agentInfo);
               return next;
             });
           },
@@ -2460,6 +2481,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                             </button>
                           ))}
                         </div>
+                      )}
+
+                      {/* Agent Created Card — shown when user asked Copilot to create an agent */}
+                      {agentCreatedPerMessage.get(i) && (
+                        <AgentCreatedCard agent={agentCreatedPerMessage.get(i)!} />
                       )}
 
                       {/* RL Feedback + agent badge — inline row, shown after stream completes */}

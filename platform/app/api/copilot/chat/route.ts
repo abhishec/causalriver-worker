@@ -38,7 +38,7 @@ interface TrainedPattern { [k: string]: unknown; }
 interface TrainedCascadeRule { [k: string]: unknown; }
 interface BrainContext { fullPrompt: string; intent: string; domains: string[]; confidence: number; sections: Array<{ title: string; content: string }>; [k: string]: unknown; }
 interface BrainRegions { [k: string]: unknown; }
-interface QueryInterpretation { intent: string; domains: string[]; requiredData: string[]; tokenBudget?: { system: number; history: number }; confidence: number; primaryDomain?: string; serviceRoute?: { type: string; seaasDomain?: string; seaasInput?: Record<string, unknown>; aasDomain?: string; aasInput?: Record<string, unknown> }; complexity?: number; entities?: unknown[]; responseStrategy?: unknown; [k: string]: unknown; }
+interface QueryInterpretation { intent: string; domains: string[]; requiredData: string[]; tokenBudget?: { system: number; history: number }; confidence: number; primaryDomain?: string; serviceRoute?: { type: string; seaasDomain?: string; seaasInput?: Record<string, unknown>; aasDomain?: string; aasInput?: Record<string, unknown>; agentSpec?: { name: string; description: string; domain: string; trigger: string; schedule?: string; requiredInputs?: string[] } }; complexity?: number; entities?: unknown[]; responseStrategy?: unknown; [k: string]: unknown; }
 
 // eslint-disable-next-line no-eval
 const _nativeRequire = eval("require") as NodeRequire;
@@ -1075,6 +1075,7 @@ export async function POST(request: NextRequest) {
     let seaasResult: Record<string, unknown> | null = null;
     let accountingResult: Record<string, unknown> | null = null;
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
+    let agentCreated: Record<string, unknown> | null = null;
 
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors).
     // All SE-aaS domains now route through executeDomain() for full WOW artifact generation.
@@ -1100,6 +1101,64 @@ export async function POST(request: NextRequest) {
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
       : (!interpretation || interpretation.source === 'regex-fallback') ? detectAccountingRoute(message) : null;
+
+    // ── Agent Creation Routing ────────────────────────────────────────────────
+    // When the LLM classifier detects "create-agent" intent, create the agent record
+    // immediately inline (no round-trip fetch). Agent is stored in se_aas_artifacts
+    // as domain_type="agent-definition". Result is sent as SSE + injected into prompt.
+    if (serviceRoute?.type === 'create-agent' && serviceRoute?.agentSpec) {
+      try {
+        const admin = getAdminClient();
+        const agentId = crypto.randomUUID();
+        const now = new Date().toISOString();
+        const spec = serviceRoute.agentSpec;
+
+        const { error: agentInsertError } = await admin.from("se_aas_artifacts").insert({
+          id: agentId,
+          organization_id: workspaceId,
+          domain_type: "agent-definition",
+          artifact_data: {
+            agentId,
+            name: spec.name,
+            description: spec.description || message,
+            domain: spec.domain || "custom",
+            trigger: spec.trigger || "manual",
+            schedule: spec.schedule ?? null,
+            requiredInputs: spec.requiredInputs ?? [],
+            status: "active",
+            brainEnabled: true,
+            rlEnabled: true,
+            memoryTracking: true,
+            createdAt: now,
+            createdBy: user.id,
+          },
+          metadata: { source: "copilot", agentVersion: "1.0" },
+          created_by: user.id,
+          created_at: now,
+        });
+
+        if (agentInsertError) {
+          logger.warn("[chat/route] Agent insert error (non-fatal):", agentInsertError);
+        }
+
+        agentCreated = {
+          agentId,
+          name: spec.name,
+          domain: spec.domain || "custom",
+          trigger: spec.trigger || "manual",
+          schedule: spec.schedule,
+          brainEnabled: true,
+          rlEnabled: true,
+          memoryTracking: true,
+          createdAt: now,
+        };
+
+        logger.warn(`[chat/route] Agent created inline: ${spec.name} (${agentId})`);
+      } catch (agentErr) {
+        logger.error("[chat/route] Agent creation failed (non-fatal):", agentErr);
+        // agentCreated stays null — effectiveSystemPrompt will instruct Claude to report error
+      }
+    }
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       try {
@@ -3538,6 +3597,35 @@ ${JSON.stringify(accountingResult.data, null, 2).slice(0, 5000)}
 Use this data to answer the user's accounting question with precision. Cite specific numbers.`;
     }
 
+    // ── Agent Creation result injection ───────────────────────────────
+    if (agentCreated) {
+      const agentName = agentCreated.name as string;
+      const agentDomain = agentCreated.domain as string;
+      const agentTrigger = agentCreated.trigger as string;
+      const agentId = agentCreated.agentId as string;
+      effectiveSystemPrompt += `\n\n## AGENT SUCCESSFULLY CREATED
+The user requested an AI agent and it has been created and is now ACTIVE.
+
+Agent details:
+- Name: ${agentName}
+- Domain: ${agentDomain}
+- Trigger: ${agentTrigger}
+- ID: ${agentId}
+- Brain Learning: Enabled
+- RL Feedback Loop: Active
+- Memory Tracking: On
+
+Tell the user their agent "${agentName}" is live and active. Mention that:
+1. Brain learning is enabled (it improves over time)
+2. RL feedback loop is active (it learns from outcomes)
+3. They can monitor it in the AI Worker Dashboard
+Be enthusiastic but concise. Do NOT list the agent ID unless the user asks.`;
+    } else if (serviceRoute?.type === 'create-agent') {
+      // Create-agent was requested but insertion failed
+      effectiveSystemPrompt += `\n\n## AGENT CREATION FAILED
+The user requested to create an AI agent but there was a technical error. Tell the user we encountered a temporary issue creating their agent and they should try again in a moment. Apologize briefly.`;
+    }
+
     // ── LEARNING LOOP: Inject ai_memory corrections into system prompt ─────
     // Query high-importance user corrections from ai_memory table.
     // These are REAL corrections saved by /api/copilot/feedback when users
@@ -3696,7 +3784,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
       conversationTurns: conversationHistory?.length,
       hasBrainArtifacts: !!actionArtifact,
-      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult,
+      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!agentCreated,
     });
 
     // ── Stream via Anthropic ──────────────────────────────────────────
@@ -3785,6 +3873,11 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           send(JSON.stringify({ deliveryIntelligenceResult }));
         }
 
+        // Send agent created event so the frontend can render AgentCreatedCard
+        if (agentCreated) {
+          send(JSON.stringify({ agentCreated }));
+        }
+
         // ── Agent Name: tell the frontend which agent handled this query ──────
         // Provides "Handled by: [Agent Name]" indicator in the chat UI.
         {
@@ -3835,7 +3928,9 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           };
 
           let agentName: string | null = null;
-          if (seaasResult) {
+          if (agentCreated) {
+            agentName = "Agent Creator";
+          } else if (seaasResult) {
             agentName = DOMAIN_AGENT_NAMES[seaasResult.domainType as string] || "SE-aaS Agent";
           } else if (deliveryIntelligenceResult) {
             const dt = (deliveryIntelligenceResult._domainType as string) || "delivery-intelligence";

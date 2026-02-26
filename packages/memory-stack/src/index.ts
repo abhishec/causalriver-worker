@@ -1228,6 +1228,7 @@ export {
   type LLMQueryInterpreterInstance,
   type QueryInterpretation,
   type ServiceRouteDecision,
+  type AgentSpec as AgentCreationSpec,
   type ExtractedEntity as QueryExtractedEntity,
   type RequiredDataSignals,
 } from './orchestrator/llm-query-interpreter';

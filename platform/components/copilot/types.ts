@@ -265,6 +265,18 @@ export interface SSECallbacks {
   onLearningPulse?: (pulse: LearningPulse) => void;
   /** Agent name: which agent/domain handled this query — shown as "Handled by: [name]" */
   onAgentName?: (name: string) => void;
+  /** Agent created: emitted when an agent is successfully created via Copilot */
+  onAgentCreated?: (agent: {
+    agentId: string;
+    name: string;
+    domain: string;
+    trigger: string;
+    schedule?: string;
+    brainEnabled?: boolean;
+    rlEnabled?: boolean;
+    memoryTracking?: boolean;
+    createdAt?: string;
+  }) => void;
   onDone: () => void;
 }
 
