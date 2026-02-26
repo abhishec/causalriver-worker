@@ -394,3 +394,66 @@ Honest model usage audit across the full session:
 - **Cost assessment**: Opus was correct for this task — cross-system debugging (Next.js build, webpack workers, route groups, shell scripts) required deep reasoning. Haiku Explore agents were correctly scoped.
 - **Subagent models**: 2x Haiku Explore (correct — search-only tasks)
 - **Commits**: `77d5eb221` (dashboard redesign + build fix), `40db8bda0` (audit fixes)
+
+---
+
+## Session: 2026-02-26 Overnight CC Run (Tookitaki Demo Prep)
+**Date:** 2026-02-26  
+**Model:** Sonnet (main), Haiku (all subagents/Bash/Explore)  
+**Duration:** ~3 hours (midnight → ~2:45 AM SGT)  
+**Gate:** Extended to 9:30 AM SGT per user instruction
+
+### What Was Accomplished
+
+**Gate 1 — Federated RL + Copilot + Agent Framework + Memory:**
+- ✅ Audited full scope (3 parallel Explore agents) — most was already built
+- ✅ Created `platform/lib/brain/rl-agent-loop.ts` — getCaseLogContext() + logAgentRetro()
+- ✅ Wired RL loop into chat route (7 edits: import, getCaseLogContext x2, caseLogCtx append, logAgentRetro)
+- ✅ Created `/api/brain/worker-memory` GET endpoint — shows memory % for ALL active AI workers
+- ✅ Created `WorkerMemoryBanner` component — compact horizontal banner with compress-all
+- ✅ Integrated WorkerMemoryBanner into task-queue-client.tsx (5s polling)
+- ✅ Created `.claude/product-ai-operating-model-requirements.md` — 3800-word research doc for Tookitaki FinCense with live MCP typology data
+
+**Security Fix:**
+- ✅ Removed hardcoded API keys from 7 files (Anthropic, OpenAI, GitHub, Supabase keys)
+- ✅ CDK outputs removed from git tracking (.gitignore updated)
+- ⚠️  POST-DEMO: Still need to rotate all 4 keys (Anthropic, OpenAI, GitHub, Supabase SRK)
+
+**Gate 2 — E2E Testing + Fixes:**
+- ✅ Login fixed: reset yuan.luo@tookitaki.com password to TestDemo2026!
+- ✅ 21/21 routes all return HTTP 200 — zero crashes
+- ✅ Fixed Sidebar hydration mismatch (suppressHydrationWarning on workspace name)
+- ✅ RL feedback schema fix: brain_feedback_queue added `status TEXT` column (was `processed boolean`), migration 20260326000001 deployed
+- ✅ copilot_response_feedback: full schema ensured, dual-write from feedback API
+- ✅ TSC: zero errors throughout
+- ✅ Amplify #473 deployed
+
+### Commits This Session
+- `e1f662558` — security: remove hardcoded API keys + add RL loop + worker memory
+- `13617c4ac` — feat: integrate WorkerMemoryBanner into tasks page
+- `ab54e12d9` — fix: RL feedback tables, sidebar hydration, feedback schema
+
+### What Went Well
+- Parallel subagents (Explore + Bash at Haiku) kept main context clean
+- Security incident resolved quickly without breaking anything
+- Migration written with proper IF NOT EXISTS guards + backfill
+- suppressHydrationWarning is the right fix for localStorage-driven server/client text mismatch
+
+### What Went Wrong / Lessons
+- pnpm build corrupted dev server .next cache — always use preview_stop → rm -rf .next → preview_start after production builds
+- Initial test user login failed (password API inconsistency between agents) — always verify with a direct curl login check after password resets
+- Migration tried `org_memberships` instead of `org_members` — ALWAYS grep existing migrations for the correct table name before writing new policies
+- brain_feedback_queue had `processed: boolean` but code queried `status = 'pending'` — schema mismatch existed in codebase for unknown time; caught by deep audit
+
+### Model Correctness Assessment
+- Main: Sonnet ✅ (multi-file feature work, correct)
+- Subagents: Haiku ✅ (all Explore/Bash agents — appropriate)
+- Cost: Well-optimised — no Opus used, Haiku for all searches
+
+### Post-Demo Actions Required (Abhishek to do)
+1. Rotate Supabase service role key (exposed in committed migrations)
+2. Rotate Anthropic API key (sk-ant-api03-VWXvidX...)
+3. Revoke OpenAI key (sk-proj-iZsG...)
+4. Revoke GitHub token (ghp_ltNeGBWMRl...)
+5. Review 12 GitHub dependency vulnerabilities (7 high, 4 moderate, 1 low)
+

@@ -127,11 +127,11 @@ export default async function SettingsPage() {
 
   if (allWorkspacesAcrossCustomers.length > 0) {
     const allWsIds = allWorkspacesAcrossCustomers.map(ws => ws.id);
-    const { data: wsCons } = await admin
+    const { data: wsCons } = await safe(admin
       .from("org_connectors")
       .select("organization_id, connector_type, display_name, status")
       .in("organization_id", allWsIds)
-      .eq("status", "active");
+      .eq("status", "active"));
     allWorkspaceConnectors = wsCons || [];
   }
 

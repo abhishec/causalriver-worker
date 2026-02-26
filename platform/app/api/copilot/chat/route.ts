@@ -1076,8 +1076,10 @@ export async function POST(request: NextRequest) {
     let accountingResult: Record<string, unknown> | null = null;
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
 
-    // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors)
-    const COPILOT_NATIVE_DOMAINS = new Set(['boilerplate-generator', 'pr-review-assistant', 'codebase-qa']);
+    // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors).
+    // All SE-aaS domains now route through executeDomain() for full WOW artifact generation.
+    // codebase-qa remains native to leverage full conversation context in Brain commander.
+    const COPILOT_NATIVE_DOMAINS = new Set(['codebase-qa']);
 
     // Determine service route from LLM interpretation or regex fallback.
     // Regex runs as safety net even when LLM interpretation is present, unless
@@ -3887,7 +3889,7 @@ function detectSEaaSRoute(
 
   // ── SQL Analyzer ──────────────────────────────────────────────────────
   if (
-    /analyze\s+(this\s+)?sql|check\s+(this\s+)?sql|sql\s+query\s+review|review\s+(this\s+)?query|optimize\s+(this\s+)?sql/i.test(lower)
+    /analyze\s+(this\s+)?sql|check\s+(this\s+)?sql|sql\s+query\s+review|review\s+(this\s+)?query|optimize\s+(this\s+)?sql|sql\s+(?:quality|audit|analysis|security|performance)|comprehensive\s+sql|perform.*sql\s+(?:quality|analysis)|sql\s+correctness/i.test(lower)
   ) {
     // Extract SQL from the message (look for code blocks or after ":")
     const sqlMatch = message.match(/```(?:sql)?\s*([\s\S]+?)```/) ||
@@ -3906,7 +3908,7 @@ function detectSEaaSRoute(
 
   // ── Test Case Generator ───────────────────────────────────────────────
   if (
-    /generate\s+test\s+cases?|create\s+test\s+cases?|test\s+cases?\s+for|write\s+tests?\s+for/i.test(lower)
+    /generate\s+test\s+cases?|create\s+test\s+cases?|test\s+cases?\s+for|write\s+tests?\s+for|generate.*test\s+suite|comprehensive.*test\s+suite|executable\s+test\s+suite/i.test(lower)
   ) {
     const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
     return {
@@ -3921,7 +3923,7 @@ function detectSEaaSRoute(
 
   // ── Test Data Generator ───────────────────────────────────────────────
   if (
-    /generate\s+test\s+data|mock\s+data|seed\s+data|fake\s+data|sample\s+data/i.test(lower)
+    /generate\s+test\s+data|mock\s+data|seed\s+data|fake\s+data|sample\s+data|synthetic\s+test\s+data|test\s+dataset|generate.*synthetic.*data|pii.safe.*anon/i.test(lower)
   ) {
     return {
       domainType: 'test-data-generator',
@@ -3935,7 +3937,7 @@ function detectSEaaSRoute(
 
   // ── TDD Code Generator ────────────────────────────────────────────────
   if (
-    /write\s+(?:tdd|test.driven)|implement\s+with\s+tests?|tdd\s+(?:for|implement)/i.test(lower)
+    /write\s+(?:tdd|test.driven)|implement\s+with\s+tests?|tdd\s+(?:for|implement)|red.green.refactor|execute\s+(?:the\s+)?(?:complete\s+)?tdd|tdd\s+(?:cycle|agent|red|phase)/i.test(lower)
   ) {
     return {
       domainType: 'tdd-code-generator',
@@ -3986,7 +3988,7 @@ function detectSEaaSRoute(
 
   // ── Log Query ─────────────────────────────────────────────────────────
   if (
-    /query\s+logs?|search\s+logs?|find\s+in\s+logs?|log\s+search|grep\s+logs?/i.test(lower)
+    /query\s+logs?|search\s+logs?|find\s+in\s+logs?|log\s+search|grep\s+logs?|log\s+(?:analysis|analys|investigation|anomaly|pattern|cluster)|error\s+pattern\s+cluster|anomaly\s+(?:timeline|investigation)|intelligent\s+log|log\s+intelligence/i.test(lower)
   ) {
     return {
       domainType: 'log-query',
@@ -3999,7 +4001,7 @@ function detectSEaaSRoute(
 
   // ── Dependency Upgrade (P1 1.4) ─────────────────────────────────────
   if (
-    /outdated\s+dep|upgrade\s+dep|dependency\s+upgrade|dependency\s+update|check\s+dep.*version|npm\s+audit|security\s+vuln/i.test(lower)
+    /outdated\s+dep|upgrade\s+dep|dependency\s+upgrade|dependency\s+update|check\s+dep.*version|npm\s+audit|security\s+vuln|dependency\s+(?:security|audit|maintenance)|full\s+dependency.*audit|cve\s+audit|package.*security\s+audit/i.test(lower)
   ) {
     const manifestMatch = message.match(/```(?:json)?\s*([\s\S]+?)```/);
     return {
@@ -4013,7 +4015,7 @@ function detectSEaaSRoute(
 
   // ── Design Doc Generator (P1 1.5) ──────────────────────────────────
   if (
-    /generate\s+(?:hld|lld|design\s+doc)|create\s+(?:hld|lld|design\s+doc)|reverse.?engineer\s+design|architecture\s+doc/i.test(lower)
+    /generate\s+(?:hld|lld|design\s+doc)|create\s+(?:hld|lld|design\s+doc)|reverse.?engineer\s+design|architecture\s+doc|system\s+design\s+doc|design\s+documentation\s+package|hld.*lld|publication.ready.*design|c4\s+diagram|sequence\s+diagram.*design/i.test(lower)
   ) {
     const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
     const isReverse = /reverse|from\s+code|extract\s+design/i.test(lower);
@@ -4030,7 +4032,7 @@ function detectSEaaSRoute(
 
   // ── Performance Profiler (P1 3.4) ──────────────────────────────────
   if (
-    /performance\s+profil|slow\s+endpoint|bottleneck.*performance|latency\s+analys|apm\s+data|slow\s+query.*analys/i.test(lower)
+    /performance\s+profil|slow\s+endpoint|bottleneck.*performance|latency\s+analys|apm\s+data|slow\s+query.*analys|performance\s+audit|comprehensive\s+performance|bottleneck\s+analysis|n\+1\s+(?:query|detection)|memory\s+(?:leak|profil)|core\s+web\s+vital/i.test(lower)
   ) {
     return {
       domainType: 'performance-profiler',
@@ -4060,7 +4062,7 @@ function detectSEaaSRoute(
   ) {
     const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
     return {
-      domainType: 'boilerplate-generator',
+      domainType: 'boilerplate-scaffold', // matches DOMAIN_MAP key
       extractedInput: {
         description: message,
         template: codeMatch?.[1]?.trim(),
@@ -4078,11 +4080,12 @@ function detectSEaaSRoute(
     const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
     const prMatch = lower.match(/#(\d+)/);
     return {
-      domainType: 'pr-review-assistant',
+      domainType: 'pr-review', // matches DOMAIN_MAP key (was 'pr-review-assistant' — wrong!)
       extractedInput: {
         diff: codeMatch?.[1]?.trim() || message,
+        title: prMatch ? `PR #${prMatch[1]}` : 'Code Review',
         prNumber: prMatch ? parseInt(prMatch[1]) : undefined,
-        checkFor: ['bugs', 'security', 'performance', 'style', 'test_coverage'],
+        focus: ['security', 'performance', 'correctness', 'tests'],
       },
     };
   }
@@ -4101,16 +4104,75 @@ function detectSEaaSRoute(
     };
   }
 
-  // ── Pod Match / Delivery Intelligence (Sprint 5 — SE-aaS WOW) ──────────
+  // ── Early Warning — P0 Velocity Collapse Detection ──────────────────────
   if (
-    /(?:assign|recommend|which|best|right)\s+pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)|delivery\s+intelligence|engagement\s+health|scope\s+(?:creep|drift|alert)/i.test(lower)
+    /early.warning|velocity\s+(?:collapse|analysis|trend|drop|prediction)|sprint\s+velocity|delivery\s+velocity|SPOF|bottleneck\s+risk|gini\s+coefficient|velocity\s+pulse|collapse\s+risk|at.risk\s+engagement/i.test(lower) ||
+    /run\s+(?:a\s+)?(?:full\s+)?delivery\s+velocity/i.test(lower)
+  ) {
+    return {
+      domainType: 'early-warning',
+      extractedInput: {
+        query: message,
+        analysisMode: 'full',
+        lookbackSprints: 3,
+        flagThreshold: 0.8,
+      },
+    };
+  }
+
+  // ── Scope Creep Detection — P0 Scope Intelligence ───────────────────────
+  if (
+    /scope\s+(?:creep|drift|integrity|audit|change|growth|injection)|story\s+point\s+drift|scope\s+baseline|unplanned\s+work|mid.sprint\s+(?:addition|injection)|burndown\s+trajectory|scope\s+control/i.test(lower) ||
+    /run\s+(?:a\s+)?(?:full\s+)?scope\s+integrity/i.test(lower)
+  ) {
+    return {
+      domainType: 'scope-creep',
+      extractedInput: {
+        query: message,
+        alertThreshold: 0.15,  // flag >15% story point drift
+        cumulative: true,
+      },
+    };
+  }
+
+  // ── Pod Match — Team Assignment Recommendation ───────────────────────────
+  if (
+    /(?:analyse|analyze)\s+(?:all\s+)?(?:available\s+)?(?:engineering\s+)?pods|(?:assign|recommend|which|best|right)\s+pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)/i.test(lower)
+  ) {
+    return {
+      domainType: 'pod-match',
+      extractedInput: {
+        query: message,
+        engagementName: message.match(/(?:for|on|about)\s+["']?([A-Z][A-Za-z0-9\s\-]+?)["']?\s+(?:engagement|client|project)/i)?.[1]?.trim(),
+        topN: 3,
+      },
+    };
+  }
+
+  // ── Engagement Health Dashboard — Delivery Intelligence composite ────────
+  if (
+    /delivery\s+intelligence|engagement\s+health|health\s+score|health\s+dashboard|generate.*engagement.*health|rag\s+status|forecast\s+confidence/i.test(lower)
   ) {
     return {
       domainType: 'delivery-intelligence',
       extractedInput: {
         query: message,
-        // Extract engagement ID or name if mentioned (best-effort)
         engagementName: message.match(/(?:for|on|about)\s+["']?([A-Z][A-Za-z0-9\s\-]+?)["']?\s+(?:engagement|client|project)/i)?.[1]?.trim(),
+      },
+    };
+  }
+
+  // ── Architecture Extractor (SWE · Architecture) ─────────────────────────
+  if (
+    /extract.*(?:system\s+)?architecture|show\s+(?:me\s+)?(?:the\s+)?(?:system\s+)?architecture|(?:system|service|micro.?service)\s+(?:graph|map|diagram|topology)|(?:generate|create|build)\s+(?:architecture|c4|container)\s+diagram|architecture\s+(?:overview|document|extract|risks?)|service\s+(?:dependency|communication)\s+map|c4\s+(?:level|diagram|context|container)|service\s+inventory|module\s+ownership\s+map/i.test(lower)
+  ) {
+    return {
+      domainType: 'architecture-extractor',
+      extractedInput: {
+        query: message,
+        includeRisks: true,
+        includeMermaid: true,
+        includeOwnership: true,
       },
     };
   }

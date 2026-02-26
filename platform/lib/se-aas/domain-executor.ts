@@ -72,6 +72,9 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "sql-analyzer": { domain: sqlAnalyzerDomain, sync: true },
   "test-case-generator": { domain: testCaseGeneratorDomain, sync: false },
   "tdd-code-generator": { domain: tddCodeGeneratorDomain, sync: false },
+  // Alias: DOMAIN_CATALOGUE id is 'tdd', DOMAIN_MAP key is 'tdd-code-generator'.
+  // Both must resolve so slash commands (id='tdd') and regex routing ('tdd-code-generator') both work.
+  "tdd": { domain: tddCodeGeneratorDomain, sync: false },
   "incident-diagnosis": { domain: incidentDiagnosisDomain, sync: false },
   "impact-analysis": { domain: impactAnalysisDomain, sync: false },
   "data-lineage": { domain: dataLineageDomain, sync: true },
@@ -90,6 +93,11 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   // "delivery-intelligence" is handled by the dedicated API endpoint,
   // but can also be invoked via copilot as a pod-match + health score composite
   "delivery-intelligence": { domain: podMatchDomain, sync: true },
+  // P0 domains: early-warning + scope-creep also use podMatchDomain for the
+  // delivery context mesh. Full data comes from /api/se-aas/engagement-health
+  // which is fetched in the copilot route's DELIVERY_DOMAINS handler.
+  "early-warning": { domain: podMatchDomain, sync: true },
+  "scope-creep": { domain: podMatchDomain, sync: true },
   // P1-15 Architecture Extractor
   "architecture-extractor": { domain: architectureExtractorDomain, sync: false },
 };
