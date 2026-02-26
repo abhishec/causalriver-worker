@@ -3,6 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
+// Must be force-dynamic: reads cookies for auth + workspace context on every request.
+// Without this, Next.js 15 tries to statically prerender the route and fails.
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/brain/rl-status
  *

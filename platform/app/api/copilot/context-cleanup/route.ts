@@ -5,6 +5,9 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 
+// Must be force-dynamic: reads auth cookies + workspace context per request
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/copilot/context-cleanup
  *

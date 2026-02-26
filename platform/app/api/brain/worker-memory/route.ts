@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
+// Must be force-dynamic: reads auth cookies + workspace context per request
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/brain/worker-memory
  *
