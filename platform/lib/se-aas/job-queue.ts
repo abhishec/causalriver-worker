@@ -7,6 +7,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { checkAndStartWaitingJobs } from "@/lib/brain/agent-orchestrator";
 
 // ============================================================================
 // TYPES
@@ -141,22 +142,28 @@ export async function getJobStatus(
 
 /**
  * Claim and execute a pending job, then update its status.
+ * After the job completes (success or error), automatically unblocks any jobs
+ * that were waiting on this job via checkAndStartWaitingJobs.
  */
 export async function executeAndCompleteJob(
   supabase: SupabaseClient,
   jobId: string,
   executor: () => Promise<Record<string, unknown>>
 ): Promise<void> {
-  // Claim the job
-  const { error: claimError } = await supabase
+  // Claim the job (also read organization_id for orchestration)
+  const { data: jobRow, error: claimError } = await supabase
     .from("agent_queue")
     .update({ status: "running", started_at: new Date().toISOString() })
     .eq("id", jobId)
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .select("organization_id")
+    .maybeSingle();
 
   if (claimError) {
     throw new Error(`Failed to claim job: ${claimError.message}`);
   }
+
+  const orgId: string | undefined = jobRow?.organization_id ?? undefined;
 
   try {
     const result = await executor();
@@ -179,6 +186,14 @@ export async function executeAndCompleteJob(
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
+  } finally {
+    // Auto-start any jobs that were waiting on this job.
+    // Fire-and-forget — never let this block the caller.
+    if (orgId) {
+      checkAndStartWaitingJobs(orgId, jobId).catch((err) => {
+        logger.warn("[job-queue] checkAndStartWaitingJobs failed", { jobId, err });
+      });
+    }
   }
 }
 

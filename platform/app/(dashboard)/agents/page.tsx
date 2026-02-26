@@ -1,10 +1,9 @@
-import { AgentsClient } from "./agents-client";
-
+import { AgentsPageWrapper } from "./agents-page-wrapper";
 
 export const metadata = {
-  title: "Agent Runs",
+  title: "Agents",
 };
 
 export default function AgentsPage() {
-  return <AgentsClient />;
+  return <AgentsPageWrapper />;
 }

@@ -51,7 +51,7 @@ export function BrainOperationsSection({ orgId, connectors }: BrainOperationsPro
   const [cronJobs, setCronJobs] = useState<MechanismStatus>(INITIAL_STATUS);
   const [brainState, setBrainState] = useState<any>(null);
 
-  const activeConnectors = connectors.filter(
+  const activeConnectors = (connectors || []).filter(
     (c) => c.status === "active" || c.status === "connected"
   );
 
@@ -80,7 +80,7 @@ export function BrainOperationsSection({ orgId, connectors }: BrainOperationsPro
       }
 
       // Derive webhook status from connectors
-      const webhookConnectors = connectors.filter(
+      const webhookConnectors = (connectors || []).filter(
         (c) =>
           ["github", "jira", "slack", "linear"].includes(c.connector_type) &&
           (c.status === "active" || c.status === "connected")
@@ -100,7 +100,7 @@ export function BrainOperationsSection({ orgId, connectors }: BrainOperationsPro
       }));
 
       // Derive sync status from most recent connector sync
-      const lastSync = connectors
+      const lastSync = (connectors || [])
         .map((c) => c.last_sync_at)
         .filter(Boolean)
         .sort()

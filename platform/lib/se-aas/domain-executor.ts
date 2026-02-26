@@ -149,7 +149,7 @@ export async function executeDomain(
 
   // ── Step -1: RL Context Priming — inject learned patterns from case-log ──
   // Non-blocking: if case-log read fails, execution continues unaffected.
-  const caseLogContext = getCaseLogContext({
+  const caseLogContext = await getCaseLogContext({
     agentType: params.domainType,
     prompt: JSON.stringify(params.request).slice(0, 200),
     orgId: params.organizationId,

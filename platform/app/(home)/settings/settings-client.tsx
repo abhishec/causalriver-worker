@@ -555,7 +555,7 @@ export function SettingsClient({
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{cust.name}</span>
                             <Badge variant="accent" size="xs">{cust.plan}</Badge>
-                            <Badge variant="default" size="xs">{cust.role ? cust.role.charAt(0).toUpperCase() + cust.role.slice(1) : "Member"}</Badge>
+                            <Badge variant="default" size="xs">{cust.role ? (cust.role.charAt(0)?.toUpperCase() ?? "") + cust.role.slice(1) : "Member"}</Badge>
                             {cust.is_design_partner && (
                               <Badge variant="default" size="xs">Design Partner</Badge>
                             )}
@@ -899,14 +899,14 @@ export function SettingsClient({
 
             {/* Brain Training Section */}
             <div className="mb-8">
-              <BrainTrainingSection orgId={orgId} connectors={connectors} />
+              <BrainTrainingSection orgId={orgId} connectors={connectors || []} />
             </div>
 
             {/* Brain Operations Section */}
             <div className="mb-8 pt-6 border-t border-border-subtle">
               <h3 className="text-sm font-semibold mb-1">Operations</h3>
               <p className="text-xs text-muted mb-4">Brain trigger mechanisms — monitor, configure, and run on-demand</p>
-              <BrainOperationsSection orgId={orgId} connectors={connectors} />
+              <BrainOperationsSection orgId={orgId} connectors={connectors || []} />
             </div>
 
             {/* Budget Controls */}

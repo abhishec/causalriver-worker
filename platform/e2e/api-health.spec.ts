@@ -76,6 +76,86 @@ test.describe("API Health Endpoints", () => {
   });
 });
 
+test.describe("Brain RL & Worker Endpoints", () => {
+  test("worker-health returns job queue stats", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const response = await page.evaluate(async () => {
+      const res = await fetch("/api/brain/worker-health");
+      return {
+        status: res.status,
+        body: await res.json(),
+      };
+    });
+
+    expect(response.status).toBe(200);
+    expect(typeof response.body.pendingJobs).toBe("number");
+    expect(typeof response.body.runningJobs).toBe("number");
+  });
+
+  test("rl-stats returns per-domain breakdown", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const response = await page.evaluate(async () => {
+      const res = await fetch("/api/brain/rl-stats");
+      return {
+        status: res.status,
+        body: await res.json(),
+      };
+    });
+
+    expect(response.status).toBe(200);
+    expect(typeof response.body.totalOutcomes).toBe("number");
+    expect(Array.isArray(response.body.byDomain)).toBe(true);
+  });
+
+  test("rl-status returns learning metrics", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const response = await page.evaluate(async () => {
+      const res = await fetch("/api/brain/rl-status");
+      return {
+        status: res.status,
+        body: await res.json(),
+      };
+    });
+
+    expect(response.status).toBe(200);
+    expect(typeof response.body.signalsThisHour).toBe("number");
+    expect(typeof response.body.learningVelocity).toBe("number");
+  });
+
+  test("learning-stats returns RL summary", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const response = await page.evaluate(async () => {
+      const res = await fetch("/api/brain/learning-stats");
+      return {
+        status: res.status,
+        body: await res.json(),
+      };
+    });
+
+    expect(response.status).toBe(200);
+    expect(typeof response.body.totalTasks).toBe("number");
+  });
+
+  test("connectors health returns array", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    const response = await page.evaluate(async () => {
+      const res = await fetch("/api/connectors/health");
+      return {
+        status: res.status,
+        body: await res.json(),
+      };
+    });
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+  });
+});
+
 test.describe("API Security", () => {
   test("CORS headers present on API responses", async ({ page }) => {
     const headers = await page.evaluate(async () => {

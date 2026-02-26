@@ -7,16 +7,28 @@
  * 1. Poll agent_queue for pending jobs (agent_type = 'se-aas')
  * 2. Claim job (status → 'running')
  * 3. Execute domain via domain-executor
- * 4. Save artifact + update job (status → 'success' or 'error')
+ * 4. If domain fails OR returns empty: trigger Recovery Agent before marking failed
+ * 5. Save artifact + update job (status → 'success', 'recovered', or 'error')
  *
  * Week 7: Priority-aware worker types (light/heavy/mixed).
  * Heavy domains (incident-diagnosis, tdd-code-generator, etc.) are separated
  * from light domains to prevent backpressure.
+ *
+ * Recovery Agent: Never surfaces a bare error to the user — always attempts
+ * an alternative domain or graceful degradation first.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
 import { executeAndCompleteJob } from "./job-queue";
 import { executeDomain } from "./domain-executor";
+import { recordJobOutcome } from "@/lib/rl/outcome-recorder";
+import { attemptRecovery } from "@/lib/brain/recovery-agent";
+import {
+  checkAndStartWaitingJobs,
+  checkAndStartBrainDependentJobs,
+  BRAIN_POPULATION_TYPES,
+} from "@/lib/brain/agent-orchestrator";
 
 export interface WorkerResult {
   processed: number;
@@ -128,20 +140,139 @@ export async function processSeAaSJobs(
           throw new Error("ANTHROPIC_API_KEY not configured — cannot execute SE-aaS domain task");
         }
 
-        const { result: domainResult, artifactId } = await executeDomain(supabase, {
-          domainType: job.task_type,
-          request: payload,
+        const startMs = Date.now();
+        let domainResult: Record<string, unknown>;
+        let artifactId: string | null = null;
+        let usedRecovery = false;
+
+        try {
+          // ── Primary execution ────────────────────────────────────────────
+          const execOutput = await executeDomain(supabase, {
+            domainType: job.task_type,
+            request: payload,
+            organizationId: job.organization_id,
+            userId,
+            anthropicApiKey,
+          });
+          domainResult = execOutput.result;
+          artifactId = execOutput.artifactId;
+
+          // ── Empty-result detection ───────────────────────────────────────
+          // If the domain ran successfully but returned no meaningful data,
+          // attempt recovery before returning the empty result to the user.
+          const resultStr = JSON.stringify(domainResult);
+          const isEmpty =
+            resultStr === "{}" ||
+            resultStr === "[]" ||
+            resultStr.length < 30 ||
+            (domainResult.data === null) ||
+            (Array.isArray(domainResult.data) && (domainResult.data as unknown[]).length === 0);
+
+          if (isEmpty) {
+            logger.warn(
+              `[job-worker] Empty result from ${job.task_type} (job ${job.id}) — triggering recovery`
+            );
+            const recovery = await attemptRecovery({
+              jobId: job.id,
+              originalDomain: job.task_type,
+              originalPayload: payload,
+              failureReason: "empty result",
+              orgId: job.organization_id,
+              emptyResult: true,
+              supabase,
+            });
+
+            if (recovery.recovered && recovery.result) {
+              domainResult = { ...(recovery.result as Record<string, unknown>) };
+              usedRecovery = true;
+              logger.warn(
+                `[job-worker] Recovery succeeded for ${job.id}: ` +
+                `strategy=${recovery.strategy} alt=${recovery.alternativeDomain ?? "none"}`
+              );
+            } else {
+              // Use the graceful degradation object as the result so the user
+              // gets a helpful message instead of an empty response.
+              domainResult = { ...(recovery.result as Record<string, unknown> ?? { _recovery: recovery }) };
+            }
+          }
+        } catch (domainErr: any) {
+          // ── Domain threw an error — attempt recovery before re-throwing ──
+          logger.warn(
+            `[job-worker] Domain ${job.task_type} threw (job ${job.id}): ${domainErr?.message ?? String(domainErr)}`
+          );
+
+          const recovery = await attemptRecovery({
+            jobId: job.id,
+            originalDomain: job.task_type,
+            originalPayload: payload,
+            failureReason: domainErr?.message ?? "unknown error",
+            orgId: job.organization_id,
+            emptyResult: false,
+            supabase,
+          });
+
+          if (recovery.recovered && recovery.result) {
+            domainResult = { ...(recovery.result as Record<string, unknown>) };
+            usedRecovery = true;
+            logger.warn(
+              `[job-worker] Error-recovery succeeded for ${job.id}: ` +
+              `strategy=${recovery.strategy} alt=${recovery.alternativeDomain ?? "none"}`
+            );
+          } else {
+            // Recovery exhausted — mark with recovery log and re-throw so
+            // executeAndCompleteJob sets status='error' with our context.
+            const errorMsg =
+              `Domain failed: ${domainErr?.message ?? "unknown"}. ` +
+              `Recovery attempted (${recovery.attemptsCount} attempts): ${recovery.explanation}`;
+            throw new Error(errorMsg);
+          }
+        }
+
+        const executionMs = Date.now() - startMs;
+
+        // ── RL Closed-Loop: record outcome ──────────────────────────────────
+        // Fire-and-forget: outcome recording MUST NOT block the job result.
+        recordJobOutcome(supabase, {
+          jobId: job.id,
+          domain: job.task_type,
           organizationId: job.organization_id,
           userId,
-          anthropicApiKey,
-        });
+          taskDescription: JSON.stringify(payload).slice(0, 200),
+          resultSummary: JSON.stringify(domainResult).slice(0, 500),
+          executionMs,
+          artifactGenerated: !!artifactId,
+          artifactId: artifactId ?? null,
+        }).catch(() => { /* non-fatal */ });
 
-        return { ...domainResult, artifactId };
+        return {
+          ...domainResult,
+          artifactId,
+          ...(usedRecovery ? { _recoveryUsed: true } : {}),
+        };
       });
 
       result.succeeded++;
+
+      // ── Orchestration: unblock waiting jobs ──────────────────────────────
+      // Fire-and-forget: NEVER let this block job completion or throw.
+      // If this job was a brain-population type, also unblock jobs waiting
+      // on brain readiness with no specific blocking job ID.
+      const _orgId = job.organization_id;
+      const _jobId = job.id;
+      const _isBrainPopulation = BRAIN_POPULATION_TYPES.has(job.task_type);
+      Promise.resolve()
+        .then(() => checkAndStartWaitingJobs(_orgId, _jobId))
+        .then(() => _isBrainPopulation ? checkAndStartBrainDependentJobs(_orgId) : Promise.resolve([]))
+        .catch(() => { /* non-fatal — orchestration must never break the job worker */ });
     } catch {
       result.failed++;
+
+      // ── Orchestration: still unblock on failure (best-effort) ────────────
+      // Even on job failure, unblock waiting jobs so they can attempt execution
+      // (they may succeed independently or surface a clearer error to the user).
+      const _orgId2 = job.organization_id;
+      const _jobId2 = job.id;
+      checkAndStartWaitingJobs(_orgId2, _jobId2).catch(() => {});
     }
   }
 

@@ -1076,6 +1076,8 @@ export async function POST(request: NextRequest) {
     let accountingResult: Record<string, unknown> | null = null;
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
     let agentCreated: Record<string, unknown> | null = null;
+    /** Set when orchestrator queues a job as waiting — injected into system prompt */
+    let orchestratorResult: Record<string, unknown> | null = null;
 
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors).
     // All SE-aaS domains now route through executeDomain() for full WOW artifact generation.
@@ -1161,6 +1163,86 @@ export async function POST(request: NextRequest) {
     }
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
+      // ── Orchestration gate: check for brain dependencies before executing ──
+      // If the brain isn't ready or a brain-population job is running, queue
+      // this domain and stream a human-readable wait message to the user.
+      let orchestrationBlocked = false;
+      try {
+        const {
+          orchestrateJob: _orchestrateJob,
+          formatOrchestratorMessage: _formatOrchestratorMessage,
+          registerDependency: _registerDependency,
+          BRAIN_DEPENDENT_DOMAINS: _BRAIN_DEPENDENT_DOMAINS,
+        } = await import("@/lib/brain/agent-orchestrator");
+
+        if (_BRAIN_DEPENDENT_DOMAINS.has(seaasRoute.domainType)) {
+          const _decision = await _orchestrateJob({
+            orgId: workspaceId,
+            taskType: seaasRoute.domainType,
+            payload: seaasRoute.extractedInput,
+          });
+
+          if (_decision.action === "queue-waiting") {
+            orchestrationBlocked = true;
+
+            // Insert a waiting job to agent_queue so it can be auto-started later
+            const { getAdminClient: _getAdminClient } = await import("@/lib/supabase/admin");
+            const _admin = _getAdminClient();
+            const { data: _waitingJob } = await _admin
+              .from("agent_queue")
+              .insert({
+                organization_id: workspaceId,
+                agent_type: "se-aas",
+                task_type: seaasRoute.domainType,
+                priority: 7, // P0 delivery domains get above-default priority
+                payload: {
+                  ...seaasRoute.extractedInput,
+                  userId: user.id,
+                  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+                },
+                status: "waiting",
+              })
+              .select("id")
+              .single();
+
+            if (_waitingJob?.id) {
+              await _registerDependency({
+                orgId: workspaceId,
+                jobId: _waitingJob.id,
+                dependsOnJobId: _decision.blockingJobId,
+                dependsOnType: _decision.blockingJobType ?? "brain-population",
+                autoStart: true,
+              });
+            }
+
+            // Get current state for the message (lightweight — already cached in orchestrateJob above)
+            const { getOrgAgentState: _getOrgAgentState } = await import("@/lib/brain/agent-orchestrator");
+            const _state = await _getOrgAgentState(workspaceId);
+            const _orchMsg = _formatOrchestratorMessage(_decision, _state);
+
+            // Store result — injected into the system prompt so Claude tells the user
+            // about the queued job. The SSE stream sends it as orchestratorQueued.
+            orchestratorResult = {
+              message: _orchMsg,
+              waiting: true,
+              jobId: _waitingJob?.id ?? null,
+              taskType: seaasRoute.domainType,
+              blockingJobId: _decision.blockingJobId ?? null,
+              blockingJobType: _decision.blockingJobType ?? "brain-population",
+              estimatedWaitMs: _decision.estimatedWaitMs ?? null,
+              brainReadiness: _state.brainReadiness,
+              brainSignalCount: _state.brainSignalCount,
+            };
+          }
+          // 'reject' case: rare (duplicate brain-population) — fall through to normal execution
+          // 'execute-now': proceed normally below
+        }
+      } catch (_orchErr: any) {
+        // Non-fatal — orchestration check must NEVER break domain execution
+        logger.warn("[chat/route] Orchestration check failed (non-fatal):", _orchErr?.message);
+      }
+
+      if (!orchestrationBlocked) {
       try {
         const { executeDomain } = await import("@/lib/se-aas/domain-executor");
 
@@ -1229,6 +1311,7 @@ export async function POST(request: NextRequest) {
           message: `Analysis could not be completed for ${seaasRoute.domainType}. The brain will provide general guidance instead.`,
         };
       }
+      } // end if (!orchestrationBlocked)
     }
 
     // ── AaaS ROUTING — Accounting queries via Brain-connected AAS executor ──
@@ -1694,7 +1777,7 @@ export async function POST(request: NextRequest) {
               .maybeSingle();
 
             taskId = trainTask?.id ?? `train-${Date.now()}`;
-            const caseLogCtx = getCaseLogContext({ agentType: "train-brain", prompt: message.trim(), orgId: workspaceId });
+            const caseLogCtx = await getCaseLogContext({ agentType: "train-brain", prompt: message.trim(), orgId: workspaceId });
 
             sendAgentStatus({
               taskId,
@@ -2114,7 +2197,7 @@ export async function POST(request: NextRequest) {
           }
 
           taskId = agentTask.id;
-          const caseLogCtx = getCaseLogContext({ agentType: agentIntent.agentType, prompt: message.trim(), orgId: workspaceId });
+          const caseLogCtx = await getCaseLogContext({ agentType: agentIntent.agentType, prompt: message.trim(), orgId: workspaceId });
 
           sendAgentStatus({
             taskId,
@@ -3626,6 +3709,28 @@ Be enthusiastic but concise. Do NOT list the agent ID unless the user asks.`;
 The user requested to create an AI agent but there was a technical error. Tell the user we encountered a temporary issue creating their agent and they should try again in a moment. Apologize briefly.`;
     }
 
+    // ── ORCHESTRATOR: Inject queued job notification into system prompt ────
+    // When brain isn't ready, the orchestrator queues the job and sets
+    // orchestratorResult so Claude tells the user about the wait.
+    if (orchestratorResult) {
+      const _orchMsg = orchestratorResult.message as string;
+      const _orchJobType = orchestratorResult.taskType as string;
+      const _orchEta = orchestratorResult.estimatedWaitMs
+        ? `~${Math.ceil((orchestratorResult.estimatedWaitMs as number) / 60_000)} minutes`
+        : null;
+      effectiveSystemPrompt += `\n\n## ORCHESTRATOR: JOB QUEUED — BRAIN NOT READY
+The user requested a "${_orchJobType}" analysis but it has been queued because the brain is not ready yet.
+
+Your response to the user MUST:
+1. Acknowledge their request warmly
+2. Explain the analysis is queued: "${_orchMsg}"
+${_orchEta ? `3. Give the estimated wait: ${_orchEta}` : '3. Tell them you\'ll notify them when it\'s ready'}
+4. Suggest they can track progress in the Agent Monitor (open from the sidebar)
+5. Keep it concise — 2-3 sentences max
+
+Do NOT attempt to answer the analysis question with placeholder or made-up data.`;
+    }
+
     // ── LEARNING LOOP: Inject ai_memory corrections into system prompt ─────
     // Query high-importance user corrections from ai_memory table.
     // These are REAL corrections saved by /api/copilot/feedback when users
@@ -3784,7 +3889,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
       conversationTurns: conversationHistory?.length,
       hasBrainArtifacts: !!actionArtifact,
-      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!agentCreated,
+      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!agentCreated || !!orchestratorResult,
     });
 
     // ── Stream via Anthropic ──────────────────────────────────────────
@@ -3796,6 +3901,12 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 
     (async () => {
       try {
+        // ── Orchestrator: emit queued job event so UI can show Agent Monitor ──
+        // This must be sent BEFORE any text so the frontend can update state.
+        if (orchestratorResult) {
+          send(JSON.stringify({ orchestratorQueued: orchestratorResult }));
+        }
+
         // ── Proactive Insights: "While you were away" (Week 6) ──
         // On first message of session, surface recent insights from ai_memory
         const isFirstMessage = !conversationHistory || conversationHistory.length === 0;

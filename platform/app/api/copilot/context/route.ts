@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -37,10 +38,29 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "orgId is required" }, { status: 400 });
     }
 
+    const admin = getAdminClient();
+    const { data: convos } = await admin
+      .from("conversations")
+      .select("messages")
+      .eq("organization_id", orgId)
+      .order("updated_at", { ascending: false })
+      .limit(5);
+
+    const totalChars = (convos ?? []).reduce((sum: number, c: { messages?: unknown }) => {
+      const msgs = Array.isArray(c.messages) ? c.messages : [];
+      return sum + msgs.reduce((s: number, m: { content?: string }) => s + (m.content?.length ?? 0), 0);
+    }, 0);
+    const estimatedTokens = Math.floor(totalChars / CHARS_PER_TOKEN);
+    const messageCount = (convos ?? []).reduce((s: number, c: { messages?: unknown }) => {
+      return s + (Array.isArray(c.messages) ? c.messages.length : 0);
+    }, 0);
+
     return NextResponse.json({
       maxTokens: MAX_TOKENS,
-      estimatedTokens: 0,
-      usagePct: 0,
+      estimatedTokens,
+      usagePct: Math.min(estimatedTokens / MAX_TOKENS, 1),
+      messageCount,
+      canCompress: estimatedTokens > 2000,
     });
   } catch (err) {
     logger.error("[context/GET] Error:", err);

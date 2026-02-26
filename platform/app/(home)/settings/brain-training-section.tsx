@@ -59,7 +59,7 @@ export function BrainTrainingSection({ orgId, connectors }: BrainTrainingSection
     return () => { cancelled = true; clearInterval(interval); };
   }, [orgId]);
 
-  const activeConnectors = connectors.filter(
+  const activeConnectors = (connectors || []).filter(
     (c) => c.status === 'active' || c.status === 'connected'
   );
   const hasAnyConnector = activeConnectors.length > 0;
