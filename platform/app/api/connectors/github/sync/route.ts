@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createGitHubConnector, createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = 'force-dynamic';
 
@@ -36,17 +37,23 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const connectorId = body.connectorId as string | undefined;
 
-    let connectorQuery = service
-      .from("org_connectors")
-      .select("id, config, credentials, signals_count")
-      .eq("organization_id", workspaceId)
-      .eq("connector_type", "github");
+    let connector: { id: string; connector_type: string; config: Record<string, unknown>; status: string; signals_count: number | null; credentials: Record<string, unknown> | null } | null = null;
 
     if (connectorId) {
-      connectorQuery = connectorQuery.eq("id", connectorId);
+      const { data: row } = await service
+        .from("org_connectors")
+        .select("id, connector_type, config, status, signals_count")
+        .eq("organization_id", workspaceId)
+        .eq("connector_type", "github")
+        .eq("id", connectorId)
+        .maybeSingle();
+      if (row) {
+        const credentials = await getConnectorCredentials(service, workspaceId, "github");
+        connector = { ...row, config: (row.config as Record<string, unknown>) ?? {}, credentials };
+      }
+    } else {
+      connector = await getConnectorWithCredentials(service, workspaceId, "github");
     }
-
-    const { data: connector } = await connectorQuery.maybeSingle();
 
     if (!connector) {
       return NextResponse.json(

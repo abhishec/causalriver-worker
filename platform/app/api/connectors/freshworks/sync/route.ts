@@ -14,6 +14,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = "force-dynamic";
 
@@ -37,20 +38,10 @@ export async function POST(request: Request) {
     const mode: "initial" | "incremental" = body.mode || "incremental";
 
     // 3. Load connector config from org_connectors
-    const { data: connectors, error: connErr } = await service
-      .from("org_connectors")
-      .select("id, connector_type, config, credentials")
-      .eq("organization_id", workspaceId)
-      .in(
-        "connector_type",
-        product === "all"
-          ? ["freshdesk", "freshsales", "freshchat"]
-          : [product]
-      );
-
-    if (connErr) {
-      return NextResponse.json({ error: "Internal error" }, { status: 500 });
-    }
+    const connectorTypes = product === "all"
+      ? ["freshdesk", "freshsales", "freshchat"]
+      : [product];
+    const connectors = await getConnectorsWithCredentials(service, workspaceId, connectorTypes);
 
     if (!connectors || connectors.length === 0) {
       return NextResponse.json(
@@ -70,7 +61,7 @@ export async function POST(request: Request) {
     const results: Record<string, any> = {};
 
     for (const connector of connectors) {
-      const creds = connector.credentials as Record<string, any>;
+      const creds = (connector.credentials ?? {}) as Record<string, any>;
       const cfg = connector.config as Record<string, any>;
       const type = connector.connector_type as string;
 

@@ -22,6 +22,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Log queries can take time for large windows
@@ -50,15 +51,7 @@ export async function POST(request: Request) {
       (mode === "initial" ? 24 : 1);
 
     // 3. Load log connector config — supports multiple connector_type values
-    const { data: connectors, error: connErr } = await service
-      .from("org_connectors")
-      .select("id, connector_type, config, credentials")
-      .eq("organization_id", workspaceId)
-      .in("connector_type", LOG_CONNECTOR_TYPES);
-
-    if (connErr) {
-      return NextResponse.json({ error: "Internal error" }, { status: 500 });
-    }
+    const connectors = await getConnectorsWithCredentials(service, workspaceId, LOG_CONNECTOR_TYPES);
 
     if (!connectors || connectors.length === 0) {
       return NextResponse.json(
@@ -86,7 +79,7 @@ export async function POST(request: Request) {
 
     // 5. Run sync for each configured log connector
     for (const conn of connectors) {
-      const creds = conn.credentials as Record<string, any>;
+      const creds = (conn.credentials ?? {}) as Record<string, any>;
       const cfg = conn.config as Record<string, any>;
 
       // Build credentials object for LogConnector

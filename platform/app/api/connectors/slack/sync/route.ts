@@ -23,6 +23,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = "force-dynamic";
 
@@ -61,27 +62,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const { connectorId } = body as { connectorId?: string };
 
-    let connectorQuery = service
-      .from("org_connectors")
-      .select("id, credentials, config, metadata, signals_count")
-      .eq("organization_id", workspaceId)
-      .eq("connector_type", "slack")
-      .eq("status", "active");
+    let connector: { id: string; connector_type: string; config: Record<string, unknown>; status: string; signals_count: number | null; credentials: Record<string, unknown> | null } | null = null;
 
     if (connectorId) {
-      connectorQuery = connectorQuery.eq("id", connectorId);
+      const { data: row } = await service
+        .from("org_connectors")
+        .select("id, connector_type, config, status, signals_count")
+        .eq("organization_id", workspaceId)
+        .eq("connector_type", "slack")
+        .eq("id", connectorId)
+        .maybeSingle();
+      if (row) {
+        const credentials = await getConnectorCredentials(service, workspaceId, "slack");
+        connector = { ...row, config: (row.config as Record<string, unknown>) ?? {}, credentials };
+      }
+    } else {
+      connector = await getConnectorWithCredentials(service, workspaceId, "slack");
     }
 
-    const { data: connector } = await connectorQuery.maybeSingle();
-
-    if (!connector?.credentials?.access_token) {
+    const slackCreds = connector?.credentials as { access_token?: string } | null;
+    if (!connector || !slackCreds?.access_token) {
       return NextResponse.json(
         { error: "Slack not connected. Please connect via Connectors page." },
         { status: 400 }
       );
     }
 
-    const token = connector.credentials.access_token;
+    const token = slackCreds.access_token;
     const lookbackDays = body.lookbackDays || 7;
     const previousSignalsCount = connector.signals_count || 0;
     const oldest = Math.floor(

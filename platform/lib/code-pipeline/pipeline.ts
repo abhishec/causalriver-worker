@@ -17,6 +17,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { executeAgent } from "@/lib/agents/execute";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -477,18 +478,12 @@ async function getGitHubCredentials(
   organizationId: string,
 ): Promise<GitHubCredentials | null> {
   try {
-    const { data } = await supabase
-      .from("org_connectors")
-      .select("credentials, config")
-      .eq("organization_id", organizationId)
-      .eq("connector_type", "github")
-      .limit(1)
-      .maybeSingle();
+    const connector = await getConnectorWithCredentials(supabase, organizationId, "github");
 
-    if (!data?.credentials) return null;
+    if (!connector?.credentials) return null;
 
-    const creds = data.credentials as Record<string, unknown>;
-    const config = (data.config as Record<string, unknown>) || {};
+    const creds = connector.credentials as Record<string, unknown>;
+    const config = connector.config;
     const token = (creds.access_token || creds.token) as string;
     if (!token) return null;
 

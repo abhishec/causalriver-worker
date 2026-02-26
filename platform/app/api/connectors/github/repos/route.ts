@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
 
 /**
  * GET /api/connectors/github/repos
@@ -25,21 +26,16 @@ export async function GET() {
     const service = await createServiceClient();
 
     // Load GitHub connector credentials
-    const { data: connector } = await service
-      .from("org_connectors")
-      .select("credentials, config, status")
-      .eq("organization_id", workspaceId)
-      .eq("connector_type", "github")
-      .maybeSingle();
+    const connector = await getConnectorWithCredentials(service, workspaceId, "github");
 
-    if (!connector || connector.status !== "active") {
+    if (!connector) {
       return NextResponse.json(
         { error: "GitHub is not connected. Please connect GitHub first." },
         { status: 404 }
       );
     }
 
-    const creds = connector.credentials as Record<string, any>;
+    const creds = (connector.credentials ?? {}) as Record<string, any>;
     const token = creds?.access_token || creds?.token;
 
     if (!token) {

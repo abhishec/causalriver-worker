@@ -20,12 +20,17 @@
  *   6. Stream response via Anthropic (or fallback to brain-only)
  */
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getAdminClient, verifyWorkspaceMembership } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import {
   estimateImpact,
 } from "@/lib/nexus-copilot-adapter";
+import { createSSEStream, SSE_HEADERS } from "@/lib/copilot/stream-utils";
+import { resolveSession } from "@/lib/copilot/session";
+import { resolveSeaasRoute, resolveAccountingRoute } from "@/lib/copilot/domain-router";
+import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
+import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
+// Keep admin client import for the orchestration dynamic import path
+import { getAdminClient } from "@/lib/supabase/admin";
 // ── @nexus-ai/memory-stack: bypasses Turbopack bundling ──────────────────────
 // memory-stack embeds TypeScript's compiler which uses dynamic require("fs").
 // Turbopack replaces require() with __require() which doesn't support dynamic calls.
@@ -50,9 +55,9 @@ function getMemoryStackSync() {
   return _memStackMod!;
 }
 
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -69,112 +74,7 @@ function estimateTokens(text: string): number {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Vercel serverless: allow up to 120s for long Claude SSE streams
 
-// ============================================================================
-// SSE STREAM HELPER
-// ============================================================================
-
-function createSSEStream() {
-  const encoder = new TextEncoder();
-  let controller: ReadableStreamDefaultController | null = null;
-
-  const stream = new ReadableStream({
-    start(c) {
-      controller = c;
-    },
-  });
-
-  let closed = false;
-
-  const send = (data: string) => {
-    if (closed || !controller) return;
-    try { controller.enqueue(encoder.encode(`data: ${data}\n\n`)); } catch { /* stream already closed */ }
-  };
-
-  const sendText = (text: string) => {
-    send(JSON.stringify({ text }));
-  };
-
-  const sendError = (error: string) => {
-    send(JSON.stringify({ error }));
-  };
-
-  const close = () => {
-    if (closed) return;
-    closed = true;
-    send("[DONE]");
-    try { controller?.close(); } catch { /* already closed */ }
-  };
-
-  // ── Agent Streaming Events (Week 2: OpenClaw + Agent Integration) ──
-
-  /** Stream an agent execution step to the UI */
-  const sendAgentStep = (step: {
-    stepNumber: number;
-    type: "thinking" | "querying" | "acting" | "observing" | "reflecting";
-    title: string;
-    content?: string;
-    toolName?: string;
-    durationMs?: number;
-    status: "started" | "completed" | "failed";
-  }) => {
-    send(JSON.stringify({ agentStep: step }));
-  };
-
-  /** Stream a progressive artifact that builds incrementally */
-  const sendProgressiveArtifact = (artifact: {
-    id: string;
-    type: string;
-    title: string;
-    content: string;
-    isPartial: boolean;
-    service?: "seaas" | "aas" | "core";
-  }) => {
-    send(JSON.stringify({ progressiveArtifact: artifact }));
-  };
-
-  /** Stream agent task status changes */
-  const sendAgentStatus = (status: {
-    taskId: string;
-    status: "starting" | "running" | "completed" | "failed" | "awaiting_approval";
-    agentType?: string;
-    message?: string;
-  }) => {
-    send(JSON.stringify({ agentStatus: status }));
-  };
-
-  /** Stream proactive insights (\"while you were away\") */
-  const sendProactiveInsights = (insights: Array<{
-    domain: string;
-    content: string;
-    importance: number;
-  }>) => {
-    send(JSON.stringify({ proactiveInsights: insights }));
-  };
-
-  /** Stream workflow execution progress */
-  const sendWorkflowProgress = (progress: {
-    runId: string;
-    workflowId: string;
-    workflowName: string;
-    status: "running" | "paused" | "completed" | "failed";
-    currentStep: number;
-    totalSteps: number;
-    steps: Array<{
-      order: number;
-      label: string;
-      status: "pending" | "running" | "completed" | "failed" | "skipped";
-      parallel_group?: string;
-    }>;
-  }) => {
-    send(JSON.stringify({ workflowProgress: progress }));
-  };
-
-  return {
-    stream, send, sendText, sendError, close,
-    sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
-    sendWorkflowProgress,
-  };
-}
+// createSSEStream, SSE_HEADERS — imported from @/lib/copilot/stream-utils
 
 // ============================================================================
 // ACTION KNOWLEDGE BUILDER — adapts DB data for DomainActionEngine input format
@@ -341,89 +241,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Validate workspace ID format (prevent path traversal) ──────────
-    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (requestedWorkspaceId && !UUID_RE.test(requestedWorkspaceId)) {
-      return NextResponse.json(
-        { error: "Invalid ID format" },
-        { status: 400 }
-      );
-    }
-
-    // ── Workspace resolution ────────────────────────────────────────────
-    // workspaceId comes from the frontend (WorkspaceProvider cookie / context).
-    // It is ALWAYS the workspace the user is currently viewing.
-    //
-    // Workspace isolation guarantee:
-    //   - Each workspace has its own causal graph, signals, memory, predictions.
-    //   - customer_id (billing parent) is NEVER used here — organization_id is the
-    //     sole isolation boundary for all brain/SE-AAS/copilot paths.
-    //
-    // CORE_WORKSPACE_ID fallback:
-    //   - Only hit when workspaceId is not provided (e.g. unauthenticated
-    //     embed, API callers without workspace context).
-    //   - The membership check below enforces access — a regular user who is
-    //     not a member of CORE will receive a 403. This is correct behaviour.
-    let workspaceId = requestedWorkspaceId || CORE_WORKSPACE_ID;
-
-    // Authenticate via Supabase
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // ── Auto-resolve workspace when frontend didn't provide one ──────
-    // Uses admin client to bypass RLS recursion on org_members
-    if (!requestedWorkspaceId) {
-      const admin = getAdminClient();
-      const { data: userOrgs } = await admin
-        .from("org_members")
-        .select("organization_id, organizations:organization_id(is_core_brain)")
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: true });
-
-      if (userOrgs && userOrgs.length > 0) {
-        // Prefer first non-core org (actual workspace), fallback to first org
-        const nonCore = userOrgs.find(
-          (m: any) => !(m.organizations as any)?.is_core_brain
-        );
-        workspaceId = nonCore?.organization_id ?? userOrgs[0].organization_id;
-        logger.debug("[Chat] Auto-resolved workspace:", workspaceId);
+    // ── Session resolution: auth + workspace membership + service client ──
+    // Delegates to resolveSession() from @/lib/copilot/session
+    const sessionResult = await resolveSession(requestedWorkspaceId);
+    if ("type" in sessionResult) {
+      switch (sessionResult.type) {
+        case "invalid_json":
+          return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
+        case "invalid_id_format":
+          return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
+        case "unauthorized":
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        case "forbidden":
+          return NextResponse.json({ error: "You do not have access to this AI Worker" }, { status: 403 });
+        case "no_api_key":
+          return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured. Contact your administrator." }, { status: 503 });
       }
-      // If no memberships found, workspaceId stays as CORE_WORKSPACE_ID → membership check will 403 (correct)
     }
-
-    // ── Validate user is a member of the requested org ──────────────────
-    // Uses admin client to bypass RLS recursion on org_members.
-    const membership = await verifyWorkspaceMembership(user.id, workspaceId);
-
-    // Platform admins can access any org (for support/debugging)
-    let adminCheck: { is_platform_admin: boolean } | null = null;
-    if (!membership) {
-      const admin = getAdminClient();
-      const { data } = await admin
-        .from("org_members")
-        .select("is_platform_admin")
-        .eq("user_id", user.id)
-        .eq("is_platform_admin", true)
-        .limit(1)
-        .maybeSingle();
-      adminCheck = data;
-    }
-
-    if (!membership && !adminCheck) {
-      return NextResponse.json(
-        { error: "You do not have access to this AI Worker" },
-        { status: 403 }
-      );
-    }
-
-    // ── Create service client once for the entire request lifecycle ──────
-    const service = await createServiceClient();
+    const { user, workspaceId, supabase, service } = sessionResult;
 
     // ── Validate API key early ────────────────────────────────────────
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -1085,81 +920,20 @@ export async function POST(request: NextRequest) {
     const COPILOT_NATIVE_DOMAINS = new Set(['codebase-qa']);
 
     // Determine service route from LLM interpretation or regex fallback.
-    // Regex runs as safety net even when LLM interpretation is present, unless
-    // the LLM explicitly routed to a different service (se-aas takes priority).
+    // resolveSeaasRoute/resolveAccountingRoute handle VALID_SEAAS_DOMAINS gating and regex fallback.
     const serviceRoute = interpretation?.serviceRoute;
-    // Validate LLM-interpreted domain against known domains — fallback to regex if unknown
-    const llmSeaasDomain = serviceRoute?.type === 'se-aas' ? serviceRoute.seaasDomain : null;
-    const VALID_SEAAS_DOMAINS = new Set([
-      'test-data-generator','sql-analyzer','test-case-generator','tdd-code-generator','tdd',
-      'incident-diagnosis','impact-analysis','data-lineage','log-query','dependency-upgrade',
-      'design-doc-generator','performance-profiler','dead-code-detector','pr-review',
-      'boilerplate-scaffold','codebase-qa','pod-match','delivery-intelligence',
-      'early-warning','scope-creep','architecture-extractor',
-    ]);
-    const seaasRoute = llmSeaasDomain && VALID_SEAAS_DOMAINS.has(llmSeaasDomain)
-      ? { domainType: llmSeaasDomain, extractedInput: serviceRoute?.seaasInput || {} }
-      : (!interpretation || interpretation.source === 'regex-fallback') ? detectSEaaSRoute(message) : null;
-    const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
-      ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
-      : (!interpretation || interpretation.source === 'regex-fallback') ? detectAccountingRoute(message) : null;
+    const seaasRoute = resolveSeaasRoute(message, interpretation as any);
+    const accountingRoute = resolveAccountingRoute(message, interpretation as any);
 
     // ── Agent Creation Routing ────────────────────────────────────────────────
-    // When the LLM classifier detects "create-agent" intent, create the agent record
-    // immediately inline (no round-trip fetch). Agent is stored in se_aas_artifacts
-    // as domain_type="agent-definition". Result is sent as SSE + injected into prompt.
+    // When the LLM classifier detects "create-agent" intent, delegate to handleAgentCreation().
     if (serviceRoute?.type === 'create-agent' && serviceRoute?.agentSpec) {
-      try {
-        const admin = getAdminClient();
-        const agentId = crypto.randomUUID();
-        const now = new Date().toISOString();
-        const spec = serviceRoute.agentSpec;
-
-        const { error: agentInsertError } = await admin.from("se_aas_artifacts").insert({
-          id: agentId,
-          organization_id: workspaceId,
-          domain_type: "agent-definition",
-          artifact_data: {
-            agentId,
-            name: spec.name,
-            description: spec.description || message,
-            domain: spec.domain || "custom",
-            trigger: spec.trigger || "manual",
-            schedule: spec.schedule ?? null,
-            requiredInputs: spec.requiredInputs ?? [],
-            status: "active",
-            brainEnabled: true,
-            rlEnabled: true,
-            memoryTracking: true,
-            createdAt: now,
-            createdBy: user.id,
-          },
-          metadata: { source: "copilot", agentVersion: "1.0" },
-          created_by: user.id,
-          created_at: now,
-        });
-
-        if (agentInsertError) {
-          logger.warn("[chat/route] Agent insert error (non-fatal):", agentInsertError);
-        }
-
-        agentCreated = {
-          agentId,
-          name: spec.name,
-          domain: spec.domain || "custom",
-          trigger: spec.trigger || "manual",
-          schedule: spec.schedule,
-          brainEnabled: true,
-          rlEnabled: true,
-          memoryTracking: true,
-          createdAt: now,
-        };
-
-        logger.warn(`[chat/route] Agent created inline: ${spec.name} (${agentId})`);
-      } catch (agentErr) {
-        logger.error("[chat/route] Agent creation failed (non-fatal):", agentErr);
-        // agentCreated stays null — effectiveSystemPrompt will instruct Claude to report error
-      }
+      agentCreated = await handleAgentCreation(
+        serviceRoute.agentSpec as any,
+        workspaceId,
+        user.id,
+        message
+      );
     }
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
@@ -1257,43 +1031,16 @@ export async function POST(request: NextRequest) {
           interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
         });
 
-        const DELIVERY_DOMAINS = ['pod-match', 'delivery-intelligence', 'early-warning', 'scope-creep'];
-        const isDeliveryDomain = DELIVERY_DOMAINS.includes(seaasRoute.domainType);
+        const isDeliveryDomain = DELIVERY_DOMAINS.has(seaasRoute.domainType);
 
         if (isDeliveryDomain) {
-          // All P0 Delivery Intelligence domains route to the SEaaSDeliveryPanel
-          // Fetch the full delivery intelligence data from the dedicated API
-          try {
-            const healthAbort = new AbortController();
-            const healthTimeout = setTimeout(() => healthAbort.abort(), 8_000);
-            const healthRes = await fetch(
-              `${request.nextUrl.origin}/api/se-aas/engagement-health`,
-              { headers: { cookie: request.headers.get('cookie') || '' }, signal: healthAbort.signal }
-            );
-            clearTimeout(healthTimeout);
-            if (healthRes.ok) {
-              const healthData = await healthRes.json();
-              deliveryIntelligenceResult = {
-                _domainType: seaasRoute.domainType, // Preserve which P0 domain triggered
-                ...healthData,
-                podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
-                // Pass through domain-specific results (e.g. velocity predictions, bottleneck data)
-                domainResult: domainResult.result,
-              };
-            } else {
-              deliveryIntelligenceResult = {
-                _domainType: seaasRoute.domainType,
-                podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
-                domainResult: domainResult.result,
-              };
-            }
-          } catch {
-            deliveryIntelligenceResult = {
-              _domainType: seaasRoute.domainType,
-              podRecommendation: (domainResult.result as any)?.data?.top_recommendation ?? (domainResult.result as any)?.top_recommendation ?? null,
-              domainResult: domainResult.result,
-            };
-          }
+          // All P0 Delivery Intelligence domains route to the SEaaSDeliveryPanel.
+          // Delegate to buildDeliveryIntelligenceResult() from delivery-handler.
+          deliveryIntelligenceResult = await buildDeliveryIntelligenceResult(
+            request,
+            seaasRoute.domainType,
+            domainResult
+          );
         } else {
           seaasResult = {
             domainType: seaasRoute.domainType,
@@ -2269,20 +2016,15 @@ export async function POST(request: NextRequest) {
             // Attempt Jira context via org connector (supports multi-instance)
             let jiraContext: string | null = null;
             try {
-              const { data: jiraConnectors } = await service
-                .from("org_connectors")
-                .select("config, credentials")
-                .eq("organization_id", workspaceId)
-                .eq("connector_type", "jira")
-                .eq("status", "active");
+              const jiraConnectors = await getConnectorsWithCredentials(service, workspaceId, ["jira"]);
 
               // Try each Jira instance until we find the ticket
               const jiraId = agentIntent.extractedParams.jiraId!;
               const projectPrefix = jiraId.split("-")[0];
 
-              for (const jiraConnector of (jiraConnectors || [])) {
+              for (const jiraConnector of jiraConnectors) {
                 const jConf = jiraConnector.config as Record<string, any>;
-                const jCreds = jiraConnector.credentials as Record<string, any> | null;
+                const jCreds = (jiraConnector.credentials ?? {}) as Record<string, any>;
                 const jiraBaseUrl = jConf.baseUrl || jConf.jira_base_url || jConf.site_url;
                 const jiraEmail = jCreds?.email || jConf.email || jConf.jira_email;
                 const jiraToken = jCreds?.api_token || jConf.apiToken || jConf.jira_api_token;
@@ -3992,51 +3734,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
         // ── Agent Name: tell the frontend which agent handled this query ──────
         // Provides "Handled by: [Agent Name]" indicator in the chat UI.
         {
-          const DOMAIN_AGENT_NAMES: Record<string, string> = {
-            // Delivery Intelligence (P0)
-            "pod-match": "Pod Match Agent",
-            "early-warning": "Early Warning Agent",
-            "scope-creep": "Scope Creep Monitor",
-            "delivery-intelligence": "Delivery Intelligence Agent",
-            // Code Intelligence (P1)
-            "pr-review": "PR Review Agent",
-            "tdd": "TDD Agent",
-            "boilerplate-scaffold": "Scaffold Agent",
-            "dependency-upgrade": "Dependency Audit Agent",
-            "design-doc-generator": "Design Doc Agent",
-            // Test
-            "test-case-generator": "Test Case Agent",
-            "test-data-generator": "Test Data Agent",
-            // SWE Codebase
-            "codebase-qa": "Codebase Q&A Agent",
-            "dead-code-detector": "Dead Code Agent",
-            "impact-analysis": "Impact Analysis Agent",
-            "architecture-extractor": "Architecture Agent",
-            // Observability
-            "incident-diagnosis": "Incident RCA Agent",
-            "log-query": "Log Analysis Agent",
-            "performance-profiler": "Performance Profiler",
-            // Data
-            "sql-analyzer": "SQL Analysis Agent",
-            "data-lineage": "Data Lineage Agent",
-            // AAS
-            "aas-pl": "Accounting Agent (P&L)",
-            "aas-balance": "Accounting Agent (Balance Sheet)",
-            "aas-trial": "Accounting Agent (Trial Balance)",
-            "aas-gst": "Accounting Agent (GST)",
-            "aas-anomaly": "Anomaly Detective",
-            "aas-transactions": "Accounting Agent (Transactions)",
-            "aas-benchmark": "Benchmark Agent",
-            "statement-generator": "Accounting Agent",
-            "reconciler": "Reconciliation Agent",
-            "bookkeeper": "Bookkeeping Agent",
-            "tax-compliance": "Tax Compliance Agent",
-            "anomaly-detective": "Anomaly Detective",
-            "audit-preparer": "Audit Agent",
-            "cash-flow-prophet": "Cash Flow Agent",
-            "revenue-leakage-detector": "Revenue Leakage Agent",
-            "causal-pl-narrator": "Causal P&L Agent",
-          };
+          // DOMAIN_AGENT_NAMES — imported from @/lib/copilot/handlers/agent-handler
 
           let agentName: string | null = null;
           if (agentCreated) {
@@ -4235,552 +3933,8 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
 }
 
 // ============================================================================
-// SE-aaS NATURAL LANGUAGE ROUTING
+// Route utility functions — moved to dedicated modules:
+//   detectSEaaSRoute(), detectLanguage()  → @/lib/copilot/handlers/seaas-handler
+//   detectAccountingRoute()               → @/lib/copilot/handlers/seaas-handler
+//   detectAgentIntent(), DOMAIN_AGENT_NAMES → @/lib/copilot/handlers/agent-handler
 // ============================================================================
-
-/**
- * Detect if user message should route to an SE-aaS domain.
- *
- * ROUTING TABLE:
- *   "analyze this SQL" / "check SQL" / "SQL query" → sql-analyzer
- *   "generate test cases" / "test for" → test-case-generator
- *   "generate test data" / "mock data" / "seed data" → test-data-generator
- *   "write TDD code" / "implement with tests" → tdd-code-generator
- *   "diagnose incident" / "root cause" / "why is X down" → incident-diagnosis
- *   "impact analysis" / "what's affected" / "blast radius" → impact-analysis
- *   "data lineage" / "where does this data come from" → data-lineage
- *   "query logs" / "find in logs" / "log search" → log-query
- */
-function detectSEaaSRoute(
-  message: string
-): { domainType: string; extractedInput: Record<string, unknown> } | null {
-  const lower = message.toLowerCase();
-
-  // ── SQL Analyzer ──────────────────────────────────────────────────────
-  if (
-    /analyze\s+(this\s+)?sql|check\s+(this\s+)?sql|sql\s+query\s+review|review\s+(this\s+)?query|optimize\s+(this\s+)?sql|sql\s+(?:quality|audit|analysis|security|performance)|comprehensive\s+sql|perform.*sql\s+(?:quality|analysis)|sql\s+correctness/i.test(lower)
-  ) {
-    // Extract SQL from the message (look for code blocks or after ":")
-    const sqlMatch = message.match(/```(?:sql)?\s*([\s\S]+?)```/) ||
-                     message.match(/:\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\s+[\s\S]+/i);
-    const query = sqlMatch ? sqlMatch[1].trim() : message.replace(/^.*?(SELECT|INSERT|UPDATE|DELETE)/i, '$1').trim();
-
-    return {
-      domainType: 'sql-analyzer',
-      extractedInput: {
-        query: query || message,
-        analysisTypes: ['correctness', 'performance', 'security', 'style'],
-        databaseType: 'postgresql',
-      },
-    };
-  }
-
-  // ── Test Case Generator ───────────────────────────────────────────────
-  if (
-    /generate\s+test\s+cases?|create\s+test\s+cases?|test\s+cases?\s+for|write\s+tests?\s+for|generate.*test\s+suite|comprehensive.*test\s+suite|executable\s+test\s+suite/i.test(lower)
-  ) {
-    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
-    return {
-      domainType: 'test-case-generator',
-      extractedInput: {
-        code: codeMatch?.[1]?.trim() || message,
-        language: detectLanguage(message),
-        coverage: 'comprehensive',
-      },
-    };
-  }
-
-  // ── Test Data Generator ───────────────────────────────────────────────
-  if (
-    /generate\s+test\s+data|mock\s+data|seed\s+data|fake\s+data|sample\s+data|synthetic\s+test\s+data|test\s+dataset|generate.*synthetic.*data|pii.safe.*anon/i.test(lower)
-  ) {
-    return {
-      domainType: 'test-data-generator',
-      extractedInput: {
-        description: message,
-        format: 'json',
-        count: 10,
-      },
-    };
-  }
-
-  // ── TDD Code Generator ────────────────────────────────────────────────
-  if (
-    /write\s+(?:tdd|test.driven)|implement\s+with\s+tests?|tdd\s+(?:for|implement)|red.green.refactor|execute\s+(?:the\s+)?(?:complete\s+)?tdd|tdd\s+(?:cycle|agent|red|phase)/i.test(lower)
-  ) {
-    return {
-      domainType: 'tdd-code-generator',
-      extractedInput: {
-        description: message,
-        language: detectLanguage(message),
-      },
-    };
-  }
-
-  // ── Incident Diagnosis ────────────────────────────────────────────────
-  if (
-    /diagnose\s+(?:this\s+)?incident|root\s+cause|why\s+is\s+.*(?:down|failing|broken|crashing)|incident\s+(?:analysis|diagnosis)/i.test(lower)
-  ) {
-    return {
-      domainType: 'incident-diagnosis',
-      extractedInput: {
-        description: message,
-        severity: /critical|p0|sev.?0/i.test(lower) ? 'critical' : 'high',
-      },
-    };
-  }
-
-  // ── Impact Analysis ───────────────────────────────────────────────────
-  if (
-    /impact\s+analysis|blast\s+radius|what.?s\s+affected|downstream\s+impact|dependency\s+impact/i.test(lower)
-  ) {
-    return {
-      domainType: 'impact-analysis',
-      extractedInput: {
-        description: message,
-        changeType: 'code_change',
-      },
-    };
-  }
-
-  // ── Data Lineage ──────────────────────────────────────────────────────
-  if (
-    /data\s+lineage|where\s+does\s+.*(?:data|field)\s+come\s+from|trace\s+data|data\s+flow|data\s+origin/i.test(lower)
-  ) {
-    return {
-      domainType: 'data-lineage',
-      extractedInput: {
-        description: message,
-      },
-    };
-  }
-
-  // ── Log Query ─────────────────────────────────────────────────────────
-  if (
-    /query\s+logs?|search\s+logs?|find\s+in\s+logs?|log\s+search|grep\s+logs?|log\s+(?:analysis|analys|investigation|anomaly|pattern|cluster)|error\s+pattern\s+cluster|anomaly\s+(?:timeline|investigation)|intelligent\s+log|log\s+intelligence/i.test(lower)
-  ) {
-    return {
-      domainType: 'log-query',
-      extractedInput: {
-        query: message,
-        timeRange: '24h',
-      },
-    };
-  }
-
-  // ── Dependency Upgrade (P1 1.4) ─────────────────────────────────────
-  if (
-    /outdated\s+dep|upgrade\s+dep|dependency\s+upgrade|dependency\s+update|check\s+dep.*version|npm\s+audit|security\s+vuln|dependency\s+(?:security|audit|maintenance)|full\s+dependency.*audit|cve\s+audit|package.*security\s+audit/i.test(lower)
-  ) {
-    const manifestMatch = message.match(/```(?:json)?\s*([\s\S]+?)```/);
-    return {
-      domainType: 'dependency-upgrade',
-      extractedInput: {
-        manifest: manifestMatch?.[1]?.trim() || '{}',
-        ecosystem: /pip|python/i.test(lower) ? 'pip' : /go\b/i.test(lower) ? 'go' : 'npm',
-      },
-    };
-  }
-
-  // ── Design Doc Generator (P1 1.5) ──────────────────────────────────
-  if (
-    /generate\s+(?:hld|lld|design\s+doc)|create\s+(?:hld|lld|design\s+doc)|reverse.?engineer\s+design|architecture\s+doc|system\s+design\s+doc|design\s+documentation\s+package|hld.*lld|publication.ready.*design|c4\s+diagram|sequence\s+diagram.*design/i.test(lower)
-  ) {
-    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
-    const isReverse = /reverse|from\s+code|extract\s+design/i.test(lower);
-    return {
-      domainType: 'design-doc-generator',
-      extractedInput: {
-        direction: isReverse ? 'reverse' : 'forward',
-        requirements: isReverse ? undefined : message,
-        sourceCode: isReverse ? (codeMatch?.[1]?.trim() || message) : codeMatch?.[1]?.trim(),
-        level: /hld\s+and\s+lld|both/i.test(lower) ? 'both' : /lld/i.test(lower) ? 'lld' : 'hld',
-      },
-    };
-  }
-
-  // ── Performance Profiler (P1 3.4) ──────────────────────────────────
-  if (
-    /performance\s+profil|slow\s+endpoint|bottleneck.*performance|latency\s+analys|apm\s+data|slow\s+query.*analys|performance\s+audit|comprehensive\s+performance|bottleneck\s+analysis|n\+1\s+(?:query|detection)|memory\s+(?:leak|profil)|core\s+web\s+vital/i.test(lower)
-  ) {
-    return {
-      domainType: 'performance-profiler',
-      extractedInput: {
-        traceData: message,
-      },
-    };
-  }
-
-  // ── Dead Code Detector (P1 4.3) ────────────────────────────────────
-  if (
-    /dead\s+code|unused\s+(?:code|import|function|variable)|unreachable\s+code|code\s+cleanup/i.test(lower)
-  ) {
-    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
-    return {
-      domainType: 'dead-code-detector',
-      extractedInput: {
-        sourceCode: codeMatch?.[1]?.trim() || message,
-        language: detectLanguage(message),
-      },
-    };
-  }
-
-  // ── Boilerplate & Scaffolding Generator (P1 1.2) ─────────────────
-  if (
-    /scaffol|boilerplate|generate\s+(?:crud|endpoint|api\s+route|service|component)|new\s+(?:service|module|endpoint|component)\s+(?:for|with|that)/i.test(lower)
-  ) {
-    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
-    return {
-      domainType: 'boilerplate-scaffold', // matches DOMAIN_MAP key
-      extractedInput: {
-        description: message,
-        template: codeMatch?.[1]?.trim(),
-        language: detectLanguage(message),
-        includeTests: true,
-        includeLogging: true,
-      },
-    };
-  }
-
-  // ── PR Review & Iteration Assistant (P1 1.3) ─────────────────────
-  if (
-    /review\s+(?:this\s+)?(?:pr|pull\s+request|diff|code\s+change)|pr\s+review|code\s+review|check\s+(?:this\s+)?(?:pr|diff)\s+for/i.test(lower)
-  ) {
-    const codeMatch = message.match(/```(?:\w+)?\s*([\s\S]+?)```/);
-    const prMatch = lower.match(/#(\d+)/);
-    return {
-      domainType: 'pr-review', // matches DOMAIN_MAP key (was 'pr-review-assistant' — wrong!)
-      extractedInput: {
-        diff: codeMatch?.[1]?.trim() || message,
-        title: prMatch ? `PR #${prMatch[1]}` : 'Code Review',
-        prNumber: prMatch ? parseInt(prMatch[1]) : undefined,
-        focus: ['security', 'performance', 'correctness', 'tests'],
-      },
-    };
-  }
-
-  // ── Codebase Q&A Agent (P1 4.1) ──────────────────────────────────
-  if (
-    /(?:how|where|what|why|explain|show\s+me)\s+.*(?:code|function|class|module|service|endpoint|logic|implemented|work|handler|controller)/i.test(lower) ||
-    /understand\s+.*(?:code|codebase)|explain\s+(?:this\s+)?(?:code|function|class|method)/i.test(lower)
-  ) {
-    return {
-      domainType: 'codebase-qa',
-      extractedInput: {
-        question: message,
-        includeGitHistory: true,
-      },
-    };
-  }
-
-  // ── Early Warning — P0 Velocity Collapse Detection ──────────────────────
-  if (
-    /early.warning|velocity\s+(?:collapse|analysis|trend|drop|prediction)|sprint\s+velocity|delivery\s+velocity|SPOF|bottleneck\s+risk|gini\s+coefficient|velocity\s+pulse|collapse\s+risk|at.risk\s+engagement|flight.?risk|overallocation|over.allocated|at.risk\s+engineer|engineer.*(?:risk|burnout|overload)|review\s+burden/i.test(lower) ||
-    /run\s+(?:a\s+)?(?:full\s+)?delivery\s+velocity/i.test(lower)
-  ) {
-    return {
-      domainType: 'early-warning',
-      extractedInput: {
-        query: message,
-        analysisMode: 'full',
-        lookbackSprints: 3,
-        flagThreshold: 0.8,
-      },
-    };
-  }
-
-  // ── Scope Creep Detection — P0 Scope Intelligence ───────────────────────
-  if (
-    /scope\s+(?:creep|drift|integrity|audit|change|growth|injection)|story\s+point\s+drift|scope\s+baseline|unplanned\s+work|mid.sprint\s+(?:addition|injection)|burndown\s+trajectory|scope\s+control/i.test(lower) ||
-    /run\s+(?:a\s+)?(?:full\s+)?scope\s+integrity/i.test(lower)
-  ) {
-    return {
-      domainType: 'scope-creep',
-      extractedInput: {
-        query: message,
-        alertThreshold: 0.15,  // flag >15% story point drift
-        cumulative: true,
-      },
-    };
-  }
-
-  // ── Pod Match — Team Assignment Recommendation ───────────────────────────
-  if (
-    /(?:analyse|analyze)\s+(?:all\s+)?(?:available\s+)?(?:engineering\s+)?pods|(?:assign|recommend|which|best|right)\s+(?:\w+\s+)?pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)|delivery\s+pod|assign.*(?:engagement|client|project)|recommend.*(?:team|pod)|pod.*(?:for|to)\s+(?:the\s+)?(?:engagement|client|project)/i.test(lower)
-  ) {
-    return {
-      domainType: 'pod-match',
-      extractedInput: {
-        query: message,
-        engagementName: message.match(/(?:for|on|about)\s+["']?([A-Z][A-Za-z0-9\s\-]+?)["']?\s+(?:engagement|client|project)/i)?.[1]?.trim(),
-        topN: 3,
-      },
-    };
-  }
-
-  // ── Engagement Health Dashboard — Delivery Intelligence composite ────────
-  if (
-    /delivery\s+intelligence|engagement\s+health|health\s+score|health\s+dashboard|generate.*engagement.*health|rag\s+status|forecast\s+confidence/i.test(lower)
-  ) {
-    return {
-      domainType: 'delivery-intelligence',
-      extractedInput: {
-        query: message,
-        engagementName: message.match(/(?:for|on|about)\s+["']?([A-Z][A-Za-z0-9\s\-]+?)["']?\s+(?:engagement|client|project)/i)?.[1]?.trim(),
-      },
-    };
-  }
-
-  // ── Architecture Extractor (SWE · Architecture) ─────────────────────────
-  if (
-    /extract.*(?:system\s+)?architecture|show\s+(?:me\s+)?(?:the\s+)?(?:system\s+)?architecture|(?:system|service|micro.?service)\s+(?:graph|map|diagram|topology)|(?:generate|create|build)\s+(?:architecture|c4|container)\s+diagram|architecture\s+(?:overview|document|extract|risks?)|service\s+(?:dependency|communication)\s+map|c4\s+(?:level|diagram|context|container)|service\s+inventory|module\s+ownership\s+map/i.test(lower)
-  ) {
-    return {
-      domainType: 'architecture-extractor',
-      extractedInput: {
-        query: message,
-        includeRisks: true,
-        includeMermaid: true,
-        includeOwnership: true,
-      },
-    };
-  }
-
-  return null;
-}
-
-/**
- * Simple language detection from message content.
- */
-function detectLanguage(message: string): string {
-  const lower = message.toLowerCase();
-  if (/typescript|\.ts\b/i.test(lower)) return 'typescript';
-  if (/python|\.py\b/i.test(lower)) return 'python';
-  if (/javascript|\.js\b/i.test(lower)) return 'javascript';
-  if (/java\b/i.test(lower)) return 'java';
-  if (/go\b|golang/i.test(lower)) return 'go';
-  if (/rust\b|\.rs\b/i.test(lower)) return 'rust';
-  if (/ruby\b|\.rb\b/i.test(lower)) return 'ruby';
-  return 'typescript'; // Default
-}
-
-// ============================================================================
-// AaaS (ACCOUNTING) NATURAL LANGUAGE ROUTING
-// ============================================================================
-
-/**
- * Detect if user message should route to an Accounting-aaS domain.
- *
- * ROUTING TABLE:
- *   "show P&L" / "profit and loss" / "revenue breakdown" → statement-generator
- *   "balance sheet" / "total assets" → statement-generator
- *   "reconcile" / "trial balance" → reconciler
- *   "classify accounts" / "journal entry" → bookkeeper
- *   "GST" / "tax compliance" / "IRAS" → tax-compliance
- *   "Benford" / "anomaly" / "duplicate" → anomaly-detective
- *   "audit" / "workpapers" → audit-preparer
- *   "expense analysis" / "cost breakdown" → statement-generator
- */
-function detectAccountingRoute(
-  message: string
-): { domainType: string; extractedInput: Record<string, unknown> } | null {
-  const lower = message.toLowerCase();
-
-  // ── Financial Statements ──────────────────────────────────────────
-  if (
-    /p\s*&\s*l|profit\s+and\s+loss|income\s+statement|revenue\s+breakdown|revenue\s+trend|expense\s+analysis|cost\s+breakdown|margin|financial\s+statement/i.test(lower)
-  ) {
-    return {
-      domainType: 'statement-generator',
-      extractedInput: { reportType: 'profit-and-loss', question: message },
-    };
-  }
-
-  // ── Balance Sheet ─────────────────────────────────────────────────
-  if (
-    /balance\s+sheet|total\s+assets|total\s+liabilities|equity\s+position|net\s+worth|financial\s+position/i.test(lower)
-  ) {
-    return {
-      domainType: 'statement-generator',
-      extractedInput: { reportType: 'balance-sheet', question: message },
-    };
-  }
-
-  // ── Reconciliation ────────────────────────────────────────────────
-  if (
-    /reconcil|trial\s+balance|month.?end\s+close|completeness\s+check/i.test(lower)
-  ) {
-    return {
-      domainType: 'reconciler',
-      extractedInput: { question: message },
-    };
-  }
-
-  // ── Bookkeeping / Classification ──────────────────────────────────
-  if (
-    /classify\s+account|journal\s+entr|double.?entry|chart\s+of\s+account|account\s+classif|bookkeep/i.test(lower)
-  ) {
-    return {
-      domainType: 'bookkeeper',
-      extractedInput: { question: message },
-    };
-  }
-
-  // ── Tax Compliance ────────────────────────────────────────────────
-  if (
-    /\bgst\b|tax\s+compliance|iras|withholding\s+tax|tax\s+filing|tax\s+obligation|vat/i.test(lower)
-  ) {
-    return {
-      domainType: 'tax-compliance',
-      extractedInput: { question: message },
-    };
-  }
-
-  // ── Anomaly Detection ─────────────────────────────────────────────
-  if (
-    /benford|anomal|duplicate\s+transaction|round.?number|vendor\s+concentration|suspicious\s+transaction|fraud/i.test(lower)
-  ) {
-    return {
-      domainType: 'anomaly-detective',
-      extractedInput: { question: message },
-    };
-  }
-
-  // ── Audit Preparation ─────────────────────────────────────────────
-  if (
-    /audit\s+read|audit\s+prep|workpaper|audit\s+risk|external\s+audit|audit\s+finding/i.test(lower)
-  ) {
-    return {
-      domainType: 'audit-preparer',
-      extractedInput: { question: message },
-    };
-  }
-
-  // ── Cash / Runway ─────────────────────────────────────────────────
-  if (
-    /cash\s+balance|runway|burn\s+rate|cash\s+flow|cash\s+position|how\s+long.*money/i.test(lower)
-  ) {
-    return {
-      domainType: 'statement-generator',
-      extractedInput: { reportType: 'cash-flow', question: message },
-    };
-  }
-
-  return null;
-}
-
-// NOTE: classifyAccountForCopilot() has been removed — accounting analysis
-// is now delegated to the AAS domain executor via executeAccountingAgent().
-
-// ============================================================================
-// AGENT INTENT DETECTION — "Start an OpenClaw agent to fix JIRA-1234"
-// ============================================================================
-
-/**
- * Detect if user wants to launch an agent via the Copilot.
- *
- * Trigger phrases:
- *   - "start an openclaw agent to ..."
- *   - "use agent/claw to ..."
- *   - "run an agent to fix JIRA-1234"
- *   - "create an openclaw agent and execute ..."
- *   - "openclaw: implement this fix"
- *   - "start an agent to review PR #123"
- *   - "launch agent for JIRA-1234"
- *
- * Also extracts:
- *   - Jira ID (JIRA-1234, PROJ-567)
- *   - Repo name
- *   - Branch name
- *   - Agent type (code-review, diagnose, build, test, analyze)
- */
-function detectAgentIntent(
-  message: string
-): {
-  agentType: string;
-  extractedParams: {
-    jiraId?: string;
-    repo?: string;
-    branch?: string;
-    prNumber?: number;
-    description?: string;
-  };
-} | null {
-  const lower = message.toLowerCase();
-
-  // ── Primary trigger: explicit agent invocation ────────────────
-  const agentTriggers = [
-    /(?:start|launch|run|create|use|spin\s+up)\s+(?:an?\s+)?(?:openclaw|agent|claw)\b/i,
-    /(?:openclaw|agent|claw)\s*[:\-—]\s*/i,
-    /(?:openclaw|agent|claw)\s+(?:to|for|and)\s+/i,
-    /(?:start|launch|run)\s+(?:an?\s+)?(?:brain\s+)?agent\b/i,
-    /create\s+(?:an?\s+)?(?:openclaw|agent|claw)\s+(?:agent\s+)?and\s+(?:execute|run)/i,
-    /(?:train|retrain|start\s+training|run\s+(?:brain\s+)?training)\s+(?:the\s+)?brain\b/i,
-  ];
-
-  const isAgentTriggered = agentTriggers.some(rx => rx.test(message));
-
-  if (!isAgentTriggered) return null;
-
-  // ── Extract parameters ────────────────────────────────────────
-
-  // Jira ID: PROJ-123, JIRA-456, NB-789, etc.
-  const jiraMatch = message.match(/\b([A-Z][A-Z0-9]+-\d+)\b/);
-  const jiraId = jiraMatch?.[1];
-
-  // PR number: PR #123, pull request #456
-  const prMatch = message.match(/(?:pr|pull\s+request)\s*#?(\d+)/i);
-  const prNumber = prMatch ? parseInt(prMatch[1]) : undefined;
-
-  // Repository: "on repo-name", "in my-repo", "repo product-amls"
-  const repoMatch = message.match(/(?:on|in|repo|repository)\s+([a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?)/i);
-  const repo = repoMatch?.[1];
-
-  // Branch: "branch release/6.3.4", "on branch main"
-  const branchMatch = message.match(/branch\s+([a-zA-Z0-9_./-]+)/i);
-  const branch = branchMatch?.[1];
-
-  // ── Detect agent type from task description ──────────────────
-  let agentType = "general";
-
-  // ── Train Brain: highest-priority intercept ──────────────────
-  if (
-    /(?:train|retrain|start\s+training|run\s+(?:brain\s+)?training)\s+(?:the\s+)?brain\b/i.test(message) ||
-    /brain\s+training/i.test(message) ||
-    /(?:train|retrain)\s+(?:the\s+)?(?:ai|brain|model)\b/i.test(message)
-  ) {
-    agentType = "train-brain";
-  } else if (/review\s+(?:pr|pull|code|diff)|pr\s+review|code\s+review/i.test(lower)) {
-    agentType = "code-review";
-  } else if (/(?:fix|implement|build|code|develop|create\s+(?:feature|fix))/i.test(lower)) {
-    agentType = "build";
-  } else if (/(?:diagnose|debug|root\s+cause|incident|why\s+is)/i.test(lower)) {
-    agentType = "diagnose";
-  } else if (/(?:test|write\s+tests?|generate\s+tests?|tdd)/i.test(lower)) {
-    agentType = "test";
-  } else if (/(?:analyze|impact|blast\s+radius|assess)/i.test(lower)) {
-    agentType = "analyze";
-  } else if (/(?:upgrade|dependency|dependencies|outdated)/i.test(lower)) {
-    agentType = "dependency-upgrade";
-  } else if (/(?:performance|profil|slow|latency)/i.test(lower)) {
-    agentType = "performance";
-  } else if (/(?:balance\s+sheet|p\s*&\s*l|financial\s+statement|accounting|reconcil|audit|tax|gst)/i.test(lower)) {
-    agentType = "analyze"; // AAAS tasks route through general analysis
-  }
-
-  // If openclaw is explicitly mentioned, tag it
-  if (/openclaw|claw/i.test(lower)) {
-    agentType = "openclaw";
-  }
-
-  return {
-    agentType,
-    extractedParams: {
-      jiraId,
-      repo,
-      branch,
-      prNumber,
-      description: message,
-    },
-  };
-}

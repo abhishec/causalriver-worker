@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     // Find all active connectors for this org
     const { data: connectors } = await service
       .from("org_connectors")
-      .select("id, connector_type, config, credentials, status")
+      .select("id, connector_type, config, status")
       .eq("organization_id", workspaceId)
       .in("status", ["active", "connected"]);
 

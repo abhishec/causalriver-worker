@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = 'force-dynamic';
 
@@ -47,17 +48,23 @@ export async function POST(request: Request) {
     };
     const connectorId = body.connectorId;
 
-    let connectorQuery = service
-      .from("org_connectors")
-      .select("id, config, credentials, signals_count")
-      .eq("organization_id", workspaceId)
-      .eq("connector_type", "jira");
+    let connector: { id: string; connector_type: string; config: Record<string, unknown>; status: string; signals_count: number | null; credentials: Record<string, unknown> | null } | null = null;
 
     if (connectorId) {
-      connectorQuery = connectorQuery.eq("id", connectorId);
+      const { data: row } = await service
+        .from("org_connectors")
+        .select("id, connector_type, config, status, signals_count")
+        .eq("organization_id", workspaceId)
+        .eq("connector_type", "jira")
+        .eq("id", connectorId)
+        .maybeSingle();
+      if (row) {
+        const rawCreds = await getConnectorCredentials(service, workspaceId, "jira");
+        connector = { ...row, config: (row.config as Record<string, unknown>) ?? {}, credentials: rawCreds };
+      }
+    } else {
+      connector = await getConnectorWithCredentials(service, workspaceId, "jira");
     }
-
-    const { data: connector } = await connectorQuery.maybeSingle();
 
     if (!connector) {
       return NextResponse.json(
@@ -73,7 +80,7 @@ export async function POST(request: Request) {
       email?: string;
       api_token?: string;
       site_url?: string;
-    };
+    } | null;
 
     const isBasicAuth = credentials?.auth_type === "basic";
     const isOAuth = !!credentials?.access_token;
@@ -84,6 +91,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    // credentials is guaranteed non-null at this point (either isBasicAuth or isOAuth is true)
+    const nonNullCreds = credentials!;
 
     const { projectKeys, fixVersionFilter, dataLookback } = body;
 
@@ -132,7 +141,7 @@ export async function POST(request: Request) {
     // 4. Fetch Jira data and transform to Brain L1 signals
     const startMs = Date.now();
     const config = connector.config as Record<string, any>;
-    const siteUrl = body.siteUrl || config?.site_url || credentials.site_url || config?.cloud_id || '';
+    const siteUrl = body.siteUrl || config?.site_url || credentials?.site_url || config?.cloud_id || '';
 
     let signalsGenerated = 0;
     let recordsProcessed = 0;
@@ -171,7 +180,7 @@ export async function POST(request: Request) {
           let hasMore = true;
           while (hasMore) {
             const boardRes = await jiraFetch(
-              credentials, siteUrl,
+              nonNullCreds, siteUrl,
               `/rest/agile/1.0/board/${board.externalId}/issue?startAt=${startAt}&maxResults=50&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
             );
             const issues = boardRes?.issues || [];
@@ -215,7 +224,7 @@ export async function POST(request: Request) {
       // and extract any project keys from dashboard gadgets for scoping.
       for (const dash of dashboardSources) {
         try {
-          const dashRes = await jiraFetch(credentials, siteUrl, `/rest/api/3/dashboard/${dash.externalId}`);
+          const dashRes = await jiraFetch(nonNullCreds, siteUrl, `/rest/api/3/dashboard/${dash.externalId}`);
           logger.info(`[Jira sync] Dashboard "${dashRes?.name || dash.externalId}" validated ✓`);
         } catch (dashErr: any) {
           logger.warn(`[Jira sync] Dashboard ${dash.externalId} validation failed: ${dashErr.message}`);
@@ -244,7 +253,7 @@ export async function POST(request: Request) {
               `project IN (${projectClause}) AND fixVersion = "${planVersion}" AND updated >= ${jqlLookback} ORDER BY updated DESC`
             );
             const planRes = await jiraFetch(
-              credentials, siteUrl,
+              nonNullCreds, siteUrl,
               `/rest/api/3/search?jql=${jql}&maxResults=200&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
             );
             const planIssues = (planRes?.issues || []).filter(
@@ -276,7 +285,7 @@ export async function POST(request: Request) {
       // ── Phase D: Project-level sync (standard REST API — catch-all) ─────────
       // Fetches all accessible projects, filtered by projectKeys + fixVersion.
       // Deduplicates against issues already synced from boards/plans above.
-      const projectsRes = await jiraFetch(credentials, siteUrl, '/rest/api/3/project/search?maxResults=50');
+      const projectsRes = await jiraFetch(nonNullCreds, siteUrl, '/rest/api/3/project/search?maxResults=50');
       const projects = projectsRes?.values || [];
 
       for (const project of projects) {
@@ -293,7 +302,7 @@ export async function POST(request: Request) {
             `project = "${project.key}"${fixVersionClause} AND updated >= ${jqlLookback} ORDER BY updated DESC`
           );
           const issuesRes = await jiraFetch(
-            credentials, siteUrl,
+            nonNullCreds, siteUrl,
             `/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,description,comment,status,assignee,reporter,issuetype,priority,created,updated,resolutiondate,sprint,storyPoints,labels,components,fixVersions`
           );
 

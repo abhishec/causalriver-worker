@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
+import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +30,7 @@ export async function POST(request: Request) {
 
     // 2. Load connector config + credentials
     const service = await createServiceClient();
-    const { data: connector } = await service
-      .from("org_connectors")
-      .select("id, config, credentials")
-      .eq("organization_id", workspaceId)
-      .eq("connector_type", "linear")
-      .maybeSingle();
+    const connector = await getConnectorWithCredentials(service, workspaceId, "linear");
 
     if (!connector) {
       return NextResponse.json(
@@ -43,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const credentials = connector.credentials as { api_key?: string; access_token?: string };
+    const credentials = connector.credentials as { api_key?: string; access_token?: string } | null;
     const apiKey = credentials?.api_key || credentials?.access_token;
     if (!apiKey) {
       return NextResponse.json(
