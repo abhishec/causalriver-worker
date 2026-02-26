@@ -4189,7 +4189,7 @@ function detectSEaaSRoute(
 
   // ── Early Warning — P0 Velocity Collapse Detection ──────────────────────
   if (
-    /early.warning|velocity\s+(?:collapse|analysis|trend|drop|prediction)|sprint\s+velocity|delivery\s+velocity|SPOF|bottleneck\s+risk|gini\s+coefficient|velocity\s+pulse|collapse\s+risk|at.risk\s+engagement/i.test(lower) ||
+    /early.warning|velocity\s+(?:collapse|analysis|trend|drop|prediction)|sprint\s+velocity|delivery\s+velocity|SPOF|bottleneck\s+risk|gini\s+coefficient|velocity\s+pulse|collapse\s+risk|at.risk\s+engagement|flight.?risk|overallocation|over.allocated|at.risk\s+engineer|engineer.*(?:risk|burnout|overload)|review\s+burden/i.test(lower) ||
     /run\s+(?:a\s+)?(?:full\s+)?delivery\s+velocity/i.test(lower)
   ) {
     return {
@@ -4220,7 +4220,7 @@ function detectSEaaSRoute(
 
   // ── Pod Match — Team Assignment Recommendation ───────────────────────────
   if (
-    /(?:analyse|analyze)\s+(?:all\s+)?(?:available\s+)?(?:engineering\s+)?pods|(?:assign|recommend|which|best|right)\s+pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)/i.test(lower)
+    /(?:analyse|analyze)\s+(?:all\s+)?(?:available\s+)?(?:engineering\s+)?pods|(?:assign|recommend|which|best|right)\s+(?:\w+\s+)?pod|which\s+team\s+(?:should|for)|pod\s+(?:match|recommendation|assignment)|who\s+should\s+(?:build|work|deliver)|delivery\s+pod|assign.*(?:engagement|client|project)|recommend.*(?:team|pod)|pod.*(?:for|to)\s+(?:the\s+)?(?:engagement|client|project)/i.test(lower)
   ) {
     return {
       domainType: 'pod-match',
