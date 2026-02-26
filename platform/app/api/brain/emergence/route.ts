@@ -166,6 +166,9 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const workspaceId   = url.searchParams.get("org_id") || await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ events: [], total: 0 });
+    }
     const limit   = Math.min(parseInt(url.searchParams.get("limit") || "20", 10) || 20, 50);
     const service = url.searchParams.get("service"); // "aas" | "seaas" | null (all)
 

@@ -78,6 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
 
     // ── Insert into brain_feedback_queue ─────────────────────────
     // This is the fire-and-forget queue that the closed-loop learning

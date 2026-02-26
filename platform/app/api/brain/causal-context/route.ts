@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ upstream: [], downstream: [], recentAnomalies: [], dataAge: null });
+    }
     const domain = request.nextUrl.searchParams.get("domain") || "finance";
 
     // Run in parallel: upstream causes, downstream effects, recent anomaly history, data age

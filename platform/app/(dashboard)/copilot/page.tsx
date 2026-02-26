@@ -988,15 +988,36 @@ function CopilotPageInner() {
   );
 }
 
-// ─── Page Component (with Suspense boundary for useSearchParams) ─────────────
+// ─── SSR-safe shell ────────────────────────────────────────────────────────────
+// CopilotPageInner relies on localStorage (workspace context) which is
+// unavailable during SSR. This shell renders a stable loading placeholder on
+// the server and swaps in the real component only after the client mounts,
+// eliminating the hydration mismatch entirely without needing a separate file.
+
+const LOADING_FALLBACK = (
+  <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
+        <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
+        <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
+      </div>
+      <span className="text-xs text-muted-foreground">Loading...</span>
+    </div>
+  </div>
+);
 
 export default function CopilotPage() {
+  // suppressHydrationWarning on the wrapper is not needed because this component
+  // renders LOADING_FALLBACK on the server (isMounted=false) and then switches
+  // to CopilotPageInner only after mount — both sides always agree on the initial HTML.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) return LOADING_FALLBACK;
+
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
-        <div className="text-sm text-muted">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={LOADING_FALLBACK}>
       <CopilotPageInner />
     </Suspense>
   );
