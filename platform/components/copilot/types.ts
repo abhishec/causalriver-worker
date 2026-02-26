@@ -158,6 +158,7 @@ export interface DeliveryIntelligenceData {
 export type DomainResult =
   | { service: "aas"; data: AccountingDomainData; messageIndex?: number }
   | { service: "seaas"; data: SEaaSDomainData; messageIndex?: number }
+  | { service: "pm-aas"; data: Record<string, unknown>; messageIndex?: number }
   | { service: "delivery-intelligence"; data: DeliveryIntelligenceData; messageIndex?: number }
   | { service: "custom"; data: Record<string, unknown>; messageIndex?: number }
   | { service: "general"; data: Record<string, unknown>; messageIndex?: number };

@@ -12,6 +12,7 @@ import { JiraSetupModal, type JiraConfig } from "@/components/connectors/JiraSet
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
 import { S3UploadModal } from "@/components/connectors/S3UploadModal";
 import { WritebackRulesPanel } from "@/components/connectors/WritebackRulesPanel";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -333,6 +334,7 @@ export function ConnectorsClient({
   );
 
   return (
+    <ErrorBoundary section="Connectors">
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -898,5 +900,6 @@ export function ConnectorsClient({
         }}
       />
     </div>
+    </ErrorBoundary>
   );
 }

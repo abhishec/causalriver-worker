@@ -8,6 +8,7 @@ import type { WorkspaceMembership, CustomerInfo } from "@/lib/workspace-context"
 import { createBrowserClient } from "@supabase/ssr";
 import { logger } from "@/lib/logger";
 import { AgentLiveMonitor } from "@/components/dashboard/AgentLiveMonitor";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -600,6 +601,7 @@ export function DashboardClient() {
 
   /* ── Main Dashboard ───────────────────────────────────────────────────── */
   return (
+    <ErrorBoundary section="Dashboard">
     <div className="min-h-screen bg-background">
       {/* ── Top Nav ──────────────────────────────────────────────────────── */}
       <nav className="border-b border-border-subtle bg-background/80 backdrop-blur-sm sticky top-0 z-10">
@@ -1354,5 +1356,6 @@ export function DashboardClient() {
         )}
       </main>
     </div>
+    </ErrorBoundary>
   );
 }

@@ -97,9 +97,12 @@ interface DomainResultRendererProps {
  * Routing priority:
  * 1. If domainId matches a specific renderer in DOMAIN_RENDERER_MAP → use it
  * 2. AAS service (aas-pl, aas-balance, aas-trial, aas-gst, aas-anomaly, aas-transactions) → FinancialStatementsPanel
- * 3. SE-aaS service without domainId → SEaaSResultPanel (legacy fallback)
+ * 3. Try to extract domainId from data._domainType (fallback for older integrations)
  * 4. delivery-intelligence without domainId → SEaaSDeliveryPanel (legacy fallback)
- * 5. GenericIntelRenderer as final fallback
+ * 5. PM-aaS service → GenericIntelRenderer (PM domain JSON doesn't match SEaaSDomainData shape)
+ * 6. SE-aaS service without domainId → SEaaSResultPanel (legacy fallback)
+ * 7. Custom commands → GenericIntelRenderer
+ * 8. GenericIntelRenderer as final fallback
  */
 export function DomainResultRenderer({ result, domainId }: DomainResultRendererProps) {
   const rawData = (typeof result.data === "object" && result.data ? result.data : {}) as Record<string, any>;
@@ -156,12 +159,23 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
     return withFeedback(<SEaaSDeliveryPanel data={rawData as unknown as DeliveryIntelligenceData} />);
   }
 
-  // ── 5. SE-aaS service → SEaaSResultPanel (legacy generic panel)
+  // ── 5. PM-aaS service → GenericIntelRenderer (PM domain results: roadmap, sprint-health, etc.)
+  // PM-aaS returns structured JSON with domain-specific keys (roadmap, sprintHealth, etc.)
+  // that does NOT match SEaaSDomainData shape — must use GenericIntelRenderer.
+  if (result.service === "pm-aas") {
+    return withFeedback(
+      <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+        <GenericIntelRenderer data={rawData} />
+      </Suspense>
+    );
+  }
+
+  // ── 6. SE-aaS service → SEaaSResultPanel (legacy generic panel)
   if (result.service === "seaas") {
     return withFeedback(<SEaaSResultPanel data={result.data} />);
   }
 
-  // ── 5.5. Custom template results → GenericIntelRenderer
+  // ── 7. Custom template results → GenericIntelRenderer
   // Custom commands (domainId starts with "custom-" or service === "custom")
   if (domainId?.startsWith("custom-") || result.service === "custom") {
     return withFeedback(
