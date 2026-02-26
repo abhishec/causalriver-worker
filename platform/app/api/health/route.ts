@@ -3,24 +3,30 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-/** Required env vars — check presence only, never leak values. */
-const REQUIRED_ENV = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "ANTHROPIC_API_KEY",
-] as const;
-
-/** Check which required env vars are present. Never leak key names publicly. */
+/**
+ * Check which required env vars are present.
+ *
+ * IMPORTANT: NEXT_PUBLIC_* vars are transformed at build time as string literals
+ * by Next.js — process.env[dynamicKey] does NOT work for them in Lambda.
+ * We must reference each NEXT_PUBLIC_* var by its literal name so the compiler
+ * inlines the value. Server-only vars (no NEXT_PUBLIC_ prefix) work fine with
+ * process.env[key] at runtime.
+ */
 function checkEnv() {
-  let missingCount = 0;
-  for (const key of REQUIRED_ENV) {
-    if (!process.env[key]) missingCount++;
-  }
+  // Must use literal property access for NEXT_PUBLIC_* (build-time inlining)
+  const hasSupabaseUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasSupabaseAnonKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const hasServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+
+  const total = 4;
+  const present = [hasSupabaseUrl, hasSupabaseAnonKey, hasServiceRole, hasAnthropicKey].filter(Boolean).length;
+  const missing = total - present;
+
   return {
-    status: missingCount === 0 ? ("ok" as const) : ("missing" as const),
-    present: REQUIRED_ENV.length - missingCount,
-    missing: missingCount,
+    status: missing === 0 ? ("ok" as const) : ("missing" as const),
+    present,
+    missing,
     // Security: never expose secret key names in public endpoint response
   };
 }
