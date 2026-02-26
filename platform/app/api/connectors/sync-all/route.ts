@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     const skipBrainCycle: boolean = body.skipBrainCycle === true;
 
     const workspaceId = body.organizationId || await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
+    }
 
     // Verify caller is a member of this workspace
     const { data: syncMembership } = await supabase

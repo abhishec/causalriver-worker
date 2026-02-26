@@ -133,7 +133,7 @@ export async function processSeAaSJobs(
 
     try {
       await executeAndCompleteJob(supabase, job.id, async () => {
-        const payload = job.payload as Record<string, unknown>;
+        const payload = (job.payload ?? {}) as Record<string, unknown>;
         const userId = (payload.userId as string) || "worker";
 
         const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
