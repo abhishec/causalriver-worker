@@ -26,6 +26,7 @@ import {
 } from "@/lib/nexus-copilot-adapter";
 import { createSSEStream, SSE_HEADERS } from "@/lib/copilot/stream-utils";
 import { resolveSession } from "@/lib/copilot/session";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { resolveSeaasRoute, resolveAccountingRoute, resolvePmAasRoute } from "@/lib/copilot/domain-router";
 import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
 import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
@@ -259,6 +260,15 @@ export async function POST(request: NextRequest) {
       }
     }
     const { user, workspaceId, supabase, service } = sessionResult;
+
+    // ── Rate limiting — 30 req/min per user (defined in SESSION_RATE_LIMITS) ──
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/copilot/chat");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment before sending another message." },
+        { status: 429 }
+      );
+    }
 
     // ── Validate API key early ────────────────────────────────────────
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
