@@ -255,6 +255,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const cached = readCache();
     const isFresh = cached && (Date.now() - cached.timestamp < 60_000);
     if (isFresh) {
+      // Auto-select first workspace if no saved selection exists in localStorage.
+      // Prevents "No AI Worker Selected" when workspaces exist but no selection is persisted
+      // (e.g., fresh browser, cleared localStorage, or first login after cache population).
+      if (!savedWorkspaceId && cached.memberships.length > 0) {
+        const firstNonCore =
+          cached.memberships.find((m) => !m.workspace.is_core_brain) ?? cached.memberships[0];
+        setCurrentWorkspaceId(firstNonCore.organization_id);
+        try { localStorage.setItem(STORAGE_KEY, firstNonCore.organization_id); } catch { /* ignore */ }
+      }
       setIsLoading(false);
     } else {
       loadWorkspaces();

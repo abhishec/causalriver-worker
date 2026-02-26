@@ -109,10 +109,10 @@ export async function POST(request: Request) {
         const result = await instance.ingest({ mode });
         results[type] = result;
 
-        // Update last_synced_at
+        // Update last_sync_at (correct column name on org_connectors)
         await service
           .from("org_connectors")
-          .update({ last_synced_at: new Date().toISOString() })
+          .update({ last_sync_at: new Date().toISOString() })
           .eq("id", connector.id);
       } catch (err: any) {
         logger.error(`[Freshworks sync] ${type} failed:`, err);

@@ -3787,9 +3787,36 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
           }
         }
 
+        // Send Agent Communication Protocol payloads (Heart/Mind/Speech) collected during domain execution
+        // These were captured via onComms callbacks in executeDomain / executeAccountingAgent
+        for (const commsPayload of agentCommsBuffer) {
+          send(JSON.stringify({ agentComms: commsPayload }));
+        }
+
         // Send SE-aaS domain result to frontend for structured display
         if (seaasResult) {
           send(JSON.stringify({ seaasResult }));
+
+          // Input discovery: check if required inputs were missing for the domain
+          // Only fire if we have a seaas result with no error (successful routing but might need more context)
+          if (!seaasResult.error) {
+            try {
+              const { getRequiredInputs } = await import("@/lib/agents/agent-comms");
+              const extractedParams = (seaasResult as Record<string, unknown>) ?? {};
+              const missingInputs = getRequiredInputs(seaasResult.domainType as string, extractedParams);
+              if (missingInputs.length > 0) {
+                send(JSON.stringify({
+                  agentInputRequest: {
+                    agentType: seaasResult.domainType,
+                    missing: missingInputs,
+                    message: `I need a bit more to work with. Could you tell me ${missingInputs.map((i: { label: string }) => i.label).join(" and ")}?`,
+                  },
+                }));
+              }
+            } catch {
+              // Non-fatal — input discovery must never break the response
+            }
+          }
         }
 
         // Send AaaS domain result to frontend for structured display
