@@ -354,16 +354,22 @@ Heavy domains  → claude-sonnet-4-6      (powerful, slower)
 
 | Domain | Model | Reason |
 |--------|-------|--------|
-| delivery-intelligence | claude-haiku-4-5 | fast lookup, low complexity |
-| pod-match | claude-haiku-4-5 | structured matching |
-| early-warning | claude-haiku-4-5 | signal aggregation |
-| scope-creep | claude-haiku-4-5 | rule-based detection |
+| pod-match | claude-haiku-4-5 | Structured SQL query |
+| early-warning | claude-haiku-4-5 | Structured aggregation |
+| scope-creep | claude-haiku-4-5 | Alert retrieval |
+| delivery-intelligence | claude-sonnet-4-6 | Multi-factor analysis |
+| pm-aas/* | claude-sonnet-4-6 | Generation quality matters |
+| aas/* | claude-sonnet-4-6 | Financial accuracy critical |
 | pr-review | claude-sonnet-4-6 | code understanding required |
 | codebase-qa | claude-sonnet-4-6 | deep analysis |
 | incident-diagnosis | claude-sonnet-4-6 | multi-step reasoning |
 | tdd-code-generator | claude-sonnet-4-6 | code generation |
 | design-doc-generator | claude-sonnet-4-6 | long-form writing |
 | architecture-extractor | claude-sonnet-4-6 | complex analysis |
+
+**RL Signal Feedback Loop:**
+
+Every domain execution records outcome to `prediction_records` → `getRecentQualityPatterns()` → injected into the next LLM call via `getBrainContext()`. This means each query is primed with the brain's accumulated accuracy history for that domain, so model routing decisions improve over time as the RL loop compounds.
 
 ### AaaS (Accounting as a Service)
 
