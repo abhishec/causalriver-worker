@@ -1085,8 +1085,17 @@ export async function POST(request: NextRequest) {
     // Regex runs as safety net even when LLM interpretation is present, unless
     // the LLM explicitly routed to a different service (se-aas takes priority).
     const serviceRoute = interpretation?.serviceRoute;
-    const seaasRoute = serviceRoute?.type === 'se-aas' && serviceRoute.seaasDomain
-      ? { domainType: serviceRoute.seaasDomain, extractedInput: serviceRoute.seaasInput || {} }
+    // Validate LLM-interpreted domain against known domains — fallback to regex if unknown
+    const llmSeaasDomain = serviceRoute?.type === 'se-aas' ? serviceRoute.seaasDomain : null;
+    const VALID_SEAAS_DOMAINS = new Set([
+      'test-data-generator','sql-analyzer','test-case-generator','tdd-code-generator','tdd',
+      'incident-diagnosis','impact-analysis','data-lineage','log-query','dependency-upgrade',
+      'design-doc-generator','performance-profiler','dead-code-detector','pr-review',
+      'boilerplate-scaffold','codebase-qa','pod-match','delivery-intelligence',
+      'early-warning','scope-creep','architecture-extractor',
+    ]);
+    const seaasRoute = llmSeaasDomain && VALID_SEAAS_DOMAINS.has(llmSeaasDomain)
+      ? { domainType: llmSeaasDomain, extractedInput: serviceRoute?.seaasInput || {} }
       : !interpretation ? detectSEaaSRoute(message) : null;
     const accountingRoute = serviceRoute?.type === 'aas' && serviceRoute.aasDomain
       ? { domainType: serviceRoute.aasDomain, extractedInput: serviceRoute.aasInput || {} }
