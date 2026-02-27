@@ -148,6 +148,7 @@ jobs:
       # alerts, signal velocity. Fires Slack alerts with 6-hour dedup so the
       # brain proactively surfaces risks without spamming the team.
       - name: Autonomous Monitor
+        if: ${{ github.event.schedule == '*/10 * * * *' || github.event_name == 'workflow_dispatch' }}
         run: |
           BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
           echo "Calling ${BASE_URL}/api/cron/autonomous-monitor ..."
