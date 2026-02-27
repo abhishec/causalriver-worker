@@ -32,6 +32,7 @@ import {
 } from "@/lib/brain/agent-orchestrator";
 import { executeCodeAgentJob, type CodeAgentPayload } from "@/lib/agents/overnight-executor";
 import { evaluateConstraints } from "@/lib/brain/policy-enforcer";
+import { emitWebhookEvent } from "@/lib/webhooks/webhook-delivery";
 
 export interface WorkerResult {
   processed: number;
@@ -155,6 +156,15 @@ export async function processSeAaSJobs(
           })
           .eq("id", job.id)
           .eq("organization_id", job.organization_id);
+
+        // Notify external subscribers that a job was policy-blocked
+        void emitWebhookEvent(supabase, job.organization_id, "policy.blocked", {
+          jobId: job.id,
+          domain: job.task_type,
+          policyName: policyResult.policyName,
+          reason: policyResult.reason,
+        });
+
         result.failed += 1;
         continue;
       }
@@ -303,6 +313,14 @@ export async function processSeAaSJobs(
 
       result.succeeded++;
 
+      // ── Webhook: notify external subscribers ─────────────────────────────
+      // Fire-and-forget: never block job completion on webhook delivery.
+      void emitWebhookEvent(supabase, job.organization_id, "agent.completed", {
+        jobId: job.id,
+        domain: job.task_type,
+        status: "completed",
+      });
+
       // ── Orchestration: unblock waiting jobs ──────────────────────────────
       // Fire-and-forget: NEVER let this block job completion or throw.
       // If this job was a brain-population type, also unblock jobs waiting
@@ -316,6 +334,13 @@ export async function processSeAaSJobs(
         .catch(() => { /* non-fatal — orchestration must never break the job worker */ });
     } catch {
       result.failed++;
+
+      // ── Webhook: notify external subscribers of failure ───────────────────
+      void emitWebhookEvent(supabase, job.organization_id, "agent.failed", {
+        jobId: job.id,
+        domain: job.task_type,
+        status: "failed",
+      });
 
       // ── Orchestration: still unblock on failure (best-effort) ────────────
       // Even on job failure, unblock waiting jobs so they can attempt execution
