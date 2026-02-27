@@ -4610,6 +4610,22 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`
           logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
         }
 
+        // ── MEM0: Structured fact extraction — ADD/UPDATE/DELETE/NOOP ──────────
+        // Mem0 paper: 90% token reduction + 26% accuracy gain vs raw text storage.
+        // Runs fire-and-forget after the RL block; never blocks the response.
+        void (async () => {
+          try {
+            const { extractAndUpdateMemory } = await import("@/lib/brain/mem0-extractor");
+            await extractAndUpdateMemory(
+              service,
+              workspaceId,
+              `User: ${message}\nAssistant: ${streamedAssistantText}`,
+              detectedIntent ?? 'copilot'
+            );
+          } catch { /* non-blocking — Mem0 failure must never affect response */ }
+        })();
+
+
         // ── NB-063: Push causal learnings from this interaction to CORE ───────
         // Mirror of domain-executor Step 7: after the feedback bus fires and
         // triggerEvolution() has potentially updated causal edge weights, compute
