@@ -1232,8 +1232,8 @@ export function DashboardClient() {
                 <div className="px-5 py-4 border-b border-border-subtle bg-accent/5">
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-semibold text-foreground">Create AI Worker</h3>
-                    <button onClick={resetWizard} className="text-muted-foreground hover:text-foreground p-1">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <button onClick={resetWizard} className="text-muted-foreground hover:text-foreground p-1" aria-label="Close wizard">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>

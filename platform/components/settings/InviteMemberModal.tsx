@@ -41,7 +41,7 @@ export function InviteMemberModal({ orgId, onClose, onInvited }: Props) {
         onInvited();
       }, 3000);
     } catch {
-      setError("Something went wrong");
+      setError("Failed to send invitation — check your connection and try again");
     } finally {
       setLoading(false);
     }
