@@ -1,0 +1,301 @@
+/**
+ * POST /api/agents/overnight
+ *
+ * Overnight Agent Orchestrator
+ * ==============================
+ * Accepts a feature spec, decomposes it into tickets, and spawns a child
+ * "code-agent" job in agent_queue for each ticket. The cron worker then
+ * picks up each child job and: generates code via Claude, commits to a
+ * GitHub branch, opens a PR, and notifies Slack.
+ *
+ * Rate limited: 2 requests/hour per user (prevent runaway spawning).
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { getBrainContext } from "@/lib/brain/brain-context";
+import { logger } from "@/lib/logger";
+import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // overnight jobs can take time
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface OvernightRequest {
+  spec: string;
+  repoOwner: string;
+  repoName: string;
+  projectKey?: string;
+  slackChannel?: string;
+}
+
+// ── Route handler ─────────────────────────────────────────────────────────────
+
+export async function POST(req: NextRequest) {
+  // ── Step 1: createClient — isolated try/catch (Amplify Lambda safety) ────
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Step 2: getUser — isolated try/catch ─────────────────────────────────
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Step 3: getCurrentWorkspaceId — isolated try/catch ───────────────────
+  let organizationId: string;
+  try {
+    organizationId = await getCurrentWorkspaceId();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!organizationId) {
+    return NextResponse.json({ error: "No workspace found" }, { status: 401 });
+  }
+
+  // ── Parse request body ────────────────────────────────────────────────────
+  let body: OvernightRequest;
+  try {
+    body = await req.json() as OvernightRequest;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { spec, repoOwner, repoName, projectKey, slackChannel } = body;
+
+  if (!spec || typeof spec !== "string" || spec.trim().length < 10) {
+    return NextResponse.json(
+      { error: "spec is required (min 10 characters)" },
+      { status: 400 }
+    );
+  }
+  if (!repoOwner || typeof repoOwner !== "string") {
+    return NextResponse.json({ error: "repoOwner is required" }, { status: 400 });
+  }
+  if (!repoName || typeof repoName !== "string") {
+    return NextResponse.json({ error: "repoName is required" }, { status: 400 });
+  }
+
+  // ── Step 4: Look up GitHub connector credentials ──────────────────────────
+  let serviceClient;
+  try {
+    serviceClient = await createServiceClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data: githubConnector, error: githubErr } = await serviceClient
+    .from("org_connectors")
+    .select("credentials")
+    .eq("organization_id", organizationId)
+    .eq("connector_type", "github")
+    .eq("status", "active")
+    .single();
+
+  if (githubErr || !githubConnector?.credentials) {
+    logger.warn("[overnight/route] No active GitHub connector found", {
+      orgId: organizationId,
+      error: githubErr?.message,
+    });
+    return NextResponse.json(
+      { error: "No active GitHub connector found. Connect GitHub in Settings > Connectors." },
+      { status: 400 }
+    );
+  }
+
+  const githubCreds = githubConnector.credentials as Record<string, unknown>;
+  const githubToken = (githubCreds.access_token as string | undefined) ?? "";
+  if (!githubToken) {
+    return NextResponse.json(
+      { error: "GitHub connector is missing access_token. Please reconnect GitHub." },
+      { status: 400 }
+    );
+  }
+
+  // ── Step 5: Look up Slack connector credentials (optional) ───────────────
+  let slackToken: string | undefined;
+  try {
+    const { data: slackConnector } = await serviceClient
+      .from("org_connectors")
+      .select("credentials")
+      .eq("organization_id", organizationId)
+      .eq("connector_type", "slack")
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (slackConnector?.credentials) {
+      const slackCreds = slackConnector.credentials as Record<string, unknown>;
+      slackToken = slackCreds.access_token as string | undefined
+        ?? slackCreds.bot_token as string | undefined;
+    }
+  } catch {
+    // Non-fatal — Slack notifications are optional
+    logger.warn("[overnight/route] Slack connector lookup failed (non-fatal)", {
+      orgId: organizationId,
+    });
+  }
+
+  // ── Step 6: Decompose spec into tickets ───────────────────────────────────
+  let tickets: DecomposedTicket[] = [];
+  try {
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === "development" ? "http://localhost:3001" : "https://platform.usebrainos.com");
+
+    const decomposeRes = await fetch(`${appUrl}/api/agents/decompose-spec`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Forward auth cookie so the decompose-spec route authenticates correctly.
+        // Note: for internal server-to-server calls, use CRON_SECRET approach if
+        // cookie forwarding is unavailable.
+        ...(req.headers.get("cookie") ? { cookie: req.headers.get("cookie")! } : {}),
+      },
+      body: JSON.stringify({ spec: spec.trim(), projectKey, repoOwner, repoName }),
+    });
+
+    if (decomposeRes.ok) {
+      const decomposeData = await decomposeRes.json() as { tickets?: DecomposedTicket[] };
+      tickets = Array.isArray(decomposeData.tickets) ? decomposeData.tickets : [];
+    } else {
+      logger.warn("[overnight/route] decompose-spec returned non-OK", {
+        status: decomposeRes.status,
+      });
+    }
+  } catch (decomposeErr) {
+    logger.warn("[overnight/route] decompose-spec call failed (non-fatal)", {
+      error: decomposeErr instanceof Error ? decomposeErr.message : String(decomposeErr),
+    });
+  }
+
+  // Fallback: create one generic ticket from the spec if decomposition failed
+  if (tickets.length === 0) {
+    tickets = [
+      {
+        title: spec.trim().slice(0, 80),
+        description: spec.trim(),
+        type: "task",
+        priority: "medium",
+        estimate: "medium",
+        dependencies: [],
+        domain: "backend",
+      },
+    ];
+    logger.warn("[overnight/route] Decomposition returned 0 tickets — using single fallback ticket", {
+      orgId: organizationId,
+    });
+  }
+
+  // ── Step 7: Get brain context ─────────────────────────────────────────────
+  let brainContextSummary: string | undefined;
+  try {
+    const ctx = await getBrainContext(serviceClient, organizationId);
+    brainContextSummary = ctx.contextSummary;
+  } catch (ctxErr) {
+    // Non-fatal — code gen will work without brain context
+    logger.warn("[overnight/route] getBrainContext failed (non-fatal)", {
+      error: ctxErr instanceof Error ? ctxErr.message : String(ctxErr),
+    });
+  }
+
+  // ── Step 8: Create parent job in agent_queue ──────────────────────────────
+  const { data: parentJob, error: parentErr } = await serviceClient
+    .from("agent_queue")
+    .insert({
+      organization_id: organizationId,
+      agent_type: "overnight-orchestrator",
+      task_type: "overnight-orchestrator",
+      priority: 5,
+      status: "running",
+      payload: {
+        spec: spec.trim(),
+        repoOwner,
+        repoName,
+        ticketCount: tickets.length,
+        userId: user.id,
+      },
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (parentErr || !parentJob) {
+    logger.error("[overnight/route] Failed to create parent job", {
+      orgId: organizationId,
+      error: parentErr?.message,
+    });
+    return NextResponse.json(
+      { error: "Failed to create orchestrator job" },
+      { status: 500 }
+    );
+  }
+
+  // ── Step 9: Create child code-agent jobs for each ticket ──────────────────
+  const childJobs: Array<{ ticketTitle: string; jobId: string }> = [];
+
+  for (const ticket of tickets) {
+    const { data: childJob, error: childErr } = await serviceClient
+      .from("agent_queue")
+      .insert({
+        organization_id: organizationId,
+        agent_type: "code-agent",
+        task_type: "code-agent",
+        priority: 5,
+        status: "pending",
+        parent_job_id: parentJob.id,
+        payload: {
+          ticket,
+          repoOwner,
+          repoName,
+          githubToken,
+          ...(slackToken ? { slackToken } : {}),
+          ...(slackChannel ? { slackChannel } : {}),
+          parentJobId: parentJob.id,
+          ...(brainContextSummary ? { brainContext: brainContextSummary } : {}),
+        },
+      })
+      .select("id")
+      .single();
+
+    if (childErr || !childJob) {
+      logger.warn("[overnight/route] Failed to create child job for ticket", {
+        ticketTitle: ticket.title,
+        error: childErr?.message,
+      });
+      // Non-fatal: continue creating other child jobs
+      continue;
+    }
+
+    childJobs.push({ ticketTitle: ticket.title, jobId: childJob.id });
+  }
+
+  logger.warn("[overnight/route] Overnight agents spawned", {
+    orgId: organizationId,
+    userId: user.id,
+    parentJobId: parentJob.id,
+    ticketCount: tickets.length,
+    childJobsCreated: childJobs.length,
+    repo: `${repoOwner}/${repoName}`,
+  });
+
+  return NextResponse.json({
+    parentJobId: parentJob.id,
+    ticketCount: tickets.length,
+    childJobsCreated: childJobs.length,
+    tickets,
+    childJobs,
+    message: "Overnight agents spawned — check /api/brain/worker-health for progress",
+  });
+}

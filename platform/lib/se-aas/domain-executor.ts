@@ -146,6 +146,87 @@ const decomposeSpecDomain = {
   },
 };
 
+// ── Inline domain: overnight-orchestrator ─────────────────────────────────
+// Passthrough domain that returns the parent job status + child job summary.
+// Allows the SE-aaS router to answer "what's the status of my overnight run?"
+// without requiring a dedicated endpoint.
+const overnightOrchestratorPassthroughDomain = {
+  async execute(ctx: any): Promise<Record<string, unknown>> {
+    const supabase = ctx.supabase as import("@supabase/supabase-js").SupabaseClient;
+    const orgId = ctx.input?.organizationId as string | undefined;
+    const parentJobId = ctx.input?.parentJobId as string | undefined;
+
+    if (!supabase || !orgId) {
+      return { status: "unknown", message: "No org context available" };
+    }
+
+    // Query recent overnight-orchestrator jobs for this org
+    let query = supabase
+      .from("agent_queue")
+      .select("id, status, payload, started_at, completed_at, error_message, created_at")
+      .eq("organization_id", orgId)
+      .eq("task_type", "overnight-orchestrator")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (parentJobId) {
+      query = supabase
+        .from("agent_queue")
+        .select("id, status, payload, started_at, completed_at, error_message, created_at")
+        .eq("organization_id", orgId)
+        .eq("id", parentJobId)
+        .limit(1);
+    }
+
+    const { data: jobs } = await query;
+    const parentJobs = jobs ?? [];
+
+    if (parentJobs.length === 0) {
+      return {
+        status: "no_jobs",
+        message: "No overnight orchestrator jobs found for this workspace",
+      };
+    }
+
+    // For each parent job, count child jobs
+    const summaries = await Promise.all(
+      parentJobs.map(async (job: Record<string, unknown>) => {
+        const { data: childJobs, count } = await supabase
+          .from("agent_queue")
+          .select("id, status", { count: "exact" })
+          .eq("parent_job_id", job.id as string)
+          .eq("task_type", "code-agent");
+
+        const children = childJobs ?? [];
+        const childSummary = {
+          total: count ?? 0,
+          pending: children.filter((c: Record<string, unknown>) => c.status === "pending").length,
+          running: children.filter((c: Record<string, unknown>) => c.status === "running").length,
+          success: children.filter((c: Record<string, unknown>) => c.status === "success").length,
+          error: children.filter((c: Record<string, unknown>) => c.status === "error").length,
+        };
+
+        const payload = job.payload as Record<string, unknown> | null;
+        return {
+          parentJobId: job.id,
+          status: job.status,
+          repo: payload ? `${payload.repoOwner}/${payload.repoName}` : null,
+          ticketCount: (payload as Record<string, unknown> | null)?.ticketCount ?? null,
+          startedAt: job.started_at,
+          completedAt: job.completed_at,
+          childJobs: childSummary,
+        };
+      })
+    );
+
+    return {
+      status: summaries[0]?.status ?? "unknown",
+      message: `Overnight orchestrator: ${summaries[0]?.childJobs.success ?? 0} PRs opened, ${summaries[0]?.childJobs.pending ?? 0} pending`,
+      jobs: summaries,
+    };
+  },
+};
+
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
 // the CORE table on every domain call — we only push once per TTL window.
@@ -195,6 +276,9 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "architecture-extractor": { domain: architectureExtractorDomain, sync: false },
   // Spec Decomposition Engine — inline domain, no memory-stack module needed
   "decompose-spec": { domain: decomposeSpecDomain, sync: false },
+  // Overnight Orchestrator — passthrough that returns parent job status
+  // Allows Copilot to query overnight job progress via SE-aaS routing
+  "overnight-orchestrator": { domain: overnightOrchestratorPassthroughDomain, sync: true },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {

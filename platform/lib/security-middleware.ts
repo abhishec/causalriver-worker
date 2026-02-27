@@ -89,6 +89,7 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   "/api/brain/feedback": 60,         // 60 req/min — feedback is lightweight writes
   "/api/agents/create": 10,          // 10 req/min — agent creation hits Anthropic + DB
   "/api/agents/chain": 10,           // 10 req/min — chain execution is multi-agent heavy
+  "/api/agents/overnight": 2,        // 2 req/hour — overnight orchestrator spawns many child jobs (see SESSION_RATE_WINDOWS)
   "/api/jobs/trigger": 5,            // 5 req/min — job triggers are very heavy
   "/api/connectors/sync-all": 5,     // 5 req/min — sync-all is very expensive (multi-connector)
   "/api/connectors/github/webhook": 120,  // 120 req/min — GitHub webhook bursts
@@ -101,6 +102,16 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   default: 60,                       // 60 req/min for anything else
 };
 
+/**
+ * Per-path window overrides (in seconds).
+ * If a path is NOT listed here, the default 60-second window is used.
+ * Use this for endpoints that need hourly (3600s) or daily (86400s) limits
+ * instead of per-minute limits.
+ */
+const SESSION_RATE_WINDOWS: Record<string, number> = {
+  "/api/agents/overnight": 3600,     // 2 req/hour — prevent runaway overnight job spawning
+};
+
 export async function checkSessionRateLimit(
   userId: string,
   pathname: string
@@ -109,10 +120,13 @@ export async function checkSessionRateLimit(
   const matchingPath = Object.keys(SESSION_RATE_LIMITS).find((p) => p !== "default" && pathname.startsWith(p));
   const limit = SESSION_RATE_LIMITS[matchingPath || "default"] || 60;
 
+  // Use per-path window override if available (e.g. 3600s for overnight endpoint)
+  const windowSeconds = matchingPath ? (SESSION_RATE_WINDOWS[matchingPath] ?? 60) : 60;
+
   const key = `session:${userId}:${matchingPath || "default"}`;
 
   try {
-    const result = await redisCheckRateLimit(key, limit, 60);
+    const result = await redisCheckRateLimit(key, limit, windowSeconds);
     return { allowed: result.allowed, remaining: result.remaining };
   } catch (err) {
     // Fail open — if Redis is down, allow the request but log

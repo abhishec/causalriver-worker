@@ -22,7 +22,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { processSeAaSJobs, type WorkerType } from "@/lib/se-aas/job-worker";
+import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -72,13 +72,19 @@ export async function GET(request: NextRequest) {
       logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", { recoverErr });
     }
 
-    // ── Phase 2: Process pending jobs ────────────────────────────
+    // ── Phase 2: Process pending SE-aaS jobs ─────────────────────
     const result = await processSeAaSJobs(service, limit, workerType);
+
+    // ── Phase 3: Process pending code-agent (overnight) jobs ─────
+    // Run up to 3 code-agent child jobs per cron tick.
+    // These are separate from SE-aaS jobs — they create GitHub PRs.
+    const codeAgentResult = await processCodeAgentJobs(service, 3);
 
     const durationMs = Date.now() - startMs;
     logger.warn(
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
-      `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} took=${durationMs}ms`
+      `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
+      `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -86,6 +92,7 @@ export async function GET(request: NextRequest) {
       workerType,
       staleJobsRecovered,
       ...result,
+      codeAgent: codeAgentResult,
       durationMs,
     });
   } catch (err) {

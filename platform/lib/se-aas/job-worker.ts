@@ -30,6 +30,7 @@ import {
   checkAndStartBrainDependentJobs,
   BRAIN_POPULATION_TYPES,
 } from "@/lib/brain/agent-orchestrator";
+import { executeCodeAgentJob, type CodeAgentPayload } from "@/lib/agents/overnight-executor";
 
 export interface WorkerResult {
   processed: number;
@@ -285,6 +286,89 @@ export async function processSeAaSJobs(
       const _orgId2 = job.organization_id;
       const _jobId2 = job.id;
       checkAndStartWaitingJobs(_orgId2, _jobId2).catch(() => {});
+    }
+  }
+
+  return result;
+}
+
+// ============================================================================
+// CODE-AGENT WORKER — Overnight orchestrator child job processor
+// ============================================================================
+
+/**
+ * Process pending code-agent jobs from the agent_queue.
+ *
+ * These are child jobs created by POST /api/agents/overnight.
+ * Each job calls executeCodeAgentJob which: generates code via Claude,
+ * commits to a GitHub branch, opens a PR, and pings Slack.
+ *
+ * @param supabase  Service-role Supabase client
+ * @param limit     Max jobs to process per invocation (default: 3)
+ */
+export async function processCodeAgentJobs(
+  supabase: SupabaseClient,
+  limit = 3
+): Promise<WorkerResult> {
+  const { data: pendingJobs, error } = await supabase
+    .from("agent_queue")
+    .select("id, organization_id, task_type, payload")
+    .eq("agent_type", "code-agent")
+    .eq("task_type", "code-agent")
+    .eq("status", "pending")
+    .order("priority", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error || !pendingJobs || pendingJobs.length === 0) {
+    return { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
+  }
+
+  const result: WorkerResult = {
+    processed: pendingJobs.length,
+    succeeded: 0,
+    failed: 0,
+    jobIds: [],
+  };
+
+  for (const job of pendingJobs) {
+    result.jobIds.push(job.id);
+
+    try {
+      await executeAndCompleteJob(supabase, job.id, async () => {
+        const payload = (job.payload ?? {}) as CodeAgentPayload;
+
+        const execResult = await executeCodeAgentJob(
+          supabase,
+          job.id,
+          job.organization_id,
+          payload
+        );
+
+        if (!execResult.success) {
+          throw new Error(execResult.error ?? "code-agent execution failed");
+        }
+
+        return {
+          prUrl: execResult.prUrl ?? null,
+          prNumber: execResult.prNumber ?? null,
+          filesCommitted: execResult.filesCommitted ?? 0,
+          branchName: execResult.branchName ?? null,
+        };
+      });
+
+      result.succeeded++;
+
+      // Unblock any jobs waiting on this child job (fire-and-forget)
+      checkAndStartWaitingJobs(job.organization_id, job.id).catch(() => {});
+    } catch (err) {
+      result.failed++;
+      logger.error("[job-worker] code-agent job failed", {
+        jobId: job.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      // Still try to unblock waiting jobs
+      checkAndStartWaitingJobs(job.organization_id, job.id).catch(() => {});
     }
   }
 
