@@ -24,6 +24,8 @@ const RULES: EnvRule[] = [
   { key: "SUPABASE_SERVICE_ROLE_KEY", required: true },
   // Anthropic
   { key: "ANTHROPIC_API_KEY", required: true },
+  // Credential encryption (for connector OAuth tokens)
+  { key: "CREDENTIAL_ENCRYPTION_KEY", required: false },
   // Optional — AWS S3 (for document uploads)
   { key: "AWS_S3_BUCKET_NAME", required: false },
   { key: "AWS_S3_REGION", required: false },
