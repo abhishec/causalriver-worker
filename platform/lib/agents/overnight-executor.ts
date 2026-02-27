@@ -9,7 +9,12 @@
  *   5. Open a PR
  *   6. Request a review from the most recent committer
  *   7. Send a Slack notification (non-fatal)
- *   8. Record RL outcome
+ *   8. Save mid-job checkpoint (resume-safe)
+ *   9. Record RL outcome
+ *
+ * Checkpoint protocol: after PR creation, checkpoint_data is saved with
+ * { completedTickets, pendingTickets, branchName, prUrl }. On resume
+ * the caller loads checkpoint_data and skips already-completed tickets.
  *
  * Called from processSeAaSJobs when task_type = "code-agent".
  */
@@ -479,7 +484,36 @@ Rules:
     }
   }
 
-  // ── Step 10: Record RL outcome ────────────────────────────────────────
+  // ── Step 10: Save mid-job checkpoint ─────────────────────────────────
+  // Persist progress so the job can be resumed if the Lambda is killed or
+  // the job is suspended for human review. checkpoint_data captures what
+  // was completed; checkpoint_phase identifies the stage.
+  try {
+    await supabase
+      .from("agent_queue")
+      .update({
+        checkpoint_data: {
+          completedTickets: [ticket.title],
+          pendingTickets: [],
+          branchName,
+          prUrl: prResult?.url ?? null,
+          prNumber: prResult?.number ?? null,
+          filesCommitted: filesToCommit.length,
+        },
+        checkpoint_phase: prResult
+          ? `ticket-complete-pr-${prResult.number}`
+          : `ticket-complete-no-pr`,
+      })
+      .eq("id", jobId);
+  } catch (checkpointErr) {
+    // Non-fatal — checkpoint failure must never fail the job itself
+    logger.warn("[overnight-executor] Checkpoint save failed (non-fatal)", {
+      jobId,
+      error: checkpointErr instanceof Error ? checkpointErr.message : String(checkpointErr),
+    });
+  }
+
+  // ── Step 11: Record RL outcome ────────────────────────────────────────
   const quality = prResult ? 0.8 : 0.3;
 
   await recordAgentOutcome(supabase, {
@@ -495,7 +529,7 @@ Rules:
     userId: "agent",
   });
 
-  logger.warn("[overnight-executor] Code-agent job complete", {
+  logger.warn("[overnight-executor] Code-agent job complete (all steps done)", {
     jobId,
     orgId,
     branchName,

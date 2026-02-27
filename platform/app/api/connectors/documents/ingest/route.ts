@@ -36,6 +36,7 @@ import { parseDocumentBuffer } from "@/lib/connectors/document-parser";
 import { logger } from "@/lib/logger";
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 1024; // 1 GB
+const MAX_PDF_SIZE = 50 * 1024 * 1024;      // 50 MB — pdf-parse memory constraint
 
 const UPLOAD_ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -87,6 +88,9 @@ export async function POST(req: NextRequest) {
   let documentId: string | undefined;
   let metadata: Record<string, unknown> | undefined;
   let pinned: boolean | undefined;
+  // PDF parse stats — populated for file uploads, used in response
+  let parsedPageCount: number | undefined;
+  let parsedWordCount: number | undefined;
 
   // ── Path A: multipart/form-data — file upload ─────────────────────────
   if (isMultipart) {
@@ -114,6 +118,16 @@ export async function POST(req: NextRequest) {
 
     const mimeType = file.type || "";
     const filename = file.name || "upload";
+
+    // PDF-specific size limit: pdf-parse loads the entire document into memory.
+    // Limiting PDFs to 50 MB prevents Lambda OOM on large scanned files.
+    const isPdf = mimeType === "application/pdf" || filename.toLowerCase().endsWith(".pdf");
+    if (isPdf && file.size > MAX_PDF_SIZE) {
+      return NextResponse.json(
+        { error: `PDF too large (${Math.round(file.size / 1024 / 1024)} MB). Maximum PDF size is ${MAX_PDF_SIZE / 1024 / 1024} MB. For larger documents, extract text first and use the JSON body format.` },
+        { status: 413 }
+      );
+    }
 
     // Accept PDF, DOCX, plain text, and markdown by MIME or extension
     const isAllowedMime = UPLOAD_ALLOWED_MIME_TYPES.has(mimeType);
@@ -149,6 +163,9 @@ export async function POST(req: NextRequest) {
     }
 
     content = parsed.text;
+    // Capture parse stats for the response body
+    parsedPageCount = parsed.pageCount;
+    parsedWordCount = parsed.wordCount;
 
     // Auto-detect source type from MIME/extension if not provided
     const rawSourceType = formData.get("sourceType") as string | null;
@@ -243,7 +260,14 @@ export async function POST(req: NextRequest) {
       pinned,
     });
 
-    return NextResponse.json({ ok: true, ...result });
+    return NextResponse.json({
+      ok: true,
+      ...result,
+      ingestedChunks: result.chunksCreated,
+      // PDF-specific stats (undefined for JSON path — omitted from response)
+      ...(parsedPageCount !== undefined ? { pages: parsedPageCount } : {}),
+      ...(parsedWordCount !== undefined ? { wordCount: parsedWordCount } : {}),
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error("[/api/connectors/documents/ingest] failed", { error: message });

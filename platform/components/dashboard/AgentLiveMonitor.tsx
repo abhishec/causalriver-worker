@@ -11,6 +11,9 @@
  *   - Initial jobs: direct Supabase client query on agent_queue
  *   - Stats: GET /api/brain/worker-health (refreshed every 30s)
  *   - Live updates: Supabase Realtime postgres_changes on agent_queue
+ *
+ * Human-in-loop: suspended jobs show a "Resume" button that calls
+ * POST /api/agents/{id}/resume with an empty body (no response required).
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -42,15 +45,16 @@ interface AgentLiveMonitorProps {
 
 /* ── Status config ──────────────────────────────────────────────────────── */
 
-const STATUS_CONFIG: Record<string, { label: string; classes: string; pulse?: boolean }> = {
-  pending:           { label: "Pending",  classes: "bg-zinc-500/10 text-zinc-400" },
-  running:           { label: "Running",  classes: "bg-accent/10 text-accent", pulse: true },
-  success:           { label: "Done",     classes: "bg-emerald-500/10 text-emerald-400" },
-  succeeded:         { label: "Done",     classes: "bg-emerald-500/10 text-emerald-400" },
-  failed:            { label: "Failed",   classes: "bg-red-500/10 text-red-400" },
-  error:             { label: "Failed",   classes: "bg-red-500/10 text-red-400" },
-  awaiting_approval: { label: "Review",   classes: "bg-amber-500/10 text-amber-400" },
-  resumed:           { label: "Resumed",  classes: "bg-blue-500/10 text-blue-400" },
+const STATUS_CONFIG: Record<string, { label: string; classes: string; pulse?: boolean; canResume?: boolean }> = {
+  pending:           { label: "Pending",      classes: "bg-zinc-500/10 text-zinc-400" },
+  running:           { label: "Running",      classes: "bg-accent/10 text-accent", pulse: true },
+  success:           { label: "Done",         classes: "bg-emerald-500/10 text-emerald-400" },
+  succeeded:         { label: "Done",         classes: "bg-emerald-500/10 text-emerald-400" },
+  failed:            { label: "Failed",       classes: "bg-red-500/10 text-red-400" },
+  error:             { label: "Failed",       classes: "bg-red-500/10 text-red-400" },
+  awaiting_approval: { label: "Review",       classes: "bg-amber-500/10 text-amber-400", canResume: true },
+  suspended:         { label: "Needs Review", classes: "bg-amber-500/10 text-amber-400", canResume: true },
+  resumed:           { label: "Resumed",      classes: "bg-blue-500/10 text-blue-400" },
 };
 
 /* ── Domain display map — internal slug → user-facing label ────────────── */
@@ -153,6 +157,8 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
     failedLast1h: 0,
   });
   const [loading, setLoading] = useState(true);
+  // Track which job is currently being resumed to show loading state on the button
+  const [resumingJobId, setResumingJobId] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* ── Fetch stats from worker-health API ────────────────────────────── */
@@ -178,6 +184,31 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
     }
   }, [orgId]);
 
+  /* ── Resume a suspended/awaiting_approval job ───────────────────────── */
+  const handleResume = useCallback(async (jobId: string) => {
+    if (resumingJobId) return; // prevent double-click
+    setResumingJobId(jobId);
+    try {
+      const resp = await fetch(`/api/agents/${jobId}/resume`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Empty body — suspended jobs don't require an explicit human response
+        body: JSON.stringify({}),
+      });
+      if (resp.ok) {
+        // Optimistically update job status to 'resumed' while Realtime catches up
+        setJobs((prev) =>
+          prev.map((j) => (j.id === jobId ? { ...j, status: "resumed" } : j))
+        );
+        fetchStats();
+      }
+    } catch {
+      // non-critical — user can try again
+    } finally {
+      setResumingJobId(null);
+    }
+  }, [resumingJobId, fetchStats]);
+
   /* ── Initial data load ─────────────────────────────────────────────── */
   useEffect(() => {
     if (!orgId) {
@@ -198,7 +229,7 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
           .from("agent_queue")
           .select("id, agent_type, task_type, status, created_at, started_at, completed_at, error_message")
           .eq("organization_id", orgId)
-          .or(`status.in.(running,succeeded,success,failed,error,awaiting_approval,resumed),created_at.gte.${twoHoursAgo}`)
+          .or(`status.in.(running,succeeded,success,failed,error,awaiting_approval,suspended,resumed),created_at.gte.${twoHoursAgo}`)
           .order("created_at", { ascending: false })
           .limit(10);
 
@@ -347,6 +378,7 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
             const icon = DOMAIN_ICONS[slug] ?? "⚙️";
             const statusCfg = STATUS_CONFIG[job.status] ?? { label: job.status, classes: "bg-zinc-500/10 text-zinc-400" };
             const duration = formatDuration(job);
+            const isResuming = resumingJobId === job.id;
 
             return (
               <div
@@ -367,6 +399,19 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
                 {/* Duration (only when completed) */}
                 {duration && (
                   <span className="text-[10px] text-muted-foreground font-mono shrink-0">{duration}</span>
+                )}
+
+                {/* Resume button — shown only for suspended/awaiting_approval jobs */}
+                {statusCfg.canResume && (
+                  <button
+                    type="button"
+                    disabled={isResuming}
+                    onClick={() => void handleResume(job.id)}
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label={`Resume job ${job.id}`}
+                  >
+                    {isResuming ? "..." : "▶ Resume"}
+                  </button>
                 )}
 
                 {/* Status badge */}

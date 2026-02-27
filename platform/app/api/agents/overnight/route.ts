@@ -245,8 +245,10 @@ export async function POST(req: NextRequest) {
 
   // ── Step 9: Create child code-agent jobs for each ticket ──────────────────
   const childJobs: Array<{ ticketTitle: string; jobId: string }> = [];
+  const totalTickets = tickets.length;
 
-  for (const ticket of tickets) {
+  for (let ticketIndex = 0; ticketIndex < tickets.length; ticketIndex++) {
+    const ticket = tickets[ticketIndex];
     const { data: childJob, error: childErr } = await serviceClient
       .from("agent_queue")
       .insert({
@@ -280,6 +282,32 @@ export async function POST(req: NextRequest) {
     }
 
     childJobs.push({ ticketTitle: ticket.title, jobId: childJob.id });
+
+    // Save parent-level checkpoint after each child job is dispatched.
+    // If the Lambda dies mid-loop, a resume can skip already-dispatched tickets.
+    const completedTickets = tickets.slice(0, ticketIndex + 1).map((t) => t.title);
+    const pendingTickets = tickets.slice(ticketIndex + 1).map((t) => t.title);
+    try {
+      await serviceClient
+        .from("agent_queue")
+        .update({
+          checkpoint_data: {
+            completedTickets,
+            pendingTickets,
+            childJobsDispatched: childJobs.map((cj) => ({ title: cj.ticketTitle, jobId: cj.jobId })),
+          },
+          checkpoint_phase: `ticket-${ticketIndex + 1}-of-${totalTickets}`,
+        })
+        .eq("id", parentJob.id)
+        .eq("organization_id", organizationId);
+    } catch (cpErr) {
+      // Non-fatal — checkpoint failure must never block the loop
+      logger.warn("[overnight/route] Parent checkpoint save failed (non-fatal)", {
+        parentJobId: parentJob.id,
+        ticketIndex,
+        error: cpErr instanceof Error ? cpErr.message : String(cpErr),
+      });
+    }
   }
 
   logger.warn("[overnight/route] Overnight agents spawned", {

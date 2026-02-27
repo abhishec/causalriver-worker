@@ -1,20 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+export type EscalationType = "human-review" | "admin-approval" | "budget-exceeded";
+
 export interface CheckpointState {
   phase: string;                           // e.g. "evidence_gathering", "risk_assessment"
   entityIds: string[];                     // customer IDs, engagement IDs being analyzed
   partialResults: Record<string, unknown>; // findings so far
   escalationQuestion: string;              // the specific question needing human judgment
   resumeInstruction: string;               // tell next Lambda: "Continue analysis from phase X with human response Y"
+  escalationType?: EscalationType;         // why the job was paused (default: "human-review")
   metadata?: Record<string, unknown>;
 }
 
 /**
  * Pause an agent job at a decision gate.
  * Saves full investigation state to checkpoint columns and marks status as
- * awaiting_approval. This is NOT terminal — the continuation job is created
- * by resume_agent_job() when the human responds.
+ * 'suspended' (clearer than 'awaiting_approval' — means human review required).
+ * This is NOT terminal — the continuation job is created by resume_agent_job()
+ * when the human responds via POST /api/agents/{id}/resume.
+ *
+ * escalationType controls the UI label and routing:
+ *   "human-review"    — default; reviewer must read output before continuing
+ *   "admin-approval"  — requires an admin-level user to unblock
+ *   "budget-exceeded" — cost/quota gate; finance approval needed
  */
 export async function pauseJobAtDecisionGate(
   supabase: SupabaseClient,
@@ -22,12 +31,17 @@ export async function pauseJobAtDecisionGate(
   orgId: string,
   checkpoint: CheckpointState
 ): Promise<void> {
+  const escalationType: EscalationType = checkpoint.escalationType ?? "human-review";
+
   try {
     const { error } = await supabase
       .from("agent_queue")
       .update({
-        status: "awaiting_approval",
-        checkpoint_data: checkpoint.partialResults,
+        status: "suspended",
+        checkpoint_data: {
+          ...checkpoint.partialResults,
+          escalationType,
+        },
         checkpoint_phase: checkpoint.phase,
         resume_prompt: checkpoint.resumeInstruction,
         escalation_question: checkpoint.escalationQuestion,
@@ -41,9 +55,10 @@ export async function pauseJobAtDecisionGate(
       return;
     }
 
-    logger.warn("Agent paused at decision gate", {
+    logger.warn("Agent suspended at decision gate", {
       jobId,
       phase: checkpoint.phase,
+      escalationType,
       question: checkpoint.escalationQuestion.slice(0, 100),
     });
   } catch (err) {

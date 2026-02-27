@@ -3,12 +3,13 @@
  * ============================
  * Resumes a paused agent_queue job that is in awaiting_approval status.
  *
- * Body: { response: string }
- *   response — the human's answer to the escalation question
+ * Body: { response?: string }
+ *   response — the human's answer to the escalation question (optional for
+ *              'suspended' jobs that don't need an explicit answer)
  *
  * Flow:
  *   1. Auth: must be org member
- *   2. Verify job belongs to caller's org and is in awaiting_approval status
+ *   2. Verify job belongs to caller's org and is in awaiting_approval or suspended status
  *   3. Call resume_agent_job() RPC → marks original job "resumed", creates
  *      new "pending" continuation job with checkpoint + human response
  *   4. Return { ok, originalJobId, newJobId }
@@ -23,15 +24,33 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
+// Statuses that allow a job to be resumed by a human
+const RESUMABLE_STATUSES = ["awaiting_approval", "suspended"] as const;
+type ResumableStatus = typeof RESUMABLE_STATUSES[number];
+
+function isResumableStatus(status: string): status is ResumableStatus {
+  return (RESUMABLE_STATUSES as readonly string[]).includes(status);
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Auth
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Auth — isolated try/catch (Amplify Lambda safety)
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,20 +61,26 @@ export async function POST(
     return NextResponse.json({ error: "Job ID required" }, { status: 400 });
   }
 
-  let body: { response?: string };
+  // Parse body — empty body is valid for suspended jobs that need no explicit answer
+  let body: { response?: string } = {};
   try {
-    body = (await req.json()) as { response?: string };
+    const text = await req.text();
+    if (text.trim()) {
+      body = JSON.parse(text) as { response?: string };
+    }
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const humanResponse = body.response?.trim();
-  if (!humanResponse) {
-    return NextResponse.json({ error: '"response" field is required' }, { status: 400 });
-  }
+  const humanResponse = body.response?.trim() ?? "";
 
   try {
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Verify the job belongs to one of the caller's orgs
     const { data: members } = await supabase
@@ -80,10 +105,21 @@ export async function POST(
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    if (job.status !== "awaiting_approval") {
+    if (!isResumableStatus(job.status)) {
       return NextResponse.json(
-        { error: `Job status is "${job.status}" — only awaiting_approval jobs can be resumed` },
+        {
+          error: `Job status is "${job.status}" — only jobs in [${RESUMABLE_STATUSES.join(", ")}] can be resumed`,
+        },
         { status: 409 }
+      );
+    }
+
+    // awaiting_approval jobs require an explicit human response.
+    // suspended jobs can be resumed with an empty response (unblock only).
+    if (job.status === "awaiting_approval" && !humanResponse) {
+      return NextResponse.json(
+        { error: '"response" field is required for awaiting_approval jobs' },
+        { status: 400 }
       );
     }
 
@@ -102,6 +138,7 @@ export async function POST(
       originalJobId: jobId,
       newJobId,
       phase: job.checkpoint_phase,
+      previousStatus: job.status,
       userId: user.id,
       orgId: job.organization_id,
     });
