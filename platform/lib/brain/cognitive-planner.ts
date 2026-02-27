@@ -24,6 +24,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { pullCorePatterns } from "@/lib/brain/se-aas-federation";
+import { logDecision } from "@/lib/brain/decision-log";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -782,6 +783,33 @@ ${pastReflectionsText}`;
         rationale: "Coverage gap: domain has not run in >6h (error fallback plan)",
       }));
   }
+
+  // ── EU AI Act Article 13: log planner dispatch decision ──────────────────
+  // Fire-and-forget — supabase here is the service client passed from cron route.
+  void logDecision(supabase, {
+    organizationId: orgId,
+    decisionType: "agent_dispatch",
+    inputContext: {
+      phase: "plan",
+      orgId,
+      cycleId,
+      coverageGaps: coverageGaps.slice(0, 10),
+      stuckDomains,
+      recoveryMode,
+      engagementCount,
+    },
+    decisionMade: {
+      decisionsCount: decisions.length,
+      domains: decisions.map((d) => d.domain),
+      priorities: decisions.map((d) => d.priority),
+    },
+    rationale: decisions.map((d) => `${d.domain}: ${d.rationale}`).join(" | ") || undefined,
+    confidence: decisions.length > 0
+      ? decisions.reduce((sum, d) => sum + (goodQualityDomains.includes(d.domain) ? 0.7 : poorQualityDomains.includes(d.domain) ? 0.3 : 0.5), 0) / decisions.length
+      : 0.5,
+    modelUsed: PLANNER_MODEL,
+    domain: decisions[0]?.domain ?? undefined,
+  });
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 3 — EXECUTE (dedup + queue)

@@ -70,6 +70,7 @@ import { logger } from "@/lib/logger";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain/orchestration-capture";
+import { logDecision } from "@/lib/brain/decision-log";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { selectModel as selectModelDAA } from "@/lib/brain/model-router";
 
@@ -854,6 +855,28 @@ export async function POST(request: NextRequest) {
         metadata: { domain_type: seaasRoute.domainType, intent: interpretation?.intent },
       }).catch(() => {});
     }
+
+    // ── EU AI Act Article 13: log domain routing decision ───────────────────
+    // Fire-and-forget — uses admin client to bypass RLS on brain_decision_log.
+    void logDecision(getAdminClient(), {
+      organizationId: workspaceId,
+      decisionType: "domain_routing",
+      inputContext: {
+        message: message.slice(0, 500),
+        brainContextSummary: brainContext?.contextSummary ?? null,
+      },
+      decisionMade: {
+        domain: seaasRoute?.domainType ?? interpretation?.primaryDomain ?? null,
+        type: interpretation?.intent ?? null,
+        seaasRouted: !!seaasRoute,
+        accountingRouted: !!accountingRoute,
+      },
+      rationale: (interpretation as any)?.reasoning ?? undefined,
+      confidence: interpretation?.confidence ?? undefined,
+      modelUsed: "claude-haiku-4-5",
+      domain: seaasRoute?.domainType ?? interpretation?.primaryDomain ?? undefined,
+      userId: user.id,
+    });
 
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       // ── Orchestration gate: check for brain dependencies before executing ──
