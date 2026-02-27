@@ -126,6 +126,182 @@ export async function POST(request: Request) {
         .eq("id", connector.id);
     }
 
+    // ── Phase 0: Repository file ingestion ───────────────────────────────────
+    // Fetches actual source files from each connected repo so Brain can answer
+    // questions about the codebase. Runs once per repo per 24h (incremental).
+    // Wrapped in try/catch — never blocks PR/commit signal sync.
+    try {
+      const INGESTIBLE_EXTENSIONS = new Set([
+        ".md", ".ts", ".tsx", ".js", ".json", ".yml", ".yaml", ".sql", ".py", ".go",
+      ]);
+      const SKIP_PREFIXES = [
+        "node_modules/", ".next/", "dist/", "build/", ".git/",
+        "node_modules\\", ".next\\", "dist\\", "build\\",
+      ];
+      const MAX_REPOS = 3;
+      const MAX_FILES_PER_REPO = 50;
+      const FETCH_DELAY_MS = 100;
+
+      const reposForFileSync = reposToSync.slice(0, MAX_REPOS);
+
+      for (const repoConfig of reposForFileSync) {
+        const owner = repoConfig.owner;
+        const repo = repoConfig.name;
+
+        // Incremental guard: skip if ingested within the last 24 hours
+        const lastFileSyncAt = (storedConfig as Record<string, unknown> & { last_file_sync_at?: string })?.last_file_sync_at;
+        if (lastFileSyncAt) {
+          const ageMs = Date.now() - new Date(lastFileSyncAt).getTime();
+          if (ageMs < 24 * 60 * 60 * 1000) {
+            logger.warn(`[GitHub Sync] Phase 0: ${owner}/${repo} — skipping file sync (last sync ${Math.round(ageMs / 3600000)}h ago, <24h)`);
+            continue;
+          }
+        }
+
+        logger.warn(`[GitHub Sync] Phase 0: fetching file tree for ${owner}/${repo}`);
+
+        // Step a: Fetch the full git tree (recursive)
+        const treeRes = await fetch(
+          `https://api.github.com/repos/${owner}/${repo}/git/trees/HEAD?recursive=1`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+            },
+          }
+        );
+
+        if (!treeRes.ok) {
+          logger.warn(`[GitHub Sync] Phase 0: tree fetch failed for ${owner}/${repo} — ${treeRes.status} ${treeRes.statusText}`);
+          continue;
+        }
+
+        const treeData = await treeRes.json() as {
+          tree?: Array<{ path: string; type: string; sha: string; size?: number }>;
+          truncated?: boolean;
+        };
+
+        if (!treeData.tree) {
+          logger.warn(`[GitHub Sync] Phase 0: empty tree for ${owner}/${repo}`);
+          continue;
+        }
+
+        // Step b: Filter to ingestible file types, excluding generated/vendor dirs
+        const allFiles = treeData.tree.filter((item) => {
+          if (item.type !== "blob") return false;
+          const path = item.path;
+          if (SKIP_PREFIXES.some((prefix) => path.startsWith(prefix))) return false;
+          const ext = path.includes(".") ? "." + path.split(".").pop()! : "";
+          return INGESTIBLE_EXTENSIONS.has(ext);
+        });
+
+        // Step c: Prioritise files — README first, then root-level, then src/
+        const prioritised = [
+          ...allFiles.filter((f) => f.path.toLowerCase().startsWith("readme")),
+          ...allFiles.filter((f) => !f.path.toLowerCase().startsWith("readme") && !f.path.includes("/")),
+          ...allFiles.filter((f) => f.path.startsWith("src/") && f.path.includes("/")),
+          ...allFiles.filter((f) =>
+            !f.path.toLowerCase().startsWith("readme") &&
+            f.path.includes("/") &&
+            !f.path.startsWith("src/")
+          ),
+        ];
+
+        // Deduplicate (a file may match multiple buckets) while preserving order
+        const seen = new Set<string>();
+        const filesToIngest: Array<{ path: string; sha: string; size?: number }> = [];
+        for (const f of prioritised) {
+          if (!seen.has(f.path)) {
+            seen.add(f.path);
+            filesToIngest.push(f);
+          }
+          if (filesToIngest.length >= MAX_FILES_PER_REPO) break;
+        }
+
+        logger.warn(`[GitHub Sync] Phase 0: ingesting ${filesToIngest.length} files from ${owner}/${repo} (${allFiles.length} total eligible)`);
+
+        // Steps d & e: Fetch each file's content and ingest into Brain
+        for (const file of filesToIngest) {
+          try {
+            await new Promise((resolve) => setTimeout(resolve, FETCH_DELAY_MS));
+
+            const contentRes = await fetch(
+              `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(file.path)}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/vnd.github+json",
+                },
+              }
+            );
+
+            if (!contentRes.ok) {
+              logger.warn(`[GitHub Sync] Phase 0: content fetch failed for ${file.path} — ${contentRes.status}`);
+              continue;
+            }
+
+            const contentData = await contentRes.json() as {
+              content?: string;
+              encoding?: string;
+              size?: number;
+              sha?: string;
+            };
+
+            if (!contentData.content || contentData.encoding !== "base64") {
+              logger.warn(`[GitHub Sync] Phase 0: unexpected encoding for ${file.path} — ${contentData.encoding}`);
+              continue;
+            }
+
+            // Decode base64 (GitHub wraps content in newlines)
+            const decoded = Buffer.from(
+              contentData.content.replace(/\n/g, ""),
+              "base64"
+            ).toString("utf-8");
+
+            if (!decoded.trim()) continue;
+
+            void ingestDocument(service, {
+              organizationId: workspaceId,
+              documentTitle: `${owner}/${repo}: ${file.path}`,
+              content: decoded,
+              sourceType: "github",
+              documentId: `repo/${owner}/${repo}/path/${file.path}`,
+              metadata: {
+                repo: `${owner}/${repo}`,
+                path: file.path,
+                sha: contentData.sha ?? file.sha,
+                size: contentData.size ?? file.size,
+              },
+            }).catch((e: Error) =>
+              logger.warn("[GitHub Sync] Phase 0: file ingest failed", { path: file.path, error: e.message })
+            );
+          } catch (fileErr) {
+            logger.warn(`[GitHub Sync] Phase 0: error fetching ${file.path}`, {
+              error: fileErr instanceof Error ? fileErr.message : String(fileErr),
+            });
+          }
+        }
+
+        // Persist last_file_sync_at to prevent re-ingestion within 24h
+        await service
+          .from("org_connectors")
+          .update({
+            config: {
+              ...storedConfig,
+              last_file_sync_at: new Date().toISOString(),
+            },
+          })
+          .eq("id", connector.id);
+
+        logger.warn(`[GitHub Sync] Phase 0: completed for ${owner}/${repo} — ${filesToIngest.length} files queued for ingestion`);
+      }
+    } catch (phase0Err) {
+      // Phase 0 is always non-fatal — PR/commit sync must never be blocked
+      logger.warn("[GitHub Sync] Phase 0: repo file ingestion failed (non-fatal)", {
+        error: phase0Err instanceof Error ? phase0Err.message : String(phase0Err),
+      });
+    }
+
     // 4. Update status to syncing
     await service
       .from("org_connectors")
