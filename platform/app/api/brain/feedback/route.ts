@@ -34,9 +34,22 @@ type Rating = typeof VALID_RATINGS[number];
 export async function POST(request: NextRequest) {
   try {
     // ── Auth ──────────────────────────────────────────────────────
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Step 1: createClient in isolated try-catch — throws when env vars missing in Lambda cold start
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
+    // Step 2: getUser in isolated try-catch
+    let user = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data?.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -85,7 +98,12 @@ export async function POST(request: NextRequest) {
     // ── Insert into brain_feedback_queue ─────────────────────────
     // This is the fire-and-forget queue that the closed-loop learning
     // engine (Loop 3) drains during each learning cycle.
-    const service = await createServiceClient();
+    let service;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const feedbackEntry = {
       organization_id: workspaceId,

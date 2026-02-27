@@ -58,10 +58,22 @@ export async function resolveSession(
   let workspaceId = requestedWorkspaceId || CORE_WORKSPACE_ID;
 
   // Authenticate via Supabase
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Step 1: createClient in isolated try-catch — throws when env vars missing in Lambda cold start
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { type: "unauthorized" };
+  }
+
+  // Step 2: getUser in isolated try-catch
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user ?? null;
+  } catch {
+    return { type: "unauthorized" };
+  }
 
   if (!user) {
     return { type: "unauthorized" };
@@ -111,7 +123,12 @@ export async function resolveSession(
   }
 
   // ── Create service client once for the entire request lifecycle ──────
-  const service = await createServiceClient();
+  let service;
+  try {
+    service = await createServiceClient();
+  } catch {
+    return { type: "unauthorized" };
+  }
 
   return { user: user as any, workspaceId, supabase, service };
 }

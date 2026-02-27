@@ -61,7 +61,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Parse event — only after signature is verified
-    const supabase = await createClient();
+    // createClient can throw on Lambda cold start if env vars missing — ack to GitHub regardless
+    let supabase;
+    try {
+      supabase = await createClient();
+    } catch {
+      logger.error('[GitHub Webhook] createClient failed — env vars missing');
+      return NextResponse.json({ ok: true });
+    }
     const event = req.headers.get('x-github-event');
     let payload;
     try {
@@ -112,11 +119,10 @@ export async function POST(req: NextRequest) {
       message: `Event ${event} received but not processed`,
     });
   } catch (error) {
+    // GitHub retries webhooks on any non-200 response — always return 200
+    // so GitHub doesn't hammer us with retries. Log the error for debugging.
     logger.error('[GitHub Webhook] Error:', error);
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true, error: 'Webhook processing failed internally' });
   }
 }
 
