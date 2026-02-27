@@ -126,7 +126,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError("Something went wrong");
+      setError("Workflow creation failed — check your connection and try again");
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
       const data = await res.json();
       onCreated(data.workflow.id);
     } catch (err) {
-      setError("Something went wrong");
+      setError("Workflow creation failed — check your connection and try again");
     } finally {
       setLoading(false);
     }
@@ -178,7 +178,7 @@ export function CreateWorkflowModal({ workspaceId, prefillSteps, onClose, onCrea
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
           <h2 className="text-lg font-semibold text-foreground">New Workflow</h2>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors">
+          <button onClick={onClose} aria-label="Close dialog" className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>

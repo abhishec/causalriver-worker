@@ -197,7 +197,7 @@ function CreateAgentForm({ onCreated, onCancel }: CreateAgentFormProps) {
         lastRun: null,
       });
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || "Agent creation failed — please refresh and try again");
     } finally {
       setSaving(false);
     }
@@ -213,6 +213,7 @@ function CreateAgentForm({ onCreated, onCancel }: CreateAgentFormProps) {
         <button
           type="button"
           onClick={onCancel}
+          aria-label="Cancel new agent"
           className="p-1 rounded-lg hover:bg-surface-hover text-muted transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -763,6 +764,7 @@ export function AgentManagementPanel({
           {/* Refresh */}
           <button
             onClick={fetchAgents}
+            aria-label="Refresh agents"
             className="p-1.5 rounded-lg border border-border-subtle text-muted hover:text-foreground hover:bg-surface transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

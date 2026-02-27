@@ -55,9 +55,10 @@ export function InviteMemberModal({ orgId, onClose, onInvited }: Props) {
           <h3 className="text-lg font-semibold">Invite Team Member</h3>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface transition-colors"
           >
-            <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

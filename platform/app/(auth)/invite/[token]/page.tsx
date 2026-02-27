@@ -93,7 +93,7 @@ export default function InvitePage() {
         router.push("/dashboard");
       }, 1500);
     } catch {
-      setError("Something went wrong");
+      setError("Failed to accept invitation — please try again or request a new invite");
       setAccepting(false);
     }
   }

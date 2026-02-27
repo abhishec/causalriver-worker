@@ -987,7 +987,7 @@ export default function CopilotPageInner() {
           />
         ) : (
           /* Empty artifact state — matches HTML .art-col > .art-empty */
-          <div className="w-[440px] shrink-0 bg-card border-l border-border-subtle flex flex-col overflow-hidden">
+          <div className="w-full max-w-[440px] shrink-0 bg-card border-l border-border-subtle flex flex-col overflow-hidden">
             {brainLoading ? (
               /* Loading skeleton — shown while domain query is in flight */
               <div className="flex-1 flex flex-col gap-4 p-6">

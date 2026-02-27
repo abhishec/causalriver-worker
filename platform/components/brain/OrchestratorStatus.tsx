@@ -161,7 +161,7 @@ export default function OrchestratorStatus() {
             title={readinessLabel}
           />
           <span className="font-semibold text-gray-200">Brain Status</span>
-          <span className="text-gray-400 font-normal">{readinessLabel}</span>
+          <span className="text-gray-300 font-normal">{readinessLabel}</span>
         </div>
         {lastUpdated && (
           <span className="text-gray-600 text-xs">
@@ -171,7 +171,7 @@ export default function OrchestratorStatus() {
       </div>
 
       {/* Description */}
-      <p className="text-gray-400 text-xs pl-5">{readinessDesc}</p>
+      <p className="text-gray-300 text-xs pl-5">{readinessDesc}</p>
 
       {/* Brain population in progress — show progress indicator */}
       {isPopulating && state.brainPopulationRunning && (
@@ -180,7 +180,7 @@ export default function OrchestratorStatus() {
             <span className="text-yellow-300 text-xs font-medium">
               Brain population in progress
             </span>
-            <span className="text-gray-400 text-xs">
+            <span className="text-gray-300 text-xs">
               {formatEta(remainingMs)} remaining
             </span>
           </div>
@@ -230,7 +230,7 @@ export default function OrchestratorStatus() {
                 </span>
               </div>
               {isPopulating && (
-                <span className="text-gray-400 text-xs">
+                <span className="text-gray-300 text-xs">
                   {formatEta(remainingMs)}
                 </span>
               )}
@@ -242,7 +242,7 @@ export default function OrchestratorStatus() {
       {/* Empty brain — call to action */}
       {isEmpty && !isPopulating && (
         <div className="pl-5">
-          <p className="text-gray-400 text-xs">
+          <p className="text-gray-300 text-xs">
             Connect a data source (GitHub, Jira) to start brain population.
             Queued analyses will auto-start once data is loaded.
           </p>

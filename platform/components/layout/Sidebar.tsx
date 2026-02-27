@@ -720,6 +720,7 @@ export function Sidebar() {
           onClick={toggleCollapse}
           className="w-6 h-5 rounded flex items-center justify-center text-muted/50 hover:text-muted hover:bg-surface-hover transition-colors mb-1"
           title={collapsed ? "Expand sidebar (\u2318[)" : "Collapse sidebar (\u2318[)"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             {collapsed
@@ -735,6 +736,7 @@ export function Sidebar() {
           }}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-1"
           title="Search (\u2318K)"
+          aria-label="Search"
         >
           <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -814,6 +816,7 @@ export function Sidebar() {
               onClick={toggleCollapse}
               className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors"
               title="Collapse sidebar (\u2318[)"
+              aria-label="Collapse sidebar"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />

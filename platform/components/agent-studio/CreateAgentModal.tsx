@@ -40,7 +40,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
       const data = await res.json();
       onCreated(data.templateId);
     } catch (err) {
-      setError("Something went wrong");
+      setError(err instanceof Error ? err.message : "Agent composition failed — please try again");
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
       const data = await res.json();
       onCreated(data.template.id);
     } catch (err) {
-      setError("Something went wrong");
+      setError(err instanceof Error ? err.message : "Agent creation failed — please try again");
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ export function CreateAgentModal({ workspaceId, onClose, onCreated }: CreateAgen
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
           <h2 className="text-lg font-semibold text-foreground">New Agent</h2>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors">
+          <button onClick={onClose} aria-label="Close dialog" className="p-1 rounded-md hover:bg-surface-hover text-muted transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>

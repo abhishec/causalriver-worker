@@ -2361,7 +2361,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       const isSessionExpired = err instanceof Error && err.message === "SESSION_EXPIRED";
       const errorText = isSessionExpired
         ? "Your session has expired. Please refresh the page to continue."
-        : "Something went wrong";
+        : "The AI worker couldn't process your request — please try again";
       // Store the user prompt for retry (only for non-auth errors)
       if (!isSessionExpired) {
         const userMsg = messagesRef.current[messagesRef.current.length - 2];
@@ -2740,7 +2740,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           <div className="px-3.5 py-2.5 rounded-xl bg-danger/5 border border-danger/10">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <span className="text-sm">⚠️</span>
-                              <span className="text-[13px] font-semibold text-danger">Something went wrong</span>
+                              <span className="text-[13px] font-semibold text-danger">Request failed</span>
                             </div>
                             <div className="text-xs text-muted-foreground mb-2.5">
                               {msg.content.replace("__ERROR__", "")}

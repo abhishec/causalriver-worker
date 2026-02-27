@@ -330,7 +330,7 @@ export default function OnboardingPage() {
 
       setStep(2);
     } catch (err: unknown) {
-      setError("Something went wrong — please try again");
+      setError("Setup failed — check your connection and try again");
     } finally {
       setLoading(false);
     }
@@ -633,7 +633,7 @@ export default function OnboardingPage() {
             </h2>
             <p className="text-muted">
               {provisionError
-                ? "Something went wrong. You can retry."
+                ? "Setup failed. Check your connection and retry."
                 : provisionDone
                   ? "Storage, connectors, and learning schedules are all set."
                   : "Setting up storage, connectors, federation, and learning schedules..."}
