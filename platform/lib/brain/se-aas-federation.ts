@@ -1,8 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-
-// The CORE brain aggregates patterns from all orgs
-const CORE_BRAIN_ORG_ID = '00000000-0000-4000-a000-000000000001';
+import { CORE_BRAIN_ORG_ID, ensureCoreBrain } from "@/lib/brain/core-brain";
 
 export type FederatedPattern = {
   domainSequence: string[];
@@ -57,6 +55,13 @@ export async function promotePatternsToCore(
   orgId: string
 ): Promise<void> {
   try {
+    // Ensure CORE brain org exists before attempting to write to it
+    const coreOk = await ensureCoreBrain(supabase);
+    if (!coreOk) {
+      logger.warn("[FedLearning] CORE brain org unavailable — skipping federation for org", { orgId });
+      return;
+    }
+
     const patterns = await collectOrgPatterns(supabase, orgId);
     if (!patterns.length) return;
 

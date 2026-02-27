@@ -25,6 +25,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
+import { checkCoreBrainHealth } from "@/lib/brain/core-brain";
 
 export async function GET(request: NextRequest) {
   const detail = request.nextUrl.searchParams.get("detail") === "true";
@@ -37,12 +38,13 @@ export async function GET(request: NextRequest) {
     let stuckJobs = 0;
     let supabaseOk = false;
     const envOk = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.ANTHROPIC_API_KEY);
+    let coreBrainHealth: { healthy: boolean; orgExists: boolean; templateCount: number; issues: string[] } | null = null;
 
     try {
       const service = await createServiceClient();
 
-      // Supabase connectivity check + queue metrics in a single round-trip
-      const [pendingResult, stuckResult] = await Promise.all([
+      // Supabase connectivity check + queue metrics + CORE brain health in parallel
+      const [pendingResult, stuckResult, coreBrainResult] = await Promise.all([
         service
           .from("agent_queue")
           .select("id", { count: "exact", head: true })
@@ -52,11 +54,13 @@ export async function GET(request: NextRequest) {
           .select("id", { count: "exact", head: true })
           .eq("status", "running")
           .lt("started_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()),
+        checkCoreBrainHealth(service),
       ]);
 
       supabaseOk = !pendingResult.error && !stuckResult.error;
       queueDepth = pendingResult.count ?? 0;
       stuckJobs = stuckResult.count ?? 0;
+      coreBrainHealth = coreBrainResult;
 
       if (queueDepth > 100) {
         logger.warn("[brain/health] Agent queue depth exceeds 100", { queueDepth, route: "/api/brain/health" });
@@ -64,11 +68,15 @@ export async function GET(request: NextRequest) {
       if (stuckJobs > 0) {
         logger.warn("[brain/health] Stuck running jobs detected", { stuckJobs, route: "/api/brain/health" });
       }
+      if (coreBrainHealth && !coreBrainHealth.healthy) {
+        logger.warn("[brain/health] CORE brain unhealthy", { issues: coreBrainHealth.issues, route: "/api/brain/health" });
+      }
     } catch (err) {
       logger.error("[brain/health] Failed to query agent_queue metrics:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/health" });
     }
 
-    const status = (!supabaseOk || stuckJobs > 5 || queueDepth > 200) ? "degraded" : "ok";
+    const coreBrainMissing = coreBrainHealth !== null && !coreBrainHealth.orgExists;
+    const status = (!supabaseOk || stuckJobs > 5 || queueDepth > 200 || coreBrainMissing) ? "degraded" : "ok";
 
     return NextResponse.json({
       status,
@@ -78,11 +86,14 @@ export async function GET(request: NextRequest) {
       envVars: envOk ? "ok" : "missing",
       queueDepth,
       stuckJobs,
+      coreBrainHealth,
       alerts: [
         ...(queueDepth > 100 ? [`Queue depth ${queueDepth} exceeds 100 — worker may be stalled`] : []),
         ...(stuckJobs > 0 ? [`${stuckJobs} job(s) stuck in running state for >30m — check Lambda logs`] : []),
         ...(!supabaseOk ? ["Supabase connectivity check failed"] : []),
         ...(!envOk ? ["One or more required env vars missing"] : []),
+        ...(coreBrainMissing ? ["CORE brain org row is missing — federation is broken"] : []),
+        ...(coreBrainHealth?.issues.filter(i => i !== "CORE brain org row is missing from organizations table") ?? []),
       ],
       timestamp: new Date().toISOString(),
     });
