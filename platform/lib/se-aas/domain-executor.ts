@@ -17,6 +17,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
+import { startJobHeartbeat, stopJobHeartbeat } from "./job-heartbeat";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { selectModelForDomain, routeModelWithIq } from "./model-router";
@@ -129,6 +130,8 @@ export interface ExecuteDomainParams {
   request: Record<string, unknown>;
   organizationId: string;
   userId: string;
+  /** Optional: job queue ID for heartbeat — prevents stale-job watchdog from killing long-running jobs */
+  jobId?: string;
   anthropicApiKey?: string;
   /** Phase 3: LLM query interpretation for targeted context retrieval */
   interpretation?: import("@nexus-ai/memory-stack").QueryInterpretation;
@@ -354,6 +357,12 @@ export async function executeDomain(
   const startMs = Date.now();
   let result: Record<string, unknown>;
   let domainError: string | null = null;
+  // ── Heartbeat: prevent stale-job watchdog from killing long-running jobs ──
+  // Emits a heartbeat every 30s. The watchdog threshold is 120s, so we get
+  // 3 grace beats. Always stopped in finally — interval never leaks.
+  const heartbeatHandle = params.jobId
+    ? startJobHeartbeat(supabase, params.jobId)
+    : null;
   try {
     result = await info.domain.execute(ctx);
   } catch (domainExecErr: any) {
@@ -380,6 +389,10 @@ export async function executeDomain(
       }
     }
     throw domainExecErr;
+  } finally {
+    if (heartbeatHandle !== null) {
+      stopJobHeartbeat(heartbeatHandle);
+    }
   }
   const durationMs = Date.now() - startMs;
 
