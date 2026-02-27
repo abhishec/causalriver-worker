@@ -13,7 +13,9 @@
  * - New active scope creep  → queue scope-creep analysis + Slack notify (warning)
  * - Signal velocity spikes  → queue brain consolidation (info)
  *
- * Deduplication: 6-hour cooldown per alert per entity (via ai_memory marker)
+ * Deduplication: shared 2-hour cooldown via monitor-dedup.ts (ai_memory namespace
+ * 'monitor-dedup:{alertKey}') — shared with monitoring-reactions so both systems
+ * see each other's dedup state and never fire duplicate agents for the same alert.
  * Slack: uses existing org_connectors webhook via get_connector_credentials RPC
  * Agent queuing: inserts to agent_queue with priority 10 (critical) or 5 (warning)
  *
@@ -25,6 +27,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
+import {
+  checkAndSetMonitorDedup,
+  healthAlertKey,
+  flightRiskAlertKey,
+  scopeCreepAlertKey,
+} from "@/lib/brain/monitor-dedup";
 
 // ============================================================================
 // Types
@@ -52,9 +60,11 @@ export interface MonitoringResult {
 }
 
 // ============================================================================
-// Deduplication window: 6 hours
+// NOTE: Deduplication is now handled by the shared monitor-dedup helper so
+// that autonomous-monitor and monitoring-reactions share the SAME dedup state
+// in ai_memory (domain='monitor-dedup:{alertKey}').  The old 6-hour per-system
+// window has been replaced by the shared 2-hour TTL defined in monitor-dedup.ts.
 // ============================================================================
-const DEDUP_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 // ============================================================================
 // Signal velocity window: alerts if > this many signals in past hour per org
@@ -68,7 +78,8 @@ const SIGNAL_VELOCITY_THRESHOLD = 50;
 /**
  * Run all monitoring checks for a single org.
  * Fires agents and Slack notifications for threshold crossings.
- * Deduplicates via ai_memory (6-hour cooldown per alert per entity).
+ * Deduplicates via shared monitor-dedup helper (2-hour TTL, ai_memory namespace
+ * 'monitor-dedup:{alertKey}' — shared with monitoring-reactions).
  */
 export async function runAutonomousMonitoring(
   supabase: SupabaseClient,
@@ -134,13 +145,16 @@ export async function runAutonomousMonitoring(
     `[AutonomousMonitor] org=${orgId} detected ${allAlerts.length} threshold alerts`
   );
 
-  // Process each alert: dedup → react
+  // Process each alert: shared dedup → react
   for (const alert of allAlerts) {
     try {
-      const alreadyFired = await isAlertRecentlyFired(supabase, orgId, alert);
+      // Build canonical dedup key matching monitoring-reactions' key format so
+      // both monitors share the same ai_memory dedup state (2h TTL).
+      const dedupKey = buildDedupKey(alert);
+      const alreadyFired = await checkAndSetMonitorDedup(supabase, orgId, dedupKey);
       if (alreadyFired) {
         logger.warn(
-          `[AutonomousMonitor] DEDUP skip — ${alert.alertType} / ${alert.entityId} fired within 6h`
+          `[AutonomousMonitor] DEDUP skip — ${alert.alertType} / ${alert.entityId} already fired within 2h`
         );
         continue;
       }
@@ -156,9 +170,7 @@ export async function runAutonomousMonitoring(
         const sent = await sendSlackAlert(supabase, orgId, alert);
         if (sent) result.notificationsSent++;
       }
-
-      // Mark as fired (prevent re-alerting within 6h)
-      await markAlertFired(supabase, orgId, alert);
+      // NOTE: dedup marker was already written by checkAndSetMonitorDedup above
     } catch (err) {
       const msg = `Failed to react to ${alert.alertType}/${alert.entityId}: ${String(err)}`;
       logger.error(`[AutonomousMonitor] ${msg}`);
@@ -415,62 +427,26 @@ async function checkSignalVelocity(
 }
 
 // ============================================================================
-// Deduplication: check ai_memory for recent same alert
+// Deduplication: build canonical alert key for shared monitor-dedup helper
+//
+// Uses the same key format as monitoring-reactions so both monitor systems
+// produce identical keys and share dedup state in ai_memory
+// (domain='monitor-dedup:{alertKey}').
 // ============================================================================
 
-async function isAlertRecentlyFired(
-  supabase: SupabaseClient,
-  orgId: string,
-  alert: ThresholdAlert
-): Promise<boolean> {
-  const dedupKey = `monitor.${alert.alertType}.${alert.entityId}`;
-  const since = new Date(Date.now() - DEDUP_WINDOW_MS).toISOString();
-
-  const { data, error } = await supabase
-    .from("ai_memory")
-    .select("id, created_at")
-    .eq("organization_id", orgId)
-    .eq("domain", dedupKey)
-    .gte("created_at", since)
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    // Log but don't block — better to fire a duplicate than miss a real alert
-    logger.warn(`[AutonomousMonitor] dedup check error for ${dedupKey}: ${error.message}`);
-    return false;
-  }
-
-  return data !== null;
-}
-
-async function markAlertFired(
-  supabase: SupabaseClient,
-  orgId: string,
-  alert: ThresholdAlert
-): Promise<void> {
-  const dedupKey = `monitor.${alert.alertType}.${alert.entityId}`;
-
-  const { error } = await supabase.from("ai_memory").insert({
-    organization_id: orgId,
-    memory_type: "fact",
-    domain: dedupKey,
-    content: `Alert fired: ${alert.alertType} for ${alert.entityId} (value: ${alert.currentValue.toFixed(2)}, threshold: ${alert.threshold})`,
-    importance: 0.6,
-    metadata: {
-      alertType: alert.alertType,
-      entityType: alert.entityType,
-      value: alert.currentValue,
-      threshold: alert.threshold,
-      severity: alert.severity,
-      domain: alert.domain,
-      firedAt: new Date().toISOString(),
-      ...(alert.extraContext ?? {}),
-    },
-  });
-
-  if (error) {
-    logger.warn(`[AutonomousMonitor] Failed to mark alert fired for ${dedupKey}: ${error.message}`);
+function buildDedupKey(alert: ThresholdAlert): string {
+  // Route to canonical key builders so both monitor systems produce identical keys
+  switch (alert.entityType) {
+    case "engineer":
+      return flightRiskAlertKey(alert.entityId);
+    case "engagement":
+      if (alert.alertType.startsWith("scope-creep")) {
+        return scopeCreepAlertKey(alert.entityId);
+      }
+      return healthAlertKey(alert.entityId);
+    default:
+      // org-level or unknown: use alertType+entityId as fallback
+      return `${alert.alertType}:${alert.entityId}`;
   }
 }
 

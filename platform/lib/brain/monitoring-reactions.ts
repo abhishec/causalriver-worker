@@ -14,10 +14,19 @@
  *
  * All reactions are non-fatal: errors are caught per-reaction and logged as warnings.
  * Returns a ReactionsReport summarising what was done.
+ *
+ * Deduplication for agent-queuing reactions uses the shared monitor-dedup helper
+ * (ai_memory namespace 'monitor-dedup:{alertKey}') so this system and the
+ * autonomous-monitor cron share dedup state and never duplicate agents for the
+ * same engagement/engineer within the 2-hour TTL window.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import {
+  checkAndSetMonitorDedup,
+  healthAlertKey,
+} from "@/lib/brain/monitor-dedup";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -144,25 +153,17 @@ async function reactHighRiskEngagements(
     const engagementId = eng.engagement_id as string;
     const score = eng.health_score as number;
 
-    // Cooldown check: skip if there's already an early-warning job for this engagement
-    // queued or running in the last 2 hours
-    const cooldownSince = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-    const { data: existingJob } = await supabase
-      .from("agent_queue")
-      .select("id")
-      .eq("organization_id", orgId)
-      .eq("task_type", "early-warning")
-      .in("status", ["pending", "running"])
-      .gte("created_at", cooldownSince)
-      .limit(1)
-      .maybeSingle();
+    // Shared dedup check: uses the same ai_memory namespace as autonomous-monitor
+    // so both systems see each other's dedup state (2-hour TTL).
+    const dedupKey = healthAlertKey(engagementId);
+    const alreadyFired = await checkAndSetMonitorDedup(supabase, orgId, dedupKey);
 
-    if (existingJob) {
+    if (alreadyFired) {
       records.push({
         type: "high-risk-engagement",
-        description: `Engagement ${engagementId} has health_score=${Math.round(score)} but early-warning job already queued — skipping`,
+        description: `Engagement ${engagementId} has health_score=${Math.round(score)} but alert already fired within 2h dedup window — skipping`,
         actionTaken: false,
-        detail: `cooldown active, job_id=${existingJob.id}`,
+        detail: `dedup key=${dedupKey}`,
       });
       continue;
     }
