@@ -28,6 +28,34 @@ import { logger } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2 minute Lambda limit
 
+/**
+ * Lambda timeout guard — 25 seconds (Lambda max is 30s; 5s buffer for cleanup).
+ *
+ * Long-running jobs can be interrupted mid-execution when Lambda's timeout fires.
+ * Without this guard, jobs are left in 'running' state permanently — the stale-job
+ * recovery RPC in Phase 1 will eventually recover them, but that takes 120s of
+ * dead time. With this guard we fail fast and return a clean response within the
+ * Lambda window, keeping the queue accurate.
+ */
+const LAMBDA_TIMEOUT_MS = 25_000;
+
+/**
+ * Wraps a promise with a timeout. Resolves with the result or rejects with a
+ * timeout error after `timeoutMs` milliseconds.
+ */
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error(`lambda_timeout: ${label} exceeded ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutHandle);
+  });
+}
+
 export async function GET(request: NextRequest) {
   // ── Auth ──────────────────────────────────────────────────────
   const authHeader = request.headers.get("authorization");
@@ -73,12 +101,27 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Phase 2: Process pending SE-aaS jobs ─────────────────────
-    const result = await processSeAaSJobs(service, limit, workerType);
+    // Wrapped with a 25s timeout so we never exceed Lambda's 30s wall clock.
+    // On timeout: job-worker leaves jobs in 'running' — Phase 1 on the next
+    // tick will recover them (stale threshold: 120s). The timeout error is
+    // caught below and returned as { ok: false, error: 'lambda_timeout' }.
+    const result = await withTimeout(
+      processSeAaSJobs(service, limit, workerType),
+      LAMBDA_TIMEOUT_MS,
+      "processSeAaSJobs"
+    );
 
     // ── Phase 3: Process pending code-agent (overnight) jobs ─────
     // Run up to 3 code-agent child jobs per cron tick.
     // These are separate from SE-aaS jobs — they create GitHub PRs.
-    const codeAgentResult = await processCodeAgentJobs(service, 3);
+    // Remaining budget after Phase 2: deduct Phase 1 + Phase 2 elapsed time.
+    const phaseElapsed = Date.now() - startMs;
+    const remainingBudget = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsed);
+    const codeAgentResult = await withTimeout(
+      processCodeAgentJobs(service, 3),
+      remainingBudget > 2_000 ? remainingBudget : 2_000, // At least 2s for code agents
+      "processCodeAgentJobs"
+    );
 
     const durationMs = Date.now() - startMs;
     logger.warn(
@@ -97,7 +140,29 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     const durationMs = Date.now() - startMs;
-    logger.error("[cron/process-jobs] Error:", { error: (err as Error)?.message ?? String(err), route: "/api/cron/process-jobs" });
+    const errorMessage = (err as Error)?.message ?? String(err);
+    const isTimeout = errorMessage.startsWith("lambda_timeout");
+
+    if (isTimeout) {
+      // Graceful timeout — jobs in 'running' state will be recovered by Phase 1
+      // on the next cron tick (stale threshold: 120s). Return 200 so the scheduler
+      // does not back off — the next invocation should run immediately.
+      logger.warn("[cron/process-jobs] Lambda timeout — returning gracefully", {
+        durationMs,
+        workerType,
+        staleJobsRecovered,
+        route: "/api/cron/process-jobs",
+      });
+      return NextResponse.json({
+        ok: false,
+        error: "lambda_timeout",
+        workerType,
+        staleJobsRecovered,
+        durationMs,
+      });
+    }
+
+    logger.error("[cron/process-jobs] Error:", { error: errorMessage, route: "/api/cron/process-jobs" });
     // Return 200 even on unexpected failure — cron schedulers that see 5xx may
     // retry immediately or back off exponentially, causing thundering herd.
     // The error is captured in logs; retrying a broken job every 2 min is safer.
