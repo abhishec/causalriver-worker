@@ -37,9 +37,11 @@ RETURNS TABLE (
   source_type    TEXT,
   similarity     FLOAT
 )
-LANGUAGE SQL
+LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+BEGIN
+  RETURN QUERY
   WITH
   -- Vector search results (semantic similarity via cosine distance)
   vector_results AS (
@@ -95,6 +97,7 @@ AS $$
   FROM rrf
   ORDER BY rrf_score DESC
   LIMIT p_limit;
+END;
 $$;
 
 GRANT EXECUTE ON FUNCTION search_document_chunks_hybrid(TEXT, extensions.vector(1536), UUID, INT, FLOAT, FLOAT)

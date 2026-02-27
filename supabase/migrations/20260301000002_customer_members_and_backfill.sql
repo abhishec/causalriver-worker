@@ -212,6 +212,13 @@ ON CONFLICT (customer_id, user_id) DO UPDATE SET
 -- ── 5. RLS for customer_members ──────────────────────────────────────────────
 ALTER TABLE customer_members ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "customer_member_read_own"                  ON customer_members;
+DROP POLICY IF EXISTS "customer_owner_admin_read_all"             ON customer_members;
+DROP POLICY IF EXISTS "platform_admin_read_all_customer_members"  ON customer_members;
+DROP POLICY IF EXISTS "customer_owner_admin_insert"               ON customer_members;
+DROP POLICY IF EXISTS "customer_owner_admin_update"               ON customer_members;
+DROP POLICY IF EXISTS "customer_owner_admin_delete"               ON customer_members;
+
 -- Users can see their own customer memberships
 CREATE POLICY "customer_member_read_own" ON customer_members
   FOR SELECT USING (user_id = auth.uid());
