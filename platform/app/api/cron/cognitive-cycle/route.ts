@@ -47,7 +47,7 @@ import { runMonitoringReactions } from "@/lib/brain/monitoring-reactions";
 import { runCausalDiscovery } from "@/lib/brain/causal-discovery";
 import { extractProcessTemplates } from "@/lib/brain/process-templates";
 import { promotePatternsToCore } from "@/lib/brain/se-aas-federation";
-import { ensureCoreBrain } from "@/lib/brain/core-brain";
+import { ensureCoreBrain, checkCoreBrainHealth } from "@/lib/brain/core-brain";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -74,6 +74,16 @@ export async function GET(request: NextRequest) {
 
     // ── Ensure CORE brain org exists (auto-recover if deleted) ────────
     await ensureCoreBrain(service);
+
+    // ── Check CORE brain health and log any issues ─────────────────────
+    const coreBrainHealth = await checkCoreBrainHealth(service);
+    if (!coreBrainHealth.healthy) {
+      logger.warn("[CronCognitiveCycle] CORE brain health check failed", {
+        issues: coreBrainHealth.issues,
+        orgExists: coreBrainHealth.orgExists,
+        templateCount: coreBrainHealth.templateCount,
+      });
+    }
 
     // ── Find orgs with recent brain activity ──────────────────────────
     // Query cross_domain_signals for distinct org IDs with signals in the last 7 days.
