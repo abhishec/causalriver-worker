@@ -16,6 +16,10 @@ import {
   detectAccountingRoute,
   detectPmAasRoute,
 } from "@/lib/copilot/handlers/seaas-handler";
+import {
+  VALID_SEAAS_DOMAIN_IDS,
+  VALID_PM_AAS_DOMAIN_IDS,
+} from "@/lib/copilot/action-domain-registry";
 
 interface QueryInterpretation {
   source?: string;
@@ -48,52 +52,18 @@ export interface DomainRoute {
  * All valid SE-aaS domain types. Any LLM-interpreted domain not in this set
  * will fall back to regex detection.
  *
- * CRITICAL: When adding a new SE-aaS domain, add it here AND in:
- *   1. CLASSIFIER_SYSTEM_PROMPT Available Services list (llm-query-interpreter.ts)
- *   2. CLASSIFIER_SYSTEM_PROMPT SE-aaS Routing Guide (trigger keywords)
- *   3. chat/route.ts domain execution list
+ * SOURCE OF TRUTH: action-domain-registry.ts — do NOT add entries here.
+ * Add a new DomainRegistryEntry to DOMAIN_REGISTRY and this set updates automatically.
  */
-export const VALID_SEAAS_DOMAINS = new Set([
-  "test-data-generator",
-  "sql-analyzer",
-  "test-case-generator",
-  "tdd-code-generator",
-  "tdd",
-  "incident-diagnosis",
-  "impact-analysis",
-  "data-lineage",
-  "log-query",
-  "dependency-upgrade",
-  "design-doc-generator",
-  "performance-profiler",
-  "dead-code-detector",
-  "pr-review",
-  "boilerplate-scaffold",
-  "codebase-qa",
-  "pod-match",
-  "delivery-intelligence",
-  "early-warning",
-  "scope-creep",
-  "architecture-extractor",
-]);
+export const VALID_SEAAS_DOMAINS = VALID_SEAAS_DOMAIN_IDS;
 
 /**
  * All valid PM-aaS domain types.
  *
- * CRITICAL: When adding a new PM-aaS domain, add it here AND in:
- *   1. CLASSIFIER_SYSTEM_PROMPT Available Services list (llm-query-interpreter.ts)
- *   2. CLASSIFIER_SYSTEM_PROMPT PM-aaS Routing Guide (trigger keywords)
- *   3. chat/route.ts PM-aaS execution block
+ * SOURCE OF TRUTH: action-domain-registry.ts — do NOT add entries here.
+ * Add a new DomainRegistryEntry to DOMAIN_REGISTRY and this set updates automatically.
  */
-export const VALID_PM_AAS_DOMAINS = new Set([
-  "roadmap-planner",
-  "sprint-health",
-  "backlog-prioritizer",
-  "stakeholder-alignment",
-  "release-risk",
-  "feature-impact",
-  "capacity-planner",
-]);
+export const VALID_PM_AAS_DOMAINS = VALID_PM_AAS_DOMAIN_IDS;
 
 /**
  * Resolve the SE-aaS route from LLM interpretation or regex fallback.
