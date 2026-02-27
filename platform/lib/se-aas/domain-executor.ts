@@ -29,6 +29,11 @@ import {
   buildErrorSpeech,
 } from "@/lib/agents/agent-comms";
 import type { AgentCommsPayload } from "@/lib/agents/agent-comms";
+import {
+  pauseJobAtDecisionGate,
+  sendEscalationNotification,
+  loadResumeCheckpoint,
+} from "@/lib/se-aas/agent-checkpoint";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -163,6 +168,30 @@ export async function executeDomain(
   const info = getDomainInfo(params.domainType);
   if (!info) {
     throw new Error(`Unknown domain: ${params.domainType}`);
+  }
+
+  // ── Decision Gate C: Resume from checkpoint (human-in-the-loop continuation) ──
+  // If this job was paused at a decision gate and a human has responded, the
+  // payload will contain checkpoint_data + human_response. We load those and
+  // inject the human decision into the request so the domain continues from
+  // exactly where it stopped — skipping the initial data-fetch steps.
+  // Only fires for queued jobs (jobId present) — direct Copilot calls never pause.
+  if (params.jobId && params.request && typeof params.request === "object") {
+    const checkpoint = loadResumeCheckpoint(params.request);
+    if (checkpoint) {
+      const { checkpointData, humanResponse, phase, resumePrompt } = checkpoint;
+      logger.warn("[domain-executor] Resuming from decision gate checkpoint", {
+        jobId: params.jobId,
+        phase,
+        humanResponse: humanResponse.slice(0, 100),
+      });
+      // Enrich the request with human decision so domain prompts can reference it
+      (params.request as Record<string, unknown>)["_resumeFromCheckpoint"] = true;
+      (params.request as Record<string, unknown>)["_checkpointPhase"] = phase;
+      (params.request as Record<string, unknown>)["_humanDecision"] = humanResponse;
+      (params.request as Record<string, unknown>)["_partialResults"] = checkpointData;
+      (params.request as Record<string, unknown>)["_resumePrompt"] = resumePrompt;
+    }
   }
 
   // ── Agent Communication Protocol setup ──────────────────────────────────
@@ -396,6 +425,129 @@ export async function executeDomain(
     }
   }
   const durationMs = Date.now() - startMs;
+
+  // ── Decision Gate A: early-warning — flight risk / health score threshold ──
+  // Only fires for queued jobs (jobId present). If any engineer has
+  // flight_risk_score > 0.7 OR engagement health_score < 40, we pause the job
+  // and ask a human whether to escalate externally or proceed with internal mitigation.
+  if (params.jobId && params.domainType === "early-warning") {
+    try {
+      const resultData = (result as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+      // Support both single-engineer result and array of engineers in the result
+      const engineers: Record<string, unknown>[] = [];
+      if (Array.isArray((resultData as any)?.engineers)) {
+        engineers.push(...((resultData as any).engineers as Record<string, unknown>[]));
+      } else if (resultData) {
+        engineers.push(resultData);
+      }
+
+      const criticalEngineers = engineers.filter(
+        (e) => typeof e.flight_risk_score === "number" && (e.flight_risk_score as number) > 0.7
+      );
+      const healthScore = typeof (resultData as any)?.health_score === "number"
+        ? ((resultData as any).health_score as number)
+        : null;
+      const engagementId =
+        (typeof (resultData as any)?.engagement_id === "string" ? (resultData as any).engagement_id : null) ??
+        (typeof params.request.engagement_id === "string" ? params.request.engagement_id : null);
+
+      const hasCriticalFlight = criticalEngineers.length > 0;
+      const hasCriticalHealth = healthScore !== null && healthScore < 40;
+
+      if (hasCriticalFlight || hasCriticalHealth) {
+        const topRiskScore = hasCriticalFlight
+          ? Math.max(...criticalEngineers.map((e) => e.flight_risk_score as number))
+          : null;
+        const escalationQuestion = hasCriticalFlight
+          ? `Flight risk is critical (score: ${topRiskScore?.toFixed(2)}). Should I escalate to the client now or proceed with internal mitigation plan?`
+          : `Engagement health is LOW (score: ${healthScore}/100). Should I escalate to the client now or proceed with internal mitigation plan?`;
+        const partialSummary = `${criticalEngineers.length} critical engineer(s) flagged.${healthScore !== null ? ` Engagement health: ${healthScore}/100.` : ""}`;
+
+        await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
+          phase: "risk_assessment",
+          entityIds: engagementId ? [engagementId] : [],
+          partialResults: { criticalEngineers, healthScore, engineersAnalyzed: engineers.length },
+          escalationQuestion,
+          resumeInstruction: `Continue early-warning analysis with human decision: {human_response}`,
+        });
+
+        await sendEscalationNotification(
+          supabase,
+          params.organizationId,
+          params.jobId,
+          escalationQuestion,
+          "risk_assessment",
+          partialSummary
+        );
+
+        // Return early — Lambda exits cleanly, state preserved in DB
+        return {
+          result: {
+            ...result,
+            paused: true,
+            pauseReason: "decision_gate",
+            escalationQuestion,
+            timing: { totalMs: durationMs },
+          },
+          artifactId: null,
+        };
+      }
+    } catch (gateErr: any) {
+      // Non-fatal — gate failure must never block domain result delivery
+      logger.warn("[domain-executor] Decision Gate A (early-warning) threw (non-fatal):", gateErr?.message);
+    }
+  }
+
+  // ── Decision Gate B: delivery-intelligence — critical health score ─────────
+  // Only fires for queued jobs (jobId present). If engagement health_score < 30
+  // (critical red), we pause and ask whether to draft a client communication.
+  if (params.jobId && params.domainType === "delivery-intelligence") {
+    try {
+      const resultData = (result as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+      const healthScore = typeof (resultData as any)?.health_score === "number"
+        ? ((resultData as any).health_score as number)
+        : null;
+
+      if (healthScore !== null && healthScore < 30) {
+        const escalationQuestion = `Engagement health is CRITICAL (score: ${healthScore}/100). Immediate escalation required — should I draft a client communication now?`;
+        const engagementId =
+          (typeof (resultData as any)?.engagement_id === "string" ? (resultData as any).engagement_id : null) ??
+          (typeof params.request.engagement_id === "string" ? params.request.engagement_id : null);
+
+        await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
+          phase: "health_assessment",
+          entityIds: engagementId ? [engagementId] : [],
+          partialResults: { healthScore, deliverySnapshot: resultData ?? {} },
+          escalationQuestion,
+          resumeInstruction: `Continue delivery-intelligence analysis with human decision: {human_response}`,
+        });
+
+        await sendEscalationNotification(
+          supabase,
+          params.organizationId,
+          params.jobId,
+          escalationQuestion,
+          "health_assessment",
+          `Engagement health CRITICAL: ${healthScore}/100`
+        );
+
+        // Return early — Lambda exits cleanly, state preserved in DB
+        return {
+          result: {
+            ...result,
+            paused: true,
+            pauseReason: "decision_gate",
+            escalationQuestion,
+            timing: { totalMs: durationMs },
+          },
+          artifactId: null,
+        };
+      }
+    } catch (gateErr: any) {
+      // Non-fatal — gate failure must never block domain result delivery
+      logger.warn("[domain-executor] Decision Gate B (delivery-intelligence) threw (non-fatal):", gateErr?.message);
+    }
+  }
 
   // Emit domain-complete comms — result ready, about to save artifact
   if (params.onComms) {
