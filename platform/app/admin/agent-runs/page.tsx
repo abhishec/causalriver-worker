@@ -149,9 +149,9 @@ function AdminAgentsClient() {
 
   if (loading && !data) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64" role="status" aria-label="Loading agent runs">
         <div className="flex items-center gap-3 text-muted">
-          <div className="w-5 h-5 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" aria-hidden="true" />
           Loading platform agent runs...
         </div>
       </div>
@@ -202,8 +202,8 @@ function AdminAgentsClient() {
               </button>
             ))}
           </div>
-          <button onClick={fetchData} className={cn("p-2 rounded-lg border border-border-subtle text-muted hover:text-foreground transition-colors", loading && "animate-spin")}>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <button onClick={fetchData} aria-label="Refresh agent runs" className="p-2 rounded-lg border border-border-subtle text-muted hover:text-foreground transition-colors">
+            <svg className={cn("w-4 h-4", loading && "animate-spin")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
