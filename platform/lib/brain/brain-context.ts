@@ -25,6 +25,15 @@ export interface BrainContext {
   contextSummary: string;             // natural language summary for LLM system prompt injection
   qualityPatterns: QualityPattern[];  // per-domain quality breakdown (RL flywheel)
   qualityPatternsSummary: string;     // single-line summary for direct LLM prompt injection
+  // Layer 8-15: expanded knowledge layers
+  sessionLearnings?: string[];        // Layer 8: recent CC session learnings from ai_memory
+  mem0Facts?: string[];               // Layer 9: structured facts from mem0_extraction
+  architecturalDecisions?: string[];  // Layer 10: code/architectural decisions from ai_memory
+  monitorAlerts?: string[];           // Layer 11: autonomous monitor alerts (last 24h)
+  moaSyntheses?: string[];            // Layer 12: MoA synthesis results
+  rlvrOutcomes?: string[];            // Layer 13: RLVR prediction outcomes (last 7 days)
+  signalActivitySummary?: string;     // Layer 14: connector signal activity (last 48h)
+  agentPatterns?: string[];           // Layer 15: agent execution patterns
 }
 
 export async function getBrainContext(
@@ -50,6 +59,15 @@ export async function getBrainContext(
       lastJobRow,
       orchestrationPatternsRow,
       repoMapRow,
+      // Layer 8-15 new queries
+      sessionLearningsRow,
+      mem0FactsRow,
+      archDecisionsRow,
+      monitorAlertsRow,
+      moaSynthesesRow,
+      rlvrOutcomesRow,
+      signalActivityRow,
+      agentPatternsRow,
     ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
@@ -116,6 +134,72 @@ export async function getBrainContext(
         .eq("memory_type", "knowledge")
         .eq("domain", "code.repo_map")
         .maybeSingle(),
+      // Layer 8: Session Learnings — what CC sessions have learned recently
+      supabase
+        .from("ai_memory")
+        .select("content, importance, created_at")
+        .eq("organization_id", orgId)
+        .like("domain", "session.%")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      // Layer 9: Mem0 Extracted Facts — structured facts from past conversations
+      supabase
+        .from("ai_memory")
+        .select("content, importance")
+        .eq("organization_id", orgId)
+        .eq("memory_type", "fact")
+        .gt("importance", 0.3)
+        .order("importance", { ascending: false })
+        .limit(10),
+      // Layer 10: Architectural Decisions — code/architecture decisions captured in brain
+      supabase
+        .from("ai_memory")
+        .select("content, importance, domain")
+        .eq("organization_id", orgId)
+        .like("domain", "code.%")
+        .order("importance", { ascending: false })
+        .limit(5),
+      // Layer 11: Autonomous Monitor Alerts — fired in last 24h (dedup markers in ai_memory)
+      supabase
+        .from("ai_memory")
+        .select("content, importance, domain, created_at")
+        .eq("organization_id", orgId)
+        .like("domain", "monitor.%")
+        .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order("importance", { ascending: false })
+        .limit(5),
+      // Layer 12: MoA Synthesis Results — recent synthesis insights
+      supabase
+        .from("ai_memory")
+        .select("content, importance, created_at")
+        .eq("organization_id", orgId)
+        .like("domain", "moa.%")
+        .order("created_at", { ascending: false })
+        .limit(3),
+      // Layer 13: RLVR Outcomes — recent prediction accuracy (last 7 days)
+      supabase
+        .from("rlvr_prediction_outcomes")
+        .select("domain_type, entity_id, predicted_value, actual_value, outcome_matched, verified_at")
+        .eq("organization_id", orgId)
+        .eq("verification_status", "verified")
+        .gte("verified_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("verified_at", { ascending: false })
+        .limit(5),
+      // Layer 14: Connector Signals Summary — signal type activity in last 48h
+      supabase
+        .from("cross_domain_signals")
+        .select("signal_type, source_domain")
+        .eq("organization_id", orgId)
+        .gte("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
+        .limit(200),
+      // Layer 15: Agent Execution Patterns — orchestration intelligence patterns
+      supabase
+        .from("ai_memory")
+        .select("content, importance, domain")
+        .eq("organization_id", orgId)
+        .like("domain", "orchestration.%")
+        .order("importance", { ascending: false })
+        .limit(5),
     ]);
 
     // Extract values safely
@@ -174,6 +258,85 @@ export async function getBrainContext(
       repoMapRow.status === "fulfilled" && repoMapRow.value.data
         ? String((repoMapRow.value.data as { content: string; metadata: unknown }).content ?? "")
         : null;
+
+    // Layer 8: Session Learnings — what CC sessions have learned
+    const sessionLearningRows = sessionLearningsRow.status === "fulfilled"
+      ? (sessionLearningsRow.value.data ?? [])
+      : [];
+    const sessionLearnings: string[] = (sessionLearningRows as Array<{ content: string; importance: number; created_at: string }>)
+      .map(r => r.content ? r.content.slice(0, 120) : "")
+      .filter((s: string) => s.length > 0);
+
+    // Layer 9: Mem0 Extracted Facts — structured facts from past conversations
+    const mem0FactRows = mem0FactsRow.status === "fulfilled"
+      ? (mem0FactsRow.value.data ?? [])
+      : [];
+    const mem0Facts: string[] = (mem0FactRows as Array<{ content: string; importance: number }>)
+      .map(r => r.content ? `[${Math.round(r.importance * 100)}%] ${r.content.slice(0, 100)}` : "")
+      .filter((s: string) => s.length > 0);
+
+    // Layer 10: Architectural Decisions — code/architecture decisions from brain
+    const archDecisionRows = archDecisionsRow.status === "fulfilled"
+      ? (archDecisionsRow.value.data ?? [])
+      : [];
+    const architecturalDecisions: string[] = (archDecisionRows as Array<{ content: string; importance: number; domain: string }>)
+      .map(r => {
+        const domainLabel = r.domain?.split(".").slice(1).join(".") ?? r.domain ?? "";
+        return r.content ? `${domainLabel}: ${r.content.slice(0, 100)}` : "";
+      })
+      .filter((s: string) => s.length > 0);
+
+    // Layer 11: Autonomous Monitor Alerts — fired in last 24h
+    const monitorAlertRows = monitorAlertsRow.status === "fulfilled"
+      ? (monitorAlertsRow.value.data ?? [])
+      : [];
+    const monitorAlerts: string[] = (monitorAlertRows as Array<{ content: string; importance: number; domain: string; created_at: string }>)
+      .map(r => r.content ? r.content.slice(0, 120) : "")
+      .filter((s: string) => s.length > 0);
+
+    // Layer 12: MoA Synthesis Results — recent synthesis insights
+    const moaSynthesisRows = moaSynthesesRow.status === "fulfilled"
+      ? (moaSynthesesRow.value.data ?? [])
+      : [];
+    const moaSyntheses: string[] = (moaSynthesisRows as Array<{ content: string; importance: number; created_at: string }>)
+      .map(r => r.content ? r.content.slice(0, 150) : "")
+      .filter((s: string) => s.length > 0);
+
+    // Layer 13: RLVR Outcomes — summarise recent prediction accuracy
+    const rlvrRows = rlvrOutcomesRow.status === "fulfilled"
+      ? (rlvrOutcomesRow.value.data ?? [])
+      : [];
+    const rlvrOutcomes: string[] = (rlvrRows as Array<{ domain_type: string; entity_id: string; predicted_value: number; actual_value: number | null; outcome_matched: boolean | null; verified_at: string }>)
+      .map(r => {
+        const matched = r.outcome_matched ? "correct" : "incorrect";
+        const actual = r.actual_value != null ? r.actual_value.toFixed(2) : "n/a";
+        return `${r.domain_type}/${r.entity_id}: pred=${r.predicted_value.toFixed(2)} actual=${actual} (${matched})`;
+      })
+      .filter((s: string) => s.length > 0);
+
+    // Layer 14: Connector Signals Summary — group by signal_type, count occurrences
+    const signalActivityRows = signalActivityRow.status === "fulfilled"
+      ? (signalActivityRow.value.data ?? [])
+      : [];
+    const signalTypeCounts: Record<string, number> = {};
+    for (const row of signalActivityRows as Array<{ signal_type: string; source_domain: string }>) {
+      const key = row.signal_type ?? "unknown";
+      signalTypeCounts[key] = (signalTypeCounts[key] ?? 0) + 1;
+    }
+    const signalActivitySummary: string = Object.entries(signalTypeCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([type, count]) => `${type}:${count}`)
+      .join(", ");
+
+    // Layer 15: Agent Execution Patterns — from orchestration.% ai_memory
+    const agentPatternRows = agentPatternsRow.status === "fulfilled"
+      ? (agentPatternsRow.value.data ?? [])
+      : [];
+    const agentPatterns: string[] = (agentPatternRows as Array<{ content: string; importance: number; domain: string }>)
+      .map(r => r.content ? r.content.split("\n")[0]?.slice(0, 100) ?? "" : "")
+      .filter((s: string) => s.length > 0)
+      .slice(0, 4);
 
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
@@ -238,6 +401,14 @@ export async function getBrainContext(
       docChunkSnippets,
       orchestrationPatterns,
       repoMapContent,
+      sessionLearnings,
+      mem0Facts,
+      architecturalDecisions,
+      monitorAlerts,
+      moaSyntheses,
+      rlvrOutcomes,
+      signalActivitySummary,
+      agentPatterns,
     });
 
     const result: BrainContext = {
@@ -254,6 +425,14 @@ export async function getBrainContext(
       contextSummary,
       qualityPatterns,
       qualityPatternsSummary,
+      sessionLearnings,
+      mem0Facts,
+      architecturalDecisions,
+      monitorAlerts,
+      moaSyntheses,
+      rlvrOutcomes,
+      signalActivitySummary,
+      agentPatterns,
     };
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
@@ -282,7 +461,20 @@ export async function getBrainContext(
 }
 
 function buildContextSummary(
-  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[]; orchestrationPatterns?: string[]; repoMapContent?: string | null }
+  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & {
+    recentDocTitles?: string[];
+    docChunkSnippets?: string[];
+    orchestrationPatterns?: string[];
+    repoMapContent?: string | null;
+    sessionLearnings?: string[];
+    mem0Facts?: string[];
+    architecturalDecisions?: string[];
+    monitorAlerts?: string[];
+    moaSyntheses?: string[];
+    rlvrOutcomes?: string[];
+    signalActivitySummary?: string;
+    agentPatterns?: string[];
+  }
 ): string {
   const parts: string[] = [];
 
@@ -334,6 +526,46 @@ function buildContextSummary(
   // Layer 7: Repo Map — codebase symbol graph (Aider pattern)
   if (ctx.repoMapContent && ctx.repoMapContent.length > 0) {
     parts.push(`## Codebase Repo Map (top symbols by PageRank):\n${ctx.repoMapContent}`);
+  }
+
+  // Layer 8: Session Learnings — what CC sessions have learned
+  if (ctx.sessionLearnings && ctx.sessionLearnings.length > 0) {
+    parts.push(`## Recent CC Session Learnings:\n${ctx.sessionLearnings.map(s => `- ${s}`).join('\n')}`);
+  }
+
+  // Layer 9: Mem0 Extracted Facts — structured facts from past conversations
+  if (ctx.mem0Facts && ctx.mem0Facts.length > 0) {
+    parts.push(`## Memory: Known Facts About This Org:\n${ctx.mem0Facts.map(f => `- ${f}`).join('\n')}`);
+  }
+
+  // Layer 10: Architectural Decisions — code/architecture decisions
+  if (ctx.architecturalDecisions && ctx.architecturalDecisions.length > 0) {
+    parts.push(`## Recent Architectural Decisions:\n${ctx.architecturalDecisions.map(d => `- ${d}`).join('\n')}`);
+  }
+
+  // Layer 11: Autonomous Monitor Alerts — active alerts in last 24h
+  if (ctx.monitorAlerts && ctx.monitorAlerts.length > 0) {
+    parts.push(`## Active Monitoring Alerts (Last 24h):\n${ctx.monitorAlerts.map(a => `- ${a}`).join('\n')}`);
+  }
+
+  // Layer 12: MoA Synthesis Results — recent insights from dual-sampling synthesis
+  if (ctx.moaSyntheses && ctx.moaSyntheses.length > 0) {
+    parts.push(`## Recent Synthesis Insights:\n${ctx.moaSyntheses.map(s => `- ${s}`).join('\n')}`);
+  }
+
+  // Layer 13: RLVR Outcomes — recent prediction accuracy
+  if (ctx.rlvrOutcomes && ctx.rlvrOutcomes.length > 0) {
+    parts.push(`## Recent Prediction Accuracy:\n${ctx.rlvrOutcomes.map(r => `- ${r}`).join('\n')}`);
+  }
+
+  // Layer 14: Signal Activity — which signal types are most active in last 48h
+  if (ctx.signalActivitySummary && ctx.signalActivitySummary.length > 0) {
+    parts.push(`## Signal Activity (48h): ${ctx.signalActivitySummary}.`);
+  }
+
+  // Layer 15: Agent Execution Patterns — how agents have been routing
+  if (ctx.agentPatterns && ctx.agentPatterns.length > 0) {
+    parts.push(`## Agent Execution Patterns:\n${ctx.agentPatterns.map(p => `- ${p}`).join('\n')}`);
   }
 
   // Layer 1: Context Engine — relevant document knowledge with chunk content
