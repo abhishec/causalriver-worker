@@ -43,6 +43,7 @@ import {
 } from "@/lib/connectors/writeback/github";
 import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { getCachedPlan, setCachedPlan, normaliseQueryKey } from "@/lib/brain/plan-cache";
+import { checkHitlGate } from "@/lib/brain/hitl-gate";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -807,6 +808,33 @@ export async function executeDomain(
     })),
     supabase,
   };
+
+  // ── Step 1b: HITL gate for high-confidence actions ────────────────────────
+  // EU AI Act Article 14 — human oversight is opt-out by default.
+  // When the brain context signals high confidence (>0.9) on this domain action,
+  // require a human approval before proceeding with LLM execution.
+  const preflightConfidence = (brainContext as any)?.confidence ?? (params.interpretation as any)?.confidence;
+  if (preflightConfidence && preflightConfidence > 0.9) {
+    try {
+      const { blocked, approvalId } = await checkHitlGate(supabase, {
+        orgId: params.organizationId,
+        gateType: "high_confidence_action",
+        summary: `High-confidence domain action: ${params.domainType}`,
+        details: { domain: params.domainType, confidence: preflightConfidence },
+      });
+      if (blocked) {
+        return { result: { status: "pending_approval", approvalId, domain: params.domainType }, artifactId: null };
+      }
+    } catch (hitlErr) {
+      // Non-blocking: HITL check failure should not prevent domain execution.
+      // Log and continue — failing open is safer than deadlocking the system.
+      logger.warn("[domain-executor] HITL gate check failed — failing open", {
+        domain: params.domainType,
+        orgId: params.organizationId,
+        error: hitlErr instanceof Error ? hitlErr.message : String(hitlErr),
+      });
+    }
+  }
 
   // ── Step 3: Execute the domain ──────────────────────────────────────────
   // Emit mid-execution comms — domain analysis is running

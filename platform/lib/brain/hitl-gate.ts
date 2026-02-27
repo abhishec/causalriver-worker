@@ -11,7 +11,8 @@
  *   if (blocked) return Response.json({ status: 'pending_approval', approvalId }, { status: 202 });
  *
  * Config is stored in ai_memory with domain='brain-config', memory_type='hitl-config'.
- * HITL is opt-in (disabled by default) — organizations must enable it.
+ * EU AI Act Article 14 — human oversight is opt-OUT for high-risk operations.
+ * HITL is enabled by default; organizations must explicitly disable it.
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -26,7 +27,7 @@ export type GateType =
   | "policy_override";
 
 export type HitlGateConfig = {
-  /** Master switch — false by default (opt-in). */
+  /** Master switch — true by default (opt-out, EU AI Act Article 14). */
   enabled: boolean;
   /** Which gate types are active for this org. */
   gateTypes: GateType[];
@@ -58,12 +59,15 @@ export type HitlApproval = {
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
 /**
- * Default gate configuration — disabled by default, must be opted into per org.
- * overnight_agent is the only gate type enabled when HITL is turned on with defaults.
+ * Default gate configuration.
+ * EU AI Act Article 14 — human oversight is opt-OUT for high-risk operations.
+ * HITL is enabled by default. Only overnight_agent and high_confidence_action
+ * are gated by default — low_confidence and policy_override are off to avoid
+ * excessive noise on lower-stakes operations.
  */
 const DEFAULT_HITL_CONFIG: HitlGateConfig = {
-  enabled: false,
-  gateTypes: ["overnight_agent"],
+  enabled: true,
+  gateTypes: ["overnight_agent", "high_confidence_action"],
   confidenceThreshold: 0.4,
 };
 
