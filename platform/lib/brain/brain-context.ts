@@ -34,6 +34,17 @@ export interface BrainContext {
   rlvrOutcomes?: string[];            // Layer 13: RLVR prediction outcomes (last 7 days)
   signalActivitySummary?: string;     // Layer 14: connector signal activity (last 48h)
   agentPatterns?: string[];           // Layer 15: agent execution patterns
+  // Layer 16-25: deep intelligence layers
+  ccConsolidationDigest?: string;     // Layer 16: synthesized session summary from ai_memory
+  connectorHealth?: string;           // Layer 17: connector status summary
+  deliveryIntelligence?: string;      // Layer 18: scope creep + engagement health
+  brainEvolutionState?: string;       // Layer 19: brain evolution/consolidation state
+  llmDecisionAudit?: string;          // Layer 20: LLM decisions from last 24h
+  aaasActivity?: string;              // Layer 21: AaaS execution counts by status
+  engineerRisk?: string;              // Layer 22: high-risk engineers (flight risk > 50)
+  podMatchIntelligence?: string;      // Layer 23: recent pod match recommendations
+  strongSignals24h?: string;          // Layer 24: cross-domain signals strength > 0.8
+  causalAnalysis?: string;            // Layer 25: causal analysis cache from ai_memory
 }
 
 export async function getBrainContext(
@@ -68,6 +79,18 @@ export async function getBrainContext(
       rlvrOutcomesRow,
       signalActivityRow,
       agentPatternsRow,
+      // Layer 16-25 new queries
+      ccConsolidationRow,
+      connectorHealthRow,
+      scopeCreepCountRow,
+      engagementHealthRow,
+      brainEvolutionRow,
+      llmDecisionRow,
+      aaasActivityRow,
+      engineerRiskRow,
+      podMatchRow,
+      strongSignalsRow,
+      causalAnalysisRow,
     ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
@@ -200,6 +223,89 @@ export async function getBrainContext(
         .like("domain", "orchestration.%")
         .order("importance", { ascending: false })
         .limit(5),
+      // Layer 16: CC Consolidation Digest — synthesized session summary
+      supabase
+        .from("ai_memory")
+        .select("content")
+        .eq("organization_id", orgId)
+        .eq("domain", "session.cc_consolidation")
+        .order("created_at", { ascending: false })
+        .limit(1),
+      // Layer 17: Connector Health — status of all org connectors
+      supabase
+        .from("org_connectors")
+        .select("connector_type, status, last_sync_at, error_message")
+        .eq("organization_id", orgId),
+      // Layer 18A: Active Delivery Intelligence — unresolved scope creep alert count
+      supabase
+        .from("scope_creep_alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .eq("acknowledged", false),
+      // Layer 18B: Active Delivery Intelligence — bottom 3 engagement health scores
+      supabase
+        .from("engagement_health_latest")
+        .select("engagement_id, engagement_name, health_score")
+        .eq("organization_id", orgId)
+        .order("health_score", { ascending: true })
+        .limit(3),
+      // Layer 19: Brain Evolution State — latest brain.evolution or brain.consolidation memory
+      supabase
+        .from("ai_memory")
+        .select("content")
+        .eq("organization_id", orgId)
+        .or("domain.like.brain.evolution%,domain.like.brain.consolidation%")
+        .order("created_at", { ascending: false })
+        .limit(1),
+      // Layer 20: LLM Decision Audit — recent LLM routing decisions (last 24h)
+      supabase
+        .from("ai_memory")
+        .select("content, importance")
+        .eq("organization_id", orgId)
+        .like("domain", "llm_decision.%")
+        .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order("importance", { ascending: false })
+        .limit(3),
+      // Layer 21: AaaS Execution Patterns — agent_queue activity by status
+      supabase
+        .from("agent_queue")
+        .select("status")
+        .eq("organization_id", orgId)
+        .eq("agent_type", "aas")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      // Layer 22: Engineer Health Snapshot — top flight risk engineers (score 0-100)
+      supabase
+        .from("engineer_health_snapshots")
+        .select("github_login, flight_risk_score")
+        .eq("organization_id", orgId)
+        .gt("flight_risk_score", 50)
+        .order("flight_risk_score", { ascending: false })
+        .limit(3),
+      // Layer 23: Pod Match Intelligence — recent pod recommendations
+      supabase
+        .from("pod_match_history")
+        .select("recommended_pod_name")
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .limit(3),
+      // Layer 24: Cross-Domain High-Confidence Signals (last 24h, strength > 0.8)
+      supabase
+        .from("cross_domain_signals")
+        .select("signal_type, signal_value, signal_strength")
+        .eq("organization_id", orgId)
+        .gt("signal_strength", 0.8)
+        .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order("signal_strength", { ascending: false, nullsFirst: false })
+        .limit(5),
+      // Layer 25: Causal Analysis Cache — most recent causal.% memories
+      supabase
+        .from("ai_memory")
+        .select("content")
+        .eq("organization_id", orgId)
+        .like("domain", "causal.%")
+        .order("created_at", { ascending: false })
+        .limit(2),
     ]);
 
     // Extract values safely
@@ -338,6 +444,125 @@ export async function getBrainContext(
       .filter((s: string) => s.length > 0)
       .slice(0, 4);
 
+    // Layer 16: CC Consolidation Digest — synthesized session summary
+    const ccConsolidationData = ccConsolidationRow.status === "fulfilled"
+      ? (ccConsolidationRow.value.data ?? [])
+      : [];
+    const ccConsolidationDigest: string | undefined = ccConsolidationData.length > 0
+      ? `## Session Digest\n${String((ccConsolidationData[0] as { content: string }).content ?? "").slice(0, 250)}`
+      : undefined;
+
+    // Layer 17: Connector Health — status of all org connectors
+    const connectorRows = connectorHealthRow.status === "fulfilled"
+      ? (connectorHealthRow.value.data ?? [])
+      : [];
+    const connectorHealth: string | undefined = connectorRows.length > 0
+      ? `## Connector Status\n${(connectorRows as Array<{ connector_type: string; status: string }>)
+          .map(c => `${c.connector_type}:${c.status}`)
+          .join(", ")
+          .slice(0, 200)}`
+      : undefined;
+
+    // Layer 18: Active Delivery Intelligence — scope creep + engagement health
+    let deliveryIntelligence: string | undefined;
+    try {
+      const scopeCreepCount = scopeCreepCountRow.status === "fulfilled"
+        ? (scopeCreepCountRow.value.count ?? 0)
+        : 0;
+      const criticalEngagements = engagementHealthRow.status === "fulfilled"
+        ? (engagementHealthRow.value.data ?? [])
+        : [];
+      const engList = (criticalEngagements as Array<{ engagement_id: string; engagement_name: string | null; health_score: number }>)
+        .map(e => `${e.engagement_name ?? e.engagement_id}: ${Math.round(e.health_score)}`)
+        .join(", ");
+      const parts18: string[] = [`Open scope alerts: ${scopeCreepCount}`];
+      if (engList) parts18.push(`Critical engagements: ${engList}`);
+      deliveryIntelligence = `## Delivery Intelligence\n${parts18.join(" | ").slice(0, 200)}`;
+    } catch (e) {
+      logger.warn("[brain-context] Layer 18 delivery intelligence failed:", e);
+    }
+
+    // Layer 19: Brain Evolution State — latest brain.evolution or brain.consolidation memory
+    const brainEvolutionData = brainEvolutionRow.status === "fulfilled"
+      ? (brainEvolutionRow.value.data ?? [])
+      : [];
+    const brainEvolutionState: string | undefined = brainEvolutionData.length > 0
+      ? `## Brain Evolution\n${String((brainEvolutionData[0] as { content: string }).content ?? "").slice(0, 150)}`
+      : undefined;
+
+    // Layer 20: LLM Decision Audit — recent LLM routing decisions (last 24h)
+    const llmDecisionRows = llmDecisionRow.status === "fulfilled"
+      ? (llmDecisionRow.value.data ?? [])
+      : [];
+    const llmDecisionAudit: string | undefined = llmDecisionRows.length > 0
+      ? `## LLM Decisions (24h)\n${(llmDecisionRows as Array<{ content: string; importance: number }>)
+          .map(r => String(r.content ?? "").slice(0, 80))
+          .join(" | ")
+          .slice(0, 200)}`
+      : undefined;
+
+    // Layer 21: AaaS Execution Patterns — count by status from agent_queue
+    const aaasRows = aaasActivityRow.status === "fulfilled"
+      ? (aaasActivityRow.value.data ?? [])
+      : [];
+    let aaasActivity: string | undefined;
+    if (aaasRows.length > 0) {
+      const statusCounts: Record<string, number> = {};
+      for (const row of aaasRows as Array<{ status: string }>) {
+        const s = row.status ?? "unknown";
+        statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+      }
+      const succeeded = statusCounts["success"] ?? 0;
+      const failed = statusCounts["error"] ?? 0;
+      const running = statusCounts["running"] ?? 0;
+      aaasActivity = `## AaaS Activity\n${succeeded} succeeded, ${failed} failed, ${running} running`;
+    }
+
+    // Layer 22: Engineer Health Snapshot — high flight risk engineers (score 0-100)
+    const engineerRiskRows = engineerRiskRow.status === "fulfilled"
+      ? (engineerRiskRow.value.data ?? [])
+      : [];
+    const engineerRisk: string | undefined = engineerRiskRows.length > 0
+      ? `## Engineer Risk\n${(engineerRiskRows as Array<{ github_login: string; flight_risk_score: number }>)
+          .map(e => `${e.github_login}: ${Math.round(e.flight_risk_score)}% risk`)
+          .join(", ")
+          .slice(0, 200)}`
+      : undefined;
+
+    // Layer 23: Pod Match Intelligence — recent pod match recommendations
+    const podMatchRows = podMatchRow.status === "fulfilled"
+      ? (podMatchRow.value.data ?? [])
+      : [];
+    const podMatchIntelligence: string | undefined = podMatchRows.length > 0
+      ? `## Pod Matches\n${(podMatchRows as Array<{ recommended_pod_name: string | null }>)
+          .map(m => m.recommended_pod_name ?? "")
+          .filter(n => n.length > 0)
+          .join(", ")
+          .slice(0, 200)}`
+      : undefined;
+
+    // Layer 24: Cross-Domain High-Confidence Signals (strength > 0.8, last 24h)
+    const strongSignalRows = strongSignalsRow.status === "fulfilled"
+      ? (strongSignalsRow.value.data ?? [])
+      : [];
+    const strongSignals24h: string | undefined = strongSignalRows.length > 0
+      ? `## Strong Signals (24h)\n${(strongSignalRows as Array<{ signal_type: string; signal_value: number | null; signal_strength: number | null }>)
+          .map(s => `${s.signal_type}: ${String(s.signal_value ?? "").slice(0, 40)}`)
+          .join(" | ")
+          .slice(0, 200)}`
+      : undefined;
+
+    // Layer 25: Causal Analysis Cache — most recent causal.% memories
+    const causalRows = causalAnalysisRow.status === "fulfilled"
+      ? (causalAnalysisRow.value.data ?? [])
+      : [];
+    const causalAnalysis: string | undefined = causalRows.length > 0
+      ? `## Causal Analysis\n${(causalRows as Array<{ content: string }>)
+          .map(r => String(r.content ?? "").slice(0, 120))
+          .join(" | ")
+          .slice(0, 200)}`
+      : undefined;
+
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -409,6 +634,16 @@ export async function getBrainContext(
       rlvrOutcomes,
       signalActivitySummary,
       agentPatterns,
+      ccConsolidationDigest,
+      connectorHealth,
+      deliveryIntelligence,
+      brainEvolutionState,
+      llmDecisionAudit,
+      aaasActivity,
+      engineerRisk,
+      podMatchIntelligence,
+      strongSignals24h,
+      causalAnalysis,
     });
 
     const result: BrainContext = {
@@ -433,6 +668,16 @@ export async function getBrainContext(
       rlvrOutcomes,
       signalActivitySummary,
       agentPatterns,
+      ccConsolidationDigest,
+      connectorHealth,
+      deliveryIntelligence,
+      brainEvolutionState,
+      llmDecisionAudit,
+      aaasActivity,
+      engineerRisk,
+      podMatchIntelligence,
+      strongSignals24h,
+      causalAnalysis,
     };
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
@@ -474,6 +719,16 @@ function buildContextSummary(
     rlvrOutcomes?: string[];
     signalActivitySummary?: string;
     agentPatterns?: string[];
+    ccConsolidationDigest?: string;
+    connectorHealth?: string;
+    deliveryIntelligence?: string;
+    brainEvolutionState?: string;
+    llmDecisionAudit?: string;
+    aaasActivity?: string;
+    engineerRisk?: string;
+    podMatchIntelligence?: string;
+    strongSignals24h?: string;
+    causalAnalysis?: string;
   }
 ): string {
   const parts: string[] = [];
@@ -566,6 +821,56 @@ function buildContextSummary(
   // Layer 15: Agent Execution Patterns — how agents have been routing
   if (ctx.agentPatterns && ctx.agentPatterns.length > 0) {
     parts.push(`## Agent Execution Patterns:\n${ctx.agentPatterns.map(p => `- ${p}`).join('\n')}`);
+  }
+
+  // Layer 16: CC Consolidation Digest — synthesized session summary
+  if (ctx.ccConsolidationDigest) {
+    parts.push(ctx.ccConsolidationDigest);
+  }
+
+  // Layer 17: Connector Health — connector status summary
+  if (ctx.connectorHealth) {
+    parts.push(ctx.connectorHealth);
+  }
+
+  // Layer 18: Active Delivery Intelligence — scope creep + engagement health
+  if (ctx.deliveryIntelligence) {
+    parts.push(ctx.deliveryIntelligence);
+  }
+
+  // Layer 19: Brain Evolution State — evolution/consolidation state
+  if (ctx.brainEvolutionState) {
+    parts.push(ctx.brainEvolutionState);
+  }
+
+  // Layer 20: LLM Decision Audit — routing decisions from last 24h
+  if (ctx.llmDecisionAudit) {
+    parts.push(ctx.llmDecisionAudit);
+  }
+
+  // Layer 21: AaaS Execution Patterns — counts by status
+  if (ctx.aaasActivity) {
+    parts.push(ctx.aaasActivity);
+  }
+
+  // Layer 22: Engineer Health Snapshot — high flight risk engineers
+  if (ctx.engineerRisk) {
+    parts.push(ctx.engineerRisk);
+  }
+
+  // Layer 23: Pod Match Intelligence — recent pod recommendations
+  if (ctx.podMatchIntelligence) {
+    parts.push(ctx.podMatchIntelligence);
+  }
+
+  // Layer 24: Cross-Domain High-Confidence Signals (last 24h)
+  if (ctx.strongSignals24h) {
+    parts.push(ctx.strongSignals24h);
+  }
+
+  // Layer 25: Causal Analysis Cache
+  if (ctx.causalAnalysis) {
+    parts.push(ctx.causalAnalysis);
   }
 
   // Layer 1: Context Engine — relevant document knowledge with chunk content
