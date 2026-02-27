@@ -26,6 +26,7 @@ import { logger } from "@/lib/logger";
 import { saveArtifact } from "@/lib/se-aas/job-queue";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ============================================================================
 // TYPES
@@ -45,28 +46,20 @@ export interface ExecutePmDomainResult {
 }
 
 // ============================================================================
-// MODEL SELECTION
+// MODEL SELECTION — routed through the BrainOS smart router
 // ============================================================================
 
-// Light PM domains: structured data + lookup
+// Light PM domains: structured data + lookup → pm-aas-structured (Haiku)
 const PM_HAIKU_DOMAINS = new Set([
   "sprint-health",
   "capacity-planner",
 ]);
 
-// Heavy PM domains: deep reasoning, generation, analysis
-const PM_SONNET_DOMAINS = new Set([
-  "roadmap-planner",
-  "backlog-prioritizer",
-  "stakeholder-alignment",
-  "release-risk",
-  "feature-impact",
-]);
-
 function selectPmModel(domainType: string): string {
-  if (PM_HAIKU_DOMAINS.has(domainType)) return "claude-haiku-4-5-20251001";
-  if (PM_SONNET_DOMAINS.has(domainType)) return "claude-sonnet-4-6";
-  return "claude-sonnet-4-6"; // safe default
+  const callType = PM_HAIKU_DOMAINS.has(domainType)
+    ? "pm-aas-structured"
+    : "pm-aas-analysis";
+  return routeCallType(callType).model;
 }
 
 // ============================================================================

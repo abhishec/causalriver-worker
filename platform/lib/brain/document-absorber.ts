@@ -16,6 +16,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 interface ChunkAbsorption {
   entities: Array<{ name: string; type: string; description: string }>;
@@ -56,7 +57,7 @@ export async function absorbDocumentChunks(
 
     try {
       const response = await client.messages.create({
-        model: "claude-haiku-4-5-20251001", // Haiku for cost efficiency
+        model: routeCallType('document-absorb').model,
         max_tokens: 1024,
         messages: [
           {

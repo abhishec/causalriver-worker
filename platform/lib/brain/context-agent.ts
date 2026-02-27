@@ -23,6 +23,7 @@ import { createBrainContextMesh } from "@nexus-ai/memory-stack";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { getAIWorkerConfig, type AIWorkerConfig } from "./ai-worker-config";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -256,7 +257,7 @@ Rules:
 - If domain is already known, confirm it or suggest a better one`;
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: routeCallType('context-agent').model,
       max_tokens: 512,
       messages: [{ role: "user", content: userPrompt }],
       system: systemPrompt,

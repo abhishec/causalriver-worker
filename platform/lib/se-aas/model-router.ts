@@ -22,6 +22,16 @@ const HAIKU_DOMAINS = new Set([
   'scope-creep',
   'early-warning',
   'delivery-intelligence',
+  // Brain agents / connectors — structured, low-complexity
+  'context-agent',
+  'context-compress',
+  'mem0-extract',
+  'document-absorb',
+  'cc-learning',
+  'slack-process',
+  'connector-analyze',
+  'pm-aas-structured',
+  'aas-artifact-simple',
 ]);
 
 // Heavy domains: code understanding, generation, synthesis
@@ -43,6 +53,14 @@ const SONNET_DOMAINS = new Set([
   'performance-profiler',
   'dead-code-detector',
   'boilerplate-scaffold',
+  // Brain agents / orchestration — reasoning, synthesis, generation
+  'copilot-complex',
+  'agent-compose',
+  'recovery-agent',
+  'self-moa',
+  'aas-artifact-complex',
+  'pm-aas-analysis',
+  'workspace-orchestrate',
 ]);
 
 export function selectModelForDomain(domainType: string): ClaudeModel {
@@ -131,6 +149,14 @@ export function routeModel(domainType: string): ModelRoutingDecision {
       ? 'Structured data query — Haiku is fast and sufficient'
       : 'Code/generation task — Sonnet for quality reasoning',
   };
+}
+
+/**
+ * Route model for non-SE-aaS call types.
+ * Used by brain agents, copilot, and other LLM callers.
+ */
+export function routeCallType(callType: string, brainIq = 50): ModelRoutingDecision {
+  return routeModelWithIq(callType, brainIq);
 }
 
 /**

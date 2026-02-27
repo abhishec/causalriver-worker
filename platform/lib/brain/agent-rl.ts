@@ -28,6 +28,8 @@ export interface AgentOutcomeParams {
   executionMs: number;
   organizationId: string;
   userId: string;
+  /** Optional: IDs of knowledge_chunks or document_chunks used during this execution */
+  chunkIds?: string[];
 }
 
 export interface LearningStats {
@@ -185,6 +187,20 @@ export async function recordAgentOutcome(
     });
   } catch (err) {
     logger.warn("[agent-rl] cross_domain_signals insert failed:", err);
+  }
+
+  // Tier 1→2: Record chunk utility if chunks were referenced
+  if (params.chunkIds && params.chunkIds.length > 0) {
+    void (async () => {
+      try {
+        const { recordChunkUsage } = await import("@/lib/brain/tier2-signals");
+        await Promise.allSettled(
+          params.chunkIds!.map(chunkId => recordChunkUsage(chunkId, params.quality, 'knowledge_chunks'))
+        );
+      } catch (e) {
+        logger.warn("[agent-rl] chunk usage recording failed", { error: String(e) });
+      }
+    })();
   }
 }
 

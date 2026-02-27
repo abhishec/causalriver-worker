@@ -22,6 +22,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from "@/lib/logger";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { routeCallType } from "@/lib/se-aas/model-router";
 import {
   buildAgentCommsPayload,
   buildIntroSpeech,
@@ -531,7 +532,7 @@ export async function executeAccountingAgent(
     prompt: `AAS ${action} (${jurisdiction}, ${transactions.length} txns, ${period ? `${period.from}–${period.to}` : 'no period'})`,
     status: rlQuality >= 0.5 ? "completed" : "partial",
     durationMs,
-    modelUsed: "claude-sonnet-4-6",
+    modelUsed: routeCallType('aas-artifact-complex').model,
     outputSummary: JSON.stringify(finalResult).slice(0, 200),
   }).catch(() => {/* non-fatal */});
 

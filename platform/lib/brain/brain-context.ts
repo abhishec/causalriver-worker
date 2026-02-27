@@ -2,6 +2,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
 import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
+import { getConsolidatedPatterns } from "@/lib/brain/tier3-consolidation";
+import { searchKnowledgeChunks } from "@/lib/brain/tier2-signals";
 
 // ── Module-level cache: 30s TTL per org ──────────────────────────────────────
 // getBrainContext() fires DB queries on every copilot message. Under concurrent
@@ -74,6 +76,10 @@ export interface BrainContext {
   // L26 = SE-aaS, L27 = AaaS, L28+ reserved for PM-aaS, OtherService-aaS, etc.
   seaasServiceLayer?: string;         // L26: SE-aaS holistic service activity (last 7d)
   aaasServiceLayer?: string;          // L27: AaaS artifact output and agent activity (24h)
+
+  // ── 3-Tier Knowledge Architecture ──
+  consolidatedPatterns?: string;      // Tier 3: stable behavioral rules + domain expertise
+  rawKnowledgeChunks?: string;        // Tier 1: relevant raw knowledge (git, docs, conversations)
 }
 
 export async function getBrainContext(
@@ -88,6 +94,14 @@ export async function getBrainContext(
   }
 
   try {
+    // Tier 3: Consolidated Knowledge — fetch stable patterns first (feeds system prompt)
+    let consolidatedPatternsData: Array<{ pattern_type: string; title: string; description: string; confidence: number }> = [];
+    try {
+      consolidatedPatternsData = await getConsolidatedPatterns(orgId, supabase, 8);
+    } catch (e) {
+      logger.warn("[brain-context] Tier 3 consolidated patterns failed", { error: String(e) });
+    }
+
     // Run all fetches in parallel — non-blocking, fail gracefully
     // Slots are named by their layer and sub-query designation
     const [
@@ -953,6 +967,11 @@ export async function getBrainContext(
       // non-fatal — document chunks are best-effort
     }
 
+    // Tier 3: Consolidated patterns string (computed before contextSummary so it can be injected first)
+    const consolidatedPatternsStr: string | undefined = consolidatedPatternsData.length > 0
+      ? `## Brain Consolidated Knowledge (Tier 3 — ${consolidatedPatternsData.length} patterns):\n${consolidatedPatternsData.map(p => `[${p.pattern_type}] ${p.title} (confidence: ${p.confidence.toFixed(2)}): ${p.description}`).join('\n')}`
+      : undefined;
+
     // ── CONTEXT SUMMARY (for LLM system prompt injection) ─────────────────────
     const contextSummary = buildContextSummary({
       // Tier 1
@@ -994,6 +1013,9 @@ export async function getBrainContext(
       // Tier 8
       seaasServiceLayer,
       aaasServiceLayer,
+      // 3-Tier Knowledge Architecture
+      consolidatedPatterns: consolidatedPatternsStr,
+      // rawKnowledgeChunks appended to contextSummary after Tier 1 fetch below
     });
 
     const result: BrainContext = {
@@ -1041,7 +1063,27 @@ export async function getBrainContext(
       // Tier 8
       seaasServiceLayer,
       aaasServiceLayer,
+      // 3-Tier Knowledge Architecture
+      // Tier 3: Consolidated patterns as formatted string (reuse pre-computed value)
+      consolidatedPatterns: consolidatedPatternsStr,
+      // Tier 1: Raw knowledge chunks (query-aware, fetched below)
+      rawKnowledgeChunks: undefined as string | undefined,
     };
+
+    // Tier 1: Raw Knowledge — query-aware retrieval using the current query
+    if (query && orgId) {
+      try {
+        const chunks = await searchKnowledgeChunks(orgId, query, 4);
+        if (chunks.length > 0) {
+          const rawKnowledgeStr = `## Raw Knowledge (Tier 1 — ${chunks.length} relevant chunks):\n${chunks.map(c => `[${c.source_type}] ${c.verbatim_text.slice(0, 500)}${c.verbatim_text.length > 500 ? '...' : ''}`).join('\n\n')}`;
+          result.rawKnowledgeChunks = rawKnowledgeStr;
+          // Append to contextSummary so callers that only read contextSummary also get Tier 1 grounding
+          result.contextSummary = result.contextSummary + " " + rawKnowledgeStr;
+        }
+      } catch (e) {
+        logger.warn("[brain-context] Tier 1 raw knowledge search failed", { error: String(e) });
+      }
+    }
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
     _brainContextCache.set(orgId, { data: result, expiry: Date.now() + BRAIN_CONTEXT_TTL_MS });
@@ -1114,8 +1156,16 @@ function buildContextSummary(ctx: {
   // Tier 8: Service Layers
   seaasServiceLayer?: string;
   aaasServiceLayer?: string;
+  // 3-Tier Knowledge Architecture
+  consolidatedPatterns?: string;
+  rawKnowledgeChunks?: string;
 }): string {
   const parts: string[] = [];
+
+  // Tier 3 FIRST: Consolidated Knowledge — stable behavioral rules shape everything else
+  if (ctx.consolidatedPatterns) {
+    parts.push(ctx.consolidatedPatterns);
+  }
 
   // 1. Brain State (L2) — always first
   if (ctx.brainState === "empty") {
@@ -1280,6 +1330,11 @@ function buildContextSummary(ctx: {
   // 29. AaaS Service Layer (L27) — LAST
   if (ctx.aaasServiceLayer) {
     parts.push(ctx.aaasServiceLayer);
+  }
+
+  // Tier 1 LAST: Raw Knowledge — verbatim grounding data
+  if (ctx.rawKnowledgeChunks) {
+    parts.push(ctx.rawKnowledgeChunks);
   }
 
   return parts.join(" ");

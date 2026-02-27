@@ -20,6 +20,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
 import { getBrainContext } from "@/lib/brain/brain-context";
+import { routeCallType } from "@/lib/se-aas/model-router";
 import {
   CAPABILITIES_MANIFEST,
   findApplicableStrategies,
@@ -253,7 +254,7 @@ If no viable alternative exists (confidence < 0.4), set alternativeDomain to nul
 Respond with ONLY the JSON object.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
+      model: routeCallType('recovery-agent').model,
       max_tokens: 256,
       messages: [{ role: "user", content: userPrompt }],
       system: systemPrompt,

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // Must be force-dynamic: reads auth cookies per request
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 const MAX_TOKENS = 8_000;
 const CHARS_PER_TOKEN = 4;
-const MODEL_FAST = "claude-haiku-4-5-20251001";
+const MODEL_FAST = routeCallType('context-compress').model;
 
 function countTokens(messages: Array<{ role: string; content: string }>): number {
   const totalChars = messages.reduce((sum, m) => sum + (m.content?.length ?? 0), 0);

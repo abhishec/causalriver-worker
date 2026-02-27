@@ -11,6 +11,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -167,7 +168,7 @@ export async function extractAndUpdateMemory(
   try {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: routeCallType('mem0-extract').model,
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });

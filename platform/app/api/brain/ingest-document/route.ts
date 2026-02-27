@@ -31,6 +31,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ingestDocument } from "@/lib/connectors/document-ingester";
 import { logger } from "@/lib/logger";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 export const dynamic = "force-dynamic";
 
@@ -112,7 +113,7 @@ async function extractTextBatch(anthropic: Anthropic, bytes: Uint8Array): Promis
   ] as unknown as Parameters<typeof anthropic.messages.create>[0]["messages"][0]["content"];
 
   const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: routeCallType('document-absorb').model,
     max_tokens: 4096,
     messages: [
       {

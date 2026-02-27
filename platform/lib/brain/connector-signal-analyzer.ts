@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 /**
  * Analyze recent connector signals for an org and extract brain knowledge.
@@ -87,7 +88,7 @@ export async function analyzeConnectorSignals(
 
     try {
       const response = await client.messages.create({
-        model: "claude-haiku-4-5-20251001",
+        model: routeCallType('connector-analyze').model,
         max_tokens: 512,
         messages: [
           {

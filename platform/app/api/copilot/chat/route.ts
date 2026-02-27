@@ -60,6 +60,7 @@ import { logger } from "@/lib/logger";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain/orchestration-capture";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -4056,8 +4057,9 @@ No connectors are configured yet. When the user asks for data from any source (S
       hasBrainArtifacts: !!actionArtifact,
       hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult,
     });
-    // Apply Brain IQ gate: if brain is not ready, downgrade general copilot queries to Haiku
-    const v4SmartModel = brainIqForRouting < 10 ? "claude-haiku-4-5-20251001" : v4SmartModelBase;
+    // Apply Brain IQ gate via smart router: IQ < 10 → Haiku, IQ >= 10 → domain-based selection
+    const { model: v4SmartModel } = routeCallType('copilot-complex', brainIqForRouting);
+    void v4SmartModelBase; // DAAO base still computed for decision record rationale
 
     // ── Self-MoA: Dual top_p synthesis flag ─────────────────────────────
     // For high-stakes queries (complexity >= 0.65 + strategic phrases):
@@ -4787,6 +4789,34 @@ A: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
         } catch (saveErr) {
           // Non-blocking — chat save must never fail the response
           logger.warn("[Copilot] Chat auto-save failed (non-fatal):", saveErr instanceof Error ? saveErr.message : String(saveErr));
+        }
+
+        // Tier 1: Ingest conversation turns into raw knowledge store (fire-and-forget)
+        if (workspaceId && message) {
+          void (async () => {
+            try {
+              const { ingestConversationTurn } = await import("@/lib/brain/tier1-store");
+              await Promise.allSettled([
+                ingestConversationTurn(workspaceId, {
+                  sessionId: _sessionId,
+                  role: 'user',
+                  content: message.slice(0, 4000),
+                  metadata: { source: 'copilot' },
+                }),
+                // Only ingest assistant response if we have the full text
+                ...(typeof streamedAssistantText === 'string' && streamedAssistantText.length > 0 ? [
+                  ingestConversationTurn(workspaceId, {
+                    sessionId: _sessionId,
+                    role: 'assistant',
+                    content: streamedAssistantText.slice(0, 4000),
+                    metadata: { source: 'copilot' },
+                  })
+                ] : []),
+              ]);
+            } catch (e) {
+              logger.warn("[chat] conversation tier1 ingest failed", { error: String(e) });
+            }
+          })();
         }
 
         close();

@@ -25,6 +25,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -315,7 +316,7 @@ Rules:
 - requiresFollowUp: true if thread is unresolved or action items have no owner`;
 
   const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: routeCallType('slack-process').model,
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });

@@ -15,6 +15,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 export interface MoAResult {
   synthesizedResponse: string;
@@ -128,7 +129,7 @@ Synthesize the best of both responses. Take the factual accuracy and structure o
 Return ONLY the synthesized response — no meta-commentary, no "combining A and B" framing, no preamble.`;
 
     const synthesisResp = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: routeCallType('self-moa').model,
       max_tokens: maxTokens,
       messages: [{ role: "user", content: synthesisPrompt }],
     });

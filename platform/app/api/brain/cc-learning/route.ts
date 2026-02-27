@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,7 @@ export async function GET(request: Request): Promise<NextResponse> {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: routeCallType('cc-learning').model,
           max_tokens: 400,
           messages: [
             {
@@ -175,7 +176,7 @@ Be specific and factual. No markdown headers. Plain prose only.`,
           event_source: "cc_learning_cron",
           recordsProcessed: records.length,
           consolidatedAt: new Date().toISOString(),
-          synthesisModel: "claude-haiku-4-5-20251001",
+          synthesisModel: routeCallType('cc-learning').model,
         },
       },
       {

@@ -29,6 +29,12 @@ interface WorkerHealth {
   failedLast1h: number;
 }
 
+interface TierStats {
+  tier1Count: number;
+  tier2Count: number;
+  tier3Count: number;
+}
+
 interface Connector {
   connector_type: string;
   status: string;
@@ -72,7 +78,7 @@ function timeAgo(date: string): string {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export default function AIWorkerControlClient({ orgId }: Props) {
+export default function AIWorkerControlClient({ orgId, workerId }: Props) {
   const router = useRouter();
 
   // All hooks BEFORE any early return
@@ -83,6 +89,9 @@ export default function AIWorkerControlClient({ orgId }: Props) {
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [recentJobs, setRecentJobs] = useState<AgentJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [tierStats, setTierStats] = useState<TierStats | null>(null);
+  const [isConsolidating, setIsConsolidating] = useState(false);
+  const [consolidationMsg, setConsolidationMsg] = useState<string | null>(null);
 
   // Read worker context from localStorage
   useEffect(() => {
@@ -94,11 +103,12 @@ export default function AIWorkerControlClient({ orgId }: Props) {
     }
   }, []);
 
-  // Fetch all data from APIs
+  // Fetch all data from APIs (scoped to this specific worker when workerId is available)
   const fetchAll = useCallback(async () => {
+    const workerParam = workerId ? `?workerId=${encodeURIComponent(workerId)}` : "";
     const [rlRes, healthRes, connRes] = await Promise.allSettled([
-      fetch("/api/brain/rl-status"),
-      fetch("/api/brain/worker-health"),
+      fetch(`/api/brain/rl-status${workerParam}`),
+      fetch(`/api/brain/worker-health${workerParam}`),
       fetch("/api/connectors/health"),
     ]);
 
@@ -129,7 +139,7 @@ export default function AIWorkerControlClient({ orgId }: Props) {
     }
 
     setIsLoading(false);
-  }, []);
+  }, [workerId]);
 
   // Fetch recent jobs via Supabase client
   const fetchJobs = useCallback(async () => {
@@ -148,6 +158,48 @@ export default function AIWorkerControlClient({ orgId }: Props) {
       // non-fatal
     }
   }, [orgId]);
+
+  // Fetch 3-tier brain knowledge counts
+  const fetchTierStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/brain/tier-stats");
+      if (res.ok) {
+        const d = await res.json();
+        setTierStats({
+          tier1Count: d.tier1Count ?? 0,
+          tier2Count: d.tier2Count ?? 0,
+          tier3Count: d.tier3Count ?? 0,
+        });
+      }
+    } catch {
+      // non-fatal
+    }
+  }, []);
+
+  // Run Tier 3 consolidation
+  const runConsolidation = useCallback(async () => {
+    if (isConsolidating) return;
+    setIsConsolidating(true);
+    setConsolidationMsg(null);
+    try {
+      const res = await fetch("/api/brain/consolidation", { method: "POST" });
+      if (res.ok) {
+        const d = await res.json();
+        const promoted = d.patternsPromoted ?? d.promoted ?? 0;
+        setConsolidationMsg(
+          `Done — ${promoted} pattern${promoted !== 1 ? "s" : ""} consolidated`
+        );
+        await fetchTierStats();
+      } else {
+        setConsolidationMsg("Consolidation failed");
+      }
+    } catch {
+      setConsolidationMsg("Consolidation failed");
+    } finally {
+      setIsConsolidating(false);
+      setTimeout(() => setConsolidationMsg(null), 5000);
+    }
+  }, [isConsolidating, fetchTierStats]);
 
   // Real-time job updates
   useEffect(() => {
@@ -175,16 +227,26 @@ export default function AIWorkerControlClient({ orgId }: Props) {
     };
   }, [orgId, fetchJobs, fetchAll]);
 
-  // Initial load + polling
+  // Initial load + polling (30s for RL/health/jobs, 60s for tier counts)
   useEffect(() => {
     fetchAll();
     fetchJobs();
-    const interval = setInterval(() => {
+    fetchTierStats();
+
+    const fastInterval = setInterval(() => {
       fetchAll();
       fetchJobs();
     }, 30_000);
-    return () => clearInterval(interval);
-  }, [fetchAll, fetchJobs]);
+
+    const slowInterval = setInterval(() => {
+      fetchTierStats();
+    }, 60_000);
+
+    return () => {
+      clearInterval(fastInterval);
+      clearInterval(slowInterval);
+    };
+  }, [fetchAll, fetchJobs, fetchTierStats]);
 
   // Derived values
   const isLearning = (rlStatus?.learningVelocity ?? 0) > 0;
@@ -242,8 +304,8 @@ export default function AIWorkerControlClient({ orgId }: Props) {
         <div className="flex-1" />
 
         {isLearning && (
-          <div className="flex items-center gap-1.5 text-xs text-purple-400 mr-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+          <div className="flex items-center gap-1.5 text-xs text-orange-400 mr-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
             Learning
           </div>
         )}
@@ -267,57 +329,67 @@ export default function AIWorkerControlClient({ orgId }: Props) {
 
       {/* ── Stats strip ──────────────────────────────────────────────────── */}
       <div className="flex items-center gap-8 px-6 py-3.5 border-b border-white/[0.06] bg-[#0d0d0d] overflow-x-auto">
-        <Stat
-          label="Brain IQ"
-          value={isLoading ? "—" : String(rlStatus?.brainIq ?? 0)}
-          accent="blue"
-        />
-        <StatDivider />
-        <Stat
-          label="Signals (24h)"
-          value={isLoading ? "—" : String(rlStatus?.totalSignals24h ?? 0)}
-          accent="emerald"
-        />
-        <Stat
-          label="This Hour"
-          value={isLoading ? "—" : String(rlStatus?.signalsThisHour ?? 0)}
-          accent="emerald"
-          dim
-        />
-        <StatDivider />
-        <Stat
-          label="Running"
-          value={isLoading ? "—" : String(workerHealth?.runningJobs ?? 0)}
-          accent={workerHealth?.runningJobs ? "blue" : "gray"}
-        />
-        <Stat
-          label="Pending"
-          value={isLoading ? "—" : String(workerHealth?.pendingJobs ?? 0)}
-          accent="yellow"
-          dim
-        />
-        <Stat
-          label="Done (1h)"
-          value={isLoading ? "—" : String(workerHealth?.succeededLast1h ?? 0)}
-          accent="emerald"
-          dim
-        />
-        <Stat
-          label="Failed (1h)"
-          value={isLoading ? "—" : String(workerHealth?.failedLast1h ?? 0)}
-          accent={workerHealth?.failedLast1h ? "red" : "gray"}
-          dim
-        />
-        <StatDivider />
-        <Stat
-          label="Connectors"
-          value={
-            isLoading
-              ? "—"
-              : `${connectedCount}/${connectors.length || "—"}`
-          }
-          accent={connectedCount > 0 ? "emerald" : "gray"}
-        />
+        {isLoading ? (
+          /* Skeleton loader for stats strip */
+          <>
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div key={i} className="flex flex-col gap-1.5 flex-shrink-0">
+                <div className="h-2 w-12 rounded bg-white/[0.06] animate-pulse" />
+                <div className="h-5 w-8 rounded bg-white/[0.08] animate-pulse" />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <Stat
+              label="Brain IQ"
+              value={String(rlStatus?.brainIq ?? 0)}
+              accent="blue"
+            />
+            <StatDivider />
+            <Stat
+              label="Signals (24h)"
+              value={String(rlStatus?.totalSignals24h ?? 0)}
+              accent="emerald"
+            />
+            <Stat
+              label="This Hour"
+              value={String(rlStatus?.signalsThisHour ?? 0)}
+              accent="emerald"
+              dim
+            />
+            <StatDivider />
+            <Stat
+              label="Running"
+              value={String(workerHealth?.runningJobs ?? 0)}
+              accent={workerHealth?.runningJobs ? "blue" : "gray"}
+            />
+            <Stat
+              label="Pending"
+              value={String(workerHealth?.pendingJobs ?? 0)}
+              accent="yellow"
+              dim
+            />
+            <Stat
+              label="Done (1h)"
+              value={String(workerHealth?.succeededLast1h ?? 0)}
+              accent="emerald"
+              dim
+            />
+            <Stat
+              label="Failed (1h)"
+              value={String(workerHealth?.failedLast1h ?? 0)}
+              accent={workerHealth?.failedLast1h ? "red" : "gray"}
+              dim
+            />
+            <StatDivider />
+            <Stat
+              label="Connectors"
+              value={`${connectedCount}/${connectors.length || 0}`}
+              accent={connectedCount > 0 ? "emerald" : "gray"}
+            />
+          </>
+        )}
       </div>
 
       {/* ── Main content ──────────────────────────────────────────────────── */}
@@ -325,8 +397,23 @@ export default function AIWorkerControlClient({ orgId }: Props) {
         {/* Left: Live Agent Activity (60%) */}
         <div className="flex-[3] overflow-y-auto border-r border-white/[0.06]">
           <div className="p-6">
+            {/* Skeleton while initial load */}
+            {isLoading && recentJobs.length === 0 && (
+              <div className="space-y-2">
+                <SectionLabel>Recent Jobs</SectionLabel>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/[0.06] animate-pulse flex-shrink-0" />
+                    <div className="h-3 flex-1 rounded bg-white/[0.06] animate-pulse" />
+                    <div className="h-3 w-12 rounded bg-white/[0.04] animate-pulse" />
+                    <div className="h-3 w-6 rounded bg-white/[0.04] animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Active now */}
-            {runningJobs.length > 0 && (
+            {!isLoading && runningJobs.length > 0 && (
               <div className="mb-6">
                 <SectionLabel>Active Now</SectionLabel>
                 <div className="space-y-2">
@@ -348,8 +435,8 @@ export default function AIWorkerControlClient({ orgId }: Props) {
               </div>
             )}
 
-            {/* Recent jobs */}
-            <div>
+            {/* Recent jobs — only shown after initial load completes */}
+            {!isLoading && <div>
               <SectionLabel>Recent Jobs</SectionLabel>
               {doneJobs.length === 0 && runningJobs.length === 0 ? (
                 <div className="py-12 text-center">
@@ -388,7 +475,7 @@ export default function AIWorkerControlClient({ orgId }: Props) {
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
           </div>
         </div>
 
@@ -400,47 +487,141 @@ export default function AIWorkerControlClient({ orgId }: Props) {
               <div className="flex items-center justify-between mb-4">
                 <SectionLabel>Brain Intelligence</SectionLabel>
                 {isLearning && (
-                  <span className="text-[10px] font-medium text-purple-400 uppercase tracking-wide flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-purple-400 animate-pulse" />
+                  <span className="text-[10px] font-medium text-orange-400 uppercase tracking-wide flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-orange-400 animate-pulse" />
                     Learning
                   </span>
                 )}
               </div>
-              <div className="flex items-end gap-2 mb-1">
-                <span className="text-4xl font-bold text-blue-400">
-                  {isLoading ? "—" : (rlStatus?.brainIq ?? 0)}
-                </span>
-                <span className="text-sm text-white/30 mb-1.5">IQ</span>
+              {isLoading ? (
+                /* Skeleton for Brain IQ card */
+                <div className="space-y-3">
+                  <div className="flex items-end gap-2">
+                    <div className="h-10 w-16 rounded bg-white/[0.06] animate-pulse" />
+                    <div className="h-4 w-5 rounded bg-white/[0.04] animate-pulse mb-1.5" />
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full w-1/3 bg-white/[0.08] rounded-full animate-pulse" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="h-3 w-16 rounded bg-white/[0.04] animate-pulse" />
+                        <div className="h-3 w-8 rounded bg-white/[0.06] animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-end gap-2 mb-1">
+                    <span className="text-4xl font-bold text-blue-400">
+                      {rlStatus?.brainIq ?? 0}
+                    </span>
+                    <span className="text-sm text-white/30 mb-1.5">IQ</span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-4">
+                    <div
+                      className="h-full bg-blue-500/60 rounded-full transition-all duration-1000"
+                      style={{
+                        width: `${Math.min(100, rlStatus?.brainIq ?? 0)}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <MetricRow
+                      label="Signals (24h)"
+                      value={String(rlStatus?.totalSignals24h ?? 0)}
+                    />
+                    <MetricRow
+                      label="Improvement"
+                      value={`${Math.round((rlStatus?.improvementThisSession ?? 0) * 100)}%`}
+                    />
+                    <MetricRow
+                      label="Velocity"
+                      value={String(rlStatus?.learningVelocity ?? 0)}
+                    />
+                    <MetricRow
+                      label="This Hour"
+                      value={String(rlStatus?.signalsThisHour ?? 0)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Knowledge Tiers */}
+            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+              <div className="flex items-center justify-between mb-4">
+                <SectionLabel>Knowledge Tiers</SectionLabel>
               </div>
-              <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-4">
-                <div
-                  className="h-full bg-blue-500/60 rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${Math.min(100, rlStatus?.brainIq ?? 0)}%`,
-                  }}
-                />
+
+              <div className="space-y-2.5">
+                {/* Tier 1 */}
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/15 flex-shrink-0">
+                    <span className="text-[9px] font-bold text-blue-400">T1</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white/60">Raw Knowledge</p>
+                    <p className="text-[10px] text-white/25">knowledge_chunks</p>
+                  </div>
+                  <span className="text-sm font-bold text-blue-400">
+                    {tierStats ? tierStats.tier1Count.toLocaleString() : "—"}
+                  </span>
+                </div>
+
+                {/* Tier 2 */}
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-purple-500/15 flex-shrink-0">
+                    <span className="text-[9px] font-bold text-purple-400">T2</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white/60">Signals (24h)</p>
+                    <p className="text-[10px] text-white/25">cross_domain_signals</p>
+                  </div>
+                  <span className="text-sm font-bold text-purple-400">
+                    {tierStats ? tierStats.tier2Count.toLocaleString() : "—"}
+                  </span>
+                </div>
+
+                {/* Tier 3 */}
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-emerald-500/15 flex-shrink-0">
+                    <span className="text-[9px] font-bold text-emerald-400">T3</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white/60">Consolidated</p>
+                    <p className="text-[10px] text-white/25">consolidated_patterns</p>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400">
+                    {tierStats ? tierStats.tier3Count.toLocaleString() : "—"}
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <MetricRow
-                  label="Signals (24h)"
-                  value={String(rlStatus?.totalSignals24h ?? "—")}
-                />
-                <MetricRow
-                  label="Improvement"
-                  value={
-                    rlStatus
-                      ? `${Math.round(rlStatus.improvementThisSession * 100)}%`
-                      : "—"
-                  }
-                />
-                <MetricRow
-                  label="Velocity"
-                  value={isLoading ? "—" : String(rlStatus?.learningVelocity ?? 0)}
-                />
-                <MetricRow
-                  label="This Hour"
-                  value={String(rlStatus?.signalsThisHour ?? "—")}
-                />
+
+              {/* Run Consolidation button */}
+              <div className="mt-4">
+                {consolidationMsg ? (
+                  <p className="text-xs text-emerald-400/80 text-center py-2">
+                    {consolidationMsg}
+                  </p>
+                ) : (
+                  <button
+                    onClick={runConsolidation}
+                    disabled={isConsolidating}
+                    className="w-full py-2 rounded-lg border border-white/10 text-xs text-white/40 hover:border-emerald-500/30 hover:text-emerald-400/70 hover:bg-emerald-500/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isConsolidating ? (
+                      <>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Consolidating...
+                      </>
+                    ) : (
+                      "Run Consolidation"
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
