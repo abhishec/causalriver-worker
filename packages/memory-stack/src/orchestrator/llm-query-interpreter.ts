@@ -88,7 +88,7 @@ export interface AgentSpec {
 
 /** Service routing decision */
 export interface ServiceRouteDecision {
-  type: 'copilot' | 'se-aas' | 'aas' | 'create-agent' | 'general';
+  type: 'copilot' | 'se-aas' | 'aas' | 'pm-aas' | 'create-agent' | 'general';
   /** SE-aaS domain to route to (e.g., 'sql-analyzer', 'test-case-generator') */
   seaasDomain?: string;
   /** Extracted input for SE-aaS domain execution */
@@ -97,6 +97,10 @@ export interface ServiceRouteDecision {
   aasDomain?: string;
   /** Extracted input for AAS agent execution */
   aasInput?: Record<string, unknown>;
+  /** PM-aaS domain to route to (e.g., 'roadmap-planner', 'sprint-health') */
+  pmaasDomain?: string;
+  /** Extracted input for PM-aaS domain execution */
+  pmaasInput?: Record<string, unknown>;
   /** Agent spec when type === 'create-agent' */
   agentSpec?: AgentSpec;
 }
@@ -166,6 +170,8 @@ const HAIKU_MODEL = MODEL_FAST;
 /** Valid SE-aaS domains */
 const VALID_SEAAS_DOMAINS = new Set([
   'sql-analyzer', 'test-case-generator', 'test-data-generator', 'tdd-code-generator',
+  // 'tdd' is an alias returned by some LLM responses — keep in sync with domain-router.ts
+  'tdd',
   'incident-diagnosis', 'impact-analysis', 'data-lineage', 'log-query',
   'dependency-upgrade', 'design-doc-generator', 'performance-profiler', 'dead-code-detector',
   'pr-review', 'boilerplate-scaffold', 'codebase-qa',
@@ -173,6 +179,12 @@ const VALID_SEAAS_DOMAINS = new Set([
   'pod-match', 'early-warning', 'scope-creep', 'delivery-intelligence',
   // P1-15 Architecture Extractor — MUST match classifier prompt + chat route list
   'architecture-extractor',
+]);
+
+/** Valid PM-aaS domains */
+const VALID_PM_AAS_DOMAINS = new Set([
+  'roadmap-planner', 'sprint-health', 'backlog-prioritizer',
+  'stakeholder-alignment', 'release-risk', 'feature-impact', 'capacity-planner',
 ]);
 
 /** Valid AAS domains */
@@ -205,6 +217,7 @@ const CLASSIFIER_SYSTEM_PROMPT = `You are NexusBrain's query classifier. Given a
 ## Available Services
 SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa, pod-match, early-warning, scope-creep, delivery-intelligence, architecture-extractor
 AAS agents: bookkeeper, reconciler, statement-generator, tax-compliance, audit-preparer, anomaly-detective, causal-accountant
+PM-aaS domains: roadmap-planner, sprint-health, backlog-prioritizer, stakeholder-alignment, release-risk, feature-impact, capacity-planner
 Copilot: general intelligence queries about the business, strategy, metrics, forecasting
 Agent Creation: creating, deploying, setting up, or building AI agents/monitors/automations
 
@@ -250,6 +263,15 @@ Examples:
 - Anomaly / Benford / duplicate / fraud → anomaly-detective
 - Causal financial analysis → causal-accountant
 
+## PM-aaS Routing Guide
+- Roadmap / product roadmap / quarterly roadmap / roadmap planning → roadmap-planner
+- Sprint health / sprint status / sprint burn-down / sprint progress → sprint-health
+- Backlog prioritization / rank backlog / WSJF / ICE / RICE scoring → backlog-prioritizer
+- Stakeholder update / executive summary / PM update / product announcement → stakeholder-alignment
+- Release risk / go-no-go / launch readiness / are we ready to ship → release-risk
+- Feature impact / feature ROI / feature value / should we build → feature-impact
+- Capacity planning / team capacity / resource allocation / headcount planning → capacity-planner
+
 ## Business Domains
 finance, growth, cs, marketing, product, strategy, engineering, people, revenue, operations, compliance
 
@@ -277,7 +299,7 @@ Set each flag based on what data the query actually needs:
 - needsFinancialEdges: query about financial causal relationships
 
 Output ONLY valid JSON matching this schema:
-{"intent":"<intent>","confidence":<0-1>,"domains":["<domain>"],"serviceRoute":{"type":"<copilot|se-aas|aas|create-agent>","seaasDomain":"<optional>","aasDomain":"<optional>","agentSpec":{"name":"<agent name if create-agent>","description":"<what it does>","domain":"<delivery-intelligence|early-warning|pod-match|scope-creep|custom>","trigger":"<manual|scheduled|event>","schedule":"<cron expression if scheduled, optional>"}},"complexity":{"score":<0-1>,"route":"<fast_query|action_domain|agent_orchestration>","reasoning":"<1 sentence>"},"entities":[{"type":"<pr|jira_ticket|person|metric|date_range|code_ref|account|domain>","value":"<extracted>","raw":"<span>"}],"requiredData":{"needsCausalEdges":<bool>,"needsPatterns":<bool>,"needsCascadeRules":<bool>,"needsEntityLinks":<bool>,"needsVelocityData":<bool>,"needsBottleneckData":<bool>,"needsSignals":<bool>,"needsPredictions":<bool>,"needsEvolution":<bool>,"needsCorrections":<bool>,"needsAccountingPatterns":<bool>,"needsFinancialEdges":<bool>}}`;
+{"intent":"<intent>","confidence":<0-1>,"domains":["<domain>"],"serviceRoute":{"type":"<copilot|se-aas|aas|pm-aas|create-agent>","seaasDomain":"<optional>","aasDomain":"<optional>","pmaasDomain":"<optional, only when type=pm-aas>","agentSpec":{"name":"<agent name if create-agent>","description":"<what it does>","domain":"<delivery-intelligence|early-warning|pod-match|scope-creep|custom>","trigger":"<manual|scheduled|event>","schedule":"<cron expression if scheduled, optional>"}},"complexity":{"score":<0-1>,"route":"<fast_query|action_domain|agent_orchestration>","reasoning":"<1 sentence>"},"entities":[{"type":"<pr|jira_ticket|person|metric|date_range|code_ref|account|domain>","value":"<extracted>","raw":"<span>"}],"requiredData":{"needsCausalEdges":<bool>,"needsPatterns":<bool>,"needsCascadeRules":<bool>,"needsEntityLinks":<bool>,"needsVelocityData":<bool>,"needsBottleneckData":<bool>,"needsSignals":<bool>,"needsPredictions":<bool>,"needsEvolution":<bool>,"needsCorrections":<bool>,"needsAccountingPatterns":<bool>,"needsFinancialEdges":<bool>}}`;
 
 // ============================================================================
 // LRU CACHE — Avoid repeat LLM calls for same queries
@@ -432,6 +454,7 @@ interface RawLLMResponse {
     type?: string;
     seaasDomain?: string;
     aasDomain?: string;
+    pmaasDomain?: string;
     agentSpec?: {
       name?: string;
       description?: string;
@@ -505,6 +528,13 @@ function validateAndNormalize(raw: RawLLMResponse, query: string, startMs: numbe
         serviceRoute.type = 'aas';
         serviceRoute.aasDomain = aasDomain;
         serviceRoute.aasInput = { question: query };
+      }
+    } else if (routeType === 'pm-aas' && raw.serviceRoute?.pmaasDomain) {
+      const pmaasDomain = raw.serviceRoute.pmaasDomain;
+      if (VALID_PM_AAS_DOMAINS.has(pmaasDomain)) {
+        serviceRoute.type = 'pm-aas';
+        serviceRoute.pmaasDomain = pmaasDomain;
+        serviceRoute.pmaasInput = { description: query };
       }
     }
 

@@ -6,7 +6,7 @@
  * actions automatically — no human input required.
  *
  * Reactions implemented:
- *  1. HIGH RISK ENGAGEMENT     → auto-queue early-warning with HIGH priority (health_score < 0.3)
+ *  1. HIGH RISK ENGAGEMENT     → auto-queue early-warning with HIGH priority (health_score < 30)
  *  2. STALLED AGENT            → mark status='failed', fire gaba RL signal (stuck > 30 min)
  *  3. DEAD LETTER QUEUE SPIKE  → insert ai_memory alert when > 5 dead letters in 24h
  *  4. BRAIN IQ DECAY           → insert ai_memory nudge when no signals in 48h
@@ -43,8 +43,11 @@ export interface ReactionsReport {
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-/** Engagement health score below this threshold triggers an early-warning job */
-const HIGH_RISK_HEALTH_THRESHOLD = 0.3;
+/**
+ * Engagement health score below this threshold triggers an early-warning job.
+ * engagement_health_scores.health_score is on a 0-100 scale.
+ */
+const HIGH_RISK_HEALTH_THRESHOLD = 30;
 
 /** Agents running for longer than this are considered stalled */
 const STALLED_AGENT_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
@@ -157,7 +160,7 @@ async function reactHighRiskEngagements(
     if (existingJob) {
       records.push({
         type: "high-risk-engagement",
-        description: `Engagement ${engagementId} has health_score=${score.toFixed(2)} but early-warning job already queued — skipping`,
+        description: `Engagement ${engagementId} has health_score=${Math.round(score)} but early-warning job already queued — skipping`,
         actionTaken: false,
         detail: `cooldown active, job_id=${existingJob.id}`,
       });
@@ -174,7 +177,7 @@ async function reactHighRiskEngagements(
       payload: {
         engagement_id: engagementId,
         triggered_by: "monitoring-reactions",
-        trigger_reason: `health_score=${score.toFixed(2)} < ${HIGH_RISK_HEALTH_THRESHOLD}`,
+        trigger_reason: `health_score=${Math.round(score)} < ${HIGH_RISK_HEALTH_THRESHOLD}`,
         auto_queued_at: new Date().toISOString(),
       },
     });
@@ -193,7 +196,7 @@ async function reactHighRiskEngagements(
     } else {
       records.push({
         type: "high-risk-engagement",
-        description: `Queued early-warning (HIGH priority) for engagement ${engagementId} (health_score=${score.toFixed(2)})`,
+        description: `Queued early-warning (HIGH priority) for engagement ${engagementId} (health_score=${Math.round(score)})`,
         actionTaken: true,
       });
     }
