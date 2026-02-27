@@ -15,21 +15,50 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { securityMiddleware } from "@/lib/ids";
+import { logger } from "@/lib/logger";
 
 const isDev = process.env.NODE_ENV === "development";
 const forceIDS = process.env.DEV_ENABLE_IDS === "true";
 
+/** Slow request threshold in milliseconds */
+const SLOW_REQUEST_THRESHOLD_MS = 2000;
+
 /* ── Security headers helper ──────────────────────────────────────── */
 
 /**
- * Generates a request correlation ID and attaches it to the response.
- * The X-Request-Id header is included in every response so Lambda invocations
- * can be correlated across logs without a distributed tracing system.
+ * Reads the caller's X-Request-Id header (pass-through for distributed tracing)
+ * or generates a new UUID if none was provided. Attaches the ID to the response.
+ *
+ * Pass-through pattern: upstream callers (load balancers, API gateways, other
+ * services) may inject their own X-Request-Id so the full request chain can be
+ * correlated in a single search across all services' logs. We honour that header
+ * rather than generating a new ID, preserving the trace context end-to-end.
  */
-function addRequestId(response: NextResponse): string {
-  const requestId = crypto.randomUUID();
+function addRequestId(request: NextRequest, response: NextResponse): string {
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
   response.headers.set("X-Request-Id", requestId);
   return requestId;
+}
+
+/**
+ * Log a warning for requests that exceed the slow-request threshold.
+ * Surfaces performance regressions before users complain.
+ */
+function logSlowRequest(
+  startMs: number,
+  path: string,
+  method: string,
+  requestId: string
+): void {
+  const durationMs = Date.now() - startMs;
+  if (durationMs > SLOW_REQUEST_THRESHOLD_MS) {
+    logger.warn("[middleware] Slow request detected", {
+      path,
+      method,
+      durationMs,
+      requestId,
+    });
+  }
 }
 
 function addSecurityHeaders(response: NextResponse) {
@@ -107,12 +136,17 @@ function addSecurityHeaders(response: NextResponse) {
 /* ── Main middleware ──────────────────────────────────────────────── */
 
 export async function middleware(request: NextRequest) {
+  const startMs = Date.now();
+  const path = request.nextUrl.pathname;
+  const method = request.method;
+
   // In development, skip IDS entirely for speed (unless DEV_ENABLE_IDS=true).
   // Supabase session middleware still runs for auth/redirect logic.
   if (isDev && !forceIDS) {
     const response = await updateSession(request);
     addSecurityHeaders(response);
-    addRequestId(response);
+    const requestId = addRequestId(request, response);
+    logSlowRequest(startMs, path, method, requestId);
     return response;
   }
 
@@ -120,7 +154,7 @@ export async function middleware(request: NextRequest) {
   // (no attack surface for SQL injection/XSS in route paths). Only /api/* endpoints
   // accept user input via request bodies and need IDS scanning.
   // Security headers (CSP, HSTS, etc.) still apply to ALL routes below.
-  const isApiRoute = request.nextUrl.pathname.startsWith("/api/");
+  const isApiRoute = path.startsWith("/api/");
 
   if (isApiRoute) {
     let securityBlock: Response | null = null;
@@ -138,7 +172,8 @@ export async function middleware(request: NextRequest) {
 
   const response = await updateSession(request);
   addSecurityHeaders(response);
-  addRequestId(response);
+  const requestId = addRequestId(request, response);
+  logSlowRequest(startMs, path, method, requestId);
   return response;
 }
 
