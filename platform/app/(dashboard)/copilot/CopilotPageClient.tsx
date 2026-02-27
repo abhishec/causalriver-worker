@@ -70,9 +70,26 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
   ],
 };
 
+// ─── Mobile detection hook (sm breakpoint = 640px) ───────────────────────────
+
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
+}
+
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
 export default function CopilotPageInner() {
+  const isMobile = useIsMobile();
   const { currentWorkspace, isLoading: workspaceLoading, workspaces, switchWorkspace, fetchError: workspaceFetchError } = useWorkspace();
   const searchParams = useSearchParams();
 
@@ -1000,9 +1017,9 @@ export default function CopilotPageInner() {
               <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
-              <span className="flex-1">
+              <span className="flex-1 min-w-0">
                 <span className="font-semibold">Brain context quality is below your threshold</span>
-                {" — "}answers may be less accurate. Connect more data sources or wait for more signals to accumulate.
+                {!isMobile && <span>{" — "}answers may be less accurate. Connect more data sources or wait for more signals to accumulate.</span>}
                 {" "}
                 <Link href="/settings?tab=brain" className="underline hover:no-underline">Adjust threshold</Link>
               </span>
@@ -1077,8 +1094,7 @@ export default function CopilotPageInner() {
             onSaveAsCommand={handleSaveAsCommand}
           />
         ) : (
-          /* Empty artifact state — matches HTML .art-col > .art-empty */
-          <div className="w-full max-w-[440px] shrink-0 bg-card border-l border-border-subtle flex flex-col overflow-hidden">
+          <div style={{ display: isMobile ? "none" : "flex" }} className="w-full max-w-[440px] shrink-0 bg-card border-l border-border-subtle flex-col overflow-hidden">
             {brainLoading ? (
               /* Loading skeleton — shown while domain query is in flight */
               <div className="flex-1 flex flex-col gap-4 p-6">
