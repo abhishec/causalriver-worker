@@ -9,12 +9,14 @@ name: Brain Refresh Cycles
 #   is ignored in production. This workflow provides the scheduled triggers
 #   for all brain refresh cycles that would otherwise never run:
 #
-#   - /api/cron/cognitive-cycle  — runs L3-L15 cognitive stack, caches
-#                                   insights to ai_memory for copilot (every 30m)
-#   - /api/cron/process-jobs     — drains the SE-aaS agent_queue so brain
-#                                   agents don't sit stuck (every 10m)
-#   - /api/cron/learning         — learning cycle (every 4h)
-#   - /api/cron/evolution        — brain evolution cycle (every 6h)
+#   - /api/cron/cognitive-cycle       — runs L3-L15 cognitive stack, caches
+#                                        insights to ai_memory for copilot (every 30m)
+#   - /api/cron/process-jobs          — drains the SE-aaS agent_queue so brain
+#                                        agents don't sit stuck (every 10m)
+#   - /api/cron/learning              — learning cycle (every 4h)
+#   - /api/cron/evolution             — brain evolution cycle (every 6h)
+#   - /api/cron/autonomous-monitor    — 4 threshold checks, Slack alerts (every 10m)
+#   - /api/cron/rlvr                  — ground-truth outcome verification (daily 3 AM)
 #
 # Schedule design:
 #   All four schedules share a single job. The 10-min and 30-min cycles run on
@@ -37,7 +39,8 @@ on:
     - cron: '*/30 * * * *'   # Every 30 min  — cognitive cycle (L3-L15 cache)
     - cron: '0 */4 * * *'    # Every 4 hours — learning cycle
     - cron: '0 */6 * * *'    # Every 6 hours — evolution cycle
-  workflow_dispatch: {}      # Manual trigger — runs all four endpoints
+    - cron: '0 3 * * *'      # Daily 3 AM UTC — RLVR ground-truth verification
+  workflow_dispatch: {}      # Manual trigger — runs all endpoints
 
 # Minimal permissions: only needs to call HTTPS endpoints, nothing in the repo.
 permissions:
@@ -136,3 +139,32 @@ jobs:
             --max-time 300 \
             "${BASE_URL}/api/brain/embed-documents" \
             || echo "::warning::embed-documents endpoint failed (non-fatal — chunks will remain NULL until next run)"
+
+      # ── Autonomous Monitor (every 10-min trigger) ────────────────────────────
+      # Checks 4 thresholds: flight-risk (>50%), eng health (<60%), scope-creep
+      # alerts, signal velocity. Fires Slack alerts with 6-hour dedup so the
+      # brain proactively surfaces risks without spamming the team.
+      - name: Autonomous Monitor
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/autonomous-monitor ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60 \
+            "${BASE_URL}/api/cron/autonomous-monitor" \
+            || echo "autonomous-monitor failed (non-fatal)"
+
+      # ── RLVR Ground-Truth Verification (daily 3 AM UTC) ─────────────────────
+      # Compares AI predictions to actual outcomes (churn, scope-creep, health
+      # deltas). Applies asymmetric RL rewards: +0.1 correct, -0.05 wrong.
+      # 45-day verify window for early-warning predictions.
+      - name: RLVR Ground-Truth Verification
+        if: ${{ github.event.schedule == '0 3 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/rlvr ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/rlvr" \
+            || echo "rlvr verification failed (non-fatal)"
