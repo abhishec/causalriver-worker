@@ -35,15 +35,22 @@ export const maxDuration = 60;
  * Returns: OracleProcessingResult with verified/expired/pending counts and avg reward
  */
 export async function POST(request: Request) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    // 1. Auth
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();
@@ -174,14 +181,22 @@ export async function POST(request: Request) {
  * accuracy rate, method leaderboard, and recent verifications.
  */
 export async function GET(_request: Request) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     const workspaceId = await getCurrentWorkspaceId();
     const service = await createServiceClient();

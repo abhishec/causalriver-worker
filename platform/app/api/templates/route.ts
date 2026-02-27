@@ -14,14 +14,22 @@ const SYSTEM_COMMAND_IDS = new Set(ALL_SLASH_COMMANDS.map((c) => c.id));
  * List the org's templates + public templates from other orgs.
  */
 export async function GET(req: NextRequest) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     const workspaceId = req.nextUrl.searchParams.get("workspaceId") || req.nextUrl.searchParams.get("orgId");
     if (!workspaceId) {
@@ -80,14 +88,22 @@ export async function GET(req: NextRequest) {
  *         gatheringSchema?, agentConfig?, sourceArtifactId?, sourceDomainId?, isPublic? }
  */
 export async function POST(req: NextRequest) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     let body: Record<string, unknown>;
     try {

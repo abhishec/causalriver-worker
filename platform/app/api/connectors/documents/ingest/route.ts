@@ -63,13 +63,22 @@ function resolveSourceType(raw: string | undefined): ValidSourceType {
 }
 
 export async function POST(req: NextRequest) {
-  // ── Auth ─────────────────────────────────────────────────────────────
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user) {
+  // ── Auth: isolated try-catch so Lambda env-var errors return 401 not 500 ──
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData, error: authError } = await supabase.auth.getUser();
+    if (authError) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

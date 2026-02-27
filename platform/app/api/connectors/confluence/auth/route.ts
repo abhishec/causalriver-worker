@@ -13,16 +13,22 @@ import { logger } from '@/lib/logger';
  * Key difference: scopes include read:confluence-content.all and read:confluence-space.summary.
  */
 export async function GET(request: NextRequest) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    // 1. Verify authentication
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  try {
 
     // 2. Get organization
     const workspaceId = await getCurrentWorkspaceId();

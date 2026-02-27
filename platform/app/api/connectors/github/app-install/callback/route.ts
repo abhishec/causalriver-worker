@@ -52,12 +52,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.id !== userId) {
-      return NextResponse.redirect(`${redirectBase}/login`);
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     // Verify that orgId from state belongs to the authenticated user.
     // Prevents CSRF-style attacks where a crafted state targets another org's ID.

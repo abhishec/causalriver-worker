@@ -37,13 +37,24 @@ interface IngestP0Request {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Auth: isolated try-catch so Lambda env-var errors return 401 not 500 ──
+  let authClient: Awaited<ReturnType<typeof createClient>>;
   try {
-    // Auth: require authenticated session
-    const authClient = await createClient();
-    const { data: { user }, error: authError } = await authClient.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    authClient = await createClient();
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData, error: authError } = await authClient.auth.getUser();
+    if (authError) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  try {
 
     const body: IngestP0Request = await req.json();
     const {

@@ -30,11 +30,24 @@ function slugify(name: string, suffix: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Auth: isolated try-catch so Lambda env-var errors return 401 not 500 ──
+  let authClient: Awaited<ReturnType<typeof createClient>>;
   try {
-    // Use regular client for auth (service client doesn't read user session correctly)
-    const authClient = await createClient();
-    const { data: { user }, error: authErr } = await authClient.auth.getUser();
-    if (authErr || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    authClient = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData, error: authErr } = await authClient.auth.getUser();
+    if (authErr) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     const service = await createServiceClient();
 

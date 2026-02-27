@@ -49,10 +49,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    let supabase: Awaited<ReturnType<typeof createClient>>;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    let user = null;
+    try {
+      const { data: _routeAuthData } = await supabase.auth.getUser();
+      user = _routeAuthData.user;
+    } catch {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
 
     if (!user || user.id !== userId) {
       return NextResponse.redirect(new URL('/login', request.url));

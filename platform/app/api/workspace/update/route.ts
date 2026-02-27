@@ -14,15 +14,22 @@ export const dynamic = "force-dynamic";
  * Auth: user must be owner/admin of the workspace (or platform admin).
  */
 export async function PATCH(request: NextRequest) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  try {
 
     const body = await request.json();
     const { workspaceId, name, daily_llm_budget, monthly_llm_budget, monthly_aws_budget, alert_threshold_pct } = body;

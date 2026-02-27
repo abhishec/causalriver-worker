@@ -64,6 +64,22 @@ function createSSEStream() {
 // ── Main Route Handler ──────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  // ── Auth: isolated try-catch so Lambda env-var errors return 401 not 500 ──
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   try {
     // ── Parse body ──────────────────────────────────────────────────────
     let body: Record<string, unknown>;
@@ -90,16 +106,6 @@ export async function POST(request: NextRequest) {
         { error: "description is required" },
         { status: 400 }
       );
-    }
-
-    // ── Auth ────────────────────────────────────────────────────────────
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // ── Org check ───────────────────────────────────────────────────────

@@ -12,15 +12,22 @@ import { logger } from "@/lib/logger";
  * Body: { token: string, repoUrl: string, organizationId: string }
  */
 export async function POST(request: Request) {
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    // 1. Auth check
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data: _routeAuthData } = await supabase.auth.getUser();
+    user = _routeAuthData.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
 
     // 2. Parse and validate body
     let body: { token?: string; repoUrl?: string; organizationId?: string };
