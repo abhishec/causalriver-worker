@@ -215,28 +215,40 @@ export async function extractAndUpdateMemory(
   let factsAdded = 0;
   let factsUpdated = 0;
   let factsDeleted = 0;
+  const extractedAt = new Date().toISOString();
 
-  for (const op of operations) {
+  // Batch ADD operations — single insert instead of N inserts
+  const addOps = operations.filter(
+    (op) => op.operation === "ADD" && op.content && op.content.trim().length > 0
+  );
+  if (addOps.length > 0) {
+    const addRows = addOps.map((op) => ({
+      organization_id: orgId,
+      domain,
+      memory_type: "fact",
+      content: op.content!.trim().slice(0, 1000),
+      importance: Math.min(1, Math.max(0, op.importance ?? 0.5)),
+      metadata: {
+        category: op.category ?? "fact",
+        entities: op.entities ?? [],
+        reasoning: op.reasoning ?? "",
+        source: "mem0_extractor",
+        extractedAt,
+      },
+    }));
     try {
-      if (op.operation === "ADD") {
-        if (!op.content || op.content.trim().length === 0) continue;
+      await supabase.from("ai_memory").insert(addRows);
+      factsAdded = addRows.length;
+    } catch (err) {
+      logger.warn("[Mem0] Batch ADD failed (non-fatal):", err instanceof Error ? err.message : String(err));
+    }
+  }
 
-        await supabase.from("ai_memory").insert({
-          organization_id: orgId,
-          domain,
-          memory_type: "fact",
-          content: op.content.trim().slice(0, 1000),
-          importance: Math.min(1, Math.max(0, op.importance ?? 0.5)),
-          metadata: {
-            category: op.category ?? "fact",
-            entities: op.entities ?? [],
-            reasoning: op.reasoning ?? "",
-            source: "mem0_extractor",
-            extractedAt: new Date().toISOString(),
-          },
-        });
-        factsAdded++;
-      } else if (op.operation === "UPDATE") {
+  // UPDATE and DELETE must remain individual (each targets a specific row by factId)
+  for (const op of operations) {
+    if (op.operation !== "UPDATE" && op.operation !== "DELETE") continue;
+    try {
+      if (op.operation === "UPDATE") {
         if (!op.factId || !existingIds.has(op.factId)) continue;
         if (!op.content || op.content.trim().length === 0) continue;
 
@@ -250,9 +262,9 @@ export async function extractAndUpdateMemory(
               entities: op.entities ?? [],
               reasoning: op.reasoning ?? "",
               source: "mem0_extractor",
-              updatedAt: new Date().toISOString(),
+              updatedAt: extractedAt,
             },
-            updated_at: new Date().toISOString(),
+            updated_at: extractedAt,
           })
           .eq("id", op.factId)
           .eq("organization_id", orgId); // RLS safety: scope to org
@@ -269,21 +281,19 @@ export async function extractAndUpdateMemory(
               softDeleted: true,
               reasoning: op.reasoning ?? "",
               source: "mem0_extractor",
-              deletedAt: new Date().toISOString(),
+              deletedAt: extractedAt,
             },
-            updated_at: new Date().toISOString(),
+            updated_at: extractedAt,
           })
           .eq("id", op.factId)
           .eq("organization_id", orgId); // RLS safety: scope to org
         factsDeleted++;
       }
-      // NOOP: skip
     } catch (err) {
       logger.warn(
         `[Mem0] Failed to apply op ${op.operation} (non-fatal):`,
         err instanceof Error ? err.message : String(err)
       );
-      // Continue processing remaining operations
     }
   }
 

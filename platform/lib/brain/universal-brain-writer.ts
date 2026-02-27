@@ -153,31 +153,21 @@ export async function universalBrainWriteBatch(
     );
   });
 
-  // Write high-importance events to ai_memory
-  const highImportance = events.filter((e) => e.importance >= 0.5);
-  for (const event of highImportance.slice(0, 20)) {
-    const memoryType: string = event.source.startsWith("connector")
-      ? "insight"
-      : "knowledge";
+  // Write high-importance events to ai_memory — batch upsert (was N individual upserts)
+  const highImportance = events.filter((e) => e.importance >= 0.5).slice(0, 20);
+  if (highImportance.length > 0) {
+    const memoryRows = highImportance.map((event) => ({
+      organization_id: orgId,
+      domain: `${event.domain}.${event.eventType}`,
+      memory_type: event.source.startsWith("connector") ? "insight" : "knowledge",
+      content: event.content.slice(0, 1000),
+      importance: event.importance,
+      metadata: { source: event.source, entity_id: event.entityId, ...event.metadata },
+    }));
     await Promise.resolve(
-      supabase.from("ai_memory").upsert(
-        {
-          organization_id: orgId,
-          domain: `${event.domain}.${event.eventType}`,
-          memory_type: memoryType,
-          content: event.content.slice(0, 1000),
-          importance: event.importance,
-          metadata: {
-            source: event.source,
-            entity_id: event.entityId,
-            ...event.metadata,
-          },
-        },
-        {
-          onConflict: "organization_id,memory_type,domain",
-          ignoreDuplicates: false,
-        }
-      )
+      supabase
+        .from("ai_memory")
+        .upsert(memoryRows, { onConflict: "organization_id,memory_type,domain", ignoreDuplicates: false })
     ).catch(() => {});
   }
 

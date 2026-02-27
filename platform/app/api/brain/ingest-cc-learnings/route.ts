@@ -121,116 +121,141 @@ async function ingestSections(
     federatedInserted: 0,
   };
 
-  for (const section of sections) {
-    if (!section.body || section.body.length < 20) continue;
+  // Pre-compute content + sourceId for all valid sections
+  const prepared = sections
+    .filter((s) => s.body && s.body.length >= 20)
+    .map((section) => {
+      const content = `## ${section.heading}\n\n${section.body}`;
+      const sectionHash = shortHash(content);
+      const sourceId = `${opts.sourceFile}-${sectionHash}`;
+      return { section, content, sourceId, highPriority: isHighPriority(section.heading, section.body) };
+    });
 
-    const content = `## ${section.heading}\n\n${section.body}`;
-    const sectionHash = shortHash(content);
-    const sourceId = `${opts.sourceFile}-${sectionHash}`;
+  if (prepared.length === 0) return stats;
 
-    // ── 1. ai_memory — check dedup via metadata.source_id ─────────────────────
-    const { data: existing } = await supabase
-      .from("ai_memory")
-      .select("id")
-      .eq("organization_id", opts.orgId)
-      .eq("domain", opts.domain)
-      .contains("metadata", { source_id: sourceId })
-      .maybeSingle();
+  // ── 1. Batch dedup check: fetch all existing source_ids for this org+domain in one query ──
+  // We use a JSONB contains query with .in() on source_id values stored in metadata.
+  // Since PostgREST doesn't support .in() on JSONB fields, we fetch the existing
+  // metadata column for this domain and filter client-side — still 1 query vs N queries.
+  const { data: existingMemories } = await supabase
+    .from("ai_memory")
+    .select("metadata")
+    .eq("organization_id", opts.orgId)
+    .eq("domain", opts.domain)
+    .eq("memory_type", opts.memoryType);
 
-    if (existing) {
-      stats.aiMemorySkipped++;
+  const existingSourceIds = new Set<string>(
+    (existingMemories ?? [])
+      .map((r: { metadata?: { source_id?: string } }) => r.metadata?.source_id)
+      .filter((id): id is string => !!id)
+  );
+
+  // ── 2. Build batch inserts for ai_memory (new sections only) ─────────────────
+  const ingestedAt = new Date().toISOString();
+  const memoryInserts = prepared
+    .filter(({ sourceId }) => !existingSourceIds.has(sourceId))
+    .map(({ section, content, sourceId, highPriority }) => ({
+      organization_id: opts.orgId,
+      domain: opts.domain,
+      memory_type: opts.memoryType,
+      content: content.slice(0, 2000),
+      importance: opts.importance,
+      metadata: {
+        source: "cc_learning_kickstart",
+        source_file: opts.sourceFile,
+        source_id: sourceId,
+        heading: section.heading,
+        ingestedAt,
+        isHighPriority: highPriority,
+      },
+    }));
+
+  stats.aiMemorySkipped = prepared.length - memoryInserts.length;
+
+  if (memoryInserts.length > 0) {
+    const { error: memErr } = await supabase.from("ai_memory").insert(memoryInserts);
+    if (memErr) {
+      logger.warn(`[ingest-cc-learnings] ai_memory batch insert failed: ${memErr.message}`);
     } else {
-      const { error: memErr } = await supabase.from("ai_memory").insert({
-        organization_id: opts.orgId,
-        domain: opts.domain,
-        memory_type: opts.memoryType,
-        content: content.slice(0, 2000),
-        importance: opts.importance,
-        metadata: {
-          source: "cc_learning_kickstart",
-          source_file: opts.sourceFile,
-          source_id: sourceId,
-          heading: section.heading,
-          ingestedAt: new Date().toISOString(),
-          isHighPriority: isHighPriority(section.heading, section.body),
-        },
-      });
-
-      if (memErr) {
-        logger.warn(`[ingest-cc-learnings] ai_memory insert failed for "${section.heading}": ${memErr.message}`);
-      } else {
-        stats.aiMemoryInserted++;
-      }
+      stats.aiMemoryInserted = memoryInserts.length;
     }
+  }
 
-    // ── 2. knowledge_chunks — upsert with ON CONFLICT DO NOTHING ──────────────
-    const { error: chunkErr, data: chunkResult } = await supabase
-      .from("knowledge_chunks")
-      .upsert(
-        {
-          organization_id: opts.orgId,
-          source_type: "code_file",
-          source_id: sourceId,
-          verbatim_text: content.slice(0, 8000),
-          ingested_by: "cc_learning_kickstart",
+  // ── 3. Batch upsert knowledge_chunks (ON CONFLICT DO NOTHING) ────────────────
+  const chunkUpserts = prepared.map(({ section, content, sourceId, highPriority }) => ({
+    organization_id: opts.orgId,
+    source_type: "code_file",
+    source_id: sourceId,
+    verbatim_text: content.slice(0, 8000),
+    ingested_by: "cc_learning_kickstart",
+    metadata: {
+      source_file: opts.sourceFile,
+      heading: section.heading,
+      domain: opts.domain,
+      isHighPriority: highPriority,
+    },
+  }));
+
+  const { error: chunkErr, data: chunkResult } = await supabase
+    .from("knowledge_chunks")
+    .upsert(chunkUpserts, { onConflict: "organization_id,source_id", ignoreDuplicates: true })
+    .select("id");
+
+  if (chunkErr) {
+    logger.warn(`[ingest-cc-learnings] knowledge_chunks batch upsert failed: ${chunkErr.message}`);
+  } else {
+    stats.knowledgeChunksInserted = chunkResult?.length ?? 0;
+    stats.knowledgeChunksSkipped = prepared.length - stats.knowledgeChunksInserted;
+  }
+
+  // ── 4. Federated push to Tookitaki workspaces (high-priority sections only) ──
+  const highPriorityItems = prepared.filter(({ highPriority }) => highPriority);
+
+  if (highPriorityItems.length > 0) {
+    for (const workspaceId of TOOKITAKI_WORKSPACE_IDS) {
+      // Batch dedup check for this workspace
+      const { data: fedExisting } = await supabase
+        .from("ai_memory")
+        .select("metadata")
+        .eq("organization_id", workspaceId)
+        .eq("domain", opts.domain)
+        .eq("memory_type", opts.memoryType);
+
+      const fedExistingIds = new Set<string>(
+        (fedExisting ?? [])
+          .map((r: { metadata?: { source_id?: string } }) => r.metadata?.source_id)
+          .filter((id): id is string => !!id)
+      );
+
+      const fedInserts = highPriorityItems
+        .map(({ section, content, sourceId }) => {
+          const federatedSourceId = `${sourceId}-federated-${workspaceId.slice(0, 8)}`;
+          return { section, content, sourceId: federatedSourceId };
+        })
+        .filter(({ sourceId: fedId }) => !fedExistingIds.has(fedId))
+        .map(({ section, content, sourceId: fedId }) => ({
+          organization_id: workspaceId,
+          domain: opts.domain,
+          memory_type: opts.memoryType,
+          content: content.slice(0, 2000),
+          importance: Math.min(opts.importance + 0.05, 1.0),
           metadata: {
+            source: "cc_learning_federated",
             source_file: opts.sourceFile,
+            source_id: fedId,
             heading: section.heading,
-            domain: opts.domain,
-            isHighPriority: isHighPriority(section.heading, section.body),
+            federatedFrom: CORE_ORG_ID,
+            ingestedAt,
+            isHighPriority: true,
           },
-        },
-        {
-          onConflict: "organization_id,source_id",
-          ignoreDuplicates: true,
-        }
-      )
-      .select("id");
+        }));
 
-    if (chunkErr) {
-      logger.warn(`[ingest-cc-learnings] knowledge_chunks upsert failed for "${section.heading}": ${chunkErr.message}`);
-    } else if (chunkResult && chunkResult.length > 0) {
-      stats.knowledgeChunksInserted++;
-    } else {
-      stats.knowledgeChunksSkipped++;
-    }
-
-    // ── 3. Federated push to Tookitaki workspaces (high-priority only) ────────
-    if (isHighPriority(section.heading, section.body)) {
-      for (const workspaceId of TOOKITAKI_WORKSPACE_IDS) {
-        const federatedSourceId = `${sourceId}-federated-${workspaceId.slice(0, 8)}`;
-
-        const { data: fedExisting } = await supabase
-          .from("ai_memory")
-          .select("id")
-          .eq("organization_id", workspaceId)
-          .eq("domain", opts.domain)
-          .contains("metadata", { source_id: federatedSourceId })
-          .maybeSingle();
-
-        if (!fedExisting) {
-          const { error: fedErr } = await supabase.from("ai_memory").insert({
-            organization_id: workspaceId,
-            domain: opts.domain,
-            memory_type: opts.memoryType,
-            content: content.slice(0, 2000),
-            importance: Math.min(opts.importance + 0.05, 1.0),
-            metadata: {
-              source: "cc_learning_federated",
-              source_file: opts.sourceFile,
-              source_id: federatedSourceId,
-              heading: section.heading,
-              federatedFrom: CORE_ORG_ID,
-              ingestedAt: new Date().toISOString(),
-              isHighPriority: true,
-            },
-          });
-
-          if (fedErr) {
-            logger.warn(`[ingest-cc-learnings] Federated insert failed for workspace ${workspaceId.slice(0, 8)}: ${fedErr.message}`);
-          } else {
-            stats.federatedInserted++;
-          }
+      if (fedInserts.length > 0) {
+        const { error: fedErr } = await supabase.from("ai_memory").insert(fedInserts);
+        if (fedErr) {
+          logger.warn(`[ingest-cc-learnings] Federated batch insert failed for workspace ${workspaceId.slice(0, 8)}: ${fedErr.message}`);
+        } else {
+          stats.federatedInserted += fedInserts.length;
         }
       }
     }

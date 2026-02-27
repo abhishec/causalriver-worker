@@ -134,27 +134,21 @@ Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 rel
         ).catch(() => {});
       }
 
-      // Store relationships as cross_domain_signals for causal graph
-      for (const rel of absorption.relationships.slice(0, 3)) {
-        await Promise.resolve(
-          supabase.from("cross_domain_signals").insert({
-            organization_id: orgId,
-            source_domain: `document.${absorption.domain}`,
-            signal_type: "knowledge_relationship",
-            signal_value: 1,
-            signal_strength: 0.6,
-            target_domain: absorption.domain,
-            entity_type: "relationship",
-            entity_id: `${rel.from}→${rel.to}`,
-            signal_metadata: {
-              from: rel.from,
-              to: rel.to,
-              relationship: rel.relationship,
-              document: documentTitle,
-            },
-            payload: { absorption_batch: i / batchSize },
-          })
-        ).catch(() => {});
+      // Store relationships as cross_domain_signals — single batch insert (was N individual inserts)
+      const relRows = absorption.relationships.slice(0, 3).map((rel) => ({
+        organization_id: orgId,
+        source_domain: `document.${absorption.domain}`,
+        signal_type: "knowledge_relationship",
+        signal_value: 1,
+        signal_strength: 0.6,
+        target_domain: absorption.domain,
+        entity_type: "relationship",
+        entity_id: `${rel.from}→${rel.to}`,
+        signal_metadata: { from: rel.from, to: rel.to, relationship: rel.relationship, document: documentTitle },
+        payload: { absorption_batch: i / batchSize },
+      }));
+      if (relRows.length > 0) {
+        await Promise.resolve(supabase.from("cross_domain_signals").insert(relRows)).catch(() => {});
       }
     } catch (err) {
       logger.warn(`[document-absorber] Batch ${i} absorption failed:`, err);

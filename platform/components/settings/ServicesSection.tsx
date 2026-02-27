@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ServiceTemplateCard } from "./ServiceTemplateCard";
 import type { ServiceTemplate } from "./ServiceTemplateCard";
 import { logger } from "@/lib/logger";
@@ -28,6 +28,19 @@ export function ServicesSection({ workspaceId }: ServicesSectionProps) {
       })
       .finally(() => setLoading(false));
   }, [workspaceId]);
+
+  // Stable callbacks — must be defined before any early returns (Rules of Hooks)
+  const handleActivated = useCallback((serviceType: string) => {
+    setTemplates((prev) =>
+      prev.map((t) => (t.service_type === serviceType ? { ...t, is_activated: true } : t))
+    );
+  }, []);
+
+  const handleDeactivated = useCallback((serviceType: string) => {
+    setTemplates((prev) =>
+      prev.map((t) => (t.service_type === serviceType ? { ...t, is_activated: false } : t))
+    );
+  }, []);
 
   if (loading) {
     return (
@@ -85,20 +98,8 @@ export function ServicesSection({ workspaceId }: ServicesSectionProps) {
             key={template.id || template.service_type}
             template={template}
             workspaceId={workspaceId}
-            onActivated={(serviceType) => {
-              setTemplates((prev) =>
-                prev.map((t) =>
-                  t.service_type === serviceType ? { ...t, is_activated: true } : t
-                )
-              );
-            }}
-            onDeactivated={(serviceType) => {
-              setTemplates((prev) =>
-                prev.map((t) =>
-                  t.service_type === serviceType ? { ...t, is_activated: false } : t
-                )
-              );
-            }}
+            onActivated={handleActivated}
+            onDeactivated={handleDeactivated}
           />
         ))}
       </div>
