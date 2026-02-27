@@ -60,7 +60,7 @@ organization_id   UUID FK organizations
 name              TEXT           -- "Fincense 5.11.5"
 activated_services TEXT[]        -- ["se-aas", "aas"]
 writeback_enabled BOOLEAN        -- whether Voice is active
-brain_readiness_threshold INT     -- signals needed before brain is "ready" (default 10)
+brain_readiness_threshold FLOAT   -- quality score threshold (0.0-1.0) for Copilot warning banner (default 0.7)
 created_at        TIMESTAMPTZ
 ```
 
@@ -738,7 +738,7 @@ brain-population syncs all connectors → populates connector_signals
     ↓
 Brain = populating (syncing...)
     ↓
-Signals ≥ brain_readiness_threshold (default: 10)
+brainIq/100 ≥ brain_readiness_threshold (default: 0.7 → warns when IQ < 70)
     ↓
 Brain = ready
     ↓
@@ -876,6 +876,105 @@ POST /api/copilot/chat (SSE stream)
 
 ---
 
+## 11.5 Recent System Additions (post 2026-02-27)
+
+### RLVR — Ground-Truth RL Verification
+
+Two separate but complementary RLVR systems:
+
+**System A — Cron RLVR Sweep** (`/api/cron/rlvr`, GET, daily 3 AM UTC):
+```
+rlvr_prediction_outcomes table (created: 20260228000002)
+  → Stores predictions with verify_after_date
+  → Cron sweeps all pending predictions past their verify date
+  → Calls verifyPendingPredictions(supabase, orgId) per org
+  → Emits verified RL signals to cross_domain_signals
+  → File: platform/lib/brain/rlvr-verifier.ts
+```
+
+**System B — Calibration Sweep** (`/api/brain/rlvr`, POST, on-demand):
+```
+Compares prediction_records confidence scores vs actual signals
+  → Computes calibration error per domain
+  → Stores results in ai_memory for next planning cycle
+  → File: platform/lib/brain/rlvr.ts
+```
+
+Both RLVR systems are wired into brain-refresh.yml (System A at 3 AM UTC).
+
+### Fleet Dashboard — Platform Admin View
+
+```
+GET /api/admin/fleet
+  → Platform admin only (is_platform_admin check via org_members)
+  → Returns FleetSpaceCard[] for all AI worker spaces
+  → Per-space metrics: brainHealthPct, rlVelocity, activeAgents, lastActivityAt
+  → Batch queries: prediction_records, cross_domain_signals, agent_queue, org_members
+  → All queries limited (no unbounded selects)
+  → UI: platform/app/(dashboard)/admin/FleetDashboardClient.tsx
+```
+
+### Self-MoA — Mixture of Agents Synthesis
+
+```
+File: platform/lib/brain/self-moa.ts
+  → shouldUseMoA(message, complexityScore) — activates for high-stakes queries
+  → Post-stream synthesis: runs dual top_p sampling on completed response
+  → Synthesized result stored in ai_memory for pattern extraction
+  → Wired into copilot/chat/route.ts (lines ~4096-4104, 4674-4694)
+  → Does NOT block the SSE stream — synthesis is fire-and-forget after streaming
+```
+
+### Dead-Letter Queue — Write-Back Failure Handling
+
+```sql
+-- dead_letter_queue table (20260329000001_dead_letter_queue)
+id               UUID PRIMARY KEY
+organization_id  UUID NOT NULL
+job_type         TEXT
+payload          JSONB
+failure_reason   TEXT
+attempt_count    INT DEFAULT 3
+writeback_queue_id UUID           -- source write-back item
+connector_type   TEXT
+slack_notified   BOOLEAN DEFAULT FALSE
+```
+
+Flow:
+```
+writeback_queue item fails 3 times
+  ↓
+writeback-dispatcher moves to dead_letter_queue
+  ↓
+Slack notification sent to workspace admin (slack_notified flag)
+  ↓
+Ops team manually reviews + re-triggers via UI
+  ↓
+gaba RL signal emitted for failed domain
+```
+
+RLS: org members can SELECT own dead letters; only service_role can INSERT.
+
+### Brain Readiness Threshold — Quality Gate
+
+```sql
+-- Added to organizations table (20260329000002_brain_readiness_threshold)
+brain_readiness_threshold FLOAT DEFAULT 0.7
+  CONSTRAINT check(value >= 0.0 AND value <= 1.0)
+```
+
+```
+GET /api/workspace/settings → { brain_readiness_threshold }
+PATCH /api/workspace/settings → update threshold (admin/owner only, clamped 0.0-1.0)
+
+Copilot warning banner logic:
+  IF brainIq/100 < brain_readiness_threshold → show "Brain quality below threshold" banner
+  Default 0.7 = warn when brainIq < 70 out of 100
+  Admins can lower threshold (e.g. 0.5) to suppress warnings for low-data orgs
+```
+
+---
+
 ## Quick Reference: What "Built" Means
 
 | Feature | Status | Missing |
@@ -892,7 +991,13 @@ POST /api/copilot/chat (SSE stream)
 | Queued-state demo UI | ✅ Built | — |
 | Large PDF chunking | ⚠️ Partial | Pgvector integration |
 | Orchestrator RL signals | ⚠️ Partial | State machine only today |
+| RLVR ground-truth verification | ✅ Built | Two systems: cron sweep + calibration API |
+| Fleet Dashboard | ✅ Built | Platform admin only, all spaces at a glance |
+| Self-MoA synthesis | ✅ Built | Post-stream, high-stakes queries only |
+| Dead-letter queue | ✅ Built | Write-back failures after 3 retries |
+| Brain readiness threshold | ✅ Built | Per-org quality gate, configurable via Settings |
+| Agent heartbeat + stale recovery | ✅ Built | Heartbeat every 30s, stale jobs auto-recovered |
 
 ---
 
-*Last updated: 2026-02-26 | Version: post-write-back sprint*
+*Last updated: 2026-02-27 | Version: post-RLVR-fleet-sprint*
