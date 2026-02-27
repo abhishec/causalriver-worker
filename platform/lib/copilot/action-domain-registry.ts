@@ -224,7 +224,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["roadmap", "product roadmap", "quarterly roadmap", "strategic roadmap"],
     regexPatterns: ["roadmap"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "sprint-health",
@@ -233,7 +233,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["sprint", "sprint health", "sprint status", "sprint burn", "current sprint"],
     regexPatterns: ["sprint.health", "sprint.status"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "backlog-prioritizer",
@@ -242,7 +242,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["backlog", "prioritize", "wsjf", "ice score", "rice score", "story points"],
     regexPatterns: ["backlog", "prioriti.*backlog"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "stakeholder-alignment",
@@ -251,7 +251,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["stakeholder", "alignment", "executive update", "pm update", "status update"],
     regexPatterns: ["stakeholder", "executive.update"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "release-risk",
@@ -260,7 +260,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["release risk", "release readiness", "go no-go", "launch risk", "can we release"],
     regexPatterns: ["release.risk", "go.no.go", "launch.risk"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "feature-impact",
@@ -269,7 +269,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["feature impact", "feature estimate", "effort estimate", "should we build", "mvp scope"],
     regexPatterns: ["feature.impact", "feature.estimate"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "capacity-planner",
@@ -278,7 +278,7 @@ export const DOMAIN_REGISTRY: DomainRegistryEntry[] = [
     keywords: ["capacity", "capacity planning", "team capacity", "sprint capacity", "bandwidth"],
     regexPatterns: ["capacity.plan", "team.capacity"],
     executionMode: "async",
-    implemented: false,
+    implemented: true,
   },
   // ─── AaaS domains ─────────────────────────────────────────────────────────
   {
