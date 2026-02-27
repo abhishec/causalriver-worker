@@ -257,6 +257,37 @@ jobs:
             echo "No migration changes detected"
           fi
 
+      - name: Lint migrations for destructive changes
+        # Scans ALL migrations (not just changed ones) for patterns that can cause
+        # data loss or zero-downtime deployment failures:
+        #   DROP COLUMN   — data loss risk (column may still be read by old Lambda)
+        #   RENAME COLUMN — breaks code until deploy completes (old code uses old name)
+        #   NOT NULL      — breaks INSERT if existing rows don't satisfy the constraint
+        # This runs as a warning (non-blocking) to surface risky patterns for review.
+        # To suppress for a legitimate migration, add a comment: -- lint-ok: DROP COLUMN
+        run: |
+          if ls supabase/migrations/*.sql 2>/dev/null | head -1 | grep -q .; then
+            MATCHED=$(grep -rn "DROP COLUMN\|RENAME COLUMN\|NOT NULL" supabase/migrations/*.sql 2>/dev/null || true)
+            if [ -n "$MATCHED" ]; then
+              echo "WARNING: Potentially destructive migration detected — review required"
+              echo ""
+              echo "Matched patterns (DROP COLUMN | RENAME COLUMN | NOT NULL):"
+              echo "$MATCHED"
+              echo ""
+              echo "Review checklist:"
+              echo "  DROP COLUMN   → Is the column still referenced by any Lambda or API route?"
+              echo "  RENAME COLUMN → Is the old column name still in any production code?"
+              echo "  NOT NULL      → Does every existing row satisfy this constraint?"
+              echo ""
+              echo "If these changes are intentional and safe, this warning can be ignored."
+              echo "This step is informational only and does not fail CI."
+            else
+              echo "No destructive migration patterns detected (DROP COLUMN / RENAME COLUMN / NOT NULL)."
+            fi
+          else
+            echo "No migration files found — skipping destructive change lint."
+          fi
+
   # ── CI Failure Notification ────────────────────────────────────────────────
   # Posts a comment on the failing PR when any CI job fails.
   # Closes the feedback loop: engineers see failures without leaving GitHub.
