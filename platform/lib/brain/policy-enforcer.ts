@@ -16,6 +16,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { logDecision } from "@/lib/brain/decision-log";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -97,6 +98,13 @@ export async function evaluateConstraints(
           orgId,
           policy: policy.name,
           reason: result.reason,
+        });
+        void logDecision(supabase, {
+          organizationId: orgId,
+          decisionType: "policy_blocked",
+          inputContext: { policy: policy.name },
+          decisionMade: { blocked: true, policy: policy.name },
+          rationale: result.reason,
         });
         return result;
       }

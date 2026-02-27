@@ -11,6 +11,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { logDecision } from "@/lib/brain/decision-log";
 
 // ── Domain Threshold Cache ─────────────────────────────────────────────────
 
@@ -222,6 +223,17 @@ export async function recordAgentOutcome(
   // Get adaptive threshold for this domain — replaces hardcoded 0.7
   const threshold = await getDomainThreshold(supabase, params.organizationId, params.domain);
   const wasSuccess = params.quality >= threshold;
+
+  // EU AI Act Article 13: log the model quality decision
+  void logDecision(supabase, {
+    organizationId: params.organizationId,
+    decisionType: "model_selection",
+    inputContext: { domain: params.domain, quality: params.quality, threshold, modelId: params.modelId },
+    decisionMade: { signal: wasSuccess ? "dopamine" : "gaba", modelId: params.modelId },
+    confidence: params.quality,
+    modelUsed: params.modelId,
+    domain: params.domain,
+  });
 
   try {
     // Derive model family for analytics grouping

@@ -21,6 +21,7 @@ import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { logger } from "@/lib/logger";
 import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
 import { checkHitlGate } from "@/lib/brain/hitl-gate";
+import { logDecision } from "@/lib/brain/decision-log";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // overnight jobs can take time
@@ -260,6 +261,17 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+
+  // ── Decision log: agent_dispatch ─────────────────────────────────────────
+  void logDecision(serviceClient, {
+    organizationId,
+    decisionType: "agent_dispatch",
+    inputContext: { spec: spec.slice(0, 500), repoName, projectKey },
+    decisionMade: { jobId: parentJob.id, agentType: "overnight" },
+    rationale: "Overnight agent dispatched",
+    userId: user.id,
+    jobId: parentJob.id,
+  });
 
   // ── Step 9: Create child code-agent jobs for each ticket ──────────────────
   const childJobs: Array<{ ticketTitle: string; jobId: string }> = [];

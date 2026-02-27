@@ -17,6 +17,7 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { logDecision } from "@/lib/brain/decision-log";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -180,6 +181,15 @@ export async function checkHitlGate(
     jobId: params.jobId,
   });
 
+  void logDecision(supabase, {
+    organizationId: params.orgId,
+    decisionType: "hitl_override",
+    inputContext: { gateType: params.gateType, summary: params.summary, jobId: params.jobId },
+    decisionMade: { blocked: true, approvalId: data.id },
+    rationale: `HITL gate triggered: ${params.gateType}`,
+    jobId: params.jobId,
+  });
+
   return { blocked: true, approvalId: data.id };
 }
 
@@ -227,6 +237,15 @@ export async function resolveHitlApproval(
     });
     return null;
   }
+
+  void logDecision(supabase, {
+    organizationId: params.orgId,
+    decisionType: "hitl_override",
+    inputContext: { approvalId: params.approvalId, action: params.action },
+    decisionMade: { resolved: true, action: params.action, resolvedBy: params.resolvedBy },
+    rationale: params.note ?? `HITL ${params.action}`,
+    userId: params.resolvedBy,
+  });
 
   // If approved and there's a blocked job → resume it
   if (params.action === "approve" && approval.job_id) {
