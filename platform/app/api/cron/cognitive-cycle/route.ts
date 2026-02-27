@@ -42,6 +42,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { runCognitivePlanner } from "@/lib/brain/cognitive-planner";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -397,6 +398,39 @@ export async function GET(request: NextRequest) {
 
     const durationMs = Date.now() - startMs;
 
+    // ── Cognitive Planner: autonomous proactive agent scheduling ──────────
+    // Runs for each active org (not just orgs with cross_domain_signals).
+    // Capped at 10 orgs to control cost — Haiku is cheap but not free.
+    const plannerResults: Array<{ orgId: string; result: unknown }> = [];
+    try {
+      const { data: activeOrgs } = await service
+        .from("organizations")
+        .select("id")
+        .eq("is_core_brain", false)
+        .limit(10);
+
+      for (const org of activeOrgs ?? []) {
+        try {
+          const result = await runCognitivePlanner(service, org.id as string);
+          plannerResults.push({ orgId: org.id as string, result });
+        } catch (err) {
+          logger.warn(`[CognitiveCycle] Planner failed for org ${org.id as string}:`, err);
+        }
+      }
+
+      const totalQueued = plannerResults.reduce((sum, r) => {
+        const res = r.result as { decisionsQueued?: number } | null;
+        return sum + (res?.decisionsQueued ?? 0);
+      }, 0);
+
+      logger.info(
+        `[CognitiveCycle] Planner ran for ${plannerResults.length} orgs, ` +
+          `queued ${totalQueued} total agent jobs`
+      );
+    } catch (err) {
+      logger.warn("[CognitiveCycle] Planner phase failed:", err);
+    }
+
     // ── Log run to scheduled_job_runs ─────────────────────────────────
     try {
       await service.from("scheduled_job_runs").insert({
@@ -406,7 +440,7 @@ export async function GET(request: NextRequest) {
         started_at: new Date(startMs).toISOString(),
         completed_at: new Date().toISOString(),
         status: skipped > 0 && processed === 0 ? "failed" : skipped > 0 ? "partial" : "success",
-        result: JSON.stringify({ processed, skipped, activeOrgIds, results }),
+        result: JSON.stringify({ processed, skipped, activeOrgIds, results, plannerResults }),
         duration_ms: durationMs,
       });
     } catch {
@@ -423,6 +457,7 @@ export async function GET(request: NextRequest) {
       skipped,
       durationMs,
       results,
+      plannerResults,
     });
   } catch (err) {
     const durationMs = Date.now() - startMs;
