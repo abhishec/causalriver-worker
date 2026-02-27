@@ -39,6 +39,13 @@ const NAV_ITEMS: { label: string; href: string; icon: string; group: "work" | "b
     access: "standard",
   },
   {
+    label: "Processes",
+    href: "/processes",
+    icon: "M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z",
+    group: "work",
+    access: "standard",
+  },
+  {
     label: "Workflows",
     href: "/workflows",
     icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5",
