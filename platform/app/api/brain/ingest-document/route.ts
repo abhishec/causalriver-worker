@@ -30,6 +30,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ingestDocument } from "@/lib/connectors/document-ingester";
 import { logger } from "@/lib/logger";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 export const dynamic = "force-dynamic";
 
@@ -141,9 +142,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // ── Rate limiting — 10 req/min (Anthropic PDF extraction is expensive) ──
+  const rateLimit = await checkSessionRateLimit(user.id, "/api/brain/ingest-document");
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment before uploading another document." },
+      { status: 429 }
+    );
+  }
+
   const workspaceId = await getCurrentWorkspaceId();
   if (!workspaceId) {
     return NextResponse.json({ error: "No workspace" }, { status: 400 });
+  }
+
+  // ── Verify user is a member of this workspace ──────────────────────
+  const { data: membership } = await supabase
+    .from("org_members")
+    .select("organization_id")
+    .eq("organization_id", workspaceId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!membership) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   // ── Parse multipart form ───────────────────────────────────────────

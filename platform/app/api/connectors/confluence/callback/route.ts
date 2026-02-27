@@ -29,12 +29,18 @@ export async function GET(request: NextRequest) {
     }
 
     const parts = state.split(':');
-    if (parts.length < 3) {
+    // State format: orgId:userId:timestamp:nonce (4 parts — nonce prevents replay attacks)
+    if (parts.length < 4) {
       return NextResponse.redirect(
         new URL('/connectors?error=invalid_state', request.url)
       );
     }
-    const [orgId, userId, timestamp] = parts;
+    const [orgId, userId, timestamp, nonce] = parts;
+    if (!nonce || nonce.length < 8) {
+      return NextResponse.redirect(
+        new URL('/connectors?error=invalid_state', request.url)
+      );
+    }
     const ts = parseInt(timestamp, 10);
 
     if (isNaN(ts) || Date.now() - ts > 10 * 60 * 1000) {

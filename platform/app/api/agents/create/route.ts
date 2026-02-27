@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,15 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Rate limiting — 10 req/min per user ──────────────────────────────────
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/create");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment before creating another agent." },
+        { status: 429 }
+      );
     }
 
     const body = await req.json();

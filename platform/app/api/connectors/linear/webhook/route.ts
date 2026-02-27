@@ -65,11 +65,16 @@ export async function POST(req: NextRequest) {
         logger.warn('Linear webhook: missing HMAC signature');
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
       }
-      const { createHmac } = await import('crypto');
+      const { createHmac, timingSafeEqual } = await import('crypto');
       const expected = createHmac('sha256', process.env.LINEAR_SIGNING_SECRET)
         .update(body)
         .digest('hex');
-      if (signature !== expected) {
+      // Use timing-safe comparison to prevent timing attacks on HMAC verification
+      const sigBuf = Buffer.from(signature, 'hex');
+      const expBuf = Buffer.from(expected, 'hex');
+      const signaturesMatch =
+        sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
+      if (!signaturesMatch) {
         logger.warn('Linear webhook: invalid HMAC signature');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }

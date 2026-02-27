@@ -66,6 +66,15 @@ export async function POST(request: NextRequest) {
       ? siteUrl.replace(/\/$/, "")
       : `https://${siteUrl.replace(/\/$/, "")}`;
 
+    // ── 3a. SSRF guard — only allow Atlassian-hosted instances ───────────────
+    const ATLASSIAN_PATTERN = /^https:\/\/[a-z0-9-]+\.atlassian\.net(\/.*)?$/i;
+    if (!ATLASSIAN_PATTERN.test(normalSiteUrl)) {
+      return NextResponse.json(
+        { error: "Invalid Jira site URL. Must be an atlassian.net domain." },
+        { status: 400 }
+      );
+    }
+
     // ── 4. Look up org by slug ────────────────────────────────────────────────
     const service = await createServiceClient();
     const { data: org, error: orgError } = await service

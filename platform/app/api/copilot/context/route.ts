@@ -38,6 +38,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "orgId is required" }, { status: 400 });
     }
 
+    // Verify the authenticated user is a member of this org before using admin client
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("organization_id", orgId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const admin = getAdminClient();
     const { data: convos } = await admin
       .from("conversations")
@@ -104,6 +116,18 @@ export async function POST(req: NextRequest) {
     }
     if (!orgId) {
       return NextResponse.json({ error: "orgId is required" }, { status: 400 });
+    }
+
+    // Verify the authenticated user is a member of this org before any admin operations
+    const { data: membership } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("organization_id", orgId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!membership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const originalTokens = countTokens(messages);
