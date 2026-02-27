@@ -6,12 +6,13 @@
  * Does two things:
  *
  * 1. STALE RUNNING JOBS
- *    Finds jobs with status='running' whose heartbeat_at is > 3 minutes old
- *    (or null and started_at > 3 minutes old). Marks them as 'failed' with
+ *    Finds jobs with status='running' whose heartbeat_at is > 90s old
+ *    (or null and started_at > 90s old). Marks them as 'failed' with
  *    a clear error message so they can be retried on the next process-jobs tick.
- *    This complements recover_stale_jobs() in process-jobs, which uses a 120s
- *    threshold. The watchdog uses 3 minutes (180s) — slightly more lenient —
- *    and runs independently so stale job recovery is not gated on process-jobs.
+ *    90s = Lambda kill ceiling on Amplify SSR. Any job running longer with no
+ *    heartbeat is definitively dead and will never complete.
+ *    This complements recover_stale_jobs() in process-jobs (120s threshold).
+ *    The watchdog runs independently so recovery is not gated on process-jobs.
  *
  * 2. PAUSED CHAIN CONTINUATIONS
  *    Finds jobs with status='paused' AND chain_parent_id IS NOT NULL whose
