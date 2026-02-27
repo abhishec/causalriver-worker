@@ -32,7 +32,12 @@ function isSuppressibleError(err) {
   if (
     typeof err.message === "string" &&
     (err.message.startsWith("Failed to collect page data") ||
-     err.message.startsWith("Cannot find module for page"))
+     err.message.startsWith("Cannot find module for page") ||
+     // pdf-parse/pdfjs-dist triggers this during /500 prerender
+     err.message.includes("should not be imported outside of pages/_document") ||
+     err.message.includes("no-document-import-in-page") ||
+     // Next.js 15.5 /_error export error
+     err.message.includes("Export encountered an error on /_error"))
   ) {
     return true;
   }
