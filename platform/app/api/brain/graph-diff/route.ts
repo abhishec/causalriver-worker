@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     const workspaceId = organizationId || await getCurrentWorkspaceId();
 
     // Verify membership
-    const { data: postMember } = await supabase
+    const { data: postMember } = await supabasePost
       .from("org_members")
       .select("role")
       .eq("user_id", user.id)

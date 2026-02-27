@@ -184,15 +184,23 @@ export async function GET() {
  * Returns the MCP tool result.
  */
 export async function POST(request: NextRequest) {
+  // ── Auth: isolate createClient() so Lambda env var errors fall through to API key check ──
+  let workspaceId: string | null = null;
+  let userId: string | null = null;
+
+  let toolsUser = null;
+  let toolsSupabase: Awaited<ReturnType<typeof createClient>> | null = null;
   try {
-    // ── Auth ──────────────────────────────────────────────────────────
-    let workspaceId: string | null = null;
-    let userId: string | null = null;
+    toolsSupabase = await createClient();
+    const { data } = await toolsSupabase.auth.getUser();
+    toolsUser = data.user;
+  } catch {
+    // createClient failure — fall through to API key auth below
+  }
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (user) {
+  try {
+    if (toolsUser) {
+      const user = toolsUser;
       userId = user.id;
       const sessionRL = await checkSessionRateLimit(user.id, "/api/brain/tools");
       if (!sessionRL.allowed) {
@@ -247,8 +255,8 @@ export async function POST(request: NextRequest) {
     // Resolve org
     if (!workspaceId) {
       workspaceId = organizationId || null;
-      if (!workspaceId && userId) {
-        const { data: membership } = await supabase
+      if (!workspaceId && userId && toolsSupabase) {
+        const { data: membership } = await toolsSupabase
           .from("org_members")
           .select("organization_id")
           .eq("user_id", userId)
@@ -264,8 +272,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate org membership when user explicitly provides an org
-    if (userId && organizationId) {
-      const { data: toolsMembership } = await supabase
+    if (userId && organizationId && toolsSupabase) {
+      const { data: toolsMembership } = await toolsSupabase
         .from("org_members")
         .select("role")
         .eq("user_id", userId)
@@ -273,7 +281,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!toolsMembership) {
-        const { data: toolsAdmin } = await supabase
+        const { data: toolsAdmin } = await toolsSupabase
           .from("org_members")
           .select("is_platform_admin")
           .eq("user_id", userId)
@@ -293,7 +301,7 @@ export async function POST(request: NextRequest) {
     // ── MCP Server: Execute tool ─────────────────────────────────────
     const { createNexusMcpServer } = await import("@nexus-ai/memory-stack");
     const mcpServer = createNexusMcpServer({
-      supabase,
+      supabase: toolsSupabase!,
       organizationId: workspaceId,
     });
 
