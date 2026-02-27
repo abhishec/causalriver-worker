@@ -28,11 +28,23 @@ const SKILL_TO_DOMAIN: Record<string, string> = {
   "delivery-health": "delivery-intelligence",
   // Process Engine templates — available to any workspace regardless of service activation.
   // Routes to agent_type='bpaas' (not 'a2a') so process-jobs Phase 5 picks them up.
-  "hr-offboarding":      "hr_offboarding",
-  "procurement":         "procurement",
-  "order-management":    "order_management",
-  "expense-approval":    "expense_approval",
-  "customer-onboarding": "customer_onboarding",
+  "hr-offboarding":           "hr_offboarding",
+  "procurement":              "procurement",
+  "order-management":         "order_management",
+  "expense-approval":         "expense_approval",
+  "customer-onboarding":      "customer_onboarding",
+  "insurance-claim":          "insurance_claim",
+  "invoice-reconciliation":   "invoice_reconciliation",
+  "sla-breach-escalation":    "sla_breach_escalation",
+  "travel-rebooking":         "travel_rebooking",
+  "compliance-audit":         "compliance_audit",
+  "subscription-migration":   "subscription_migration",
+  "dispute-resolution":       "dispute_resolution",
+  "financial-close":          "financial_close",
+  "product-workflow":         "product_workflow",
+  "ar-collections":           "ar_collections",
+  "incident-response":        "incident_response",
+  "qbr-preparation":          "qbr_preparation",
 };
 
 // Domains that route to agent_type='bpaas' (Process Engine) instead of 'a2a'
@@ -42,6 +54,18 @@ const BPAAS_DOMAINS = new Set([
   "order_management",
   "expense_approval",
   "customer_onboarding",
+  "insurance_claim",
+  "invoice_reconciliation",
+  "sla_breach_escalation",
+  "travel_rebooking",
+  "compliance_audit",
+  "subscription_migration",
+  "dispute_resolution",
+  "financial_close",
+  "product_workflow",
+  "ar_collections",
+  "incident_response",
+  "qbr_preparation",
 ]);
 
 const VALID_SKILLS = new Set(Object.keys(SKILL_TO_DOMAIN));

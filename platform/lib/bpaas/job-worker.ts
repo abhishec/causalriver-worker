@@ -178,10 +178,13 @@ export async function processBPaaSJob(
       });
     } else if (result.status === "awaiting_approval") {
       // HITL pause — job is NOT done; it waits for POST /api/agents/{id}/resume
+      // Use 'awaiting_approval' (not 'awaiting_hitl') — the CHECK constraint only
+      // allows: pending, running, completed, failed, blocked, paused, suspended,
+      // awaiting_approval, resumed, cancelled. 'awaiting_hitl' is NOT in the list.
       await supabase
         .from("agent_queue")
         .update({
-          status: "awaiting_hitl",
+          status: "awaiting_approval",
           result: {
             processInstanceId: result.processInstanceId,
             finalState: result.finalState,
@@ -191,7 +194,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job paused at approval gate (awaiting_hitl)", {
+      logger.warn("[bpaas/job-worker] Job paused at approval gate (awaiting_approval)", {
         jobId: job.id,
         processType,
         approvalId: result.approvalId,
