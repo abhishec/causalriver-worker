@@ -135,7 +135,8 @@ export async function GET(request: NextRequest) {
       .from("org_connectors")
       .select("id, connector_type, instance_name, display_name, status, last_sync_at, config, metadata, signals_count, error_message, created_at")
       .eq("organization_id", workspaceId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(500); // Safety cap — no org should have more than 500 connectors
 
     if (type) query = query.eq("connector_type", type);
 

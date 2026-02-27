@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
       weeklySignals,
       recentSignalsResult,
       feedbackResult,
+      feedbackHelpfulResult,
       queueResult,
     ] = await Promise.all([
       // Signals in the last hour
@@ -106,11 +107,18 @@ export async function GET(req: NextRequest) {
         .order("signal_timestamp", { ascending: false })
         .limit(5),
 
-      // User feedback stats
+      // User feedback total count (count-only — avoids fetching all rows for large orgs)
       supabase
         .from("copilot_response_feedback")
-        .select("rating")
+        .select("id", { count: "exact", head: true })
         .eq("organization_id", workspaceId),
+
+      // Helpful feedback count (separate count query — avoids loading all rows)
+      supabase
+        .from("copilot_response_feedback")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", workspaceId)
+        .eq("rating", "helpful"),
 
       // Queue depth
       supabase
@@ -126,10 +134,9 @@ export async function GET(req: NextRequest) {
     // Velocity: signals/hour averaged over 7 days
     const learningVelocity = Math.round((signalsThisWeek / (7 * 24)) * 10) / 10;
 
-    const feedbackRows = feedbackResult.data ?? [];
-    const feedbackTotal = feedbackRows.length;
-    const feedbackHelpful = feedbackRows.filter((r) => r.rating === "helpful").length;
-    const feedbackNotHelpful = feedbackRows.filter((r) => r.rating !== "helpful").length;
+    const feedbackTotal = feedbackResult.count ?? 0;
+    const feedbackHelpful = feedbackHelpfulResult.count ?? 0;
+    const feedbackNotHelpful = Math.max(0, feedbackTotal - feedbackHelpful);
 
     const improvementThisSession = feedbackTotal > 0 ? Math.round((feedbackHelpful / feedbackTotal) * 100) : 0;
 

@@ -94,13 +94,21 @@ export async function GET() {
       };
     }
 
-    // Connectors — try connector_type first (actual column name), fallback to provider
-    try {
-      const { data: connectors } = await admin
+    // Connectors + active agents — run in parallel (independent queries)
+    const [connectorsResult, tasksResult] = await Promise.allSettled([
+      admin
         .from("org_connectors")
         .select("organization_id, connector_type")
-        .in("organization_id", orgIds);
+        .in("organization_id", orgIds),
+      admin
+        .from("brain_agent_tasks")
+        .select("organization_id")
+        .in("organization_id", orgIds)
+        .eq("status", "running"),
+    ]);
 
+    if (connectorsResult.status === "fulfilled") {
+      const { data: connectors } = connectorsResult.value;
       if (connectors) {
         for (const c of connectors as { organization_id: string; connector_type: string }[]) {
           const ws = result[c.organization_id];
@@ -112,18 +120,12 @@ export async function GET() {
           }
         }
       }
-    } catch {
+    } else {
       logger.warn("[/api/dashboard/summary] org_connectors query failed — skipping");
     }
 
-    // Active agents (brain_agent_tasks with status = 'running')
-    try {
-      const { data: tasks } = await admin
-        .from("brain_agent_tasks")
-        .select("organization_id")
-        .in("organization_id", orgIds)
-        .eq("status", "running");
-
+    if (tasksResult.status === "fulfilled") {
+      const { data: tasks } = tasksResult.value;
       if (tasks) {
         for (const t of tasks as { organization_id: string }[]) {
           const ws = result[t.organization_id];
@@ -133,8 +135,7 @@ export async function GET() {
           }
         }
       }
-    } catch {
-      // brain_agent_tasks may not exist — that's fine
+      // brain_agent_tasks may not exist — settled rejection is silently ignored
     }
 
     return NextResponse.json({ workspaces: result });

@@ -145,8 +145,13 @@ describe("recordAgentOutcome", () => {
 
     const signalInsert = insertMock.mock.calls[1][0]; // second call = cross_domain_signals
     expect(signalInsert.signal_type).toBe("dopamine");
-    expect(signalInsert.signal_value).toBe(0.9);
+    // signal_value is the string neurotransmitter name for tier3-consolidation
+    // .in("signal_value", ["dopamine"]) filtering (not the numeric quality).
+    // The numeric quality is stored in signal_strength and signal_metadata.numericSignalValue.
+    expect(signalInsert.signal_value).toBe("dopamine");
+    expect(signalInsert.signal_strength).toBe(0.9);
     expect(signalInsert.signal_metadata.wasSuccess).toBe(true);
+    expect(signalInsert.signal_metadata.numericSignalValue).toBe(0.9);
     expect(signalInsert.source_domain).toBe("se-aas.pod-match");
   });
 
@@ -160,7 +165,11 @@ describe("recordAgentOutcome", () => {
 
     const signalInsert = insertMock.mock.calls[1][0];
     expect(signalInsert.signal_type).toBe("gaba");
-    expect(signalInsert.signal_value).toBeCloseTo(-(1 - 0.4));
+    // signal_value is the string "gaba" for tier3-consolidation filtering.
+    // The numeric signal value (-(1-quality)) is stored in signal_metadata.numericSignalValue.
+    expect(signalInsert.signal_value).toBe("gaba");
+    expect(signalInsert.signal_strength).toBe(0.4);
+    expect(signalInsert.signal_metadata.numericSignalValue).toBeCloseTo(-(1 - 0.4));
     expect(signalInsert.signal_metadata.wasSuccess).toBe(false);
   });
 

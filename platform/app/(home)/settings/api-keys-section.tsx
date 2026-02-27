@@ -85,6 +85,7 @@ export function ApiKeysSection({ initialKeys, orgId }: ApiKeysSectionProps) {
   }
 
   async function handleRevokeKey(keyId: string) {
+    if (!confirm("Revoke this API key? Any SDK or integration using it will immediately stop working.")) return;
     setLoading(true);
     setError(null);
 
