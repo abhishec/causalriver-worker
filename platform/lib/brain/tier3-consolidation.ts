@@ -7,7 +7,7 @@
  *
  * Consolidation criteria:
  *   - Signals: `signal_strength >= 0.72` AND `signal_value = 'dopamine'` (7-day window)
- *   - Predictions: `quality_score >= 0.75` (7-day window)
+ *   - Predictions: `confidence >= 0.75` (7-day window)
  *   - Cluster threshold: 3+ events on the same domain → pattern candidate
  *
  * Upsert behaviour:
@@ -33,7 +33,7 @@ interface CrossDomainSignal {
 interface PredictionRecord {
   id: string;
   domain: string;
-  quality_score: number;
+  confidence: number;
   task_description: string | null;
 }
 
@@ -255,9 +255,9 @@ export async function runConsolidation(
     // ── Step 2: High-quality prediction records ──────────────────────────────
     const { data: predRows, error: predError } = await admin
       .from("prediction_records")
-      .select("id, domain, quality_score, task_description")
+      .select("id, domain, confidence, task_description")
       .eq("organization_id", orgId)
-      .gte("quality_score", 0.75)
+      .gte("confidence", 0.75)
       .gte("created_at", since)
       .limit(50);
 
@@ -307,7 +307,7 @@ export async function runConsolidation(
     for (const [domain, cluster] of predsByDomain) {
       if (cluster.length < 3) continue;
 
-      const avgQuality = average(cluster.map((p) => p.quality_score));
+      const avgQuality = average(cluster.map((p) => p.confidence));
       const predIds = cluster.map((p) => p.id);
 
       const created = await upsertPattern(admin, {
