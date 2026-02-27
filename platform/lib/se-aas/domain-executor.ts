@@ -21,6 +21,7 @@ import { startJobHeartbeat, stopJobHeartbeat } from "./job-heartbeat";
 import { recordAgentOutcome, computeAgentQuality, recordStepOutcome } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
+import { depositDomainExecutionOutcome } from "@/lib/brain/engagement-flywheel";
 import { selectModelForDomain, routeModelWithIq } from "./model-router";
 import {
   buildAgentCommsPayload,
@@ -1257,6 +1258,18 @@ export async function executeDomain(
     outputSummary: JSON.stringify(result).slice(0, 200),
   }).catch(() => {/* non-fatal */});
 
+  // ── Data Flywheel: Deposit structured milestone into engagement_outcomes ──
+  // Fire-and-forget — never block domain response.
+  // Only deposits for pod-match, early-warning, scope-creep (key delivery domains).
+  if (['pod-match', 'early-warning', 'scope-creep'].includes(params.domainType)) {
+    void depositDomainExecutionOutcome(supabase, {
+      organizationId: params.organizationId,
+      engagementId: (params.request as { engagementId?: string }).engagementId,
+      domainType: params.domainType,
+      qualityScore: rlQuality,
+      result,
+    });
+  }
 
   // ── Step 9: RLVR Prediction Registration (fire-and-forget) ────────────
   // For early-warning results with high flight risk, record a prediction for

@@ -20,6 +20,7 @@ import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { logger } from "@/lib/logger";
 import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
+import { checkHitlGate } from "@/lib/brain/hitl-gate";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // overnight jobs can take time
@@ -98,6 +99,24 @@ export async function POST(req: NextRequest) {
   }
   if (!repoName || typeof repoName !== "string") {
     return NextResponse.json({ error: "repoName is required" }, { status: 400 });
+  }
+
+  // ── Step 3b: HITL gate check (opt-in, off by default) ────────────────────
+  // If the org has HITL enabled with 'overnight_agent' gate, this pauses
+  // execution and returns a 202 until a human approves via /api/brain/approvals.
+  {
+    const { blocked, approvalId } = await checkHitlGate(supabase, {
+      orgId: organizationId,
+      gateType: "overnight_agent",
+      summary: `Overnight agent requested: ${spec.trim().slice(0, 200)}`,
+      details: { spec: spec.trim(), repoOwner, repoName, projectKey, slackChannel },
+    });
+    if (blocked) {
+      return NextResponse.json(
+        { status: "pending_approval", approvalId },
+        { status: 202 }
+      );
+    }
   }
 
   // ── Step 4: Look up GitHub connector credentials (via RPC decryption) ────
