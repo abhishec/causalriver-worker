@@ -20,6 +20,7 @@ import { saveArtifact } from "./job-queue";
 import { startJobHeartbeat, stopJobHeartbeat } from "./job-heartbeat";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
 import { selectModelForDomain, routeModelWithIq } from "./model-router";
 import {
   buildAgentCommsPayload,
@@ -590,6 +591,32 @@ export async function executeDomain(
     modelUsed: "claude-sonnet-4-6",
     outputSummary: JSON.stringify(result).slice(0, 200),
   }).catch(() => {/* non-fatal */});
+
+
+  // ── Step 9: RLVR Prediction Registration (fire-and-forget) ────────────
+  // For early-warning results with high flight risk, record a prediction for
+  // ground-truth verification 45 days later. The RLVR cron at 3 AM UTC will
+  // re-measure actual outcomes and emit verified RL signals to cross_domain_signals.
+  if (params.domainType === 'early-warning') {
+    try {
+      const resultObj = result as Record<string, unknown>;
+      const flightRisk = (resultObj?.data as Record<string, unknown>)?.flight_risk_score;
+      const engineerLogin = (resultObj?.data as Record<string, unknown>)?.engineer_login;
+      if (typeof flightRisk === 'number' && flightRisk > 0.5) {
+        void recordRlvrPrediction(supabase, params.organizationId, {
+          domainType: 'early-warning',
+          entityId: typeof engineerLogin === 'string' && engineerLogin ? engineerLogin : 'unknown',
+          entityType: 'engineer',
+          predictedValue: flightRisk,
+          predictedOutcome: `Engineer flight risk at ${flightRisk.toFixed(2)} — may disengage within 45 days`,
+          verifyAfterDays: 45,
+          metadata: { rlTaskId, quality: rlQuality },
+        });
+      }
+    } catch {
+      // Non-fatal — RLVR recording must never block domain response
+    }
+  }
 
   // ── Final: Emit completion comms — full heart/mind/speech payload ─────────
   // This is the most important comms emission: it gives the user the human-voice
