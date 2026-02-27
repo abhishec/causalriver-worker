@@ -723,7 +723,7 @@ export async function executeDomain(
   const rlQuality = computeAgentQuality(JSON.stringify(result), null, durationMs, params.domainType);
   const rlTaskId = `${params.domainType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
 
-  recordAgentOutcome(supabase, {
+  void recordAgentOutcome(supabase, {
     agentId: rlTaskId,
     domain: params.domainType,
     taskDescription: JSON.stringify(params.request).slice(0, 200),
@@ -734,7 +734,7 @@ export async function executeDomain(
     userId: params.userId,
   }).catch(() => {/* non-fatal */});
 
-  logAgentRetro({
+  void logAgentRetro({
     taskId: rlTaskId,
     agentType: params.domainType,
     prompt: JSON.stringify(params.request).slice(0, 100),
