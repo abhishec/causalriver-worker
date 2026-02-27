@@ -60,6 +60,13 @@ const NAV_ITEMS: { label: string; href: string; icon: string; group: "work" | "b
     group: "build",
     access: "full",
   },
+  {
+    label: "Approvals",
+    href: "/connectors/approvals",
+    icon: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    group: "build",
+    access: "full",
+  },
   // ── System (admin/owner only) ──
   {
     label: "Settings",
@@ -568,6 +575,25 @@ export function Sidebar() {
     [isFullAccess, navReady]
   );
 
+  // Pending write-back approvals badge count (admin/owner only)
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
+  useEffect(() => {
+    if (!isFullAccess) return;
+    let cancelled = false;
+    const fetchCount = async () => {
+      try {
+        const res = await fetch("/api/connectors/writeback/pending");
+        if (res.ok && !cancelled) {
+          const json = await res.json() as { total?: number };
+          setPendingApprovalCount(json.total ?? 0);
+        }
+      } catch { /* non-critical */ }
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 30_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [isFullAccess]);
+
   // Service-aware vocabulary for labels
   const vocab = useMemo(() => getVocabulary(activeService), [activeService]);
 
@@ -749,6 +775,12 @@ export function Sidebar() {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                   </svg>
+                  {/* Pending approvals badge */}
+                  {item.href === "/connectors/approvals" && pendingApprovalCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-amber-500 text-[9px] font-bold text-white flex items-center justify-center leading-none">
+                      {pendingApprovalCount > 9 ? "9+" : pendingApprovalCount}
+                    </span>
+                  )}
                 </Link>
               </div>
             );

@@ -377,14 +377,260 @@ async function insertWritebackAuditLog(
   }
 }
 
+// ─── Approval Intercept ───────────────────────────────────────────────────────
+
+/**
+ * Check whether the org has require_writeback_approval enabled in their metadata.
+ * Returns false on any error (fail-open so write-backs still execute by default).
+ */
+async function orgRequiresApproval(
+  supabase: SupabaseClient,
+  organizationId: string
+): Promise<boolean> {
+  try {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("metadata")
+      .eq("id", organizationId)
+      .maybeSingle();
+    return (org?.metadata as Record<string, unknown> | null)?.require_writeback_approval === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Queue a pending approval record for an agent write-back.
+ * Called when the org requires approval before write-backs execute.
+ *
+ * Returns the approval ID on success, null on failure.
+ */
+export async function queueWritebackApproval(
+  supabase: SupabaseClient,
+  params: {
+    organizationId: string;
+    jobId: string | null;
+    connectorType: string;
+    actionType: string;
+    actionPayload: Record<string, unknown>;
+    requestedBy: string;
+  }
+): Promise<{ approvalId: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from("writeback_approvals")
+      .insert({
+        organization_id: params.organizationId,
+        job_id: params.jobId ?? null,
+        connector_type: params.connectorType,
+        action_type: params.actionType,
+        action_payload: params.actionPayload,
+        status: "pending",
+        requested_by: params.requestedBy,
+      })
+      .select("id")
+      .single();
+
+    if (error || !data) {
+      logger.warn("[writeback-dispatcher] Failed to queue approval:", {
+        organizationId: params.organizationId,
+        error: error?.message,
+      });
+      return null;
+    }
+
+    logger.warn("[writeback-dispatcher] Approval queued:", {
+      approvalId: data.id,
+      connectorType: params.connectorType,
+      actionType: params.actionType,
+      organizationId: params.organizationId,
+    });
+
+    // Notify via Slack (fire-and-forget) if org has a webhook
+    void notifyApprovalRequired(supabase, params.organizationId, data.id, params);
+
+    return { approvalId: data.id };
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] queueWritebackApproval threw (non-fatal):", err);
+    return null;
+  }
+}
+
+/**
+ * Execute the stored action_payload from an approved writeback_approvals record.
+ * Called by the approve API route after the user approves.
+ *
+ * Returns success/error from the write-back execution.
+ */
+export async function executeApprovedWriteback(
+  supabase: SupabaseClient,
+  approval: {
+    id: string;
+    organization_id: string;
+    connector_type: string;
+    action_type: string;
+    action_payload: Record<string, unknown>;
+  }
+): Promise<{ success: boolean; error?: string; externalRef?: Record<string, unknown> }> {
+  try {
+    const connectorRow = await supabase
+      .from("org_connectors")
+      .select("id, config")
+      .eq("organization_id", approval.organization_id)
+      .eq("connector_type", approval.connector_type)
+      .maybeSingle();
+
+    const config = (connectorRow.data?.config as Record<string, unknown>) ?? {};
+    const connectorRowId = connectorRow.data?.id as string | undefined;
+
+    let credentials: Record<string, unknown> | null = null;
+    if (REFRESHABLE_WRITE_BACK_TYPES.has(approval.connector_type)) {
+      const freshToken = await getConnectorToken(
+        supabase,
+        approval.organization_id,
+        approval.connector_type as "jira" | "confluence"
+      );
+      if (freshToken) {
+        const rawCreds = await getConnectorCredentials(
+          supabase,
+          approval.organization_id,
+          approval.connector_type
+        );
+        credentials = { ...(rawCreds ?? {}), access_token: freshToken };
+      }
+    } else {
+      credentials = await getConnectorCredentials(
+        supabase,
+        approval.organization_id,
+        approval.connector_type
+      );
+    }
+
+    if (!credentials) {
+      return {
+        success: false,
+        error: `No active credentials for connector ${approval.connector_type}`,
+      };
+    }
+
+    const result = await executeWritebackAction(
+      approval.connector_type,
+      approval.action_type,
+      approval.action_payload,
+      credentials,
+      config
+    );
+
+    // Detect 401/403 auth failures and mark connector errored
+    if (
+      !result.success &&
+      result.error &&
+      /\b(401|403)\b/.test(result.error) &&
+      connectorRowId
+    ) {
+      await markConnectorError(
+        supabase,
+        connectorRowId,
+        "Token expired or revoked during approved write-back — reconnect required"
+      );
+    }
+
+    return result;
+  } catch (err) {
+    return {
+      success: false,
+      error: `Execution threw: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
+
+/**
+ * Notify the org's Slack webhook that a write-back is pending approval.
+ * Fire-and-forget safe — never throws.
+ */
+async function notifyApprovalRequired(
+  supabase: SupabaseClient,
+  organizationId: string,
+  approvalId: string,
+  params: {
+    connectorType: string;
+    actionType: string;
+    requestedBy: string;
+  }
+): Promise<void> {
+  try {
+    const { data: prefs } = await supabase
+      .from("notification_preferences")
+      .select("slack_webhook_url")
+      .eq("organization_id", organizationId)
+      .not("slack_webhook_url", "is", null)
+      .limit(1)
+      .maybeSingle();
+
+    const webhookUrl = prefs?.slack_webhook_url as string | undefined;
+    if (!webhookUrl) return;
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.usebrainos.com";
+    const approvalUrl = `${appUrl}/connectors/approvals`;
+
+    const actionLabel = params.actionType.replace(/_/g, " ");
+    const resp = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `[BrainOS] Agent wants to ${actionLabel} on ${params.connectorType} — approval required`,
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: "Write-back Approval Required" },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: [
+                `*Connector:* ${params.connectorType}`,
+                `*Action:* ${actionLabel}`,
+                `*Requested by:* ${params.requestedBy}`,
+                `*Approval ID:* \`${approvalId}\``,
+              ].join("\n"),
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: { type: "plain_text", text: "Review Approval" },
+                url: approvalUrl,
+                style: "primary",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      logger.warn("[writeback-dispatcher] Approval Slack notification failed:", {
+        status: resp.status,
+        approvalId,
+      });
+    }
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] notifyApprovalRequired error (non-fatal):", err);
+  }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
  * Called after every successful domain execution (fire-and-forget safe).
  *
  * Finds enabled connector_writeback_rules for the org+domain, evaluates
- * conditions, renders action payloads from templates, and inserts
- * pending rows into writeback_queue.
+ * conditions, renders action payloads from templates, and either:
+ * - Inserts a pending approval record (if org has require_writeback_approval=true)
+ * - Inserts pending rows into writeback_queue (default: execute immediately)
  */
 export async function checkAndQueueWriteback(
   supabase: SupabaseClient,
@@ -428,6 +674,9 @@ export async function checkAndQueueWriteback(
         code: "RBAC_DENIED",
       };
     }
+
+    // ── Approval gate ────────────────────────────────────────────────────────
+    const requiresApproval = await orgRequiresApproval(supabase, ctx.organizationId);
 
     const { data: rules, error } = await supabase
       .from("connector_writeback_rules")
@@ -476,7 +725,30 @@ export async function checkAndQueueWriteback(
         ctx.domainType
       );
 
-      // Insert into writeback_queue
+      // ── Approval intercept ────────────────────────────────────────────────
+      if (requiresApproval) {
+        const approval = await queueWritebackApproval(supabase, {
+          organizationId: ctx.organizationId,
+          jobId: ctx.jobId,
+          connectorType: rule.connector_type,
+          actionType: rule.action_type,
+          actionPayload,
+          requestedBy: `domain:${ctx.domainType}`,
+        });
+
+        if (approval) {
+          queued++;
+          logger.warn("[writeback-dispatcher] Write-back held for approval:", {
+            approvalId: approval.approvalId,
+            ruleId: rule.id,
+            connectorType: rule.connector_type,
+            actionType: rule.action_type,
+          });
+        }
+        continue;
+      }
+
+      // Insert into writeback_queue (immediate execution path)
       const { error: insertError } = await supabase
         .from("writeback_queue")
         .insert({

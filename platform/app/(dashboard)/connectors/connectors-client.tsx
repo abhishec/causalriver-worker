@@ -60,6 +60,67 @@ interface ConnectorsClientProps {
   userRole?: string | null;
 }
 
+/* ── Approvals callout — links to /connectors/approvals with live badge ── */
+
+function ApprovalsCallout({ userRole }: { userRole?: string | null }) {
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const isAdmin = userRole === "admin" || userRole === "owner";
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    fetch("/api/connectors/writeback/pending")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json: { total?: number } | null) => {
+        if (!cancelled && json) setPendingCount(json.total ?? 0);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [isAdmin]);
+
+  if (!isAdmin) return null;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
+          Write-back Approvals
+        </div>
+        {pendingCount !== null && pendingCount > 0 && (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
+            {pendingCount} pending
+          </span>
+        )}
+      </div>
+      <Link
+        href="/connectors/approvals"
+        className="flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface hover:bg-surface-hover transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+            <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {pendingCount !== null && pendingCount > 0
+                ? `${pendingCount} write-back${pendingCount === 1 ? "" : "s"} waiting for approval`
+                : "No pending approvals"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Review and approve agent actions before they execute on connected systems
+            </p>
+          </div>
+        </div>
+        <svg className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </Link>
+    </div>
+  );
+}
+
 /* ── Domain colors ─────────────────────────────────────────────── */
 
 const DOMAIN_COLORS: Record<string, string> = {
@@ -939,6 +1000,9 @@ export function ConnectorsClient({
         </div>
         <WritebackRulesPanel organizationId={organizationId} userRole={userRole} />
       </div>
+
+      {/* ── Write-back Approvals queue link ─────────────────────── */}
+      <ApprovalsCallout userRole={userRole} />
 
       {/* GitHub Setup Modal — token + branch selection + data lookback */}
       <GitHubSetupModal
