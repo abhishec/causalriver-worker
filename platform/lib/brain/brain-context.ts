@@ -49,6 +49,7 @@ export async function getBrainContext(
       pendingJobsRow,
       lastJobRow,
       orchestrationPatternsRow,
+      repoMapRow,
     ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
@@ -107,6 +108,14 @@ export async function getBrainContext(
         .like("domain", "orchestration.%")
         .order("importance", { ascending: false })
         .limit(5),
+      // Layer 7: Repo Map — PageRank symbol map of codebase (Aider pattern)
+      supabase
+        .from("ai_memory")
+        .select("content, metadata")
+        .eq("organization_id", orgId)
+        .eq("memory_type", "knowledge")
+        .eq("domain", "code.repo_map")
+        .maybeSingle(),
     ]);
 
     // Extract values safely
@@ -159,6 +168,12 @@ export async function getBrainContext(
       )
       .filter((s: string) => s.length > 0)
       .slice(0, 3);
+
+    // Layer 7: Repo Map — codebase symbol graph (Aider pattern, PageRank)
+    const repoMapContent: string | null =
+      repoMapRow.status === "fulfilled" && repoMapRow.value.data
+        ? String((repoMapRow.value.data as { content: string; metadata: unknown }).content ?? "")
+        : null;
 
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
@@ -222,6 +237,7 @@ export async function getBrainContext(
       recentDocTitles,
       docChunkSnippets,
       orchestrationPatterns,
+      repoMapContent,
     });
 
     const result: BrainContext = {
@@ -266,7 +282,7 @@ export async function getBrainContext(
 }
 
 function buildContextSummary(
-  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[]; orchestrationPatterns?: string[] }
+  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[]; orchestrationPatterns?: string[]; repoMapContent?: string | null }
 ): string {
   const parts: string[] = [];
 
@@ -313,6 +329,11 @@ function buildContextSummary(
   // Layer 6: Orchestration Intelligence — past routing decisions for self-teaching
   if (ctx.orchestrationPatterns && ctx.orchestrationPatterns.length > 0) {
     parts.push(`## Orchestration Intelligence (from past decisions):\n${ctx.orchestrationPatterns.map(p => `- ${p}`).join('\n')}`);
+  }
+
+  // Layer 7: Repo Map — codebase symbol graph (Aider pattern)
+  if (ctx.repoMapContent && ctx.repoMapContent.length > 0) {
+    parts.push(`## Codebase Repo Map (top symbols by PageRank):\n${ctx.repoMapContent}`);
   }
 
   // Layer 1: Context Engine — relevant document knowledge with chunk content
