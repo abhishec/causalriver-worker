@@ -100,6 +100,8 @@ const nextConfig: NextConfig = {
     'tree-sitter-java',
     'tree-sitter-python',
     'tree-sitter-scala',
+    // pdf-parse uses native binaries and must not be bundled by webpack/turbopack
+    'pdf-parse',
   ],
   // Turbopack rule equivalent for .node files (used in `next dev --turbopack`).
   // Without this, Next.js warns "Webpack is configured while Turbopack is not".
