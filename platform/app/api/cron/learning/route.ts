@@ -23,6 +23,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { applyGroundTruthSignals } from "@/lib/brain/ground-truth-validator";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -77,6 +78,8 @@ export async function GET(request: NextRequest) {
             organizationId: org.id,
           });
           const cycleResult = await engine.runLearningCycle();
+          // Fire-and-forget: apply objective ground-truth RL signals from connector outcomes
+          void applyGroundTruthSignals(service, org.id);
           results.push({
             workerId: `org_${org.id}`,
             workerName: `${org.name} (org-level)`,
@@ -110,6 +113,8 @@ export async function GET(request: NextRequest) {
           organizationId: org.id,
         });
         const cycleResult = await engine.runLearningCycle();
+        // Fire-and-forget: apply objective ground-truth RL signals from connector outcomes
+        void applyGroundTruthSignals(service, org.id);
         const orgDurationMs = Date.now() - orgStart;
         for (const worker of workers) {
           results.push({
