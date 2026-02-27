@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { getConnectorTokenWithId, markConnectorError } from "@/lib/connectors/get-connector-token";
 import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = 'force-dynamic';
 
@@ -162,6 +163,24 @@ export async function POST(request: Request) {
     };
     const jqlLookback = lookbackMap[effectiveLookback] ?? "-90d";
 
+    // ── Fix 1: Incremental sync cursor ────────────────────────────────────────
+    // Read last_synced_at from connector config. When present, only fetch items
+    // updated since that timestamp — avoids re-processing all history every run.
+    const lastSyncedAt = (connector.config as Record<string, any>)?.last_synced_at as string | undefined;
+    const syncStartTime = new Date().toISOString();
+
+    // Build incremental JQL clause if we have a prior sync timestamp.
+    // Format: updated >= "YYYY-MM-DDTHH:MM" (Jira JQL format, no seconds)
+    const incrementalJqlClause = lastSyncedAt
+      ? ` AND updated >= "${lastSyncedAt.slice(0, 16).replace("T", " ")}"`
+      : "";
+
+    if (lastSyncedAt) {
+      logger.warn(`[Jira sync] Incremental sync from ${lastSyncedAt} — only fetching updated items`);
+    } else {
+      logger.warn(`[Jira sync] Full sync (no last_synced_at cursor found)`);
+    }
+
     // 3. Update status to syncing
     await service
       .from("org_connectors")
@@ -211,7 +230,7 @@ export async function POST(request: Request) {
       // Uses /rest/agile/1.0/board/{boardId}/issue which returns the board's backlog + active sprint.
       for (const board of boardSources) {
         try {
-          logger.info(`[Jira sync] Fetching board ${board.externalId} issues via Agile API...`);
+          logger.warn(`[Jira sync] Fetching board ${board.externalId} issues via Agile API...`);
 
           // Fetch board issues — paginate to get all (Agile API max 50 per page)
           let startAt = 0;
@@ -238,20 +257,56 @@ export async function POST(request: Request) {
             });
           }
 
-          logger.info(`[Jira sync] Board ${board.externalId}: ${boardIssues.length} issues`);
+          // Incremental filter: only keep issues updated since last sync
+          if (lastSyncedAt) {
+            const cutoff = new Date(lastSyncedAt).getTime();
+            boardIssues = boardIssues.filter((issue: any) => {
+              const updatedAt = issue.fields?.updated;
+              return !updatedAt || new Date(updatedAt).getTime() >= cutoff;
+            });
+          }
+
+          logger.warn(`[Jira sync] Board ${board.externalId}: ${boardIssues.length} issues`);
 
           const signals = boardIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId, board.projectKey));
           for (const i of boardIssues) syncedIssueKeys.add(i.key);
 
           if (signals.length > 0) {
-            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
-            if (insertErr) errors.push(`board-${board.externalId}: ${insertErr.message}`);
+            // Fix 2: UPSERT with onConflict — prevents re-inserting same issue between syncs
+            const { error: upsertErr } = await service
+              .from('cross_domain_signals')
+              .upsert(signals, {
+                onConflict: 'organization_id,entity_type,entity_id',
+                ignoreDuplicates: false,
+              });
+            if (upsertErr) errors.push(`board-${board.externalId}: ${upsertErr.message}`);
             else signalsGenerated += signals.length;
           }
           recordsProcessed += boardIssues.length;
 
           // Cross-link board issues to GitHub PRs
           await linkIssuesToGitHub(service, workspaceId, boardIssues);
+
+          // Fix 4: Wire document embedding for each board issue
+          for (const issue of boardIssues) {
+            const fields = issue.fields || {};
+            const commentExcerpts = extractCommentExcerpts(fields.comment) ?? [];
+            const content = [
+              fields.summary,
+              typeof fields.description === 'string' ? fields.description : JSON.stringify(fields.description ?? ''),
+              ...commentExcerpts,
+            ].filter(Boolean).join("\n");
+
+            void ingestDocument(service, {
+              organizationId: workspaceId,
+              documentTitle: `${issue.key}: ${fields.summary ?? ''}`,
+              content,
+              sourceType: "text",
+              sourceUrl: siteUrl ? `${siteUrl}/browse/${issue.key}` : undefined,
+              documentId: issue.key,
+              metadata: { project_key: board.projectKey ?? fields.project?.key },
+            }).catch((e: Error) => logger.warn("[Jira sync] Board issue doc ingest failed", { error: e.message }));
+          }
         } catch (boardErr: any) {
           logger.warn(`[Jira sync] Board ${board.externalId} Agile API failed, will fall back to project sync: ${boardErr.message}`);
           errors.push(`board-${board.externalId}: ${boardErr.message}`);
@@ -264,7 +319,7 @@ export async function POST(request: Request) {
       for (const dash of dashboardSources) {
         try {
           const dashRes = await jiraFetch(nonNullCreds, siteUrl, `/rest/api/3/dashboard/${dash.externalId}`);
-          logger.info(`[Jira sync] Dashboard "${dashRes?.name || dash.externalId}" validated ✓`);
+          logger.warn(`[Jira sync] Dashboard "${dashRes?.name || dash.externalId}" validated ✓`);
         } catch (dashErr: any) {
           logger.warn(`[Jira sync] Dashboard ${dash.externalId} validation failed: ${dashErr.message}`);
           // Non-fatal — dashboard access isn't required for project-level sync
@@ -289,7 +344,7 @@ export async function POST(request: Request) {
             // Query plan-scoped issues via JQL — cross-project with fixVersion filter
             const projectClause = planProjectKeys.map((k) => `"${k}"`).join(', ');
             const jql = encodeURIComponent(
-              `project IN (${projectClause}) AND fixVersion = "${planVersion}" AND updated >= ${jqlLookback} ORDER BY updated DESC`
+              `project IN (${projectClause}) AND fixVersion = "${planVersion}"${incrementalJqlClause} ORDER BY updated DESC`
             );
             const planRes = await jiraFetch(
               nonNullCreds, siteUrl,
@@ -300,21 +355,48 @@ export async function POST(request: Request) {
             );
 
             if (planIssues.length > 0) {
-              logger.info(`[Jira sync] Plan ${plan.externalId} (v${planVersion}): ${planIssues.length} new issues via JQL`);
+              logger.warn(`[Jira sync] Plan ${plan.externalId} (v${planVersion}): ${planIssues.length} new issues via JQL`);
               const signals = planIssues.map((issue: any) => transformIssueToSignal(issue, workspaceId));
               for (const i of planIssues) syncedIssueKeys.add(i.key);
 
-              const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
-              if (insertErr) errors.push(`plan-${plan.externalId}: ${insertErr.message}`);
+              // Fix 2: UPSERT with onConflict
+              const { error: upsertErr } = await service
+                .from('cross_domain_signals')
+                .upsert(signals, {
+                  onConflict: 'organization_id,entity_type,entity_id',
+                  ignoreDuplicates: false,
+                });
+              if (upsertErr) errors.push(`plan-${plan.externalId}: ${upsertErr.message}`);
               else signalsGenerated += signals.length;
               recordsProcessed += planIssues.length;
 
               await linkIssuesToGitHub(service, workspaceId, planIssues);
+
+              // Fix 4: Wire document embedding for each plan issue
+              for (const issue of planIssues) {
+                const fields = issue.fields || {};
+                const commentExcerpts = extractCommentExcerpts(fields.comment) ?? [];
+                const content = [
+                  fields.summary,
+                  typeof fields.description === 'string' ? fields.description : JSON.stringify(fields.description ?? ''),
+                  ...commentExcerpts,
+                ].filter(Boolean).join("\n");
+
+                void ingestDocument(service, {
+                  organizationId: workspaceId,
+                  documentTitle: `${issue.key}: ${fields.summary ?? ''}`,
+                  content,
+                  sourceType: "text",
+                  sourceUrl: siteUrl ? `${siteUrl}/browse/${issue.key}` : undefined,
+                  documentId: issue.key,
+                  metadata: { project_key: fields.project?.key },
+                }).catch((e: Error) => logger.warn("[Jira sync] Plan issue doc ingest failed", { error: e.message }));
+              }
             } else {
-              logger.info(`[Jira sync] Plan ${plan.externalId}: 0 new issues (all covered by board/project sync)`);
+              logger.warn(`[Jira sync] Plan ${plan.externalId}: 0 new issues (all covered by board/project sync)`);
             }
           } else {
-            logger.info(`[Jira sync] Plan ${plan.externalId}: No version/project context — will be covered by project-level sync`);
+            logger.warn(`[Jira sync] Plan ${plan.externalId}: No version/project context — will be covered by project-level sync`);
           }
         } catch (planErr: any) {
           logger.warn(`[Jira sync] Plan ${plan.externalId} sync failed: ${planErr.message} — falling back to project-level sync`);
@@ -337,8 +419,9 @@ export async function POST(request: Request) {
           const fixVersionClause = effectiveFixVersion
             ? ` AND fixVersion = "${effectiveFixVersion}"`
             : "";
+          // Fix 1: Apply incremental JQL clause — only fetch issues updated since last sync
           const jql = encodeURIComponent(
-            `project = "${project.key}"${fixVersionClause} AND updated >= ${jqlLookback} ORDER BY updated DESC`
+            `project = "${project.key}"${fixVersionClause}${incrementalJqlClause} AND updated >= ${jqlLookback} ORDER BY updated DESC`
           );
           const issuesRes = await jiraFetch(
             nonNullCreds, siteUrl,
@@ -356,8 +439,14 @@ export async function POST(request: Request) {
           for (const i of issues) syncedIssueKeys.add(i.key);
 
           if (signals.length > 0) {
-            const { error: insertErr } = await service.from('cross_domain_signals').insert(signals);
-            if (insertErr) errors.push(`${project.key}: ${insertErr.message}`);
+            // Fix 2: UPSERT with onConflict — prevents re-inserting same issue between syncs
+            const { error: upsertErr } = await service
+              .from('cross_domain_signals')
+              .upsert(signals, {
+                onConflict: 'organization_id,entity_type,entity_id',
+                ignoreDuplicates: false,
+              });
+            if (upsertErr) errors.push(`${project.key}: ${upsertErr.message}`);
             else signalsGenerated += signals.length;
           }
 
@@ -365,6 +454,27 @@ export async function POST(request: Request) {
 
           // Cross-link to GitHub
           await linkIssuesToGitHub(service, workspaceId, issues);
+
+          // Fix 4: Wire document embedding for each project issue
+          for (const issue of issues) {
+            const fields = issue.fields || {};
+            const commentExcerpts = extractCommentExcerpts(fields.comment) ?? [];
+            const content = [
+              fields.summary,
+              typeof fields.description === 'string' ? fields.description : JSON.stringify(fields.description ?? ''),
+              ...commentExcerpts,
+            ].filter(Boolean).join("\n");
+
+            void ingestDocument(service, {
+              organizationId: workspaceId,
+              documentTitle: `${issue.key}: ${fields.summary ?? ''}`,
+              content,
+              sourceType: "text",
+              sourceUrl: siteUrl ? `${siteUrl}/browse/${issue.key}` : undefined,
+              documentId: issue.key,
+              metadata: { project_key: project.key },
+            }).catch((e: Error) => logger.warn("[Jira sync] Project issue doc ingest failed", { error: e.message }));
+          }
         } catch (projectErr: any) {
           errors.push(`${project.key}: ${projectErr.message}`);
         }
@@ -390,7 +500,7 @@ export async function POST(request: Request) {
       errors.push(`Jira API: ${fetchErr.message}`);
     }
 
-    logger.info(`[Jira sync] Total: ${signalsGenerated} signals from ${recordsProcessed} issues (${syncedIssueKeys.size} unique). Sources: ${boardSources.length} boards, ${dashboardSources.length} dashboards, ${planSources.length} plans + project catch-all.`);
+    logger.warn(`[Jira sync] Total: ${signalsGenerated} signals from ${recordsProcessed} issues (${syncedIssueKeys.size} unique). Sources: ${boardSources.length} boards, ${dashboardSources.length} dashboards, ${planSources.length} plans + project catch-all.`);
 
     const duration_ms = Date.now() - startMs;
 
@@ -440,13 +550,14 @@ export async function POST(request: Request) {
           predictionsExpired: result.predictionsExpired,
           averageReward: result.banditRewardsGiven ?? 0,
         };
-        logger.info(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
+        logger.warn(`[Jira sync] Oracle: ${result.predictionsVerified} verified, ${result.predictionsExpired} expired`);
       }
     } catch (oracleErr: any) {
       logger.warn("[Jira sync] Oracle error (non-fatal):", oracleErr.message);
     }
 
     // 6. Update connector with results (accumulate signals_count)
+    // Fix 1: Persist last_synced_at cursor for incremental sync on next run
     const previousSignalsCount = (connector as any).signals_count || 0;
     await service
       .from("org_connectors")
@@ -456,6 +567,7 @@ export async function POST(request: Request) {
         error_message: errors.length > 0 ? errors.join("; ") : null,
         config: {
           ...connector.config,
+          last_synced_at: syncStartTime,
           ingestion_progress: {
             step: "signals_complete",
             message: `Synced ${signalsGenerated} signals from ${recordsProcessed} Jira issues`,
@@ -486,10 +598,30 @@ export async function POST(request: Request) {
 }
 
 /**
+ * Fix 3: Atlassian fetch with exponential backoff on 429 rate limit responses.
+ * Retries up to maxRetries times, honouring Retry-After header when present.
+ */
+async function atlassianFetch(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, options);
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get("Retry-After") ?? "5", 10);
+      const delay = Math.max(retryAfter * 1000, Math.pow(2, attempt) * 1000);
+      logger.warn(`[Jira sync] Rate limited (429) — retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+    return res;
+  }
+  throw new Error("Atlassian API rate limit exceeded after retries");
+}
+
+/**
  * Jira API fetch helper — supports both OAuth (Bearer) and Basic Auth (email:apiToken).
  * Basic Auth is used for design-partner connections made via the admin /connect route.
  *
  * Throws JiraAuthError on 401/403 so callers can mark the connector as errored.
+ * Uses atlassianFetch for rate limit backoff.
  */
 async function jiraFetch(
   credentials: {
@@ -513,7 +645,7 @@ async function jiraFetch(
       ? `Basic ${Buffer.from(`${credentials.email}:${credentials.api_token}`).toString("base64")}`
       : `Bearer ${credentials.access_token}`;
 
-  const response = await fetch(`${baseUrl}${endpoint}`, {
+  const response = await atlassianFetch(`${baseUrl}${endpoint}`, {
     headers: {
       Authorization: authHeader,
       Accept: "application/json",
@@ -811,5 +943,5 @@ async function deriveRealJiraInsights(supabase: any, organizationId: string) {
     created_at: new Date().toISOString(),
   }, { onConflict: "organization_id,memory_type,domain" });
 
-  logger.info(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId} — release readiness: ${completionRate}% (${riskLevel} risk, ${blockers.length} blockers)`);
+  logger.warn(`[Brain] Derived real Jira insights from ${signals.length} signals for org ${organizationId} — release readiness: ${completionRate}% (${riskLevel} risk, ${blockers.length} blockers)`);
 }

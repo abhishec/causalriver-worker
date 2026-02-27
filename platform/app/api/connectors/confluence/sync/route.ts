@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +82,24 @@ export async function POST(request: Request) {
     const { spaceKeys, pageLimit = 100 } = body;
     const effectivePageLimit = Math.min(pageLimit, 200); // Hard cap at 200 pages per sync
 
+    // ── Fix 1: Incremental sync cursor ────────────────────────────────────────
+    // Read last_synced_at from connector config. When present, only fetch pages
+    // modified since that timestamp using Confluence CQL lastModified filter.
+    const lastSyncedAt = (config as Record<string, any>)?.last_synced_at as string | undefined;
+    const syncStartTime = new Date().toISOString();
+
+    // Build CQL lastModified clause for incremental sync.
+    // Confluence CQL format: lastModified > "2026-01-01 00:00"
+    const cqlLastModified = lastSyncedAt
+      ? ` AND lastModified > "${lastSyncedAt.slice(0, 16).replace("T", " ")}"`
+      : "";
+
+    if (lastSyncedAt) {
+      logger.warn(`[Confluence sync] Incremental sync from ${lastSyncedAt} — only fetching pages modified since`);
+    } else {
+      logger.warn(`[Confluence sync] Full sync (no last_synced_at cursor found)`);
+    }
+
     // 3. Mark syncing in progress
     await service
       .from("org_connectors")
@@ -124,6 +143,8 @@ export async function POST(request: Request) {
       logger.warn(`[Confluence sync] No spaces found for org ${workspaceId} (cloudId: ${cloudId})`);
     }
 
+    const siteUrl = config?.site_url as string | undefined;
+
     // 5. For each space, fetch pages (up to effectivePageLimit total)
     const jiraKeyRegex = /\b([A-Z][A-Z0-9]+-\d+)\b/g;
     let totalPagesCap = effectivePageLimit;
@@ -132,7 +153,8 @@ export async function POST(request: Request) {
       if (totalPagesCap <= 0) break;
 
       try {
-        // Fetch pages in this space (paginate, but cap at remaining budget)
+        // Fetch pages in this space using CQL for incremental support.
+        // CQL allows lastModified filter which the simple space content endpoint doesn't support.
         let startAt = 0;
         const pageSize = Math.min(25, totalPagesCap);
         let hasMore = true;
@@ -144,11 +166,23 @@ export async function POST(request: Request) {
         }> = [];
 
         while (hasMore && totalPagesCap > 0) {
-          const pagesData = await confluenceFetch(
-            credentials.access_token,
-            cloudId,
-            `/wiki/rest/api/space/${space.key}/content/page?limit=${pageSize}&start=${startAt}&expand=version`
-          );
+          // Use CQL search endpoint when we have an incremental filter, otherwise use
+          // the simpler space content endpoint (same as before for full syncs).
+          let pagesData: Record<string, unknown>;
+          if (cqlLastModified) {
+            const cql = encodeURIComponent(`type = "page" AND space = "${space.key}"${cqlLastModified} ORDER BY lastModified DESC`);
+            pagesData = await confluenceFetch(
+              credentials.access_token,
+              cloudId,
+              `/wiki/rest/api/content/search?cql=${cql}&limit=${pageSize}&start=${startAt}&expand=version`
+            );
+          } else {
+            pagesData = await confluenceFetch(
+              credentials.access_token,
+              cloudId,
+              `/wiki/rest/api/space/${space.key}/content/page?limit=${pageSize}&start=${startAt}&expand=version`
+            );
+          }
 
           const pagesTyped = pagesData as {
             results?: Array<{ id: string; title: string; _links: { webui: string }; version: { when: string } }>;
@@ -163,7 +197,7 @@ export async function POST(request: Request) {
           hasMore = batch.length === pageSize && (pagesTyped.size ?? 0) > startAt;
         }
 
-        logger.info(`[Confluence sync] Space ${space.key}: ${spacePages.length} pages`);
+        logger.warn(`[Confluence sync] Space ${space.key}: ${spacePages.length} pages`);
 
         // 6. For each page, fetch body and extract signals
         for (const page of spacePages) {
@@ -192,12 +226,12 @@ export async function POST(request: Request) {
             // Build content excerpt (first 600 chars of clean text)
             const contentExcerpt = cleanText.slice(0, 600).trim();
 
-            const siteUrl = config?.site_url as string | undefined;
             const pageUrl = siteUrl
               ? `${siteUrl}/wiki${page._links?.webui ?? ''}`
               : `https://confluence.atlassian.com/wiki${page._links?.webui ?? ''}`;
 
             // 7. Insert as connector_signal via cross_domain_signals
+            // Fix 2: UPSERT with onConflict — prevents re-inserting same page between syncs
             const signal = {
               organization_id: workspaceId,
               source_domain: 'knowledge.confluence',
@@ -221,13 +255,15 @@ export async function POST(request: Request) {
               },
             };
 
-            const { error: insertErr } = await service
+            const { error: upsertErr } = await service
               .from('cross_domain_signals')
-              .insert(signal);
+              .upsert(signal, {
+                onConflict: 'organization_id,entity_type,entity_id',
+                ignoreDuplicates: false,
+              });
 
-            if (insertErr) {
-              // Upsert on conflict (page already synced)
-              errors.push(`page-${page.id}: ${insertErr.message}`);
+            if (upsertErr) {
+              errors.push(`page-${page.id}: ${upsertErr.message}`);
             } else {
               signalsGenerated++;
             }
@@ -239,6 +275,17 @@ export async function POST(request: Request) {
               await insertJiraCrossRefs(service, workspaceId, page.id, page.title, jiraKeys);
               jiraCrossRefs += jiraKeys.length;
             }
+
+            // Fix 4: Wire document embedding — ingest page text into vector search
+            void ingestDocument(service, {
+              organizationId: workspaceId,
+              documentTitle: page.title,
+              content: cleanText,
+              sourceType: "confluence",
+              sourceUrl: pageUrl,
+              documentId: page.id,
+              metadata: { space_key: space.key },
+            }).catch((e: Error) => logger.warn("[Confluence sync] Page doc ingest failed", { error: e.message }));
           } catch (pageErr: unknown) {
             const msg = pageErr instanceof Error ? pageErr.message : String(pageErr);
             logger.warn(`[Confluence sync] Page ${page.id} fetch failed: ${msg}`);
@@ -254,11 +301,12 @@ export async function POST(request: Request) {
 
     const duration_ms = Date.now() - startMs;
 
-    logger.info(
+    logger.warn(
       `[Confluence sync] Complete: ${signalsGenerated} signals from ${pagesProcessed} pages, ${jiraCrossRefs} Jira cross-refs, ${errors.length} errors`
     );
 
     // 9. Update connector with results
+    // Fix 1: Persist last_synced_at cursor for incremental sync on next run
     const previousSignalsCount = connector.signals_count ?? 0;
     await service
       .from("org_connectors")
@@ -268,6 +316,7 @@ export async function POST(request: Request) {
         error_message: errors.length > 0 ? errors.slice(0, 5).join("; ") : null,
         config: {
           ...config,
+          last_synced_at: syncStartTime,
           ingestion_progress: {
             step: "signals_complete",
             message: `Synced ${signalsGenerated} signals from ${pagesProcessed} Confluence pages`,
@@ -300,7 +349,27 @@ export async function POST(request: Request) {
 }
 
 /**
+ * Fix 3: Atlassian fetch with exponential backoff on 429 rate limit responses.
+ * Retries up to maxRetries times, honouring Retry-After header when present.
+ */
+async function atlassianFetch(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const res = await fetch(url, options);
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get("Retry-After") ?? "5", 10);
+      const delay = Math.max(retryAfter * 1000, Math.pow(2, attempt) * 1000);
+      logger.warn(`[Confluence sync] Rate limited (429) — retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+    return res;
+  }
+  throw new Error("Atlassian API rate limit exceeded after retries");
+}
+
+/**
  * Confluence REST API fetch helper — uses Bearer token from OAuth.
+ * Uses atlassianFetch for rate limit backoff.
  */
 async function confluenceFetch(
   accessToken: string,
@@ -310,7 +379,7 @@ async function confluenceFetch(
   const baseUrl = `https://api.atlassian.com/ex/confluence/${cloudId}`;
   const url = `${baseUrl}${endpoint}`;
 
-  const response = await fetch(url, {
+  const response = await atlassianFetch(url, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
       Accept: 'application/json',
