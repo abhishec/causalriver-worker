@@ -137,7 +137,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <h3 className="text-sm font-medium text-foreground">
                 {this.props.section
                   ? `${this.props.section} encountered an error`
-                  : "Something went wrong"}
+                  : "Failed to load this section"}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {this.state.error?.message || "An unexpected error occurred"}
