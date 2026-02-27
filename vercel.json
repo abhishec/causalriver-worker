@@ -24,6 +24,14 @@
     {
       "path": "/api/cron/evolution",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/autonomous-monitor",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/rlvr",
+      "schedule": "0 3 * * *"
     }
   ]
 }
