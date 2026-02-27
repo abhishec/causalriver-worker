@@ -255,7 +255,7 @@ export function CopilotOverlay() {
         }
         return;
       }
-      setResponse("Something went wrong — please try again");
+      setResponse("Failed to get a response — check your connection and try again");
     } finally {
       clearTimeout(timeout);
       setIsLoading(false);

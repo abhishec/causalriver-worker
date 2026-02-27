@@ -419,7 +419,7 @@ function AddRuleForm({ onCreated, onCancel }: AddRuleFormProps) {
       const created: WritebackRule = await res.json();
       onCreated(created);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Failed to save rule — check your connection and try again");
     } finally {
       setSaving(false);
     }
