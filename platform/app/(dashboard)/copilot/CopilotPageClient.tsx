@@ -748,7 +748,107 @@ export default function CopilotPageInner() {
   }, []);
 
   // Service artifacts for the current service
-  const serviceArtifacts = artifacts.filter((a) => a.service === activeService);
+  const serviceArtifacts = useMemo(
+    () => artifacts.filter((a) => a.service === activeService),
+    [artifacts, activeService]
+  );
+
+  // ── Memoised JSX-level handlers (prevent child re-renders) ────────────────
+
+  // CopilotChat handlers
+  const handleArtifactPaneOpen = useCallback(() => {
+    setArtifactPaneOpen(true);
+    setBrainLoading(true);
+  }, []);
+
+  const handleOpenArtifact = useCallback((id: string) => {
+    setActiveArtifactId(id);
+    setArtifactPaneOpen(true);
+  }, []);
+
+  const handleCreateAgent = useCallback(() => setShowComposer(true), []);
+  const handleCloseComposer = useCallback(() => setShowComposer(false), []);
+
+  // ArtifactPane handlers
+  const handleArtifactPaneClose = useCallback(() => setArtifactPaneOpen(false), []);
+
+  const handleJumpToMessage = useCallback((messageIndex: number) => {
+    window.dispatchEvent(new CustomEvent("copilot-jump-to-message", { detail: { messageIndex } }));
+  }, []);
+
+  const handleSaveAsCommand = useCallback((artifact: UnifiedArtifact) => {
+    setSaveDialogArtifact(artifact);
+  }, []);
+
+  // AgentComposerPanel handlers
+  const handleComposerArtifact = useCallback((artifact: {
+    id: string; type: string; title: string; content: string; rawData?: unknown; service?: string;
+  }) => {
+    handleArtifact({
+      id: artifact.id,
+      type: artifact.type as CopilotArtifact["type"],
+      title: artifact.title,
+      content: artifact.content,
+      createdAt: Date.now(),
+    });
+  }, [handleArtifact]);
+
+  const handleComposerSaved = useCallback(() => {
+    refetchTemplates();
+    refetchWorkflows();
+  }, [refetchTemplates, refetchWorkflows]);
+
+  const handleComposerSaveAsCommand = useCallback((compositionData: {
+    name: string; persona: string; tools: string[]; executionPlan: string[]; prompt: string;
+  }) => {
+    setCompositionForSave(compositionData);
+    setShowComposer(false);
+  }, []);
+
+  // SaveTemplateDialog handlers (from artifact)
+  const handleSaveDialogClose = useCallback(() => setSaveDialogArtifact(null), []);
+
+  const handleSaveDialogSaved = useCallback(() => {
+    setSaveDialogArtifact(null);
+    refetchTemplates();
+  }, [refetchTemplates]);
+
+  // SaveTemplateDialog handlers (from composer)
+  const handleCompositionDialogClose = useCallback(() => setCompositionForSave(null), []);
+
+  const handleCompositionDialogSaved = useCallback(() => {
+    setCompositionForSave(null);
+    refetchTemplates();
+  }, [refetchTemplates]);
+
+  // Brain quality warning dismiss
+  const handleDismissQualityWarning = useCallback(() => setBrainQualityWarningDismissed(true), []);
+
+  // Save-error toast dismiss
+  const handleDismissSaveErrorToast = useCallback(() => setSaveErrorToast(null), []);
+
+  // extraParams object for CopilotChat — stable reference prevents prop-diffing churn
+  const chatExtraParams = useMemo(
+    () => ({
+      workspaceId: currentWorkspace?.id,
+      workerId: workerId || undefined,
+      workerName: workerName || undefined,
+      ...(compressedSummary ? { compressedSummary } : {}),
+    }),
+    [currentWorkspace?.id, workerId, workerName, compressedSummary]
+  );
+
+  // persona prop object for CopilotChat — stable reference
+  const chatPersona = useMemo(
+    () => ({ name: persona.name, description: persona.description, color: persona.color }),
+    [persona.name, persona.description, persona.color]
+  );
+
+  // examplePrompts is a static constant lookup — stable reference via useMemo
+  const chatExamplePrompts = useMemo(
+    () => EXAMPLE_PROMPTS[activeService],
+    [activeService]
+  );
 
   // ── Workspace guard: prevent 500 errors when no workspace is selected ──
   // Use isMounted to ensure SSR and client first-render both show the loading state,
@@ -907,7 +1007,7 @@ export default function CopilotPageInner() {
                 <Link href="/settings?tab=brain" className="underline hover:no-underline">Adjust threshold</Link>
               </span>
               <button
-                onClick={() => setBrainQualityWarningDismissed(true)}
+                onClick={handleDismissQualityWarning}
                 className="shrink-0 text-warning/60 hover:text-warning transition-colors"
                 aria-label="Dismiss warning"
               >
@@ -936,28 +1036,21 @@ export default function CopilotPageInner() {
               key={currentWorkspace?.id}
               ref={chatRef}
               endpoint="/api/copilot/chat"
-              extraParams={{ workspaceId: currentWorkspace?.id, workerId: workerId || undefined, workerName: workerName || undefined, ...(compressedSummary ? { compressedSummary } : {}) }}
+              extraParams={chatExtraParams}
               activeService={activeService}
-              persona={{
-                name: persona.name,
-                description: persona.description,
-                color: persona.color,
-              }}
-              examplePrompts={EXAMPLE_PROMPTS[activeService]}
+              persona={chatPersona}
+              examplePrompts={chatExamplePrompts}
               onArtifact={handleArtifact}
               onBrainMeta={handleBrainMeta}
               onDomainResult={handleDomainResult}
               onServiceChange={handleServiceChange}
-              onArtifactPaneOpen={() => { setArtifactPaneOpen(true); setBrainLoading(true); }}
+              onArtifactPaneOpen={handleArtifactPaneOpen}
               onSave={handleSave}
               messageArtifacts={messageArtifactMap}
-              onOpenArtifact={(id) => {
-                setActiveArtifactId(id);
-                setArtifactPaneOpen(true);
-              }}
+              onOpenArtifact={handleOpenArtifact}
               customCommands={mergedCustomCommands}
               customGatheringMap={mergedGatheringMap}
-              onCreateAgent={() => setShowComposer(true)}
+              onCreateAgent={handleCreateAgent}
             />
           </ErrorBoundary>
           {/* ── Context Monitor: token usage + compress ────────────────── */}
@@ -979,11 +1072,9 @@ export default function CopilotPageInner() {
             activeArtifactId={activeArtifactId}
             onSelectArtifact={setActiveArtifactId}
             onPinArtifact={handlePinArtifact}
-            onClose={() => setArtifactPaneOpen(false)}
-            onJumpToMessage={(messageIndex) => {
-              window.dispatchEvent(new CustomEvent("copilot-jump-to-message", { detail: { messageIndex } }));
-            }}
-            onSaveAsCommand={(artifact) => setSaveDialogArtifact(artifact)}
+            onClose={handleArtifactPaneClose}
+            onJumpToMessage={handleJumpToMessage}
+            onSaveAsCommand={handleSaveAsCommand}
           />
         ) : (
           /* Empty artifact state — matches HTML .art-col > .art-empty */
@@ -1033,21 +1124,10 @@ export default function CopilotPageInner() {
       {showComposer && (
         <AgentComposerPanel
           workspaceId={currentWorkspace?.id}
-          onClose={() => setShowComposer(false)}
-          onArtifact={(artifact) => {
-            handleArtifact({
-              id: artifact.id,
-              type: artifact.type as any,
-              title: artifact.title,
-              content: artifact.content,
-              createdAt: Date.now(),
-            });
-          }}
-          onSaved={() => { refetchTemplates(); refetchWorkflows(); }}
-          onSaveAsCommand={(compositionData) => {
-            setCompositionForSave(compositionData);
-            setShowComposer(false);
-          }}
+          onClose={handleCloseComposer}
+          onArtifact={handleComposerArtifact}
+          onSaved={handleComposerSaved}
+          onSaveAsCommand={handleComposerSaveAsCommand}
         />
       )}
 
@@ -1063,11 +1143,8 @@ export default function CopilotPageInner() {
             rawData: saveDialogArtifact.rawData,
           }}
           workspaceId={currentWorkspace.id}
-          onClose={() => setSaveDialogArtifact(null)}
-          onSaved={() => {
-            setSaveDialogArtifact(null);
-            refetchTemplates();
-          }}
+          onClose={handleSaveDialogClose}
+          onSaved={handleSaveDialogSaved}
         />
       )}
 
@@ -1081,11 +1158,8 @@ export default function CopilotPageInner() {
           }}
           workspaceId={currentWorkspace.id}
           compositionData={compositionForSave}
-          onClose={() => setCompositionForSave(null)}
-          onSaved={() => {
-            setCompositionForSave(null);
-            refetchTemplates();
-          }}
+          onClose={handleCompositionDialogClose}
+          onSaved={handleCompositionDialogSaved}
         />
       )}
 
@@ -1097,7 +1171,7 @@ export default function CopilotPageInner() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
             <span className="text-xs text-destructive">{saveErrorToast}</span>
-            <button onClick={() => setSaveErrorToast(null)} className="ml-2 text-destructive/60 hover:text-destructive">
+            <button onClick={handleDismissSaveErrorToast} className="ml-2 text-destructive/60 hover:text-destructive">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
