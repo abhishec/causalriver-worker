@@ -150,21 +150,23 @@ function pickPolicyCheckEvent(
     )) {
       if (outboundEvents.has(rule.ruleId)) return rule.ruleId;
     }
-    // Canonical escalation event names — covers all 15 process templates
+    // Template-specific escalation events first (more specific than generic fallbacks)
+    // then canonical event names as fallbacks.
     const escalateMatch = firstMatch(
+      // Template-specific escalation events (checked first for correct routing)
+      "fraud_signals",            // insurance_claim (fraud detected → FRAUD_REVIEW)
+      "rm_missing",               // compliance_audit
+      "active_enterprise_customer", // ar_collections
+      "dependency_conflict",      // product_workflow
+      "unidentified_transaction", // financial_close
+      // Generic canonical escalation events
       "policy_fail",
       "escalate",
       "breach_confirmed",
       "compliance_conflict",
       "policy_violation",
       "security_conflict",
-      "cfo_review_required",
-      // Additional template-specific escalation events
-      "rm_missing",              // compliance_audit
-      "active_enterprise_customer", // ar_collections
-      "dependency_conflict",     // product_workflow
-      "unidentified_transaction", // financial_close
-      "fraud_signals"            // insurance_claim (fraud detected)
+      "cfo_review_required"
     );
     if (escalateMatch) return escalateMatch;
     // Last resort: any non-pass, non-approval-gate outbound event (template-safety net)
