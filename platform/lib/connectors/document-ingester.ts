@@ -236,12 +236,15 @@ export async function ingestDocument(
 }
 
 /**
- * Search document chunks — vector similarity first, tsvector fallback.
+ * Search document chunks — hybrid BM25+vector first, then vector-only, then tsvector.
  *
  * Priority:
- *   1. Vector similarity search via search_document_chunks RPC (semantic)
- *   2. Full-text tsvector search (lexical fallback when embeddings missing)
- *   3. Recency fetch (when query is empty — context priming)
+ *   1. Hybrid search via search_document_chunks_hybrid RPC (BM25 + vector via RRF)
+ *      → Catches exact names (Alice Johnson, sprint-42) AND semantic matches
+ *   2. Vector-only search via search_document_chunks RPC (semantic fallback)
+ *      → Used when hybrid RPC is unavailable or returns empty
+ *   3. Full-text tsvector search (lexical fallback when embeddings missing)
+ *   4. Recency fetch (when query is empty — context priming)
  *
  * Called by getBrainContext() to include document knowledge in every LLM decision.
  */
@@ -267,41 +270,91 @@ export async function searchDocumentChunks(
     return data ?? [];
   }
 
-  // Non-empty query: try vector similarity search first
+  // Non-empty query: generate embedding once, reuse across all search tiers
+  let queryEmbeddingArr: number[] = new Array(1536).fill(0);
+  let embeddingReady = false;
   try {
-    const queryEmbeddingArr = await generateRealEmbedding(query);
-    const queryEmbedding = `[${queryEmbeddingArr.join(",")}]`;
-
-    const { data: vectorData, error: vectorError } = await supabase
-      .rpc("search_document_chunks", {
-        p_organization_id: organizationId,
-        query_embedding: queryEmbedding,
-        match_count: limit,
-      });
-
-    if (!vectorError && vectorData && vectorData.length > 0) {
-      logger.warn("[document-ingester] searchDocumentChunks: vector search returned results", {
-        count: vectorData.length,
-      });
-      return vectorData as Array<{ chunk_text: string; document_title: string | null; chunk_index: number; source_type: string }>;
-    }
-
-    if (vectorError) {
-      logger.warn("[document-ingester] Vector search failed, falling back to tsvector", {
-        error: vectorError.message,
-      });
-    } else {
-      // Vector search succeeded but returned 0 results — embeddings may not yet exist for this org.
-      // Fall through to tsvector below.
-      logger.warn("[document-ingester] Vector search returned 0 results — falling back to tsvector");
-    }
+    queryEmbeddingArr = await generateRealEmbedding(query);
+    embeddingReady = queryEmbeddingArr.some(v => v !== 0);
   } catch (embErr) {
-    logger.warn("[document-ingester] Embedding generation for query failed, falling back to tsvector", {
+    logger.warn("[document-ingester] Embedding generation failed, will use BM25/tsvector only", {
       error: embErr instanceof Error ? embErr.message : String(embErr),
     });
   }
 
-  // Fallback: PostgreSQL full-text search (always available — search_vector is GENERATED ALWAYS AS)
+  const queryEmbedding = `[${queryEmbeddingArr.join(",")}]`;
+
+  // ── Tier 1: Hybrid search (BM25 + vector via Reciprocal Rank Fusion) ──────
+  // Catches exact proper nouns, IDs, sprint names AND semantic matches.
+  // Falls through if RPC not available (before migration runs) or returns 0.
+  if (embeddingReady) {
+    try {
+      const { data: hybridData, error: hybridError } = await supabase
+        .rpc("search_document_chunks_hybrid", {
+          query_text: query,
+          query_embedding: queryEmbedding,
+          p_org_id: organizationId,
+          p_limit: limit,
+          vector_weight: 0.6,
+          bm25_weight: 0.4,
+        });
+
+      if (!hybridError && hybridData && hybridData.length > 0) {
+        logger.warn("[document-ingester] searchDocumentChunks: hybrid search returned results", {
+          count: hybridData.length,
+        });
+        return hybridData as Array<{ chunk_text: string; document_title: string | null; chunk_index: number; source_type: string }>;
+      }
+
+      if (hybridError) {
+        logger.warn("[document-ingester] Hybrid search failed, falling back to vector-only", {
+          error: hybridError.message,
+        });
+      } else {
+        logger.warn("[document-ingester] Hybrid search returned 0 results — falling back to vector-only");
+      }
+    } catch (hybridErr) {
+      logger.warn("[document-ingester] Hybrid search threw, falling back to vector-only", {
+        error: hybridErr instanceof Error ? hybridErr.message : String(hybridErr),
+      });
+    }
+  }
+
+  // ── Tier 2: Vector-only search (semantic similarity) ─────────────────────
+  // Used when hybrid returned empty or embedding was not ready for hybrid.
+  if (embeddingReady) {
+    try {
+      const { data: vectorData, error: vectorError } = await supabase
+        .rpc("search_document_chunks", {
+          p_organization_id: organizationId,
+          query_embedding: queryEmbedding,
+          match_count: limit,
+        });
+
+      if (!vectorError && vectorData && vectorData.length > 0) {
+        logger.warn("[document-ingester] searchDocumentChunks: vector-only search returned results", {
+          count: vectorData.length,
+        });
+        return vectorData as Array<{ chunk_text: string; document_title: string | null; chunk_index: number; source_type: string }>;
+      }
+
+      if (vectorError) {
+        logger.warn("[document-ingester] Vector search failed, falling back to tsvector", {
+          error: vectorError.message,
+        });
+      } else {
+        logger.warn("[document-ingester] Vector search returned 0 results — falling back to tsvector");
+      }
+    } catch (vecErr) {
+      logger.warn("[document-ingester] Vector search threw, falling back to tsvector", {
+        error: vecErr instanceof Error ? vecErr.message : String(vecErr),
+      });
+    }
+  }
+
+  // ── Tier 3: PostgreSQL full-text search (tsvector) ────────────────────────
+  // Always available — search_vector is GENERATED ALWAYS AS on document_chunks.
+  // Handles cases where embeddings haven't been generated yet.
   const { data, error } = await supabase
     .from("document_chunks")
     .select("chunk_text, document_title, chunk_index, source_type")
