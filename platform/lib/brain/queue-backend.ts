@@ -105,8 +105,8 @@ async function enqueueBullMQ(job: AgentJobPayload): Promise<string> {
 
   try {
     // Dynamic import — avoids bundling ioredis/bullmq when REDIS_URL is not set
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { Queue } = await import("bullmq" as any);
+    // @ts-expect-error bullmq is an optional peer dependency, installed only when REDIS_URL is set
+    const { Queue } = await import("bullmq");
     const { default: IORedis } = await import("ioredis");
 
     const connection = new IORedis(redisUrl, { maxRetriesPerRequest: null });
