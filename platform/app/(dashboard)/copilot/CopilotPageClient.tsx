@@ -603,6 +603,44 @@ export default function CopilotPageInner() {
     };
   }, []);
 
+  // ── Brain quality warning: show banner when brainIq/100 < threshold ──────
+  const [brainQualityBelowThreshold, setBrainQualityBelowThreshold] = useState(false);
+  const [brainQualityWarningDismissed, setBrainQualityWarningDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!currentWorkspace?.id || brainQualityWarningDismissed) return;
+    let cancelled = false;
+    async function checkBrainQuality() {
+      try {
+        // Fetch threshold (workspace/settings) and signal count (ai-worker-config) in parallel
+        const [settingsRes, configRes] = await Promise.all([
+          fetch("/api/workspace/settings"),
+          fetch("/api/workspace/ai-worker-config"),
+        ]);
+        if (cancelled) return;
+        if (!settingsRes.ok || !configRes.ok) return;
+        const [settings, config] = await Promise.all([settingsRes.json(), configRes.json()]);
+        const threshold: number = typeof settings.brain_readiness_threshold === "number"
+          ? settings.brain_readiness_threshold
+          : 0.7;
+        // Compute brainIq from signal count using same log formula as brain-context.ts
+        const signalCount: number = typeof config.brainSignalCount === "number"
+          ? config.brainSignalCount
+          : 0;
+        const brainIq = signalCount === 0
+          ? 0
+          : Math.min(100, Math.round(Math.log(signalCount + 1) * 6.5));
+        if (!cancelled) {
+          setBrainQualityBelowThreshold(brainIq / 100 < threshold);
+        }
+      } catch {
+        // Non-critical — suppress all errors
+      }
+    }
+    checkBrainQuality();
+    return () => { cancelled = true; };
+  }, [currentWorkspace?.id, brainQualityWarningDismissed]);
+
   // ── Context Monitor: track messages for token display ─────────────────────
   const [contextMessages, setContextMessages] = useState<Array<{ role: string; content: string }>>([]);
   // Stores the latest compressed summary so it can be injected into subsequent chat requests
@@ -830,6 +868,30 @@ export default function CopilotPageInner() {
                   }}
                 />
               ))}
+            </div>
+          )}
+
+          {/* ── Brain quality warning banner ─────────────────────── */}
+          {brainQualityBelowThreshold && !brainQualityWarningDismissed && (
+            <div className="mx-4 mt-3 flex items-start gap-3 px-4 py-3 rounded-lg bg-warning/10 border border-warning/30 text-warning text-xs">
+              <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <span className="flex-1">
+                <span className="font-semibold">Brain context quality is below your threshold</span>
+                {" — "}answers may be less accurate. Connect more data sources or wait for more signals to accumulate.
+                {" "}
+                <a href="/settings?tab=brain" className="underline hover:no-underline">Adjust threshold</a>
+              </span>
+              <button
+                onClick={() => setBrainQualityWarningDismissed(true)}
+                className="shrink-0 text-warning/60 hover:text-warning transition-colors"
+                aria-label="Dismiss warning"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           )}
 

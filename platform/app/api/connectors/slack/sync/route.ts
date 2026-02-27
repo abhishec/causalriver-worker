@@ -309,44 +309,105 @@ export async function POST(request: NextRequest) {
       ).catch(() => {}); // fire-and-forget — never block sync response
     }
 
-    // ── Step 4c: Document ingestion — fire-and-forget per channel ────────
-    // Ingest channel message threads as searchable documents for vector search.
-    for (const channel of channels.slice(0, 20)) {
+    // ── Step 4c: Document ingestion — thread-aware, fire-and-forget per channel ─
+    // For each top-level message with reply_count > 0, fetches full thread replies
+    // via conversations.replies. This dramatically improves context quality by
+    // capturing full discussion threads rather than just the parent message.
+    void (async () => {
       try {
-        const historyRes = await fetch(
-          `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${oldest}&limit=200`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const historyData = await historyRes.json();
-        if (!historyData.ok) continue;
-        const msgs: SlackMessage[] = historyData.messages || [];
-        if (msgs.length === 0) continue;
+        for (const channel of channels.slice(0, 20)) {
+          try {
+            const historyRes = await fetch(
+              `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${oldest}&limit=200`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const historyData = await historyRes.json();
+            if (!historyData.ok) continue;
+            const msgs: SlackMessage[] = historyData.messages || [];
+            if (msgs.length === 0) continue;
 
-        // Group into threads (keyed by thread_ts or ts)
-        const threadMap = new Map<string, SlackMessage[]>();
-        for (const msg of msgs) {
-          const key = msg.thread_ts || msg.ts;
-          if (!threadMap.has(key)) threadMap.set(key, []);
-          threadMap.get(key)!.push(msg);
-        }
+            // Build initial thread map from history messages.
+            // Top-level messages are keyed by their own ts.
+            // Reply messages (thread_ts !== ts) are keyed by thread_ts.
+            const threadMap = new Map<string, SlackMessage[]>();
+            for (const msg of msgs) {
+              const key = msg.thread_ts && msg.thread_ts !== msg.ts ? msg.thread_ts : msg.ts;
+              if (!threadMap.has(key)) threadMap.set(key, []);
+              threadMap.get(key)!.push(msg);
+            }
 
-        for (const [threadTs, threadMsgs] of threadMap) {
-          const content = threadMsgs.map(m => `${m.user}: ${m.text}`).join("\n");
-          if (!content.trim()) continue;
-          void ingestDocument(service, {
-            organizationId: workspaceId,
-            documentTitle: `Slack: #${channel.name} thread (${new Date().toLocaleDateString()})`,
-            content,
-            sourceType: "text",
-            sourceUrl: `https://slack.com/archives/${channel.id}`,
-            documentId: `slack-${channel.id}-${threadTs}`,
-            metadata: { channel_name: channel.name, thread_ts: threadTs },
-          }).catch(e => logger.warn("Slack doc ingest failed", { error: e.message }));
+            // For top-level messages that have replies, fetch the complete thread
+            // via conversations.replies. This replaces partial reply data from
+            // conversations.history with the full reply chain.
+            const REPLY_DELAY_MS = 200; // respect Slack Tier 3 rate limit (50 req/min)
+            const topLevelWithReplies = msgs.filter(
+              (m) => (m.reply_count ?? 0) > 0 && (!m.thread_ts || m.thread_ts === m.ts)
+            );
+
+            for (const parentMsg of topLevelWithReplies.slice(0, 20)) {
+              await new Promise((r) => setTimeout(r, REPLY_DELAY_MS));
+              try {
+                const repliesRes = await fetch(
+                  `https://slack.com/api/conversations.replies?channel=${channel.id}&ts=${parentMsg.ts}&limit=100`,
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const repliesData = await repliesRes.json();
+
+                if (repliesData.ok && Array.isArray(repliesData.messages) && repliesData.messages.length > 1) {
+                  // conversations.replies includes parent as messages[0] plus all replies
+                  threadMap.set(parentMsg.ts, repliesData.messages as SlackMessage[]);
+                }
+              } catch {
+                // Non-fatal: fall back to history-based partial thread
+              }
+            }
+
+            // Ingest each thread as a single searchable document
+            for (const [threadTs, threadMsgs] of threadMap) {
+              const [parent, ...replies] = threadMsgs;
+              const parentLine = parent ? `${parent.user}: ${parent.text}` : "";
+              const replyLines = replies
+                .filter((m) => m.text?.trim())
+                .map((m) => `  > ${m.user}: ${m.text}`)
+                .join("\n");
+
+              const content = [parentLine, replyLines].filter(Boolean).join("\n");
+              if (!content.trim()) continue;
+
+              const isThread = replies.length > 0;
+              const dateStr = parent
+                ? new Date(parseFloat(parent.ts) * 1000).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : new Date().toLocaleDateString();
+
+              void ingestDocument(service, {
+                organizationId: workspaceId,
+                documentTitle: isThread
+                  ? `Slack: #${channel.name} thread (${dateStr}, ${replies.length + 1} messages)`
+                  : `Slack: #${channel.name} message (${dateStr})`,
+                content,
+                sourceType: "text",
+                sourceUrl: `https://slack.com/archives/${channel.id}`,
+                documentId: `slack-${channel.id}-${threadTs}`,
+                metadata: {
+                  channel_name: channel.name,
+                  thread_ts: threadTs,
+                  reply_count: replies.length,
+                  is_thread: isThread,
+                },
+              }).catch((e: Error) => logger.warn("Slack doc ingest failed", { error: e.message }));
+            }
+          } catch {
+            // Non-fatal: per-channel errors never block sync
+          }
         }
       } catch {
-        // Non-fatal: document ingestion errors never block sync
+        // Outer safety net — never let Step 4c surface as a sync failure
       }
-    }
+    })();
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;

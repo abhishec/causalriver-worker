@@ -87,11 +87,41 @@ const SERVICE_INFO: Record<ServiceMode, { label: string; desc: string; icon: str
 
 const SERVICE_MODE_KEY = "nexus_service_mode";
 
+/* ── Domain label map — keeps internal slugs out of the UI ─────────────── */
+const DOMAIN_LABELS: Record<string, string> = {
+  "pod-match":              "Pod Assignment",
+  "early-warning":          "Risk Radar",
+  "scope-creep":            "Scope Monitor",
+  "delivery-intelligence":  "Delivery Intelligence",
+  "pr-review":              "PR Review",
+  "tdd-code-generator":     "Test Generation",
+  "tdd":                    "Test Generation",
+  "incident-diagnosis":     "Incident Diagnosis",
+  "impact-analysis":        "Impact Analysis",
+  "sql-analyzer":           "SQL Analysis",
+  "test-data-generator":    "Test Data Generation",
+  "design-doc-generator":   "Design Document",
+  "codebase-qa":            "Codebase Q&A",
+  "architecture-extractor": "Architecture Analysis",
+  "agent-definition":       "Agent Configuration",
+  "p-and-l":                "P&L Analysis",
+  "balance-sheet":          "Balance Sheet",
+  "gst-audit":              "GST Audit",
+  "anomaly-detection":      "Anomaly Detection",
+};
+
+function toDomainLabel(slug: string | null | undefined): string {
+  if (!slug) return "—";
+  if (DOMAIN_LABELS[slug]) return DOMAIN_LABELS[slug];
+  return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
 /* ── Dashboard Client ─────────────────────────────────────────────────────── */
 
 export function DashboardClient() {
   const {
     workspaces,
+    currentWorkspace,
     isLoading: workspaceLoading,
     fetchError,
     switchWorkspace,
@@ -126,6 +156,9 @@ export function DashboardClient() {
   // Rename state
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+
+  // Workspace switcher dropdown (visible when multiple AI worker spaces exist)
+  const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -631,6 +664,60 @@ export function DashboardClient() {
             )}
           </div>
           <div className="flex items-center gap-1">
+            {/* AI Worker Space switcher — only shown when multiple spaces exist under the customer */}
+            {activeWorkspaces.length > 1 && currentWorkspace && (
+              <div className="relative mr-2">
+                <button
+                  onClick={() => setWsDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-foreground bg-surface hover:bg-surface-hover border border-border-subtle transition-colors"
+                  aria-haspopup="listbox"
+                  aria-expanded={wsDropdownOpen}
+                >
+                  <svg className="w-3.5 h-3.5 text-muted-foreground shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                  <span className="max-w-[140px] truncate">{currentWorkspace.name}</span>
+                  <svg className={`w-3 h-3 text-muted-foreground transition-transform ${wsDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {wsDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setWsDropdownOpen(false)} />
+                    <div className="absolute right-0 top-full mt-1 z-50 min-w-[200px] rounded-lg bg-card border border-border shadow-lg py-1">
+                      <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        AI Worker Spaces
+                      </div>
+                      {activeWorkspaces.map((m) => {
+                        const isActive = m.workspace.id === currentWorkspace.id;
+                        return (
+                          <button
+                            key={m.organization_id}
+                            onClick={() => {
+                              setWsDropdownOpen(false);
+                              if (!isActive) switchWorkspace(m.organization_id);
+                            }}
+                            className={`w-full flex items-center gap-2 px-4 py-2 text-left text-xs transition-colors ${
+                              isActive
+                                ? "bg-accent/10 text-accent"
+                                : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
+                            }`}
+                          >
+                            <span className="w-1 h-1 rounded-full bg-current shrink-0 opacity-40" />
+                            <span className="truncate flex-1">{m.workspace.name}</span>
+                            {isActive && (
+                              <svg className="w-3 h-3 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
             <Link
               href="/settings"
               className="px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
@@ -919,7 +1006,7 @@ export function DashboardClient() {
                         <div className="text-[10px] text-muted-foreground">Tasks (24h)</div>
                       </div>
                       <div className="rounded-lg bg-background/40 border border-border-subtle px-3 py-2">
-                        <div className="text-lg font-bold text-foreground tabular-nums truncate">{learningStats.topDomain ?? "—"}</div>
+                        <div className="text-lg font-bold text-foreground tabular-nums truncate">{toDomainLabel(learningStats.topDomain)}</div>
                         <div className="text-[10px] text-muted-foreground">Top Domain</div>
                       </div>
                     </div>

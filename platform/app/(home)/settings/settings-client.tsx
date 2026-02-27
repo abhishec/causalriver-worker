@@ -13,6 +13,7 @@ import { NotificationSettings } from "./notification-settings";
 import { BrainTrainingSection } from "./brain-training-section";
 import { BrainOperationsSection } from "./brain-operations-section";
 import { BrainLearningThresholdSection } from "./brain-learning-threshold-section";
+import { BrainReadinessThresholdSection } from "./brain-readiness-threshold-section";
 import { KnowledgeBaseSection } from "./knowledge-base-section";
 import { HealthScoreWidget } from "@/components/brain/HealthScoreWidget";
 
@@ -919,6 +920,13 @@ export function SettingsClient({
               <h3 className="text-sm font-semibold mb-1">Learning Configuration</h3>
               <p className="text-xs text-muted mb-4">Configure how many signals the brain needs before activating query responses</p>
               <BrainLearningThresholdSection orgId={orgId} />
+            </div>
+
+            {/* Brain Readiness Threshold */}
+            <div className="mb-8 pt-6 border-t border-border-subtle">
+              <h3 className="text-sm font-semibold mb-1">Copilot Quality Warning</h3>
+              <p className="text-xs text-muted mb-4">Set the quality threshold below which the Copilot shows a warning banner to alert users that answers may be less accurate</p>
+              <BrainReadinessThresholdSection orgId={orgId} />
             </div>
 
             {/* Brain Operations Section */}

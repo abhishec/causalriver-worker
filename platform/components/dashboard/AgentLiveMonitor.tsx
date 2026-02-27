@@ -53,6 +53,41 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string; pulse?: bo
   resumed:           { label: "Resumed",  classes: "bg-blue-500/10 text-blue-400" },
 };
 
+/* ── Domain display map — internal slug → user-facing label ────────────── */
+// These are NEVER shown to users in raw form. Every slug maps to a plain label.
+
+const DOMAIN_LABELS: Record<string, string> = {
+  // SE-aaS delivery intelligence domains
+  "pod-match":              "Pod Assignment",
+  "early-warning":          "Risk Radar",
+  "scope-creep":            "Scope Monitor",
+  "delivery-intelligence":  "Delivery Intelligence",
+  // SE-aaS engineering domains
+  "pr-review":              "PR Review",
+  "tdd-code-generator":     "Test Generation",
+  "tdd":                    "Test Generation",
+  "incident-diagnosis":     "Incident Diagnosis",
+  "impact-analysis":        "Impact Analysis",
+  "sql-analyzer":           "SQL Analysis",
+  "test-data-generator":    "Test Data Generation",
+  "design-doc-generator":   "Design Document",
+  "codebase-qa":            "Codebase Q&A",
+  "architecture-extractor": "Architecture Analysis",
+  "agent-definition":       "Agent Configuration",
+  // AaaS domains
+  "p-and-l":                "P&L Analysis",
+  "balance-sheet":          "Balance Sheet",
+  "gst-audit":              "GST Audit",
+  "anomaly-detection":      "Anomaly Detection",
+  // System / background jobs
+  "agent-task":             "Agent Task",
+  "cognitive-cycle":        "Brain Cycle",
+  "brain-refresh":          "Brain Refresh",
+  "rlvr":                   "Learning Update",
+  "overnight":              "Overnight Agent",
+  "spec-decompose":         "Spec Analysis",
+};
+
 /* ── Domain icon map ────────────────────────────────────────────────────── */
 
 const DOMAIN_ICONS: Record<string, string> = {
@@ -75,8 +110,20 @@ const DOMAIN_ICONS: Record<string, string> = {
 
 /* ── Helpers ────────────────────────────────────────────────────────────── */
 
-function getTaskLabel(row: AgentQueueRow): string {
+/** Returns the raw slug for icon lookups — kept internal */
+function getTaskSlug(row: AgentQueueRow): string {
   return row.task_type ?? row.agent_type ?? "agent-task";
+}
+
+/** Returns a human-readable label — never exposes raw slugs to users */
+function getTaskLabel(row: AgentQueueRow): string {
+  const slug = getTaskSlug(row);
+  if (DOMAIN_LABELS[slug]) return DOMAIN_LABELS[slug];
+  // Fallback: convert hyphenated slug to title case ("my-task-type" → "My Task Type")
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 function formatRelativeTime(iso: string): string {
@@ -143,10 +190,15 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
     const load = async () => {
       try {
         const supabase = createClient();
+        // Only show running jobs, completed/failed jobs (any age), or
+        // pending jobs created within the last 2 hours. Stale ghost entries
+        // (e.g. "waiting 7h ago") are hidden — they add no value to the user.
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
         const { data, error } = await supabase
           .from("agent_queue")
           .select("id, agent_type, task_type, status, created_at, started_at, completed_at, error_message")
           .eq("organization_id", orgId)
+          .or(`status.in.(running,succeeded,success,failed,error,awaiting_approval,resumed),created_at.gte.${twoHoursAgo}`)
           .order("created_at", { ascending: false })
           .limit(10);
 
@@ -290,8 +342,9 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
       ) : (
         <div className="space-y-1.5">
           {jobs.map((job) => {
+            const slug = getTaskSlug(job);
             const label = getTaskLabel(job);
-            const icon = DOMAIN_ICONS[label] ?? "⚙️";
+            const icon = DOMAIN_ICONS[slug] ?? "⚙️";
             const statusCfg = STATUS_CONFIG[job.status] ?? { label: job.status, classes: "bg-zinc-500/10 text-zinc-400" };
             const duration = formatDuration(job);
 
@@ -307,7 +360,7 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
 
                 {/* Task label + time */}
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-mono truncate block text-foreground">{label}</span>
+                  <span className="text-xs font-medium truncate block text-foreground">{label}</span>
                   <span className="text-[10px] text-muted-foreground">{formatRelativeTime(job.created_at)}</span>
                 </div>
 
