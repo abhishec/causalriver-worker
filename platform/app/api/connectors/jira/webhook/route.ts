@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     // Find org by Jira instance URL in connector config
     const { data: connectors } = await service
       .from('org_connectors')
-      .select('organization_id, config, credentials')
+      .select('organization_id, config')
       .eq('connector_type', 'jira')
       .eq('status', 'active')
       .limit(50);

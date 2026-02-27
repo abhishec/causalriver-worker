@@ -27,6 +27,19 @@ const nextConfig: NextConfig = {
     AWS_S3_REGION: process.env.AWS_S3_REGION,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    AWS_REGION: process.env.AWS_REGION,
+    // Redis cache — falls back to in-memory if missing, but must be inlined for Lambda
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    // GitHub App connector
+    GITHUB_APP_SLUG: process.env.GITHUB_APP_SLUG,
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+    // Freshworks connector
+    FRESHDESK_CLIENT_ID: process.env.FRESHDESK_CLIENT_ID,
+    FRESHDESK_CLIENT_SECRET: process.env.FRESHDESK_CLIENT_SECRET,
+    // Credential encryption key — set in Amplify Console, never hardcoded
+    CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
   },
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
