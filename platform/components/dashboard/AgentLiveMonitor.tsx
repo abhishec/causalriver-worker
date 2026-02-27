@@ -3,115 +3,171 @@
 /**
  * AgentLiveMonitor — Real-time AI agent job tracker
  *
- * Shows the last 10 SE-aaS jobs for the current AI worker space with live
+ * Shows the last 10 agent_queue jobs for the current AI worker space with live
  * updates via Supabase Realtime. Updates instantly when new jobs are submitted
- * or existing jobs change status (pending → running → success/error).
+ * or existing jobs change status (pending → running → success/failed).
+ *
+ * Data sources:
+ *   - Initial jobs: direct Supabase client query on agent_queue
+ *   - Stats: GET /api/brain/worker-health (refreshed every 30s)
+ *   - Live updates: Supabase Realtime postgres_changes on agent_queue
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-interface AgentJob {
+/* ── Types ──────────────────────────────────────────────────────────────── */
+
+interface AgentQueueRow {
   id: string;
-  taskType: string;
-  status: "pending" | "running" | "success" | "error";
-  createdAt: string;
-  completedAt: string | null;
-  durationMs: number | null;
-  hasArtifact: boolean;
+  agent_type: string | null;
+  task_type: string | null;
+  status: string;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
 }
 
-interface WorkerHealth {
+interface WorkerStats {
   pendingJobs: number;
   runningJobs: number;
   succeededLast1h: number;
   failedLast1h: number;
-  recentJobs: AgentJob[];
 }
 
 interface AgentLiveMonitorProps {
   orgId: string;
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-warning/10 text-warning",
-  running: "bg-accent/10 text-accent",
-  success: "bg-success/10 text-success",
-  error: "bg-danger/10 text-danger",
+/* ── Status config ──────────────────────────────────────────────────────── */
+
+const STATUS_CONFIG: Record<string, { label: string; classes: string; pulse?: boolean }> = {
+  pending:           { label: "Pending",  classes: "bg-zinc-500/10 text-zinc-400" },
+  running:           { label: "Running",  classes: "bg-accent/10 text-accent", pulse: true },
+  success:           { label: "Done",     classes: "bg-emerald-500/10 text-emerald-400" },
+  succeeded:         { label: "Done",     classes: "bg-emerald-500/10 text-emerald-400" },
+  failed:            { label: "Failed",   classes: "bg-red-500/10 text-red-400" },
+  error:             { label: "Failed",   classes: "bg-red-500/10 text-red-400" },
+  awaiting_approval: { label: "Review",   classes: "bg-amber-500/10 text-amber-400" },
+  resumed:           { label: "Resumed",  classes: "bg-blue-500/10 text-blue-400" },
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Queued",
-  running: "Running",
-  success: "Done",
-  error: "Failed",
-};
+/* ── Domain icon map ────────────────────────────────────────────────────── */
 
 const DOMAIN_ICONS: Record<string, string> = {
-  "pod-match": "🎯",
-  "early-warning": "⚡",
-  "scope-creep": "📊",
-  "delivery-intelligence": "🔍",
-  "pr-review": "🔎",
-  "tdd-code-generator": "🧪",
-  "tdd": "🧪",
-  "incident-diagnosis": "🚨",
-  "impact-analysis": "💥",
-  "sql-analyzer": "🗄️",
-  "test-data-generator": "🎲",
-  "design-doc-generator": "📝",
-  "codebase-qa": "💬",
+  "pod-match":              "🎯",
+  "early-warning":          "⚡",
+  "scope-creep":            "📊",
+  "delivery-intelligence":  "🔍",
+  "pr-review":              "🔎",
+  "tdd-code-generator":     "🧪",
+  "tdd":                    "🧪",
+  "incident-diagnosis":     "🚨",
+  "impact-analysis":        "💥",
+  "sql-analyzer":           "🗄️",
+  "test-data-generator":    "🎲",
+  "design-doc-generator":   "📝",
+  "codebase-qa":            "💬",
   "architecture-extractor": "🏗️",
-  "agent-definition": "🤖",
+  "agent-definition":       "🤖",
 };
 
-function formatDuration(ms: number | null): string {
-  if (!ms) return "";
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${Math.round(ms / 60000)}m`;
+/* ── Helpers ────────────────────────────────────────────────────────────── */
+
+function getTaskLabel(row: AgentQueueRow): string {
+  return row.task_type ?? row.agent_type ?? "agent-task";
 }
 
 function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "Just now";
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   return `${Math.floor(mins / 60)}h ago`;
 }
 
-export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
-  const [health, setHealth] = useState<WorkerHealth | null>(null);
-  const [loading, setLoading] = useState(true);
+function formatDuration(row: AgentQueueRow): string {
+  if (!row.completed_at || !row.started_at) return "";
+  const ms = new Date(row.completed_at).getTime() - new Date(row.started_at).getTime();
+  if (ms < 1000) return `${ms}ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  return `${Math.round(ms / 60_000)}m`;
+}
 
-  const fetchHealth = useCallback(async () => {
+/* ── Component ──────────────────────────────────────────────────────────── */
+
+export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
+  const [jobs, setJobs] = useState<AgentQueueRow[]>([]);
+  const [stats, setStats] = useState<WorkerStats>({
+    pendingJobs: 0,
+    runningJobs: 0,
+    succeededLast1h: 0,
+    failedLast1h: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* ── Fetch stats from worker-health API ────────────────────────────── */
+  const fetchStats = useCallback(async () => {
     try {
       const resp = await fetch("/api/brain/worker-health");
       if (resp.ok) {
-        const data: WorkerHealth = await resp.json();
-        setHealth(data);
+        const data = await resp.json();
+        setStats({
+          pendingJobs:    data.pendingJobs    ?? 0,
+          runningJobs:    data.runningJobs    ?? 0,
+          succeededLast1h: data.succeededLast1h ?? 0,
+          failedLast1h:   data.failedLast1h   ?? 0,
+        });
       }
     } catch {
-      // non-fatal
-    } finally {
-      setLoading(false);
+      // non-critical — stats are supplementary
     }
   }, []);
 
-  // Initial load
+  /* ── Initial data load ─────────────────────────────────────────────── */
   useEffect(() => {
-    fetchHealth();
-  }, [fetchHealth]);
+    if (!orgId) {
+      setLoading(false);
+      return;
+    }
 
-  // Supabase Realtime — subscribe to agent_queue changes for this org
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("agent_queue")
+          .select("id, agent_type, task_type, status, created_at, started_at, completed_at, error_message")
+          .eq("organization_id", orgId)
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (!cancelled) {
+          if (!error && data) {
+            setJobs(data as AgentQueueRow[]);
+          }
+        }
+      } catch {
+        // non-critical
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    fetchStats();
+
+    return () => { cancelled = true; };
+  }, [orgId, fetchStats]);
+
+  /* ── Supabase Realtime subscription ─────────────────────────────────── */
   useEffect(() => {
     if (!orgId) return;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !supabaseAnonKey) return;
-
-    const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient();
 
     const channel = supabase
       .channel(`agent-jobs-${orgId}`)
@@ -123,9 +179,19 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
           table: "agent_queue",
           filter: `organization_id=eq.${orgId}`,
         },
-        () => {
-          // Re-fetch on any change to get latest stats + artifact flags
-          fetchHealth();
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const newRow = payload.new as AgentQueueRow;
+            setJobs((prev) => [newRow, ...prev].slice(0, 10));
+            // Refresh stats to keep counts accurate
+            fetchStats();
+          } else if (payload.eventType === "UPDATE") {
+            const updated = payload.new as AgentQueueRow;
+            setJobs((prev) =>
+              prev.map((j) => (j.id === updated.id ? updated : j))
+            );
+            fetchStats();
+          }
         }
       )
       .subscribe();
@@ -133,124 +199,137 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orgId, fetchHealth]);
+  }, [orgId, fetchStats]);
 
+  /* ── 30-second stats poll ─────────────────────────────────────────── */
+  useEffect(() => {
+    intervalRef.current = setInterval(fetchStats, 30_000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [fetchStats]);
+
+  /* ── Loading skeleton ───────────────────────────────────────────────── */
   if (loading) {
     return (
-      <div className="rounded-xl border border-border-subtle bg-card p-4">
+      <div className="rounded-xl border border-border-subtle bg-surface p-4">
         <div className="flex items-center justify-between mb-3">
-          <div className="h-3 w-32 bg-surface-hover rounded animate-pulse" />
-          <div className="h-3 w-16 bg-surface-hover rounded animate-pulse" />
+          <div className="h-3 w-36 bg-surface-hover rounded animate-pulse" />
+          <div className="h-3 w-20 bg-surface-hover rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-8 bg-surface-hover rounded-lg animate-pulse" />
+          ))}
         </div>
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-9 bg-surface rounded-lg animate-pulse" />
+            <div key={i} className="h-9 bg-surface-hover rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
     );
   }
 
-  const jobs = health?.recentJobs ?? [];
-  const hasRunning = (health?.runningJobs ?? 0) > 0;
+  const hasRunning = stats.runningJobs > 0;
 
+  /* ── Render ─────────────────────────────────────────────────────────── */
   return (
-    <div className="rounded-xl border border-border-subtle bg-card p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            {hasRunning ? (
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            ) : (
-              <span className="w-2 h-2 rounded-full bg-success/60" />
-            )}
-            <span className="text-xs font-semibold">Agent Monitor</span>
-          </div>
-          {hasRunning && (
-            <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded-full">
-              {health?.runningJobs} running
-            </span>
-          )}
-        </div>
+    <div className="rounded-xl border border-border-subtle bg-surface p-4">
 
-        {/* Stats pills */}
-        <div className="flex items-center gap-2 text-[10px] text-muted">
-          {(health?.pendingJobs ?? 0) > 0 && (
-            <span className="bg-warning/10 text-warning px-1.5 py-0.5 rounded font-medium">
-              {health?.pendingJobs} queued
-            </span>
-          )}
-          <span className="bg-success/10 text-success px-1.5 py-0.5 rounded font-medium">
-            ✓ {health?.succeededLast1h ?? 0}/hr
+      {/* ── Section header ──────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 mb-3">
+        {hasRunning ? (
+          <span className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
+        ) : (
+          <span className="w-2 h-2 rounded-full bg-emerald-500/60 shrink-0" />
+        )}
+        <span className="text-xs font-semibold text-foreground">AI Worker Activity</span>
+        {hasRunning && (
+          <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded-full">
+            {stats.runningJobs} running
           </span>
-          {(health?.failedLast1h ?? 0) > 0 && (
-            <span className="bg-danger/10 text-danger px-1.5 py-0.5 rounded font-medium">
-              ✗ {health?.failedLast1h}
-            </span>
-          )}
+        )}
+      </div>
+
+      {/* ── Stats chips row ──────────────────────────────────────────── */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="rounded-lg bg-background/60 border border-border-subtle px-2.5 py-2 text-center">
+          <div className="text-sm font-bold text-foreground tabular-nums">{stats.pendingJobs}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Pending</div>
+        </div>
+        <div className="rounded-lg bg-background/60 border border-border-subtle px-2.5 py-2 text-center">
+          <div className={`text-sm font-bold tabular-nums ${hasRunning ? "text-accent" : "text-foreground"}`}>
+            {stats.runningJobs}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Running</div>
+        </div>
+        <div className="rounded-lg bg-background/60 border border-border-subtle px-2.5 py-2 text-center">
+          <div className="text-sm font-bold text-emerald-400 tabular-nums">{stats.succeededLast1h}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Done (1h)</div>
+        </div>
+        <div className="rounded-lg bg-background/60 border border-border-subtle px-2.5 py-2 text-center">
+          <div className={`text-sm font-bold tabular-nums ${stats.failedLast1h > 0 ? "text-red-400" : "text-foreground"}`}>
+            {stats.failedLast1h}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Failed (1h)</div>
         </div>
       </div>
 
-      {/* Job list */}
+      {/* ── Job list ─────────────────────────────────────────────────── */}
       {jobs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-6 text-center">
           <div className="text-2xl mb-2">🤖</div>
-          <p className="text-xs text-muted">No agent tasks yet</p>
-          <p className="text-[10px] text-muted/60 mt-0.5">
-            Run a query in Copilot to see tasks here
-          </p>
+          <p className="text-xs text-muted-foreground">No agent tasks yet — run a query in Copilot to see them here</p>
         </div>
       ) : (
         <div className="space-y-1.5">
-          {jobs.map((job) => (
-            <div
-              key={job.id}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg bg-surface hover:bg-surface-hover transition-colors"
-            >
-              {/* Domain icon */}
-              <span className="text-base shrink-0 w-5 text-center">
-                {DOMAIN_ICONS[job.taskType] ?? "⚙️"}
-              </span>
+          {jobs.map((job) => {
+            const label = getTaskLabel(job);
+            const icon = DOMAIN_ICONS[label] ?? "⚙️";
+            const statusCfg = STATUS_CONFIG[job.status] ?? { label: job.status, classes: "bg-zinc-500/10 text-zinc-400" };
+            const duration = formatDuration(job);
 
-              {/* Task type */}
-              <div className="flex-1 min-w-0">
-                <span className="text-xs font-mono truncate block">{job.taskType}</span>
-                <span className="text-[10px] text-muted">{formatRelativeTime(job.createdAt)}</span>
-              </div>
-
-              {/* Duration */}
-              {job.durationMs && (
-                <span className="text-[10px] text-muted font-mono shrink-0">
-                  {formatDuration(job.durationMs)}
-                </span>
-              )}
-
-              {/* Artifact badge */}
-              {job.hasArtifact && job.status === "success" && (
-                <span className="text-[9px] font-medium text-brain-training bg-brain-training/10 px-1.5 py-0.5 rounded shrink-0">
-                  artifact
-                </span>
-              )}
-
-              {/* Status badge */}
-              <span
-                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${STATUS_STYLES[job.status] ?? "bg-muted/10 text-muted"}`}
+            return (
+              <div
+                key={job.id}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-background/40 border border-border-subtle/50 hover:bg-surface-hover transition-colors"
               >
-                {job.status === "running" ? (
-                  <span className="flex items-center gap-1">
-                    <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Running
-                  </span>
-                ) : (
-                  STATUS_LABELS[job.status] ?? job.status
+                {/* Domain icon */}
+                <span className="text-base shrink-0 w-5 text-center" aria-hidden="true">
+                  {icon}
+                </span>
+
+                {/* Task label + time */}
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-mono truncate block text-foreground">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{formatRelativeTime(job.created_at)}</span>
+                </div>
+
+                {/* Duration (only when completed) */}
+                {duration && (
+                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">{duration}</span>
                 )}
-              </span>
-            </div>
-          ))}
+
+                {/* Status badge */}
+                <span
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${statusCfg.classes}`}
+                >
+                  {statusCfg.pulse ? (
+                    <span className="flex items-center gap-1">
+                      <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      {statusCfg.label}
+                    </span>
+                  ) : (
+                    statusCfg.label
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
