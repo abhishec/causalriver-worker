@@ -29,16 +29,26 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function POST(request: NextRequest) {
+  // ── Auth: 500→401 Lambda pattern (two isolated try/catch blocks) ──────────
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    // ── Auth ──────────────────────────────────────────────────────
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    if (!user) {
+  let user: { id: string } | null = null;
+  try {
+    const { data, error: authError } = await supabase.auth.getUser();
+    if (authError || !data.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     // ── Rate limiting: 10 req/min per user (full cognitive stack is expensive) ─
     const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/run");
@@ -98,16 +108,24 @@ export async function POST(request: NextRequest) {
     // ── Execute via shared module ─────────────────────────────────
     const service = await createServiceClient();
 
-    const result = await executeAgent(service, {
-      prompt: prompt.trim(),
-      agentType,
-      organizationId: workspaceId,
-      userId: user.id,
-      autoExecuteThreshold,
-      priority,
-      source: source as any,
-      conversationId,
-    });
+    // Timeout guard: Amplify/Vercel Lambda max is 30s (maxDuration=120 for paid plans).
+    // Guard at 25s to leave headroom for response serialization.
+    const AGENT_TIMEOUT_MS = 25_000;
+    const result = await Promise.race([
+      executeAgent(service, {
+        prompt: prompt.trim(),
+        agentType,
+        organizationId: workspaceId,
+        userId: user.id,
+        autoExecuteThreshold,
+        priority,
+        source: source as any,
+        conversationId,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Agent execution timed out after 25s")), AGENT_TIMEOUT_MS)
+      ),
+    ]);
 
     return NextResponse.json({
       success: result.status !== "failed",

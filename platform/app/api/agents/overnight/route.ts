@@ -325,20 +325,36 @@ export async function POST(req: NextRequest) {
     ? childJobs.length / tickets.length
     : 0.5;
 
-  // Mark the parent job as success (it was inserted as 'running')
-  void serviceClient
-    .from("agent_queue")
-    .update({
-      status: "success",
-      completed_at: new Date().toISOString(),
-      result: {
-        ticketCount: tickets.length,
-        childJobsCreated: childJobs.length,
-        repo: `${repoOwner}/${repoName}`,
-      },
-    })
-    .eq("id", parentJob.id)
-    .eq("organization_id", organizationId);
+  // Mark the parent job as success (it was inserted as 'running').
+  // Wrapped in async IIFE to surface errors via logger.warn instead of silently swallowing them.
+  void (async () => {
+    try {
+      const { error } = await serviceClient
+        .from("agent_queue")
+        .update({
+          status: "success",
+          completed_at: new Date().toISOString(),
+          result: {
+            ticketCount: tickets.length,
+            childJobsCreated: childJobs.length,
+            repo: `${repoOwner}/${repoName}`,
+          },
+        })
+        .eq("id", parentJob.id)
+        .eq("organization_id", organizationId);
+      if (error) {
+        logger.warn("[overnight/route] Parent job status update failed (non-fatal)", {
+          parentJobId: parentJob.id,
+          error: error.message,
+        });
+      }
+    } catch (e) {
+      logger.warn("[overnight/route] Parent job status update threw (non-fatal)", {
+        parentJobId: parentJob.id,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  })();
 
   // Fire-and-forget RL outcome for the parent orchestration job
   recordAgentOutcome(serviceClient, {

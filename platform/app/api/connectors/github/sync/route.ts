@@ -8,6 +8,7 @@ import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
 import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120; // GitHub sync fetches paginated API data across multiple repos
 
 /**
  * POST /api/connectors/github/sync
@@ -21,17 +22,24 @@ export const dynamic = 'force-dynamic';
  * dataLookback:   overrides stored config when provided ("30d"|"90d"|"6m"|"1y"|"all")
  */
 export async function POST(request: Request) {
+  // ── Auth: 500→401 Lambda pattern — createClient and getUser in separate try/catch ──
+  let supabase: Awaited<ReturnType<typeof createClient>>;
   try {
-    // 1. Auth
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  try {
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace context" }, { status: 400 });
@@ -419,7 +427,7 @@ export async function POST(request: Request) {
         repos_synced: reposToSync.length,
         repo_names: reposToSync.map((r) => `${r.owner}/${r.name}`),
       },
-    }).catch(() => {}); // fire-and-forget, never block sync
+    }).catch((e: Error) => logger.warn("[GitHub Sync] universalBrainWrite failed (non-fatal)", { error: e.message })); // fire-and-forget, never block sync
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     // Convert synced signals into IncomingSignal format and run Oracle.

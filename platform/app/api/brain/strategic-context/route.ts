@@ -19,6 +19,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30; // parallel DB queries across multiple tables
 
 export async function GET() {
   // ── Auth: 500→401 Lambda pattern ──────────────────────────────────────────

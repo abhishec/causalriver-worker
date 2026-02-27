@@ -6,6 +6,7 @@ import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/conn
 import { getAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // fetches paginated GitHub commits + per-commit detail, can exceed 10s easily
 
 /**
  * POST /api/connectors/github/ingest-commits
