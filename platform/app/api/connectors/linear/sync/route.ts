@@ -4,6 +4,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials } from "@/lib/connectors/get-credentials";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +117,31 @@ export async function POST(request: Request) {
           } catch (batchErr: any) {
             errors.push(`Batch ${i / BATCH_SIZE} failed: ${batchErr.message}`);
           }
+        }
+      }
+
+      // Document ingestion — fire-and-forget Linear issue signals
+      {
+        const { data: linearSignals } = await service
+          .from("cross_domain_signals")
+          .select("entity_id, signal_metadata")
+          .eq("organization_id", workspaceId)
+          .eq("source_domain", "engineering.linear")
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        for (const signal of linearSignals ?? []) {
+          const meta = signal.signal_metadata as Record<string, unknown>;
+          const title = (meta?.title as string) || signal.entity_id;
+          const description = (meta?.description as string) || "";
+          void ingestDocument(service, {
+            organizationId: workspaceId,
+            documentTitle: `Linear: ${title}`,
+            content: [title, description].filter(Boolean).join("\n"),
+            sourceType: "text",
+            documentId: signal.entity_id,
+            metadata: { team: meta?.team, state: meta?.state, priority: meta?.priority },
+          }).catch(e => logger.warn("Linear doc ingest failed", { error: e.message }));
         }
       }
 

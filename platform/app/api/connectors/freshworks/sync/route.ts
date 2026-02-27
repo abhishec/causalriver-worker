@@ -15,6 +15,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +131,32 @@ export async function POST(request: Request) {
       (sum: number, r: any) => sum + (r.signalsIngested || 0),
       0
     );
+
+    // Document ingestion — fire-and-forget Freshdesk ticket signals
+    {
+      const { data: fwSignals } = await service
+        .from("cross_domain_signals")
+        .select("entity_id, signal_metadata")
+        .eq("organization_id", workspaceId)
+        .eq("source_domain", "support.freshdesk")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      for (const signal of fwSignals ?? []) {
+        const meta = signal.signal_metadata as Record<string, unknown>;
+        const subject = (meta?.subject as string) || signal.entity_id;
+        const description = (meta?.description as string) || "";
+        if (!subject) continue;
+        void ingestDocument(service, {
+          organizationId: workspaceId,
+          documentTitle: `Freshdesk: ${subject}`,
+          content: [subject, description].filter(Boolean).join("\n"),
+          sourceType: "text",
+          documentId: signal.entity_id,
+          metadata: { status: meta?.status, priority: meta?.priority, type: meta?.type },
+        }).catch(e => logger.warn("Freshdesk doc ingest failed", { error: e.message }));
+      }
+    }
 
     return NextResponse.json({
       success: true,

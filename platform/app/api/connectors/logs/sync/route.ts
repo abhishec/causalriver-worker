@@ -23,6 +23,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Log queries can take time for large windows
@@ -117,6 +118,32 @@ export async function POST(request: Request) {
       } catch (err: any) {
         logger.error(`[Logs sync] ${conn.connector_type} failed:`, err);
         results[conn.connector_type] = { success: false, error: "Sync failed" };
+      }
+    }
+
+    // Document ingestion — fire-and-forget log error cluster signals
+    {
+      const { data: logSignals } = await service
+        .from("cross_domain_signals")
+        .select("entity_id, signal_metadata")
+        .eq("organization_id", workspaceId)
+        .in("source_domain", ["observability.cloudwatch", "observability.datadog", "observability.elk"])
+        .eq("entity_type", "log_error")
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+      for (const signal of logSignals ?? []) {
+        const meta = signal.signal_metadata as Record<string, unknown>;
+        const message = (meta?.message as string) || (meta?.error as string) || signal.entity_id;
+        if (!message) continue;
+        void ingestDocument(service, {
+          organizationId: workspaceId,
+          documentTitle: `Log Error: ${message.slice(0, 80)}`,
+          content: message,
+          sourceType: "text",
+          documentId: signal.entity_id,
+          metadata: { service: meta?.service, level: meta?.level, source: meta?.source },
+        }).catch(e => logger.warn("Log doc ingest failed", { error: e.message }));
       }
     }
 

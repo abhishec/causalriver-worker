@@ -5,6 +5,7 @@ import { createGitHubConnector, createOutcomeOracle, createCausalMethodBandit } 
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = 'force-dynamic';
 
@@ -197,6 +198,34 @@ export async function POST(request: Request) {
     // 6. Derive REAL causal relationships from actual ingested signals
     // (replaces fake seeded data with org-specific statistics)
     await deriveRealCausalInsights(service, workspaceId);
+
+    // 6b. Document ingestion — fire-and-forget PR descriptions + commit messages
+    // Fetches recently synced PR/commit signals and ingests them as searchable documents.
+    {
+      const { data: ghSignals } = await service
+        .from("cross_domain_signals")
+        .select("entity_id, signal_metadata")
+        .eq("organization_id", workspaceId)
+        .eq("source_domain", "engineering.github")
+        .in("entity_type", ["pull_request", "commit"])
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      for (const signal of ghSignals ?? []) {
+        const meta = signal.signal_metadata as Record<string, unknown>;
+        const title = (meta?.title as string) || (meta?.message as string) || signal.entity_id;
+        const body = (meta?.body as string) || (meta?.description as string) || "";
+        if (!body && !title) continue;
+        void ingestDocument(service, {
+          organizationId: workspaceId,
+          documentTitle: `GitHub: ${title}`,
+          content: [title, body].filter(Boolean).join("\n"),
+          sourceType: "github",
+          documentId: signal.entity_id,
+          metadata: { repo: meta?.repo, type: meta?.type },
+        }).catch(e => logger.warn("GitHub doc ingest failed", { error: e.message }));
+      }
+    }
 
     // 6a. Universal brain write — fire-and-forget high-level summary event
     // This adds an interpretive layer on top of raw signals, training L3-L7

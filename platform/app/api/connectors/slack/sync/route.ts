@@ -26,6 +26,7 @@ import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
 import { processSlackThreads } from "@/lib/connectors/slack-thread-processor";
+import { ingestDocument } from "@/lib/connectors/document-ingester";
 
 export const dynamic = "force-dynamic";
 
@@ -306,6 +307,45 @@ export async function POST(request: NextRequest) {
         threadChannels,
         lookbackDays * 24  // convert days to hours
       ).catch(() => {}); // fire-and-forget — never block sync response
+    }
+
+    // ── Step 4c: Document ingestion — fire-and-forget per channel ────────
+    // Ingest channel message threads as searchable documents for vector search.
+    for (const channel of channels.slice(0, 20)) {
+      try {
+        const historyRes = await fetch(
+          `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${oldest}&limit=200`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const historyData = await historyRes.json();
+        if (!historyData.ok) continue;
+        const msgs: SlackMessage[] = historyData.messages || [];
+        if (msgs.length === 0) continue;
+
+        // Group into threads (keyed by thread_ts or ts)
+        const threadMap = new Map<string, SlackMessage[]>();
+        for (const msg of msgs) {
+          const key = msg.thread_ts || msg.ts;
+          if (!threadMap.has(key)) threadMap.set(key, []);
+          threadMap.get(key)!.push(msg);
+        }
+
+        for (const [threadTs, threadMsgs] of threadMap) {
+          const content = threadMsgs.map(m => `${m.user}: ${m.text}`).join("\n");
+          if (!content.trim()) continue;
+          void ingestDocument(service, {
+            organizationId: workspaceId,
+            documentTitle: `Slack: #${channel.name} thread (${new Date().toLocaleDateString()})`,
+            content,
+            sourceType: "text",
+            sourceUrl: `https://slack.com/archives/${channel.id}`,
+            documentId: `slack-${channel.id}-${threadTs}`,
+            metadata: { channel_name: channel.name, thread_ts: threadTs },
+          }).catch(e => logger.warn("Slack doc ingest failed", { error: e.message }));
+        }
+      } catch {
+        // Non-fatal: document ingestion errors never block sync
+      }
     }
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
