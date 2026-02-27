@@ -2,12 +2,14 @@ import { logger } from "@/lib/logger";
 import { addPRComment, createGitHubIssue } from "./github";
 import { createJiraTicket } from "./jira";
 import { postSlackMessage } from "./slack";
+import { executeConfluenceAction } from "./confluence";
 import type { WritebackActionResult } from "./types";
 
 export * from "./types";
 export * from "./slack";
 export * from "./jira";
 export * from "./github";
+export * from "./confluence";
 
 /**
  * Dispatch a write-back action to the appropriate connector.
@@ -113,6 +115,11 @@ export async function executeWritebackAction(
         success: false,
         error: `GitHub write-back: unsupported actionType '${actionType}'. Expected 'create_issue' or 'add_pr_comment'.`,
       };
+    }
+
+    case "confluence": {
+      // Delegates to executeConfluenceAction which handles create_page / update_page
+      return executeConfluenceAction(actionType, actionPayload, credentials, config);
     }
 
     default: {

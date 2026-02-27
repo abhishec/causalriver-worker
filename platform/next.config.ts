@@ -40,6 +40,8 @@ const nextConfig: NextConfig = {
     FRESHDESK_CLIENT_SECRET: process.env.FRESHDESK_CLIENT_SECRET,
     // Credential encryption key — set in Amplify Console, never hardcoded
     CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
+    // Confluence webhook HMAC-SHA256 secret — set in Confluence webhook settings
+    CONFLUENCE_WEBHOOK_SECRET: process.env.CONFLUENCE_WEBHOOK_SECRET,
   },
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
