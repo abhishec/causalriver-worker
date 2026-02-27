@@ -3,7 +3,7 @@ import { logger } from "@/lib/logger";
 import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
 import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
 import { getConsolidatedPatterns } from "@/lib/brain/tier3-consolidation";
-import { searchKnowledgeChunks } from "@/lib/brain/tier2-signals";
+import { searchKnowledgeChunks, recordChunkUsage } from "@/lib/brain/tier2-signals";
 import { getAdminClient } from "@/lib/supabase/admin";
 
 // ── Module-level cache: 30s TTL per org ──────────────────────────────────────
@@ -1231,6 +1231,14 @@ export async function getBrainContext(
           result.rawKnowledgeChunks = rawKnowledgeStr;
           // Append to contextSummary so callers that only read contextSummary also get Tier 1 grounding
           result.contextSummary = result.contextSummary + " " + rawKnowledgeStr;
+
+          // Bug fix: wire chunk utility tracking so Tier-2 signals fire on every copilot query.
+          // Without this, reference_count/avg_quality/consolidation_candidate never update,
+          // and Tier-3 consolidation can't identify high-value chunks to promote.
+          // Quality proxy: similarity score (0–1); fallback chunks get 0.5 (neutral signal).
+          void Promise.allSettled(
+            chunks.map(c => recordChunkUsage(c.id, Math.max(0.5, c.similarity), "knowledge_chunks"))
+          );
         }
       } catch (e) {
         logger.warn("[brain-context] Tier 1 raw knowledge search failed", { error: String(e) });
