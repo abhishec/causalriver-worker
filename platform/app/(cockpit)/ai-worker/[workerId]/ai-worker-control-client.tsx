@@ -311,7 +311,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
         </span>
 
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-success" />
           <span className="text-xs text-white/30">Active</span>
         </div>
 
@@ -624,11 +624,11 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                   <button
                     onClick={runConsolidation}
                     disabled={isConsolidating}
-                    className="w-full py-2 rounded-lg border border-white/10 text-xs text-white/40 hover:border-emerald-500/30 hover:text-emerald-400/70 hover:bg-emerald-500/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2 rounded-lg border border-white/10 text-xs text-white/40 hover:border-success/30 hover:text-success/70 hover:bg-success/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
                     {isConsolidating ? (
                       <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                         Consolidating...
                       </>
                     ) : (
