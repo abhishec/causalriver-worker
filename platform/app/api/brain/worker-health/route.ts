@@ -144,12 +144,35 @@ export async function GET() {
       };
     });
 
-    const succeededLast1h = recentRows.filter(
-      (j) => j.status === "success" && j.completed_at && j.completed_at >= oneHourAgo
-    ).length;
-    const failedLast1h = recentRows.filter(
-      (j) => j.status === "error" && j.completed_at && j.completed_at >= oneHourAgo
-    ).length;
+    // Succeeded count in last 1h — full count query, not limited to recentRows sample
+    let succeededLast1h = 0;
+    try {
+      const { count, error } = await admin
+        .from("agent_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", workspaceId)
+        .eq("status", "success")
+        .gte("completed_at", oneHourAgo);
+      if (!error) succeededLast1h = count ?? 0;
+      else logger.warn("[worker-health] succeeded count query error:", error.message);
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (succeeded) unavailable:", e);
+    }
+
+    // Failed count in last 1h — full count query, not limited to recentRows sample
+    let failedLast1h = 0;
+    try {
+      const { count, error } = await admin
+        .from("agent_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", workspaceId)
+        .eq("status", "error")
+        .gte("completed_at", oneHourAgo);
+      if (!error) failedLast1h = count ?? 0;
+      else logger.warn("[worker-health] failed count query error:", error.message);
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (failed) unavailable:", e);
+    }
 
     return NextResponse.json({
       pendingJobs: pendingCount,
@@ -157,6 +180,7 @@ export async function GET() {
       succeededLast1h,
       failedLast1h,
       recentJobs,
+      timestamp: new Date().toISOString(),
     });
   } catch (err) {
     logger.error("[worker-health] Error:", err);
