@@ -9,6 +9,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { getBrainContext } from "@/lib/brain/brain-context";
+import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 import { createJiraTicket } from "@/lib/connectors/writeback/jira";
@@ -142,14 +144,30 @@ export async function POST(req: NextRequest) {
   }
 
   const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+  const decomposeStartMs = Date.now();
+
+  // ── Step 4a: Inject Brain context into Claude call (non-fatal) ────────────
+  let brainContextBlock = "";
+  try {
+    let svcCtx;
+    try { svcCtx = await createServiceClient(); } catch { /* non-fatal */ }
+    if (svcCtx) {
+      const ctx = await getBrainContext(svcCtx, organizationId);
+      if (ctx.contextSummary) {
+        brainContextBlock = `\n\nCODEBASE & TEAM CONTEXT (from Brain):\n${ctx.contextSummary}`;
+      }
+    }
+  } catch {
+    // Non-fatal — proceed without brain context
+  }
 
   let tickets: DecomposedTicket[] = [];
 
   try {
     const userMessage =
       repoOwner && repoName
-        ? `Repository: ${repoOwner}/${repoName}\n\nSpec:\n${spec.trim()}`
-        : `Spec:\n${spec.trim()}`;
+        ? `Repository: ${repoOwner}/${repoName}${brainContextBlock}\n\nSpec:\n${spec.trim()}`
+        : `Spec:\n${spec.trim()}${brainContextBlock}`;
 
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
@@ -296,6 +314,29 @@ export async function POST(req: NextRequest) {
     jiraTicketCount: jiraTickets.length,
     artifactId,
   });
+
+  // ── Step 7: Record RL outcome (fire-and-forget) ───────────────────────────
+  // Quality: 0.1 if no tickets produced, scales 0.5→1.0 with ticket count (max 10)
+  const decomposeQuality =
+    tickets.length === 0
+      ? 0.1
+      : Math.min(0.5 + (tickets.length / 10) * 0.5, 1.0);
+
+  try {
+    const svcRl = await createServiceClient();
+    recordAgentOutcome(svcRl, {
+      agentId: artifactId ?? `decompose-spec:${Date.now()}`,
+      domain: "spec-decomposition",
+      taskDescription: `Decompose spec into tickets${repoOwner && repoName ? ` for ${repoOwner}/${repoName}` : ""}`,
+      resultSummary: `Generated ${tickets.length} tickets${jiraTickets.length > 0 ? `, ${jiraTickets.length} Jira tickets created` : ""}. Sample: ${tickets.slice(0, 2).map((t) => t.title).join(", ")}${tickets.length > 2 ? "…" : ""}`,
+      quality: decomposeQuality,
+      executionMs: Date.now() - decomposeStartMs,
+      organizationId,
+      userId: user.id,
+    }).catch(() => { /* fire-and-forget: never block the response */ });
+  } catch {
+    // Non-fatal — RL recording failure should never block the API response
+  }
 
   return NextResponse.json({
     tickets,

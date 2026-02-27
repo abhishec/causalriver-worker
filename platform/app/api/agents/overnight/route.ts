@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { getBrainContext } from "@/lib/brain/brain-context";
+import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 import { logger } from "@/lib/logger";
 import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
 
@@ -289,6 +290,40 @@ export async function POST(req: NextRequest) {
     childJobsCreated: childJobs.length,
     repo: `${repoOwner}/${repoName}`,
   });
+
+  // ── Step 10: Mark parent job success + record RL outcome ─────────────────
+  // The parent job's role is "decompose spec into child jobs" — that's now done.
+  // Quality: fraction of tickets that got child jobs (1.0 if all got jobs).
+  const parentQuality = tickets.length > 0
+    ? childJobs.length / tickets.length
+    : 0.5;
+
+  // Mark the parent job as success (it was inserted as 'running')
+  void serviceClient
+    .from("agent_queue")
+    .update({
+      status: "success",
+      completed_at: new Date().toISOString(),
+      result: {
+        ticketCount: tickets.length,
+        childJobsCreated: childJobs.length,
+        repo: `${repoOwner}/${repoName}`,
+      },
+    })
+    .eq("id", parentJob.id)
+    .eq("organization_id", organizationId);
+
+  // Fire-and-forget RL outcome for the parent orchestration job
+  recordAgentOutcome(serviceClient, {
+    agentId: parentJob.id,
+    domain: "overnight-orchestrator",
+    taskDescription: `Decompose spec and spawn code-agent jobs for ${repoOwner}/${repoName}`,
+    resultSummary: `Spawned ${childJobs.length}/${tickets.length} code-agent jobs. Tickets: ${tickets.slice(0, 3).map(t => t.title).join(", ")}${tickets.length > 3 ? "…" : ""}`,
+    quality: parentQuality,
+    executionMs: 0, // orchestration time is not meaningful for quality
+    organizationId,
+    userId: user.id,
+  }).catch(() => { /* fire-and-forget: never block the response */ });
 
   return NextResponse.json({
     parentJobId: parentJob.id,

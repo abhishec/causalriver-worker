@@ -438,6 +438,7 @@ async function _runCognitivePlannerInner(
 - Good quality domains (avg >= 0.7 last 24h): ${goodQualityDomains.join(", ") || "none"}
 - Stuck domains (5+ failures last 2h): ${stuckDomains.join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
+- IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition
 
 ## Past Planning Decisions and Lessons
 ${pastReflectionsText}`;

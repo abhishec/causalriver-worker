@@ -16,7 +16,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { recordAgentOutcome, computeAgentQuality, extractStructuredMemory } from "@/lib/brain/agent-rl";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -130,6 +130,17 @@ export async function recordJobOutcome(
     organizationId: params.organizationId,
     userId: params.userId,
   });
+
+  // ── 2b. Mem0-style structured memory extraction ────────────────────────
+  // Fire-and-forget: calls Haiku to extract what worked/failed/pattern.
+  // MUST NOT block the job result — wrap in void + catch.
+  void extractStructuredMemory(supabase, {
+    organizationId: params.organizationId,
+    domain: params.domain,
+    inputQuery: params.taskDescription,
+    resultSummary: params.resultSummary,
+    quality,
+  }).catch(() => { /* non-fatal */ });
 
   // ── 3. Update brain_evolution_snapshots today-row ─────────────────────
   // We upsert the today snapshot and update accuracy as a rolling average.

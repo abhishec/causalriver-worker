@@ -8,6 +8,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { checkAndStartWaitingJobs } from "@/lib/brain/agent-orchestrator";
+import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 
 // ============================================================================
 // TYPES
@@ -172,8 +173,11 @@ export async function executeAndCompleteJob(
 
   const orgId: string | undefined = jobRow?.organization_id ?? undefined;
 
+  const executionStartMs = Date.now();
+
   try {
     const result = await executor();
+    const executionMs = Date.now() - executionStartMs;
 
     await supabase
       .from("agent_queue")
@@ -183,7 +187,27 @@ export async function executeAndCompleteJob(
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
+
+    // ── Orchestrator RL signal: job succeeded → dopamine ──────────────────
+    // Emitted at the orchestration layer for ALL agent_queue job types.
+    // SE-aaS jobs also get a domain-specific signal from recordJobOutcome()
+    // in job-worker.ts. This signal captures the orchestration outcome itself.
+    if (orgId) {
+      const resultStr = JSON.stringify(result).slice(0, 500);
+      const quality = computeAgentQuality(resultStr, null, executionMs);
+      recordAgentOutcome(supabase, {
+        agentId: jobId,
+        domain: "orchestrator",
+        taskDescription: `job_queue:${jobId}`,
+        resultSummary: resultStr,
+        quality,
+        executionMs,
+        organizationId: orgId,
+        userId: "worker",
+      }).catch(() => { /* non-fatal */ });
+    }
   } catch (err: any) {
+    const executionMs = Date.now() - executionStartMs;
     logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, err?.message || err);
     await supabase
       .from("agent_queue")
@@ -193,6 +217,20 @@ export async function executeAndCompleteJob(
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
+
+    // ── Orchestrator RL signal: job failed → gaba signal ──────────────────
+    if (orgId) {
+      recordAgentOutcome(supabase, {
+        agentId: jobId,
+        domain: "orchestrator",
+        taskDescription: `job_queue:${jobId}`,
+        resultSummary: `error: ${err?.message ?? "unknown"}`.slice(0, 500),
+        quality: 0,
+        executionMs,
+        organizationId: orgId,
+        userId: "worker",
+      }).catch(() => { /* non-fatal */ });
+    }
   } finally {
     // Auto-start any jobs that were waiting on this job.
     // Fire-and-forget — never let this block the caller.

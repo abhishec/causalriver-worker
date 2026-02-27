@@ -8,6 +8,7 @@
  * All functions are fire-and-forget safe — never throw, only logger.warn on failure.
  */
 
+import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
@@ -279,6 +280,160 @@ export async function getRecentQualityPatterns(
     return patterns.sort((a, b) => b.avgQuality - a.avgQuality);
   } catch {
     return [];
+  }
+}
+
+// ── Structured Memory Extraction ───────────────────────────────────────────
+
+/** Haiku model for fast, cheap memory extraction */
+const MEMORY_EXTRACTION_MODEL = "claude-haiku-4-5-20251001";
+
+/** Max structured-outcome entries to retain per domain per org */
+const MAX_STRUCTURED_OUTCOMES_PER_DOMAIN = 20;
+
+export interface StructuredMemoryResult {
+  worked: string;
+  failed: string;
+  pattern: string;
+}
+
+/**
+ * Mem0-style structured memory extraction.
+ *
+ * After each domain execution, calls Haiku with the domain name, input query,
+ * output quality, and optional error to extract 3 facts:
+ *   1. What worked
+ *   2. What failed
+ *   3. One org-specific pattern
+ *
+ * Stores result in ai_memory as memory_type='structured-outcome'.
+ * Keeps the most recent MAX_STRUCTURED_OUTCOMES_PER_DOMAIN entries per domain.
+ *
+ * Fire-and-forget safe — never throws, only logger.warn on failure.
+ */
+export async function extractStructuredMemory(
+  supabase: SupabaseClient,
+  params: {
+    organizationId: string;
+    domain: string;
+    inputQuery: string;
+    resultSummary: string;
+    quality: number;
+    error?: string | null;
+  }
+): Promise<void> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    logger.warn("[agent-rl] extractStructuredMemory: ANTHROPIC_API_KEY not set — skipping");
+    return;
+  }
+
+  try {
+    const anthropic = new Anthropic({ apiKey });
+
+    const qualityLabel =
+      params.quality >= 0.8 ? "high" :
+      params.quality >= 0.5 ? "medium" : "low";
+
+    const errorContext = params.error
+      ? `\nError encountered: ${params.error.slice(0, 200)}`
+      : "";
+
+    const prompt = `You are analyzing an AI agent execution to extract learning signals.
+
+Domain: ${params.domain}
+Input query: ${params.inputQuery.slice(0, 200)}
+Output quality: ${qualityLabel} (${params.quality.toFixed(2)}/1.0)
+Result summary: ${params.resultSummary.slice(0, 300)}${errorContext}
+
+Extract exactly 3 facts as JSON. Be concise (max 20 words each):
+{
+  "worked": "what succeeded or contributed to quality in this execution",
+  "failed": "what failed or reduced quality (or 'nothing failed' if quality is high)",
+  "pattern": "one org-specific behavioral pattern observed"
+}
+
+Respond with ONLY the JSON object. No explanation.`;
+
+    const response = await anthropic.messages.create({
+      model: MEMORY_EXTRACTION_MODEL,
+      max_tokens: 200,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const rawText = response.content[0]?.type === "text"
+      ? response.content[0].text.trim()
+      : "";
+
+    if (!rawText) {
+      logger.warn("[agent-rl] extractStructuredMemory: empty response from Haiku");
+      return;
+    }
+
+    // Parse the JSON response
+    let extracted: StructuredMemoryResult;
+    try {
+      // Strip markdown code fences if present
+      const jsonText = rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+      extracted = JSON.parse(jsonText) as StructuredMemoryResult;
+    } catch {
+      logger.warn("[agent-rl] extractStructuredMemory: failed to parse Haiku JSON response:", rawText.slice(0, 100));
+      return;
+    }
+
+    // Validate structure
+    if (!extracted.worked || !extracted.failed || !extracted.pattern) {
+      logger.warn("[agent-rl] extractStructuredMemory: incomplete JSON — missing fields");
+      return;
+    }
+
+    // ── Store in ai_memory ────────────────────────────────────────────────
+    const content = JSON.stringify({
+      worked: extracted.worked,
+      failed: extracted.failed,
+      pattern: extracted.pattern,
+    });
+
+    await supabase.from("ai_memory").insert({
+      organization_id: params.organizationId,
+      domain: params.domain,
+      memory_type: "structured-outcome",
+      content,
+      importance: params.quality,
+      metadata: {
+        quality: params.quality,
+        extractedAt: new Date().toISOString(),
+        inputQueryPreview: params.inputQuery.slice(0, 100),
+      },
+    });
+
+    // ── Bound: keep last MAX_STRUCTURED_OUTCOMES_PER_DOMAIN per domain ───
+    try {
+      const { data: existing } = await supabase
+        .from("ai_memory")
+        .select("id, created_at")
+        .eq("organization_id", params.organizationId)
+        .eq("domain", params.domain)
+        .eq("memory_type", "structured-outcome")
+        .order("created_at", { ascending: false });
+
+      if (existing && existing.length > MAX_STRUCTURED_OUTCOMES_PER_DOMAIN) {
+        const toDelete = existing.slice(MAX_STRUCTURED_OUTCOMES_PER_DOMAIN).map(
+          (r: { id: string }) => r.id
+        );
+        await supabase.from("ai_memory").delete().in("id", toDelete);
+      }
+    } catch (pruneErr) {
+      logger.warn("[agent-rl] extractStructuredMemory: pruning failed (non-fatal):", pruneErr);
+    }
+
+    logger.warn(
+      `[agent-rl] Structured memory extracted for domain=${params.domain} ` +
+      `org=${params.organizationId.slice(0, 8)} quality=${params.quality.toFixed(2)}`
+    );
+  } catch (err) {
+    logger.warn("[agent-rl] extractStructuredMemory failed:", err);
+    // Non-fatal — never let memory extraction break the RL pipeline
   }
 }
 
