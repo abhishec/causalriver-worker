@@ -31,6 +31,7 @@ import {
   BRAIN_POPULATION_TYPES,
 } from "@/lib/brain/agent-orchestrator";
 import { executeCodeAgentJob, type CodeAgentPayload } from "@/lib/agents/overnight-executor";
+import { evaluateConstraints } from "@/lib/brain/policy-enforcer";
 
 export interface WorkerResult {
   processed: number;
@@ -131,6 +132,41 @@ export async function processSeAaSJobs(
 
   for (const job of filteredJobs) {
     result.jobIds.push(job.id);
+
+    // ── PolicyEnforcer gate — evaluate per-org constraints before dispatch ──
+    // If a policy is violated the job is left in 'pending' and a 'blocked'
+    // record is written so operators can inspect it. We continue to the next
+    // job so a single blocked org doesn't stall other orgs in the batch.
+    try {
+      const policyResult = await evaluateConstraints(supabase, job.organization_id);
+      if (!policyResult.allowed) {
+        logger.warn("[job-worker] PolicyEnforcer blocked job", {
+          jobId: job.id,
+          orgId: job.organization_id,
+          policy: policyResult.policyName,
+          reason: policyResult.reason,
+        });
+        // Mark as blocked so the UI can surface a reason to the user
+        await supabase
+          .from("agent_queue")
+          .update({
+            status: "failed",
+            error_message: `[PolicyEnforcer] ${policyResult.policyName}: ${policyResult.reason}`,
+          })
+          .eq("id", job.id)
+          .eq("organization_id", job.organization_id);
+        result.failed += 1;
+        continue;
+      }
+    } catch (policyErr) {
+      // Fail-open: evaluateConstraints already handles its own errors,
+      // but guard here too so a catastrophic policy module failure never
+      // drops the whole batch.
+      logger.warn("[job-worker] PolicyEnforcer threw (fail-open, continuing)", {
+        jobId: job.id,
+        err: policyErr instanceof Error ? policyErr.message : String(policyErr),
+      });
+    }
 
     try {
       await executeAndCompleteJob(supabase, job.id, async () => {

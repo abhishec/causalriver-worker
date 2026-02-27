@@ -18,7 +18,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { saveArtifact } from "./job-queue";
 import { startJobHeartbeat, stopJobHeartbeat } from "./job-heartbeat";
-import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { recordAgentOutcome, computeAgentQuality, recordStepOutcome } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
 import { selectModelForDomain, routeModelWithIq } from "./model-router";
@@ -41,6 +41,7 @@ import {
   createGitHubPR,
 } from "@/lib/connectors/writeback/github";
 import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
+import { getCachedPlan, setCachedPlan, normaliseQueryKey } from "@/lib/brain/plan-cache";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -653,32 +654,64 @@ export async function executeDomain(
 
   // ── Step -1: RL Context Priming — inject learned patterns from case-log ──
   // Non-blocking: if case-log read fails, execution continues unaffected.
-  try {
-    const caseLogContext = await getCaseLogContext({
-      agentType: params.domainType ?? '',
-      prompt: JSON.stringify(params.request ?? {}).slice(0, 200),
-      orgId: params.organizationId ?? '',
-    });
-    if (caseLogContext) {
-      // Inject into request so domain Claude prompts can reference past patterns
-      (params.request as Record<string, unknown>)["_caseLogContext"] = caseLogContext;
+  {
+    const stepStart = Date.now();
+    let stepSuccess = true;
+    let stepError: string | undefined;
+    try {
+      const caseLogContext = await getCaseLogContext({
+        agentType: params.domainType ?? '',
+        prompt: JSON.stringify(params.request ?? {}).slice(0, 200),
+        orgId: params.organizationId ?? '',
+      });
+      if (caseLogContext) {
+        // Inject into request so domain Claude prompts can reference past patterns
+        (params.request as Record<string, unknown>)["_caseLogContext"] = caseLogContext;
+      }
+    } catch (err: unknown) {
+      stepSuccess = false;
+      stepError = err instanceof Error ? err.message : String(err);
+      // Non-fatal — case-log priming failure must never block domain execution
     }
-  } catch {
-    // Non-fatal — case-log priming failure must never block domain execution
+    void recordStepOutcome(supabase, {
+      organizationId: params.organizationId,
+      domain: params.domainType,
+      stepName: "case-log-prime",
+      stepIndex: 0,
+      success: stepSuccess,
+      durationMs: Date.now() - stepStart,
+      ...(stepError ? { errorMessage: stepError } : {}),
+    });
   }
 
   // ── Step -1b: Brain Context Priming — inject live brain state into every domain ──
   // Non-blocking: if getBrainContext fails, domain execution continues unaffected.
   let brainContextStr = "";
-  try {
-    const { getBrainContext } = await import("@/lib/brain/brain-context");
-    const brainCtx = await getBrainContext(supabase, params.organizationId);
-    brainContextStr = brainCtx.contextSummary;
-    if (brainContextStr) {
-      (params.request as Record<string, unknown>)["_brainContextStr"] = brainContextStr;
+  {
+    const stepStart = Date.now();
+    let stepSuccess = true;
+    let stepError: string | undefined;
+    try {
+      const { getBrainContext } = await import("@/lib/brain/brain-context");
+      const brainCtx = await getBrainContext(supabase, params.organizationId);
+      brainContextStr = brainCtx.contextSummary;
+      if (brainContextStr) {
+        (params.request as Record<string, unknown>)["_brainContextStr"] = brainContextStr;
+      }
+    } catch (err: unknown) {
+      stepSuccess = false;
+      stepError = err instanceof Error ? err.message : String(err);
+      // non-fatal — domain proceeds without brain context enrichment
     }
-  } catch {
-    // non-fatal — domain proceeds without brain context enrichment
+    void recordStepOutcome(supabase, {
+      organizationId: params.organizationId,
+      domain: params.domainType,
+      stepName: "brain-context",
+      stepIndex: 1,
+      success: stepSuccess,
+      durationMs: Date.now() - stepStart,
+      ...(stepError ? { errorMessage: stepError } : {}),
+    });
   }
 
   // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─
@@ -802,6 +835,31 @@ export async function executeDomain(
     }
   }
 
+  // ── PlanCache: short-circuit on repeated identical requests ────────────────
+  // Only cache non-queued (direct Copilot) calls — jobId calls are unique
+  // queue runs and must not be deduplicated. queryKey is derived from the
+  // user-facing message/query field, normalised to first 100 lowercase chars.
+  const _cacheQueryRaw =
+    (typeof params.request.message === "string" ? params.request.message : null) ??
+    (typeof params.request.query === "string" ? params.request.query : null) ??
+    params.domainType;
+  const _cacheQueryKey = normaliseQueryKey(_cacheQueryRaw);
+  if (!params.jobId) {
+    const cachedResult = getCachedPlan<Record<string, unknown>>(
+      params.organizationId,
+      params.domainType,
+      _cacheQueryKey
+    );
+    if (cachedResult) {
+      logger.warn("[domain-executor] PlanCache HIT — returning cached result", {
+        domain: params.domainType,
+        queryKey: _cacheQueryKey,
+        orgId: params.organizationId,
+      });
+      return { result: { ...cachedResult, _cached: true }, artifactId: null };
+    }
+  }
+
   const startMs = Date.now();
   let result: Record<string, unknown>;
   let domainError: string | null = null;
@@ -823,6 +881,11 @@ export async function executeDomain(
       if (moaSynthesis) {
         result = { ...result, moaSynthesis, moaEnabled: true };
       }
+    }
+
+    // ── PlanCache: store fresh result for next identical request ─────────────
+    if (!params.jobId) {
+      setCachedPlan(params.organizationId, params.domainType, _cacheQueryKey, result);
     }
   } catch (domainExecErr: any) {
     domainError = domainExecErr?.message ?? "Unknown domain execution error";

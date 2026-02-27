@@ -202,6 +202,14 @@ export interface ConversationTurnInput {
   role: "user" | "assistant";
   content: string;
   metadata?: Record<string, unknown>;
+  /**
+   * ProcessSession fields — set these when the conversation turn is part of a
+   * workflow execution so the knowledge chunk is linked to the workflow run.
+   * All fields are optional; omitting them is safe for non-workflow turns.
+   */
+  workflow_run_id?: string;
+  process_step_id?: string;
+  process_phase?: string;
 }
 
 /**
@@ -212,14 +220,21 @@ export async function ingestConversationTurn(
   orgId: string,
   turn: ConversationTurnInput
 ): Promise<string | null> {
-  const { sessionId, role, content, metadata } = turn;
+  const { sessionId, role, content, metadata, workflow_run_id, process_step_id, process_phase } = turn;
   const verbatim_text = `[${role}]: ${content}`;
+
+  // ProcessSession fields — only included when the turn is part of a workflow
+  // run so the chunk can be linked back to the workflow execution record.
+  const processSessionMeta: Record<string, unknown> = {};
+  if (workflow_run_id) processSessionMeta.workflow_run_id = workflow_run_id;
+  if (process_step_id) processSessionMeta.process_step_id = process_step_id;
+  if (process_phase) processSessionMeta.process_phase = process_phase;
 
   return ingestRawChunk(orgId, {
     source_type: "conversation_turn",
     source_id: sessionId,
     verbatim_text,
-    metadata: { sessionId, role, ...(metadata ?? {}) },
+    metadata: { sessionId, role, ...(metadata ?? {}), ...processSessionMeta },
   });
 }
 
