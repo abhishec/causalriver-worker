@@ -26,6 +26,17 @@ import { logger } from "@/lib/logger";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+type BrainProgressSnapshot = {
+  timestamp: string;
+  totalCyclesRun: number;
+  avgPlanConfidence: number;
+  domainsExcludedGlobally: string[];
+  domainsExcludedByOrg: number; // count
+  reflectionsStored: number;
+  learningVelocity: number; // avg confidence delta vs prior snapshot
+  lastUpdatedBy: string; // orgId that triggered last update
+};
+
 export interface PlannerDecision {
   domain: string;
   priority: "high" | "normal" | "low";
@@ -129,6 +140,58 @@ async function getGloballyBrokenDomains(supabase: SupabaseClient): Promise<Set<s
       .filter(([, count]) => count > 10)
       .map(([domain]) => domain)
   );
+}
+
+// ── Brain Progress Tracker ────────────────────────────────────────────────────
+
+async function updateBrainProgress(
+  supabase: SupabaseClient,
+  orgId: string,
+  cycleData: {
+    planConfidence: number;
+    globallyBrokenDomains: Set<string>;
+    orgExcludedCount: number;
+    reflectionsStored: number;
+  }
+): Promise<void> {
+  try {
+    // Read existing snapshot
+    const { data: existing } = await supabase
+      .from('ai_memory')
+      .select('id, content')
+      .eq('domain', 'brain-system')
+      .eq('memory_type', 'brain-progress')
+      .eq('organization_id', orgId)
+      .maybeSingle();
+
+    const prior: BrainProgressSnapshot | null = existing?.content
+      ? (() => { try { return JSON.parse(existing.content as string) as BrainProgressSnapshot; } catch { return null; } })()
+      : null;
+
+    const snapshot: BrainProgressSnapshot = {
+      timestamp: new Date().toISOString(),
+      totalCyclesRun: (prior?.totalCyclesRun ?? 0) + 1,
+      avgPlanConfidence: cycleData.planConfidence,
+      domainsExcludedGlobally: Array.from(cycleData.globallyBrokenDomains),
+      domainsExcludedByOrg: cycleData.orgExcludedCount,
+      reflectionsStored: cycleData.reflectionsStored,
+      learningVelocity: prior ? cycleData.planConfidence - prior.avgPlanConfidence : 0,
+      lastUpdatedBy: orgId,
+    };
+
+    if (existing?.id) {
+      await supabase
+        .from('ai_memory')
+        .update({ content: JSON.stringify(snapshot), updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+    } else {
+      await supabase
+        .from('ai_memory')
+        .insert({ domain: 'brain-system', memory_type: 'brain-progress', organization_id: orgId, content: JSON.stringify(snapshot) });
+    }
+  } catch (err) {
+    logger.warn('[CognitivePlanner] Failed to update brain progress', { err });
+  }
 }
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -378,6 +441,22 @@ async function _runCognitivePlannerInner(
       pastReflectionsText = pastReflections
         .map((r: { content: string }) => r.content)
         .join("\n\n");
+    }
+
+    // Also read brain-progress snapshot and inject into state context
+    const { data: progressData } = await supabase
+      .from('ai_memory')
+      .select('content')
+      .eq('domain', 'brain-system')
+      .eq('memory_type', 'brain-progress')
+      .eq('organization_id', orgId)
+      .maybeSingle();
+
+    if (progressData?.content) {
+      try {
+        const progress: BrainProgressSnapshot = JSON.parse(progressData.content as string);
+        pastReflectionsText += `\nBrain Progress: ${progress.totalCyclesRun} cycles run, learning velocity: ${progress.learningVelocity > 0 ? '+' : ''}${progress.learningVelocity.toFixed(3)}, globally excluded: ${progress.domainsExcludedGlobally.join(', ') || 'none'}`;
+      } catch { /* ignore */ }
     }
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 0 (prime) failed:", err);
@@ -740,6 +819,26 @@ ${pastReflectionsText}`;
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 4 (record cycle) failed:", err);
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE POST — UPDATE BRAIN PROGRESS (persistent learning velocity tracker)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // Compute avg plan confidence from decisions: good quality = 0.7, normal = 0.5, fallback = 0.5
+  const planConfidence = decisions.length > 0
+    ? decisions.reduce((sum, d) => {
+        if (goodQualityDomains.includes(d.domain)) return sum + 0.7;
+        if (poorQualityDomains.includes(d.domain)) return sum + 0.3;
+        return sum + 0.5;
+      }, 0) / decisions.length
+    : 0.5;
+
+  await updateBrainProgress(supabase, orgId, {
+    planConfidence,
+    globallyBrokenDomains,
+    orgExcludedCount: stuckDomains.length,
+    reflectionsStored: reflected ? 1 : 0,
+  });
 
   logger.info(
     `[CognitivePlanner] Cycle complete: ` +
