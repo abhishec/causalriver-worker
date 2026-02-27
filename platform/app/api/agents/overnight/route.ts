@@ -16,6 +16,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { getBrainContext } from "@/lib/brain/brain-context";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { logger } from "@/lib/logger";
 import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
 
@@ -53,6 +54,15 @@ export async function POST(req: NextRequest) {
   }
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Rate limiting: 2 req/hour per user (prevent runaway job spawning) ────
+  const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/overnight");
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Overnight agents are limited to 2 per hour." },
+      { status: 429 }
+    );
   }
 
   // ── Step 3: getCurrentWorkspaceId — isolated try/catch ───────────────────

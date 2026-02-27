@@ -42,6 +42,33 @@ const nextConfig: NextConfig = {
     CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
     // Confluence webhook HMAC-SHA256 secret — set in Confluence webhook settings
     CONFLUENCE_WEBHOOK_SECRET: process.env.CONFLUENCE_WEBHOOK_SECRET,
+    // GitHub App connector (server-side webhook validation + API calls)
+    GITHUB_APP_ID: process.env.GITHUB_APP_ID,
+    GITHUB_APP_PRIVATE_KEY: process.env.GITHUB_APP_PRIVATE_KEY,
+    GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
+    // Slack connector (OAuth + webhook validation)
+    SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
+    SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+    SLACK_SIGNING_SECRET: process.env.SLACK_SIGNING_SECRET,
+    // Jira connector
+    JIRA_CLIENT_ID: process.env.JIRA_CLIENT_ID,
+    JIRA_CLIENT_SECRET: process.env.JIRA_CLIENT_SECRET,
+    JIRA_API_TOKEN: process.env.JIRA_API_TOKEN,
+    JIRA_BASE_URL: process.env.JIRA_BASE_URL,
+    JIRA_EMAIL: process.env.JIRA_EMAIL,
+    JIRA_WEBHOOK_SECRET: process.env.JIRA_WEBHOOK_SECRET,
+    // Linear connector
+    LINEAR_SIGNING_SECRET: process.env.LINEAR_SIGNING_SECRET,
+    LINEAR_WEBHOOK_SECRET: process.env.LINEAR_WEBHOOK_SECRET,
+    // Resend (email notifications)
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    // OpenClaw plugin gateway
+    OPENCLAW_API_KEY: process.env.OPENCLAW_API_KEY,
+    OPENCLAW_GATEWAY_URL: process.env.OPENCLAW_GATEWAY_URL,
+    // Internal API security
+    NEXUS_INTERNAL_API_KEY: process.env.NEXUS_INTERNAL_API_KEY,
+    NEXUS_WEBHOOK_SECRET: process.env.NEXUS_WEBHOOK_SECRET,
+    ADMIN_SECRET: process.env.ADMIN_SECRET,
   },
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).

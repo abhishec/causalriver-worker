@@ -89,6 +89,8 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
   "/api/brain/feedback": 60,         // 60 req/min — feedback is lightweight writes
   "/api/agents/create": 10,          // 10 req/min — agent creation hits Anthropic + DB
   "/api/agents/chain": 10,           // 10 req/min — chain execution is multi-agent heavy
+  "/api/agents/run": 10,             // 10 req/min — full cognitive stack is expensive
+  "/api/agents/decompose-spec": 10,  // 10 req/min — Claude decomposition calls are expensive
   "/api/agents/overnight": 2,        // 2 req/hour — overnight orchestrator spawns many child jobs (see SESSION_RATE_WINDOWS)
   "/api/jobs/trigger": 5,            // 5 req/min — job triggers are very heavy
   "/api/connectors/sync-all": 5,     // 5 req/min — sync-all is very expensive (multi-connector)

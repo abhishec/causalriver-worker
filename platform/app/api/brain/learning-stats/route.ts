@@ -20,17 +20,17 @@ import { getLearningStats } from "@/lib/brain/agent-rl";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  // ── Auth: isolate createClient() failures so they return 401, never 500 ──
+  // ── Auth: isolate createClient() AND getUser() failures so they return 401, never 500 ──
   let supabase;
+  let user = null;
   try {
     supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  if (!user || !supabase) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

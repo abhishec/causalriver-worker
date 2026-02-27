@@ -21,6 +21,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { logger } from "@/lib/logger";
 import { executeAgent } from "@/lib/agents/execute";
 
@@ -37,6 +38,15 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Rate limiting: 10 req/min per user (full cognitive stack is expensive) ─
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/run");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Agent execution is limited to 10 per minute." },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();

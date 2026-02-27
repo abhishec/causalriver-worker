@@ -11,6 +11,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { getBrainContext } from "@/lib/brain/brain-context";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 import { createJiraTicket } from "@/lib/connectors/writeback/jira";
@@ -100,6 +101,15 @@ export async function POST(req: NextRequest) {
   }
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Rate limiting: 10 req/min per user (Claude calls are expensive) ───────
+  const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/decompose-spec");
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Spec decomposition is limited to 10 per minute." },
+      { status: 429 }
+    );
   }
 
   // ── Step 3: getCurrentWorkspaceId — isolated try/catch ───────────────────

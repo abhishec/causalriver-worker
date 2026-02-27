@@ -45,13 +45,21 @@ export async function GET(request: NextRequest) {
   }
 
   // ── Detailed health (platform admin only) ──────────────────────
+  let _detailSupabase;
+  let _detailUser = null;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    _detailSupabase = await createClient();
+    const { data } = await _detailSupabase.auth.getUser();
+    _detailUser = data?.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!_detailUser || !_detailSupabase) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  try {
+    const supabase = _detailSupabase;
+    const user = _detailUser;
 
     // Check platform admin
     const service = await createServiceClient();
@@ -131,16 +139,18 @@ export async function GET(request: NextRequest) {
  * 6. Job execution health (are scheduled jobs running?)
  */
 async function handleLearningHealth(request: NextRequest) {
-  // Auth guard — isolate createClient() so failures return 401, not 500
+  // Auth guard — isolate createClient() AND getUser() so failures return 401, not 500
   let supabase;
+  let user = null;
   try {
     supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    user = data?.user;
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!user || !supabase) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
