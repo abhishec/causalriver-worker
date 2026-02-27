@@ -9,61 +9,109 @@
  * - Split on: paragraph breaks > sentence breaks > word boundaries
  *
  * Embedding strategy:
+ * - OpenAI text-embedding-3-small (1536-dim) — real semantic embeddings
  * - Embeddings are generated asynchronously (not blocking ingestion)
  * - Full-text search (tsvector) is used immediately
- * - When embeddings are available via voyage-3/ada-002, they enhance retrieval
+ * - Vector similarity search (cosine) activates once embeddings are stored
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { generateEmbedding } from "@nexus-ai/memory-stack/embeddings";
-import { reduceDimensions } from "@nexus-ai/memory-stack/embeddings";
 import { absorbDocumentChunks } from "@/lib/brain/document-absorber";
 
-// document_chunks.embedding is vector(1536). N-gram engine produces 384 dims.
-// Pad 384 → 1536 using zero-fill via reduceDimensions (pads when input < target).
+// document_chunks.embedding is vector(1536).
+// OpenAI text-embedding-3-small produces exactly 1536 dimensions — no padding needed.
 const EMBEDDING_DIMS = 1536;
-const NGRAM_DIMS = 384;
+const EMBEDDING_BATCH_SIZE = 10;   // chunks per OpenAI batch (rate limit safety)
+const EMBEDDING_BATCH_DELAY_MS = 100; // ms between batches
 
 /**
- * Generate a 1536-dim embedding for a chunk of text using n-gram hashing.
- * No API calls required — works fully offline.
+ * Generate a real semantic embedding using OpenAI text-embedding-3-small.
+ * Returns a 1536-dim float array.
  *
- * Returns pgvector format string: "[0.1,0.2,...]"
+ * Fallback: zero vector when API key is missing or request fails.
+ * Zero vector is better than n-gram noise — it avoids polluting cosine similarity rankings.
  */
-function generateChunkEmbedding(text: string): string {
-  const ngram = generateEmbedding(text, NGRAM_DIMS);
-  const padded = reduceDimensions(ngram, EMBEDDING_DIMS);
-  return `[${padded.join(",")}]`;
+async function generateRealEmbedding(text: string): Promise<number[]> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    logger.warn("[document-ingester] OPENAI_API_KEY not set — returning zero vector fallback");
+    return new Array(EMBEDDING_DIMS).fill(0);
+  }
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-embedding-3-small",
+        input: text.slice(0, 8000), // max ~8K tokens
+        dimensions: EMBEDDING_DIMS,
+      }),
+    });
+
+    if (!response.ok) {
+      logger.warn("[document-ingester] OpenAI embedding request failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      return new Array(EMBEDDING_DIMS).fill(0);
+    }
+
+    const data = await response.json() as { data: Array<{ embedding: number[] }> };
+    return data.data[0]?.embedding ?? new Array(EMBEDDING_DIMS).fill(0);
+  } catch (err) {
+    logger.warn("[document-ingester] OpenAI embedding error", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return new Array(EMBEDDING_DIMS).fill(0);
+  }
 }
 
 /**
- * Background: generate and store embeddings for a list of chunk IDs.
+ * Background: generate and store OpenAI embeddings for a list of chunk IDs.
  * Fire-and-forget — called with void to not block the ingest response.
+ * Processes in batches of EMBEDDING_BATCH_SIZE with a short delay between batches.
  */
 async function generateEmbeddingsForChunks(
   supabase: SupabaseClient,
   chunkIds: string[],
   chunkTexts: string[]
 ): Promise<void> {
-  for (let i = 0; i < chunkIds.length; i++) {
-    try {
-      const embeddingStr = generateChunkEmbedding(chunkTexts[i]);
-      const { error } = await supabase
-        .from("document_chunks")
-        .update({ embedding: embeddingStr })
-        .eq("id", chunkIds[i]);
-      if (error) {
-        logger.warn("[document-ingester] Failed to update embedding for chunk", {
-          chunkId: chunkIds[i],
-          error: error.message,
+  for (let batchStart = 0; batchStart < chunkIds.length; batchStart += EMBEDDING_BATCH_SIZE) {
+    const batchIds = chunkIds.slice(batchStart, batchStart + EMBEDDING_BATCH_SIZE);
+    const batchTexts = chunkTexts.slice(batchStart, batchStart + EMBEDDING_BATCH_SIZE);
+
+    for (let i = 0; i < batchIds.length; i++) {
+      try {
+        const embedding = await generateRealEmbedding(batchTexts[i]);
+        const embeddingStr = `[${embedding.join(",")}]`;
+
+        const { error } = await supabase
+          .from("document_chunks")
+          .update({ embedding: embeddingStr })
+          .eq("id", batchIds[i]);
+
+        if (error) {
+          logger.warn("[document-ingester] Failed to update embedding for chunk", {
+            chunkId: batchIds[i],
+            error: error.message,
+          });
+        }
+      } catch (err) {
+        logger.warn("[document-ingester] Embedding generation failed for chunk", {
+          chunkId: batchIds[i],
+          error: err instanceof Error ? err.message : String(err),
         });
       }
-    } catch (err) {
-      logger.warn("[document-ingester] Embedding generation failed for chunk", {
-        chunkId: chunkIds[i],
-        error: err instanceof Error ? err.message : String(err),
-      });
+    }
+
+    // Rate limit safety: pause between batches (skip delay after last batch)
+    if (batchStart + EMBEDDING_BATCH_SIZE < chunkIds.length) {
+      await new Promise((resolve) => setTimeout(resolve, EMBEDDING_BATCH_DELAY_MS));
     }
   }
 }
@@ -162,7 +210,7 @@ export async function ingestDocument(
 
   logger.warn(`[document-ingester] Ingested ${chunks.length} chunks from "${params.documentTitle ?? params.sourceUrl ?? "unknown"}"`);
 
-  // Background: generate n-gram embeddings for each chunk (non-blocking).
+  // Background: generate OpenAI embeddings for each chunk (non-blocking).
   // The ingest response returns immediately; embeddings are populated async.
   if (insertedRows && insertedRows.length > 0) {
     const ids = insertedRows.map((r: { id: string }) => r.id);
@@ -221,7 +269,9 @@ export async function searchDocumentChunks(
 
   // Non-empty query: try vector similarity search first
   try {
-    const queryEmbedding = generateChunkEmbedding(query);
+    const queryEmbeddingArr = await generateRealEmbedding(query);
+    const queryEmbedding = `[${queryEmbeddingArr.join(",")}]`;
+
     const { data: vectorData, error: vectorError } = await supabase
       .rpc("search_document_chunks", {
         p_organization_id: organizationId,
