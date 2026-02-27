@@ -24,6 +24,7 @@ import { SmartSuggestionCard } from "@/components/copilot/SmartSuggestionCard";
 import type { SmartSuggestion } from "@/components/copilot/SmartSuggestionCard";
 import { useSmartSuggestions } from "@/lib/hooks/useSmartSuggestions";
 import { ContextMonitor } from "@/components/copilot/ContextMonitor";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 // ─── Service Mode ─────────────────────────────────────────────────────────────
 
@@ -69,22 +70,6 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
     "Summarize this week's scope creep alerts",
   ],
 };
-
-// ─── Mobile detection hook (sm breakpoint = 640px) ───────────────────────────
-
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 640 : false
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    setIsMobile(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return isMobile;
-}
 
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
