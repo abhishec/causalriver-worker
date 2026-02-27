@@ -45,6 +45,10 @@ export interface BrainContext {
   podMatchIntelligence?: string;      // Layer 23: recent pod match recommendations
   strongSignals24h?: string;          // Layer 24: cross-domain signals strength > 0.8
   causalAnalysis?: string;            // Layer 25: causal analysis cache from ai_memory
+  // Layer 26-27: Dynamic service layers — one layer per service (grows as new services ship)
+  // L26 = SE-aaS, L27 = AaaS, L28+ reserved for PM-aaS, OtherService-aaS, etc.
+  seaasServiceLayer?: string;         // Layer 26: SE-aaS holistic service activity (last 7d)
+  aaasServiceLayer?: string;          // Layer 27: AaaS artifact output and agent activity (24h)
 }
 
 export async function getBrainContext(
@@ -91,6 +95,8 @@ export async function getBrainContext(
       podMatchRow,
       strongSignalsRow,
       causalAnalysisRow,
+      seaasServiceRow,
+      aaasServiceRow,
     ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
@@ -306,6 +312,22 @@ export async function getBrainContext(
         .like("domain", "causal.%")
         .order("created_at", { ascending: false })
         .limit(2),
+      // Layer 26: SE-aaS Service Layer — holistic view of SE-aaS job activity (last 7 days)
+      supabase
+        .from("agent_queue")
+        .select("task_type, status")
+        .eq("organization_id", orgId)
+        .in("task_type", ["pr-review", "tdd", "impact-analysis", "early-warning", "pod-match", "scope-creep", "delivery-intelligence"])
+        .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(30),
+      // Layer 27: AaaS Service Layer — artifacts produced in last 24h (output of AaaS agents)
+      supabase
+        .from("se_aas_artifacts")
+        .select("domain_type, created_at")
+        .eq("organization_id", orgId)
+        .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .limit(50),
     ]);
 
     // Extract values safely
@@ -563,6 +585,44 @@ export async function getBrainContext(
           .slice(0, 200)}`
       : undefined;
 
+    // Layer 26: SE-aaS Service Layer — group by task_type, count success/error
+    const seaasJobRows = seaasServiceRow.status === "fulfilled"
+      ? (seaasServiceRow.value.data ?? [])
+      : [];
+    let seaasServiceLayer: string | undefined;
+    if (seaasJobRows.length > 0) {
+      const byDomain: Record<string, { total: number; success: number; error: number }> = {};
+      for (const row of seaasJobRows as Array<{ task_type: string; status: string }>) {
+        const d = row.task_type ?? "unknown";
+        if (!byDomain[d]) byDomain[d] = { total: 0, success: 0, error: 0 };
+        byDomain[d].total++;
+        if (row.status === "success") byDomain[d].success++;
+        if (row.status === "error") byDomain[d].error++;
+      }
+      const summary = Object.entries(byDomain)
+        .map(([d, c]) => `${d}:${c.total}r/${c.success}ok`)
+        .join(", ");
+      seaasServiceLayer = `## SE-aaS Service Layer (7d)\n${summary}`.slice(0, 250);
+    }
+
+    // Layer 27: AaaS Service Layer — artifacts produced in last 24h grouped by domain_type
+    const aaasArtifactRows = aaasServiceRow.status === "fulfilled"
+      ? (aaasServiceRow.value.data ?? [])
+      : [];
+    let aaasServiceLayer: string | undefined;
+    if (aaasArtifactRows.length > 0) {
+      const domainCounts: Record<string, number> = {};
+      for (const row of aaasArtifactRows as Array<{ domain_type: string }>) {
+        const d = row.domain_type ?? "unknown";
+        domainCounts[d] = (domainCounts[d] ?? 0) + 1;
+      }
+      const summary = Object.entries(domainCounts)
+        .sort(([, a], [, b]) => b - a)
+        .map(([d, c]) => `${d}:${c}`)
+        .join(", ");
+      aaasServiceLayer = `## AaaS Service Layer (24h)\n${summary}`.slice(0, 200);
+    }
+
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -644,6 +704,8 @@ export async function getBrainContext(
       podMatchIntelligence,
       strongSignals24h,
       causalAnalysis,
+      seaasServiceLayer,
+      aaasServiceLayer,
     });
 
     const result: BrainContext = {
@@ -678,6 +740,8 @@ export async function getBrainContext(
       podMatchIntelligence,
       strongSignals24h,
       causalAnalysis,
+      seaasServiceLayer,
+      aaasServiceLayer,
     };
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
@@ -729,6 +793,8 @@ function buildContextSummary(
     podMatchIntelligence?: string;
     strongSignals24h?: string;
     causalAnalysis?: string;
+    seaasServiceLayer?: string;
+    aaasServiceLayer?: string;
   }
 ): string {
   const parts: string[] = [];
@@ -871,6 +937,16 @@ function buildContextSummary(
   // Layer 25: Causal Analysis Cache
   if (ctx.causalAnalysis) {
     parts.push(ctx.causalAnalysis);
+  }
+
+  // Layer 26: SE-aaS Service Layer — holistic SE-aaS activity
+  if (ctx.seaasServiceLayer) {
+    parts.push(ctx.seaasServiceLayer);
+  }
+
+  // Layer 27: AaaS Service Layer — holistic AaaS activity
+  if (ctx.aaasServiceLayer) {
+    parts.push(ctx.aaasServiceLayer);
   }
 
   // Layer 1: Context Engine — relevant document knowledge with chunk content
