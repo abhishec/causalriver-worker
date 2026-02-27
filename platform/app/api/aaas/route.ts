@@ -684,7 +684,20 @@ function generateTransactionInterpretations(
 import { getOrgStorage, isS3Configured } from "@/lib/storage/org-storage";
 import { logger } from "@/lib/logger";
 
+// Module-level GL transaction cache.
+// Bounded at 100 entries — evict oldest when limit is reached.
+// In Lambda, each instance serves a limited set of orgs so growth is naturally bounded,
+// but explicit eviction prevents edge-case memory bloat in long-lived containers.
 const glCache = new Map<string, GLTransaction[]>();
+const GL_CACHE_MAX = 100;
+function _glCacheSet(orgId: string, txns: GLTransaction[]): void {
+  if (glCache.size >= GL_CACHE_MAX && !glCache.has(orgId)) {
+    // Evict the first (oldest) entry
+    const firstKey = glCache.keys().next().value;
+    if (firstKey !== undefined) glCache.delete(firstKey);
+  }
+  glCache.set(orgId, txns);
+}
 
 async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
   if (glCache.has(orgId)) return glCache.get(orgId)!;
@@ -694,7 +707,7 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
     try {
       const storage = getOrgStorage();
       const transactions = await storage.downloadJSON<GLTransaction[]>(orgId, "gl-data.json");
-      glCache.set(orgId, transactions);
+      _glCacheSet(orgId, transactions);
       logger.info(`[GL] Loaded ${transactions.length} txns from S3 for org ${orgId}`);
       return transactions;
     } catch (s3Err: any) {
@@ -723,7 +736,7 @@ async function getGLDataFromStorage(orgId: string): Promise<GLTransaction[]> {
     logger.warn(`[GL] Malformed JSON in storage for org ${orgId}`);
     return [];
   }
-  glCache.set(orgId, transactions);
+  _glCacheSet(orgId, transactions);
   logger.info(`[GL] Loaded ${transactions.length} txns from Supabase Storage for org ${orgId}`);
   return transactions;
 }

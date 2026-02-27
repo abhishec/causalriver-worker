@@ -125,6 +125,31 @@ const _copilotDeltaLastMs = new Map<string, number>();
 const COPILOT_CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes — matches domain-executor
 const COPILOT_DELTA_INTERVAL_MS = 5 * 60 * 1000;      // 5 minutes — max once per 5 min per org
 
+// ── Module-level cache size guard ──────────────────────────────────────────────
+// Lambda instances can serve many orgs over their lifetime. Evict expired entries
+// periodically to prevent unbounded Map growth (memory leak risk).
+const CACHE_MAX_ENTRIES = 200; // ~200 active orgs per Lambda instance is very safe
+function _evictExpiredCacheEntries(): void {
+  const now = Date.now();
+  for (const [k, v] of _correctionsCache) {
+    if (v.expiry <= now) _correctionsCache.delete(k);
+  }
+  for (const [k, v] of _learningPulseCache) {
+    if (v.expiry <= now) _learningPulseCache.delete(k);
+  }
+  // Evict oldest TTL-guard entries if Maps grow too large
+  if (_copilotCorePushLastMs.size > CACHE_MAX_ENTRIES) {
+    const sorted = [..._copilotCorePushLastMs.entries()].sort((a, b) => a[1] - b[1]);
+    sorted.slice(0, sorted.length - CACHE_MAX_ENTRIES).forEach(([k]) => _copilotCorePushLastMs.delete(k));
+  }
+  if (_copilotDeltaLastMs.size > CACHE_MAX_ENTRIES) {
+    const sorted = [..._copilotDeltaLastMs.entries()].sort((a, b) => a[1] - b[1]);
+    sorted.slice(0, sorted.length - CACHE_MAX_ENTRIES).forEach(([k]) => _copilotDeltaLastMs.delete(k));
+  }
+}
+// Eviction counter — run cleanup every ~100 requests (amortised O(1) per request)
+let _evictCounter = 0;
+
 /** Rough token estimate: ~4 chars per token for English text */
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
@@ -151,6 +176,9 @@ const buildActionKnowledge = _buildActionKnowledge;
 // ============================================================================
 
 export async function POST(request: NextRequest) {
+  // ── Amortised cache eviction: run every ~100 requests to prevent unbounded Map growth ──
+  if (++_evictCounter % 100 === 0) { _evictExpiredCacheEntries(); }
+
   try {
     let body: Record<string, unknown>;
     try {
