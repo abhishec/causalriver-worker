@@ -134,8 +134,10 @@ function addSecurityHeaders(response: NextResponse) {
 
   // ── Enterprise API metadata headers ────────────────────────────────────
   // X-API-Version: signals the current API contract version to enterprise consumers
+  // X-BrainOS-Build: short commit SHA for distributed tracing and deploy correlation
   // X-BrainOS-Env: lets consumers distinguish production from non-production responses
-  response.headers.set('X-API-Version', '1.0');
+  response.headers.set('X-API-Version', '1.0.0');
+  response.headers.set('X-BrainOS-Build', process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'local');
   response.headers.set('X-BrainOS-Env', process.env.NODE_ENV === 'production' ? 'production' : 'development');
 }
 
