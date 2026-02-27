@@ -24,7 +24,7 @@
  *      pinned       — 'true' | 'false'
  *
  *   Supported file types for upload: PDF, DOCX, plain text, Markdown.
- *   Max upload size: 50 MB.
+ *   Max upload size: 1 GB (use S3 upload path for Lambda deployments > 6 MB).
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -35,7 +35,7 @@ import { ingestDocument } from "@/lib/connectors/document-ingester";
 import { parseDocumentBuffer } from "@/lib/connectors/document-parser";
 import { logger } from "@/lib/logger";
 
-const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50 MB
+const MAX_UPLOAD_SIZE = 1024 * 1024 * 1024; // 1 GB
 
 const UPLOAD_ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -46,6 +46,9 @@ const UPLOAD_ALLOWED_MIME_TYPES = new Set([
 ]);
 
 export const dynamic = "force-dynamic";
+// Allow up to 1 GB uploads — Next.js default body limit is 4 MB.
+// For Amplify/Lambda deployments, files > 6 MB must use the S3 upload path.
+export const maxDuration = 60; // seconds (Vercel/Amplify max for large file processing)
 
 // Supported source types for the ingest pipeline
 const validSourceTypes = ["pdf", "confluence", "github", "markdown", "text"] as const;
