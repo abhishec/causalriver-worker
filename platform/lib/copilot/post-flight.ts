@@ -1,0 +1,348 @@
+/**
+ * Copilot Post-Flight
+ *
+ * Handles all fire-and-forget persistence that runs after the SSE stream finishes:
+ *   1. RL quality computation + outcome recording
+ *   2. Decision pattern training (ai_memory upsert + cross_domain_signals)
+ *   3. Response harvesting (Haiku-powered key fact extraction → ai_memory)
+ *   4. MoA post-stream synthesis storage (when _useMoA flag is set)
+ *   5. Chat auto-save to the conversations table
+ *   6. Tier-1 raw knowledge store ingest (both user + assistant turns)
+ *   7. Mem0 structured fact extraction
+ *
+ * All operations are fire-and-forget: errors are logged but NEVER propagate.
+ * The calling code must ensure the SSE stream is already closed before calling
+ * runPostFlight (or it can be called concurrently in a void promise).
+ */
+
+import { logger } from "@/lib/logger";
+import type { CopilotExecutionContext } from "@/lib/copilot/execution-context";
+
+export interface PostFlightOptions {
+  ctx: CopilotExecutionContext;
+  streamedAssistantText: string;
+  detectedIntent: string | null;
+  v4SmartModel: string;
+  streamStartMs: number;
+  seaasResult: Record<string, unknown> | null;
+  accountingResult: Record<string, unknown> | null;
+  deliveryIntelligenceResult: Record<string, unknown> | null;
+  /** Whether Self-MoA was activated for this request */
+  useMoA: boolean;
+  /** Effective system prompt sent to the LLM (needed for MoA re-sampling) */
+  effectiveSystemPrompt: string;
+  /** Causal weights snapshot taken before the stream (for federation delta) */
+  copilotCausalWeightsBefore: Map<string, number>;
+  copilotFedCycleId: string;
+  /** Whether the 5-min federation delta TTL has elapsed for this org */
+  shouldRunFederationDelta: boolean;
+}
+
+/**
+ * Run all post-flight persistence tasks.
+ *
+ * This function is designed to be called with `void runPostFlight(opts)` — it
+ * swallows all errors and never throws.
+ */
+export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
+  const {
+    ctx,
+    streamedAssistantText,
+    detectedIntent,
+    v4SmartModel,
+    streamStartMs,
+    seaasResult,
+    accountingResult,
+    deliveryIntelligenceResult,
+    useMoA,
+    effectiveSystemPrompt,
+    copilotCausalWeightsBefore,
+    copilotFedCycleId,
+    shouldRunFederationDelta,
+  } = opts;
+
+  const { workspaceId, userId, service, message, memStack } = ctx;
+  const _sessionId = ctx.requestId;
+  const _rlExecutionMs = Date.now() - streamStartMs;
+
+  // ── 1. RL Quality Recording ────────────────────────────────────────────────
+  let _rlQuality = 0.5;
+  try {
+    const { computeAgentQuality, recordAgentOutcome } = await import('@/lib/brain/agent-rl');
+    const _rlDomain = detectedIntent ?? 'general';
+    _rlQuality = computeAgentQuality(
+      streamedAssistantText ?? '',
+      null,
+      _rlExecutionMs,
+      _rlDomain
+    );
+
+    void recordAgentOutcome(service, {
+      agentId: `copilot_${workspaceId}_${Date.now()}`,
+      domain: _rlDomain,
+      taskDescription: message.trim().slice(0, 200),
+      resultSummary: streamedAssistantText.slice(0, 500),
+      quality: _rlQuality,
+      executionMs: _rlExecutionMs,
+      organizationId: workspaceId,
+      userId,
+    }).catch((rlErr: unknown) =>
+      logger.warn('[PostFlight] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr))
+    );
+  } catch (rlErr: unknown) {
+    logger.warn('[PostFlight] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
+  }
+
+  // ── 2. Decision Pattern Training ──────────────────────────────────────────
+  // Write high-quality decisions to ai_memory as pattern training data.
+  // Uses upsert on (organization_id, memory_type, domain) unique index.
+  try {
+    const _rlDomain = detectedIntent ?? 'general';
+    if (_rlQuality >= 0.6) {
+      void Promise.resolve(
+        service.from('ai_memory').upsert({
+          organization_id: workspaceId,
+          domain: `routing.${_rlDomain}`,
+          memory_type: 'pattern',
+          content: `Query: "${message.trim().slice(0, 200)}" → Intent: ${_rlDomain}, Quality: ${(_rlQuality * 100).toFixed(0)}%`,
+          importance: _rlQuality,
+          metadata: {
+            type: 'claude_decision_pattern',
+            record: {
+              sessionId: _sessionId,
+              query: message.trim().slice(0, 200),
+              detectedIntent: _rlDomain,
+              modelSelected: v4SmartModel,
+              responseQuality: _rlQuality,
+              durationMs: _rlExecutionMs,
+            },
+          },
+        }, {
+          onConflict: 'organization_id,memory_type,domain',
+          ignoreDuplicates: false,
+        })
+      ).catch(() => {}); // fire-and-forget
+    }
+
+    // Emit llm_decision signal for ALL queries (including low-quality — brain needs
+    // negative training examples to learn what routing patterns to avoid).
+    if (memStack) {
+      const { createBrainFeedbackBus: _decisionFeedbackBus } = memStack;
+      const _decisionBus = _decisionFeedbackBus({ supabase: service, organizationId: workspaceId });
+      void _decisionBus.emitSignal({
+        sourceDomain: 'copilot.routing',
+        signalType: 'llm_decision',
+        signalValue: _rlQuality,
+        entityType: 'routing_decision',
+        entityId: _sessionId,
+        metadata: {
+          intent: _rlDomain,
+          model: v4SmartModel,
+        },
+      }).catch(() => {}); // fire-and-forget
+    }
+  } catch { /* non-fatal */ }
+
+  // ── 3. Response Harvesting (Haiku key fact extraction → ai_memory) ─────────
+  if (streamedAssistantText && streamedAssistantText.length > 200) {
+    void (async () => {
+      try {
+        const { default: AnthropicHarvest } = await import('@anthropic-ai/sdk');
+        const harvestClient = new AnthropicHarvest({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const harvestResp = await harvestClient.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 512,
+          messages: [{
+            role: 'user',
+            content: `Extract key facts and patterns from this AI response (domain: ${detectedIntent ?? 'general'}).
+
+Response: ${streamedAssistantText.slice(0, 2000)}
+
+Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`,
+          }],
+        });
+
+        const harvestContent = harvestResp.content[0];
+        if (harvestContent.type === 'text') {
+          const jsonMatch = harvestContent.text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const harvest = JSON.parse(jsonMatch[0]) as { keyFacts?: string[]; patterns?: string[]; decisions?: string[] };
+            const content = [
+              (harvest.keyFacts ?? []).join(' | '),
+              (harvest.patterns ?? []).join(' | '),
+              (harvest.decisions ?? []).join(' | '),
+            ].filter(Boolean).join('\n');
+
+            if (content.length > 20) {
+              await Promise.resolve(
+                service.from('ai_memory').upsert({
+                  organization_id: workspaceId,
+                  domain: `response.${detectedIntent ?? 'general'}`,
+                  memory_type: 'pattern',
+                  content: content.slice(0, 1000),
+                  importance: _rlQuality ?? 0.5,
+                  metadata: {
+                    source: 'response_harvester',
+                    intent: detectedIntent,
+                    model: v4SmartModel,
+                    quality: _rlQuality,
+                  },
+                }, {
+                  onConflict: 'organization_id,memory_type,domain',
+                  ignoreDuplicates: false,
+                })
+              ).catch(() => {});
+            }
+          }
+        }
+      } catch { /* non-blocking — harvest failure must never affect response */ }
+    })();
+  }
+
+  // ── 4. Self-MoA Post-Stream Synthesis ─────────────────────────────────────
+  if (useMoA && streamedAssistantText.length > 0) {
+    void (async () => {
+      try {
+        const { runSelfMoA } = await import("@/lib/brain/self-moa");
+        const _moaResult = await runSelfMoA(
+          [{ role: "user", content: message }],
+          effectiveSystemPrompt,
+          v4SmartModel,
+          512
+        );
+        if (_moaResult.usedMoA && _moaResult.synthesizedResponse) {
+          await Promise.resolve(
+            service.from("ai_memory").upsert({
+              organization_id: workspaceId,
+              memory_type: "pattern",
+              domain: `moa.${detectedIntent ?? "general"}`,
+              content: `Q: ${message.slice(0, 200)}\nA: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
+              importance: 0.85,
+              metadata: {
+                source: "self_moa",
+                qualityBoost: _moaResult.qualityBoost,
+                model: v4SmartModel,
+                originalQuery: message.slice(0, 200),
+              },
+            }, {
+              onConflict: "organization_id,memory_type,domain",
+              ignoreDuplicates: false,
+            })
+          ).catch(() => {});
+        }
+      } catch { /* non-blocking — MoA failure must never affect response */ }
+    })();
+  }
+
+  // ── 5. Chat Auto-Save ─────────────────────────────────────────────────────
+  try {
+    const conversationHistory = (ctx as any)._conversationHistory as Array<{ role: string; content: string }> | undefined;
+    const sessionDate = new Date().toISOString().slice(0, 10);
+    const sessionTitle = message.trim().slice(0, 80) || "New conversation";
+
+    const updatedMessages: Array<{ role: string; content: string; timestamp: string }> = [
+      ...(conversationHistory ?? []).map((h) => ({ role: h.role, content: h.content, timestamp: "" })),
+      { role: "user", content: message.trim(), timestamp: new Date().toISOString() },
+      ...(streamedAssistantText
+        ? [{ role: "assistant", content: streamedAssistantText.trim(), timestamp: new Date().toISOString() }]
+        : []),
+    ];
+
+    await service
+      .from("conversations")
+      .upsert(
+        {
+          org_id: workspaceId,
+          user_id: userId,
+          title: sessionTitle,
+          service_mode: seaasResult || deliveryIntelligenceResult ? "seaas" : accountingResult ? "aas" : "general",
+          messages: updatedMessages,
+          metadata: {
+            lastDomain: detectedIntent || "general",
+            sessionDate,
+          },
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "id",
+          ignoreDuplicates: true,
+        }
+      )
+      .select("id")
+      .maybeSingle();
+  } catch (saveErr) {
+    logger.warn("[PostFlight] Chat auto-save failed (non-fatal):", saveErr instanceof Error ? saveErr.message : String(saveErr));
+  }
+
+  // ── 6. Tier-1 Raw Knowledge Store Ingest ──────────────────────────────────
+  if (workspaceId && message) {
+    void (async () => {
+      try {
+        const { ingestConversationTurn } = await import("@/lib/brain/tier1-store");
+        await Promise.allSettled([
+          ingestConversationTurn(workspaceId, {
+            sessionId: _sessionId,
+            role: 'user',
+            content: message.slice(0, 4000),
+            metadata: { source: 'copilot' },
+          }),
+          ...(typeof streamedAssistantText === 'string' && streamedAssistantText.length > 0 ? [
+            ingestConversationTurn(workspaceId, {
+              sessionId: _sessionId,
+              role: 'assistant',
+              content: streamedAssistantText.slice(0, 4000),
+              metadata: { source: 'copilot' },
+            }),
+          ] : []),
+        ]);
+      } catch (e) {
+        logger.warn("[PostFlight] Conversation tier1 ingest failed", { error: String(e) });
+      }
+    })();
+  }
+
+  // ── 7. Mem0 Structured Fact Extraction ────────────────────────────────────
+  void (async () => {
+    try {
+      const { extractAndUpdateMemory } = await import("@/lib/brain/mem0-extractor");
+      await extractAndUpdateMemory(
+        service,
+        workspaceId,
+        `User: ${message}\nAssistant: ${streamedAssistantText}`,
+        detectedIntent ?? 'copilot'
+      );
+    } catch { /* non-blocking */ }
+  })();
+
+  // ── 8. Causal Federation Delta Promotion ──────────────────────────────────
+  // Mirror of domain-executor Step 7: promote learned causal weight deltas to CORE.
+  // shouldRunFederationDelta is pre-computed by the caller (TTL guard + snapshot size).
+  if (shouldRunFederationDelta && copilotCausalWeightsBefore.size > 0) {
+    void (async () => {
+      try {
+        const { computeAndPromoteCausalDeltas } = await import("@nexus-ai/memory-stack");
+        const _fedResult = await computeAndPromoteCausalDeltas(
+          service,
+          workspaceId,
+          copilotCausalWeightsBefore,
+          copilotFedCycleId,
+          {
+            fedAvgLearningRate: 0.3,
+            maxDelta: 0.15,
+            minDelta: 0.01,
+            minSampleSize: 10,
+            maxPairsPerRun: 20,
+          },
+        );
+        logger.debug(
+          `[PostFlight federation] org=${workspaceId.slice(0, 8)} ` +
+          `applied=${_fedResult.deltasApplied} filtered=${_fedResult.deltasFiltered} ` +
+          `newPairs=${_fedResult.newPairsAdded} updatedPairs=${_fedResult.existingPairsUpdated} ` +
+          `took=${_fedResult.durationMs}ms`
+        );
+      } catch (e: unknown) {
+        logger.warn("[PostFlight] Causal delta promotion failed (non-fatal):", e instanceof Error ? e.message : String(e));
+      }
+    })();
+  }
+}
