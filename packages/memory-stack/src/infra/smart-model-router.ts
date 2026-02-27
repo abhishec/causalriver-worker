@@ -1,21 +1,25 @@
 /**
- * Smart Model Router — Cost-Optimized LLM Model Selection
+ * Smart Model Router — DAAO Cost-Optimized LLM Model Selection
  * =========================================================
  *
- * Automatically selects between Haiku (cheap/fast) and Sonnet (powerful/expensive)
- * based on query complexity. Maintains design-partner-grade output quality while
- * cutting LLM costs 60-70%.
+ * Implements Difficulty-Aware Adaptive Orchestration (DAAO):
+ * Route queries to appropriate model based on complexity assessment.
+ * Research result: 84% cost reduction, +11% quality vs single-model approach.
+ * (DAAO paper, 2025 — Difficulty-Aware Adaptive Orchestration for LLMs)
  *
- * Strategy:
- *   - Haiku ($0.001/$0.005 per 1K): Simple Q&A, factual lookups, status checks,
+ * Three-tier routing:
+ *   - Haiku  ($0.80/M tokens): Simple Q&A, factual lookups, status checks,
  *     structured extraction, greetings, single-domain questions
- *   - Sonnet ($0.003/$0.015 per 1K): Multi-domain analysis, strategic planning,
+ *   - Sonnet ($15/M tokens):  Multi-domain analysis, strategic planning,
  *     causal reasoning, playbook generation, what-if scenarios, executive briefings
+ *   - Opus   ($75/M tokens):  Cross-system debugging (3+ system boundaries),
+ *     deep root-cause analysis, architectural decisions with long-term impact,
+ *     expert-level multi-domain synthesis
  *
  * The router analyzes the query text for complexity signals:
- *   - Multi-domain mentions → Sonnet
+ *   - Multi-domain mentions → Sonnet or Opus
  *   - Strategic/planning keywords → Sonnet
- *   - Causal/why/how questions → Sonnet
+ *   - Expert-level cross-system reasoning → Opus
  *   - Simple lookups/status → Haiku
  *   - Short queries without complexity markers → Haiku
  *
@@ -33,10 +37,31 @@
 export const MODEL_FAST = 'claude-haiku-4-5-20251001';
 
 /** Deep model — full reasoning power for complex multi-domain analysis */
-export const MODEL_DEEP = 'claude-sonnet-4-20250514';
+export const MODEL_DEEP = 'claude-sonnet-4-6';
 
-/** Premium model — for explicitly premium features only */
-export const MODEL_PREMIUM = 'claude-sonnet-4-5-20250929';
+/** Expert model — cross-system root-cause, architectural decisions, 3+ system boundaries */
+export const MODEL_EXPERT = 'claude-opus-4-6';
+
+// ============================================================================
+// DAAO TYPES
+// ============================================================================
+
+/** The three model tiers in the DAAO routing system */
+export type ModelTier = 'haiku' | 'sonnet' | 'opus';
+
+/** Full routing decision with rationale, for brain RL capture */
+export interface RoutingDecision {
+  /** Full model ID string */
+  model: string;
+  /** Tier label */
+  tier: ModelTier;
+  /** Human-readable rationale for the selection */
+  reasoning: string;
+  /** 0-1 complexity score that drove the decision */
+  complexityScore: number;
+  /** Cost bucket for budgeting and reporting */
+  estimatedCost: 'low' | 'medium' | 'high';
+}
 
 // ============================================================================
 // COMPLEXITY DETECTION
@@ -66,6 +91,27 @@ const STRATEGIC_KEYWORDS = new Set([
   'holistic', 'comprehensive', 'end-to-end', 'full picture',
 ]);
 
+/**
+ * Expert-level signals that push routing to Opus.
+ * These represent queries crossing 3+ system boundaries or requiring
+ * architectural-level reasoning beyond Sonnet's optimal range.
+ */
+const EXPERT_KEYWORDS = new Set([
+  // Cross-system debugging
+  'debug', 'debugging', 'root cause', 'investigate', 'diagnose', 'trace',
+  'why does', 'why is it', 'intermittent', 'flaky', 'race condition',
+  // Architectural decisions
+  'architect', 'architecture', 'design decision', 'long-term', 'trade-off between',
+  'refactor entire', 'migrate entire', 'replace entire', 'overhaul',
+  'system design', 'scalability', 'performance bottleneck',
+  // Deep multi-system synthesis
+  'across all', 'every system', 'entire platform', 'full stack',
+  'end to end debugging', 'infrastructure + application', 'database + api + frontend',
+  // Expert analysis
+  'comprehensive audit', 'security audit', 'performance audit', 'full audit',
+  'post-mortem', 'incident analysis', 'blameless review',
+]);
+
 /** Simple query patterns that Haiku handles perfectly */
 const SIMPLE_PATTERNS = [
   // Greetings
@@ -91,7 +137,7 @@ const DOMAIN_KEYWORDS = new Set([
 export interface ComplexityResult {
   /** Selected model ID */
   model: string;
-  /** Complexity score (0-1). >0.4 = Sonnet territory */
+  /** Complexity score (0-1). <0.4 = Haiku, 0.4-0.75 = Sonnet, >0.75 = Opus */
   score: number;
   /** Why this model was selected */
   reason: string;
@@ -101,6 +147,7 @@ export interface ComplexityResult {
 
 /**
  * Analyze query complexity and select the optimal model.
+ * Implements DAAO three-tier routing: Haiku → Sonnet → Opus.
  *
  * @param query - The user's message
  * @param context - Optional context about the request
@@ -173,6 +220,23 @@ export function routeModel(
     signals.push('short_query');
   }
 
+  // ── Expert keyword detection → Opus signal ───────────────────────
+  let expertHits = 0;
+  for (const keyword of EXPERT_KEYWORDS) {
+    if (keyword.includes(' ')) {
+      if (lowerQuery.includes(keyword)) expertHits++;
+    } else {
+      if (lowerQuery.split(/\s+/).includes(keyword)) expertHits++;
+    }
+  }
+  if (expertHits >= 2) {
+    score += 0.5;
+    signals.push(`expert_keywords(${expertHits})`);
+  } else if (expertHits === 1) {
+    score += 0.25;
+    signals.push(`expert_keywords(${expertHits})`);
+  }
+
   // ── Strategic keyword detection ──────────────────────────────────
   const words = lowerQuery.split(/\s+/);
   let strategicHits = 0;
@@ -225,14 +289,25 @@ export function routeModel(
   // Clamp score
   const finalScore = Math.max(0, Math.min(1, score));
 
-  // Decision threshold: 0.4
-  // Below 0.4 → Haiku (simple/structured queries)
-  // 0.4 and above → Sonnet (complex/strategic queries)
+  // ── DAAO Three-Tier Decision ─────────────────────────────────────
+  // < 0.40  → Haiku  (simple/structured queries, majority of traffic)
+  // 0.40-0.75 → Sonnet (moderate complexity, multi-domain, strategic)
+  // >= 0.75 → Opus   (expert-level, 3+ system boundaries, architectural)
   const SONNET_THRESHOLD = 0.4;
-  const selectedModel = finalScore >= SONNET_THRESHOLD ? MODEL_DEEP : MODEL_FAST;
+  const OPUS_THRESHOLD = 0.75;
 
+  let selectedModel: string;
+  if (finalScore >= OPUS_THRESHOLD) {
+    selectedModel = MODEL_EXPERT;
+  } else if (finalScore >= SONNET_THRESHOLD) {
+    selectedModel = MODEL_DEEP;
+  } else {
+    selectedModel = MODEL_FAST;
+  }
+
+  const tierLabel = finalScore >= OPUS_THRESHOLD ? 'Opus' : finalScore >= SONNET_THRESHOLD ? 'Sonnet' : 'Haiku';
   const reason = finalScore >= SONNET_THRESHOLD
-    ? `Complex query (score ${finalScore.toFixed(2)}): ${signals.join(', ')}`
+    ? `${tierLabel} query (score ${finalScore.toFixed(2)}): ${signals.join(', ')}`
     : `Simple query (score ${finalScore.toFixed(2)}): Haiku provides equivalent quality`;
 
   return {
@@ -251,6 +326,48 @@ export function selectModel(
   context?: Parameters<typeof routeModel>[1],
 ): string {
   return routeModel(query, context).model;
+}
+
+/**
+ * DAAO full routing decision — returns RoutingDecision for brain RL capture.
+ * Use this when you need to log the decision (tier, score, cost) to the brain.
+ */
+export function routeQueryDAA(
+  message: string,
+  conversationHistory: Array<{ role: string }>,
+  hasSEaaSContext: boolean,
+  forceModel?: string,
+): RoutingDecision {
+  if (forceModel) {
+    const tier: ModelTier = forceModel.includes('haiku') ? 'haiku'
+      : forceModel.includes('opus') ? 'opus'
+      : 'sonnet';
+    return {
+      model: forceModel,
+      tier,
+      reasoning: 'forced',
+      complexityScore: 0.5,
+      estimatedCost: 'medium',
+    };
+  }
+
+  const result = routeModel(message, {
+    hasConversationHistory: conversationHistory.length > 0,
+    conversationTurns: conversationHistory.length,
+    hasDomainResults: hasSEaaSContext,
+  });
+
+  const tier: ModelTier = result.model === MODEL_EXPERT ? 'opus'
+    : result.model === MODEL_DEEP ? 'sonnet'
+    : 'haiku';
+
+  return {
+    model: result.model,
+    tier,
+    reasoning: result.reason,
+    complexityScore: result.score,
+    estimatedCost: tier === 'haiku' ? 'low' : tier === 'sonnet' ? 'medium' : 'high',
+  };
 }
 
 /**

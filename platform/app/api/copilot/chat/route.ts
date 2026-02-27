@@ -4046,8 +4046,8 @@ No connectors are configured yet. When the user asks for data from any source (S
       // Non-fatal: agent status is enrichment only
     }
 
-    // ── Smart model selection: Haiku for simple, Sonnet for complex ──
-    // Brain IQ gates the final model choice: IQ < 10 → Haiku regardless of query complexity.
+    // ── DAAO: Difficulty-Aware Adaptive Orchestration — 3-tier model routing ──
+    // Haiku (simple) → Sonnet (moderate) → Opus (expert). Brain IQ gates: IQ < 10 → Haiku.
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModelBase = selectSmartModel(message, {
       commanderComplexity: commandResult?.dispatch?.complexityScore,
@@ -4086,8 +4086,8 @@ No connectors are configured yet. When the user asks for data from any source (S
       routedDomain: seaasRoute?.domainType ?? null,
       modelSelected: v4SmartModel,
       modelRationale: brainIqForRouting < 10
-        ? `Brain IQ ${brainIqForRouting} < 10: downgraded to Haiku`
-        : `Brain IQ ${brainIqForRouting}: selected ${v4SmartModel}`,
+        ? `Brain IQ ${brainIqForRouting} < 10: DAAO downgraded to Haiku`
+        : `DAAO score → ${v4SmartModel} (Brain IQ: ${brainIqForRouting})`,
       brainContextUsed: !!brainContext,
       brainIqAtDecision: brainIqForRouting ?? 0,
       causalEdgesAvailable: causalEdges?.length ?? 0,

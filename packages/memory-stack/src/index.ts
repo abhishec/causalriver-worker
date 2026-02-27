@@ -552,15 +552,18 @@ export {
   type EnhancedDecisionIntelligence,
 } from './orchestrator/llm-brain-amplifier';
 
-// Smart Model Router — Cost-Optimized LLM Model Selection
+// Smart Model Router — DAAO Cost-Optimized LLM Model Selection
 export {
   routeModel,
+  routeQueryDAA,
   selectModel,
   routeActionDomainModel,
   MODEL_FAST,
   MODEL_DEEP,
-  MODEL_PREMIUM,
+  MODEL_EXPERT,
   type ComplexityResult,
+  type ModelTier,
+  type RoutingDecision,
 } from './infra/smart-model-router';
 
 // Response Feedback Loop (query → correction → memory)
