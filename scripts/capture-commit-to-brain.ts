@@ -14,6 +14,31 @@ const COMMIT_HASH = process.env.COMMIT_HASH ?? "unknown";
 const COMMIT_MESSAGE = process.env.COMMIT_MESSAGE ?? "";
 const COMMIT_AUTHOR = process.env.COMMIT_AUTHOR ?? "unknown";
 const COMMIT_TIMESTAMP = process.env.COMMIT_TIMESTAMP ?? new Date().toISOString();
+const APP_URL = process.env.APP_URL ?? "https://platform.usebrainos.com";
+const CRON_SECRET = process.env.CRON_SECRET ?? "";
+
+/**
+ * Commit prefixes that signal a session boundary — meaning the commit
+ * represents a meaningful system-level change to the brain, RL pipeline,
+ * or security layer.  When one of these is detected we fire an additional
+ * CC learning consolidation snapshot so the brain captures the full session
+ * context at the moment the code lands in production.
+ */
+const SESSION_BOUNDARY_PREFIXES = [
+  "feat(brain)",
+  "feat(rl)",
+  "fix(rl-audit)",
+  "fix(security)",
+  "fix(audit",
+  "feat(orchestrat",
+  "feat(memory",
+  "feat(session",
+];
+
+function isSessionBoundaryCommit(message: string): boolean {
+  const lower = message.toLowerCase();
+  return SESSION_BOUNDARY_PREFIXES.some((prefix) => lower.startsWith(prefix));
+}
 
 async function main() {
   console.log(`Capturing commit ${COMMIT_HASH.slice(0, 7)} to brain...`);
@@ -139,6 +164,41 @@ Keep it factual, technical, and under 300 words. No markdown headers.`,
   console.log(
     `Commit ${COMMIT_HASH.slice(0, 7)} captured to brain (domain: ${domain}, importance: ${importance})`
   );
+
+  // ── Session boundary check ─────────────────────────────────────────────────
+  // If this commit is tagged as a brain/rl/security session boundary, also
+  // fire the CC learning consolidation endpoint so the brain gets a full
+  // session snapshot at the moment the code lands — not just the raw commit.
+  if (isSessionBoundaryCommit(COMMIT_MESSAGE) && CRON_SECRET) {
+    console.log(
+      `Session boundary commit detected ("${COMMIT_MESSAGE.slice(0, 60)}..."). Triggering CC learning consolidation...`
+    );
+    try {
+      const consolidateResp = await fetch(`${APP_URL}/api/brain/cc-learning`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${CRON_SECRET}`,
+        },
+        signal: AbortSignal.timeout(120_000),
+      });
+
+      if (consolidateResp.ok) {
+        const result = (await consolidateResp.json()) as {
+          recordsProcessed?: number;
+          orgsUpdated?: number;
+        };
+        console.log(
+          `CC learning consolidation complete: ${result.recordsProcessed ?? 0} records, ${result.orgsUpdated ?? 0} orgs updated`
+        );
+      } else {
+        console.warn(
+          `CC learning consolidation returned ${consolidateResp.status} (non-fatal)`
+        );
+      }
+    } catch (err) {
+      console.warn("CC learning consolidation failed (non-fatal):", err);
+    }
+  }
 }
 
 function detectDomain(message: string): string {

@@ -164,6 +164,64 @@ export async function captureSessionSummary(
   }
 }
 
+/**
+ * Write a single CC decision pattern to ai_memory.
+ *
+ * Use this when the command center makes a meaningful routing, model-selection,
+ * or architectural decision that future sessions should learn from.
+ */
+export async function captureDecisionPattern(
+  supabase: SupabaseClient,
+  orgId: string,
+  pattern: string
+): Promise<void> {
+  try {
+    await universalBrainWrite(supabase, orgId, {
+      source: "brain.evolution",
+      eventType: "decision_pattern",
+      content: pattern,
+      importance: 0.8,
+      domain: "session.decision_pattern",
+      metadata: {
+        event_source: "command_center_session",
+        capturedAt: new Date().toISOString(),
+      },
+    });
+  } catch {
+    return;
+  }
+}
+
+/**
+ * Write a lesson learned (debugging insight, anti-pattern fix) to ai_memory.
+ *
+ * @param category  Short slug for the type of lesson, e.g. "rls", "amplify",
+ *                  "security", "rl", "routing". Becomes part of the domain key.
+ */
+export async function captureLessonLearned(
+  supabase: SupabaseClient,
+  orgId: string,
+  lesson: string,
+  category: string
+): Promise<void> {
+  try {
+    await universalBrainWrite(supabase, orgId, {
+      source: "brain.evolution",
+      eventType: "lesson_learned",
+      content: lesson,
+      importance: 0.85,
+      domain: `session.lesson.${category}`,
+      metadata: {
+        event_source: "command_center_session",
+        category,
+        capturedAt: new Date().toISOString(),
+      },
+    });
+  } catch {
+    return;
+  }
+}
+
 export async function captureCurrentSessionLearnings(
   supabase: SupabaseClient,
   orgId: string

@@ -154,6 +154,23 @@ jobs:
             "${BASE_URL}/api/cron/autonomous-monitor" \
             || echo "autonomous-monitor failed (non-fatal)"
 
+      # ── CC Learning Consolidation (only on 4-hour trigger or manual dispatch) ─
+      # Reads ai_memory records written by the command center in the last 8 hours
+      # (event_source IN command_center_session, git_commit_training,
+      # orchestration_intelligence), uses Haiku to synthesise a rolling digest,
+      # and upserts "session.cc_consolidation" back into ai_memory so the brain
+      # carries forward what the CC learned each day — not just individual commits.
+      - name: CC Learning Consolidation (4-hour boundary)
+        if: ${{ github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/brain/cc-learning ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 120 \
+            "${BASE_URL}/api/brain/cc-learning" \
+            || echo "cc-learning consolidation failed (non-fatal)"
+
       # ── RLVR Ground-Truth Verification (daily 3 AM UTC) ─────────────────────
       # Compares AI predictions to actual outcomes (churn, scope-creep, health
       # deltas). Applies asymmetric RL rewards: +0.1 correct, -0.05 wrong.
