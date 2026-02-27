@@ -4059,7 +4059,18 @@ No connectors are configured yet. When the user asks for data from any source (S
     // Apply Brain IQ gate: if brain is not ready, downgrade general copilot queries to Haiku
     const v4SmartModel = brainIqForRouting < 10 ? "claude-haiku-4-5-20251001" : v4SmartModelBase;
 
-    // ── Orchestration Capture: model selection decision → brain training ──
+    // ── Self-MoA: Dual top_p synthesis flag ─────────────────────────────
+    // For high-stakes queries (complexity >= 0.65 + strategic phrases):
+    // run at top_p=0.85 (focused) + top_p=0.99 (exploratory) post-stream,
+    // synthesize with Haiku, store as high-quality reference in ai_memory.
+    // Fire-and-forget — never blocks the SSE stream.
+    const { shouldUseMoA: _shouldUseMoA } = await import("@/lib/brain/self-moa");
+    const _useMoA = _shouldUseMoA(message, commandResult?.dispatch?.complexityScore ?? 0);
+    if (_useMoA) {
+      logger.debug(`[Self-MoA] Activated for high-stakes query: complexity=${commandResult?.dispatch?.complexityScore?.toFixed(2)} query="${message.slice(0, 80)}"`);
+    }
+
+        // ── Orchestration Capture: model selection decision → brain training ──
     // Fire-and-forget: never block user response
     captureModelSelection(
       service,
@@ -4626,7 +4637,48 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`
         })();
 
 
-        // ── NB-063: Push causal learnings from this interaction to CORE ───────
+        // ── Self-MoA: Post-stream synthesis → ai_memory ──────────────────
+        // For high-stakes queries where _useMoA was set: run dual top_p sampling
+        // + Haiku synthesis and store the result as a high-quality Q&A reference.
+        // Brain accumulates these pairs for future few-shot context enrichment.
+        // Fire-and-forget — never blocks response delivery.
+        if (_useMoA && streamedAssistantText.length > 0) {
+          void (async () => {
+            try {
+              const { runSelfMoA } = await import("@/lib/brain/self-moa");
+              const _moaResult = await runSelfMoA(
+                [{ role: "user", content: message }],
+                effectiveSystemPrompt,
+                v4SmartModel,
+                512
+              );
+              if (_moaResult.usedMoA && _moaResult.synthesizedResponse) {
+                await Promise.resolve(
+                  service.from("ai_memory").upsert({
+                    organization_id: workspaceId,
+                    memory_type: "pattern",
+                    domain: `moa.${detectedIntent ?? "general"}`,
+                    content: `Q: ${message.slice(0, 200)}
+A: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
+                    importance: 0.85,
+                    metadata: {
+                      source: "self_moa",
+                      qualityBoost: _moaResult.qualityBoost,
+                      model: v4SmartModel,
+                      originalQuery: message.slice(0, 200),
+                    },
+                  }, {
+                    onConflict: "organization_id,memory_type,domain",
+                    ignoreDuplicates: false,
+                  })
+                ).catch(() => {});
+                logger.debug(`[Self-MoA] Stored high-quality reference for domain=${detectedIntent ?? "general"} boost=${_moaResult.qualityBoost}`);
+              }
+            } catch { /* non-blocking — MoA failure must never affect response */ }
+          })();
+        }
+
+                // ── NB-063: Push causal learnings from this interaction to CORE ───────
         // Mirror of domain-executor Step 7: after the feedback bus fires and
         // triggerEvolution() has potentially updated causal edge weights, compute
         // what changed vs the pre-stream snapshot and promote only the deltas to CORE.

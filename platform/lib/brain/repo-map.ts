@@ -356,7 +356,6 @@ export async function buildRepoMap(
   const project = new Project({
     tsConfigFilePath: tsConfigPath,
     skipAddingFilesFromTsConfig: false,
-    skipFileDependencyResolution: true, // faster — we build our own graph
     compilerOptions: {
       skipLibCheck: true,
     },
