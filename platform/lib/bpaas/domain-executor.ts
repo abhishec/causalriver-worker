@@ -154,11 +154,12 @@ function pickPolicyCheckEvent(
     // then canonical event names as fallbacks.
     const escalateMatch = firstMatch(
       // Template-specific escalation events (checked first for correct routing)
-      "fraud_signals",            // insurance_claim (fraud detected → FRAUD_REVIEW)
-      "rm_missing",               // compliance_audit
+      "fraud_signals",              // insurance_claim (fraud → FRAUD_REVIEW)
+      "rm_missing",                 // compliance_audit
       "active_enterprise_customer", // ar_collections
-      "dependency_conflict",      // product_workflow
-      "unidentified_transaction", // financial_close
+      "dependency_conflict",        // product_workflow
+      "unidentified_transaction",   // financial_close
+      "elevated_review_triggered",  // dispute_resolution
       // Generic canonical escalation events
       "policy_fail",
       "escalate",
