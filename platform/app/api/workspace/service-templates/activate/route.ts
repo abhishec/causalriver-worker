@@ -61,16 +61,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Only workspace admins can activate services" }, { status: 403 });
     }
 
-    // Verify workspace exists
-    const { data: workspace } = await admin
-      .from("ai_workspace")
-      .select("id, organization_id")
-      .eq("id", workspaceId)
+    // Verify workspace exists — canonical source is ai_worker_config (ai_workspace is deprecated).
+    // ai_worker_config uses organization_id as the primary lookup key (no separate id column).
+    // workspaceId here is the organization_id.
+    const { data: workerConfig } = await admin
+      .from("ai_worker_config")
+      .select("organization_id")
+      .eq("organization_id", workspaceId)
       .maybeSingle();
 
-    // If workspace not found, try organizations table (workspace may = org)
-    const orgId = workspace?.organization_id ?? workspaceId;
-    const resolvedWorkspaceId = workspace?.id ?? workspaceId;
+    // orgId is the organization_id; resolvedWorkspaceId = workspaceId for activation records
+    const orgId = workerConfig?.organization_id ?? workspaceId;
+    const resolvedWorkspaceId = workspaceId;
 
     // Upsert activation record
     const { error: activationError } = await admin

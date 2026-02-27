@@ -53,6 +53,10 @@ export interface AIWorkerConfig {
   contextAgentConfig: AIWorkerContextAgentConfig;
   recoveryConfig: AIWorkerRecoveryConfig;
   status: "active" | "paused" | "archived";
+  /** Extended fields stored in ai_worker_config — optional (not all rows have them) */
+  activatedServices?: string[];
+  aaasConfig?: { enabled: boolean };
+  writebackEnabled?: boolean;
 }
 
 // ── Defaults ────────────────────────────────────────────────────────────────
@@ -254,5 +258,61 @@ export async function ensureAIWorkerConfig(
     }
   } catch (err) {
     logger.warn("[ai-worker-config] ensureAIWorkerConfig unexpected error:", err);
+  }
+}
+
+/**
+ * Return the activated_services array for an org.
+ * Defaults to ['SE-aaS'] if the row doesn't exist or has no value.
+ */
+export async function getActivatedServices(orgId: string): Promise<string[]> {
+  try {
+    const config = await getAIWorkerConfig(orgId);
+    return config.activatedServices ?? ["SE-aaS"];
+  } catch {
+    return ["SE-aaS"];
+  }
+}
+
+/**
+ * Add a service to the activated_services list for an org (idempotent).
+ */
+export async function activateServiceInConfig(
+  orgId: string,
+  service: string
+): Promise<void> {
+  try {
+    const admin = getAdminClient();
+    const current = await getActivatedServices(orgId);
+    if (current.includes(service)) return; // already present
+    const updated = [...current, service];
+    await admin
+      .from("ai_worker_config")
+      .upsert(
+        { organization_id: orgId, activated_services: updated },
+        { onConflict: "organization_id", ignoreDuplicates: false }
+      );
+  } catch (err) {
+    logger.warn("[ai-worker-config] activateServiceInConfig failed:", err);
+  }
+}
+
+/**
+ * Toggle the writeback_enabled flag for an org.
+ */
+export async function updateWritebackEnabled(
+  orgId: string,
+  enabled: boolean
+): Promise<void> {
+  try {
+    const admin = getAdminClient();
+    await admin
+      .from("ai_worker_config")
+      .upsert(
+        { organization_id: orgId, writeback_enabled: enabled },
+        { onConflict: "organization_id", ignoreDuplicates: false }
+      );
+  } catch (err) {
+    logger.warn("[ai-worker-config] updateWritebackEnabled failed:", err);
   }
 }

@@ -1,17 +1,28 @@
 /**
- * AI Workspace — Core unit of intelligence in BrainOS
- * =====================================================
- * Hierarchy: Customer → Org → AI Workspace
+ * AI Workspace — Thin adapter over ai-worker-config
+ * ==================================================
+ * DEPRECATED DIRECTION: All DB operations now go through ai_worker_config.
+ * The ai_workspace table has been marked deprecated in migration
+ * 20260330000050_consolidate_ai_workspace_deprecated.sql.
  *
- * An AI Workspace = org + activated services.
- * It has its own Brain, runs agents, has Copilot, and tracks RL.
+ * This file remains to preserve the AIWorkspace type and function signatures
+ * used by brain/workspace/route.ts and other consumers. Internally every
+ * function delegates to ai-worker-config.ts which reads/writes ai_worker_config.
  *
- * All functions are safe by default: never throw, always return a usable result.
+ * Do NOT add new features here — add them to ai-worker-config.ts instead.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
+import {
+  getAIWorkerConfig,
+  updateAIWorkerConfig,
+  ensureAIWorkerConfig,
+  getActivatedServices,
+  activateServiceInConfig,
+  updateWritebackEnabled as workerUpdateWritebackEnabled,
+  type AIWorkerConfig,
+} from "@/lib/brain/ai-worker-config";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,99 +59,39 @@ export interface AIWorkspace {
   updatedAt: string;
 }
 
-// ── Defaults ─────────────────────────────────────────────────────────────────
+// ── Converter: AIWorkerConfig → AIWorkspace ───────────────────────────────────
 
-const DEFAULT_ENABLED_DOMAINS = [
-  "pod-match",
-  "early-warning",
-  "scope-creep",
-  "delivery-intelligence",
-  "pr-review",
-  "tdd-code-generator",
-  "incident-diagnosis",
-  "impact-analysis",
-  "sql-analyzer",
-  "test-data-generator",
-  "design-doc-generator",
-  "codebase-qa",
-  "architecture-extractor",
-];
-
-function buildDefault(orgId: string, name?: string): AIWorkspace {
+function workerConfigToWorkspace(cfg: AIWorkerConfig): AIWorkspace {
   const now = new Date().toISOString();
   return {
-    id: "",
-    organizationId: orgId,
-    name: name ?? "",
-    activatedServices: ["SE-aaS"],
+    id: cfg.organizationId,          // ai_worker_config has no separate id field exposed
+    organizationId: cfg.organizationId,
+    name: cfg.displayName,
+    activatedServices: cfg.activatedServices ?? ["SE-aaS"],
     seaasConfig: {
-      enabledDomains: [...DEFAULT_ENABLED_DOMAINS],
-      asyncMode: true,
-      maxConcurrentJobs: 3,
+      enabledDomains: cfg.enabledDomains,
+      asyncMode: true,                // static default — not stored in ai_worker_config
+      maxConcurrentJobs: cfg.orchestratorConfig.maxConcurrentJobs,
     },
-    aaasConfig: {
-      enabled: false,
-    },
+    aaasConfig: cfg.aaasConfig ?? { enabled: false },
     brainConfig: {
-      minIqForActivation: 10,
-      learningRate: 0.1,
-      enableFederation: true,
-      contextWindowTokens: 8000,
-      enableRecovery: true,
-      recoveryModel: "claude-haiku-4-5-20251001",
-      maxRecoveryAttempts: 3,
+      minIqForActivation: cfg.orchestratorConfig.brainReadinessMinIQ,
+      learningRate: cfg.brainConfig.learningRate,
+      enableFederation: cfg.brainConfig.enableFederation,
+      contextWindowTokens: cfg.brainConfig.contextWindowTokens,
+      enableRecovery: cfg.orchestratorConfig.enableRecovery,
+      recoveryModel: cfg.recoveryConfig.claudeModel,
+      maxRecoveryAttempts: cfg.recoveryConfig.maxRecoveryAttempts,
     },
     orchestratorConfig: {
-      enableRlPriority: true,
-      brainReadinessMinIq: 10,
-      autoStartWaitingJobs: true,
+      enableRlPriority: cfg.orchestratorConfig.enableRLPriority,
+      brainReadinessMinIq: cfg.orchestratorConfig.brainReadinessMinIQ,
+      autoStartWaitingJobs: cfg.orchestratorConfig.autoStartWaitingJobs,
     },
-    writebackEnabled: false,
-    status: "active",
+    writebackEnabled: cfg.writebackEnabled ?? false,
+    status: cfg.status,
     createdAt: now,
     updatedAt: now,
-  };
-}
-
-// ── DB row → AIWorkspace mapper ───────────────────────────────────────────────
-
-function rowToWorkspace(row: Record<string, any>): AIWorkspace {
-  const seaas = row.seaas_config ?? {};
-  const aaas = row.aaas_config ?? {};
-  const brain = row.brain_config ?? {};
-  const orch = row.orchestrator_config ?? {};
-
-  return {
-    id: row.id,
-    organizationId: row.organization_id,
-    name: row.name ?? "",
-    activatedServices: row.activated_services ?? ["SE-aaS"],
-    seaasConfig: {
-      enabledDomains: seaas.enabled_domains ?? [...DEFAULT_ENABLED_DOMAINS],
-      asyncMode: seaas.async_mode ?? true,
-      maxConcurrentJobs: seaas.max_concurrent_jobs ?? 3,
-    },
-    aaasConfig: {
-      enabled: aaas.enabled ?? false,
-    },
-    brainConfig: {
-      minIqForActivation: brain.min_iq_for_activation ?? 10,
-      learningRate: brain.learning_rate ?? 0.1,
-      enableFederation: brain.enable_federation ?? true,
-      contextWindowTokens: brain.context_window_tokens ?? 8000,
-      enableRecovery: brain.enable_recovery ?? true,
-      recoveryModel: brain.recovery_model ?? "claude-haiku-4-5-20251001",
-      maxRecoveryAttempts: brain.max_recovery_attempts ?? 3,
-    },
-    orchestratorConfig: {
-      enableRlPriority: orch.enable_rl_priority ?? true,
-      brainReadinessMinIq: orch.brain_readiness_min_iq ?? 10,
-      autoStartWaitingJobs: orch.auto_start_waiting_jobs ?? true,
-    },
-    writebackEnabled: row.writeback_enabled ?? false,
-    status: row.status ?? "active",
-    createdAt: row.created_at ?? new Date().toISOString(),
-    updatedAt: row.updated_at ?? new Date().toISOString(),
   };
 }
 
@@ -150,180 +101,142 @@ function rowToWorkspace(row: Record<string, any>): AIWorkspace {
  * Read the AI Workspace for an organisation.
  * If no row exists, creates one with defaults (upsert).
  * Never throws — returns a safe default if DB fails.
+ *
+ * Now delegates to ai_worker_config.
  */
 export async function getOrCreateAIWorkspace(
   orgId: string,
   name?: string
 ): Promise<AIWorkspace> {
   try {
-    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; called during workspace
-    // provisioning and server-side context resolution without an active user session.
-    const admin = getAdminClient();
-
-    const { data, error } = await admin
-      .from("ai_workspace")
-      .select("*")
-      .eq("organization_id", orgId)
-      .maybeSingle();
-
-    if (error) {
-      logger.warn("[ai-workspace] read failed:", error.message);
-      return buildDefault(orgId, name);
+    const cfg = await getAIWorkerConfig(orgId);
+    const workspace = workerConfigToWorkspace(cfg);
+    // Apply caller-provided name if the config has an empty display_name
+    if (name && !workspace.name) {
+      workspace.name = name;
     }
-
-    if (!data) {
-      // No row yet — insert defaults
-      const { data: inserted, error: insertError } = await admin
-        .from("ai_workspace")
-        .insert({
-          organization_id: orgId,
-          name: name ?? "",
-          activated_services: ["SE-aaS"],
-          status: "active",
-        })
-        .select("*")
-        .maybeSingle();
-
-      if (insertError || !inserted) {
-        logger.warn("[ai-workspace] insert defaults failed:", insertError?.message);
-        return buildDefault(orgId, name);
-      }
-
-      return rowToWorkspace(inserted);
-    }
-
-    return rowToWorkspace(data);
+    return workspace;
   } catch (err) {
     logger.warn("[ai-workspace] getOrCreateAIWorkspace unexpected error:", err);
-    return buildDefault(orgId, name);
+    // Build minimal safe default
+    const now = new Date().toISOString();
+    return {
+      id: orgId,
+      organizationId: orgId,
+      name: name ?? "",
+      activatedServices: ["SE-aaS"],
+      seaasConfig: { enabledDomains: [], asyncMode: true, maxConcurrentJobs: 3 },
+      aaasConfig: { enabled: false },
+      brainConfig: {
+        minIqForActivation: 10,
+        learningRate: 0.1,
+        enableFederation: true,
+        contextWindowTokens: 8000,
+        enableRecovery: true,
+        recoveryModel: "claude-haiku-4-5-20251001",
+        maxRecoveryAttempts: 3,
+      },
+      orchestratorConfig: { enableRlPriority: true, brainReadinessMinIq: 10, autoStartWaitingJobs: true },
+      writebackEnabled: false,
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    };
   }
 }
 
 /**
  * Returns activated_services for an org's AI Workspace.
  * Returns ['SE-aaS'] as default if workspace does not exist or DB fails.
+ *
+ * Now delegates to ai_worker_config.
  */
 export async function getAIWorkspaceServices(orgId: string): Promise<string[]> {
-  try {
-    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side read.
-    const admin = getAdminClient();
-    const { data, error } = await admin
-      .from("ai_workspace")
-      .select("activated_services")
-      .eq("organization_id", orgId)
-      .maybeSingle();
-
-    if (error || !data) return ["SE-aaS"];
-    return data.activated_services ?? ["SE-aaS"];
-  } catch {
-    return ["SE-aaS"];
-  }
+  return getActivatedServices(orgId);
 }
 
 /**
  * Adds a service to activated_services if not already present.
  * No-ops gracefully if the workspace row doesn't exist yet.
+ *
+ * Now delegates to ai_worker_config.
  */
 export async function activateService(
   orgId: string,
   service: string
 ): Promise<void> {
-  try {
-    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side activation.
-    const admin = getAdminClient();
-
-    const { data } = await admin
-      .from("ai_workspace")
-      .select("id, activated_services")
-      .eq("organization_id", orgId)
-      .maybeSingle();
-
-    if (!data) {
-      logger.warn("[ai-workspace] activateService: no workspace row for org", orgId);
-      return;
-    }
-
-    const current: string[] = data.activated_services ?? [];
-    if (current.includes(service)) return;  // Already activated
-
-    const { error } = await admin
-      .from("ai_workspace")
-      .update({ activated_services: [...current, service] })
-      .eq("organization_id", orgId);
-
-    if (error) {
-      logger.warn("[ai-workspace] activateService update failed:", error.message);
-    }
-  } catch (err) {
-    logger.warn("[ai-workspace] activateService unexpected error:", err);
-  }
+  return activateServiceInConfig(orgId, service);
 }
 
 /**
  * Patch workspace config fields. Only provided keys are updated.
  * Supports: name, activatedServices, seaasConfig, aaasConfig, brainConfig, orchestratorConfig, status.
+ *
+ * Now delegates to ai_worker_config.
  */
 export async function updateWorkspaceConfig(
   orgId: string,
   patch: Partial<AIWorkspace>
 ): Promise<void> {
   try {
-    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side config patch.
-    const admin = getAdminClient();
+    const workerPatch: Partial<Omit<AIWorkerConfig, "organizationId">> = {};
 
-    const dbPatch: Record<string, unknown> = {};
-
-    if (patch.name !== undefined) dbPatch.name = patch.name;
-    if (patch.status !== undefined) dbPatch.status = patch.status;
-    if (patch.activatedServices !== undefined)
-      dbPatch.activated_services = patch.activatedServices;
-    if (patch.writebackEnabled !== undefined)
-      dbPatch.writeback_enabled = patch.writebackEnabled;
+    if (patch.name !== undefined) workerPatch.displayName = patch.name;
+    if (patch.status !== undefined) workerPatch.status = patch.status as AIWorkerConfig["status"];
+    if (patch.activatedServices !== undefined) workerPatch.activatedServices = patch.activatedServices;
+    if (patch.writebackEnabled !== undefined) workerPatch.writebackEnabled = patch.writebackEnabled;
+    if (patch.aaasConfig !== undefined) workerPatch.aaasConfig = patch.aaasConfig;
 
     if (patch.seaasConfig !== undefined) {
-      dbPatch.seaas_config = {
-        enabled_domains: patch.seaasConfig.enabledDomains,
-        async_mode: patch.seaasConfig.asyncMode,
-        max_concurrent_jobs: patch.seaasConfig.maxConcurrentJobs,
-      };
+      workerPatch.enabledDomains = patch.seaasConfig.enabledDomains;
+      // maxConcurrentJobs lives in orchestratorConfig in ai_worker_config
+      if (patch.orchestratorConfig === undefined) {
+        // Fetch current to merge max_concurrent_jobs
+        const current = await getAIWorkerConfig(orgId);
+        workerPatch.orchestratorConfig = {
+          ...current.orchestratorConfig,
+          maxConcurrentJobs: patch.seaasConfig.maxConcurrentJobs,
+        };
+      }
     }
 
-    if (patch.aaasConfig !== undefined) {
-      dbPatch.aaas_config = {
-        enabled: patch.aaasConfig.enabled,
+    if (patch.orchestratorConfig !== undefined) {
+      const current = await getAIWorkerConfig(orgId);
+      workerPatch.orchestratorConfig = {
+        ...current.orchestratorConfig,
+        enableRLPriority: patch.orchestratorConfig.enableRlPriority,
+        brainReadinessMinIQ: patch.orchestratorConfig.brainReadinessMinIq,
+        autoStartWaitingJobs: patch.orchestratorConfig.autoStartWaitingJobs,
       };
     }
 
     if (patch.brainConfig !== undefined) {
-      dbPatch.brain_config = {
-        min_iq_for_activation: patch.brainConfig.minIqForActivation,
-        learning_rate: patch.brainConfig.learningRate,
-        enable_federation: patch.brainConfig.enableFederation,
-        context_window_tokens: patch.brainConfig.contextWindowTokens,
-        enable_recovery: patch.brainConfig.enableRecovery,
-        recovery_model: patch.brainConfig.recoveryModel,
-        max_recovery_attempts: patch.brainConfig.maxRecoveryAttempts,
+      const current = await getAIWorkerConfig(orgId);
+      workerPatch.brainConfig = {
+        ...current.brainConfig,
+        learningRate: patch.brainConfig.learningRate,
+        enableFederation: patch.brainConfig.enableFederation,
+        contextWindowTokens: patch.brainConfig.contextWindowTokens,
       };
-    }
-
-    if (patch.orchestratorConfig !== undefined) {
-      dbPatch.orchestrator_config = {
-        enable_rl_priority: patch.orchestratorConfig.enableRlPriority,
-        brain_readiness_min_iq: patch.orchestratorConfig.brainReadinessMinIq,
-        auto_start_waiting_jobs: patch.orchestratorConfig.autoStartWaitingJobs,
+      // Recovery fields go into recoveryConfig
+      workerPatch.recoveryConfig = {
+        ...current.recoveryConfig,
+        enableAutoRecovery: patch.brainConfig.enableRecovery,
+        claudeModel: patch.brainConfig.recoveryModel,
+        maxRecoveryAttempts: patch.brainConfig.maxRecoveryAttempts,
       };
+      // brainReadinessMinIQ goes into orchestratorConfig
+      if (!workerPatch.orchestratorConfig) {
+        workerPatch.orchestratorConfig = {
+          ...current.orchestratorConfig,
+          brainReadinessMinIQ: patch.brainConfig.minIqForActivation,
+        };
+      }
     }
 
-    if (Object.keys(dbPatch).length === 0) return;
+    if (Object.keys(workerPatch).length === 0) return;
 
-    const { error } = await admin
-      .from("ai_workspace")
-      .update(dbPatch)
-      .eq("organization_id", orgId);
-
-    if (error) {
-      logger.warn("[ai-workspace] updateWorkspaceConfig failed:", error.message);
-    }
+    await updateAIWorkerConfig(orgId, workerPatch);
   } catch (err) {
     logger.warn("[ai-workspace] updateWorkspaceConfig unexpected error:", err);
   }
@@ -333,22 +246,17 @@ export async function updateWorkspaceConfig(
  * Toggle writeback_enabled for an org's AI Workspace.
  * Enables or disables automatic post-execution dispatch to connected systems.
  * Never throws — logs and swallows errors.
+ *
+ * Now delegates to ai_worker_config (supabase param unused but kept for API compat).
  */
 export async function updateWritebackEnabled(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   orgId: string,
   enabled: boolean
 ): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from("ai_workspace")
-      .update({ writeback_enabled: enabled })
-      .eq("organization_id", orgId);
-
-    if (error) {
-      logger.warn("[ai-workspace] updateWritebackEnabled failed:", error.message);
-    }
-  } catch (err) {
-    logger.warn("[ai-workspace] updateWritebackEnabled unexpected error:", err);
-  }
+  return workerUpdateWritebackEnabled(orgId, enabled);
 }
+
+// Re-export ensureAIWorkerConfig under a workspace alias for callers that
+// used to call ensureAIWorkspace.
+export { ensureAIWorkerConfig as ensureAIWorkspace };

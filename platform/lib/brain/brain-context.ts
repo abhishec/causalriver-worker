@@ -174,10 +174,12 @@ export async function getBrainContext(
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
-      // L1 — Workspace Identity: orchestrator_config + service_mode
+      // L1 — Workspace Identity: orchestrator_config (canonical: ai_worker_config)
+      // ai_workspace is deprecated — all reads now go to ai_worker_config.
+      // service_mode is not on ai_worker_config (it lives on conversations).
       supabase
-        .from("ai_workspace")
-        .select("orchestrator_config, service_mode")
+        .from("ai_worker_config")
+        .select("orchestrator_config")
         .eq("organization_id", orgId)
         .maybeSingle(),
 
