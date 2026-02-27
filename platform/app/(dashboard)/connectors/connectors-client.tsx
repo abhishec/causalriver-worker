@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { formatNumber, cn } from "@/lib/utils";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -128,6 +129,7 @@ export function ConnectorsClient({
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
   const [freshworksDomain, setFreshworksDomain] = useState("");
   const [showFreshworksInput, setShowFreshworksInput] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   // Health data: per-type polling every 60s to show live last-sync + auth method + status
   const [healthMap, setHealthMap] = useState<Record<string, {
@@ -228,16 +230,22 @@ export function ConnectorsClient({
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
+        const successMsg = data.status === "active" ? "Connection test passed — credentials valid" : `Connection test: status is ${data.status}`;
         setTestResult({
           type: connectorId || type,
           success: true,
-          message: data.status === "active" ? "Connection verified — credentials valid" : `Status: ${data.status}`,
+          message: successMsg,
         });
+        setMessage({ type: "success", text: successMsg });
       } else {
-        setTestResult({ type: connectorId || type, success: false, message: "Connection test failed — check credentials" });
+        const failMsg = "Connection test failed — check credentials";
+        setTestResult({ type: connectorId || type, success: false, message: failMsg });
+        setMessage({ type: "error", text: failMsg });
       }
     } catch {
-      setTestResult({ type: connectorId || type, success: false, message: "Network error — unable to reach API" });
+      const errMsg = "Connection test failed — network error";
+      setTestResult({ type: connectorId || type, success: false, message: errMsg });
+      setMessage({ type: "error", text: errMsg });
     } finally {
       setTestingConnection(null);
     }
@@ -348,7 +356,7 @@ export function ConnectorsClient({
       {/* Stats Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatValue label="Total Connectors" value={String(connectors.length)} subtitle="Available" />
-        <StatValue label="Connected" value={String(connectedCount)} subtitle={connectedCount > 0 ? "Active" : "None active"} />
+        <StatValue label="Connected" value={String(connectedCount)} subtitle={connectedCount > 0 ? "connected" : "none connected"} />
         <StatValue label="Active Domains" value={String(activeDomains.size)} subtitle="With signals" />
         <StatValue label="Total Signals" value={formatNumber(totalSignals)} subtitle="Across all sources" />
       </div>
@@ -397,7 +405,11 @@ export function ConnectorsClient({
               </div>
             ) : (
               <div className="text-[11px] text-muted">
-                Go to <span className="font-medium">Settings → Brain</span> to run first training cycle
+                Go to{" "}
+                <Link href="/settings?tab=brain" className="font-medium underline underline-offset-2 hover:text-foreground transition-colors">
+                  Settings → Brain
+                </Link>{" "}
+                to run first training cycle
               </div>
             )}
           </div>
@@ -626,11 +638,36 @@ export function ConnectorsClient({
       )}
 
       {/* ── Available Connectors — grouped by service ──────────── */}
+      {/* ── Coming Soon toggle ─────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-medium uppercase tracking-wider text-muted">
+          Available Connectors
+        </div>
+        <button
+          onClick={() => setShowComingSoon((prev) => !prev)}
+          className="flex items-center gap-1.5 text-[11px] text-muted hover:text-foreground transition-colors"
+        >
+          <span className={cn(
+            "w-7 h-4 rounded-full transition-colors relative",
+            showComingSoon ? "bg-accent" : "bg-border"
+          )}>
+            <span className={cn(
+              "absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform shadow",
+              showComingSoon && "translate-x-3"
+            )} />
+          </span>
+          {showComingSoon ? "Hide coming soon" : "Show coming soon"}
+        </button>
+      </div>
+
       {(["seaas", "aaas", "general"] as const).map((svcKey) => {
         const svcInfo = SERVICE_LABELS[svcKey];
-        const svcConnectors = availableConnectors.filter(
+        const allSvcConnectors = availableConnectors.filter(
           (c) => (SERVICE_MAP[c.type] || "general") === svcKey
         );
+        const svcConnectors = showComingSoon
+          ? allSvcConnectors
+          : allSvcConnectors.filter((c) => c.oauth || c.type === "s3-storage");
         if (svcConnectors.length === 0) return null;
         return (
       <div key={svcKey}>
@@ -716,7 +753,27 @@ export function ConnectorsClient({
                       {isGitHub ? (
                         <>
                           <button
-                            onClick={() => { window.location.href = "/api/connectors/github/app-install"; }}
+                            onClick={async () => {
+                              try {
+                                const res = await fetch("/api/connectors/github/app-install", { redirect: "manual" });
+                                // A successful redirect returns opaqueredirect (type==="opaqueredirect") or status 0 in fetch with redirect:manual
+                                // In Next.js the route always redirects (3xx) on success, or returns JSON error on failure
+                                if (res.type === "opaqueredirect" || (res.status >= 300 && res.status < 400)) {
+                                  // Server wants to redirect — follow it properly
+                                  window.location.href = "/api/connectors/github/app-install";
+                                  return;
+                                }
+                                // Non-redirect means an error JSON was returned
+                                const data = await res.json().catch(() => ({}));
+                                setMessage({
+                                  type: "error",
+                                  text: data.error || "GitHub App not configured. Please add GITHUB_APP_SLUG to your environment variables.",
+                                });
+                              } catch {
+                                // fetch() itself failed (network error) — fall back to direct navigation
+                                window.location.href = "/api/connectors/github/app-install";
+                              }
+                            }}
                             className="flex-1 py-2 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-1.5"
                             title="Org-level access, no tokens needed"
                           >
