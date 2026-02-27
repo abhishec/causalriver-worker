@@ -73,6 +73,7 @@ import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain
 import { logDecision } from "@/lib/brain/decision-log";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { selectModel as selectModelDAA } from "@/lib/brain/model-router";
+import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -232,6 +233,17 @@ export async function POST(request: NextRequest) {
     const commandResult: any = (ctx as any)._commandResult;
     const interpretation: QueryInterpretation | undefined = (ctx as any)._interpretation;
     (ctx as any)._conversationHistory = conversationHistory;
+
+    // ── SOC2 Audit: log copilot message received (fire-and-forget) ───────────
+    void logAuditEvent({
+      organizationId: workspaceId,
+      userId: user.id,
+      action: AuditAction.DATA_CREATE,
+      resourceType: "copilot_message",
+      resourceId: workspaceId,
+      newValue: { messageLength: message.length, hasAttachment: false },
+      ...extractRequestContext(request),
+    });
 
     const { intelligence } = commandResult;
 
