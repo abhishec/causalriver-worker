@@ -5,6 +5,7 @@ import { createOutcomeOracle, createCausalMethodBandit, linkJiraToGitHub } from 
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { getConnectorTokenWithId, markConnectorError } from "@/lib/connectors/get-connector-token";
+import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
 
 export const dynamic = 'force-dynamic';
 
@@ -395,6 +396,27 @@ export async function POST(request: Request) {
 
     // 5. Derive REAL Jira insights from actual ingested signals
     await deriveRealJiraInsights(service, workspaceId);
+
+    // 5a. Universal brain write — fire-and-forget high-level summary event
+    // This adds an interpretive layer on top of raw Jira signals, training L3-L7
+    universalBrainWrite(service, workspaceId, {
+      source: "connector.jira",
+      eventType: "sync_completed",
+      content: `Jira sync completed: ${signalsGenerated} signals from ${recordsProcessed} issues (${syncedIssueKeys.size} unique). Sources: ${boardSources.length} boards, ${dashboardSources.length} dashboards, ${planSources.length} plans.${errors.length > 0 ? ` Errors: ${errors.slice(0, 2).join("; ")}` : " All sources synced successfully."}`,
+      entityType: "jira_sync",
+      entityId: `jira_sync:${workspaceId}:${Date.now()}`,
+      importance: Math.min(0.5 + signalsGenerated / 2000, 0.9),
+      domain: "product",
+      metadata: {
+        signals_generated: signalsGenerated,
+        records_processed: recordsProcessed,
+        unique_issues: syncedIssueKeys.size,
+        board_sources: boardSources.length,
+        dashboard_sources: dashboardSources.length,
+        plan_sources: planSources.length,
+        effective_fix_version: effectiveFixVersion ?? null,
+      },
+    }).catch(() => {}); // fire-and-forget, never block sync
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;

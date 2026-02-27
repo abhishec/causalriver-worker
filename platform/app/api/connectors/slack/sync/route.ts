@@ -24,6 +24,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
+import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
 
 export const dynamic = "force-dynamic";
 
@@ -271,6 +272,25 @@ export async function POST(request: NextRequest) {
 
     // ── Step 4: Derive REAL communication insights from actual signals ────
     await deriveRealSlackInsights(service, workspaceId);
+
+    // ── Step 4a: Universal brain write — fire-and-forget high-level summary ──
+    // Adds an interpretive layer on top of raw Slack signals, training L3-L7
+    universalBrainWrite(service, workspaceId, {
+      source: "connector.slack",
+      eventType: "sync_completed",
+      content: `Slack sync completed: ${signalsInserted} signals from ${totalMessages} messages across ${Math.min(channels.length, 20)} channels (${lookbackDays}d lookback). ${totalThreads} threaded discussions found.`,
+      entityType: "slack_sync",
+      entityId: `slack_sync:${workspaceId}:${Date.now()}`,
+      importance: Math.min(0.5 + signalsInserted / 1000, 0.85),
+      domain: "communication",
+      metadata: {
+        signals_inserted: signalsInserted,
+        total_messages: totalMessages,
+        total_threads: totalThreads,
+        channels_synced: Math.min(channels.length, 20),
+        lookback_days: lookbackDays,
+      },
+    }).catch(() => {}); // fire-and-forget, never block sync
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;

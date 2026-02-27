@@ -4,6 +4,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { createGitHubConnector, createOutcomeOracle, createCausalMethodBandit } from "@nexus-ai/memory-stack";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
+import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
 
 export const dynamic = 'force-dynamic';
 
@@ -196,6 +197,24 @@ export async function POST(request: Request) {
     // 6. Derive REAL causal relationships from actual ingested signals
     // (replaces fake seeded data with org-specific statistics)
     await deriveRealCausalInsights(service, workspaceId);
+
+    // 6a. Universal brain write — fire-and-forget high-level summary event
+    // This adds an interpretive layer on top of raw signals, training L3-L7
+    universalBrainWrite(service, workspaceId, {
+      source: "connector.github",
+      eventType: "sync_completed",
+      content: `GitHub sync completed: ${totalSignals} signals from ${totalRecords} records across ${reposToSync.length} repo(s). ${syncErrors.length > 0 ? `Errors: ${syncErrors.slice(0, 2).join("; ")}` : "All repos synced successfully."}`,
+      entityType: "github_sync",
+      entityId: `github_sync:${workspaceId}:${Date.now()}`,
+      importance: Math.min(0.5 + totalSignals / 2000, 0.9),
+      domain: "github",
+      metadata: {
+        signals_generated: totalSignals,
+        records_processed: totalRecords,
+        repos_synced: reposToSync.length,
+        repo_names: reposToSync.map((r) => `${r.owner}/${r.name}`),
+      },
+    }).catch(() => {}); // fire-and-forget, never block sync
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     // Convert synced signals into IncomingSignal format and run Oracle.
