@@ -3,34 +3,106 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { getConnectorWithCredentials, getConnectorCredentials } from "@/lib/connectors/get-credentials";
-import { ingestDocument } from "@/lib/connectors/document-ingester";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/connectors/github/ingest-commits
  *
- * Fetches the last 90 days of commits from connected GitHub repo(s) and embeds
- * each commit as a searchable brain document. This enables Brain to answer
- * questions like "What changed in the auth module last month?"
+ * Fetches a GitHub repo's commit history and ingests each commit as a
+ * knowledge chunk (source_type = 'git_commit') into the brain's Tier 1
+ * raw knowledge store. Enables copilot to answer questions like:
+ *   - "What changed in the last sprint?"
+ *   - "Show me commits that touched the auth system"
  *
- * Body: {
- *   connectorId?: string,   -- target a specific connector instance
- *   lookbackDays?: number,  -- default: 90, max: 365
- *   maxCommits?: number,    -- default: 100, max: 500 (per repo)
- * }
- *
- * Returns: { ingestedCount, totalCommits, reposProcessed, errors }
+ * Deduplicates by commit SHA via upsert on (organization_id, source_id).
+ * Paginates GitHub API up to 500 commits per call.
+ * Emits a dopamine brain signal after ingestion.
  */
-export async function POST(request: Request) {
+
+// ── Request / Response types ──────────────────────────────────────────────────
+
+interface IngestCommitsBody {
+  repoOwner?: string;
+  repoName?: string;
+  branch?: string;      // default: "main"
+  since?: string;       // ISO date — only fetch commits after this date
+  limit?: number;       // default: 200, max: 500
+  connectorId?: string; // optional: target a specific connector instance
+}
+
+interface IngestCommitsResponse {
+  ingested: number;
+  skipped: number;
+  errors: number;
+  latestCommitSha: string | null;
+  executionMs: number;
+}
+
+// ── GitHub API types ──────────────────────────────────────────────────────────
+
+interface GitHubCommitListItem {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      date: string;
+    };
+  };
+}
+
+interface GitHubCommitDetail {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      date: string;
+    };
+  };
+  stats?: {
+    additions: number;
+    deletions: number;
+    total: number;
+  };
+  files?: Array<{
+    filename: string;
+    status: string;
+    additions: number;
+    deletions: number;
+  }>;
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const MAX_COMMITS = 500;
+const DEFAULT_LIMIT = 200;
+const PAGE_SIZE = 100;
+const PAGE_DELAY_MS = 100; // Rate limit protection between pages
+const DETAIL_THRESHOLD = 100; // Only fetch full commit detail if limit <= this
+
+// ── Route handler ─────────────────────────────────────────────────────────────
+
+export async function POST(request: Request): Promise<NextResponse> {
+  const startMs = Date.now();
+
   try {
     // 1. Auth
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
+    let authUser: { id: string } | null = null;
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      authUser = user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -39,17 +111,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No workspace context" }, { status: 400 });
     }
 
-    // 2. Load connector config + credentials
-    const service = await createServiceClient();
-    const body = await request.json().catch(() => ({})) as {
-      connectorId?: string;
-      lookbackDays?: number;
-      maxCommits?: number;
-    };
+    // 2. Parse request body
+    const body = await request.json().catch(() => ({})) as IngestCommitsBody;
+    const branch = body.branch ?? "main";
+    const since = body.since;
+    const limit = Math.min(body.limit ?? DEFAULT_LIMIT, MAX_COMMITS);
 
-    const connectorId = body.connectorId;
-    const lookbackDays = Math.min(body.lookbackDays ?? 90, 365);
-    const maxCommitsPerRepo = Math.min(body.maxCommits ?? 100, 500);
+    // 3. Load GitHub connector + credentials (service client bypasses RLS)
+    const service = await createServiceClient();
 
     let connector: {
       id: string;
@@ -60,17 +129,21 @@ export async function POST(request: Request) {
       credentials: Record<string, unknown> | null;
     } | null = null;
 
-    if (connectorId) {
+    if (body.connectorId) {
       const { data: row } = await service
         .from("org_connectors")
         .select("id, connector_type, config, status, signals_count")
         .eq("organization_id", workspaceId)
         .eq("connector_type", "github")
-        .eq("id", connectorId)
+        .eq("id", body.connectorId)
         .maybeSingle();
       if (row) {
         const credentials = await getConnectorCredentials(service, workspaceId, "github");
-        connector = { ...row, config: (row.config as Record<string, unknown>) ?? {}, credentials };
+        connector = {
+          ...row,
+          config: (row.config as Record<string, unknown>) ?? {},
+          credentials,
+        };
       }
     } else {
       connector = await getConnectorWithCredentials(service, workspaceId, "github");
@@ -92,220 +165,346 @@ export async function POST(request: Request) {
       );
     }
 
+    // 4. Resolve repo owner/name: body params override connector config
     const storedConfig = connector.config as {
       owner?: string;
       repo?: string;
       repositories?: Array<{ owner: string; name: string; branch?: string }>;
     };
 
-    // Support both single-repo and multi-repo connector configs
-    const repositories = storedConfig.repositories;
-    const reposToProcess =
-      !repositories || repositories.length === 0
-        ? [{ owner: storedConfig.owner || "", name: storedConfig.repo || "" }]
-        : repositories;
+    let repoOwner = body.repoOwner;
+    let repoName = body.repoName;
 
-    if (!reposToProcess[0]?.owner || !reposToProcess[0]?.name) {
+    if (!repoOwner || !repoName) {
+      // Fall back to connector config
+      if (storedConfig.repositories && storedConfig.repositories.length > 0) {
+        repoOwner = storedConfig.repositories[0].owner;
+        repoName = storedConfig.repositories[0].name;
+      } else {
+        repoOwner = storedConfig.owner;
+        repoName = storedConfig.repo;
+      }
+    }
+
+    if (!repoOwner || !repoName) {
       return NextResponse.json(
-        { error: "GitHub connector config missing owner/repo. Please reconfigure." },
+        { error: "repoOwner and repoName are required (or configure a GitHub connector with a repo)." },
         { status: 400 }
       );
     }
 
-    // Compute since timestamp: lookbackDays ago in ISO format
-    const sinceDate = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
+    logger.warn(
+      `[ingest-commits] Starting ingestion for ${repoOwner}/${repoName} branch=${branch} limit=${limit}${since ? ` since=${since}` : ""}`
+    );
 
-    let totalCommits = 0;
-    let ingestedCount = 0;
-    const errors: string[] = [];
+    // 5. Fetch commit list from GitHub (paginated)
+    const allCommits = await fetchCommitList(token, repoOwner, repoName, branch, since, limit);
 
-    // 3. Process each repo
-    for (const repoConfig of reposToProcess.slice(0, 3)) {
-      const owner = repoConfig.owner;
-      const repo = repoConfig.name;
+    logger.warn(`[ingest-commits] Fetched ${allCommits.length} commits from ${repoOwner}/${repoName}`);
 
+    // 6. Ingest commits into knowledge_chunks
+    let ingested = 0;
+    let skipped = 0;
+    let errors = 0;
+    let latestCommitSha: string | null = allCommits.length > 0 ? allCommits[0].sha : null;
+
+    const admin = getAdminClient();
+    const fetchDetails = limit <= DETAIL_THRESHOLD;
+
+    for (const commitRef of allCommits) {
       try {
-        logger.warn(`[GitHub ingest-commits] Fetching commits for ${owner}/${repo} since ${sinceDate}`);
+        let detail: GitHubCommitDetail | null = null;
 
-        // Fetch commit list — paginate up to maxCommitsPerRepo
-        let page = 1;
-        let hasMore = true;
-        const allCommits: Array<{ sha: string; commit: { message: string; author: { name: string; date: string } } }> = [];
-
-        while (hasMore && allCommits.length < maxCommitsPerRepo) {
-          const perPage = Math.min(100, maxCommitsPerRepo - allCommits.length);
-          const listUrl = `https://api.github.com/repos/${owner}/${repo}/commits?since=${sinceDate}&per_page=${perPage}&page=${page}`;
-
-          const listRes = await fetch(listUrl, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/vnd.github+json",
-            },
-          });
-
-          if (!listRes.ok) {
-            const errMsg = `GitHub commits list failed for ${owner}/${repo}: ${listRes.status} ${listRes.statusText}`;
-            logger.warn(`[GitHub ingest-commits] ${errMsg}`);
-            errors.push(errMsg);
-            break;
-          }
-
-          const commits = await listRes.json() as Array<{
-            sha: string;
-            commit: { message: string; author: { name: string; date: string } };
-          }>;
-
-          if (!Array.isArray(commits) || commits.length === 0) {
-            hasMore = false;
-            break;
-          }
-
-          allCommits.push(...commits);
-          hasMore = commits.length === perPage;
-          page++;
+        if (fetchDetails) {
+          // Fetch full commit detail (files, stats) — only for small batches to avoid rate limits
+          detail = await fetchCommitDetail(token, repoOwner, repoName, commitRef.sha);
         }
 
-        totalCommits += allCommits.length;
-        logger.warn(`[GitHub ingest-commits] ${owner}/${repo}: found ${allCommits.length} commits in last ${lookbackDays} days`);
+        const sha = commitRef.sha;
+        const message = commitRef.commit.message || "(no message)";
+        const authorName = commitRef.commit.author.name || "Unknown";
+        const authorDate = commitRef.commit.author.date || new Date().toISOString();
+        const filesCount = detail?.files?.length ?? undefined;
+        const additions = detail?.stats?.additions ?? 0;
+        const deletions = detail?.stats?.deletions ?? 0;
+        const fileNames = detail?.files?.map((f) => f.filename).slice(0, 20) ?? [];
 
-        // 4. For each commit, fetch diff summary and ingest as brain document
-        const FETCH_DELAY_MS = 150; // stay well under GitHub's 5000 req/hr limit
+        // Build verbatim text for semantic search
+        const verbatimText = buildVerbatimText({
+          sha,
+          message,
+          authorName,
+          authorDate,
+          repoOwner,
+          repoName,
+          branch,
+          filesCount,
+          additions,
+          deletions,
+          fileNames,
+        });
 
-        for (const commitRef of allCommits) {
-          try {
-            await new Promise((resolve) => setTimeout(resolve, FETCH_DELAY_MS));
-
-            // Fetch full commit detail including files changed
-            const detailUrl = `https://api.github.com/repos/${owner}/${repo}/commits/${commitRef.sha}`;
-            const detailRes = await fetch(detailUrl, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/vnd.github+json",
-              },
-            });
-
-            if (!detailRes.ok) {
-              logger.warn(`[GitHub ingest-commits] Commit detail fetch failed: ${commitRef.sha} — ${detailRes.status}`);
-              continue;
-            }
-
-            const detail = await detailRes.json() as {
-              sha: string;
-              commit: {
-                message: string;
-                author: { name: string; email?: string; date: string };
-              };
-              stats?: { additions: number; deletions: number; total: number };
-              files?: Array<{
-                filename: string;
-                status: string;
-                additions: number;
-                deletions: number;
-              }>;
-            };
-
-            const sha = detail.sha;
-            const shortSha = sha.slice(0, 7);
-            const message = detail.commit.message || "(no message)";
-            const author = detail.commit.author.name || "Unknown";
-            const date = detail.commit.author.date || new Date().toISOString();
-            const additions = detail.stats?.additions ?? 0;
-            const deletions = detail.stats?.deletions ?? 0;
-
-            // Build file list: changed filenames grouped by status
-            const files = detail.files ?? [];
-            const filesByStatus: Record<string, string[]> = {};
-            for (const f of files) {
-              const status = f.status || "modified";
-              if (!filesByStatus[status]) filesByStatus[status] = [];
-              filesByStatus[status].push(f.filename);
-            }
-
-            const fileList = files.map((f) => f.filename).join(", ") || "(no files)";
-            const fileSummaryParts: string[] = [];
-            for (const [status, fnames] of Object.entries(filesByStatus)) {
-              fileSummaryParts.push(`${status}: ${fnames.slice(0, 10).join(", ")}${fnames.length > 10 ? ` (+${fnames.length - 10} more)` : ""}`);
-            }
-            const fileSummary = fileSummaryParts.join("; ") || fileList;
-
-            // Compose the document text for semantic search
-            const documentText = [
-              `Commit ${shortSha}: ${message.split("\n")[0]}`,
-              message.split("\n").slice(1).filter(Boolean).join(" ").trim() || null,
-              `Author: ${author}`,
-              `Date: ${new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
-              `Repository: ${owner}/${repo}`,
-              `Files changed (${files.length}): ${fileSummary}`,
-              additions + deletions > 0 ? `Changes: ${additions} additions, ${deletions} deletions` : null,
-            ]
-              .filter(Boolean)
-              .join("\n");
-
-            // Ingest into brain_documents (document_chunks table)
-            await ingestDocument(service, {
-              organizationId: workspaceId,
-              documentTitle: `${owner}/${repo} commit ${shortSha}: ${message.split("\n")[0].slice(0, 100)}`,
-              content: documentText,
-              sourceType: "github",
-              sourceUrl: `https://github.com/${owner}/${repo}/commit/${sha}`,
-              documentId: `commit/${owner}/${repo}/${sha}`,
+        // Upsert into knowledge_chunks with conflict on (organization_id, source_id)
+        // The unique index knowledge_chunks_org_source_id_unique enforces deduplication.
+        const { data: upsertData, error: upsertError } = await admin
+          .from("knowledge_chunks")
+          .upsert(
+            {
+              organization_id: workspaceId,
+              source_type: "git_commit",
+              source_id: sha,
+              source_url: `https://github.com/${repoOwner}/${repoName}/commit/${sha}`,
+              verbatim_text: verbatimText,
               metadata: {
-                type: "git-commit",
                 sha,
-                short_sha: shortSha,
-                author,
-                date,
-                repo: `${owner}/${repo}`,
-                files_changed: files.length,
+                author: authorName,
+                date: authorDate,
+                repo: `${repoOwner}/${repoName}`,
+                branch,
                 additions,
                 deletions,
-                file_list: files.map((f) => f.filename).slice(0, 20),
+                files: fileNames,
               },
-            });
+              ingested_by: "ingest-commits-api",
+            },
+            {
+              onConflict: "organization_id,source_id",
+              ignoreDuplicates: true,
+            }
+          )
+          .select("id");
 
-            ingestedCount++;
-          } catch (commitErr) {
-            const msg = commitErr instanceof Error ? commitErr.message : String(commitErr);
-            logger.warn(`[GitHub ingest-commits] Failed to process commit ${commitRef.sha}: ${msg}`);
-          }
+        if (upsertError) {
+          logger.warn(`[ingest-commits] Upsert failed for commit ${sha.slice(0, 7)}`, {
+            error: upsertError.message,
+          });
+          errors++;
+        } else if (!upsertData || upsertData.length === 0) {
+          // ignoreDuplicates=true returns empty array for skipped rows
+          skipped++;
+        } else {
+          ingested++;
         }
-
-        logger.warn(`[GitHub ingest-commits] ${owner}/${repo}: ingested ${ingestedCount} commits`);
-      } catch (repoErr) {
-        const msg = repoErr instanceof Error ? repoErr.message : String(repoErr);
-        errors.push(`${owner}/${repo}: ${msg}`);
-        logger.warn(`[GitHub ingest-commits] Repo processing failed: ${msg}`);
+      } catch (commitErr) {
+        logger.warn(`[ingest-commits] Error processing commit ${commitRef.sha.slice(0, 7)}`, {
+          error: commitErr instanceof Error ? commitErr.message : String(commitErr),
+        });
+        errors++;
       }
     }
 
-    // 5. Update connector last_commit_ingest_at timestamp
-    try {
-      await service
-        .from("org_connectors")
-        .update({
-          config: {
-            ...storedConfig,
-            last_commit_ingest_at: new Date().toISOString(),
-            last_commit_ingest_count: ingestedCount,
+    logger.warn(
+      `[ingest-commits] ${repoOwner}/${repoName}: ingested=${ingested} skipped=${skipped} errors=${errors}`
+    );
+
+    // 7. Emit brain dopamine signal after successful batch ingestion
+    if (ingested > 0) {
+      try {
+        await service.from("cross_domain_signals").insert({
+          organization_id: workspaceId,
+          signal_type: "dopamine",
+          signal_value: 0.7,
+          source_domain: "github.commits",
+          entity_type: "connector",
+          entity_id: `github:${repoOwner}/${repoName}`,
+          signal_metadata: {
+            ingestedCount: ingested,
+            skippedCount: skipped,
+            repo: `${repoOwner}/${repoName}`,
+            branch,
+            latestCommitSha,
           },
-        })
-        .eq("id", connector.id);
-    } catch {
-      // Non-fatal: connector config update failure doesn't fail the ingest
+        });
+      } catch (signalErr) {
+        // Non-fatal: brain signal failure never blocks the ingestion response
+        logger.warn("[ingest-commits] Brain signal insert failed (non-fatal)", {
+          error: signalErr instanceof Error ? signalErr.message : String(signalErr),
+        });
+      }
     }
 
-    logger.warn(`[GitHub ingest-commits] Complete: ingested ${ingestedCount}/${totalCommits} commits from ${reposToProcess.length} repo(s)`);
+    const executionMs = Date.now() - startMs;
 
-    return NextResponse.json({
-      success: errors.length === 0,
-      ingestedCount,
-      totalCommits,
-      reposProcessed: reposToProcess.length,
-      lookbackDays,
+    const response: IngestCommitsResponse = {
+      ingested,
+      skipped,
       errors,
-    });
+      latestCommitSha,
+      executionMs,
+    };
+
+    return NextResponse.json(response);
   } catch (err: unknown) {
-    logger.error("[GitHub ingest-commits] Error:", err instanceof Error ? err.message : err);
+    logger.error(
+      "[ingest-commits] Unhandled error:",
+      err instanceof Error ? err.message : err
+    );
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
+}
+
+// ── GitHub API helpers ────────────────────────────────────────────────────────
+
+/**
+ * Fetch paginated commit list from GitHub REST API.
+ * Respects the Link header for pagination and stops at `limit`.
+ */
+async function fetchCommitList(
+  token: string,
+  owner: string,
+  repo: string,
+  branch: string,
+  since: string | undefined,
+  limit: number
+): Promise<GitHubCommitListItem[]> {
+  const all: GitHubCommitListItem[] = [];
+  let pagesFetched = 0;
+
+  // Build initial URL
+  const params = new URLSearchParams({
+    sha: branch,
+    per_page: String(PAGE_SIZE),
+  });
+  if (since) {
+    params.set("since", since);
+  }
+  let nextUrl: string | null =
+    `https://api.github.com/repos/${owner}/${repo}/commits?${params.toString()}`;
+
+  while (nextUrl && all.length < limit) {
+    if (pagesFetched > 0) {
+      // Rate limit protection: 100ms between pages when fetching > 100 commits
+      await new Promise((resolve) => setTimeout(resolve, PAGE_DELAY_MS));
+    }
+
+    const res = await fetch(nextUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+
+    if (!res.ok) {
+      logger.warn(
+        `[ingest-commits] GitHub commits list failed: ${res.status} ${res.statusText}`
+      );
+      break;
+    }
+
+    const page = (await res.json()) as GitHubCommitListItem[];
+
+    if (!Array.isArray(page) || page.length === 0) {
+      break;
+    }
+
+    // Only take up to remaining quota
+    const remaining = limit - all.length;
+    all.push(...page.slice(0, remaining));
+    pagesFetched++;
+
+    // Follow Link: <url>; rel="next" header for pagination
+    nextUrl = parseNextLink(res.headers.get("Link"));
+  }
+
+  return all;
+}
+
+/**
+ * Fetch full commit detail (files, stats) for a single SHA.
+ */
+async function fetchCommitDetail(
+  token: string,
+  owner: string,
+  repo: string,
+  sha: string
+): Promise<GitHubCommitDetail | null> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits/${sha}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      return null;
+    }
+
+    return (await res.json()) as GitHubCommitDetail;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parse the `Link` response header to extract the `rel="next"` URL.
+ * Returns null if no next page.
+ *
+ * Example: `<https://api.github.com/...?page=2>; rel="next", <...>; rel="last"`
+ */
+function parseNextLink(linkHeader: string | null): string | null {
+  if (!linkHeader) return null;
+
+  for (const part of linkHeader.split(",")) {
+    const trimmed = part.trim();
+    if (trimmed.includes('rel="next"')) {
+      const match = trimmed.match(/<([^>]+)>/);
+      if (match) return match[1];
+    }
+  }
+
+  return null;
+}
+
+// ── Verbatim text builder ─────────────────────────────────────────────────────
+
+interface VerbatimParams {
+  sha: string;
+  message: string;
+  authorName: string;
+  authorDate: string;
+  repoOwner: string;
+  repoName: string;
+  branch: string;
+  filesCount: number | undefined;
+  additions: number;
+  deletions: number;
+  fileNames: string[];
+}
+
+/**
+ * Build the verbatim text that will be embedded for semantic search.
+ * Includes all semantically meaningful fields so queries like
+ * "commits that touched auth" or "what changed last sprint" work correctly.
+ */
+function buildVerbatimText(p: VerbatimParams): string {
+  const lines: string[] = [
+    `Author: ${p.authorName}`,
+    `Date: ${p.authorDate}`,
+    `Message: ${p.message.slice(0, 500)}`,
+  ];
+
+  if (p.filesCount !== undefined) {
+    lines.push(`Files changed: ${p.filesCount}`);
+  } else {
+    lines.push(`Files changed: unknown`);
+  }
+
+  if (p.additions > 0 || p.deletions > 0) {
+    lines.push(`Additions: ${p.additions}  Deletions: ${p.deletions}`);
+  }
+
+  if (p.fileNames.length > 0) {
+    lines.push(`Changed files: ${p.fileNames.join(", ")}`);
+  }
+
+  lines.push(`SHA: ${p.sha}`);
+  lines.push(`Repository: ${p.repoOwner}/${p.repoName}  Branch: ${p.branch}`);
+
+  return lines.join("\n");
 }

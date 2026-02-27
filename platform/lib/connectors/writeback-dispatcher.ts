@@ -27,6 +27,7 @@ export interface WritebackContext {
   artifactId: string | null;
   domainType: string;
   organizationId: string;
+  userId: string;
   artifactData: Record<string, unknown>;
 }
 
@@ -268,6 +269,114 @@ export async function shouldRetryWriteback(
   }
 }
 
+// ─── RBAC ─────────────────────────────────────────────────────────────────────
+
+/** Roles permitted to trigger write-back operations */
+const WRITEBACK_ALLOWED_ROLES = new Set(["admin", "owner"]);
+
+/**
+ * Check whether the given user has permission to trigger write-backs for the org.
+ *
+ * Queries org_members for the user's role. Returns allowed=true for admin/owner.
+ *
+ * Fail-open on DB errors: if we cannot determine the role, we log a warning and
+ * allow the write-back rather than blocking legitimate operations.
+ */
+async function checkWritebackPermission(
+  supabase: SupabaseClient,
+  organizationId: string,
+  userId: string
+): Promise<{ allowed: boolean; role: string | null; reason?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from("org_members")
+      .select("role")
+      .eq("organization_id", organizationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      logger.warn("[writeback-dispatcher] RBAC check DB error — failing open:", {
+        organizationId,
+        userId,
+        error: error.message,
+      });
+      return { allowed: true, role: null, reason: "db_error_fail_open" };
+    }
+
+    if (!data) {
+      // User is not a member of this org
+      return {
+        allowed: false,
+        role: null,
+        reason: "Write-back requires admin or owner role",
+      };
+    }
+
+    const role = data.role as string;
+    if (WRITEBACK_ALLOWED_ROLES.has(role)) {
+      return { allowed: true, role };
+    }
+
+    return {
+      allowed: false,
+      role,
+      reason: "Write-back requires admin or owner role",
+    };
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] RBAC check threw — failing open:", {
+      organizationId,
+      userId,
+      err: err instanceof Error ? err.message : String(err),
+    });
+    return { allowed: true, role: null, reason: "exception_fail_open" };
+  }
+}
+
+/**
+ * Insert a row into writeback_audit_log.
+ * Fire-and-forget safe — never throws.
+ */
+async function insertWritebackAuditLog(
+  supabase: SupabaseClient,
+  params: {
+    organizationId: string;
+    userId: string;
+    userRole: string | null;
+    action: "allowed" | "denied";
+    connectorType: string;
+    writeType: string;
+    entityId?: string;
+    denialReason?: string;
+    metadata?: Record<string, unknown>;
+  }
+): Promise<void> {
+  try {
+    const { error } = await supabase.from("writeback_audit_log").insert({
+      organization_id: params.organizationId,
+      user_id: params.userId,
+      user_role: params.userRole ?? "unknown",
+      action: params.action,
+      connector_type: params.connectorType,
+      write_type: params.writeType,
+      entity_id: params.entityId ?? null,
+      denial_reason: params.denialReason ?? null,
+      metadata: params.metadata ?? {},
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      logger.warn("[writeback-dispatcher] Failed to insert writeback_audit_log:", {
+        organizationId: params.organizationId,
+        userId: params.userId,
+        error: error.message,
+      });
+    }
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] insertWritebackAuditLog threw (non-fatal):", err);
+  }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -280,8 +389,46 @@ export async function shouldRetryWriteback(
 export async function checkAndQueueWriteback(
   supabase: SupabaseClient,
   ctx: WritebackContext
-): Promise<{ queued: number }> {
+): Promise<{ queued: number; error?: string; code?: string }> {
   try {
+    // ── RBAC Gate ────────────────────────────────────────────────────────────
+    // Only admin or owner roles may trigger write-backs.
+    // Fail-open on DB errors to avoid blocking legitimate operations.
+    const rbac = await checkWritebackPermission(
+      supabase,
+      ctx.organizationId,
+      ctx.userId
+    );
+
+    if (!rbac.allowed) {
+      logger.warn("[writeback-dispatcher] RBAC denied:", {
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        role: rbac.role,
+        reason: rbac.reason,
+        domainType: ctx.domainType,
+      });
+
+      // Audit log: denied attempt (connector_type and write_type use domainType as
+      // placeholder — no rule match has occurred yet at this stage)
+      void insertWritebackAuditLog(supabase, {
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        userRole: rbac.role,
+        action: "denied",
+        connectorType: "unknown",
+        writeType: ctx.domainType,
+        denialReason: rbac.reason,
+        metadata: { jobId: ctx.jobId, artifactId: ctx.artifactId },
+      });
+
+      return {
+        queued: 0,
+        error: "Insufficient permissions",
+        code: "RBAC_DENIED",
+      };
+    }
+
     const { data: rules, error } = await supabase
       .from("connector_writeback_rules")
       .select(
@@ -363,6 +510,24 @@ export async function checkAndQueueWriteback(
         actionType: rule.action_type,
         organizationId: ctx.organizationId,
         domainType: ctx.domainType,
+      });
+
+      // Audit log: allowed write-back queued
+      void insertWritebackAuditLog(supabase, {
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        userRole: rbac.role,
+        action: "allowed",
+        connectorType: rule.connector_type,
+        writeType: rule.action_type,
+        entityId: rule.id,
+        metadata: {
+          jobId: ctx.jobId,
+          artifactId: ctx.artifactId,
+          ruleId: rule.id,
+          ruleName: rule.name,
+          domainType: ctx.domainType,
+        },
       });
     }
 

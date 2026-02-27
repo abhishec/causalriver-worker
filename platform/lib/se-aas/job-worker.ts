@@ -254,6 +254,7 @@ export async function processSeAaSJobs(
           artifactId: artifactId ?? null,
           domainType: job.task_type,
           organizationId: job.organization_id,
+          userId,
           artifactData: domainResult,
         }).catch(() => { /* non-fatal */ });
 
