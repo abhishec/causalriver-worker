@@ -1381,14 +1381,24 @@ export async function getBrainContext(
   }
   })(); // end fetchPromise IIFE
 
-  // Register in _inFlight so concurrent callers join this fetch
-  _inFlight.set(orgId, fetchPromise);
+  // Register in _inFlight so concurrent callers join this fetch.
+  // Only register if there isn't already a concurrent fetch in progress;
+  // forceRefresh=true skips the join check above but we must not overwrite
+  // an existing _inFlight entry since that entry's finally block would then
+  // delete OUR promise instead of itself, silently dropping deduplication.
+  const alreadyInFlight = _inFlight.has(orgId);
+  if (!alreadyInFlight) {
+    _inFlight.set(orgId, fetchPromise);
+  }
   try {
     return await fetchPromise;
   } finally {
-    // Always remove the entry — whether the fetch succeeded or threw —
-    // so the next caller (after an error) gets a fresh attempt.
-    _inFlight.delete(orgId);
+    // Only remove the entry if it still points to OUR promise.
+    // If forceRefresh caused a second fetch while another was in-flight,
+    // the first fetch's finally must not delete the second's entry.
+    if (_inFlight.get(orgId) === fetchPromise) {
+      _inFlight.delete(orgId);
+    }
   }
 }
 

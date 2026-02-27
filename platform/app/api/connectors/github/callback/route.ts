@@ -174,8 +174,8 @@ export async function GET(request: NextRequest) {
 
     const githubUser = await userResponse.json();
 
-    // Store credentials
-    const serviceForStore = await createServiceClient();
+    // Store credentials — reuse the same service client created above
+    const serviceForStore = service;
 
     const credentials = {
       access_token: tokenData.access_token,

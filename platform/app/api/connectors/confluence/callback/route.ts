@@ -169,8 +169,8 @@ export async function GET(request: NextRequest) {
 
     const primarySite = resources[0]; // Use first available site
 
-    // Store credentials
-    const serviceForStore = await createServiceClient();
+    // Store credentials — reuse the same service client created above
+    const serviceForStore = service;
 
     const credentials = {
       access_token: tokenData['access_token'],

@@ -121,8 +121,7 @@ export async function POST(request: Request) {
 
     // If body provided branch config that differs from stored, persist it
     if (body.trackedBranches || body.dataLookback) {
-      const service2 = await createServiceClient();
-      await service2
+      await service
         .from("org_connectors")
         .update({
           config: {

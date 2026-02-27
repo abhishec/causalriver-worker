@@ -1313,7 +1313,9 @@ export async function executeDomain(
       domainType: params.domainType,
       qualityScore: rlQuality,
       result,
-    });
+    }).catch((err: unknown) =>
+      logger.warn("[domain-executor] depositDomainExecutionOutcome fire-and-forget failed (non-fatal):", String(err))
+    );
   }
 
   // ── Step 9: RLVR Prediction Registration (fire-and-forget) ────────────

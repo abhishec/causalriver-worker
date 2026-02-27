@@ -144,8 +144,7 @@ export async function POST(request: Request) {
 
     // Persist fixVersionFilter + dataLookback to connector config if provided
     if (fixVersionFilter !== undefined || dataLookback !== undefined) {
-      const service2 = await createServiceClient();
-      await service2
+      await service
         .from("org_connectors")
         .update({
           config: {
