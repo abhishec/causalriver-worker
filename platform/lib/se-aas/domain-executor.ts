@@ -44,6 +44,7 @@ import {
 import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { getCachedPlan, setCachedPlan, normaliseQueryKey } from "@/lib/brain/plan-cache";
 import { checkHitlGate } from "@/lib/brain/hitl-gate";
+import { logAuditEvent, AuditAction } from "@/lib/audit";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -874,10 +875,11 @@ export async function executeDomain(
     params.domainType;
   const _cacheQueryKey = normaliseQueryKey(_cacheQueryRaw);
   if (!params.jobId) {
-    const cachedResult = getCachedPlan<Record<string, unknown>>(
+    const cachedResult = await getCachedPlan<Record<string, unknown>>(
       params.organizationId,
       params.domainType,
-      _cacheQueryKey
+      _cacheQueryKey,
+      supabase
     );
     if (cachedResult) {
       logger.warn("[domain-executor] PlanCache HIT — returning cached result", {
@@ -1284,6 +1286,21 @@ export async function executeDomain(
     durationMs,
     modelUsed: "claude-sonnet-4-6",
     outputSummary: JSON.stringify(result).slice(0, 200),
+  }).catch(() => {/* non-fatal */});
+
+  // ── SOC2 Audit: log domain execution outcome (fire-and-forget) ──────────
+  void logAuditEvent({
+    organizationId: params.organizationId,
+    userId: params.userId,
+    action: AuditAction.DATA_CREATE,
+    resourceType: "domain_execution",
+    resourceId: params.jobId ?? params.organizationId,
+    newValue: {
+      domain: params.domainType,
+      status: (result as Record<string, unknown>).success ? "completed" : "failed",
+      quality: rlQuality,
+      durationMs,
+    },
   }).catch(() => {/* non-fatal */});
 
   // ── Data Flywheel: Deposit structured milestone into engagement_outcomes ──

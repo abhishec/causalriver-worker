@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
+import { invalidateOnNewSignal } from "@/lib/brain/plan-cache";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 minutes for multi-connector sync
@@ -217,6 +218,14 @@ export async function POST(request: Request) {
     const skippedCount = results.filter((r) => (r as any).skipped).length;
     const failedCount = results.filter((r) => !r.success && !(r as any).skipped).length;
     const syncedCount = results.length - skippedCount;
+
+    // ── PlanCache: invalidate stale plans when new signals arrive ─────────────
+    // Any connector that produced signals means the org's data has changed.
+    // Flush all cached domain plans for this org so the next Copilot request
+    // re-executes domains against fresh data instead of serving stale answers.
+    if (totalSignals > 0 && successCount > 0) {
+      invalidateOnNewSignal(workspaceId);
+    }
 
     // ── Auto-trigger brain cycle after successful sync ──────────────────
     // If signals were ingested AND the caller hasn't set skipBrainCycle=true,
