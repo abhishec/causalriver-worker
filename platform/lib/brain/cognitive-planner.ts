@@ -65,6 +65,15 @@ export interface CognitivePlannerResult {
   reflected: boolean;
 }
 
+export interface ReflectionSchema {
+  domain: string;
+  failureType: "error" | "unknown";
+  rootCause: string;
+  suggestedFix: string;
+  confidence: number;
+  avoidPattern: string;
+}
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 /**
@@ -364,18 +373,31 @@ async function _runCognitivePlannerInner(
           );
 
           // Store as episodic memory (Reflexion episodic buffer, bounded at 10)
-          // B3: Include error patterns in content so future Phase 0 retrieval sees them
+          // B3: Store structured ReflectionSchema JSON so Phase 0 can extract avoidPatterns
+          const reflectionSchema: ReflectionSchema = {
+            domain: priorDomains.length > 0 ? priorDomains.join(", ") : orgId,
+            failureType: errorSummary ? "error" : "unknown",
+            rootCause: errorSummary || "No error data available",
+            suggestedFix: reflection,
+            confidence: 0.6,
+            avoidPattern: errorSummary
+              ? `Avoid: ${errorSummary.slice(0, 200)}`
+              : "No specific pattern identified",
+          };
+          const structuredContent = JSON.stringify(reflectionSchema);
+
           await supabase.from("ai_memory").insert({
             organization_id: orgId,
             domain: "cognitive-planner",
             memory_type: "episodic",
-            content: errorSummary ? `${reflection} Recent failures: ${errorSummary}` : reflection,
+            content: structuredContent,
             importance: 0.8,
             metadata: {
               cycleId: priorDecisions.cycleId,
               successCount,
               failCount,
               errorSummary: errorSummary || null,
+              structured: true,
             },
           });
 
@@ -441,6 +463,30 @@ async function _runCognitivePlannerInner(
       pastReflectionsText = pastReflections
         .map((r: { content: string }) => r.content)
         .join("\n\n");
+
+      // Extract structured avoidPatterns from JSON reflections
+      const avoidPatterns: string[] = [];
+      for (const r of pastReflections) {
+        try {
+          const parsed = JSON.parse((r as { content: string }).content);
+          // Handle array of ReflectionSchema
+          if (Array.isArray(parsed)) {
+            for (const entry of parsed) {
+              if (entry.avoidPattern && typeof entry.avoidPattern === "string") {
+                avoidPatterns.push(entry.avoidPattern);
+              }
+            }
+          } else if (parsed.avoidPattern) {
+            avoidPatterns.push(parsed.avoidPattern as string);
+          }
+        } catch {
+          // freetext fallback — skip avoidPattern extraction
+        }
+      }
+
+      if (avoidPatterns.length > 0) {
+        pastReflectionsText += `\n\n⚠️ AVOID THESE PATTERNS (do NOT repeat):\n${avoidPatterns.map((p) => `- ${p}`).join("\n")}`;
+      }
     }
 
     // Also read brain-progress snapshot and inject into state context
