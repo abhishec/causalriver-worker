@@ -105,3 +105,34 @@ jobs:
             --max-time 300 \
             "${BASE_URL}/api/cron/learning" \
             || echo "::warning::learning endpoint failed (non-fatal — will retry at next 4-hour boundary)"
+
+      # ── Connector Signal Analyzer (only on 4-hour trigger or manual dispatch) ──
+      # Groups recent connector signals (GitHub, Jira, Slack etc.) by domain,
+      # runs Haiku LLM on each batch to extract patterns/trends/risks, and
+      # stores the derived understanding into ai_memory. This is how 100% of
+      # connector data becomes brain knowledge — not just hand-coded heuristics.
+      - name: Connector Signal Analyzer (4-hour boundary only)
+        if: ${{ github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/brain/analyze-signals ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/brain/analyze-signals" \
+            || echo "analyze-signals failed (non-fatal)"
+
+      # ── Document Embedding Backfill (every 30-min and 4-hour trigger) ────────
+      # Generates n-gram embeddings for document_chunks rows where embedding IS NULL.
+      # Processes max 50 chunks per call to stay within Lambda timeout.
+      # Safe to call repeatedly — idempotent, only touches NULL-embedding rows.
+      - name: Document Embedding Backfill
+        if: ${{ github.event.schedule == '*/30 * * * *' || github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/brain/embed-documents ..."
+          curl -f -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/brain/embed-documents" \
+            || echo "::warning::embed-documents endpoint failed (non-fatal — chunks will remain NULL until next run)"

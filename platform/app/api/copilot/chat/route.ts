@@ -4505,6 +4505,64 @@ No connectors are configured yet. When the user asks for data from any source (S
               activeConnectors: _decisionRecord.activeConnectors,
             },
           }).catch(() => {}); // fire-and-forget
+
+          // ── RESPONSE HARVEST: Extract key knowledge from this response → brain ──
+          // Only for responses with enough content to extract meaningful patterns.
+          // Uses Haiku for cost efficiency — this runs for every copilot response.
+          if (streamedAssistantText && streamedAssistantText.length > 200) {
+            void (async () => {
+              try {
+                const { default: AnthropicHarvest } = await import('@anthropic-ai/sdk');
+                const harvestClient = new AnthropicHarvest({ apiKey: process.env.ANTHROPIC_API_KEY });
+                const harvestResp = await harvestClient.messages.create({
+                  model: 'claude-haiku-4-5-20251001',
+                  max_tokens: 512,
+                  messages: [{
+                    role: 'user',
+                    content: `Extract key facts and patterns from this AI response (domain: ${detectedIntent ?? 'general'}).
+
+Response: ${streamedAssistantText.slice(0, 2000)}
+
+Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`
+                  }]
+                });
+
+                const harvestContent = harvestResp.content[0];
+                if (harvestContent.type === 'text') {
+                  const jsonMatch = harvestContent.text.match(/\{[\s\S]*\}/);
+                  if (jsonMatch) {
+                    const harvest = JSON.parse(jsonMatch[0]) as { keyFacts?: string[]; patterns?: string[]; decisions?: string[] };
+                    const content = [
+                      (harvest.keyFacts ?? []).join(' | '),
+                      (harvest.patterns ?? []).join(' | '),
+                      (harvest.decisions ?? []).join(' | '),
+                    ].filter(Boolean).join('\n');
+
+                    if (content.length > 20) {
+                      await Promise.resolve(
+                        service.from('ai_memory').upsert({
+                          organization_id: workspaceId,
+                          domain: `response.${detectedIntent ?? 'general'}`,
+                          memory_type: 'pattern',
+                          content: content.slice(0, 1000),
+                          importance: _rlQuality ?? 0.5,
+                          metadata: {
+                            source: 'response_harvester',
+                            intent: detectedIntent,
+                            model: v4SmartModel,
+                            quality: _rlQuality,
+                          },
+                        }, {
+                          onConflict: 'organization_id,memory_type,domain',
+                          ignoreDuplicates: false,
+                        })
+                      ).catch(() => {});
+                    }
+                  }
+                }
+              } catch { /* non-blocking — harvest failure must never affect response */ }
+            })();
+          }
         } catch (rlErr: unknown) {
           logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
         }

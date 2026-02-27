@@ -16,6 +16,57 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { generateEmbedding } from "@nexus-ai/memory-stack/embeddings";
+import { reduceDimensions } from "@nexus-ai/memory-stack/embeddings";
+import { absorbDocumentChunks } from "@/lib/brain/document-absorber";
+
+// document_chunks.embedding is vector(1536). N-gram engine produces 384 dims.
+// Pad 384 → 1536 using zero-fill via reduceDimensions (pads when input < target).
+const EMBEDDING_DIMS = 1536;
+const NGRAM_DIMS = 384;
+
+/**
+ * Generate a 1536-dim embedding for a chunk of text using n-gram hashing.
+ * No API calls required — works fully offline.
+ *
+ * Returns pgvector format string: "[0.1,0.2,...]"
+ */
+function generateChunkEmbedding(text: string): string {
+  const ngram = generateEmbedding(text, NGRAM_DIMS);
+  const padded = reduceDimensions(ngram, EMBEDDING_DIMS);
+  return `[${padded.join(",")}]`;
+}
+
+/**
+ * Background: generate and store embeddings for a list of chunk IDs.
+ * Fire-and-forget — called with void to not block the ingest response.
+ */
+async function generateEmbeddingsForChunks(
+  supabase: SupabaseClient,
+  chunkIds: string[],
+  chunkTexts: string[]
+): Promise<void> {
+  for (let i = 0; i < chunkIds.length; i++) {
+    try {
+      const embeddingStr = generateChunkEmbedding(chunkTexts[i]);
+      const { error } = await supabase
+        .from("document_chunks")
+        .update({ embedding: embeddingStr })
+        .eq("id", chunkIds[i]);
+      if (error) {
+        logger.warn("[document-ingester] Failed to update embedding for chunk", {
+          chunkId: chunkIds[i],
+          error: error.message,
+        });
+      }
+    } catch (err) {
+      logger.warn("[document-ingester] Embedding generation failed for chunk", {
+        chunkId: chunkIds[i],
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+}
 
 const CHUNK_TARGET_CHARS = 2000;   // ~512 tokens
 const CHUNK_OVERLAP_CHARS = 200;   // ~50 tokens overlap
@@ -100,15 +151,34 @@ export async function ingestDocument(
     pinned: params.pinned ?? false,
   }));
 
-  const { error } = await supabase
+  const { data: insertedRows, error } = await supabase
     .from("document_chunks")
-    .insert(rows);
+    .insert(rows)
+    .select("id, chunk_text");
 
   if (error) {
     throw new Error(`Failed to ingest document: ${error.message}`);
   }
 
   logger.warn(`[document-ingester] Ingested ${chunks.length} chunks from "${params.documentTitle ?? params.sourceUrl ?? "unknown"}"`);
+
+  // Background: generate n-gram embeddings for each chunk (non-blocking).
+  // The ingest response returns immediately; embeddings are populated async.
+  if (insertedRows && insertedRows.length > 0) {
+    const ids = insertedRows.map((r: { id: string }) => r.id);
+    const texts = insertedRows.map((r: { chunk_text: string }) => r.chunk_text);
+    void generateEmbeddingsForChunks(supabase, ids, texts);
+  }
+
+  // Background: extract structured knowledge from chunks → brain memory.
+  // Non-blocking fire-and-forget — absorption runs after response returns.
+  void absorbDocumentChunks(
+    supabase,
+    params.organizationId,
+    params.documentTitle ?? params.sourceUrl ?? "unknown",
+    rows.map((r) => ({ id: String(r.chunk_index), chunk_text: r.chunk_text, chunk_index: r.chunk_index })),
+    params.sourceType
+  );
 
   return {
     chunksCreated: chunks.length,
@@ -118,8 +188,13 @@ export async function ingestDocument(
 }
 
 /**
- * Search document chunks using full-text search.
- * Falls back to this when embeddings are not available.
+ * Search document chunks — vector similarity first, tsvector fallback.
+ *
+ * Priority:
+ *   1. Vector similarity search via search_document_chunks RPC (semantic)
+ *   2. Full-text tsvector search (lexical fallback when embeddings missing)
+ *   3. Recency fetch (when query is empty — context priming)
+ *
  * Called by getBrainContext() to include document knowledge in every LLM decision.
  */
 export async function searchDocumentChunks(
@@ -144,7 +219,39 @@ export async function searchDocumentChunks(
     return data ?? [];
   }
 
-  // Non-empty query: use PostgreSQL full-text search
+  // Non-empty query: try vector similarity search first
+  try {
+    const queryEmbedding = generateChunkEmbedding(query);
+    const { data: vectorData, error: vectorError } = await supabase
+      .rpc("search_document_chunks", {
+        p_organization_id: organizationId,
+        query_embedding: queryEmbedding,
+        match_count: limit,
+      });
+
+    if (!vectorError && vectorData && vectorData.length > 0) {
+      logger.warn("[document-ingester] searchDocumentChunks: vector search returned results", {
+        count: vectorData.length,
+      });
+      return vectorData as Array<{ chunk_text: string; document_title: string | null; chunk_index: number; source_type: string }>;
+    }
+
+    if (vectorError) {
+      logger.warn("[document-ingester] Vector search failed, falling back to tsvector", {
+        error: vectorError.message,
+      });
+    } else {
+      // Vector search succeeded but returned 0 results — embeddings may not yet exist for this org.
+      // Fall through to tsvector below.
+      logger.warn("[document-ingester] Vector search returned 0 results — falling back to tsvector");
+    }
+  } catch (embErr) {
+    logger.warn("[document-ingester] Embedding generation for query failed, falling back to tsvector", {
+      error: embErr instanceof Error ? embErr.message : String(embErr),
+    });
+  }
+
+  // Fallback: PostgreSQL full-text search (always available — search_vector is GENERATED ALWAYS AS)
   const { data, error } = await supabase
     .from("document_chunks")
     .select("chunk_text, document_title, chunk_index, source_type")
@@ -154,7 +261,7 @@ export async function searchDocumentChunks(
     .limit(limit);
 
   if (error) {
-    logger.warn("[document-ingester] searchDocumentChunks failed", { error: error.message });
+    logger.warn("[document-ingester] searchDocumentChunks tsvector fallback failed", { error: error.message });
     return [];
   }
 
