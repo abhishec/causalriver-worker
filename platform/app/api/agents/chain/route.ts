@@ -16,6 +16,7 @@ import { executeAgentChain } from "@/lib/agents/chain-executor";
 import type { AgentChain } from "@/lib/agents/chain-executor";
 import { AGENT_TYPE_TO_BRAIN_AGENT } from "@/lib/agents/execute";
 import { logger } from "@/lib/logger";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 const MAX_STEPS = 5;
 
@@ -39,6 +40,15 @@ export async function POST(request: NextRequest) {
     }
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Rate limiting — 10 req/min per user (agent chain execution is expensive) ──
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/agents/chain");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment before executing another chain." },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();

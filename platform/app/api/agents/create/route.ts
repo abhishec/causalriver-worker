@@ -3,6 +3,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
+import { logAuditEvent, AuditAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,21 @@ export async function POST(req: Request) {
     logger.warn(
       `[/api/agents/create] Agent created: ${spec.name} (${agentId}) for org ${organizationId}`
     );
+
+    // ── Audit log — agent creation is a high-value security event ──
+    void logAuditEvent({
+      organizationId,
+      userId: user.id,
+      action: AuditAction.DATA_CREATE,
+      resourceType: "agent",
+      resourceId: agentId,
+      metadata: {
+        name: spec.name,
+        domain: spec.domain || "custom",
+        trigger: spec.trigger || "manual",
+        schedule: spec.schedule ?? null,
+      },
+    });
 
     const response: AgentCreatedResponse = {
       agentId,

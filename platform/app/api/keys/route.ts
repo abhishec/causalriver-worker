@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { generateApiKey } from "@/lib/api-key-auth";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { logAuditEvent, AuditAction } from "@/lib/audit";
 
 /**
  * GET /api/keys
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
 
     // Insert into api_keys table using service client (bypasses RLS for insert)
     const service = await createServiceClient();
-    const { error } = await service.from("api_keys").insert({
+    const { data: newKey, error } = await service.from("api_keys").insert({
       organization_id: workspaceId,
       key_hash: keyHash,
       key_prefix: keyPrefix,
@@ -91,10 +92,20 @@ export async function POST(request: Request) {
       rate_limit_per_minute: rateLimitPerMinute || 60,
       created_by: user.id,
       is_active: true,
-    });
+    }).select("id").single();
 
     if (error)
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
+
+    // ── Audit log — API key creation is a high-security event ──
+    void logAuditEvent({
+      organizationId: workspaceId,
+      userId: user.id,
+      action: AuditAction.API_KEY_CREATE,
+      resourceType: "api_key",
+      resourceId: newKey?.id ?? keyPrefix,
+      metadata: { name: name.trim(), keyPrefix, permissions: permissions || ["read"] },
+    });
 
     // Return the raw key — this is the ONLY time it's visible
     return NextResponse.json({
@@ -157,6 +168,15 @@ export async function DELETE(request: Request) {
 
     if (error)
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
+
+    // ── Audit log — API key revocation is a high-security event ──
+    void logAuditEvent({
+      organizationId: workspaceId,
+      userId: user.id,
+      action: AuditAction.API_KEY_REVOKE,
+      resourceType: "api_key",
+      resourceId: keyId,
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

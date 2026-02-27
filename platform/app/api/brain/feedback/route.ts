@@ -25,6 +25,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,15 @@ export async function POST(request: NextRequest) {
     }
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Rate limiting — 60 req/min per user ──────────────────────────────
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/brain/feedback");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait before submitting more feedback." },
+        { status: 429 }
+      );
     }
 
     // ── Parse body ───────────────────────────────────────────────

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Allow up to 2 minutes for multi-connector sync
@@ -34,6 +35,15 @@ export async function POST(request: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // ── Rate limiting — 5 req/min per user (sync-all is very expensive) ──
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/connectors/sync-all");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait before syncing again." },
+        { status: 429 }
+      );
     }
 
     const body = await request.json().catch(() => ({}));
