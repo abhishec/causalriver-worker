@@ -70,6 +70,82 @@ import {
   architectureExtractorDomain,
 } from "@nexus-ai/memory-stack";
 
+// ── Inline domain: decompose-spec ─────────────────────────────────────────
+// Decomposes a feature spec into actionable engineering tickets via Claude.
+// Registered inline rather than as a memory-stack module because it owns no
+// structured DB data — all logic is Anthropic-call + artifact write-back.
+const DECOMPOSE_SPEC_SYSTEM_PROMPT = `You are a senior software architect decomposing a feature spec into actionable engineering tickets.
+
+Given a spec, return a JSON array of tickets. Each ticket has:
+- title: string (max 80 chars, imperative: "Add X", "Fix Y", "Implement Z")
+- description: string (acceptance criteria, 2-5 bullet points)
+- type: "feature" | "bug" | "task" | "test"
+- priority: "high" | "medium" | "low"
+- estimate: "small" | "medium" | "large" (S=<4h, M=<2d, L=<1w)
+- dependencies: string[] (titles of tickets this depends on, empty if none)
+- domain: "frontend" | "backend" | "database" | "devops" | "testing"
+
+Rules:
+- Max 10 tickets per spec
+- Start with infrastructure/DB tickets, then backend, then frontend, then tests
+- Each ticket must be independently completable (no ambiguous requirements)
+- Include a test ticket for every feature ticket
+
+Return ONLY valid JSON — no markdown, no explanation. The response must be a JSON array.`;
+
+const decomposeSpecDomain = {
+  async execute(ctx: any): Promise<Record<string, unknown>> {
+    const Anthropic = (await import("@anthropic-ai/sdk")).default;
+    const apiKey =
+      (ctx.input?.anthropicApiKey as string | undefined) ?? process.env.ANTHROPIC_API_KEY ?? "";
+    if (!apiKey) throw new Error("ANTHROPIC_API_KEY not available for decompose-spec domain");
+
+    const spec = (ctx.input?.spec as string | undefined) ?? "";
+    if (!spec.trim()) throw new Error("decompose-spec: spec is required in request");
+
+    const repoOwner = ctx.input?.repoOwner as string | undefined;
+    const repoName = ctx.input?.repoName as string | undefined;
+
+    const userContent =
+      repoOwner && repoName
+        ? `Repository: ${repoOwner}/${repoName}\n\nSpec:\n${spec.trim()}`
+        : `Spec:\n${spec.trim()}`;
+
+    const anthropic = new Anthropic({ apiKey });
+    const response = await anthropic.messages.create({
+      model: ctx.input?.model ?? "claude-sonnet-4-6",
+      max_tokens: 4096,
+      system: DECOMPOSE_SPEC_SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userContent }],
+    });
+
+    const rawText =
+      response.content[0]?.type === "text" ? response.content[0].text : "[]";
+
+    // Strip markdown code fences if present
+    const stripped = rawText
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```\s*$/i, "")
+      .trim();
+
+    let tickets: unknown[] = [];
+    try {
+      const parsed = JSON.parse(stripped);
+      if (Array.isArray(parsed)) tickets = parsed;
+    } catch {
+      logger.warn("[decompose-spec domain] Failed to parse Claude response:", rawText.slice(0, 300));
+    }
+
+    return {
+      tickets,
+      spec: spec.trim(),
+      repoOwner: repoOwner ?? null,
+      repoName: repoName ?? null,
+      model: ctx.input?.model ?? "claude-sonnet-4-6",
+    };
+  },
+};
+
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
 // the CORE table on every domain call — we only push once per TTL window.
@@ -117,6 +193,8 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "scope-creep": { domain: podMatchDomain, sync: true },
   // P1-15 Architecture Extractor
   "architecture-extractor": { domain: architectureExtractorDomain, sync: false },
+  // Spec Decomposition Engine — inline domain, no memory-stack module needed
+  "decompose-spec": { domain: decomposeSpecDomain, sync: false },
 };
 
 export function getDomainInfo(domainType: string): { domain: any; sync: boolean } | null {

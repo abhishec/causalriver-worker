@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { addPRComment, createGitHubIssue } from "./github";
+import { addPRComment, createGitHubIssue, createGitHubPR } from "./github";
 import { createJiraTicket } from "./jira";
 import { postSlackMessage } from "./slack";
 import { executeConfluenceAction } from "./confluence";
@@ -110,10 +110,36 @@ export async function executeWritebackAction(
         });
       }
 
+      if (actionType === "github_pr") {
+        try {
+          const result = await createGitHubPR(
+            token,
+            String(actionPayload.owner ?? ""),
+            String(actionPayload.repo ?? ""),
+            String(actionPayload.title ?? ""),
+            String(actionPayload.body ?? ""),
+            String(actionPayload.head ?? ""),
+            typeof actionPayload.base === "string" ? actionPayload.base : "main"
+          );
+          return {
+            success: true,
+            externalRef: {
+              github_pr_number: result.number,
+              github_pr_url: result.url,
+              github_pr_title: result.title,
+            },
+          };
+        } catch (prErr) {
+          const message = prErr instanceof Error ? prErr.message : String(prErr);
+          logger.error("[writeback/github] createGitHubPR error:", message);
+          return { success: false, error: message };
+        }
+      }
+
       logger.warn("[writeback/github] Unknown actionType:", actionType);
       return {
         success: false,
-        error: `GitHub write-back: unsupported actionType '${actionType}'. Expected 'create_issue' or 'add_pr_comment'.`,
+        error: `GitHub write-back: unsupported actionType '${actionType}'. Expected 'create_issue', 'add_pr_comment', or 'github_pr'.`,
       };
     }
 
