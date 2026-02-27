@@ -45,6 +45,8 @@ import { logger } from "@/lib/logger";
 import { runCognitivePlanner } from "@/lib/brain/cognitive-planner";
 import { runMonitoringReactions } from "@/lib/brain/monitoring-reactions";
 import { runCausalDiscovery } from "@/lib/brain/causal-discovery";
+import { extractProcessTemplates } from "@/lib/brain/process-templates";
+import { promotePatternsToCore } from "@/lib/brain/se-aas-federation";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -417,6 +419,11 @@ export async function GET(request: NextRequest) {
         try {
           const result = await runCognitivePlanner(service, org.id as string);
           plannerResults.push({ orgId: org.id as string, result });
+          // After planner runs, promote successful SE-aaS patterns to CORE (fire-and-forget)
+          void promotePatternsToCore(service, org.id as string);
+          // Fire-and-forget: extract process templates from successful domain sequences.
+          // Runs after planner so any newly completed outcomes are included.
+          void extractProcessTemplates(service, org.id as string);
         } catch (err) {
           logger.warn(`[CognitiveCycle] Planner failed for org ${org.id as string}:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: (org.id as string)?.slice(0, 8) });
         }
