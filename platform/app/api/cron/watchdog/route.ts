@@ -31,8 +31,10 @@ import { logger } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; // Short cron — just DB queries, no LLM calls
 
-/** Jobs stuck in 'running' for longer than this are considered stale. */
-const STALE_RUNNING_THRESHOLD_SECONDS = 180; // 3 minutes
+/** Jobs stuck in 'running' for longer than this are considered stale.
+ *  90s matches the Lambda kill limit (Lambda max duration is 90s on Amplify SSR).
+ *  Any job running for >90s with no heartbeat is definitively dead. */
+const STALE_RUNNING_THRESHOLD_SECONDS = 90; // 90 seconds = Lambda kill threshold
 
 /** Paused chain continuations older than this are re-queued. */
 const STALE_PAUSED_CHAIN_THRESHOLD_SECONDS = 60; // 1 minute

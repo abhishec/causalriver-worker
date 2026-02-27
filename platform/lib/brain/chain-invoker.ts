@@ -45,9 +45,13 @@ export const MAX_CHAIN_DEPTH = 20;
  *     }
  *     await processTicket(ticket);
  *   }
+ *
+ * @param startedAt  Timestamp (Date.now()) when the current Lambda started
+ * @param budgetMs   Optional override — defaults to LAMBDA_BUDGET_MS (75 000ms).
+ *                   Useful in tests or when a shorter window is needed.
  */
-export function shouldChain(startedAt: number): boolean {
-  return Date.now() - startedAt > LAMBDA_BUDGET_MS;
+export function shouldChain(startedAt: number, budgetMs: number = LAMBDA_BUDGET_MS): boolean {
+  return Date.now() - startedAt > budgetMs;
 }
 
 /**

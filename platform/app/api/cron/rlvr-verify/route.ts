@@ -292,7 +292,7 @@ export async function GET(request: NextRequest) {
       // Emit RL signal for verified prediction
       try {
         const isCorrect = verification.wasCorrect === true;
-        const signalStrength = isCorrect ? CORRECT_SIGNAL : Math.abs(INCORRECT_SIGNAL);
+        const signalValue = isCorrect ? CORRECT_SIGNAL : INCORRECT_SIGNAL; // numeric: +0.1 or -0.05
         const signalType = isCorrect ? "dopamine" : "gaba";
 
         await supabase.from("cross_domain_signals").insert({
@@ -300,8 +300,8 @@ export async function GET(request: NextRequest) {
           source_domain: `rlvr.${prediction.domain}`,
           target_domain: prediction.domain,
           signal_type: signalType,
-          signal_value: signalType,
-          signal_strength: signalStrength,
+          signal_value: signalValue,
+          signal_strength: Math.abs(signalValue),
           entity_type: "prediction",
           entity_id: prediction.id,
           signal_timestamp: new Date().toISOString(),
