@@ -511,6 +511,69 @@ export async function GET(request: NextRequest) {
       logger.warn("[CognitiveCycle] Causal discovery phase failed:", err);
     }
 
+    // ── ai_memory Maintenance: prune working memory + dedup markers ──────────
+    // Prevents unbounded table growth from:
+    //   - memory_type='working'  rows inserted every 30m by the cognitive planner
+    //   - memory_type='dedup'    rows inserted every planning cycle (2h TTL)
+    //   - memory_type='episodic' rows beyond the 10-row bound per org/domain
+    let totalMaintenanceDeleted = 0;
+    try {
+      const maintenanceOrgIds = [...new Set([...activeOrgIds])];
+      for (const orgId of maintenanceOrgIds) {
+        try {
+          const { data: pruneResult, error: pruneError } = await service.rpc(
+            "prune_ai_memory",
+            { p_organization_id: orgId }
+          );
+          if (pruneError) {
+            // Function not deployed yet — fall back to inline DELETEs
+            logger.warn(
+              `[CronCognitiveCycle] prune_ai_memory RPC unavailable for org=${orgId}, using inline SQL:`,
+              pruneError
+            );
+            await service
+              .from("ai_memory")
+              .delete()
+              .eq("organization_id", orgId)
+              .eq("memory_type", "working")
+              .lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+            await service
+              .from("ai_memory")
+              .delete()
+              .eq("organization_id", orgId)
+              .eq("memory_type", "dedup")
+              .lt("created_at", new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString());
+            const { data: workingRows } = await service
+              .from("ai_memory")
+              .select("id")
+              .eq("organization_id", orgId)
+              .eq("memory_type", "working")
+              .order("created_at", { ascending: false })
+              .range(50, 9999);
+            if (workingRows && workingRows.length > 0) {
+              const excessIds = workingRows.map((r: { id: string }) => r.id);
+              await service.from("ai_memory").delete().in("id", excessIds);
+            }
+          } else {
+            totalMaintenanceDeleted += (pruneResult as number | null) ?? 0;
+          }
+        } catch (err) {
+          logger.warn(`[CronCognitiveCycle] Maintenance failed for org=${orgId}:`, {
+            error: (err as Error)?.message ?? String(err),
+          });
+        }
+      }
+      if (totalMaintenanceDeleted > 0) {
+        logger.info(
+          `[CronCognitiveCycle] Maintenance: pruned ${totalMaintenanceDeleted} stale ai_memory rows across ${maintenanceOrgIds.length} orgs`
+        );
+      }
+    } catch (err) {
+      logger.warn("[CronCognitiveCycle] Maintenance phase failed:", {
+        error: (err as Error)?.message ?? String(err),
+      });
+    }
+
     // ── Log run to scheduled_job_runs ─────────────────────────────────
     try {
       await service.from("scheduled_job_runs").insert({
@@ -520,7 +583,7 @@ export async function GET(request: NextRequest) {
         started_at: new Date(startMs).toISOString(),
         completed_at: new Date().toISOString(),
         status: skipped > 0 && processed === 0 ? "failed" : skipped > 0 ? "partial" : "success",
-        result: JSON.stringify({ processed, skipped, activeOrgIds, results, plannerResults, causalDiscoveryResults }),
+        result: JSON.stringify({ processed, skipped, activeOrgIds, results, plannerResults, causalDiscoveryResults, maintenanceDeleted: totalMaintenanceDeleted }),
         duration_ms: durationMs,
       });
     } catch {

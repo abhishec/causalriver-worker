@@ -111,7 +111,10 @@ export function NotificationBell() {
       {/* Bell Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
+        aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : "Notifications"}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className="relative p-1.5 rounded-lg hover:bg-surface-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
       >
         <svg
           className="w-4 h-4 text-muted"
