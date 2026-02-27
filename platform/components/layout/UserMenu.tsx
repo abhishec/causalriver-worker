@@ -67,7 +67,7 @@ function WorkspaceRow({
           </svg>
         ) : (
           <span className="text-xs font-semibold text-muted-foreground">
-            {ws.name.slice(0, 2).toUpperCase()}
+            {(ws.name ?? "??").slice(0, 2).toUpperCase()}
           </span>
         )}
       </div>

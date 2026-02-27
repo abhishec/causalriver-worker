@@ -251,7 +251,7 @@ export default function InvitePage() {
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
             <span className="text-xl font-bold text-accent">
-              {info.orgName.charAt(0)}
+              {info.orgName?.charAt(0) ?? "?"}
             </span>
           </div>
           <div>

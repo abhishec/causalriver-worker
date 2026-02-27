@@ -136,7 +136,7 @@ export default async function AdminOverviewPage() {
               <div key={cust.id}>
                 <div className="flex items-center gap-2 px-3 py-1.5 mb-1">
                   <div className="w-5 h-5 rounded bg-warning/15 flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-bold text-warning">{cust.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-[9px] font-bold text-warning">{cust.name?.charAt(0).toUpperCase() ?? "?"}</span>
                   </div>
                   <span className="text-[11px] font-semibold text-muted-foreground truncate">{cust.name}</span>
                   <Badge variant="default" size="xs">{cust.plan}</Badge>
@@ -147,7 +147,7 @@ export default async function AdminOverviewPage() {
                     <Link key={org.id} href={`/admin/workspaces/${org.id}`} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-surface-hover transition-colors">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${org.is_core_brain ? "bg-accent/20" : "bg-surface"}`}>
-                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name.charAt(0).toUpperCase()}</span>
+                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name?.charAt(0).toUpperCase() ?? "?"}</span>
                         </div>
                         <span className="text-[12px] font-medium truncate">{org.name}</span>
                       </div>
@@ -170,7 +170,7 @@ export default async function AdminOverviewPage() {
                     <Link key={org.id} href={`/admin/workspaces/${org.id}`} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-surface-hover transition-colors">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${org.is_core_brain ? "bg-accent/20" : "bg-surface"}`}>
-                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name.charAt(0).toUpperCase()}</span>
+                          <span className={`text-[10px] font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>{org.name?.charAt(0).toUpperCase() ?? "?"}</span>
                         </div>
                         <span className="text-[12px] font-medium truncate">{org.name}</span>
                       </div>

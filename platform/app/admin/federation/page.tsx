@@ -129,7 +129,7 @@ export default async function AdminFederationPage() {
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-2.5">
                         <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold ${org.is_core_brain ? 'bg-accent/20 text-accent' : 'bg-surface text-muted'}`}>
-                          {org.name.charAt(0).toUpperCase()}
+                          {org.name?.charAt(0).toUpperCase() ?? "?"}
                         </div>
                         <div>
                           <div className="text-xs font-medium">{org.name}</div>
