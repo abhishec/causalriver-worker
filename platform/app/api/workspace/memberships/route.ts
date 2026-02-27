@@ -112,6 +112,7 @@ export async function GET() {
         return {
           ...r,
           id: r.organization_id,
+          ai_worker_id: r.organization_id, // canonical AI Worker identity (1:1 with space)
           name: org?.name ?? r.organization_id,
           slug: org?.slug,
           customer_id: org?.customer_id ?? null,

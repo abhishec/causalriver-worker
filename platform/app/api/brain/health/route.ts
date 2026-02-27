@@ -222,6 +222,7 @@ async function handleLearningHealth(request: NextRequest) {
       status,
       overall_score: overallScore,
       organization_id: workspaceId,
+      ai_worker_id: workspaceId, // canonical AI Worker identity alias
       dimensions: {
         predictions: predictionHealth,
         causal_graph: causalGraphHealth,

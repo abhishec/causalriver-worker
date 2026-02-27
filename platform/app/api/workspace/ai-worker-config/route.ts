@@ -54,6 +54,7 @@ export async function GET() {
     );
 
     return NextResponse.json({
+      ai_worker_id: workspaceId, // canonical AI Worker identity
       brainReadinessMinIq: workspace.orchestratorConfig.brainReadinessMinIq,
       brainSignalCount,
     });
