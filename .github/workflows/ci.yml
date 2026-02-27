@@ -256,3 +256,45 @@ jobs:
           else
             echo "No migration changes detected"
           fi
+
+  # ── CI Failure Notification ────────────────────────────────────────────────
+  # Posts a comment on the failing PR when any CI job fails.
+  # Closes the feedback loop: engineers see failures without leaving GitHub.
+  notify-failure:
+    name: Notify on CI failure
+    runs-on: ubuntu-latest
+    needs: [test, platform-build, migration-check]
+    if: failure() && github.event_name == 'pull_request'
+    steps:
+      - name: Post failure comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { context } = require('@actions/github');
+            const failedJobs = ['test', 'platform-build', 'migration-check']
+              .filter(j => context.payload.workflow_run?.conclusion === 'failure')
+              .join(', ') || 'one or more jobs';
+
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                '## CI Failed',
+                '',
+                `**Run**: [View logs](${runUrl})`,
+                `**Branch**: \`${context.payload.pull_request.head.ref}\``,
+                `**Commit**: \`${context.payload.pull_request.head.sha.slice(0, 7)}\``,
+                '',
+                '**Quick diagnosis checklist:**',
+                '- TypeScript errors: `cd platform && npx tsc --noEmit`',
+                '- Lint errors: `cd platform && pnpm lint`',
+                '- Build failure: `pnpm turbo build --filter=platform`',
+                '- Migration issues: check `supabase/migrations/` for duplicate timestamps or missing IF EXISTS guards',
+                '',
+                '_This comment was posted automatically by CI. Fix the issues above and push to re-run._',
+              ].join('\n'),
+            });

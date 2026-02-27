@@ -9,6 +9,7 @@ applications:
             - pushd .. && pnpm install --frozen-lockfile && pnpm --filter @nexus-ai/memory-stack run build && popd
         build:
           commands:
+            - pnpm exec tsc --noEmit
             - pnpm build
       artifacts:
         baseDirectory: .next
