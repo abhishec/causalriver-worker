@@ -35,15 +35,12 @@ export const dynamic = "force-dynamic";
 
 // ── Auth helper ──────────────────────────────────────────────────────────────
 
-async function getAuthedUser() {
+async function getAuthedUser(): Promise<{ id: string; email?: string } | null> {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    if (error || !user) return null;
-    return user;
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return null;
+    return data.user;
   } catch {
     return null;
   }
@@ -72,7 +69,7 @@ export async function GET(_req: NextRequest) {
     }
     return NextResponse.json({ state });
   } catch (err: any) {
-    logger.error("[orchestrator/GET] Unexpected error:", err?.message);
+    logger.error("[orchestrator/GET] Unexpected error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/orchestrator" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -171,7 +168,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const jobId: string = inserted.id;
+    const jobId: string = (inserted as { id: string }).id;
 
     // ── Register dependency if waiting ────────────────────────────────────────
     if (decision.action === "queue-waiting") {
@@ -201,7 +198,7 @@ export async function POST(req: NextRequest) {
       reason: decision.reason,
     });
   } catch (err: any) {
-    logger.error("[orchestrator/POST] Unexpected error:", err?.message);
+    logger.error("[orchestrator/POST] Unexpected error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/orchestrator" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

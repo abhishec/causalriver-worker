@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         const orgResult = await checkOrgHealth(service, org.id, org.name);
         results.push(orgResult);
       } catch (err) {
-        logger.error(`[health-alerts] Error checking org ${org.name}:`, err);
+        logger.error(`[health-alerts] Error checking org ${org.name}:`, { error: (err as Error)?.message ?? String(err), route: "/api/brain/health/check-alerts", orgId: org.id?.slice(0, 8) });
         results.push({
           org_id: org.id,
           org_name: org.name,
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       results,
     });
   } catch (err) {
-    logger.error("[health-alerts] Unhandled error:", err);
+    logger.error("[health-alerts] Unhandled error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/health/check-alerts" });
     return NextResponse.json(
       { error: "Health alert check failed" },
       { status: 500 }
@@ -323,7 +323,7 @@ async function deliverAlerts(
         }
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "Slack delivery failed";
-        logger.error(`[health-alerts] Slack delivery failed for org ${orgId}:`, err);
+        logger.error(`[health-alerts] Slack delivery failed for org ${orgId}:`, { error: errorMsg, route: "/api/brain/health/check-alerts", orgId: orgId?.slice(0, 8) });
         // Log for retry
         await logDeliveryFailure(supabase, orgId, "slack", errorMsg, violations);
       }
@@ -359,7 +359,7 @@ async function deliverAlerts(
         }
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "Email delivery failed";
-        logger.error(`[health-alerts] Email delivery failed for org ${orgId}:`, err);
+        logger.error(`[health-alerts] Email delivery failed for org ${orgId}:`, { error: errorMsg, route: "/api/brain/health/check-alerts", orgId: orgId?.slice(0, 8) });
         // Log for retry
         await logDeliveryFailure(supabase, orgId, "email", errorMsg, violations);
       }

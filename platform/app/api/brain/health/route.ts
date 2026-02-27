@@ -23,18 +23,67 @@ export const dynamic = "force-dynamic";
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
+import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const detail = request.nextUrl.searchParams.get("detail") === "true";
   const learning = request.nextUrl.searchParams.get("learning") === "true";
 
-  // Basic liveness check (no auth required)
+  // Basic liveness check (no auth required) — includes agent queue metrics
+  // so ops teams can detect queue stalls and stuck jobs before users notice.
   if (!detail && !learning) {
+    let queueDepth = 0;
+    let stuckJobs = 0;
+    let supabaseOk = false;
+    const envOk = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.ANTHROPIC_API_KEY);
+
+    try {
+      const service = await createServiceClient();
+
+      // Supabase connectivity check + queue metrics in a single round-trip
+      const [pendingResult, stuckResult] = await Promise.all([
+        service
+          .from("agent_queue")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+        service
+          .from("agent_queue")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "running")
+          .lt("started_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()),
+      ]);
+
+      supabaseOk = !pendingResult.error && !stuckResult.error;
+      queueDepth = pendingResult.count ?? 0;
+      stuckJobs = stuckResult.count ?? 0;
+
+      if (queueDepth > 100) {
+        logger.warn("[brain/health] Agent queue depth exceeds 100", { queueDepth, route: "/api/brain/health" });
+      }
+      if (stuckJobs > 0) {
+        logger.warn("[brain/health] Stuck running jobs detected", { stuckJobs, route: "/api/brain/health" });
+      }
+    } catch (err) {
+      logger.error("[brain/health] Failed to query agent_queue metrics:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/health" });
+    }
+
+    const status = (!supabaseOk || stuckJobs > 5 || queueDepth > 200) ? "degraded" : "ok";
+
     return NextResponse.json({
-      status: "ok",
+      status,
       service: "nexusbrain",
       version: "1.0.0",
+      supabase: supabaseOk ? "ok" : "unreachable",
+      envVars: envOk ? "ok" : "missing",
+      queueDepth,
+      stuckJobs,
+      alerts: [
+        ...(queueDepth > 100 ? [`Queue depth ${queueDepth} exceeds 100 — worker may be stalled`] : []),
+        ...(stuckJobs > 0 ? [`${stuckJobs} job(s) stuck in running state for >30m — check Lambda logs`] : []),
+        ...(!supabaseOk ? ["Supabase connectivity check failed"] : []),
+        ...(!envOk ? ["One or more required env vars missing"] : []),
+      ],
       timestamp: new Date().toISOString(),
     });
   }

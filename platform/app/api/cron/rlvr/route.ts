@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
           `expired=${summary.expired} took=${orgDuration}ms`,
         );
       } catch (err) {
-        logger.warn(`[CronRLVR] org=${orgId.slice(0, 8)} verification threw:`, err);
+        logger.warn(`[CronRLVR] org=${orgId.slice(0, 8)} verification threw:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/rlvr", orgId: orgId.slice(0, 8) });
         orgResults.push({
           orgId: orgId.slice(0, 8),
           verified: 0,
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       orgResults,
     });
   } catch (error: unknown) {
-    logger.error("[CronRLVR] Fatal error:", error);
+    logger.error("[CronRLVR] Fatal error:", { error: (error as Error)?.message ?? String(error), route: "/api/cron/rlvr" });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

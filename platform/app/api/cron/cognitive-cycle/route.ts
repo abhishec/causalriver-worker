@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       .limit(MAX_ORGS_PER_RUN * 20); // over-fetch to deduplicate
 
     if (orgError) {
-      logger.error("[CronCognitiveCycle] Failed to fetch active orgs:", orgError);
+      logger.error("[CronCognitiveCycle] Failed to fetch active orgs:", { error: orgError?.message ?? String(orgError), route: "/api/cron/cognitive-cycle" });
       return NextResponse.json({ error: "Failed to fetch active orgs" }, { status: 500 });
     }
 
@@ -388,7 +388,7 @@ export async function GET(request: NextRequest) {
         );
       } catch (err) {
         const orgDurationMs = Date.now() - orgStart;
-        logger.error(`[CronCognitiveCycle] org=${orgId} failed:`, err);
+        logger.error(`[CronCognitiveCycle] org=${orgId} failed:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: orgId?.slice(0, 8) });
         results.push({
           orgId,
           success: false,
@@ -418,7 +418,7 @@ export async function GET(request: NextRequest) {
           const result = await runCognitivePlanner(service, org.id as string);
           plannerResults.push({ orgId: org.id as string, result });
         } catch (err) {
-          logger.warn(`[CognitiveCycle] Planner failed for org ${org.id as string}:`, err);
+          logger.warn(`[CognitiveCycle] Planner failed for org ${org.id as string}:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: (org.id as string)?.slice(0, 8) });
         }
       }
 
@@ -432,7 +432,7 @@ export async function GET(request: NextRequest) {
           `queued ${totalQueued} total agent jobs`
       );
     } catch (err) {
-      logger.warn("[CognitiveCycle] Planner phase failed:", err);
+      logger.warn("[CognitiveCycle] Planner phase failed:", { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle" });
     }
 
     // ── Monitoring Reactions: autonomous corrective actions ─────────────────
@@ -454,7 +454,7 @@ export async function GET(request: NextRequest) {
             logger.warn("[monitoring-reactions]", JSON.stringify(report));
           }
         } catch (err) {
-          logger.warn(`[CognitiveCycle] Monitoring reactions failed for org ${org.id as string}:`, err);
+          logger.warn(`[CognitiveCycle] Monitoring reactions failed for org ${org.id as string}:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: (org.id as string)?.slice(0, 8) });
         }
       }
 
@@ -468,7 +468,7 @@ export async function GET(request: NextRequest) {
           `${totalActioned} total actions taken`
       );
     } catch (err) {
-      logger.warn("[CognitiveCycle] Monitoring reactions phase failed:", err);
+      logger.warn("[CognitiveCycle] Monitoring reactions phase failed:", { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle" });
     }
 
     // ── Causal Discovery: L16 write-back (ai_memory + knowledge_chunks) ────────
@@ -490,7 +490,7 @@ export async function GET(request: NextRequest) {
           const causalResult = await runCausalDiscovery(service, org.id as string);
           causalDiscoveryResults.push({ orgId: org.id as string, result: causalResult });
         } catch (err) {
-          logger.warn(`[CognitiveCycle] Causal discovery failed for org ${org.id as string}:`, err);
+          logger.warn(`[CognitiveCycle] Causal discovery failed for org ${org.id as string}:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: (org.id as string)?.slice(0, 8) });
         }
       }
 
@@ -542,7 +542,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     const durationMs = Date.now() - startMs;
-    logger.error("[CronCognitiveCycle] Fatal error:", err);
+    logger.error("[CronCognitiveCycle] Fatal error:", { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle" });
     // Return 200 — cron schedulers that see 5xx may retry immediately (thundering herd)
     return NextResponse.json(
       { ok: false, error: "Cognitive cycle failed", durationMs },

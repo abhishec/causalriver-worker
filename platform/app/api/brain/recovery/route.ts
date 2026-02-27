@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (jobError) {
-      logger.error("[POST /api/brain/recovery] DB error fetching job:", jobError);
+      logger.error("[POST /api/brain/recovery] DB error fetching job:", { error: jobError?.message ?? String(jobError), route: "/api/brain/recovery" });
       return NextResponse.json({ error: "Failed to fetch job" }, { status: 500 });
     }
 
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       ...recoveryResult,
     });
   } catch (err: any) {
-    logger.error("[POST /api/brain/recovery] Unexpected error:", err);
+    logger.error("[POST /api/brain/recovery] Unexpected error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/recovery" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -266,7 +266,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (err: any) {
-    logger.error("[GET /api/brain/recovery] Unexpected error:", err);
+    logger.error("[GET /api/brain/recovery] Unexpected error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/recovery" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

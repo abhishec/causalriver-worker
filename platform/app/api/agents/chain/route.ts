@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error: unknown) {
-    logger.error("[AgentChainAPI] Error:", error);
+    logger.error("[AgentChainAPI] Error:", { error: (error as Error)?.message ?? String(error), route: "/api/agents/chain" });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -30,6 +30,15 @@ import { checkSessionRateLimit } from "@/lib/security-middleware";
 import { resolveSeaasRoute, resolveAccountingRoute, resolvePmAasRoute } from "@/lib/copilot/domain-router";
 import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
 import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
+import {
+  buildActionKnowledge as _buildActionKnowledge,
+  injectMemoryCompression,
+  injectCommandCenterPersona,
+  injectZeroDataGuard,
+  getNoHallucinationFallback,
+  type TrainedCausalEdge as _TrainedCausalEdge,
+  type TrainedRule as _TrainedRule,
+} from "@/lib/copilot/message-builder";
 // Keep admin client import for the orchestration dynamic import path
 import { getAdminClient } from "@/lib/supabase/admin";
 // ── @nexus-ai/memory-stack: bypasses Turbopack bundling ──────────────────────
@@ -125,111 +134,15 @@ export const maxDuration = 120; // Vercel serverless: allow up to 120s for long 
 // createSSEStream, SSE_HEADERS — imported from @/lib/copilot/stream-utils
 
 // ============================================================================
-// ACTION KNOWLEDGE BUILDER — adapts DB data for DomainActionEngine input format
-// (DomainActionEngine has its own typed input, this bridges the gap)
+// ACTION KNOWLEDGE BUILDER — extracted to @/lib/copilot/message-builder
+// Re-exported here so existing call sites in this file continue to work.
 // ============================================================================
 
+// Re-use type alias from message-builder (imported as _TrainedCausalEdge above)
 type UserIntent = "build" | "explain" | "diagnose" | "predict" | "general";
 
-function buildActionKnowledge(
-  question: string,
-  intent: string,
-  domains: string[],
-  causalEdges: TrainedCausalEdge[],
-  rules: TrainedRule[],
-  entityState?: Record<string, unknown>
-): {
-  question: string;
-  intent: UserIntent;
-  extractedDomains: string[];
-  primaryDomain: string;
-  directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>>;
-  directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>>;
-  matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }>;
-} {
-  // Map BrainIntent → UserIntent for DomainActionEngine compatibility
-  const intentMap: Record<string, UserIntent> = {
-    build: "build", explain: "explain", diagnose: "diagnose",
-    predict: "predict", whatif: "predict", cascade: "diagnose",
-    debugging: "diagnose", incident: "diagnose", review: "explain",
-    onboarding: "explain", knowledge: "explain", health: "general",
-    uncertainty: "general", general: "general",
-  };
-  const actionIntent: UserIntent = intentMap[intent] || "general";
-
-  // Build directCauses and directEffects from causal edges
-  const directCauses: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
-  const directEffects: Record<string, Array<{ source: string; target: string; effectSize: number; lagDays: number }>> = {};
-
-  for (const edge of causalEdges) {
-    const entry = {
-      source: edge.source_domain,
-      target: edge.target_domain,
-      effectSize: edge.effect_size,
-      lagDays: edge.optimal_lag_days,
-    };
-
-    if (!directCauses[edge.target_domain]) directCauses[edge.target_domain] = [];
-    directCauses[edge.target_domain].push(entry);
-
-    if (!directEffects[edge.source_domain]) directEffects[edge.source_domain] = [];
-    directEffects[edge.source_domain].push(entry);
-  }
-
-  for (const domain of Object.keys(directCauses)) {
-    directCauses[domain].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
-  }
-  for (const domain of Object.keys(directEffects)) {
-    directEffects[domain].sort((a, b) => Math.abs(b.effectSize) - Math.abs(a.effectSize));
-  }
-
-  // Parse and evaluate rules for ActionEngine
-  const matchedRules: Array<{ title: string; naturalLanguage: string; conditions: string[]; triggered: boolean }> = [];
-
-  for (const r of rules) {
-    try {
-      const p = JSON.parse(r.content);
-      if (p && p.when && p.entity_type) {
-        const conditionStrs = (p.when.conditions || []).map(
-          (c: { field: string; operator: string; value: unknown }) =>
-            `${c.field} ${c.operator} ${c.value}`
-        );
-
-        let triggered = false;
-        if (entityState && p.when.conditions?.length > 0) {
-          triggered = p.when.conditions.some((c: { field: string; operator: string; value: unknown }) => {
-            const parts = c.field.split(".");
-            let val: unknown = entityState;
-            for (const part of parts) {
-              if (val == null || typeof val !== "object") return false;
-              val = (val as Record<string, unknown>)[part];
-            }
-            return val !== undefined;
-          });
-        }
-
-        matchedRules.push({
-          title: p.title || "Untitled Rule",
-          naturalLanguage: p.natural_language || p.naturalLanguage || p.description || "",
-          conditions: conditionStrs,
-          triggered,
-        });
-      }
-    } catch {
-      // Skip malformed
-    }
-  }
-
-  return {
-    question,
-    intent: actionIntent,
-    extractedDomains: domains,
-    primaryDomain: domains[0] || "finance",
-    directCauses,
-    directEffects,
-    matchedRules,
-  };
-}
+// Thin wrapper: delegates to the extracted module so tests can cover the pure logic.
+const buildActionKnowledge = _buildActionKnowledge;
 
 // ============================================================================
 // MAIN ROUTE HANDLER
@@ -342,7 +255,7 @@ export async function POST(request: NextRequest) {
     try {
       memStack = getMemoryStackSync();
     } catch (memErr) {
-      logger.error("[Copilot/Chat] Failed to load @nexus-ai/memory-stack:", memErr);
+      logger.error("[Copilot/Chat] Failed to load @nexus-ai/memory-stack:", { error: (memErr as Error)?.message ?? String(memErr), route: "/api/copilot/chat" });
       // Return a graceful SSE error instead of 500
       const { stream, sendText, sendError, close } = createSSEStream();
       (async () => {
@@ -400,7 +313,7 @@ export async function POST(request: NextRequest) {
     try {
       interpretation = await interpreter.interpret(_classifierBrainPrefix + message);
     } catch (interpErr) {
-      logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', interpErr);
+      logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', { error: (interpErr as Error)?.message ?? String(interpErr), route: "/api/copilot/chat" });
     }
 
     let commandResult;
@@ -411,7 +324,7 @@ export async function POST(request: NextRequest) {
         interpretation,
       });
     } catch (cmdErr) {
-      logger.warn("[Copilot/Chat] Brain commander failed (non-fatal, falling back to basic chat):", cmdErr);
+      logger.warn("[Copilot/Chat] Brain commander failed (non-fatal, falling back to basic chat):", { error: (cmdErr as Error)?.message ?? String(cmdErr), route: "/api/copilot/chat" });
       // Graceful fallback: return a basic chat response without brain intelligence
       commandResult = {
         intelligence: { causalEdges: [], rules: [], cascadeRules: [], patterns: [], insights: [] },
@@ -978,7 +891,7 @@ export async function POST(request: NextRequest) {
             };
           }
         } catch (reqErr) {
-          logger.warn("[Copilot] Non-fatal: requirement intelligence fetch failed:", reqErr);
+          logger.warn("[Copilot] Non-fatal: requirement intelligence fetch failed:", { error: (reqErr as Error)?.message ?? String(reqErr), route: "/api/copilot/chat" });
         }
       }
 
@@ -987,7 +900,7 @@ export async function POST(request: NextRequest) {
       brainContext = builder.buildContext(message);
 
     } catch (brainErr) {
-      logger.warn("[BrainContext] Non-fatal: could not load brain intelligence:", brainErr);
+      logger.warn("[BrainContext] Non-fatal: could not load brain intelligence:", { error: (brainErr as Error)?.message ?? String(brainErr), route: "/api/copilot/chat" });
     }
 
     // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
@@ -1161,7 +1074,7 @@ export async function POST(request: NextRequest) {
         // Track which domain completed so SSE IIFE can emit agent_status events
         executedSeaasDomain = seaasRoute.domainType;
       } catch (seaasErr) {
-        logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", seaasErr);
+        logger.warn("[SE-aaS NL] Non-fatal: domain execution failed:", { error: (seaasErr as Error)?.message ?? String(seaasErr), route: "/api/copilot/chat" });
         // Surface a user-visible error instead of silent failure
         seaasResult = {
           domainType: seaasRoute.domainType,
@@ -1240,7 +1153,7 @@ export async function POST(request: NextRequest) {
           };
         }
       } catch (acctErr) {
-        logger.warn("[AaaS NL] Non-fatal: accounting routing failed:", acctErr);
+        logger.warn("[AaaS NL] Non-fatal: accounting routing failed:", { error: (acctErr as Error)?.message ?? String(acctErr), route: "/api/copilot/chat" });
         accountingResult = {
           domainType: accountingRoute?.domainType ?? "accounting",
           brainAugmented: false,
@@ -1270,7 +1183,7 @@ export async function POST(request: NextRequest) {
           ...pmDomainResult.result,
         };
       } catch (pmErr) {
-        logger.warn("[PM-aaS NL] Non-fatal: PM domain execution failed:", pmErr);
+        logger.warn("[PM-aaS NL] Non-fatal: PM domain execution failed:", { error: (pmErr as Error)?.message ?? String(pmErr), route: "/api/copilot/chat" });
         pmAasResult = {
           domainType: pmAasRoute.domainType,
           brainAugmented: false,
@@ -1419,7 +1332,7 @@ export async function POST(request: NextRequest) {
           // (falls through to normal LLM path below, using the template prompt)
         }
       } catch (templateErr) {
-        logger.warn("[CustomTemplate] Non-fatal: template loading failed:", templateErr);
+        logger.warn("[CustomTemplate] Non-fatal: template loading failed:", { error: (templateErr as Error)?.message ?? String(templateErr), route: "/api/copilot/chat" });
       }
     }
 
@@ -1615,7 +1528,7 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (wfErr) {
-        logger.warn("[Workflow] Non-fatal: workflow routing failed:", wfErr);
+        logger.warn("[Workflow] Non-fatal: workflow routing failed:", { error: (wfErr as Error)?.message ?? String(wfErr), route: "/api/copilot/chat" });
       }
     }
 
@@ -2752,53 +2665,21 @@ You currently have: ${causalEdges.length} causal edges, ${rules.length} business
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
 
-    // ── Memory compression injection ──────────────────────────────────────────
+    // ── Memory compression injection (via message-builder helper) ─────────────
     // When the user compressed earlier conversation turns, prepend the summary so
     // the LLM has context from ALL prior messages — not just the last 10.
-    // This is the "unlimited memory" mechanism: summary + recent turns = full continuity.
-    if (compressedSummary && compressedSummary.trim().length > 0) {
-      effectiveSystemPrompt =
-        `## CONVERSATION MEMORY (earlier turns summarized)\n${compressedSummary}\n\n---\n\n` +
-        effectiveSystemPrompt;
-    }
+    effectiveSystemPrompt = injectMemoryCompression(effectiveSystemPrompt, compressedSummary);
 
-    // ── Command-Center Persona: always-intelligent, proactive, orchestration-aware ──
+    // ── Command-Center Persona (via message-builder helper) ───────────────────
     // Injected after base prompt so it ALWAYS applies regardless of brain state.
-    effectiveSystemPrompt += `\n\n## Your Role: AI Worker Intelligence Commander
+    effectiveSystemPrompt = injectCommandCenterPersona(effectiveSystemPrompt);
 
-You are BrainOS Copilot — an autonomous AI that manages delivery intelligence for software engineering organizations. You operate like a senior principal engineer running a command center.
-
-BEHAVIORAL RULES (follow these always, regardless of brain data state):
-1. Always orchestrate: When a query needs data you're still collecting, kick off the agent AND answer with what you know now. Never make users wait empty-handed.
-2. Always be specific: Name the domains, metrics, and signals you're analyzing. "I'm analyzing velocity from your GitHub commits and Jira sprint data" not "analyzing your data."
-3. Always give status: Reference what agents are running, what completed recently, what the brain currently knows.
-4. Always add value even with no brain data: Use industry benchmarks, best practices, and your reasoning about what the data WOULD show based on the organization's context.
-5. Async-first communication: "I've started X — here's what I know now, and here's what X will tell us in Y minutes."
-6. Never passive: If you see a pattern or risk, surface it proactively. Don't wait for the user to ask.
-7. Command-center tone: Decisive, specific, action-oriented. Not chatbot-generic.
-8. Anti-silence rule: You NEVER respond with just "I don't have data on that." Always follow any gap acknowledgment with something substantive — a framework, a benchmark, a question that helps diagnose the situation, or a concrete next step.`;
-
-    // ── Zero-data guard: even when brainContext exists, if the org has NO data,
+    // ── Zero-data guard (via message-builder helper) ──────────────────────────
+    // Even when brainContext exists, if the org has NO data,
     // instruct the LLM to reason intelligently using expertise — not to stay silent.
     const totalDataPoints = causalEdges.length + rules.length + patterns.length + cascadeRules.length;
     if (totalDataPoints === 0) {
-      effectiveSystemPrompt += `\n\n## Brain State: Initializing — Operate as Expert Consultant
-
-The brain is still collecting organizational signals. Causal graph data is not yet loaded.
-
-You have access to:
-- Deep software engineering and delivery intelligence expertise
-- Industry benchmarks, SRE/DevOps best practices, and delivery frameworks
-- General knowledge about the organization's structure based on this conversation
-
-Behavioral rules for this state:
-1. ALWAYS provide substantive value — never say "I don't have data" without offering something useful as a substitute
-2. Be specific about what data you would normally analyze (e.g., "Once your GitHub connector is active, I'd look at PR cycle time, reviewer distribution, and commit velocity")
-3. Offer concrete recommendations grounded in industry best practices and the context you DO have
-4. Tell the user exactly what data collection steps are needed and what insights will unlock
-5. Behave like a senior delivery consultant who just joined the team — you have expertise even before the monitoring is fully set up
-6. DO NOT fabricate specific numbers (commit counts, ticket counts, etc.) — but DO give frameworks, benchmarks, and directional guidance
-7. When suggesting setup steps, be precise: "Connect GitHub at /connectors — once active, the brain ingests PR and commit data automatically"`;
+      effectiveSystemPrompt = injectZeroDataGuard(effectiveSystemPrompt);
     }
 
     // ── Delivery Intelligence exemption — overrides zero-data restriction ──

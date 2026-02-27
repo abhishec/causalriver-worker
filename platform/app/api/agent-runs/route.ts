@@ -7,11 +7,17 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+    // ── Auth: isolate createClient() + getUser() — Lambda cold-start safety ──
+    let supabase;
+    let user = null;
+    try {
+      supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (!error) user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!user || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -130,7 +136,7 @@ export async function GET(request: NextRequest) {
       timeRange: { since, hours },
     });
   } catch (error: any) {
-    logger.error("Agent runs API error:", error);
+    logger.error("Agent runs API error:", { error: error?.message ?? String(error), route: "/api/agent-runs" });
     return NextResponse.json(
       { error: "Internal error" },
       { status: 500 }

@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       .limit(MAX_ORGS_PER_RUN * 10); // over-fetch to deduplicate
 
     if (orgError) {
-      logger.error("[CronAutonomousMonitor] Failed to fetch active orgs:", orgError);
+      logger.error("[CronAutonomousMonitor] Failed to fetch active orgs:", { error: orgError?.message ?? String(orgError), route: "/api/cron/autonomous-monitor" });
       return NextResponse.json({ error: "Failed to fetch active orgs" }, { status: 500 });
     }
 

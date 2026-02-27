@@ -118,7 +118,7 @@ export async function POST(req: Request) {
     });
 
     if (insertError) {
-      logger.error("[/api/agents/create] insert error:", insertError);
+      logger.error("[/api/agents/create] insert error:", { error: insertError?.message ?? String(insertError), route: "/api/agents/create" });
       return NextResponse.json(
         { error: "Failed to persist agent" },
         { status: 500 }
@@ -159,7 +159,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(response);
   } catch (err) {
-    logger.error("[/api/agents/create] unexpected error:", err);
+    logger.error("[/api/agents/create] unexpected error:", { error: (err as Error)?.message ?? String(err), route: "/api/agents/create" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

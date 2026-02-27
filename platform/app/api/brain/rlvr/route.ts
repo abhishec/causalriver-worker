@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           const result = await runRLVR(supabase, orgId);
           return { orgId: orgId.slice(0, 8), ...result };
         } catch (err) {
-          logger.warn(`[rlvr-route] runRLVR threw for org=${orgId.slice(0, 8)}:`, err);
+          logger.warn(`[rlvr-route] runRLVR threw for org=${orgId.slice(0, 8)}:`, { error: (err as Error)?.message ?? String(err), route: "/api/brain/rlvr" });
           return {
             orgId: orgId.slice(0, 8),
             totalEvaluated: 0,
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       durationMs,
     });
   } catch (error: unknown) {
-    logger.error("[rlvr-route] Fatal error:", error);
+    logger.error("[rlvr-route] Fatal error:", { error: (error as Error)?.message ?? String(error), route: "/api/brain/rlvr" });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

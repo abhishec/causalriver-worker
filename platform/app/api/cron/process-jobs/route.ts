@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       }
     } catch (recoverErr) {
       // Non-fatal: stale recovery failure must NOT prevent new jobs from running
-      logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", { recoverErr });
+      logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", { error: (recoverErr as Error)?.message ?? String(recoverErr), route: "/api/cron/process-jobs" });
     }
 
     // ── Phase 2: Process pending SE-aaS jobs ─────────────────────
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (err) {
     const durationMs = Date.now() - startMs;
-    logger.error("[cron/process-jobs] Error:", err);
+    logger.error("[cron/process-jobs] Error:", { error: (err as Error)?.message ?? String(err), route: "/api/cron/process-jobs" });
     // Return 200 even on unexpected failure — cron schedulers that see 5xx may
     // retry immediately or back off exponentially, causing thundering herd.
     // The error is captured in logs; retrying a broken job every 2 min is safer.

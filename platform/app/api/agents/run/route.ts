@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       message: "Agent task finished. GET /api/agents/tasks?taskId=" + result.taskId,
     });
   } catch (error: unknown) {
-    logger.error("[AgentRun] Error:", error);
+    logger.error("[AgentRun] Error:", { error: (error as Error)?.message ?? String(error), route: "/api/agents/run" });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

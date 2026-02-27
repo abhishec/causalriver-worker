@@ -99,7 +99,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(stats);
   } catch (err) {
-    logger.error("[/api/brain/learning-stats] error:", err);
+    logger.error("[/api/brain/learning-stats] error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/learning-stats" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

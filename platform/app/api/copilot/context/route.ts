@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       canCompress: estimatedTokens > 2000,
     });
   } catch (err) {
-    logger.error("[context/GET] Error:", err);
+    logger.error("[context/GET] Error:", { error: (err as Error)?.message ?? String(err), route: "/api/copilot/context" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -208,7 +208,7 @@ Write a compact summary that lets the conversation continue with full context.`,
           ? summaryResponse.content[0].text
           : "";
       } catch (claudeErr) {
-        logger.warn("[context/compress] Claude summarization failed, falling back to prune-only:", claudeErr);
+        logger.warn("[context/compress] Claude summarization failed, falling back to prune-only:", { error: (claudeErr as Error)?.message ?? String(claudeErr), route: "/api/copilot/context" });
         summary = "";
       }
     } else {
@@ -246,7 +246,7 @@ Write a compact summary that lets the conversation continue with full context.`,
       tokensSaved,
     });
   } catch (err) {
-    logger.error("[context/compress] Error:", err);
+    logger.error("[context/compress] Error:", { error: (err as Error)?.message ?? String(err), route: "/api/copilot/context" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

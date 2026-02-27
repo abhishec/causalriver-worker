@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
         ),
       ]);
     } catch (err) {
-      logger.error(`[AgentResume] Task ${taskId} failed again:`, err);
+      logger.error(`[AgentResume] Task ${taskId} failed again:`, { error: (err as Error)?.message ?? String(err), route: "/api/agents/resume", taskId });
       await service
         .from("brain_agent_tasks")
         .update({
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
       message: `Agent resumed from step ${resumeFromStep} (${phase}). GET /api/agents/tasks?taskId=${taskId}`,
     });
   } catch (error: unknown) {
-    logger.error("[AgentResume] Error:", error);
+    logger.error("[AgentResume] Error:", { error: (error as Error)?.message ?? String(error), route: "/api/agents/resume" });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

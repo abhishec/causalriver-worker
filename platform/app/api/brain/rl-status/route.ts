@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     if (!error) user = data.user;
   } catch (authErr) {
     // createClient() or getUser() threw (e.g. network error, no request context)
-    logger.warn("[rl-status] Auth failed:", authErr);
+    logger.warn("[rl-status] Auth failed:", { error: (authErr as Error)?.message ?? String(authErr), route: "/api/brain/rl-status" });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!user || !supabase) {
@@ -161,7 +161,7 @@ export async function GET(req: NextRequest) {
       learningStats: learningStats ?? null,
     });
   } catch (err) {
-    logger.error("[rl-status] Error:", err);
+    logger.error("[rl-status] Error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/rl-status" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

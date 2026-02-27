@@ -130,7 +130,7 @@ export async function POST(
     });
 
     if (rpcError) {
-      logger.error("resume_agent_job RPC failed", { jobId, rpcError });
+      logger.error("resume_agent_job RPC failed", { error: rpcError?.message ?? String(rpcError), route: "/api/agents/[id]/resume", jobId });
       return NextResponse.json({ error: "Failed to resume job" }, { status: 500 });
     }
 
@@ -150,7 +150,7 @@ export async function POST(
       message: `Continuation job ${newJobId} queued. It will be picked up in the next worker cycle.`,
     });
   } catch (err) {
-    logger.error("POST /api/agents/[id]/resume failed", { jobId, err });
+    logger.error("POST /api/agents/[id]/resume failed", { error: (err as Error)?.message ?? String(err), route: "/api/agents/[id]/resume", jobId });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

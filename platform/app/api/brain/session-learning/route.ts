@@ -116,7 +116,7 @@ async function handleCapture(
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    logger.error("[/api/brain/session-learning] capture error:", err);
+    logger.error("[/api/brain/session-learning] capture error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/session-learning" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
