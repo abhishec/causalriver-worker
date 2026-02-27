@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
@@ -9,10 +10,19 @@ import { logger } from "@/lib/logger";
 export const metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const admin = getAdminClient();
-  const workspaceId = await getCurrentWorkspaceId();
-  const user = await getAuthUser();
+  // ── 500→401 Lambda pattern: each init wrapped separately ──
+  // createClient/getAdminClient/getCurrentWorkspaceId all throw if env vars or
+  // session are missing on a Lambda cold start. Redirect to login rather than 500.
+  const supabase = await createClient().catch(() => redirect("/login"));
+  const workspaceId = await getCurrentWorkspaceId().catch(() => redirect("/login"));
+
+  // Admin client: optional — customer tab degrades gracefully if unavailable
+  let admin: ReturnType<typeof getAdminClient> | null = null;
+  try { admin = getAdminClient(); } catch { logger.warn("[Settings] Admin client unavailable — customer tab disabled"); }
+
+  // Auth user: optional — only drives the customer memberships query
+  let user: Awaited<ReturnType<typeof getAuthUser>> | null = null;
+  try { user = await getAuthUser(); } catch { logger.warn("[Settings] getAuthUser failed — customer memberships empty"); }
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
@@ -50,7 +60,7 @@ export default async function SettingsPage() {
       .order("created_at", { ascending: true })),
 
     // Fetch all customer memberships for this user (uses admin to bypass RLS)
-    user
+    user && admin
       ? safe(admin
           .from("customer_members")
           .select("customer_id, role, primary_org_id")
@@ -105,7 +115,7 @@ export default async function SettingsPage() {
   let allCustomers: CustomerRow[] = [];
   let allWorkspacesAcrossCustomers: WorkspaceRow[] = [];
 
-  if (allCustomerIds.length > 0) {
+  if (allCustomerIds.length > 0 && admin) {
     const [customersResult, workspacesResult] = await Promise.all([
       safe(admin
         .from("customers")
@@ -125,7 +135,7 @@ export default async function SettingsPage() {
   // ── Fetch connector counts for ALL workspaces across all customers ──
   let allWorkspaceConnectors: { organization_id: string; connector_type: string; display_name: string; status: string }[] = [];
 
-  if (allWorkspacesAcrossCustomers.length > 0) {
+  if (allWorkspacesAcrossCustomers.length > 0 && admin) {
     const allWsIds = allWorkspacesAcrossCustomers.map(ws => ws.id);
     const { data: wsCons } = await safe(admin
       .from("org_connectors")
