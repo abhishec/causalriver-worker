@@ -24,6 +24,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
 import { processA2ATasks } from "@/lib/a2a/task-processor";
+import { processProcessEngineJobs } from "@/lib/process-engine/worker";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -136,12 +137,34 @@ export async function GET(request: NextRequest) {
       "processA2ATasks"
     );
 
+    // ── Phase 5: Process Engine Jobs ─────────────────────────────
+    // Picks up agent_type='bpaas' jobs — process engine templates are
+    // available to all AI Workers regardless of SE-aaS/AaaS activation.
+    // Runs up to 5 BPaaS jobs per cron tick.
+    let processEngineResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
+    const phaseElapsed3 = Date.now() - startMs;
+    const remainingForProcessEngine = Math.max(0, 28_000 - phaseElapsed3);
+    if (remainingForProcessEngine > 2_000) {
+      try {
+        processEngineResult = await withTimeout(
+          processProcessEngineJobs(service, 5),
+          remainingForProcessEngine,
+          "processProcessEngineJobs"
+        );
+      } catch (err) {
+        logger.warn("[cron/process-jobs] Phase 5 Process Engine failed", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
     const durationMs = Date.now() - startMs;
     logger.warn(
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
-      `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) took=${durationMs}ms`
+      `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) ` +
+      `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -151,6 +174,7 @@ export async function GET(request: NextRequest) {
       ...result,
       codeAgent: codeAgentResult,
       a2a: a2aResult,
+      processEngine: processEngineResult,
       durationMs,
     });
   } catch (err) {

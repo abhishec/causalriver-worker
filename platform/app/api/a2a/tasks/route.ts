@@ -26,7 +26,23 @@ const SKILL_TO_DOMAIN: Record<string, string> = {
   "early-warning": "early-warning",
   "scope-creep": "scope-creep",
   "delivery-health": "delivery-intelligence",
+  // Process Engine templates — available to any workspace regardless of service activation.
+  // Routes to agent_type='bpaas' (not 'a2a') so process-jobs Phase 5 picks them up.
+  "hr-offboarding":      "hr_offboarding",
+  "procurement":         "procurement",
+  "order-management":    "order_management",
+  "expense-approval":    "expense_approval",
+  "customer-onboarding": "customer_onboarding",
 };
+
+// Domains that route to agent_type='bpaas' (Process Engine) instead of 'a2a'
+const BPAAS_DOMAINS = new Set([
+  "hr_offboarding",
+  "procurement",
+  "order_management",
+  "expense_approval",
+  "customer_onboarding",
+]);
 
 const VALID_SKILLS = new Set(Object.keys(SKILL_TO_DOMAIN));
 
@@ -153,12 +169,16 @@ export async function POST(request: NextRequest) {
     const taskSessionId = sessionId ?? crypto.randomUUID();
     const domainType = SKILL_TO_DOMAIN[skill];
 
+    // Process Engine skills use agent_type='bpaas' so process-jobs Phase 5 picks them up.
+    // All other A2A skills use agent_type='a2a'.
+    const agentType = BPAAS_DOMAINS.has(domainType) ? "bpaas" : "a2a";
+
     // Insert A2A task into agent_queue
     const { data: job, error: insertError } = await admin
       .from("agent_queue")
       .insert({
         organization_id: organizationId,
-        agent_type: "a2a",
+        agent_type: agentType,
         task_type: domainType,
         priority: 5,
         payload: {

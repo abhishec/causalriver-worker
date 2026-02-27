@@ -806,11 +806,32 @@ async function _runCognitivePlannerInner(
     logger.warn("[CognitivePlanner] Phase 1f (recovery mode check) failed:", err);
   }
 
+  // 1g. Process Engine health signals (non-blocking, best-effort)
+  // Read bpaas.* RL signals so the planner is aware of process engine health
+  // even though it never autonomously schedules these domains.
+  let processEngineSignals: Array<{ domain: string; confidence: number }> = [];
+  try {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const { data: peSignals } = await supabase
+      .from("prediction_records")
+      .select("domain, confidence")
+      .eq("organization_id", orgId)
+      .like("domain", "bpaas.%")
+      .gte("created_at", twoHoursAgo)
+      .limit(10);
+    processEngineSignals = (peSignals ?? []) as typeof processEngineSignals;
+  } catch {
+    // Non-fatal — process engine health is informational only
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 2 — PLAN (one Claude Haiku call)
   // ══════════════════════════════════════════════════════════════════════════
 
   const maxDecisions = recoveryMode ? 1 : plannerConfig.maxDomainsPerCycle;
+  const processEngineHealthSummary = processEngineSignals.length > 0
+    ? processEngineSignals.map((s) => `${s.domain}(conf:${s.confidence.toFixed(2)})`).join(", ")
+    : "no recent data";
   const stateSnapshot = `## Current State
 - Active engagements: ${engagementCount}
 - Domains not run in >${plannerConfig.coverageGapHours}h (coverage gaps): ${coverageGaps.join(", ") || "none"}
@@ -820,7 +841,8 @@ async function _runCognitivePlannerInner(
 - Stuck domains (${plannerConfig.stuckDomainThreshold}+ failures last 2h): ${stuckDomains.join(", ") || "none"}
 - Globally broken domains (>10 failures across all orgs in 2h — NEVER schedule): ${[...globallyBrokenDomains].join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
-- IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition
+- Process Engine (bpaas) recent signals (informational, NOT schedulable): ${processEngineHealthSummary}
+- IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition, bpaas.*, process.*
 
 ## Past Planning Decisions and Lessons
 ${pastReflectionsText}`;
@@ -948,6 +970,27 @@ ${pastReflectionsText}`;
 
   for (const decision of decisions) {
     try {
+      // Process Engine templates are USER-TRIGGERED ONLY — never schedule autonomously.
+      // bpaas.* prefix = process engine domain (hr_offboarding, procurement, etc.)
+      // Also block known BPaaS process types that LLM might suggest without the prefix.
+      const BPAAS_PROCESS_TYPES = new Set([
+        "hr_offboarding", "hr-offboarding",
+        "procurement",
+        "order_management", "order-management",
+        "expense_approval", "expense-approval",
+      ]);
+      if (
+        decision.domain.startsWith("bpaas.") ||
+        decision.domain.startsWith("process.") ||
+        BPAAS_PROCESS_TYPES.has(decision.domain)
+      ) {
+        logger.warn("[CognitivePlanner] Skipping process engine domain (user-triggered only)", {
+          domain: decision.domain,
+          orgId,
+        });
+        continue;
+      }
+
       // Dedup check: 2-hour cooldown per domain per org
       const dedupKey = `cognitive-planner:${decision.domain}:${orgId}`;
       const { count: existingMarker } = await supabase
