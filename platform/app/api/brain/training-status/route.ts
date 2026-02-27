@@ -6,14 +6,29 @@ export const dynamic = "force-dynamic";
 
 // Returns a comprehensive view of brain training status across all 30 layers
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let supabase: Awaited<ReturnType<typeof createClient>>;
+  try {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let user: { id: string } | null = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const workspaceId = await getCurrentWorkspaceId();
+  let workspaceId: string | null | undefined;
+  try {
+    workspaceId = await getCurrentWorkspaceId();
+  } catch {
+    return NextResponse.json({ error: "No workspace" }, { status: 400 });
+  }
   if (!workspaceId)
     return NextResponse.json({ error: "No workspace" }, { status: 400 });
 

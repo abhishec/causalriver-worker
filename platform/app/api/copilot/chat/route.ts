@@ -4200,13 +4200,13 @@ No connectors are configured yet. When the user asks for data from any source (S
     // ── NB-063: Snapshot causal weights BEFORE stream for federation delta ───
     // Mirror of domain-executor Step 0: capture the org's causal graph state
     // right now so that after the stream we can diff what changed and promote
-    // only the deltas to CORE. Fire-and-forget if it fails — never blocks stream.
+    // only the deltas to CORE. True fire-and-forget — never blocks TTFB.
     let _copilotCausalWeightsBefore: Map<string, number> = new Map();
     const _copilotFedCycleId = `copilot_${workspaceId.slice(0, 8)}_${Date.now()}`;
-    try {
-      const { snapshotCausalWeights } = await import("@nexus-ai/memory-stack");
-      _copilotCausalWeightsBefore = await snapshotCausalWeights(service, workspaceId);
-    } catch { /* non-fatal — federation is best-effort */ }
+    const _causalSnapshotPromise = import("@nexus-ai/memory-stack")
+      .then(({ snapshotCausalWeights }) => snapshotCausalWeights(service, workspaceId))
+      .then((snap) => { _copilotCausalWeightsBefore = snap; })
+      .catch(() => { /* non-fatal — federation is best-effort */ });
 
     // ── Brain RL: Fire pre-stream interaction signal ────────────────────────
     // Must fire BEFORE the async IIFE so signal is captured even if the client
@@ -4798,6 +4798,9 @@ A: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
         // triggerEvolution() has potentially updated causal edge weights, compute
         // what changed vs the pre-stream snapshot and promote only the deltas to CORE.
         // TTL guard: max once per 5 minutes per org to prevent per-request federation overhead.
+        // Ensure the pre-stream snapshot has resolved (it was fire-and-forget, but the
+        // AI stream takes 3-10s so it's almost certainly done; await just in case).
+        await _causalSnapshotPromise;
         if (
           _copilotCausalWeightsBefore.size > 0 &&
           (Date.now() - (_copilotDeltaLastMs.get(workspaceId) ?? 0)) >= COPILOT_DELTA_INTERVAL_MS

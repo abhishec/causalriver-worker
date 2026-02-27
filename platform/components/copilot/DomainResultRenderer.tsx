@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import Link from "next/link";
 import type { DomainResult, DeliveryIntelligenceData } from "@/components/copilot/types";
 import { FinancialStatementsPanel, AAS_DOMAIN_TO_TAB } from "@/components/copilot/FinancialStatementsPanel";
 import { SEaaSResultPanel } from "@/components/copilot/SEaaSResultPanel";
@@ -42,9 +43,9 @@ function DataModeIndicator({
       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
       <span>
         Framework analysis ·{" "}
-        <a href="/connectors" className="underline underline-offset-2 hover:text-muted-foreground/80">
+        <Link href="/connectors" className="underline underline-offset-2 hover:text-muted-foreground/80">
           Connect data sources
-        </a>{" "}
+        </Link>{" "}
         for live insights
       </span>
     </div>
