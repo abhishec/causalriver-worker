@@ -17,8 +17,20 @@ import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    let supabase: Awaited<ReturnType<typeof createClient>>;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let user: { id: string } | null = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -60,7 +72,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const service = await createServiceClient();
+    let service: Awaited<ReturnType<typeof createServiceClient>>;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Save feedback
     const { error: insertError } = await service
@@ -163,8 +180,20 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    let supabase: Awaited<ReturnType<typeof createClient>>;
+    try {
+      supabase = await createClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let user: { id: string } | null = null;
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -189,7 +218,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const service = await createServiceClient();
+    let service: Awaited<ReturnType<typeof createServiceClient>>;
+    try {
+      service = await createServiceClient();
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     // Get feedback stats
     const [helpful, notHelpful, incorrect, total] = await Promise.all([
