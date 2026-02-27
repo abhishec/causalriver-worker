@@ -12,6 +12,8 @@
  *   - prediction_records          older than 90 days
  *   - brain_case_log              older than 180 days
  *   - agent_queue (done rows)     older than 30 days  (status: success | error | recovered)
+ *   - ai_memory (working)         memory_type='working', domain='cognitive-planner', older than 1 hour
+ *   - ai_memory (dedup markers)   memory_type='dedup', older than 3 hours
  *
  * Each table is deleted independently — a failure on one does NOT abort the rest.
  * Returns a JSON summary with the deleted row counts per table.
@@ -30,6 +32,10 @@ export const maxDuration = 60;
 
 function daysAgoISO(days: number): string {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function hoursAgoISO(hours: number): string {
+  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 }
 
 /** Run a single delete, swallow errors, return deleted count (or -1 on failure). */
@@ -104,6 +110,27 @@ export async function GET(request: NextRequest) {
           .delete({ count: "exact" })
           .in("status", ["success", "error", "recovered"])
           .lt("created_at", daysAgoISO(30))
+      ),
+
+      // ai_memory working memory rows inserted by cognitive-planner Phase 4, older than 1 hour
+      // B1: cognitive-planner inserts a working row every 30min per org — never cleaned up otherwise
+      safeDelete("ai_memory(working)", () =>
+        admin
+          .from("ai_memory")
+          .delete({ count: "exact" })
+          .eq("memory_type", "working")
+          .eq("domain", "cognitive-planner")
+          .lt("created_at", hoursAgoISO(1))
+      ),
+
+      // ai_memory dedup markers expire after 2h but are never deleted — orphaned rows accumulate
+      // B2: delete markers older than 3 hours (1h grace buffer beyond the 2h cooldown window)
+      safeDelete("ai_memory(dedup)", () =>
+        admin
+          .from("ai_memory")
+          .delete({ count: "exact" })
+          .eq("memory_type", "dedup")
+          .lt("created_at", hoursAgoISO(3))
       ),
     ]);
 
