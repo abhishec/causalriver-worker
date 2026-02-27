@@ -4134,6 +4134,21 @@ No connectors are configured yet. When the user asks for data from any source (S
       logger.debug(`[Self-MoA] Activated for high-stakes query: complexity=${commandResult?.dispatch?.complexityScore?.toFixed(2)} query="${message.slice(0, 80)}"`);
     }
 
+    // ── Self-MOA (3-lens): Domain multi-agent synthesis flag ─────────────
+    // Trigger conditions: early-warning or delivery-intelligence domain
+    // + Brain IQ >= 50 + query length > 100 chars + not a follow-up.
+    // Fire-and-forget from the SSE IIFE — never blocks stream delivery.
+    const _executedDomain = seaasRoute?.domainType ?? null;
+    const _shouldUseDomainMoa = (
+      (_executedDomain === "early-warning" || _executedDomain === "delivery-intelligence") &&
+      brainIqForRouting >= 50 &&
+      message.length > 100 &&
+      !_isFollowUp
+    );
+    if (_shouldUseDomainMoa) {
+      logger.warn(`[Self-MOA] 3-lens MOA activated for domain=${_executedDomain} iq=${brainIqForRouting} queryLen=${message.length}`);
+    }
+
         // ── Orchestration Capture: model selection decision → brain training ──
     // Fire-and-forget: never block user response
     captureModelSelection(
@@ -4356,6 +4371,42 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send SE-aaS Delivery Intelligence result (pod-match + health scores) for SEaaSDeliveryPanel
         if (deliveryIntelligenceResult) {
           send(JSON.stringify({ deliveryIntelligenceResult }));
+        }
+
+        // ── Self-MOA (3-lens): Fire-and-forget multi-agent synthesis ──────
+        // When the domain is early-warning or delivery-intelligence and Brain IQ >= 50
+        // and query is substantial, run 3 parallel Haiku sub-agents then Sonnet synthesis.
+        // Result is sent as a separate SSE event (moaResult) so the frontend can surface it.
+        // Never blocks — all errors are swallowed with logger.warn.
+        if (_shouldUseDomainMoa && process.env.ANTHROPIC_API_KEY) {
+          void (async () => {
+            try {
+              const { runSelfMoa: _runSelfMoa } = await import("@/lib/brain/self-moa");
+              const _moaBrainCtx = (brainContext?.sections ?? [])
+                .map((s: { title: string; content: string }) => `${s.title}: ${s.content}`)
+                .join("\n")
+                .slice(0, 2000);
+
+              const _moaResult = await _runSelfMoa({
+                query: message,
+                domain: _executedDomain ?? "delivery-intelligence",
+                organizationId: workspaceId,
+                userId: user.id,
+                brainContext: _moaBrainCtx,
+                apiKey: process.env.ANTHROPIC_API_KEY!,
+              });
+
+              if (_moaResult) {
+                send(JSON.stringify({ moaResult: _moaResult }));
+                logger.warn(
+                  `[Self-MOA] SSE sent moaResult consensus=${_moaResult.consensusLevel} ` +
+                    `confidence=${_moaResult.overallConfidence} executionMs=${_moaResult.executionMs}`
+                );
+              }
+            } catch (moaErr) {
+              logger.warn("[Self-MOA] fire-and-forget MOA failed (non-fatal):", moaErr);
+            }
+          })();
         }
 
         // Send PM-aaS domain result to frontend for structured display
