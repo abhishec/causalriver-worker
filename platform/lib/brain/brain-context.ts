@@ -48,6 +48,7 @@ export async function getBrainContext(
       signalCountRow,
       pendingJobsRow,
       lastJobRow,
+      orchestrationPatternsRow,
     ] = await Promise.allSettled([
       // Workspace config (for threshold settings)
       supabase
@@ -97,6 +98,15 @@ export async function getBrainContext(
         .in("status", ["success", "error"])
         .order("completed_at", { ascending: false })
         .limit(1),
+      // Layer 6: Orchestration Intelligence — past routing decisions for self-teaching
+      supabase
+        .from("ai_memory")
+        .select("domain, content, importance")
+        .eq("organization_id", orgId)
+        .eq("memory_type", "pattern")
+        .like("domain", "orchestration.%")
+        .order("importance", { ascending: false })
+        .limit(5),
     ]);
 
     // Extract values safely
@@ -138,6 +148,17 @@ export async function getBrainContext(
     const lastJobStatus: string | null = lastJobData.length > 0
       ? `${lastJobData[0].task_type}: ${lastJobData[0].status}`
       : null;
+
+    // Layer 6: Orchestration Intelligence — extract top past routing patterns for self-teaching
+    const orchestrationPatternRows = orchestrationPatternsRow.status === "fulfilled"
+      ? (orchestrationPatternsRow.value.data ?? [])
+      : [];
+    const orchestrationPatterns: string[] = orchestrationPatternRows
+      .map((r: { domain: string; content: string; importance: number }) =>
+        r.content ? r.content.split('\n')[2]?.replace('Reasoning: ', '') ?? r.content.slice(0, 100) : ''
+      )
+      .filter((s: string) => s.length > 0)
+      .slice(0, 3);
 
     // Fetch per-domain quality patterns from prediction_records (RL flywheel — closes the loop)
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
@@ -200,6 +221,7 @@ export async function getBrainContext(
       smartRouterRecommendation,
       recentDocTitles,
       docChunkSnippets,
+      orchestrationPatterns,
     });
 
     const result: BrainContext = {
@@ -244,7 +266,7 @@ export async function getBrainContext(
 }
 
 function buildContextSummary(
-  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[] }
+  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[]; orchestrationPatterns?: string[] }
 ): string {
   const parts: string[] = [];
 
@@ -286,6 +308,11 @@ function buildContextSummary(
   // Layer 5: Smart Router — model tier recommendation for this org
   if (ctx.smartRouterRecommendation) {
     parts.push(`Smart Router: ${ctx.smartRouterRecommendation}.`);
+  }
+
+  // Layer 6: Orchestration Intelligence — past routing decisions for self-teaching
+  if (ctx.orchestrationPatterns && ctx.orchestrationPatterns.length > 0) {
+    parts.push(`## Orchestration Intelligence (from past decisions):\n${ctx.orchestrationPatterns.map(p => `- ${p}`).join('\n')}`);
   }
 
   // Layer 1: Context Engine — relevant document knowledge with chunk content

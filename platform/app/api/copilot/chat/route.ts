@@ -59,6 +59,7 @@ function getMemoryStackSync() {
 import { logger } from "@/lib/logger";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
+import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain/orchestration-capture";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -1024,6 +1025,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Orchestration Capture: SE-aaS routing decision → brain training ──
+    // Fire-and-forget: never block user response
+    if (seaasRoute) {
+      captureOrchestrationDecision(service, workspaceId, {
+        type: 'sequencing',
+        trigger: message.slice(0, 200),
+        reasoning: `Detected domain ${seaasRoute.domainType} — routing to specialized SE-aaS executor`,
+        outcome: `SE-aaS routing: ${seaasRoute.domainType}`,
+        confidenceScore: 0.85,
+        domain: seaasRoute.domainType,
+        metadata: { domain_type: seaasRoute.domainType, intent: interpretation?.intent },
+      }).catch(() => {});
+    }
+
     if (seaasRoute && process.env.ANTHROPIC_API_KEY && !COPILOT_NATIVE_DOMAINS.has(seaasRoute.domainType)) {
       // ── Orchestration gate: check for brain dependencies before executing ──
       // If the brain isn't ready or a brain-population job is running, queue
@@ -1612,6 +1627,20 @@ export async function POST(request: NextRequest) {
     // ══════════════════════════════════════════════════════════════════════
 
     const agentIntent = detectAgentIntent(message);
+
+    // ── Orchestration Capture: agent spawn decision → brain training ──
+    // Fire-and-forget: never block user response
+    if (agentIntent) {
+      captureOrchestrationDecision(service, workspaceId, {
+        type: 'agent_spawn',
+        trigger: message.slice(0, 200),
+        reasoning: `User requested autonomous task execution — spawning agent for: ${agentIntent.agentType}`,
+        outcome: `Agent spawned: ${agentIntent.agentType}`,
+        confidenceScore: 0.9,
+        domain: 'agent_management',
+        metadata: { agent_type: agentIntent.agentType },
+      }).catch(() => {});
+    }
 
     // Skip regex agent path when LLM already handled create-agent via handleAgentCreation().
     // Without this guard, both paths run: handleAgentCreation succeeds, then detectAgentIntent
@@ -4029,6 +4058,20 @@ No connectors are configured yet. When the user asks for data from any source (S
     });
     // Apply Brain IQ gate: if brain is not ready, downgrade general copilot queries to Haiku
     const v4SmartModel = brainIqForRouting < 10 ? "claude-haiku-4-5-20251001" : v4SmartModelBase;
+
+    // ── Orchestration Capture: model selection decision → brain training ──
+    // Fire-and-forget: never block user response
+    captureModelSelection(
+      service,
+      workspaceId,
+      `User query: ${message.slice(0, 100)}`,
+      v4SmartModel,
+      brainIqForRouting < 10
+        ? `Brain IQ ${brainIqForRouting} below threshold — downgraded to cost-efficient model`
+        : `Brain IQ ${brainIqForRouting} sufficient — using ${v4SmartModel} for quality`,
+      'claude-sonnet-4-6',
+      detectedIntent ?? 'general'
+    ).catch(() => {});
 
     // ── Decision Record: capture routing intelligence for brain training ──
     // Initialized before the stream so it's accessible in the post-stream RL block.
