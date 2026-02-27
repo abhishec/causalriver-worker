@@ -1141,6 +1141,10 @@ export async function consumeSSEStream(
             if (parsed.brainWarning) {
               callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
             }
+            // Self-MoA result — 3-angle synthesis for delivery-intelligence / early-warning
+            if (parsed.moaResult) {
+              callbacks.onMoaResult?.(parsed.moaResult);
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1186,6 +1190,7 @@ export async function consumeSSEStream(
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
             if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
             if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
+            if (parsed.moaResult) callbacks.onMoaResult?.(parsed.moaResult);
           } catch { /* skip */ }
         }
       }

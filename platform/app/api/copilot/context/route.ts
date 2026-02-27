@@ -4,6 +4,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 // Must be force-dynamic: reads auth cookies per request
 export const dynamic = "force-dynamic";
@@ -104,6 +105,15 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Rate limit: context compression calls Anthropic — cap at 20 req/min per user
+    const rateLimit = await checkSessionRateLimit(user.id, "/api/copilot/context");
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait before compressing again." },
+        { status: 429 }
+      );
     }
 
     const body = await req.json();

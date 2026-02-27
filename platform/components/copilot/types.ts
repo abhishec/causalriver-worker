@@ -375,6 +375,13 @@ export interface SSECallbacks {
   onAgentInputRequest?: (request: AgentInputRequest) => void;
   /** SE-aaS domain status: emitted when a domain agent starts/completes execution */
   onSeaasDomainStatus?: (event: { type: 'agent_status'; status: 'running' | 'complete'; domain: string; message?: string }) => void;
+  /**
+   * Self-MoA result: 3-angle Haiku synthesis + Sonnet consensus sent after
+   * delivery-intelligence / early-warning domain execution completes.
+   * The frontend can surface this as a "multi-perspective analysis" badge or
+   * expand it in the chat bubble below the primary response.
+   */
+  onMoaResult?: (result: { consensusLevel: string; overallConfidence: number; synthesis: string; executionMs: number; [k: string]: unknown }) => void;
   onDone: () => void;
 }
 

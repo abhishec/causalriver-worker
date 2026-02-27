@@ -171,6 +171,8 @@ const VALID_SEAAS_DOMAINS = new Set([
   'pr-review', 'boilerplate-scaffold', 'codebase-qa',
   // SE-aaS Delivery Intelligence domains — MUST match classifier prompt + chat route list
   'pod-match', 'early-warning', 'scope-creep', 'delivery-intelligence',
+  // P1-15 Architecture Extractor — MUST match classifier prompt + chat route list
+  'architecture-extractor',
 ]);
 
 /** Valid AAS domains */
@@ -201,7 +203,7 @@ const VALID_ROUTES = new Set<DispatchRoute>(['fast_query', 'action_domain', 'age
 const CLASSIFIER_SYSTEM_PROMPT = `You are NexusBrain's query classifier. Given a user query, classify it and output ONLY a JSON object (no markdown, no explanation).
 
 ## Available Services
-SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa, pod-match, early-warning, scope-creep, delivery-intelligence
+SE-aaS domains: sql-analyzer, test-case-generator, test-data-generator, tdd-code-generator, incident-diagnosis, impact-analysis, data-lineage, log-query, dependency-upgrade, design-doc-generator, performance-profiler, dead-code-detector, pr-review, boilerplate-scaffold, codebase-qa, pod-match, early-warning, scope-creep, delivery-intelligence, architecture-extractor
 AAS agents: bookkeeper, reconciler, statement-generator, tax-compliance, audit-preparer, anomaly-detective, causal-accountant
 Copilot: general intelligence queries about the business, strategy, metrics, forecasting
 Agent Creation: creating, deploying, setting up, or building AI agents/monitors/automations
@@ -231,6 +233,7 @@ Examples:
 - PR / code review → pr-review
 - Scaffold / boilerplate generation → boilerplate-scaffold
 - How does code work / explain codebase → codebase-qa
+- Extract architecture / service graph / C4 diagram / module map / system design doc → architecture-extractor
 - Recommend / assign / which pod or team → pod-match
 - Velocity collapse / sprint velocity / at-risk engagement / bottleneck risk / flight risk / overallocation / engineer capacity → early-warning
 - Scope creep / scope drift / story point drift / unplanned work / scope integrity → scope-creep
@@ -683,6 +686,13 @@ function extractSeaasInput(query: string, domain: string): Record<string, unknow
         includePodMatches: true,
         includeScopeAlerts: true,
         includeEngineerHealth: true,
+      };
+    case 'architecture-extractor':
+      return {
+        description: query,
+        level: /lld\b/i.test(query) ? 'lld' : /hld\b/i.test(query) ? 'hld' : 'both',
+        includeMermaid: true,
+        includeC4: true,
       };
     default:
       return { description: query };
