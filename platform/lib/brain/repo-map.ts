@@ -461,3 +461,149 @@ export async function buildAndStoreRepoMap(
     mapLength: map.mapText.length,
   };
 }
+
+// ── In-memory repo map: generateRepoMap ──────────────────────────────────────
+//
+// Lightweight variant that operates entirely in-memory on pre-fetched file content.
+// Unlike buildRepoMap (which reads from disk via tsConfigFilePath), this function
+// accepts an array of { path, content } pairs — suitable for use inside getBrainContext()
+// where files come from brain_documents / document_chunks DB rows.
+//
+// Sort order: API routes first (app/api), lib files second, components third.
+// Output truncated to 8000 chars (~2000 tokens).
+
+/**
+ * Generate a compact "map" of the codebase from pre-fetched file content.
+ *
+ * @param files     Array of { path, content } — typically top 20 most-recently-changed code files
+ * @param maxChars  Maximum output characters (default: 8000 ≈ 2000 tokens)
+ * @returns         A single string formatted as a compact symbol map for LLM context
+ */
+export function generateRepoMap(
+  files: Array<{ path: string; content: string }>,
+  maxChars: number = 8000,
+): string {
+  if (files.length === 0) return "";
+
+  // ── Sort: API routes first, lib second, components third, rest last ──
+  const sortPriority = (p: string): number => {
+    if (p.includes("app/api") || p.includes("app\\api")) return 0;
+    if (p.includes("/lib/") || p.includes("\\lib\\")) return 1;
+    if (p.includes("/components/") || p.includes("\\components\\")) return 2;
+    return 3;
+  };
+
+  const sorted = [...files].sort((a, b) => sortPriority(a.path) - sortPriority(b.path));
+
+  const project = new Project({
+    useInMemoryFileSystem: true,
+    compilerOptions: {
+      allowJs: true,
+      checkJs: false,
+      strict: false,
+      skipLibCheck: true,
+    },
+  });
+
+  const lines: string[] = [
+    `// Repo Map — ${sorted.length} files | ${new Date().toISOString().slice(0, 10)}`,
+    "",
+  ];
+  let charCount = lines.join("\n").length;
+
+  for (const file of sorted) {
+    if (!file.content.trim()) continue;
+
+    // Only parse TS/JS files — skip Python, YAML, etc.
+    const ext = file.path.split(".").pop()?.toLowerCase() ?? "";
+    const isTs = ext === "ts" || ext === "tsx" || ext === "js" || ext === "jsx";
+    if (!isTs) continue;
+
+    const tempExt = ext === "tsx" || ext === "jsx" ? ".tsx" : ".ts";
+    const tempPath = `__rmap_${Math.random().toString(36).slice(2)}${tempExt}`;
+
+    let sourceFile: ReturnType<typeof project.createSourceFile>;
+    try {
+      sourceFile = project.createSourceFile(tempPath, file.content, { overwrite: true });
+    } catch {
+      continue;
+    }
+
+    const fileLines: string[] = [];
+
+    // Exported functions
+    for (const fn of sourceFile.getFunctions()) {
+      if (!fn.isExported() && !fn.isDefaultExport()) continue;
+      const name = fn.getName();
+      if (!name) continue;
+      const params = fn.getParameters()
+        .slice(0, 3)
+        .map((p) => {
+          const t = p.getTypeNode()?.getText() ?? "";
+          return t ? `${p.getName()}: ${t.slice(0, 25)}` : p.getName();
+        })
+        .join(", ");
+      const ret = fn.getReturnTypeNode()?.getText()?.slice(0, 30) ?? "";
+      fileLines.push(`  export function ${name}(${params})${ret ? `: ${ret}` : ""}`);
+    }
+
+    // Exported arrow functions (top-level const)
+    for (const varDecl of sourceFile.getVariableDeclarations()) {
+      const stmt = varDecl.getVariableStatement();
+      if (!stmt?.isExported()) continue;
+      const init = varDecl.getInitializer();
+      if (!init) continue;
+      const kind = init.getKind();
+      if (kind !== SyntaxKind.ArrowFunction && kind !== SyntaxKind.FunctionExpression) continue;
+      fileLines.push(`  export const ${varDecl.getName()} (function)`);
+    }
+
+    // Exported classes
+    for (const cls of sourceFile.getClasses()) {
+      if (!cls.isExported() && !cls.isDefaultExport()) continue;
+      const name = cls.getName();
+      if (!name) continue;
+      const methods = cls.getMethods()
+        .filter((m) => (m as { getScope?(): string }).getScope?.() !== "private" && (m as { getScope?(): string }).getScope?.() !== "protected")
+        .slice(0, 4)
+        .map((m) => {
+          const ret = m.getReturnTypeNode()?.getText()?.slice(0, 25) ?? "";
+          return `    ${m.getName()}()${ret ? `: ${ret}` : ""}`;
+        });
+      fileLines.push(`  export class ${name} {`);
+      for (const method of methods) fileLines.push(method);
+      if (methods.length > 0) fileLines.push("  }");
+    }
+
+    // Exported interfaces (name only to save tokens)
+    for (const iface of sourceFile.getInterfaces()) {
+      if (!iface.isExported()) continue;
+      fileLines.push(`  export interface ${iface.getName()}`);
+    }
+
+    // Exported type aliases (name only)
+    for (const typeAlias of sourceFile.getTypeAliases()) {
+      if (!typeAlias.isExported()) continue;
+      fileLines.push(`  export type ${typeAlias.getName()}`);
+    }
+
+    try {
+      project.removeSourceFile(sourceFile);
+    } catch {
+      // non-fatal cleanup
+    }
+
+    if (fileLines.length === 0) continue;
+
+    const fileHeader = `${file.path}:`;
+    const fileBlock = [fileHeader, ...fileLines, ""].join("\n");
+
+    if (charCount + fileBlock.length > maxChars) break;
+    lines.push(fileHeader);
+    for (const l of fileLines) lines.push(l);
+    lines.push("");
+    charCount += fileBlock.length;
+  }
+
+  return lines.join("\n");
+}

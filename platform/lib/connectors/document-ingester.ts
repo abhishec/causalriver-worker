@@ -18,6 +18,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { absorbDocumentChunks } from "@/lib/brain/document-absorber";
+import { chunkCodeFile, detectLanguage } from "@/lib/brain/code-chunker";
+
+// File extensions that trigger AST-aware chunking instead of naive paragraph splitting.
+const CODE_EXTS_FOR_AST = new Set(["ts", "tsx", "js", "jsx"]);
 
 // document_chunks.embedding is vector(1536).
 // OpenAI text-embedding-3-small produces exactly 1536 dimensions — no padding needed.
@@ -179,12 +183,46 @@ export function chunkDocument(text: string): string[] {
 
 /**
  * Ingest a document: chunk it and store in document_chunks table.
+ *
+ * For TypeScript/JavaScript files (detected from documentTitle extension),
+ * uses AST-aware chunking (ts-morph) to split at function/class/interface
+ * boundaries instead of naive paragraph breaks. All other file types use
+ * the standard paragraph-based chunker.
  */
 export async function ingestDocument(
   supabase: SupabaseClient,
   params: IngestDocumentParams
 ): Promise<IngestResult> {
-  const chunks = chunkDocument(params.content);
+  // ── Choose chunker based on file type ──────────────────────────────────
+  // AST chunking for TS/JS: keeps functions and classes intact in one chunk,
+  // which dramatically improves retrieval recall for code RAG queries.
+  const titleForExt = params.documentTitle ?? params.sourceUrl ?? "";
+  const ext = titleForExt.split(".").pop()?.toLowerCase() ?? "";
+  const useAstChunker = CODE_EXTS_FOR_AST.has(ext) && params.content.trim().length > 0;
+
+  let chunks: string[];
+
+  if (useAstChunker) {
+    try {
+      const lang = detectLanguage(titleForExt);
+      const astChunks = await chunkCodeFile(titleForExt, params.content);
+      if (astChunks.length > 0) {
+        chunks = astChunks.map((c) => c.content);
+        logger.warn(`[document-ingester] AST chunked "${titleForExt}" (${lang}): ${astChunks.length} semantic chunks`);
+      } else {
+        // ts-morph returned nothing (empty file) — fall through to naive chunker
+        chunks = chunkDocument(params.content);
+      }
+    } catch (err) {
+      logger.warn("[document-ingester] AST chunking failed, falling back to naive chunker", {
+        file: titleForExt,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      chunks = chunkDocument(params.content);
+    }
+  } else {
+    chunks = chunkDocument(params.content);
+  }
 
   const rows = chunks.map((text, index) => ({
     organization_id: params.organizationId,

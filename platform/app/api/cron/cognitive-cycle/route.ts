@@ -43,6 +43,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { runCognitivePlanner } from "@/lib/brain/cognitive-planner";
+import { runMonitoringReactions } from "@/lib/brain/monitoring-reactions";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -429,6 +430,42 @@ export async function GET(request: NextRequest) {
       );
     } catch (err) {
       logger.warn("[CognitiveCycle] Planner phase failed:", err);
+    }
+
+    // ── Monitoring Reactions: autonomous corrective actions ─────────────────
+    // Runs after the planner for each active org. Takes corrective actions
+    // for: high-risk engagements, stalled agents, dead letter spikes, brain decay, domain blackouts.
+    const monitoringReportsAll: Array<{ orgId: string; report: unknown }> = [];
+    try {
+      const { data: reactionOrgs } = await service
+        .from("organizations")
+        .select("id")
+        .eq("is_core_brain", false)
+        .limit(10);
+
+      for (const org of reactionOrgs ?? []) {
+        try {
+          const report = await runMonitoringReactions(service, org.id as string);
+          monitoringReportsAll.push({ orgId: org.id as string, report });
+          if (report.totalActioned > 0) {
+            console.warn("[monitoring-reactions]", JSON.stringify(report));
+          }
+        } catch (err) {
+          logger.warn(`[CognitiveCycle] Monitoring reactions failed for org ${org.id as string}:`, err);
+        }
+      }
+
+      const totalActioned = monitoringReportsAll.reduce((sum, r) => {
+        const rep = r.report as { totalActioned?: number } | null;
+        return sum + (rep?.totalActioned ?? 0);
+      }, 0);
+
+      logger.info(
+        `[CognitiveCycle] Monitoring reactions ran for ${monitoringReportsAll.length} orgs, ` +
+          `${totalActioned} total actions taken`
+      );
+    } catch (err) {
+      logger.warn("[CognitiveCycle] Monitoring reactions phase failed:", err);
     }
 
     // ── Log run to scheduled_job_runs ─────────────────────────────────

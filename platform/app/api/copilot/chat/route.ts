@@ -62,6 +62,7 @@ import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain/orchestration-capture";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { selectModel as selectModelDAA } from "@/lib/brain/model-router";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -3899,6 +3900,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     // slow DB never stalls the entire request. Defaults are safe (IQ=0, brainState=empty).
     let brainIqForRouting = 0;
     let brainWarning: string | null = null;
+    let _brainRepoMapContent: string | null = null;
     try {
       const { getBrainContext } = await import("@/lib/brain/brain-context");
       const brainCtxTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5_000));
@@ -3918,6 +3920,12 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
             logger.warn("[Copilot] Core insight pull failed (non-fatal):", e instanceof Error ? e.message : String(e))
           );
         } catch { /* non-fatal — federation never blocks the response */ }
+      }
+
+      // Capture repo map for injection after this try block
+      const _repoMapRaw = (brainCtx as unknown as Record<string, unknown>)["repoMapContent"];
+      if (typeof _repoMapRaw === "string" && _repoMapRaw.length > 0) {
+        _brainRepoMapContent = _repoMapRaw;
       }
 
       if (brainCtx.brainState !== "empty") {
@@ -3989,6 +3997,15 @@ Additional context:
       }
     } catch {
       // non-fatal — proceed without brain context
+    }
+
+    // ── Codebase Map injection (from Brain Tier 3 — L6 Repo Map) ─────────────
+    // Injects a compact symbol map of the codebase so Copilot understands the
+    // structure (exported functions, classes, interfaces) without reading every file.
+    // Source: ai_memory domain=code.repo_map (PageRank) OR dynamic generation from
+    // top 20 most-recently-changed code files in document_chunks.
+    if (_brainRepoMapContent && _brainRepoMapContent.length > 0) {
+      effectiveSystemPrompt += `\n\n## CODEBASE MAP\n${_brainRepoMapContent}`;
     }
 
     // ── FM-09: Connector Awareness — inject active connector list so LLM can answer
@@ -4080,18 +4097,31 @@ No connectors are configured yet. When the user asks for data from any source (S
     }
 
     // ── DAAO: Difficulty-Aware Adaptive Orchestration — 3-tier model routing ──
-    // Haiku (simple) → Sonnet (moderate) → Opus (expert). Brain IQ gates: IQ < 10 → Haiku.
+    // Routes to Haiku (simple, ~80%) / Sonnet (standard, ~18%) / Opus (expert, ~2%).
+    // Target: 84% cost reduction by keeping simple queries on Haiku.
+    const hasDomainResults = !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult;
+    const _domainCount = [seaasResult, accountingResult, deliveryIntelligenceResult, pmAasResult].filter(Boolean).length;
+    const _isFollowUp = !!(conversationHistory && conversationHistory.length > 0);
+    const _daaResult = selectModelDAA(message, {
+      hasDomainData: hasDomainResults,
+      domainCount: _domainCount,
+      isFollowUp: _isFollowUp,
+      brainIq: brainIqForRouting,
+    });
+    // Legacy brain-IQ gate (IQ < 10 → force Haiku) applied as secondary safety gate
+    const { model: _legacyIqModel } = routeCallType('copilot-complex', brainIqForRouting);
+    const v4SmartModel = brainIqForRouting < 10 ? _legacyIqModel : _daaResult.model;
+    console.warn(`[DAAO] model=${v4SmartModel} tier=${_daaResult.tier} iq=${brainIqForRouting} hasDomain=${hasDomainResults} followUp=${_isFollowUp} queryLen=${message.trim().length} rationale="${_daaResult.rationale}"`);
+    // Legacy memStack selectModel call kept for decision record rationale field
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModelBase = selectSmartModel(message, {
       commanderComplexity: commandResult?.dispatch?.complexityScore,
       hasConversationHistory: conversationHistory && conversationHistory.length > 0,
       conversationTurns: conversationHistory?.length,
       hasBrainArtifacts: !!actionArtifact,
-      hasDomainResults: !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult,
+      hasDomainResults,
     });
-    // Apply Brain IQ gate via smart router: IQ < 10 → Haiku, IQ >= 10 → domain-based selection
-    const { model: v4SmartModel } = routeCallType('copilot-complex', brainIqForRouting);
-    void v4SmartModelBase; // DAAO base still computed for decision record rationale
+    void v4SmartModelBase; // retained for captureModelSelection rationale parity
 
     // ── Self-MoA: Dual top_p synthesis flag ─────────────────────────────
     // For high-stakes queries (complexity >= 0.65 + strategic phrases):
