@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { ProcessFSM } from "@/lib/workflows/engine";
 
 export const dynamic = "force-dynamic";
 
@@ -134,11 +135,16 @@ export async function POST(
       return NextResponse.json({ error: "Failed to resume job" }, { status: 500 });
     }
 
+    // Restore FSM state on resume — survives Lambda cold start
+    const fsm = await ProcessFSM.restore(service, jobId);
+    logger.warn("[resume] FSM restored", { fsmState: fsm.state, jobId });
+
     logger.warn("Agent job resumed by human", {
       originalJobId: jobId,
       newJobId,
       phase: job.checkpoint_phase,
       previousStatus: job.status,
+      fsmRestoredState: fsm.state,
       userId: user.id,
       orgId: job.organization_id,
     });

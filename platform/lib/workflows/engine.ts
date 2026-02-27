@@ -840,9 +840,88 @@ function evaluateSingleClause(clause: string, output: Record<string, unknown>): 
 /**
  * ProcessFSM — explicit class interface over the functional workflow engine.
  * Wraps executeWorkflow for object-oriented callers.
+ *
+ * Survives Lambda cold starts: call save() after every state transition and
+ * restore() on resume to reconstruct state from agent_queue.metadata.
  */
 export class ProcessFSM {
-  constructor(private readonly supabase: SupabaseClient) {}
+  /** Current FSM state — persisted to agent_queue.metadata on save(). */
+  state: 'idle' | 'running' | 'paused' | 'awaiting_hitl' | 'completed' | 'failed' = 'idle';
+
+  /** Ordered history of state transitions for audit trail. */
+  history: Array<{ from: string; to: string; at: string }> = [];
+
+  constructor(private readonly supabase?: SupabaseClient) {}
+
+  /**
+   * Transition to a new state and record the change in history.
+   * Call save() after transitioning to persist to DB.
+   */
+  transition(next: ProcessFSM['state']): void {
+    this.history.push({ from: this.state, to: next, at: new Date().toISOString() });
+    this.state = next;
+  }
+
+  /**
+   * Persist current FSM state to agent_queue.metadata.
+   * Called after every state transition.
+   * Non-fatal: logs a warning but never throws.
+   */
+  async save(supabase: SupabaseClient, jobId: string): Promise<void> {
+    try {
+      await supabase
+        .from("agent_queue")
+        .update({
+          metadata: {
+            fsm_state: this.state,
+            fsm_history: this.history,
+            fsm_updated_at: new Date().toISOString(),
+          },
+        })
+        .eq("id", jobId);
+    } catch (err) {
+      // Non-fatal: log but don't break execution
+      logger.warn("[ProcessFSM] save error:", err);
+    }
+  }
+
+  /**
+   * Restore FSM state from agent_queue.metadata.
+   * Falls back to agent_queue.status mapping if metadata is not yet set.
+   * Called on resume after Lambda cold start.
+   * Never throws — returns an idle FSM on any error.
+   */
+  static async restore(supabase: SupabaseClient, jobId: string): Promise<ProcessFSM> {
+    const fsm = new ProcessFSM();
+    try {
+      const { data } = await supabase
+        .from("agent_queue")
+        .select("metadata, status")
+        .eq("id", jobId)
+        .single();
+
+      if (data?.metadata?.fsm_state) {
+        fsm.state = data.metadata.fsm_state as ProcessFSM['state'];
+        fsm.history = (data.metadata.fsm_history as Array<{ from: string; to: string; at: string }>) ?? [];
+      } else if (data?.status) {
+        // Fall back to agent_queue.status mapping when metadata not yet set
+        const statusMap: Record<string, ProcessFSM['state']> = {
+          pending: 'idle',
+          running: 'running',
+          completed: 'completed',
+          failed: 'failed',
+          blocked: 'awaiting_hitl',
+          paused: 'paused',
+          awaiting_approval: 'awaiting_hitl',
+          suspended: 'paused',
+        };
+        fsm.state = statusMap[data.status] ?? 'idle';
+      }
+    } catch (err) {
+      logger.warn("[ProcessFSM] restore error:", err);
+    }
+    return fsm;
+  }
 
   /**
    * Execute a workflow or resume a paused run.
@@ -852,6 +931,9 @@ export class ProcessFSM {
     params: WorkflowExecutionParams,
     callbacks?: WorkflowProgressCallback,
   ): Promise<WorkflowExecutionResult> {
+    if (!this.supabase) {
+      throw new Error("[ProcessFSM] supabase client required for execute()");
+    }
     return executeWorkflow(this.supabase, params, callbacks);
   }
 }
