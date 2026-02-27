@@ -26,8 +26,9 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { BPaaSFSMRunner } from "./fsm-runner";
-import type { BPaaSContext, BPaaSState, BPaaSTransitionEvent } from "./fsm-runner";
+import type { BPaaSContext, BPaaSTransitionEvent } from "./fsm-runner";
 import { getProcessDefinition, bpaasDomain } from "./process-registry";
+import type { FSMTransition } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
 import { getBrainContext } from "@/lib/brain/brain-context";
@@ -111,6 +112,104 @@ function buildApprovalSummary(
     parts.push(`Policy rules: ${policyOutcome.rules.join(", ")}`);
   }
   return parts.join(" | ");
+}
+
+/**
+ * Select the correct outbound event from POLICY_CHECK based on policy result
+ * and the template's available outbound transitions.
+ *
+ * Priority:
+ * 1. If triggered rule IDs match outbound events, use the most-specific match
+ * 2. Fall back to canonical event names (policy_fail, breach_confirmed, etc.)
+ * 3. Final fallback: "policy_pass" or "policy_fail"
+ */
+function pickPolicyCheckEvent(
+  templateTransitions: FSMTransition[],
+  policyResult: {
+    passed: boolean;
+    requiresApproval: boolean;
+    escalationRequired: boolean;
+    triggeredRules: Array<{ ruleId: string; action: string }>;
+  },
+  currentState: string
+): string {
+  const outbound = templateTransitions.filter((t) => t.from === currentState);
+  const outboundEvents = new Set(outbound.map((t) => t.on));
+
+  const firstMatch = (...candidates: string[]): string | undefined =>
+    candidates.find((c) => outboundEvents.has(c));
+
+  const hasBlock = policyResult.triggeredRules.some((r) => r.action === "block");
+  const hasEscalate = policyResult.escalationRequired;
+  const hasRequireApproval = policyResult.requiresApproval;
+
+  if (hasBlock || hasEscalate) {
+    // Try rule-id-specific events first (e.g. "breach_confirmed", "compliance_conflict")
+    for (const rule of policyResult.triggeredRules.filter(
+      (r) => r.action === "block" || r.action === "escalate"
+    )) {
+      if (outboundEvents.has(rule.ruleId)) return rule.ruleId;
+    }
+    // Canonical escalation event names — covers all 15 process templates
+    const escalateMatch = firstMatch(
+      "policy_fail",
+      "escalate",
+      "breach_confirmed",
+      "compliance_conflict",
+      "policy_violation",
+      "security_conflict",
+      "cfo_review_required",
+      // Additional template-specific escalation events
+      "rm_missing",              // compliance_audit
+      "active_enterprise_customer", // ar_collections
+      "dependency_conflict",     // product_workflow
+      "unidentified_transaction", // financial_close
+      "fraud_signals"            // insurance_claim (fraud detected)
+    );
+    if (escalateMatch) return escalateMatch;
+    // Last resort: any non-pass, non-approval-gate outbound event (template-safety net)
+    const anyNonPassEvent = outbound.find(
+      (t) => t.on !== "policy_pass"
+    );
+    return anyNonPassEvent?.on ?? "policy_fail";
+  }
+
+  if (hasRequireApproval) {
+    // Try rule-id-specific events first (e.g. "variance_detected", "pre_breach_warning")
+    for (const rule of policyResult.triggeredRules.filter(
+      (r) => r.action === "require_approval"
+    )) {
+      if (outboundEvents.has(rule.ruleId)) return rule.ruleId;
+    }
+    // Canonical approval event names — covers all 15 process templates
+    const approvalMatch = firstMatch(
+      "requires_approval",
+      "variance_detected",
+      "policy_violation",
+      "pre_breach_warning",
+      "two_person_approval_required",
+      "elevated_review_triggered",
+      // Additional template-specific approval events
+      "conflicts_found",         // subscription_migration
+      "payment_plan_requested",  // ar_collections
+      "disputed_transaction",    // financial_close
+      "inconclusive_evidence"    // dispute_resolution
+    );
+    if (approvalMatch) return approvalMatch;
+    // Last resort: any non-pass, non-escalate outbound event
+    const anyNonEscalateEvent = outbound.find(
+      (t) => t.on !== "policy_pass" && t.on !== "policy_fail" &&
+             t.on !== "breach_confirmed" && t.on !== "rm_missing" &&
+             t.on !== "active_enterprise_customer" && t.on !== "dependency_conflict" &&
+             t.on !== "unidentified_transaction" && t.on !== "security_conflict" &&
+             t.on !== "cfo_review_required" && t.on !== "compliance_conflict" &&
+             t.on !== "fraud_signals"
+    );
+    return anyNonEscalateEvent?.on ?? "requires_approval";
+  }
+
+  // All passed
+  return firstMatch("policy_pass") ?? "policy_pass";
 }
 
 // ── LLM Caller ───────────────────────────────────────────────────────────────
@@ -269,9 +368,11 @@ export async function executeBPaaSProcess(
   let lastError: string | undefined;
   const domain = bpaasDomain(params.processType);
 
-  const terminalStates: BPaaSState[] = ["COMPLETE", "FAILED", "ESCALATE", "APPROVAL_GATE"];
+  // Core terminal states — loop exits when any of these is reached.
+  // Using Set<string> so custom states that route to ESCALATE/FAILED are handled correctly.
+  const coreTerminalStates = new Set<string>(["COMPLETE", "FAILED", "ESCALATE", "APPROVAL_GATE"]);
 
-  while (!terminalStates.includes(runner.getCurrentState())) {
+  while (!coreTerminalStates.has(runner.getCurrentState())) {
     // Lambda budget check — chain if near 75s limit
     if (runner.shouldChain()) {
       await runner.saveChainCheckpoint(supabase, chainDepth);
@@ -518,14 +619,18 @@ export async function executeBPaaSProcess(
         // `definition` is already loaded at the top of executeBPaaSProcess — reuse it.
         const ctx = runner.getContext();
 
-        // Validate definition is loaded (should always be true at this point)
-        if (!definition) {
-          throw new Error(`POLICY_CHECK: process definition not loaded for ${params.processType}`);
-        }
-
         const policyCtx: PolicyContext = extractPolicyContext(
           (ctx.computedValues ?? {}) as Record<string, unknown>
         );
+
+        // Also inject assessed facts scalars so ASSESS-extracted booleans/numbers
+        // are available for policy rule evaluation (e.g. has_unvested_equity, tenure_years)
+        if (ctx.assessedFacts) {
+          const assessedScalars = extractPolicyContext(
+            ctx.assessedFacts as Record<string, unknown>
+          );
+          Object.assign(policyCtx, assessedScalars);
+        }
 
         const policyResult = await runPolicyCheck(
           supabase,
@@ -545,21 +650,27 @@ export async function executeBPaaSProcess(
         const currentFsmState = runner.getCurrentState();
         runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
-        if (policyResult.passed) {
-          await runner.transition("policy_pass", supabase);
-        } else {
-          await runner.transition("policy_fail", supabase);
-        }
+        // Use template-aware event selection — templates may have custom outbound events
+        // from POLICY_CHECK (e.g. variance_detected, breach_confirmed) instead of
+        // the generic policy_pass/policy_fail.
+        const policyEvent = pickPolicyCheckEvent(
+          definition.transitions,
+          policyResult,
+          currentState
+        );
+
+        await runner.transition(policyEvent as BPaaSTransitionEvent, supabase);
         await runner.save(supabase);
 
-        // If policy failed, state is now ESCALATE — loop will terminate
-        if (!policyResult.passed) {
+        // If policy resulted in escalation or failure, return early
+        const nextState = runner.getCurrentState();
+        if (nextState === "ESCALATE" || nextState === "FAILED") {
           const escalationLvl = policyResult.escalationLevel ?? "policy_block";
           return {
             status: "escalated",
             processInstanceId,
             processType: params.processType,
-            finalState: runner.getCurrentState(),
+            finalState: nextState,
             escalationLevel: escalationLvl,
             durationMs: Date.now() - startedAt,
           };
@@ -683,12 +794,15 @@ export async function executeBPaaSProcess(
       }
 
       else {
-        // Unknown state — break to avoid infinite loop
-        logger.warn("[BPaaS/DomainExecutor] Unknown state in loop, breaking", {
-          state: currentState,
-          processInstanceId,
-        });
-        break;
+        // Unhandled state — not a core state and not in CUSTOM_INTERMEDIATE_STATES.
+        // This should never happen if all process templates are correctly defined.
+        // Throw so the outer catch block transitions to FAILED with a descriptive error.
+        throw new Error(
+          `Unhandled state: ${currentState}. ` +
+          `If this is a custom intermediate state, add it to CUSTOM_INTERMEDIATE_STATES ` +
+          `in domain-executor.ts. Core states: DECOMPOSE, ASSESS, COMPUTE, POLICY_CHECK, ` +
+          `APPROVAL_GATE, MUTATE, SCHEDULE_NOTIFY. Custom states: ${Array.from(CUSTOM_INTERMEDIATE_STATES).join(", ")}.`
+        );
       }
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
@@ -717,6 +831,9 @@ export async function executeBPaaSProcess(
   const finalState = runner.getCurrentState();
   const ctx = runner.getContext();
 
+  // Include fired policy rules in RL output for policy tuning signals
+  const firedPolicyRules = ctx.policyOutcome?.rules ?? [];
+
   const outputResult: Record<string, unknown> = {
     processType: params.processType,
     processInstanceId,
@@ -724,6 +841,7 @@ export async function executeBPaaSProcess(
     computedValues: ctx.computedValues,
     mutationResult: ctx.mutationResult,
     customStateResults: ctx.customStateResults,
+    firedPolicyRules,
     stateCount: ctx.stateHistory.length,
     durationMs,
   };
