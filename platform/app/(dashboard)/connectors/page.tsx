@@ -15,7 +15,7 @@ const CONNECTORS = [
   { name: "Stripe", type: "stripe", domain: "finance", icon: "💳", description: "Payment events, subscription changes, invoices, disputes", oauth: false },
   { name: "HubSpot", type: "hubspot", domain: "sales", icon: "🎯", description: "Deal stage changes, contact activity, pipeline metrics", oauth: false },
   // Freshworks suite (NB-020)
-  { name: "Freshdesk", type: "freshdesk", domain: "support", icon: "🎧", description: "Support tickets, conversations, SLA tracking, agent performance", oauth: false },
+  { name: "Freshdesk", type: "freshdesk", domain: "support", icon: "🎧", description: "Support tickets, conversations, SLA tracking, agent performance", oauth: true },
   { name: "Freshsales", type: "freshsales", domain: "sales", icon: "💼", description: "CRM contacts, deals, activities, pipeline and revenue metrics", oauth: false },
   { name: "Freshchat", type: "freshchat", domain: "support", icon: "💬", description: "Live-chat conversations, message threads, agent response times", oauth: false },
   { name: "Intercom", type: "intercom", domain: "support", icon: "💬", description: "Conversations, resolution times, customer satisfaction", oauth: false },

@@ -565,7 +565,20 @@ export function ConnectorsClient({
                     <div className="flex flex-col gap-1.5 shrink-0">
                       {(instance.status === "error" || health?.status === "error") && (
                         <button
-                          onClick={() => handleOAuthConnect(instance.connectorType)}
+                          onClick={() => {
+                            if (instance.connectorType === "freshdesk") {
+                              // Use stored domain from metadata to avoid requiring re-entry
+                              const storedDomain = (instance.metadata as Record<string, unknown>)?.domain as string | undefined;
+                              if (storedDomain) {
+                                window.location.href = `/api/connectors/freshworks/auth?domain=${encodeURIComponent(storedDomain)}`;
+                              } else {
+                                // No domain stored — show the domain input by setting state
+                                setShowFreshworksInput(true);
+                              }
+                            } else {
+                              handleOAuthConnect(instance.connectorType);
+                            }
+                          }}
                           className="px-3 py-1.5 rounded-lg bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 transition-colors flex items-center gap-1.5"
                         >
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
