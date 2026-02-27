@@ -35,9 +35,10 @@ export default defineConfig({
         // Model routers (pure input→output)
         "lib/brain/model-router.ts",
         "lib/se-aas/model-router.ts",
-        // Domain routing (pure logic)
+        // Domain routing + message building (pure logic)
         "lib/copilot/domain-router.ts",
         "lib/copilot/stream-utils.ts",
+        "lib/copilot/message-builder.ts",
         // SE-aaS catalogue (pure domain registry)
         "lib/se-aas/domain-catalogue.ts",
         // RL quality scoring (pure heuristic)

@@ -21,6 +21,17 @@ const forceIDS = process.env.DEV_ENABLE_IDS === "true";
 
 /* ── Security headers helper ──────────────────────────────────────── */
 
+/**
+ * Generates a request correlation ID and attaches it to the response.
+ * The X-Request-Id header is included in every response so Lambda invocations
+ * can be correlated across logs without a distributed tracing system.
+ */
+function addRequestId(response: NextResponse): string {
+  const requestId = crypto.randomUUID();
+  response.headers.set("X-Request-Id", requestId);
+  return requestId;
+}
+
 function addSecurityHeaders(response: NextResponse) {
   // Content Security Policy (CSP) — Defense against XSS
   //
@@ -101,6 +112,7 @@ export async function middleware(request: NextRequest) {
   if (isDev && !forceIDS) {
     const response = await updateSession(request);
     addSecurityHeaders(response);
+    addRequestId(response);
     return response;
   }
 
@@ -126,6 +138,7 @@ export async function middleware(request: NextRequest) {
 
   const response = await updateSession(request);
   addSecurityHeaders(response);
+  addRequestId(response);
   return response;
 }
 
