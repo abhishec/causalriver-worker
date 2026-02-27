@@ -196,9 +196,14 @@ function pickPolicyCheckEvent(
       "inconclusive_evidence"    // dispute_resolution
     );
     if (approvalMatch) return approvalMatch;
-    // Last resort: any non-pass, non-escalate outbound event
+    // Fallback: templates that use policy_pass → APPROVAL_GATE pattern
+    // (e.g. hr_offboarding, procurement, expense_approval, travel_rebooking, etc.)
+    // In these templates, the approval decision is made IN the APPROVAL_GATE state,
+    // not at POLICY_CHECK. So requiresApproval=true still routes via policy_pass.
+    if (outboundEvents.has("policy_pass")) return "policy_pass";
+    // Last resort: any non-escalate outbound event
     const anyNonEscalateEvent = outbound.find(
-      (t) => t.on !== "policy_pass" && t.on !== "policy_fail" &&
+      (t) => t.on !== "policy_fail" &&
              t.on !== "breach_confirmed" && t.on !== "rm_missing" &&
              t.on !== "active_enterprise_customer" && t.on !== "dependency_conflict" &&
              t.on !== "unidentified_transaction" && t.on !== "security_conflict" &&
