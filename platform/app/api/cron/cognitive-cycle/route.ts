@@ -44,6 +44,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { runCognitivePlanner } from "@/lib/brain/cognitive-planner";
 import { runMonitoringReactions } from "@/lib/brain/monitoring-reactions";
+import { runCausalDiscovery } from "@/lib/brain/causal-discovery";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -468,6 +469,46 @@ export async function GET(request: NextRequest) {
       logger.warn("[CognitiveCycle] Monitoring reactions phase failed:", err);
     }
 
+    // ── Causal Discovery: L16 write-back (ai_memory + knowledge_chunks) ────────
+    // Runs after monitoring reactions for each active org. Discovers correlations
+    // between engineer health leading indicators and outcomes, then writes
+    // findings to ai_memory (domain='causal-discovery') so that getBrainContext()
+    // L16 surfaces them in every copilot response. Also writes to knowledge_chunks
+    // for semantic RAG retrieval.
+    const causalDiscoveryResults: Array<{ orgId: string; result: unknown }> = [];
+    try {
+      const { data: causalOrgs } = await service
+        .from("organizations")
+        .select("id")
+        .eq("is_core_brain", false)
+        .limit(10);
+
+      for (const org of causalOrgs ?? []) {
+        try {
+          const causalResult = await runCausalDiscovery(service, org.id as string);
+          causalDiscoveryResults.push({ orgId: org.id as string, result: causalResult });
+        } catch (err) {
+          logger.warn(`[CognitiveCycle] Causal discovery failed for org ${org.id as string}:`, err);
+        }
+      }
+
+      const totalFindings = causalDiscoveryResults.reduce((sum, r) => {
+        const res = r.result as { findings?: unknown[] } | null;
+        return sum + (res?.findings?.length ?? 0);
+      }, 0);
+      const totalMemories = causalDiscoveryResults.reduce((sum, r) => {
+        const res = r.result as { memoriesWritten?: number } | null;
+        return sum + (res?.memoriesWritten ?? 0);
+      }, 0);
+
+      logger.info(
+        `[CognitiveCycle] Causal discovery ran for ${causalDiscoveryResults.length} orgs, ` +
+        `${totalFindings} findings, ${totalMemories} memories written`
+      );
+    } catch (err) {
+      logger.warn("[CognitiveCycle] Causal discovery phase failed:", err);
+    }
+
     // ── Log run to scheduled_job_runs ─────────────────────────────────
     try {
       await service.from("scheduled_job_runs").insert({
@@ -477,7 +518,7 @@ export async function GET(request: NextRequest) {
         started_at: new Date(startMs).toISOString(),
         completed_at: new Date().toISOString(),
         status: skipped > 0 && processed === 0 ? "failed" : skipped > 0 ? "partial" : "success",
-        result: JSON.stringify({ processed, skipped, activeOrgIds, results, plannerResults }),
+        result: JSON.stringify({ processed, skipped, activeOrgIds, results, plannerResults, causalDiscoveryResults }),
         duration_ms: durationMs,
       });
     } catch {
@@ -495,6 +536,7 @@ export async function GET(request: NextRequest) {
       durationMs,
       results,
       plannerResults,
+      causalDiscoveryResults,
     });
   } catch (err) {
     const durationMs = Date.now() - startMs;

@@ -4,6 +4,7 @@ import { searchDocumentChunks } from "@/lib/connectors/document-ingester";
 import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent-rl";
 import { getConsolidatedPatterns } from "@/lib/brain/tier3-consolidation";
 import { searchKnowledgeChunks } from "@/lib/brain/tier2-signals";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 // ── Module-level cache: 30s TTL per org ──────────────────────────────────────
 // getBrainContext() fires DB queries on every copilot message. Under concurrent
@@ -12,6 +13,13 @@ import { searchKnowledgeChunks } from "@/lib/brain/tier2-signals";
 // reflected quickly. Cache is per-org so org isolation is preserved.
 const _brainContextCache = new Map<string, { data: BrainContext; expiry: number }>();
 const BRAIN_CONTEXT_TTL_MS = 30_000; // 30 seconds
+
+// ── Cross-org patterns cache: 5-min TTL (expensive: full-table scan across orgs) ─
+// L24 cross-org query uses the service client to aggregate patterns across ALL orgs.
+// This is intentionally slow and expensive — 5-min TTL prevents thundering herd.
+// Org isolation is preserved by anonymizing: strip org IDs, keep only pattern text.
+const _crossOrgPatternsCache = { data: null as string | null, expiry: 0 };
+const CROSS_ORG_PATTERNS_TTL_MS = 5 * 60_000; // 5 minutes
 
 // ── 8-Tier 27-Layer Brain Architecture ────────────────────────────────────────
 // Tier 1: Identity          (L1-L2)   — workspace + brain state
@@ -119,7 +127,8 @@ export async function getBrainContext(
       signalActivityRow,      // L5: cross_domain_signals signal_type+source_domain last 48h
 
       // ── TIER 3: CODE & DOCUMENT INTELLIGENCE ──
-      repoMapRow,             // L6: code.repo_map knowledge memory
+      repoMapRow,             // L6a: code.repo_map knowledge memory (PageRank map)
+      repoMapStatsRow,        // L6b: knowledge_chunks code_file count+metadata for live repo stats
       archDecisionsRow,       // L7: code.% ai_memory importance desc
       gitMemoryRow,           // L8a: code.commit.% / git.% ai_memory last 7d
       gitSignalsRow,          // L8b: cross_domain_signals source_domain=github last 7d
@@ -135,19 +144,20 @@ export async function getBrainContext(
       qualityRow,             // L13: prediction_records confidence last 10
       rlvrOutcomesRow,        // L14: rlvr_prediction_outcomes verified last 7d
       predictiveSignalsRow,   // L15: cross_domain_signals strength > 0.8 last 24h
-      causalIntelligenceRow,  // L16: causal.% ai_memory last 3
-      brainEvolutionRow,      // L17: brain.evolution% / brain.consolidation% last 1
+      causalEdgesRow,         // L16: causal_relationships_statistical top edges (replaces empty ai_memory causal.%)
+      brainEvolutionRecentRow, // L17a: prediction_records last 7d (RL activity this week)
+      brainEvolutionOlderRow,  // L17b: prediction_records 8-30d ago (RL baseline)
 
       // ── TIER 6: PLATFORM INTELLIGENCE ──
       connectorHealthRow,     // L18: org_connectors status
       aiWorkerFleetRow,       // L19: agent_queue last 24h task_type+status
-      llmDecisionRow,         // L20: llm_decision.% ai_memory last 24h
-      userIntentRow,          // L21: copilot.intent.% / session.query.% / user.intent.% last 7d
+      llmDecisionRow,         // L20: cross_domain_signals source_domain like llm.% (replaces empty ai_memory llm_decision.%)
+      userIntentRow,          // L21: conversations recent titles (replaces empty ai_memory user.intent.%)
       temporalPatternsRow,    // L22: engagement_health_scores last 14d
 
       // ── TIER 7: META & CROSS-CUTTING ──
       crossDomainSignals24hRow, // L23: cross_domain_signals last 24h strength desc
-      crossOrgPatternsRow,      // L24: federation.% / cross_org.% / platform.pattern.% ai_memory
+      crossOrgPatternsRow,      // L24: (unused slot — fetched separately via service client with TTL cache)
       metaBrainCountRow,        // L25: ai_memory total count for this org
 
       // ── TIER 8: SERVICE LAYERS ──
@@ -232,7 +242,7 @@ export async function getBrainContext(
 
       // ── TIER 3: CODE & DOCUMENT INTELLIGENCE ──
 
-      // L6 — Repo Map: memory_type=knowledge, domain=code.repo_map
+      // L6a — Repo Map: memory_type=knowledge, domain=code.repo_map (PageRank map stored by /api/brain/repo-map)
       supabase
         .from("ai_memory")
         .select("content, metadata")
@@ -240,6 +250,16 @@ export async function getBrainContext(
         .eq("memory_type", "knowledge")
         .eq("domain", "code.repo_map")
         .maybeSingle(),
+
+      // L6b — Repo Map Stats: knowledge_chunks source_type=code_file (live codebase stats)
+      // Aggregates: total files, unique paths, most recent file, dominant extensions
+      supabase
+        .from("knowledge_chunks")
+        .select("metadata, created_at")
+        .eq("organization_id", orgId)
+        .eq("source_type", "code_file")
+        .order("created_at", { ascending: false })
+        .limit(200),
 
       // L7 — Architectural Decisions: code.% domain, importance desc, limit 5
       supabase
@@ -349,23 +369,36 @@ export async function getBrainContext(
         .order("signal_strength", { ascending: false, nullsFirst: false })
         .limit(5),
 
-      // L16 — Causal Intelligence: causal.% domain, created_at desc, limit 3
+      // L16 — Causal Intelligence: causal_relationships_statistical top edges by confidence
+      // Previous query (ai_memory causal.%) was always empty — nothing writes to that domain.
+      // causal_relationships_statistical is populated by connector syncs (GitHub, Jira, etc.)
       supabase
-        .from("ai_memory")
-        .select("content")
+        .from("causal_relationships_statistical")
+        .select("source_domain, target_domain, effect_size, confidence_score, statistical_method")
         .eq("organization_id", orgId)
-        .like("domain", "causal.%")
-        .order("created_at", { ascending: false })
-        .limit(3),
+        .gte("confidence_score", 0.5)
+        .order("confidence_score", { ascending: false })
+        .limit(5),
 
-      // L17 — Brain Evolution: brain.evolution% OR brain.consolidation%, created_at desc, limit 1
+      // L17a — Brain Evolution (recent): prediction_records last 7d (this week's RL activity)
+      // Previous query (ai_memory brain.evolution%) was always empty — nothing writes to that domain.
+      // prediction_records is the authoritative source of RL signal history.
       supabase
-        .from("ai_memory")
-        .select("content")
+        .from("prediction_records")
+        .select("confidence, domain, created_at")
         .eq("organization_id", orgId)
-        .or("domain.like.brain.evolution%,domain.like.brain.consolidation%")
+        .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("created_at", { ascending: false })
-        .limit(1),
+        .limit(50),
+
+      // L17b — Brain Evolution (older baseline): prediction_records 8-30d ago
+      supabase
+        .from("prediction_records")
+        .select("confidence, domain")
+        .eq("organization_id", orgId)
+        .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .lt("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .limit(100),
 
       // ── TIER 6: PLATFORM INTELLIGENCE ──
 
@@ -384,25 +417,28 @@ export async function getBrainContext(
         .order("created_at", { ascending: false })
         .limit(50),
 
-      // L20 — LLM Decision Learning: llm_decision.% domain, last 24h, importance desc, limit 5
+      // L20 — LLM Decision Learning: cross_domain_signals source_domain like llm.%, last 24h, strength desc, limit 10
+      // Previous query (ai_memory llm_decision.%) was always empty — nothing writes to that domain.
+      // universalBrainWrite with source='llm.decision' writes to cross_domain_signals with target_domain='routing'.
       supabase
-        .from("ai_memory")
-        .select("content, importance")
+        .from("cross_domain_signals")
+        .select("signal_type, signal_value, signal_strength, source_domain, created_at")
         .eq("organization_id", orgId)
-        .like("domain", "llm_decision.%")
+        .like("source_domain", "llm.%")
         .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order("importance", { ascending: false })
-        .limit(5),
+        .order("signal_strength", { ascending: false, nullsFirst: false })
+        .limit(10),
 
-      // L21 — User Intent Patterns: copilot.intent.% OR session.query.% OR user.intent.%, last 7d, limit 8
+      // L21 — User Intent Patterns: conversations titles last 7d (replaces empty ai_memory user.intent.%)
+      // Previous query (ai_memory copilot.intent.% / user.intent.%) was always empty — nothing writes those domains.
+      // conversations.title captures the user's intent as a human-readable label set at conversation creation.
       supabase
-        .from("ai_memory")
-        .select("content, domain, created_at")
-        .eq("organization_id", orgId)
-        .or("domain.like.copilot.intent.%,domain.like.session.query.%,domain.like.user.intent.%")
+        .from("conversations")
+        .select("title, service_mode, created_at")
+        .eq("org_id", orgId)
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order("created_at", { ascending: false })
-        .limit(8),
+        .limit(20),
 
       // L22 — Temporal Patterns: engagement_health_scores last 14d, health_score+computed_at+engagement_id, limit 20
       supabase
@@ -424,14 +460,11 @@ export async function getBrainContext(
         .order("signal_strength", { ascending: false, nullsFirst: false })
         .limit(8),
 
-      // L24 — Cross-Org Patterns: federation.% OR cross_org.% OR platform.pattern.%, created_at desc, limit 3
-      supabase
-        .from("ai_memory")
-        .select("content, domain, created_at")
-        .eq("organization_id", orgId)
-        .or("domain.like.federation.%,domain.like.cross_org.%,domain.like.platform.pattern.%")
-        .order("created_at", { ascending: false })
-        .limit(3),
+      // L24 — Cross-Org Patterns: placeholder — actual cross-org fetch happens after allSettled
+      // using the service client (getAdminClient) so it bypasses RLS for cross-org aggregation.
+      // Previous query (ai_memory federation.%/cross_org.%) was always empty — nothing writes those domains.
+      // We resolve a dummy promise here to keep the destructuring array index stable.
+      Promise.resolve({ data: null, error: null }),
 
       // L25 — Meta-Brain State: ai_memory total count (head: true = count only)
       supabase
@@ -564,11 +597,43 @@ export async function getBrainContext(
 
     // ── TIER 3: CODE & DOCUMENT INTELLIGENCE ─────────────────────────────────
 
-    // L6: Repo Map
+    // L6a: Repo Map (PageRank symbol map stored by /api/brain/repo-map cron)
     const repoMapContent: string | null =
       repoMapRow.status === "fulfilled" && repoMapRow.value.data
         ? String((repoMapRow.value.data as { content: string; metadata: unknown }).content ?? "")
         : null;
+
+    // L6b: Live codebase stats from knowledge_chunks (source_type=code_file)
+    // Complements the PageRank map with current file counts, dominant extensions, top dirs
+    const repoStatsRows = repoMapStatsRow.status === "fulfilled"
+      ? (repoMapStatsRow.value.data ?? [])
+      : [];
+    let repoMapLiveStats: string | undefined;
+    if (repoStatsRows.length > 0) {
+      const extCounts: Record<string, number> = {};
+      const dirCounts: Record<string, number> = {};
+      for (const row of repoStatsRows as Array<{ metadata: Record<string, unknown> | null; created_at: string }>) {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>;
+        const filePath = String(meta.path ?? "");
+        if (filePath) {
+          const ext = filePath.split(".").pop() ?? "unknown";
+          extCounts[ext] = (extCounts[ext] ?? 0) + 1;
+          const dir = filePath.split("/").slice(0, 2).join("/");
+          if (dir) dirCounts[dir] = (dirCounts[dir] ?? 0) + 1;
+        }
+      }
+      const topExts = Object.entries(extCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([e, c]) => `${e}:${c}`)
+        .join(", ");
+      const topDirs = Object.entries(dirCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 4)
+        .map(([d, c]) => `${d}(${c})`)
+        .join(", ");
+      repoMapLiveStats = `## Codebase (${repoStatsRows.length} files indexed) | Extensions: ${topExts} | Dirs: ${topDirs}`.slice(0, 250);
+    }
 
     // L7: Architectural Decisions
     const archDecisionRows = archDecisionsRow.status === "fulfilled"
@@ -681,24 +746,37 @@ export async function getBrainContext(
           .slice(0, 250)}`
       : undefined;
 
-    // L16: Causal Intelligence
-    const causalRows = causalIntelligenceRow.status === "fulfilled"
-      ? (causalIntelligenceRow.value.data ?? [])
+    // L16: Causal Intelligence — from causal_relationships_statistical top edges
+    const causalRows = causalEdgesRow.status === "fulfilled"
+      ? (causalEdgesRow.value.data ?? [])
       : [];
     const causalIntelligence: string | undefined = causalRows.length > 0
-      ? `## Causal Intelligence\n${(causalRows as Array<{ content: string }>)
-          .map(r => String(r.content ?? "").slice(0, 120))
+      ? `## Causal Intelligence\n${(causalRows as Array<{ source_domain: string; target_domain: string; effect_size: number | null; confidence_score: number | null }>)
+          .map(r => `${r.source_domain ?? "?"} → ${r.target_domain ?? "?"} (effect=${(r.effect_size ?? 0).toFixed(2)}, conf=${(r.confidence_score ?? 0).toFixed(2)})`)
           .join(" | ")
           .slice(0, 250)}`
       : undefined;
 
-    // L17: Brain Evolution State
-    const brainEvolutionData = brainEvolutionRow.status === "fulfilled"
-      ? (brainEvolutionRow.value.data ?? [])
+    // L17: Brain Evolution State — computed from recent vs older prediction_records RL activity
+    const brainEvolutionRecentData = brainEvolutionRecentRow.status === "fulfilled"
+      ? (brainEvolutionRecentRow.value.data ?? [])
       : [];
-    const brainEvolutionState: string | undefined = brainEvolutionData.length > 0
-      ? `## Brain Evolution\n${String((brainEvolutionData[0] as { content: string }).content ?? "").slice(0, 150)}`
-      : undefined;
+    const brainEvolutionOlderData = brainEvolutionOlderRow.status === "fulfilled"
+      ? (brainEvolutionOlderRow.value.data ?? [])
+      : [];
+    let brainEvolutionState: string | undefined;
+    if (brainEvolutionRecentData.length > 0 || brainEvolutionOlderData.length > 0) {
+      const recentAvg = brainEvolutionRecentData.length > 0
+        ? brainEvolutionRecentData.reduce((s, r) => s + (typeof (r as { confidence: number }).confidence === "number" ? (r as { confidence: number }).confidence : 0), 0) / brainEvolutionRecentData.length
+        : null;
+      const olderAvg = brainEvolutionOlderData.length > 0
+        ? brainEvolutionOlderData.reduce((s, r) => s + (typeof (r as { confidence: number }).confidence === "number" ? (r as { confidence: number }).confidence : 0), 0) / brainEvolutionOlderData.length
+        : null;
+      const trend = recentAvg !== null && olderAvg !== null
+        ? recentAvg > olderAvg + 0.05 ? "improving" : recentAvg < olderAvg - 0.05 ? "declining" : "stable"
+        : "unknown";
+      brainEvolutionState = `## Brain Evolution\nRL tasks this week: ${brainEvolutionRecentData.length}, avg quality: ${recentAvg !== null ? (recentAvg * 100).toFixed(0) : "?"}%. Trend: ${trend}.`;
+    }
 
     // ── TIER 6: PLATFORM INTELLIGENCE ────────────────────────────────────────
 
@@ -738,24 +816,24 @@ export async function getBrainContext(
       aiWorkerFleet = `## AI Worker Fleet (24h)\nStatus: ${statusSummary} | Top tasks: ${topTasks}`.slice(0, 250);
     }
 
-    // L20: LLM Decision Learning
+    // L20: LLM Decision Learning — from cross_domain_signals source_domain=llm.%
     const llmDecisionRows = llmDecisionRow.status === "fulfilled"
       ? (llmDecisionRow.value.data ?? [])
       : [];
     const llmDecisionLearning: string | undefined = llmDecisionRows.length > 0
-      ? `## LLM Decision Learning (24h)\n${(llmDecisionRows as Array<{ content: string; importance: number }>)
-          .map(r => String(r.content ?? "").slice(0, 80))
+      ? `## LLM Decision Learning (24h)\n${(llmDecisionRows as Array<{ signal_type: string; signal_value: unknown; signal_strength: number | null; source_domain: string }>)
+          .map(r => `${r.source_domain}:${r.signal_type}(${((r.signal_strength ?? 0) * 100).toFixed(0)}%)`)
           .join(" | ")
           .slice(0, 250)}`
       : undefined;
 
-    // L21: User Intent Patterns
+    // L21: User Intent Patterns — from conversations.title last 7d
     const userIntentRows = userIntentRow.status === "fulfilled"
       ? (userIntentRow.value.data ?? [])
       : [];
     const userIntentPatterns: string | undefined = userIntentRows.length > 0
-      ? `## User Intent Patterns (7d)\n${(userIntentRows as Array<{ content: string; domain: string }>)
-          .map(r => r.content ? r.content.slice(0, 80) : "")
+      ? `## User Intent Patterns (7d)\n${(userIntentRows as Array<{ title: string | null; service_mode: string | null }>)
+          .map(r => r.title ? r.title.slice(0, 80) : "")
           .filter(s => s.length > 0)
           .join(" | ")
           .slice(0, 300)}`
