@@ -739,27 +739,40 @@ export async function GET(request: Request) {
 
     // Resolve org — check query param or find user's org with GL data
     const url = new URL(request.url);
-    let orgId = url.searchParams.get("orgId");
+    const orgIdParam = url.searchParams.get("orgId");
 
-    if (!orgId) {
-      // Find user's org memberships and try each for GL data
-      const { data: memberships } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id);
+    // Always fetch user's org memberships (needed for validation and auto-resolve)
+    const { data: memberships } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", user.id);
 
-      // Also check if platform admin
-      const { data: adminCheck } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .eq("is_platform_admin", true)
-        .limit(1);
+    const userOrgIds = memberships?.map((m) => m.organization_id) || [];
 
-      const orgIds = memberships?.map((m) => m.organization_id) || [];
+    // Check if platform admin (admins can access any org)
+    const { data: adminCheck } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .eq("is_platform_admin", true)
+      .limit(1);
 
-      // If platform admin, also include PH Accounting org
-      if (adminCheck && adminCheck.length > 0) {
+    const isPlatformAdmin = adminCheck && adminCheck.length > 0;
+
+    let orgId: string | null = null;
+
+    if (orgIdParam) {
+      // Security: validate that the requesting user is a member of the requested org
+      // (platform admins bypass this check)
+      const isMember = isPlatformAdmin || userOrgIds.includes(orgIdParam);
+      if (!isMember) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      orgId = orgIdParam;
+    } else {
+      // Auto-resolve: if platform admin, also include PH Accounting org
+      const orgIds = [...userOrgIds];
+      if (isPlatformAdmin) {
         const { data: phOrg } = await supabase
           .from("organizations")
           .select("id")
@@ -872,16 +885,24 @@ export async function POST(request: Request) {
     const jurisdiction = body.jurisdiction || 'SG';
     const period = body.period;
 
-    // Resolve org
-    let orgId = body.orgId as string | null;
-    if (!orgId) {
-      const { data: memberships } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id);
+    // Resolve org — always validate user membership before trusting orgId from body
+    const orgIdParam = body.orgId as string | null;
+    const { data: memberships } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", user.id);
 
-      const orgIds = memberships?.map((m) => m.organization_id) || [];
-      for (const oid of orgIds) {
+    const userOrgIds = memberships?.map((m) => m.organization_id) || [];
+
+    let orgId: string | null = null;
+    if (orgIdParam) {
+      // Security: reject requests for orgs the user doesn't belong to
+      if (!userOrgIds.includes(orgIdParam)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      orgId = orgIdParam;
+    } else {
+      for (const oid of userOrgIds) {
         const txns = await getGLDataFromStorage(oid);
         if (txns.length > 0) {
           orgId = oid;

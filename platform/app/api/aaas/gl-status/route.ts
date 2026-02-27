@@ -34,17 +34,25 @@ export async function GET(request: Request) {
 
     // ── Resolve org ──────────────────────────────────────────────────────
     const url = new URL(request.url);
-    let orgId = url.searchParams.get("orgId");
+    const orgIdParam = url.searchParams.get("orgId");
 
-    if (!orgId) {
-      // Find user's first org membership
-      const { data: memberships } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .limit(1);
+    // Always fetch user memberships (needed for validation and auto-resolve)
+    const { data: memberships } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", user.id);
 
-      orgId = memberships?.[0]?.organization_id || null;
+    const userOrgIds = memberships?.map((m) => m.organization_id) || [];
+
+    let orgId: string | null = null;
+    if (orgIdParam) {
+      // Security: reject requests for orgs the user doesn't belong to
+      if (!userOrgIds.includes(orgIdParam)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      orgId = orgIdParam;
+    } else {
+      orgId = userOrgIds[0] ?? null;
     }
 
     if (!orgId) {

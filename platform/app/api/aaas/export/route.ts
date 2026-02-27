@@ -415,18 +415,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Resolve org
+    // Resolve org — always validate user membership before trusting orgId from params
     const url = new URL(request.url);
-    let orgId = url.searchParams.get("orgId");
+    const orgIdParam = url.searchParams.get("orgId");
 
-    if (!orgId) {
-      const { data: memberships } = await supabase
-        .from("org_members")
-        .select("organization_id")
-        .eq("user_id", user.id);
-      const orgIds = memberships?.map((m) => m.organization_id) || [];
+    const { data: memberships } = await supabase
+      .from("org_members")
+      .select("organization_id")
+      .eq("user_id", user.id);
+    const userOrgIds = memberships?.map((m) => m.organization_id) || [];
 
-      for (const oid of orgIds) {
+    let orgId: string | null = null;
+    if (orgIdParam) {
+      // Security: reject requests for orgs the user doesn't belong to
+      if (!userOrgIds.includes(orgIdParam)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      orgId = orgIdParam;
+    } else {
+      for (const oid of userOrgIds) {
         // Quick check: does this org have GL data?
         try {
           if (isS3Configured()) {
