@@ -25,6 +25,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { pullCorePatterns } from "@/lib/brain/se-aas-federation";
 import { logDecision } from "@/lib/brain/decision-log";
+import { retrieveRelevantMemories } from "@/lib/brain/memory-retrieval";
+import { logAuditEvent, AuditAction } from "@/lib/audit";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,35 +124,117 @@ async function loadPlannerConfig(
 // ── Global Circuit Breaker ────────────────────────────────────────────────────
 
 /**
- * Returns the set of domains that have failed >10 times across ALL orgs in the
- * last 2 hours (confidence < 0.3).  These are excluded from planning globally —
- * a single bad domain cannot burn planner cycles fleet-wide.
+ * Per-domain metadata returned by the enhanced circuit breaker.
  */
-async function getGloballyBrokenDomains(supabase: SupabaseClient): Promise<Set<string>> {
+export interface CircuitBreakerStatus {
+  domain: string;
+  failureCount: number;
+  orgCount: number;          // how many distinct orgs are contributing failures
+  isPoisoned: boolean;       // true if >80% of failures come from a single org
+  poisoningOrgId?: string;   // the org responsible for poisoning (if isPoisoned)
+  overriddenByOrg?: string;  // if the requesting org has bypassed this exclusion
+}
+
+/**
+ * Returns domains that have failed >10 times across ALL orgs in the last 2 hours
+ * (confidence < 0.3), with enhanced poisoning detection and per-org overrides.
+ *
+ * Poisoning protection: if >80% of failures come from a single org, the domain
+ * is NOT added to the broken list — one badly-configured org cannot block everyone.
+ *
+ * Per-org override: if requestingOrgId has stored a bypass override in ai_memory,
+ * the domain is excluded from that org's broken list only.
+ */
+export async function getGloballyBrokenDomains(
+  supabase: SupabaseClient,
+  requestingOrgId?: string
+): Promise<{ broken: string[]; status: CircuitBreakerStatus[] }> {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
   const { data, error } = await supabase
     .from("prediction_records")
-    .select("domain")
+    .select("domain, organization_id")
     .lt("confidence", 0.3)
     .gte("created_at", twoHoursAgo)
     .not("domain", "is", null);
 
-  if (error || !data) return new Set();
+  if (error || !data?.length) return { broken: [], status: [] };
 
-  // Count failures per domain across ALL orgs
-  const domainCounts: Record<string, number> = {};
+  // Group by domain — track total failures and per-org breakdown
+  const byDomain = new Map<string, { total: number; byOrg: Map<string, number> }>();
   for (const row of data) {
-    const domain = (row as { domain: string | null }).domain;
-    if (domain) domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+    const typedRow = row as { domain: string | null; organization_id: string | null };
+    const domain = typedRow.domain;
+    const orgId = typedRow.organization_id;
+    if (!domain) continue;
+    if (!byDomain.has(domain)) {
+      byDomain.set(domain, { total: 0, byOrg: new Map() });
+    }
+    const entry = byDomain.get(domain)!;
+    entry.total++;
+    if (orgId) {
+      entry.byOrg.set(orgId, (entry.byOrg.get(orgId) ?? 0) + 1);
+    }
   }
 
-  // Globally exclude domains with >10 failures in last 2h
-  return new Set(
-    Object.entries(domainCounts)
-      .filter(([, count]) => count > 10)
-      .map(([domain]) => domain)
-  );
+  // Load per-org overrides once (bulk fetch for requesting org)
+  const overriddenDomains = new Set<string>();
+  if (requestingOrgId) {
+    try {
+      const { data: overrides } = await supabase
+        .from("ai_memory")
+        .select("content")
+        .eq("organization_id", requestingOrgId)
+        .eq("domain", "brain-config")
+        .eq("memory_type", "circuit-breaker-override");
+      if (overrides?.length) {
+        for (const row of overrides) {
+          try {
+            const parsed = JSON.parse(row.content as string) as { domain?: string; action?: string };
+            if (parsed.domain && parsed.action === "bypass") {
+              overriddenDomains.add(parsed.domain);
+            }
+          } catch { /* skip malformed entries */ }
+        }
+      }
+    } catch { /* non-fatal — proceed without overrides */ }
+  }
+
+  const status: CircuitBreakerStatus[] = [];
+  const broken: string[] = [];
+
+  for (const [domain, stats] of byDomain.entries()) {
+    if (stats.total < 10) continue;
+
+    // Poisoning detection: >80% from a single org
+    let maxByOrg = 0;
+    let maxOrgId: string | undefined;
+    for (const [org, count] of stats.byOrg.entries()) {
+      if (count > maxByOrg) {
+        maxByOrg = count;
+        maxOrgId = org;
+      }
+    }
+    const isPoisoned = maxByOrg / stats.total > 0.8;
+
+    const hasOrgOverride = overriddenDomains.has(domain);
+
+    status.push({
+      domain,
+      failureCount: stats.total,
+      orgCount: stats.byOrg.size,
+      isPoisoned,
+      poisoningOrgId: isPoisoned ? maxOrgId : undefined,
+      overriddenByOrg: hasOrgOverride ? requestingOrgId : undefined,
+    });
+
+    // Exclude from global broken list if poisoned OR requesting org has an override
+    if (!isPoisoned && !hasOrgOverride) {
+      broken.push(domain);
+    }
+  }
+
+  return { broken, status };
 }
 
 // ── Brain Progress Tracker ────────────────────────────────────────────────────
@@ -403,6 +487,21 @@ async function _runCognitivePlannerInner(
             },
           });
 
+          // SOC2 Audit: log brain episodic memory write (fire-and-forget)
+          void logAuditEvent({
+            organizationId: orgId,
+            action: AuditAction.DATA_CREATE,
+            resourceType: "ai_memory",
+            resourceId: orgId,
+            newValue: {
+              domain: "cognitive-planner",
+              memory_type: "episodic",
+              cycleId: priorDecisions.cycleId,
+              successCount,
+              failCount,
+            },
+          }).catch(() => {/* non-fatal */});
+
           // Mark prior cycle as reflected
           await supabase
             .from("ai_memory")
@@ -451,26 +550,34 @@ async function _runCognitivePlannerInner(
   let pastReflectionsText = "No prior planning history.";
 
   try {
-    const { data: pastReflections } = await supabase
-      .from("ai_memory")
-      .select("content, importance, created_at")
-      .eq("organization_id", orgId)
-      .eq("domain", "cognitive-planner")
-      .eq("memory_type", "episodic")
-      .order("importance", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(3);
+    // Semantic memory retrieval: 3 buckets (recent, low-confidence failures, domain-matched)
+    // with 90-day lookback — replaces the simple .limit(3) time-only query.
+    // Note: currentDomains is undefined at Phase 0 because stuckDomains are computed in Phase 1
+    // (which runs after). Buckets 1+2 (recent + low-confidence failures) are always active.
+    // Domain-matched bucket activates on subsequent cycles via Phase 5 stored reflections.
+    const relevantMemories = await retrieveRelevantMemories(supabase, orgId, {
+      lookbackDays: 90,
+      limit: 15,
+    });
 
-    if (pastReflections && pastReflections.length > 0) {
-      pastReflectionsText = pastReflections
-        .map((r: { content: string }) => r.content)
+    if (relevantMemories.length > 0) {
+      // Format with date + confidence badge so planner knows how old and how reliable each memory is
+      pastReflectionsText = relevantMemories
+        .map(
+          (m) =>
+            `[${new Date(m.created_at).toLocaleDateString()}${
+              m.confidence !== undefined
+                ? ` conf:${m.confidence.toFixed(2)}`
+                : ""
+            }] ${m.content}`
+        )
         .join("\n\n");
 
       // Extract structured avoidPatterns from JSON reflections
       const avoidPatterns: string[] = [];
-      for (const r of pastReflections) {
+      for (const m of relevantMemories) {
         try {
-          const parsed = JSON.parse((r as { content: string }).content);
+          const parsed = JSON.parse(m.content);
           // Handle array of ReflectionSchema
           if (Array.isArray(parsed)) {
             for (const entry of parsed) {
@@ -526,19 +633,41 @@ async function _runCognitivePlannerInner(
   // ══════════════════════════════════════════════════════════════════════════
 
   // Pre-flight: fetch globally broken domains (cross-org circuit breaker)
+  // Pass orgId so per-org overrides and poisoning detection are applied
   let globallyBrokenDomains: Set<string> = new Set();
+  let circuitBreakerStatus: CircuitBreakerStatus[] = [];
   try {
-    globallyBrokenDomains = await getGloballyBrokenDomains(supabase);
+    const cbResult = await getGloballyBrokenDomains(supabase, orgId);
+    globallyBrokenDomains = new Set(cbResult.broken);
+    circuitBreakerStatus = cbResult.status;
     if (globallyBrokenDomains.size > 0) {
       logger.warn(
         "[CognitivePlanner] Global circuit breaker active — domains excluded fleet-wide:",
         { domains: [...globallyBrokenDomains], orgId }
       );
+      for (const domain of globallyBrokenDomains) {
+        void logDecision(supabase, {
+          organizationId: orgId,
+          decisionType: "circuit_breaker",
+          inputContext: { domain, scope: "global" },
+          decisionMade: { excluded: true, reason: "global_circuit_breaker" },
+          rationale: "Domain excluded by global circuit breaker (>10 failures/2h)",
+          domain,
+        });
+      }
+    }
+    // Log poisoning warnings — these domains are filtered to protect the fleet
+    for (const s of circuitBreakerStatus) {
+      if (s.isPoisoned) {
+        logger.warn(
+          "[CognitivePlanner] Circuit breaker POISONING detected — single org >80% failures, NOT excluding fleet-wide:",
+          { domain: s.domain, failureCount: s.failureCount, orgCount: s.orgCount, poisoningOrgId: s.poisoningOrgId }
+        );
+      }
     }
   } catch (err) {
     logger.warn("[CognitivePlanner] getGloballyBrokenDomains failed (non-fatal):", err);
   }
-
   let coverageGaps: string[] = [...SE_AAS_DOMAINS];
   let poorQualityDomains: string[] = [];
   let goodQualityDomains: string[] = [];
