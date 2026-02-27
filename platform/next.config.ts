@@ -69,6 +69,13 @@ const nextConfig: NextConfig = {
     NEXUS_INTERNAL_API_KEY: process.env.NEXUS_INTERNAL_API_KEY,
     NEXUS_WEBHOOK_SECRET: process.env.NEXUS_WEBHOOK_SECRET,
     ADMIN_SECRET: process.env.ADMIN_SECRET,
+    // Supabase URL alias — some server-side code uses SUPABASE_URL as fallback
+    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+    // Redis-backed queue (BullMQ) — optional: falls back to Supabase queue if not set
+    REDIS_URL: process.env.REDIS_URL,
+    // Feature flags — controls optional platform features
+    ENABLE_OVERNIGHT_AGENT: process.env.ENABLE_OVERNIGHT_AGENT,
+    ENABLE_WEBHOOKS: process.env.ENABLE_WEBHOOKS,
   },
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).
