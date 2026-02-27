@@ -1,15 +1,36 @@
 /**
- * MCP SSE Endpoint — NexusBrain Brain-as-a-Service
- * =================================================
+ * MCP SSE Endpoint — NexusBrain Brain-as-a-Service (Stateless HTTP Transport)
+ * ============================================================================
  *
- * Exposes 15 Brain tools via the Model Context Protocol (MCP) over
- * Server-Sent Events (SSE). Any MCP-compatible agent framework
- * (OpenClaw, Claude Code, Cursor, OpenHands, LangGraph, etc.)
- * can connect and use the Brain as an intelligence layer.
+ * ARCHITECTURE NOTE — WHY SSE WAS REMOVED:
+ * -----------------------------------------
+ * The original implementation used Server-Sent Events (SSE) with an in-memory
+ * session Map to correlate GET (SSE stream) with POST (tool calls). This is
+ * fundamentally unsafe on AWS Amplify's multi-instance Lambda deployment:
+ *
+ *   - Amplify runs N Lambda instances concurrently under load
+ *   - A GET request establishing the SSE session lands on Lambda instance A
+ *   - A subsequent POST for that session may land on Lambda instance B
+ *   - Instance B has no knowledge of the session stored in instance A's memory
+ *   - Result: silent response drop, broken tool calls, confusing timeouts
+ *
+ * SOLUTION — STATELESS HTTP TRANSPORT:
+ * --------------------------------------
+ * Each POST /api/mcp/sse request is now self-contained:
+ *   - No prior GET session required
+ *   - Auth is verified per-request from the Bearer token
+ *   - JSON-RPC request → JSON-RPC response in a single HTTP round-trip
+ *   - No module-level state (no Map, no setInterval)
+ *   - Lambda-safe: any instance can handle any request
+ *
+ * Stateless design: each request is self-contained. No SSE streaming in Lambda
+ * (multi-instance unsafe).
+ *
+ * If streaming is needed by a caller, use the tasks endpoint with polling.
  *
  * Protocol:
- *   GET  /api/mcp/sse           → SSE stream (tool discovery + responses)
- *   POST /api/mcp/sse           → JSON-RPC tool invocations
+ *   GET  /api/mcp/sse           → server info + deprecation notice
+ *   POST /api/mcp/sse           → JSON-RPC 2.0 stateless tool invocation
  *
  * Auth:
  *   Authorization: Bearer nxb_<key>
@@ -24,49 +45,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "@/lib/api-key-auth";
-import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
+import { checkRateLimit, hashKey } from "@/lib/rate-limiter";
 import { createServiceClient } from "@/lib/supabase/server";
-import { checkWorkspaceResources, incrementResource, decrementResource } from "@/lib/workspace-resource-guard";
+import { checkWorkspaceResources, incrementResource } from "@/lib/workspace-resource-guard";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes for long-running tools
-
-// ============================================================================
-// SESSION MANAGEMENT
-// ============================================================================
-
-// WARNING: In-memory session Map is NOT safe on multi-instance Lambda.
-// SSE subscriptions only work if POST and GET land on the same Lambda instance.
-// On AWS Amplify (multi-instance), a POST can land on a different instance than
-// the GET that created the session — silently dropping SSE responses to the client.
-// For production multi-instance deployments, move session state to Supabase KV.
-// The stateless POST mode (no sessionId / no SSE) works correctly across all instances
-// and is the recommended path for production MCP integrations.
-const sessions = new Map<
-  string,
-  {
-    organizationId: string;
-    permissions: string[];
-    messageEndpoint: string;
-    createdAt: number;
-  }
->();
-
-// Clean up stale sessions every 5 minutes
-const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
-
-function cleanupSessions() {
-  const now = Date.now();
-  for (const [id, session] of sessions) {
-    if (now - session.createdAt > SESSION_TTL_MS) {
-      sessions.delete(id);
-    }
-  }
-}
-
-const _cleanupTimer = setInterval(cleanupSessions, 5 * 60 * 1000);
-if (typeof _cleanupTimer === "object" && "unref" in _cleanupTimer) { (_cleanupTimer as NodeJS.Timeout).unref(); }
 
 // ============================================================================
 // AUTH HELPER
@@ -78,7 +63,7 @@ async function authenticateRequest(
   | { organizationId: string; permissions: string[]; rateLimitPerMinute: number; rawKey: string }
   | { error: string; status: number }
 > {
-  // Check query param first (SSE connections can't set headers easily)
+  // Check query param first (legacy SSE connections couldn't set headers easily)
   const authHeader =
     request.headers.get("authorization") ||
     (request.nextUrl.searchParams.get("api_key")
@@ -108,178 +93,102 @@ async function authenticateRequest(
 }
 
 // ============================================================================
-// GET — SSE Connection (MCP Protocol)
+// GET — Server info (SSE transport removed for Lambda compatibility)
 // ============================================================================
 
 /**
- * Establishes an SSE connection. The client receives:
- * 1. An `endpoint` event with the POST URL for sending messages
- * 2. JSON-RPC responses to tool calls (sent via POST)
- *
- * This implements the MCP SSE transport protocol:
- * - Client GETs this endpoint to establish SSE stream
- * - Server sends `endpoint` event with message URL
- * - Client POSTs JSON-RPC messages to that URL
- * - Server sends responses back over the SSE stream
+ * Returns server capabilities and explains why SSE streaming is not offered.
+ * Legacy SSE clients should switch to stateless POST mode.
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
+  return NextResponse.json(
+    {
+      name: "nexusbrain-mcp",
+      version: "1.0.0",
+      transport: "stateless-http",
+      notice:
+        "SSE streaming transport is NOT available on Amplify multi-instance Lambda. " +
+        "Use stateless POST mode: POST /api/mcp/sse with a JSON-RPC 2.0 body. " +
+        "Each request is self-contained — no prior GET session needed.",
+      methods: ["initialize", "tools/list", "tools/call", "ping"],
+      tools: BRAIN_MCP_TOOLS.map((t) => t.name),
+    },
+    {
+      headers: {
+        "X-MCP-Transport": "stateless-http", // Amplify Lambda safe
+        "Access-Control-Allow-Origin": "*",
+      },
+    }
+  );
+}
+
+// ============================================================================
+// POST — JSON-RPC Stateless Handler (MCP Protocol)
+// ============================================================================
+
+export async function POST(request: NextRequest) {
+  // Stateless: authenticate from header on every request (no session lookup)
   const auth = await authenticateRequest(request);
   if ("error" in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  // Week 7: Check org resource limits before allowing new connection
-  try {
-    const service = await createServiceClient();
-    const resourceCheck = await checkWorkspaceResources(service, auth.organizationId, "mcp_connection");
-    if (!resourceCheck.ok) {
-      return NextResponse.json(
-        { error: resourceCheck.reason },
-        { status: 429 }
-      );
-    }
-    // Increment active connection count
-    await incrementResource(service, auth.organizationId, "mcp_connection");
-  } catch {
-    // Non-fatal: resource guard not available
-  }
-
-  // Generate session ID
-  const sessionId = crypto.randomUUID();
-  const messageEndpoint = `/api/mcp/sse?sessionId=${sessionId}`;
-
-  // Store session
-  sessions.set(sessionId, {
-    organizationId: auth.organizationId,
-    permissions: auth.permissions,
-    messageEndpoint,
-    createdAt: Date.now(),
-  });
-
-  // Warn operators: SSE session state is in-memory. On Amplify multi-instance Lambda,
-  // a subsequent POST for this sessionId may land on a different instance and lose the
-  // SSE controller reference. Clients should use stateless POST mode for reliability.
-  logger.warn(
-    `[mcp/sse] SSE session created (${sessionId}). ` +
-    `In-memory sessions are NOT safe on multi-instance Lambda — use stateless POST mode for production.`
-  );
-
-  // Periodic cleanup
-  cleanupSessions();
-
-  // Create SSE stream
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    start(controller) {
-      // Send the message endpoint event (MCP SSE protocol)
-      controller.enqueue(
-        encoder.encode(`event: endpoint\ndata: ${messageEndpoint}\n\n`)
-      );
-
-      // Send server info as first message
-      const serverInfo = {
-        jsonrpc: "2.0",
-        method: "notifications/initialized",
-        params: {
-          serverInfo: {
-            name: "nexusbrain",
-            version: "1.0.0",
-          },
-          capabilities: {
-            tools: { listChanged: false },
-          },
-        },
-      };
-      controller.enqueue(
-        encoder.encode(`event: message\ndata: ${JSON.stringify(serverInfo)}\n\n`)
-      );
-
-      // Keep-alive ping every 30 seconds
-      const keepAlive = setInterval(() => {
-        try {
-          controller.enqueue(encoder.encode(`: keepalive\n\n`));
-        } catch {
-          clearInterval(keepAlive);
-        }
-      }, 30_000);
-
-      // Store the controller and cleanup in session for POST handler to use
-      (sessions.get(sessionId) as any)._controller = controller;
-      (sessions.get(sessionId) as any)._keepAlive = keepAlive;
-    },
-    cancel() {
-      const session = sessions.get(sessionId) as any;
-      if (session?._keepAlive) clearInterval(session._keepAlive);
-      sessions.delete(sessionId);
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "X-Accel-Buffering": "no",
-      // CORS for external agents
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    },
-  });
-}
-
-// ============================================================================
-// POST — JSON-RPC Message Handler (MCP Protocol)
-// ============================================================================
-
-export async function POST(request: NextRequest) {
-  const sessionId = request.nextUrl.searchParams.get("sessionId");
-
-  // If no session, authenticate directly (stateless mode)
-  let workspaceId: string;
-  let permissions: string[];
-  let controller: ReadableStreamDefaultController | null = null;
-
-  if (sessionId && sessions.has(sessionId)) {
-    const session = sessions.get(sessionId)!;
-    workspaceId = session.organizationId;
-    permissions = session.permissions;
-    controller = (session as any)._controller || null;
-  } else {
-    // Stateless mode: authenticate from header
-    const auth = await authenticateRequest(request);
-    if ("error" in auth) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
-    workspaceId = auth.organizationId;
-    permissions = auth.permissions;
-  }
+  const workspaceId = auth.organizationId;
+  const permissions = auth.permissions;
 
   // Parse JSON-RPC request
-  let body: any;
+  let body: {
+    jsonrpc?: string;
+    method?: string;
+    params?: Record<string, unknown>;
+    id?: string | number | null;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json(
       { jsonrpc: "2.0", error: { code: -32700, message: "Parse error" }, id: null },
-      { status: 400 }
+      {
+        status: 400,
+        headers: { "X-MCP-Transport": "stateless-http" },
+      }
     );
   }
 
-  const { method, params, id } = body;
+  const { method, params = {}, id = null } = body;
+
+  if (!method) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", error: { code: -32600, message: "Invalid Request: method is required" }, id },
+      {
+        status: 200,
+        headers: { "X-MCP-Transport": "stateless-http" },
+      }
+    );
+  }
+
+  logger.warn("[mcp/sse] stateless request", { method, id, workspaceId });
 
   // Route JSON-RPC methods
-  let response: any;
+  let response: {
+    jsonrpc: string;
+    result?: unknown;
+    error?: { code: number; message: string };
+    id: string | number | null | undefined;
+  };
+
   try {
     switch (method) {
       case "initialize":
         response = handleInitialize(id);
         break;
+
       case "tools/list":
         response = handleToolsList(id);
         break;
-      case "tools/call":
-        // Week 7: Check daily tool call limit
+
+      case "tools/call": {
+        // Check daily tool call limit
         try {
           const svc = await createServiceClient();
           const toolCheck = await checkWorkspaceResources(svc, workspaceId, "tool_call");
@@ -295,11 +204,15 @@ export async function POST(request: NextRequest) {
         } catch {
           // Non-fatal: resource guard not available
         }
-        response = await handleToolCall(id, params, workspaceId, permissions);
+        const callParams = params as { name?: string; arguments?: Record<string, unknown> };
+        response = await handleToolCall(id, callParams, workspaceId, permissions);
         break;
+      }
+
       case "ping":
         response = { jsonrpc: "2.0", result: {}, id };
         break;
+
       default:
         response = {
           jsonrpc: "2.0",
@@ -307,31 +220,17 @@ export async function POST(request: NextRequest) {
           id,
         };
     }
-  } catch (err) {
+  } catch {
     response = {
       jsonrpc: "2.0",
-      error: {
-        code: -32603,
-        message: "Internal error",
-      },
+      error: { code: -32603, message: "Internal error" },
       id,
     };
   }
 
-  // If we have an SSE controller, also push the response over SSE
-  if (controller) {
-    try {
-      const encoder = new TextEncoder();
-      controller.enqueue(
-        encoder.encode(`event: message\ndata: ${JSON.stringify(response)}\n\n`)
-      );
-    } catch {
-      // SSE stream may have closed — that's OK
-    }
-  }
-
   return NextResponse.json(response, {
     headers: {
+      "X-MCP-Transport": "stateless-http", // Amplify Lambda safe
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Authorization, Content-Type",
     },
@@ -358,7 +257,7 @@ export async function OPTIONS() {
 // JSON-RPC HANDLERS
 // ============================================================================
 
-function handleInitialize(id: string | number) {
+function handleInitialize(id: string | number | null | undefined) {
   return {
     jsonrpc: "2.0",
     result: {
@@ -369,13 +268,14 @@ function handleInitialize(id: string | number) {
       serverInfo: {
         name: "nexusbrain",
         version: "1.0.0",
+        transport: "stateless-http",
       },
     },
     id,
   };
 }
 
-function handleToolsList(id: string | number) {
+function handleToolsList(id: string | number | null | undefined) {
   return {
     jsonrpc: "2.0",
     result: { tools: BRAIN_MCP_TOOLS },
@@ -384,19 +284,36 @@ function handleToolsList(id: string | number) {
 }
 
 async function handleToolCall(
-  id: string | number,
-  params: { name: string; arguments?: Record<string, unknown> },
+  id: string | number | null | undefined,
+  params: { name?: string; arguments?: Record<string, unknown> },
   organizationId: string,
   permissions: string[]
 ) {
   const { name, arguments: args = {} } = params;
 
+  if (!name) {
+    return {
+      jsonrpc: "2.0",
+      error: { code: -32602, message: "Invalid params: name is required for tools/call" },
+      id,
+    };
+  }
+
   // Permission check for write tools
-  if (name === "brain_execute" && !permissions.includes("execute_motor_commands") && !permissions.includes("write")) {
+  if (
+    name === "brain_execute" &&
+    !permissions.includes("execute_motor_commands") &&
+    !permissions.includes("write")
+  ) {
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: "Error: API key lacks 'execute_motor_commands' permission for brain_execute" }],
+        content: [
+          {
+            type: "text",
+            text: "Error: API key lacks 'execute_motor_commands' permission for brain_execute",
+          },
+        ],
         isError: true,
       },
       id,
@@ -409,7 +326,12 @@ async function handleToolCall(
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: `Error: Unknown tool '${name}'. Use tools/list to discover available tools.` }],
+        content: [
+          {
+            type: "text",
+            text: `Error: Unknown tool '${name}'. Use tools/list to discover available tools.`,
+          },
+        ],
         isError: true,
       },
       id,
@@ -421,15 +343,20 @@ async function handleToolCall(
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
+        content: [
+          {
+            type: "text",
+            text: typeof result === "string" ? result : JSON.stringify(result, null, 2),
+          },
+        ],
       },
       id,
     };
-  } catch (err) {
+  } catch {
     return {
       jsonrpc: "2.0",
       result: {
-        content: [{ type: "text", text: `Error: Tool execution failed` }],
+        content: [{ type: "text", text: "Error: Tool execution failed" }],
         isError: true,
       },
       id,
@@ -784,8 +711,21 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
     const supabase = await createServiceClient();
     const issueKey = String(args.issueKey || "");
 
-    // 1. Fetch Jira ticket details via the jarvis handler pattern
-    let ticketData: any = null;
+    // 1. Fetch Jira ticket details
+    let ticketData: {
+      key: string;
+      summary?: string;
+      description?: string;
+      status?: string;
+      priority?: string;
+      assignee?: string;
+      reporter?: string;
+      issueType?: string;
+      components?: string[];
+      labels?: string[];
+      created?: string;
+      updated?: string;
+    } | null = null;
     try {
       const jiraBaseUrl = process.env.JIRA_BASE_URL;
       const jiraEmail = process.env.JIRA_EMAIL;
@@ -798,13 +738,29 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
           { headers: { Authorization: `Basic ${jiraAuth}`, Accept: "application/json" } }
         );
         if (res.ok) {
-          const raw = await res.json();
+          const raw = await res.json() as {
+            key: string;
+            fields?: {
+              summary?: string;
+              description?: { content?: Array<{ content?: Array<{ text?: string }> }> };
+              status?: { name?: string };
+              priority?: { name?: string };
+              assignee?: { displayName?: string };
+              reporter?: { displayName?: string };
+              issuetype?: { name?: string };
+              components?: Array<{ name?: string }>;
+              labels?: string[];
+              created?: string;
+              updated?: string;
+            };
+            renderedFields?: { description?: string };
+          };
           ticketData = {
             key: raw.key,
             summary: raw.fields?.summary,
             description: raw.fields?.description?.content
-              ?.map((block: any) =>
-                block.content?.map((c: any) => c.text).join("") || ""
+              ?.map((block) =>
+                block.content?.map((c) => c.text).join("") || ""
               )
               .join("\n") || raw.renderedFields?.description || "",
             status: raw.fields?.status?.name,
@@ -812,7 +768,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
             assignee: raw.fields?.assignee?.displayName,
             reporter: raw.fields?.reporter?.displayName,
             issueType: raw.fields?.issuetype?.name,
-            components: raw.fields?.components?.map((c: any) => c.name) || [],
+            components: raw.fields?.components?.map((c) => c.name ?? "") || [],
             labels: raw.fields?.labels || [],
             created: raw.fields?.created,
             updated: raw.fields?.updated,
@@ -902,50 +858,49 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
     const payload = (args.payload || {}) as Record<string, unknown>;
     const confidence = Number(args.confidence ?? 0.5);
 
+    // onCommandExecuted must be synchronous — matches MotorCommandEngine interface
+    // Using structural types to avoid top-level import of @nexus-ai/memory-stack
+    const onCommandExecuted = (
+      cmd: { id: string },
+      result: { status: string; success: boolean; response?: unknown }
+    ): void => {
+      // Fire-and-forget: log execution result to brain for learning
+      void Promise.resolve(
+        supabase.from("brain_execution_log").insert({
+          organization_id: orgId,
+          rule_id: `mcp_${action}`,
+          rule_type: action,
+          input_data: { ...payload, commandId: cmd.id },
+          output_data: { source: "mcp-stateless", confidence, result: result.status, response: result.response },
+          result: result.success ? "success" : "failed",
+          confidence,
+        })
+      ).catch(() => undefined);
+    };
+
     // Create motor command engine with approval gate
     const engine = createMotorCommandEngine({
       autoExecuteThreshold: 0.7,
       maxCommandsPerBatch: 5,
       verbose: false,
-      onCommandExecuted: async (cmd: any, result: any) => {
-        // Log execution result to brain for learning
-        await supabase.from("brain_execution_log").insert({
-          organization_id: orgId,
-          rule_id: `mcp_${action}`,
-          rule_type: action,
-          input_data: { ...payload, commandId: cmd.id },
-          output_data: { source: "mcp-sse", confidence, result: result.status, response: result.response },
-          result: result.success ? "success" : "failed",
-          confidence,
-        });
-      },
+      onCommandExecuted,
     });
-
-    // Load org connectors and register them
-    const { data: connectors } = await supabase
-      .from("org_connectors")
-      .select("connector_type, config, status")
-      .eq("organization_id", orgId)
-      .eq("status", "active");
-
-    // Register available connectors (the engine uses a connector registry pattern)
-    // The connectors are already pre-registered in createMotorCommandEngine via
-    // createConnectorRegistry(). For now, we execute with the default registry.
-    // Production wiring to real GitHub/Jira/Slack connectors uses the org's
-    // connector configs loaded above.
 
     // Build the motor command
     const command = {
       id: `mcp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      actionType: action as any,
+      actionType: action as "github_create_pr" | "github_create_issue" | "github_trigger_workflow" |
+        "jira_create_issue" | "jira_update_issue" | "jira_transition_issue" | "jira_add_comment" |
+        "slack_send_message" | "slack_post_to_channel" | "email_send" | "webhook_call" |
+        "deploy_to_staging" | "trigger_ci_build" | "run_test_suite",
       target: String(payload.target || payload.channel || payload.repo || payload.project || ""),
       parameters: payload,
       confidence,
-      approvalMode: confidence >= 0.7 ? "auto" as const : confidence >= 0.35 ? "requires_approval" as const : "dry_run" as const,
-      priority: "medium" as const,
+      approvalMode: confidence >= 0.7 ? "auto" : confidence >= 0.35 ? "requires_approval" : "dry_run",
+      priority: "medium",
       targetDomains: [action.split("_")[0]], // e.g., "github" from "github_create_pr"
       evidence: `MCP agent invoked brain_execute with confidence ${confidence}`,
-      sourceArtifactType: "mcp-sse",
+      sourceArtifactType: "mcp-stateless",
       expectedImpact: String(payload.description || payload.title || action),
       createdAt: new Date().toISOString(),
       timeoutMs: 30_000,
@@ -962,7 +917,7 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       rule_type: action,
       input_data: payload,
       output_data: {
-        source: "mcp-sse",
+        source: "mcp-stateless",
         confidence,
         motorResult: {
           status: result.status,
@@ -1016,11 +971,11 @@ async function executeAasTool(
 
   const { executeAccountingAgent } = await import("@/lib/aas/domain-executor");
   const result = await executeAccountingAgent(supabase, {
-    action: action as any,
+    action: action as Parameters<typeof executeAccountingAgent>[1]["action"],
     organizationId,
     userId: "mcp-agent",
     transactions,
-    period: args.period as any,
+    period: args.period as Parameters<typeof executeAccountingAgent>[1]["period"],
     jurisdiction: String(args.jurisdiction || "SG"),
   });
 
