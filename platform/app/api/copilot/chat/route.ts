@@ -25,8 +25,8 @@ import {
   estimateImpact,
 } from "@/lib/nexus-copilot-adapter";
 import { createSSEStream, SSE_HEADERS } from "@/lib/copilot/stream-utils";
-import { resolveSession } from "@/lib/copilot/session";
-import { checkSessionRateLimit } from "@/lib/security-middleware";
+import { runPreFlight } from "@/lib/copilot/pre-flight";
+import { runPostFlight } from "@/lib/copilot/post-flight";
 import { resolveSeaasRoute, resolveAccountingRoute, resolvePmAasRoute } from "@/lib/copilot/domain-router";
 import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
 import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
@@ -211,126 +211,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Session resolution: auth + workspace membership + service client ──
-    // Delegates to resolveSession() from @/lib/copilot/session
-    const sessionResult = await resolveSession(requestedWorkspaceId);
-    if ("type" in sessionResult) {
-      switch (sessionResult.type) {
-        case "invalid_json":
-          return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
-        case "invalid_id_format":
-          return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
-        case "unauthorized":
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        case "forbidden":
-          return NextResponse.json({ error: "You do not have access to this AI Worker" }, { status: 403 });
-        case "no_api_key":
-          return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured. Contact your administrator." }, { status: 503 });
-      }
+    // ── Pre-flight: auth + rate limit + API key + memStack + brain init ──
+    const preFlightResult = await runPreFlight(
+      requestedWorkspaceId,
+      message,
+      compressedSummary,
+    );
+    if (preFlightResult instanceof NextResponse) {
+      return preFlightResult;
     }
-    const { user, workspaceId, supabase, service } = sessionResult;
-
-    // ── Rate limiting — 30 req/min per user (defined in SESSION_RATE_LIMITS) ──
-    const rateLimit = await checkSessionRateLimit(user.id, "/api/copilot/chat");
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { error: "Too many requests. Please wait a moment before sending another message." },
-        { status: 429 }
-      );
+    if ("type" in preFlightResult && preFlightResult.type === "sse_brain_error") {
+      return preFlightResult.response;
     }
-
-    // ── Validate API key early ────────────────────────────────────────
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicApiKey) {
-      return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY not configured. Contact your administrator." },
-        { status: 503 }
-      );
-    }
-
-    // ── Brain Commander: Unified intelligence pipeline ──────────────────
-    // Replace manual DB queries with Commander — single source of truth
-    // for intelligence gathering, dispatch assessment, and permission filtering.
-    let memStack: Record<string, any>;
-    try {
-      memStack = getMemoryStackSync();
-    } catch (memErr) {
-      logger.error("[Copilot/Chat] Failed to load @nexus-ai/memory-stack:", { error: (memErr as Error)?.message ?? String(memErr), route: "/api/copilot/chat" });
-      // Return a graceful SSE error instead of 500
-      const { stream, sendText, sendError, close } = createSSEStream();
-      (async () => {
-        sendText("I'm unable to process your request right now — the brain intelligence engine failed to initialize. This is typically a server configuration issue. Please try again in a moment, or contact your administrator if the problem persists.");
-        sendError("Brain engine initialization failed");
-        close();
-      })();
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache, no-transform",
-          Connection: "keep-alive",
-          "X-Accel-Buffering": "no",
-        },
-      });
-    }
-
-    const { createBrainCommander } = memStack;
-    const commander = createBrainCommander({
-      supabase,
-      organizationId: workspaceId,
-      anthropicApiKey,
-      enableActions: false, // We handle action engine separately below for copilot
-      enableMotorCommands: false,
-    });
-
-    // ── Phase 3: LLM Query Interpretation ────────────────────────────
-    // Replace regex dispatch with semantic LLM interpretation (~200ms).
-    // Provides: intent classification, entity extraction, service routing,
-    // required data signals (skip unneeded DB queries), adaptive token budgets.
-    // Falls back to regex dispatch-assessor on any failure.
-    const { createLLMQueryInterpreter } = memStack;
-    const interpreter = createLLMQueryInterpreter({
-      anthropicApiKey,
-      // 500ms default was aborting Haiku calls under load — use 8s dedicated timeout.
-      // This controller is SEPARATE from request.signal so navigation/disconnect
-      // does not abort the classification mid-flight.
-      timeoutMs: 8000,
-    });
-    // ── Brain state prefix: lightweight signal count for classifier routing ──
-    // Gives the LLM classifier awareness of brain data availability before routing.
-    // Avoids routing to data-heavy SE-aaS domains when brain is empty.
-    let _classifierBrainPrefix = '';
-    try {
-      const { count } = await supabase
-        .from('cross_domain_signals')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', workspaceId);
-      const _sigCount = count ?? 0;
-      const _brainReady = _sigCount > 10;
-      _classifierBrainPrefix = `[Brain: ${_sigCount} signals, ${_brainReady ? 'data available' : 'limited data'}] `;
-    } catch { /* non-fatal — classifier runs without prefix if this fails */ }
-
-    let interpretation: QueryInterpretation | undefined;
-    try {
-      interpretation = await interpreter.interpret(_classifierBrainPrefix + message);
-    } catch (interpErr) {
-      logger.warn('[LLMInterpreter] Non-fatal: LLM interpretation failed, falling back to regex dispatch:', { error: (interpErr as Error)?.message ?? String(interpErr), route: "/api/copilot/chat" });
-    }
-
-    let commandResult;
-    try {
-      commandResult = await commander.command(message, {
-        userId: user.id,
-        entityState,
-        interpretation,
-      });
-    } catch (cmdErr) {
-      logger.warn("[Copilot/Chat] Brain commander failed (non-fatal, falling back to basic chat):", { error: (cmdErr as Error)?.message ?? String(cmdErr), route: "/api/copilot/chat" });
-      // Graceful fallback: return a basic chat response without brain intelligence
-      commandResult = {
-        intelligence: { causalEdges: [], rules: [], cascadeRules: [], patterns: [], insights: [] },
-        dispatch: { complexityScore: 0 },
-      };
-    }
+    const ctx = preFlightResult;
+    const { workspaceId, userId: _userId, supabase, service } = ctx;
+    const user = { id: _userId } as { id: string };
+    const memStack: Record<string, any> = ctx.memStack!;
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY!;
+    const commandResult: any = (ctx as any)._commandResult;
+    const interpretation: QueryInterpretation | undefined = (ctx as any)._interpretation;
+    (ctx as any)._conversationHistory = conversationHistory;
 
     const { intelligence } = commandResult;
 
@@ -4479,343 +4379,33 @@ No connectors are configured yet. When the user asks for data from any source (S
           logger.warn("[Copilot] Feedback bus error (non-fatal):", feedbackErr instanceof Error ? feedbackErr.message : String(feedbackErr));
         });
 
-        // ── RL Quality Recording: close the RL flywheel for copilot LLM responses ──
-        // recordAgentOutcome() was only called from domain-executor (SE-aaS path).
-        // For standard copilot responses, prediction_records was never written.
-        // This fire-and-forget call closes that gap.
-        try {
-          const { computeAgentQuality, recordAgentOutcome } = await import('@/lib/brain/agent-rl');
-          const _rlDomain = detectedIntent ?? 'general';
-          const _rlExecutionMs = Date.now() - streamStartMs;
-          const _rlResultText = streamedAssistantText ?? '';
-          const _rlQuality = computeAgentQuality(
-            _rlResultText,
-            null,
-            _rlExecutionMs,
-            _rlDomain
-          );
-          recordAgentOutcome(service, {
-            agentId: `copilot_${workspaceId}_${Date.now()}`,
-            domain: _rlDomain,
-            taskDescription: message.trim().slice(0, 200),
-            resultSummary: _rlResultText.slice(0, 500),
-            quality: _rlQuality,
-            executionMs: _rlExecutionMs,
-            organizationId: workspaceId,
-            userId: user.id,
-          }).catch((rlErr: unknown) => logger.warn('[Copilot] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr)));
-
-          // ── Decision Pattern Training: backfill quality + write brain training data ──
-          // Now that we have the computed quality, backfill the pre-initialized decision
-          // record and write it to ai_memory (positive examples only, quality >= 0.6) and
-          // cross_domain_signals (all examples — brain needs negative examples too).
-          _decisionRecord.responseQuality = _rlQuality;
-          _decisionRecord.durationMs = _rlExecutionMs;
-          logger.debug(`[Copilot] Decision quality: intent=${_decisionRecord.detectedIntent} quality=${_rlQuality.toFixed(2)} model=${_decisionRecord.modelSelected}`);
-
-          // Write high-quality decisions to ai_memory as pattern training data.
-          // Uses upsert on (organization_id, memory_type, domain) unique index so rows
-          // don't grow unboundedly — each intent gets one row, updated on each interaction.
-          if (_rlQuality >= 0.6) {
-            Promise.resolve(
-              service.from('ai_memory').upsert({
-                organization_id: workspaceId,
-                domain: `routing.${_decisionRecord.detectedIntent}`,
-                memory_type: 'pattern',
-                content: `Query: "${_decisionRecord.query}" → Intent: ${_decisionRecord.detectedIntent}, Domain: ${_decisionRecord.routedDomain ?? 'none'}, Quality: ${(_rlQuality * 100).toFixed(0)}%`,
-                importance: _rlQuality,
-                metadata: {
-                  type: 'claude_decision_pattern',
-                  record: _decisionRecord,
-                },
-              }, {
-                onConflict: 'organization_id,memory_type,domain',
-                ignoreDuplicates: false,
-              })
-            ).catch(() => {}); // fire-and-forget
-          }
-
-          // Emit llm_decision signal for ALL queries (including low-quality — brain needs
-          // negative training examples to learn what routing patterns to avoid).
-          const { createBrainFeedbackBus: _decisionFeedbackBus } = memStack;
-          const _decisionBus = _decisionFeedbackBus({ supabase: service, organizationId: workspaceId });
-          _decisionBus.emitSignal({
-            sourceDomain: 'copilot.routing',
-            signalType: 'llm_decision',
-            signalValue: _rlQuality,
-            entityType: 'routing_decision',
-            entityId: _sessionId,
-            metadata: {
-              intent: _decisionRecord.detectedIntent,
-              domain: _decisionRecord.routedDomain,
-              model: _decisionRecord.modelSelected,
-              brainIq: _decisionRecord.brainIqAtDecision,
-              causalEdges: _decisionRecord.causalEdgesAvailable,
-              orchestration: _decisionRecord.orchestrationDecision,
-              activeConnectors: _decisionRecord.activeConnectors,
-            },
-          }).catch(() => {}); // fire-and-forget
-
-          // ── RESPONSE HARVEST: Extract key knowledge from this response → brain ──
-          // Only for responses with enough content to extract meaningful patterns.
-          // Uses Haiku for cost efficiency — this runs for every copilot response.
-          if (streamedAssistantText && streamedAssistantText.length > 200) {
-            void (async () => {
-              try {
-                const { default: AnthropicHarvest } = await import('@anthropic-ai/sdk');
-                const harvestClient = new AnthropicHarvest({ apiKey: process.env.ANTHROPIC_API_KEY });
-                const harvestResp = await harvestClient.messages.create({
-                  model: 'claude-haiku-4-5-20251001',
-                  max_tokens: 512,
-                  messages: [{
-                    role: 'user',
-                    content: `Extract key facts and patterns from this AI response (domain: ${detectedIntent ?? 'general'}).
-
-Response: ${streamedAssistantText.slice(0, 2000)}
-
-Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`
-                  }]
-                });
-
-                const harvestContent = harvestResp.content[0];
-                if (harvestContent.type === 'text') {
-                  const jsonMatch = harvestContent.text.match(/\{[\s\S]*\}/);
-                  if (jsonMatch) {
-                    const harvest = JSON.parse(jsonMatch[0]) as { keyFacts?: string[]; patterns?: string[]; decisions?: string[] };
-                    const content = [
-                      (harvest.keyFacts ?? []).join(' | '),
-                      (harvest.patterns ?? []).join(' | '),
-                      (harvest.decisions ?? []).join(' | '),
-                    ].filter(Boolean).join('\n');
-
-                    if (content.length > 20) {
-                      await Promise.resolve(
-                        service.from('ai_memory').upsert({
-                          organization_id: workspaceId,
-                          domain: `response.${detectedIntent ?? 'general'}`,
-                          memory_type: 'pattern',
-                          content: content.slice(0, 1000),
-                          importance: _rlQuality ?? 0.5,
-                          metadata: {
-                            source: 'response_harvester',
-                            intent: detectedIntent,
-                            model: v4SmartModel,
-                            quality: _rlQuality,
-                          },
-                        }, {
-                          onConflict: 'organization_id,memory_type,domain',
-                          ignoreDuplicates: false,
-                        })
-                      ).catch(() => {});
-                    }
-                  }
-                }
-              } catch { /* non-blocking — harvest failure must never affect response */ }
-            })();
-          }
-        } catch (rlErr: unknown) {
-          logger.warn('[Copilot] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
-        }
-
-        // ── MEM0: Structured fact extraction — ADD/UPDATE/DELETE/NOOP ──────────
-        // Mem0 paper: 90% token reduction + 26% accuracy gain vs raw text storage.
-        // Runs fire-and-forget after the RL block; never blocks the response.
-        void (async () => {
-          try {
-            const { extractAndUpdateMemory } = await import("@/lib/brain/mem0-extractor");
-            await extractAndUpdateMemory(
-              service,
-              workspaceId,
-              `User: ${message}\nAssistant: ${streamedAssistantText}`,
-              detectedIntent ?? 'copilot'
-            );
-          } catch { /* non-blocking — Mem0 failure must never affect response */ }
-        })();
-
-
-        // ── Self-MoA: Post-stream synthesis → ai_memory ──────────────────
-        // For high-stakes queries where _useMoA was set: run dual top_p sampling
-        // + Haiku synthesis and store the result as a high-quality Q&A reference.
-        // Brain accumulates these pairs for future few-shot context enrichment.
-        // Fire-and-forget — never blocks response delivery.
-        if (_useMoA && streamedAssistantText.length > 0) {
-          void (async () => {
-            try {
-              const { runSelfMoA } = await import("@/lib/brain/self-moa");
-              const _moaResult = await runSelfMoA(
-                [{ role: "user", content: message }],
-                effectiveSystemPrompt,
-                v4SmartModel,
-                512
-              );
-              if (_moaResult.usedMoA && _moaResult.synthesizedResponse) {
-                await Promise.resolve(
-                  service.from("ai_memory").upsert({
-                    organization_id: workspaceId,
-                    memory_type: "pattern",
-                    domain: `moa.${detectedIntent ?? "general"}`,
-                    content: `Q: ${message.slice(0, 200)}
-A: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
-                    importance: 0.85,
-                    metadata: {
-                      source: "self_moa",
-                      qualityBoost: _moaResult.qualityBoost,
-                      model: v4SmartModel,
-                      originalQuery: message.slice(0, 200),
-                    },
-                  }, {
-                    onConflict: "organization_id,memory_type,domain",
-                    ignoreDuplicates: false,
-                  })
-                ).catch(() => {});
-                logger.debug(`[Self-MoA] Stored high-quality reference for domain=${detectedIntent ?? "general"} boost=${_moaResult.qualityBoost}`);
-              }
-            } catch { /* non-blocking — MoA failure must never affect response */ }
-          })();
-        }
-
-                // ── NB-063: Push causal learnings from this interaction to CORE ───────
-        // Mirror of domain-executor Step 7: after the feedback bus fires and
-        // triggerEvolution() has potentially updated causal edge weights, compute
-        // what changed vs the pre-stream snapshot and promote only the deltas to CORE.
-        // TTL guard: max once per 5 minutes per org to prevent per-request federation overhead.
-        // Ensure the pre-stream snapshot has resolved (it was fire-and-forget, but the
-        // AI stream takes 3-10s so it's almost certainly done; await just in case).
-        await _causalSnapshotPromise;
-        if (
-          _copilotCausalWeightsBefore.size > 0 &&
-          (Date.now() - (_copilotDeltaLastMs.get(workspaceId) ?? 0)) >= COPILOT_DELTA_INTERVAL_MS
-        ) {
-          _copilotDeltaLastMs.set(workspaceId, Date.now());
-          (async () => {
-            try {
-              const { computeAndPromoteCausalDeltas } = await import("@nexus-ai/memory-stack");
-              const _fedResult = await computeAndPromoteCausalDeltas(
-                service,
-                workspaceId,
-                _copilotCausalWeightsBefore,
-                _copilotFedCycleId,
-                {
-                  fedAvgLearningRate: 0.3,
-                  maxDelta: 0.15,
-                  minDelta: 0.01,
-                  minSampleSize: 10,
-                  maxPairsPerRun: 20,
-                },
-              );
-              logger.debug(
-                `[Copilot federation] org=${workspaceId.slice(0, 8)} ` +
-                `applied=${_fedResult.deltasApplied} filtered=${_fedResult.deltasFiltered} ` +
-                `newPairs=${_fedResult.newPairsAdded} updatedPairs=${_fedResult.existingPairsUpdated} ` +
-                `took=${_fedResult.durationMs}ms`
-              );
-            } catch (e: unknown) {
-              logger.warn("[Copilot] Causal delta promotion failed (non-fatal):", e instanceof Error ? e.message : String(e));
+        // ── Post-flight: RL, memory, chat save, tier1 ingest, mem0, causal federation ──
+        // All persistence is fire-and-forget inside runPostFlight — errors are logged
+        // but never propagate. ctx._conversationHistory is set from conversationHistory above.
+        void runPostFlight({
+          ctx,
+          streamedAssistantText,
+          detectedIntent: detectedIntent ?? null,
+          v4SmartModel,
+          streamStartMs,
+          seaasResult,
+          accountingResult,
+          deliveryIntelligenceResult,
+          useMoA: _useMoA,
+          effectiveSystemPrompt,
+          copilotCausalWeightsBefore: _copilotCausalWeightsBefore,
+          copilotFedCycleId: _copilotFedCycleId,
+          shouldRunFederationDelta: (() => {
+            if (
+              _copilotCausalWeightsBefore.size > 0 &&
+              (Date.now() - (_copilotDeltaLastMs.get(workspaceId) ?? 0)) >= COPILOT_DELTA_INTERVAL_MS
+            ) {
+              _copilotDeltaLastMs.set(workspaceId, Date.now());
+              return true;
             }
-          })();
-        }
-
-        // ── Notify OpenClaw gateway of conversation completion ──────
-        // This lets the Signal Harvester process the conversation for
-        // causal signals, prediction outcomes, and implicit feedback.
-        try {
-          const { gatewayManager: gm } = await import("@/lib/openclaw/gateway-client");
-          const gwConn = gm.getConnection(workspaceId);
-          if (gwConn && gwConn.isConnected()) {
-            gwConn.send("nexusbrain.ingest", {
-              signals: [{
-                type: "conversation_completed",
-                source: "copilot",
-                orgId: workspaceId,
-                userId: user.id,
-                query: message.trim().slice(0, 500),
-                domain: detectedIntent || "general",
-                causalEdgesUsed: causalEdges.length,
-                patternsUsed: patterns.length,
-                brainAugmented: !!brainContext,
-                timestamp: new Date().toISOString(),
-              }],
-            }).catch((gwErr) => { logger.warn("[Copilot] OpenClaw ingest failed (non-fatal):", gwErr instanceof Error ? gwErr.message : String(gwErr)); });
-          }
-        } catch {
-          // Non-blocking: gateway not available
-        }
-
-        // ── Chat Auto-Save — persist conversation turn to conversations table ──
-        // Every message pair (user + assistant) is saved so history survives page refresh.
-        // Uses upsert-by-session-key pattern: one row per (org_id, user_id) per day session.
-        // Non-fatal: save failure must NEVER prevent response delivery.
-        try {
-          const sessionDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-          const sessionTitle = message.trim().slice(0, 80) || "New conversation";
-
-          // Build the updated message list: prior history + new user+assistant pair
-          // streamedAssistantText was accumulated during the LLM stream loop above.
-          const updatedMessages: Array<{ role: string; content: string; timestamp: string }> = [
-            ...(conversationHistory ?? []).map((h) => ({ role: h.role, content: h.content, timestamp: "" })),
-            { role: "user", content: message.trim(), timestamp: new Date().toISOString() },
-            ...(streamedAssistantText
-              ? [{ role: "assistant", content: streamedAssistantText.trim(), timestamp: new Date().toISOString() }]
-              : []),
-          ];
-
-          // Upsert the conversation row — insert if new session, update messages if existing
-          await service
-            .from("conversations")
-            .upsert(
-              {
-                org_id: workspaceId,
-                user_id: user.id,
-                title: sessionTitle,
-                service_mode: seaasResult || deliveryIntelligenceResult ? "seaas" : accountingResult ? "aas" : "general",
-                messages: updatedMessages,
-                metadata: {
-                  lastDomain: detectedIntent || "general",
-                  brainIq: brainIqForRouting,
-                  sessionDate,
-                },
-                updated_at: new Date().toISOString(),
-              },
-              {
-                onConflict: "id",
-                ignoreDuplicates: true,
-              }
-            )
-            .select("id")
-            .maybeSingle();
-        } catch (saveErr) {
-          // Non-blocking — chat save must never fail the response
-          logger.warn("[Copilot] Chat auto-save failed (non-fatal):", saveErr instanceof Error ? saveErr.message : String(saveErr));
-        }
-
-        // Tier 1: Ingest conversation turns into raw knowledge store (fire-and-forget)
-        if (workspaceId && message) {
-          void (async () => {
-            try {
-              const { ingestConversationTurn } = await import("@/lib/brain/tier1-store");
-              await Promise.allSettled([
-                ingestConversationTurn(workspaceId, {
-                  sessionId: _sessionId,
-                  role: 'user',
-                  content: message.slice(0, 4000),
-                  metadata: { source: 'copilot' },
-                }),
-                // Only ingest assistant response if we have the full text
-                ...(typeof streamedAssistantText === 'string' && streamedAssistantText.length > 0 ? [
-                  ingestConversationTurn(workspaceId, {
-                    sessionId: _sessionId,
-                    role: 'assistant',
-                    content: streamedAssistantText.slice(0, 4000),
-                    metadata: { source: 'copilot' },
-                  })
-                ] : []),
-              ]);
-            } catch (e) {
-              logger.warn("[chat] conversation tier1 ingest failed", { error: String(e) });
-            }
-          })();
-        }
-
+            return false;
+          })(),
+        });
         close();
       } catch (err) {
         sendError(

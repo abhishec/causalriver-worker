@@ -14,6 +14,15 @@ import { getAdminClient } from "@/lib/supabase/admin";
 const _brainContextCache = new Map<string, { data: BrainContext; expiry: number }>();
 const BRAIN_CONTEXT_TTL_MS = 30_000; // 30 seconds
 
+// ── In-flight dedup: prevents thundering herd on cache misses ────────────────
+// When multiple concurrent requests for the same org arrive simultaneously after
+// a Lambda cold start or cache expiry, each would independently fire all 27+
+// parallel DB queries. The _inFlight map ensures only ONE fetch runs per org at
+// a time — all other concurrent callers await the same promise and share the
+// result. The entry is deleted in a `finally` block so a failed fetch never
+// permanently blocks the org.
+const _inFlight = new Map<string, Promise<BrainContext>>();
+
 // ── Cross-org patterns cache: 5-min TTL (expensive: full-table scan across orgs) ─
 // L24 cross-org query uses the service client to aggregate patterns across ALL orgs.
 // This is intentionally slow and expensive — 5-min TTL prevents thundering herd.
@@ -102,6 +111,11 @@ export async function getBrainContext(
     return cached.data;
   }
 
+  // ── In-flight dedup: join an existing fetch instead of firing a new one ──
+  const existingFetch = _inFlight.get(orgId);
+  if (!forceRefresh && existingFetch) return existingFetch;
+
+  const fetchPromise = (async (): Promise<BrainContext> => {
   try {
     // Tier 3: Consolidated Knowledge — fetch stable patterns first (feeds system prompt)
     let consolidatedPatternsData: Array<{ pattern_type: string; title: string; description: string; confidence: number }> = [];
@@ -1269,6 +1283,17 @@ export async function getBrainContext(
       qualityPatterns: [],
       qualityPatternsSummary: "No recent domain quality data",
     };
+  }
+  })(); // end fetchPromise IIFE
+
+  // Register in _inFlight so concurrent callers join this fetch
+  _inFlight.set(orgId, fetchPromise);
+  try {
+    return await fetchPromise;
+  } finally {
+    // Always remove the entry — whether the fetch succeeded or threw —
+    // so the next caller (after an error) gets a fresh attempt.
+    _inFlight.delete(orgId);
   }
 }
 
