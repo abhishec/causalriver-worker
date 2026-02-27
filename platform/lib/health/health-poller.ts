@@ -182,11 +182,12 @@ export async function pollHealthOnce(
       );
       const newViolations = violations.filter((v) => !recentDimensions.has(v.dimension));
 
-      // 5. Create alerts for new violations
-      for (const violation of newViolations) {
-        await supabase.from("cascade_alerts").insert({
+      // 5. Create alerts for new violations — batch both tables in 2 round-trips
+      if (newViolations.length > 0) {
+        const alertNow = Date.now();
+        const cascadeAlertRows = newViolations.map((violation) => ({
           organization_id: organizationId,
-          alert_id: `health-${violation.dimension}-${Date.now()}`,
+          alert_id: `health-${violation.dimension}-${alertNow}`,
           alert_type: "health_monitor",
           severity: violation.severity,
           trigger_domain: violation.dimension,
@@ -197,9 +198,9 @@ export async function pollHealthOnce(
           recommended_interventions: [getRecommendation(violation.dimension)],
           message: violation.message,
           is_read: false,
-        });
+        }));
 
-        await supabase.from("health_alert_log").insert({
+        const healthAlertLogRows = newViolations.map((violation) => ({
           organization_id: organizationId,
           dimension: violation.dimension,
           score: violation.score,
@@ -207,9 +208,14 @@ export async function pollHealthOnce(
           severity: violation.severity,
           message: violation.message,
           delivered_in_app: true,
-        });
+        }));
 
-        alertsCreated++;
+        await Promise.all([
+          supabase.from("cascade_alerts").insert(cascadeAlertRows),
+          supabase.from("health_alert_log").insert(healthAlertLogRows),
+        ]);
+
+        alertsCreated += newViolations.length;
       }
     }
   }

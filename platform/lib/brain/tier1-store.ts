@@ -70,6 +70,8 @@ async function embedChunkAsync(chunkId: string, text: string): Promise<void> {
   try {
     const embedding = await generateEmbedding(text);
     const embeddingStr = `[${embedding.join(",")}]`;
+    // Admin client bypasses RLS — knowledge_chunks has no user-scoped RLS; this is a
+    // background async update called from a fire-and-forget embedding task.
     const admin = getAdminClient();
     const { error } = await admin
       .from("knowledge_chunks")
@@ -121,6 +123,8 @@ export async function ingestRawChunk(
 ): Promise<string | null> {
   try {
     const verbatim = input.verbatim_text.slice(0, MAX_TEXT_CHARS);
+    // Admin client bypasses RLS — knowledge_chunks is a server-side write table with no
+    // user-scoped RLS. orgId is validated by the caller before this library function is invoked.
     const admin = getAdminClient();
 
     const { data, error } = await admin

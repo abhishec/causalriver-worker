@@ -90,6 +90,8 @@ async function loadRecentOutcomes(
   orgId: string
 ): Promise<Array<{ domain: string; confidence: number; was_correct: boolean; created_at: string }>> {
   try {
+    // Admin client bypasses RLS — prediction_records has no user-scoped RLS; this is a
+    // server-side brain function called during agent execution with no active user session.
     const admin = getAdminClient();
     const { data } = await admin
       .from("prediction_records")
@@ -107,6 +109,7 @@ async function loadRecentOutcomes(
 /** Load recent failure patterns from brain_case_log (org or global) */
 async function loadRecentFailurePatterns(orgId: string): Promise<string[]> {
   try {
+    // Admin client bypasses RLS — brain_case_log has no user-scoped RLS; server-side brain context function.
     const admin = getAdminClient();
     const { data } = await admin
       .from("brain_case_log")
@@ -128,6 +131,7 @@ async function loadRecentFailurePatterns(orgId: string): Promise<string[]> {
 /** Read active connectors from connector_signals (distinct source domains from last 7 days) */
 async function loadActiveConnectors(orgId: string): Promise<string[]> {
   try {
+    // Admin client bypasses RLS — connector_signals has no user-scoped RLS; server-side brain context function.
     const admin = getAdminClient();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 

@@ -347,28 +347,30 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        // ── Upsert to ai_memory ─────────────────────────────────────
+        // ── Batch upsert to ai_memory ───────────────────────────────
         // ON CONFLICT (organization_id, memory_type, domain) → UPDATE content + metadata.
         // This is bounded: max 6 rows per org, refreshed each cycle.
+        // Batch all rows in one round-trip instead of N serial upserts.
         let insightsPersisted = 0;
-        for (const row of insightRows) {
-          const { error: upsertError } = await service
+        if (insightRows.length > 0) {
+          const rowsWithTimestamp = insightRows.map((row) => ({
+            ...row,
+            updated_at: new Date().toISOString(),
+          }));
+          const { error: batchUpsertError } = await service
             .from("ai_memory")
-            .upsert(
-              {
-                ...row,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "organization_id,memory_type,domain", ignoreDuplicates: false }
-            );
+            .upsert(rowsWithTimestamp, {
+              onConflict: "organization_id,memory_type,domain",
+              ignoreDuplicates: false,
+            });
 
-          if (upsertError) {
+          if (batchUpsertError) {
             logger.warn(
-              `[CronCognitiveCycle] Failed to upsert insight for org=${orgId} domain=${row.domain}:`,
-              upsertError
+              `[CronCognitiveCycle] Batch upsert failed for org=${orgId}:`,
+              batchUpsertError
             );
           } else {
-            insightsPersisted++;
+            insightsPersisted = insightRows.length;
           }
         }
 

@@ -264,11 +264,19 @@ async function buildDigest(
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // ── Auth: isolate createClient() + getUser() — Lambda cold-start safety ──
+    let supabase;
+    let user = null;
+    try {
+      supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (!error) user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!user || !supabase) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const workspaceId = await getCurrentWorkspaceId();
     const body = await request.json().catch(() => ({}));
@@ -346,11 +354,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // ── Auth: isolate createClient() + getUser() — Lambda cold-start safety ──
+    let supabase;
+    let user = null;
+    try {
+      supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+      if (!error) user = data.user;
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!user || !supabase) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const workspaceId = await getCurrentWorkspaceId();
 

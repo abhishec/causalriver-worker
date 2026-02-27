@@ -423,77 +423,83 @@ async function reactDomainBlackout(
   const records: ReactionRecord[] = [];
   const blackoutSince = new Date(Date.now() - DOMAIN_BLACKOUT_WINDOW_MS).toISOString();
 
-  for (const domain of TRACKED_DOMAINS) {
-    // Count successful runs in the last 7 days for this domain
-    const { count } = await supabase
-      .from("agent_queue")
-      .select("*", { count: "exact", head: true })
-      .eq("organization_id", orgId)
-      .eq("task_type", domain)
-      .eq("status", "completed")
-      .gte("completed_at", blackoutSince);
+  // Batch: fetch successful run counts for ALL tracked domains in one query.
+  // Replaces N sequential COUNT queries (was 4 queries → now 1 + 1 dedup check).
+  const { data: successfulJobRows } = await supabase
+    .from("agent_queue")
+    .select("task_type")
+    .eq("organization_id", orgId)
+    .in("task_type", TRACKED_DOMAINS)
+    .eq("status", "completed")
+    .gte("completed_at", blackoutSince)
+    .limit(TRACKED_DOMAINS.length * 10);
 
-    const successfulRuns = count ?? 0;
+  const domainsWithRuns = new Set(
+    (successfulJobRows ?? []).map((r: { task_type: string }) => r.task_type)
+  );
+  const blackoutDomains = TRACKED_DOMAINS.filter((d) => !domainsWithRuns.has(d));
 
-    if (successfulRuns > 0) continue;
+  if (blackoutDomains.length === 0) return records;
 
-    // Domain blackout — check if already blacklisted (avoid duplicate memory entries)
-    const { data: existingBlacklist } = await supabase
-      .from("ai_memory")
-      .select("id")
-      .eq("organization_id", orgId)
-      .eq("memory_type", "dedup")
-      .eq("domain", "monitoring-blacklist")
-      .eq("content", domain)
-      .limit(1)
-      .maybeSingle();
+  // Batch: fetch existing dedup markers for all blackout domains in one query.
+  const { data: existingMarkers } = await supabase
+    .from("ai_memory")
+    .select("content")
+    .eq("organization_id", orgId)
+    .eq("memory_type", "dedup")
+    .eq("domain", "monitoring-blacklist")
+    .in("content", blackoutDomains)
+    .limit(blackoutDomains.length);
 
-    if (existingBlacklist) {
-      // Already noted — skip
-      continue;
-    }
+  const alreadyBlacklisted = new Set(
+    (existingMarkers ?? []).map((m: { content: string }) => m.content)
+  );
+  const newBlackouts = blackoutDomains.filter((d) => !alreadyBlacklisted.has(d));
 
-    const blacklistContent = `Domain '${domain}' has had 0 successful runs in the last 7 days. Check agent configuration, data availability, and connector health for this domain.`;
+  if (newBlackouts.length === 0) return records;
 
-    const { error: memErr } = await supabase.from("ai_memory").insert([
-      // Human-readable alert
-      {
-        organization_id: orgId,
-        memory_type: "alert",
-        domain: "monitoring",
-        content: blacklistContent,
-        importance: 0.8,
-        metadata: {
-          trigger: "domain_blackout",
-          affected_domain: domain,
-          window_days: 7,
-          detected_at: new Date().toISOString(),
-        },
+  // Batch insert all alert + dedup rows in one round-trip.
+  const detectedAt = new Date().toISOString();
+  const memoryRows = newBlackouts.flatMap((domain) => [
+    {
+      organization_id: orgId,
+      memory_type: "alert",
+      domain: "monitoring",
+      content: `Domain '${domain}' has had 0 successful runs in the last 7 days. Check agent configuration, data availability, and connector health for this domain.`,
+      importance: 0.8,
+      metadata: {
+        trigger: "domain_blackout",
+        affected_domain: domain,
+        window_days: 7,
+        detected_at: detectedAt,
       },
-      // Dedup marker to prevent re-alerting (expires naturally as memory is rotated)
-      {
-        organization_id: orgId,
-        memory_type: "dedup",
-        domain: "monitoring-blacklist",
-        content: domain,
-        importance: 0.1,
-        metadata: {
-          blacklisted_at: new Date().toISOString(),
-          reason: "no_successful_runs_7d",
-        },
+    },
+    {
+      organization_id: orgId,
+      memory_type: "dedup",
+      domain: "monitoring-blacklist",
+      content: domain,
+      importance: 0.1,
+      metadata: {
+        blacklisted_at: detectedAt,
+        reason: "no_successful_runs_7d",
       },
-    ]);
+    },
+  ]);
 
-    if (memErr) {
+  const { error: batchMemErr } = await supabase.from("ai_memory").insert(memoryRows);
+
+  for (const domain of newBlackouts) {
+    if (batchMemErr) {
       logger.warn(
-        `[MonitoringReactions] Failed to insert domain blackout for domain=${domain} org=${orgId}:`,
-        memErr
+        `[MonitoringReactions] Failed to insert domain blackout batch for org=${orgId}:`,
+        batchMemErr
       );
       records.push({
         type: "domain-blackout",
         description: `Domain '${domain}' has 0 successful runs in 7 days but ai_memory insert failed`,
         actionTaken: false,
-        detail: memErr.message,
+        detail: batchMemErr.message,
       });
     } else {
       records.push({

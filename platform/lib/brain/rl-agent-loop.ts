@@ -58,6 +58,8 @@ export interface AgentTaskRetro {
 export async function getCaseLogContext(ctx: AgentStartupContext): Promise<string> {
   // ── 1. DB primary path ────────────────────────────────────────────────
   try {
+    // Admin client bypasses RLS — brain_case_log has no user-scoped RLS; this is a
+    // server-side RL loop function called without an active user session.
     const supabase = getAdminClient();
     const { data: rows, error } = await supabase
       .from("brain_case_log")
@@ -186,6 +188,7 @@ export async function logAgentRetro(retro: AgentTaskRetro): Promise<void> {
 
   // ── 1. DB primary path ────────────────────────────────────────────────
   try {
+    // Admin client bypasses RLS — brain_case_log system-level retro write (organization_id=null).
     const supabase = getAdminClient();
     await supabase.from("brain_case_log").insert({
       organization_id: null, // retros are system-level

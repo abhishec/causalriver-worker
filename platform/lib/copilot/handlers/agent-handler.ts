@@ -49,6 +49,8 @@ export async function handleAgentCreation(
   originalMessage: string
 ): Promise<AgentCreatedResult | null> {
   try {
+    // Admin client bypasses RLS — se_aas_artifacts and agent_queue have no user-scoped RLS.
+    // Caller (chat/route.ts) has already verified workspace membership before invoking this handler.
     const admin = getAdminClient();
     const agentId = crypto.randomUUID();
     const now = new Date().toISOString();

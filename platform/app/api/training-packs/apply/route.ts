@@ -13,9 +13,17 @@ export const dynamic = "force-dynamic";
  * Body: { packId?: string }  — if provided, applies only that pack
  */
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  // ── Auth: isolate createClient() + getUser() — Lambda cold-start safety ──
+  let supabase;
+  let user = null;
+  try {
+    supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user || !supabase) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

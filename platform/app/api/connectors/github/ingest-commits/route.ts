@@ -90,10 +90,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   const startMs = Date.now();
 
   try {
-    // 1. Auth
-    const supabase = await createClient();
+    // ── Auth: isolate createClient() + getUser() — Lambda cold-start safety ──
+    let supabase;
     let authUser: { id: string } | null = null;
     try {
+      supabase = await createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -103,7 +104,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!authUser) {
+    if (!authUser || !supabase) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
