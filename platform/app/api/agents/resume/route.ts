@@ -128,7 +128,8 @@ export async function POST(request: NextRequest) {
     // ── Re-run from checkpoint ───────────────────────────────────
     // Determine which phase we're resuming from and what work remains
     const phase = checkpointState.phase as string || "";
-    const AGENT_TIMEOUT_MS = 90_000;
+    // 75s = Lambda budget. Chain invoker triggers at ~75s to create continuation job.
+    const AGENT_TIMEOUT_MS = 75_000;
 
     try {
       await Promise.race([
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
           user.id
         ),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Resumed agent timed out (90s)")), AGENT_TIMEOUT_MS)
+          setTimeout(() => reject(new Error("Resumed agent timed out (75s) — chain continuation will resume")), AGENT_TIMEOUT_MS)
         ),
       ]);
     } catch (err) {

@@ -44,6 +44,7 @@ on:
     - cron: '0 3 * * *'      # Daily 3 AM UTC — RLVR ground-truth verification
     - cron: '0 3 * * 0'      # Weekly Sunday 3 AM UTC — RLVR prediction_records verification (30-60d)
     - cron: '0 4 * * *'      # Daily 4 AM UTC — CC learnings ingestion (case-log + retro → brain)
+    - cron: '*/3 * * * *'   # Every 3 min   — stale job watchdog + chain continuation re-queue
   workflow_dispatch: {}      # Manual trigger — runs all endpoints
 
 # Minimal permissions: only needs to call HTTPS endpoints, nothing in the repo.
@@ -267,3 +268,21 @@ jobs:
             --max-time 300 \
             "${BASE_URL}/api/cron/consolidate" \
             || echo "consolidate failed (non-fatal)"
+
+      # ── Stale Job Watchdog (every 3-minute trigger) ───────────────────────────
+      # Two responsibilities:
+      #   1. Finds jobs stuck in 'running' with no heartbeat for > 3 min → marks
+      #      them 'failed' so they are retried on next process-jobs tick.
+      #   2. Finds 'paused' Lambda chain continuation jobs → re-queues them as
+      #      'pending' so the chain continues automatically.
+      # Runs on every trigger (3-min, 10-min, 30-min, etc.) since it is cheap
+      # and stale jobs should be recovered as fast as possible.
+      - name: Stale Job Watchdog
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/watchdog ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 30 \
+            "${BASE_URL}/api/cron/watchdog" \
+            || echo "watchdog failed (non-fatal — stale jobs will be caught on next tick)"

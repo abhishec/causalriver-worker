@@ -13,6 +13,109 @@ export interface CheckpointState {
   metadata?: Record<string, unknown>;
 }
 
+// ── Deep Checkpoint — full conversation context for Lambda chaining ──────────
+
+/**
+ * DeepCheckpoint serialises the full conversation history and context window
+ * so a continuation Lambda can resume exactly where the previous one stopped.
+ *
+ * Unlike CheckpointState (for human-review gates), DeepCheckpoint is written
+ * automatically when the 75s Lambda budget is nearly exhausted, enabling
+ * unlimited job duration via DB-backed continuations.
+ */
+export interface DeepCheckpoint {
+  jobId: string;
+  phase: string;
+  phaseLabel: string;
+  /** Full LLM conversation history — every message, system → assistant → user. */
+  conversationHistory: Array<{ role: string; content: string }>;
+  /** Tickets / sub-tasks already completed in this job. */
+  completedTickets: string[];
+  branchName?: string;
+  prUrl?: string;
+  contextWindow: {
+    tokensUsed: number;
+    systemPrompt: string;
+    lastUserMessage: string;
+  };
+  /** How many Lambda hops deep this checkpoint is. */
+  chainDepth: number;
+  savedAt: string;
+}
+
+/**
+ * Save a DeepCheckpoint to agent_queue.checkpoint_data and mark the job
+ * as 'paused' (NOT terminal) so the next Lambda chain continuation can
+ * pick it up.
+ *
+ * Also writes heartbeat_at so the watchdog doesn't mark this job stale
+ * before the child continuation job is picked up.
+ */
+export async function saveDeepCheckpoint(
+  supabase: SupabaseClient,
+  jobId: string,
+  checkpoint: Omit<DeepCheckpoint, "savedAt">
+): Promise<void> {
+  const data: DeepCheckpoint = { ...checkpoint, savedAt: new Date().toISOString() };
+
+  try {
+    const { error } = await supabase
+      .from("agent_queue")
+      .update({
+        checkpoint_data: data,
+        checkpoint_phase: checkpoint.phase,
+        heartbeat_at: new Date().toISOString(),
+        status: "paused", // PAUSED not terminal — chain continuation will resume
+      })
+      .eq("id", jobId);
+
+    if (error) {
+      logger.error("[saveDeepCheckpoint] Failed to save checkpoint", { jobId, error });
+      return;
+    }
+
+    logger.warn("[saveDeepCheckpoint] Saved deep checkpoint", {
+      jobId,
+      phase: checkpoint.phase,
+      chainDepth: checkpoint.chainDepth,
+      historyLength: checkpoint.conversationHistory.length,
+      completedTickets: checkpoint.completedTickets.length,
+    });
+  } catch (err) {
+    logger.error("[saveDeepCheckpoint] Threw unexpectedly", { jobId, err });
+  }
+}
+
+/**
+ * Load a DeepCheckpoint from agent_queue.checkpoint_data.
+ * Returns null if there is no checkpoint (fresh job) or if the data is
+ * not a valid DeepCheckpoint.
+ */
+export async function loadDeepCheckpoint(
+  supabase: SupabaseClient,
+  jobId: string
+): Promise<DeepCheckpoint | null> {
+  try {
+    const { data, error } = await supabase
+      .from("agent_queue")
+      .select("checkpoint_data, chain_depth")
+      .eq("id", jobId)
+      .single();
+
+    if (error || !data?.checkpoint_data) return null;
+
+    const cp = data.checkpoint_data as DeepCheckpoint;
+    // Backfill chain_depth from the column if the checkpoint predates the field
+    if (typeof cp.chainDepth !== "number" && typeof data.chain_depth === "number") {
+      cp.chainDepth = data.chain_depth;
+    }
+    return cp;
+  } catch (err) {
+    logger.warn("[loadDeepCheckpoint] Failed to load checkpoint", { jobId, err });
+    return null;
+  }
+}
+
 /**
  * Pause an agent job at a decision gate.
  * Saves full investigation state to checkpoint columns and marks status as

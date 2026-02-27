@@ -151,13 +151,14 @@ export async function executeAgent(
   const taskId = task.id;
 
   // ── Run with timeout ─────────────────────────────────────────────
-  const AGENT_TIMEOUT_MS = 90_000;
+  // 75s = Lambda budget. Chain invoker triggers at ~75s to create continuation job.
+  const AGENT_TIMEOUT_MS = 75_000;
 
   try {
     await Promise.race([
       runBrainRuntime(supabase, taskId, organizationId, prompt, agentType, autoExecuteThreshold, userId, episodicContext),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Agent execution timed out (90s)")), AGENT_TIMEOUT_MS)
+        setTimeout(() => reject(new Error("Agent execution timed out (75s) — chain continuation will resume")), AGENT_TIMEOUT_MS)
       ),
     ]);
   } catch (err) {
