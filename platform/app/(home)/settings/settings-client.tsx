@@ -789,7 +789,7 @@ export function SettingsClient({
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-semibold">GitHub</h3>
                       {connectedTypes.has("github") && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400">Connected</span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">Connected</span>
                       )}
                     </div>
                     <p className="text-[11px] text-muted">Connect a GitHub repository for code intelligence</p>
@@ -824,7 +824,7 @@ export function SettingsClient({
                   </div>
 
                   {githubSuccess ? (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20 text-success text-sm">
                       <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
