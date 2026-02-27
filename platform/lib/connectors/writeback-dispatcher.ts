@@ -605,6 +605,9 @@ export async function processWritebackQueue(
               created_at: new Date().toISOString(),
             })
           ); // fire-and-forget
+
+          // Insert into dead_letter_queue for manual review + send Slack to admin
+          void moveToDeadLetterQueue(supabase, item, newAttempts, result.error ?? "Unknown error"); // fire-and-forget
         } else {
           logger.warn("[writeback-dispatcher] Action failed:", {
             itemId: item.id,
@@ -664,5 +667,138 @@ async function resolveDomainType(
     return (data?.domain_type as string) ?? "";
   } catch {
     return "";
+  }
+}
+
+/**
+ * Move a permanently-failed write-back item into the dead_letter_queue table
+ * and send a Slack notification to the workspace admin (if configured).
+ *
+ * Fire-and-forget safe — never throws.
+ */
+async function moveToDeadLetterQueue(
+  supabase: SupabaseClient,
+  item: WritebackQueueItem,
+  attemptCount: number,
+  failureReason: string
+): Promise<void> {
+  try {
+    // Insert into dead_letter_queue
+    const { error: dlqError } = await supabase.from("dead_letter_queue").insert({
+      organization_id: item.organization_id,
+      job_type: "writeback",
+      payload: {
+        writeback_queue_id: item.id,
+        rule_id: item.rule_id,
+        connector_type: item.connector_type,
+        action_type: item.action_type,
+        action_payload: item.action_payload,
+        original_created_at: item.created_at,
+      },
+      failure_reason: failureReason,
+      attempt_count: attemptCount,
+      writeback_queue_id: item.id,
+      connector_type: item.connector_type,
+      action_type: item.action_type,
+      rule_id: item.rule_id,
+      slack_notified: false,
+    });
+
+    if (dlqError) {
+      logger.warn("[writeback-dispatcher] Failed to insert dead_letter_queue row:", {
+        itemId: item.id,
+        error: dlqError.message,
+      });
+    }
+
+    // Send Slack notification to admin if they have a webhook configured
+    await notifyAdminSlackDeadLetter(supabase, item, attemptCount, failureReason);
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] moveToDeadLetterQueue error (non-fatal):", err);
+  }
+}
+
+/**
+ * Send a Slack notification to the workspace admin when a write-back item is dead-lettered.
+ * Looks up the admin's notification preferences for a Slack webhook URL.
+ *
+ * Never throws — silently skips if no webhook is configured.
+ */
+async function notifyAdminSlackDeadLetter(
+  supabase: SupabaseClient,
+  item: WritebackQueueItem,
+  attemptCount: number,
+  failureReason: string
+): Promise<void> {
+  try {
+    // Look up the Slack webhook from notification_preferences for this org
+    const { data: prefs } = await supabase
+      .from("notification_preferences")
+      .select("slack_webhook_url")
+      .eq("organization_id", item.organization_id)
+      .not("slack_webhook_url", "is", null)
+      .limit(1)
+      .maybeSingle();
+
+    const webhookUrl = prefs?.slack_webhook_url as string | undefined;
+    if (!webhookUrl) {
+      return;
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.usebrainos.com";
+    const deadLetterUrl = `${appUrl}/settings?tab=connectors`;
+
+    const resp = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `[BrainOS] Write-back permanently failed after ${attemptCount} attempts`,
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: "Write-back Dead Letter" },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: [
+                `*Connector:* ${item.connector_type}`,
+                `*Action:* ${item.action_type}`,
+                `*Attempts:* ${attemptCount}`,
+                `*Failure reason:* ${failureReason}`,
+                `*Item ID:* \`${item.id}\``,
+              ].join("\n"),
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: { type: "plain_text", text: "Review in Settings" },
+                url: deadLetterUrl,
+                style: "danger",
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      logger.warn("[writeback-dispatcher] Dead-letter Slack notification failed:", {
+        status: resp.status,
+        itemId: item.id,
+      });
+    } else {
+      // Mark as notified in dead_letter_queue (best-effort)
+      void supabase
+        .from("dead_letter_queue")
+        .update({ slack_notified: true, slack_notified_at: new Date().toISOString() })
+        .eq("writeback_queue_id", item.id);
+    }
+  } catch (err) {
+    logger.warn("[writeback-dispatcher] notifyAdminSlackDeadLetter error (non-fatal):", err);
   }
 }
