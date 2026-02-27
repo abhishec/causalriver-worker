@@ -92,6 +92,8 @@ export interface OrgAgentState {
 
 // ── Internal helpers ─────────────────────────────────────────────────────────
 
+// Admin client bypasses RLS — agent_queue and agent orchestration tables have no
+// user-scoped RLS. This orchestrator runs as a background server process with no user session.
 function adminClient(): SupabaseClient<any, any, any> {
   return getAdminClient();
 }

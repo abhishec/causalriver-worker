@@ -156,6 +156,8 @@ export async function getOrCreateAIWorkspace(
   name?: string
 ): Promise<AIWorkspace> {
   try {
+    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; called during workspace
+    // provisioning and server-side context resolution without an active user session.
     const admin = getAdminClient();
 
     const { data, error } = await admin
@@ -203,6 +205,7 @@ export async function getOrCreateAIWorkspace(
  */
 export async function getAIWorkspaceServices(orgId: string): Promise<string[]> {
   try {
+    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side read.
     const admin = getAdminClient();
     const { data, error } = await admin
       .from("ai_workspace")
@@ -226,6 +229,7 @@ export async function activateService(
   service: string
 ): Promise<void> {
   try {
+    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side activation.
     const admin = getAdminClient();
 
     const { data } = await admin
@@ -264,6 +268,7 @@ export async function updateWorkspaceConfig(
   patch: Partial<AIWorkspace>
 ): Promise<void> {
   try {
+    // Admin client bypasses RLS — ai_workspace has no user-scoped RLS; server-side config patch.
     const admin = getAdminClient();
 
     const dbPatch: Record<string, unknown> = {};

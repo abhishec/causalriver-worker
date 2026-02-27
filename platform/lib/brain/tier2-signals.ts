@@ -90,6 +90,7 @@ export async function searchKnowledgeChunks(
   limit = 5
 ): Promise<KnowledgeChunkResult[]> {
   try {
+    // Admin client bypasses RLS — knowledge_chunks has no user-scoped RLS; server-side semantic search.
     const admin = getAdminClient();
     const embedding = await embedText(query);
 
@@ -179,6 +180,8 @@ export async function recordChunkUsage(
   table: "knowledge_chunks" | "document_chunks"
 ): Promise<void> {
   try {
+    // Admin client bypasses RLS — knowledge_chunks/document_chunks have no user-scoped RLS;
+    // this is a fire-and-forget RL quality tracking update from a background job.
     const admin = getAdminClient();
 
     // Read current stats — single() is safe because id is the PK

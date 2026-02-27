@@ -225,6 +225,8 @@ export async function runConsolidation(
   let patternsPromoted = 0;
 
   try {
+    // Admin client bypasses RLS — cross_domain_signals, prediction_records, and consolidated_patterns
+    // have no user-scoped RLS. This runs as a cron job with no active user session.
     const admin = getAdminClient();
     const since = sevenDaysAgo();
 

@@ -155,6 +155,8 @@ function rowToConfig(row: Record<string, any>): AIWorkerConfig {
  */
 export async function getAIWorkerConfig(orgId: string): Promise<AIWorkerConfig> {
   try {
+    // Admin client bypasses RLS — ai_worker_config has no user-scoped RLS; called from
+    // background brain init and server-side config resolution without an active user session.
     const admin = getAdminClient();
 
     const { data, error } = await admin
@@ -190,6 +192,7 @@ export async function updateAIWorkerConfig(
   patch: Partial<Omit<AIWorkerConfig, "organizationId">>
 ): Promise<void> {
   try {
+    // Admin client bypasses RLS — ai_worker_config has no user-scoped RLS; server-side update.
     const admin = getAdminClient();
 
     // Map patch fields to DB column names
@@ -228,6 +231,7 @@ export async function ensureAIWorkerConfig(
   displayName?: string
 ): Promise<void> {
   try {
+    // Admin client bypasses RLS — ai_worker_config upsert during workspace provisioning (no user session context).
     const admin = getAdminClient();
 
     const { error } = await admin.from("ai_worker_config").upsert(

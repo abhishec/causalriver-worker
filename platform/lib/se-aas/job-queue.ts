@@ -147,6 +147,10 @@ export async function getJobStatus(
  *
  * After the job completes (success or error), automatically unblocks any jobs
  * that were waiting on this job via checkAndStartWaitingJobs.
+ *
+ * Retry logic: if the job fails and retry_count < max_retries, the job is
+ * re-queued as 'pending' with retry_count incremented instead of being
+ * permanently failed. This gives transient failures automatic recovery.
  */
 export async function executeAndCompleteJob(
   supabase: SupabaseClient,
@@ -172,6 +176,16 @@ export async function executeAndCompleteJob(
   }
 
   const orgId: string | undefined = jobRow?.organization_id ?? undefined;
+
+  // Fetch current retry state so we can make re-queue vs permanent-fail decision
+  const { data: retryRow } = await supabase
+    .from("agent_queue")
+    .select("retry_count, max_retries")
+    .eq("id", jobId)
+    .maybeSingle();
+
+  const retryCount: number = (retryRow?.retry_count as number) ?? 0;
+  const maxRetries: number = (retryRow?.max_retries as number) ?? 3;
 
   const executionStartMs = Date.now();
 
@@ -206,17 +220,41 @@ export async function executeAndCompleteJob(
         userId: "worker",
       }).catch(() => { /* non-fatal */ });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     const executionMs = Date.now() - executionStartMs;
-    logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, err?.message || err);
-    await supabase
-      .from("agent_queue")
-      .update({
-        status: "error",
-        error_message: "Job execution failed",
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", jobId);
+    const errMessage = err instanceof Error ? err.message : String(err);
+    logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, errMessage);
+
+    if (retryCount < maxRetries) {
+      // Re-queue for automatic retry — transient failures get another chance
+      const nextAttempt = retryCount + 1;
+      await supabase
+        .from("agent_queue")
+        .update({
+          status: "pending",
+          retry_count: nextAttempt,
+          error_message: `Attempt ${nextAttempt}/${maxRetries} failed: ${errMessage.slice(0, 200)}. Retrying...`,
+          started_at: null,
+          heartbeat_at: null,
+        })
+        .eq("id", jobId);
+      logger.warn(
+        `[job-queue] Job ${jobId} re-queued for retry (attempt ${nextAttempt}/${maxRetries}): ${errMessage.slice(0, 100)}`
+      );
+    } else {
+      // Exhausted retries — permanent failure
+      await supabase
+        .from("agent_queue")
+        .update({
+          status: "error",
+          error_message: `Permanently failed after ${maxRetries} retries: ${errMessage.slice(0, 200)}`,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+      logger.error(
+        `[job-queue] Job ${jobId} permanently failed after ${maxRetries} retries: ${errMessage.slice(0, 100)}`
+      );
+    }
 
     // ── Orchestrator RL signal: job failed → gaba signal ──────────────────
     if (orgId) {
@@ -224,7 +262,7 @@ export async function executeAndCompleteJob(
         agentId: jobId,
         domain: "orchestrator",
         taskDescription: `job_queue:${jobId}`,
-        resultSummary: `error: ${err?.message ?? "unknown"}`.slice(0, 500),
+        resultSummary: `error: ${errMessage}`.slice(0, 500),
         quality: 0,
         executionMs,
         organizationId: orgId,
