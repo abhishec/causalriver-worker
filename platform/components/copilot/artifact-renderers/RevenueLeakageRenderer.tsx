@@ -76,7 +76,8 @@ export function RevenueLeakageRenderer({ data }: { data: Record<string, any> }) 
   const [tab, setTab] = useState("overview");
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
-  const findings: LeakageFinding[] = data?.findings ?? [];
+  // Memoized to avoid new array reference on every render when data?.findings is null
+  const findings: LeakageFinding[] = useMemo(() => data?.findings ?? [], [data?.findings]);
   const summary = data?.summary ?? {};
   const currency = findings[0]?.currency ?? "SGD";
 

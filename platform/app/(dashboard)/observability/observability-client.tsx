@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { TabGroup } from "@/components/ui/TabGroup";
 import { StatValue } from "@/components/ui/StatValue";
 import { TimeRangeSelector, type TimeRange } from "@/components/ui/TimeRangeSelector";
@@ -42,14 +42,14 @@ export function ObservabilityClient({
   // ── Filter all data by selected time range ─────────────────────
   const cutoff = useMemo(() => new Date(Date.now() - (TIME_RANGE_MS[timeRange] || 7 * 86400000)).toISOString(), [timeRange]);
 
-  const filterByTime = <T extends { created_at?: string }>(items: T[]) =>
-    items.filter((item) => !item.created_at || item.created_at >= cutoff);
+  const filterByTime = useCallback(<T extends { created_at?: string }>(items: T[]) =>
+    items.filter((item) => !item.created_at || item.created_at >= cutoff), [cutoff]);
 
-  const filteredSignals = useMemo(() => filterByTime(signalIngestion), [signalIngestion, cutoff]);
-  const filteredCalcs = useMemo(() => filterByTime(causalCalcs), [causalCalcs, cutoff]);
-  const filteredOps = useMemo(() => filterByTime(connectorOps), [connectorOps, cutoff]);
-  const filteredAgents = useMemo(() => filterByTime(agentExecutions), [agentExecutions, cutoff]);
-  const filteredAlerts = useMemo(() => filterByTime(alerts), [alerts, cutoff]);
+  const filteredSignals = useMemo(() => filterByTime(signalIngestion), [signalIngestion, filterByTime]);
+  const filteredCalcs = useMemo(() => filterByTime(causalCalcs), [causalCalcs, filterByTime]);
+  const filteredOps = useMemo(() => filterByTime(connectorOps), [connectorOps, filterByTime]);
+  const filteredAgents = useMemo(() => filterByTime(agentExecutions), [agentExecutions, filterByTime]);
+  const filteredAlerts = useMemo(() => filterByTime(alerts), [alerts, filterByTime]);
 
   // Summary stats (now using filtered data)
   const totalSignals = filteredSignals.length;

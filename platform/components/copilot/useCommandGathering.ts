@@ -394,7 +394,7 @@ export function useCommandGathering(
 
       return true;
     },
-    [advanceToParam]
+    [advanceToParam, effectiveMap]
   );
 
   const submitParam = useCallback(

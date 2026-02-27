@@ -94,7 +94,8 @@ export default function ConnectorsPageV2() {
     init();
     const interval = setInterval(loadSyncProgress, 5000);
     return () => clearInterval(interval);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-only: init and loadSyncProgress are stable async fns defined in component scope
 
   async function init() {
     const params = new URLSearchParams(window.location.search);

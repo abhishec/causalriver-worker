@@ -206,7 +206,11 @@ export function DashboardClient() {
   }, [workspaces, customersForUser, isPlatformAdmin]);
 
   // Filtered workspaces when a customer is selected
-  const activeWorkspaces = activeCustomerId ? workspacesForActiveCustomer : [];
+  // Memoized to prevent hooks that depend on this from re-running on every render
+  const activeWorkspaces = useMemo(
+    () => (activeCustomerId ? workspacesForActiveCustomer : []),
+    [activeCustomerId, workspacesForActiveCustomer]
+  );
 
   // Build flattened AI Worker list from summaries
   const aiWorkers = useMemo((): AIWorkerDisplay[] => {

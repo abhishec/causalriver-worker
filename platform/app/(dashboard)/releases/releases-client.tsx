@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 // ─── Types (mirror release-tracker.ts shapes) ────────────────────────────────
 
@@ -109,21 +109,26 @@ export default function ReleaseDashboardClient({
   const [syncing,   setSyncing]    = useState(false);
   const [error,     setError]      = useState<string | null>(null);
 
-  const releaseConfig = selected
-    ? {
-        organizationId: orgId,
-        releaseName:    selected.release_name,
-        releaseType:    selected.release_type as any,
-        branchName:     selected.branch_name,
-        baseVersion:    selected.base_version,
-        targetDate:     selected.target_date,
-        teamLabel:      selected.team_label,
-        teamMembers:    selected.team_members,
-        githubRepo:     selected.github_repo,
-        jiraProjectKey: selected.jira_project_key,
-        jiraFixVersion: selected.jira_fix_version,
-      }
-    : null;
+  // Memoized to prevent fetchQuery useCallback from re-creating on every render
+  const releaseConfig = useMemo(
+    () => selected
+      ? {
+          organizationId: orgId,
+          releaseName:    selected.release_name,
+          releaseType:    selected.release_type as any,
+          branchName:     selected.branch_name,
+          baseVersion:    selected.base_version,
+          targetDate:     selected.target_date,
+          teamLabel:      selected.team_label,
+          teamMembers:    selected.team_members,
+          githubRepo:     selected.github_repo,
+          jiraProjectKey: selected.jira_project_key,
+          jiraFixVersion: selected.jira_fix_version,
+        }
+      : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selected?.id, orgId]
+  );
 
   const fetchQuery = useCallback(
     async (query: string, releaseId: string) => {

@@ -74,7 +74,8 @@ export default function OAuthSettingsPage() {
 
   useEffect(() => {
     loadOAuthSettings();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-only: loadOAuthSettings is a stable async fn defined in component scope
 
   async function loadOAuthSettings() {
     try {

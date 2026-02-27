@@ -76,8 +76,9 @@ export function CausalPLRenderer({ data }: { data: Record<string, any> }) {
   const [tab, setTab] = useState("statement");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  const variances: Variance[] = data?.variances ?? [];
-  const attributions: CausalAttribution[] = data?.causalAttributions ?? [];
+  // Memoized to avoid new array references on every render when data is null
+  const variances: Variance[] = useMemo(() => data?.variances ?? [], [data?.variances]);
+  const attributions: CausalAttribution[] = useMemo(() => data?.causalAttributions ?? [], [data?.causalAttributions]);
   const narrative: string = data?.summaryNarrative ?? data?.summary ?? "";
   const confidence: number = data?.confidenceScore ?? 0;
   const periodLabel = data?.periodLabel ?? `${data?.periodFrom ?? ""} — ${data?.periodTo ?? ""}`;

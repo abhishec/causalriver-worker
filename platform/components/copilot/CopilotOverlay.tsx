@@ -135,6 +135,22 @@ export function CopilotOverlay() {
   const abortRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
+  // Closing animation state — declared before keyboard useEffect so handleClose can be a dep
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = useCallback(() => {
+    abortRef.current?.abort();
+    setIsClosing(true);
+    // Let the exit animation play (200ms) before unmounting
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      setInput("");
+      setResponse("");
+      setIsLoading(false);
+    }, 180);
+  }, []);
+
   // Portal mount
   useEffect(() => {
     setMounted(true);
@@ -155,7 +171,7 @@ export function CopilotOverlay() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   // Focus input when overlay opens
   useEffect(() => {
@@ -166,22 +182,6 @@ export function CopilotOverlay() {
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-
-  // Closing animation state
-  const [isClosing, setIsClosing] = useState(false);
-
-  const handleClose = useCallback(() => {
-    abortRef.current?.abort();
-    setIsClosing(true);
-    // Let the exit animation play (200ms) before unmounting
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsClosing(false);
-      setInput("");
-      setResponse("");
-      setIsLoading(false);
-    }, 180);
-  }, []);
 
   // Click outside to close
   const handleBackdropClick = useCallback(

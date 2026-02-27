@@ -153,7 +153,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
     }
 
     setIsLoading(false);
-  }, [workerId]);
+  }, [workerId, orgId]);
 
   // Fetch recent jobs via Supabase client
   const fetchJobs = useCallback(async () => {

@@ -175,7 +175,8 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
         // Silently fail — Brain vs Claude panel still shows with available data
       })
       .finally(() => setLoading(false));
-  }, [event?.id, event?.domain]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event?.id, event?.domain, event?.type]);
 
   // Fetch the real Claude baseline — what Claude says with ZERO business context
   useEffect(() => {
@@ -206,7 +207,8 @@ export function AnomalyDetailPanel({ event, onClose }: AnomalyDetailPanelProps) 
         // Silently fail — static fallback shown
       })
       .finally(() => setClaudeLoading(false));
-  }, [event?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event?.id, event?.type]);
 
   if (!event) return null;
 

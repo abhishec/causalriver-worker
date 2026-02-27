@@ -113,9 +113,10 @@ export function CashFlowForecastRenderer({ data }: { data: Record<string, any> }
   const [tab, setTab] = useState("forecast");
 
   const forecast = data?.forecast ?? data;
-  const predictions: WeeklyProjection[] = forecast?.predictions ?? [];
-  const risks: ForecastRisk[] = forecast?.risks ?? [];
-  const recommendations: Recommendation[] = data?.recommendations ?? [];
+  // Memoized to avoid new array references on every render when data is null
+  const predictions: WeeklyProjection[] = useMemo(() => forecast?.predictions ?? [], [forecast?.predictions]);
+  const risks: ForecastRisk[] = useMemo(() => forecast?.risks ?? [], [forecast?.risks]);
+  const recommendations: Recommendation[] = useMemo(() => data?.recommendations ?? [], [data?.recommendations]);
   const priorComparison: ForecastComparison | undefined = data?.priorComparison;
   const narrative: string = forecast?.causalNarrative ?? data?.summary ?? "";
 

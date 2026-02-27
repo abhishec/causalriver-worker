@@ -80,7 +80,8 @@ export default function ArtifactsPage() {
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [currentWorkspace?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWorkspace?.id]); // intentional: only re-run when org ID changes, not on every workspace object reference change
 
   const filtered = filter === "all"
     ? artifacts
