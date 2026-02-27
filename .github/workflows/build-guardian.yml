@@ -1,0 +1,52 @@
+name: Build Guardian
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+
+jobs:
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build memory-stack (required for platform tsc)
+        # The platform imports @nexus-ai/memory-stack which resolves to dist/index.d.ts.
+        # dist/ is gitignored — must be built before tsc can type-check platform routes.
+        run: pnpm --filter @nexus-ai/memory-stack run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: TypeScript check
+        run: cd platform && pnpm exec tsc --noEmit
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: ESLint check
+        run: cd platform && pnpm lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Build failed! TypeScript or lint errors found."
+          echo "Local diagnosis:"
+          echo "  TypeScript: cd platform && npx tsc --noEmit"
+          echo "  Lint:       cd platform && npx next lint --max-warnings 50"

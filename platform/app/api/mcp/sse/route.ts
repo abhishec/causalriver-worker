@@ -896,8 +896,8 @@ const TOOL_HANDLERS: Record<string, ToolHandler> = {
       target: String(payload.target || payload.channel || payload.repo || payload.project || ""),
       parameters: payload,
       confidence,
-      approvalMode: confidence >= 0.7 ? "auto" : confidence >= 0.35 ? "requires_approval" : "dry_run",
-      priority: "medium",
+      approvalMode: (confidence >= 0.7 ? "auto" : confidence >= 0.35 ? "requires_approval" : "dry_run") as "auto" | "requires_approval" | "dry_run",
+      priority: "medium" as "critical" | "high" | "medium" | "low",
       targetDomains: [action.split("_")[0]], // e.g., "github" from "github_create_pr"
       evidence: `MCP agent invoked brain_execute with confidence ${confidence}`,
       sourceArtifactType: "mcp-stateless",
