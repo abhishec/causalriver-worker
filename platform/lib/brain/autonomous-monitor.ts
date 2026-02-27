@@ -33,6 +33,7 @@ import {
   flightRiskAlertKey,
   scopeCreepAlertKey,
 } from "@/lib/brain/monitor-dedup";
+import { checkDomainDrift } from "@/lib/brain/agent-rl";
 
 // ============================================================================
 // Types
@@ -177,6 +178,31 @@ export async function runAutonomousMonitoring(
       result.errors.push(msg);
     }
   }
+
+  // ── Domain Drift Detection (fire-and-forget) ─────────────────────────────
+  // Run after the primary alert processing so it never delays reactions.
+  // Checks quality trend (last 7d vs prior 7d) for the 4 core SE-aaS domains.
+  // Emits a gaba drift signal to cross_domain_signals when >15% quality drop detected.
+  void (async () => {
+    const SE_AAS_DOMAINS = ["pod-match", "early-warning", "delivery-intelligence", "scope-creep"];
+    try {
+      await Promise.allSettled(
+        SE_AAS_DOMAINS.map(domain =>
+          checkDomainDrift(supabase, orgId, domain).then(driftResult => {
+            if (driftResult.hasDrift) {
+              logger.warn(
+                `[AutonomousMonitor] Domain drift detected — org=${orgId} domain=${domain} ` +
+                `drop=${driftResult.dropPct.toFixed(1)}% ` +
+                `(current=${driftResult.currentAvg.toFixed(2)} vs baseline=${driftResult.baselineAvg.toFixed(2)})`
+              );
+            }
+          })
+        )
+      );
+    } catch {
+      // Non-fatal — drift detection must never block monitor run
+    }
+  })();
 
   return result;
 }

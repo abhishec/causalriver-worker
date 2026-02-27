@@ -918,6 +918,16 @@ export async function executeDomain(
   }
   const durationMs = Date.now() - startMs;
 
+  // ── Step 3 outcome: record execute step signal (fire-and-forget) ─────────
+  void recordStepOutcome(supabase, {
+    organizationId: params.organizationId,
+    domain: params.domainType,
+    stepName: "execute",
+    stepIndex: 2,
+    success: true,
+    durationMs,
+  });
+
   // ── Decision Gate A: early-warning — flight risk / health score threshold ──
   // Only fires for queued jobs (jobId present). If any engineer has
   // flight_risk_score > 0.7 OR engagement health_score < 40, we pause the job
@@ -1234,6 +1244,7 @@ export async function executeDomain(
     executionMs: durationMs,
     organizationId: params.organizationId,
     userId: params.userId,
+    modelId: selectedModel,
   }).catch(() => {/* non-fatal */});
 
   void logAgentRetro({

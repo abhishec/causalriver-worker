@@ -31,6 +31,8 @@ export interface AgentOutcomeParams {
   userId: string;
   /** Optional: IDs of knowledge_chunks or document_chunks used during this execution */
   chunkIds?: string[];
+  /** Optional: Claude model ID used (e.g. "claude-haiku-4-5-20251001", "claude-sonnet-4-6") */
+  modelId?: string;
 }
 
 export interface LearningStats {
@@ -143,6 +145,15 @@ export async function recordAgentOutcome(
   const wasSuccess = params.quality >= 0.7;
 
   try {
+    // Derive model family for analytics grouping
+    const modelFamily = params.modelId
+      ? params.modelId.includes("haiku")
+        ? "haiku"
+        : params.modelId.includes("sonnet")
+          ? "sonnet"
+          : "opus"
+      : undefined;
+
     // Insert to prediction_records (L4 Causal layer)
     await supabase.from("prediction_records").insert({
       organization_id: params.organizationId,
@@ -156,6 +167,9 @@ export async function recordAgentOutcome(
       was_correct: wasSuccess,
       verified_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
+      metadata: {
+        ...(params.modelId ? { modelId: params.modelId, modelFamily } : {}),
+      },
     });
   } catch (err) {
     logger.warn("[agent-rl] prediction_records insert failed:", err);
@@ -521,4 +535,119 @@ export async function getLearningStats(
     logger.warn("[agent-rl] getLearningStats failed:", err);
     return null;
   }
+}
+
+// ── Step-level Outcome Recording ───────────────────────────────────────────
+
+/**
+ * Record the outcome of a single orchestration step to cross_domain_signals.
+ *
+ * Emits a dopamine signal on success or a gaba signal on failure.
+ * Fire-and-forget safe — never throws, never blocks caller.
+ *
+ * Used by domain-executor.ts at major step boundaries (case-log-prime,
+ * brain-context, execute) to give the RL system step-level granularity.
+ */
+export async function recordStepOutcome(
+  supabase: SupabaseClient,
+  params: {
+    organizationId: string;
+    domain: string;
+    stepName: string;         // e.g., "case-log-prime", "brain-context", "execute"
+    stepIndex: number;        // 0-based
+    success: boolean;
+    durationMs: number;
+    errorMessage?: string;
+  }
+): Promise<void> {
+  try {
+    await supabase.from("cross_domain_signals").insert({
+      organization_id: params.organizationId,
+      source_domain: params.domain,
+      target_domain: "orchestrator",
+      signal_type: params.success ? "dopamine" : "gaba",
+      signal_value: params.success ? "step_success" : "step_failure",
+      signal_strength: params.success ? 0.6 : 0.3,
+      signal_timestamp: new Date().toISOString(),
+      entity_type: "process_step",
+      entity_id: `${params.domain}:${params.stepName}:${params.stepIndex}`,
+      payload: {
+        stepName: params.stepName,
+        stepIndex: params.stepIndex,
+        durationMs: params.durationMs,
+        ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
+      },
+    });
+  } catch {
+    // Fire-and-forget — never block execution
+  }
+}
+
+// ── Domain Drift Detection ─────────────────────────────────────────────────
+
+/**
+ * Compare the last 7 days of domain quality against the prior 7 days (days 8–14).
+ * If the recent average has dropped more than 15% vs the baseline, emits a gaba
+ * drift signal to cross_domain_signals and returns hasDrift=true.
+ *
+ * Intended to run periodically (autonomous-monitor cron), NOT on every request.
+ * Fire-and-forget safe for the signal insert — the return value is always reliable.
+ */
+export async function checkDomainDrift(
+  supabase: SupabaseClient,
+  orgId: string,
+  domain: string
+): Promise<{ hasDrift: boolean; currentAvg: number; baselineAvg: number; dropPct: number }> {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [recentResult, baselineResult] = await Promise.all([
+    supabase
+      .from("prediction_records")
+      .select("confidence")
+      .eq("organization_id", orgId)
+      .eq("domain", domain)
+      .gte("created_at", sevenDaysAgo),
+    supabase
+      .from("prediction_records")
+      .select("confidence")
+      .eq("organization_id", orgId)
+      .eq("domain", domain)
+      .gte("created_at", fourteenDaysAgo)
+      .lt("created_at", sevenDaysAgo),
+  ]);
+
+  const avg = (rows: { confidence: number }[]) =>
+    rows.length ? rows.reduce((s, r) => s + r.confidence, 0) / rows.length : 0;
+
+  const currentAvg = avg((recentResult.data ?? []) as { confidence: number }[]);
+  const baselineAvg = avg((baselineResult.data ?? []) as { confidence: number }[]);
+
+  if (baselineAvg === 0 || currentAvg === 0) {
+    return { hasDrift: false, currentAvg, baselineAvg, dropPct: 0 };
+  }
+
+  const dropPct = ((baselineAvg - currentAvg) / baselineAvg) * 100;
+  const hasDrift = dropPct > 15; // >15% quality drop = drift signal
+
+  if (hasDrift) {
+    try {
+      await supabase.from("cross_domain_signals").insert({
+        organization_id: orgId,
+        source_domain: domain,
+        target_domain: "monitor",
+        signal_type: "gaba",
+        signal_value: "domain_drift",
+        signal_strength: Math.min(dropPct / 100, 1),
+        signal_timestamp: new Date().toISOString(),
+        entity_type: "domain_health",
+        entity_id: domain,
+        payload: { currentAvg, baselineAvg, dropPct },
+      });
+    } catch {
+      // Non-fatal — drift signal emission must never throw
+    }
+  }
+
+  return { hasDrift, currentAvg, baselineAvg, dropPct };
 }
