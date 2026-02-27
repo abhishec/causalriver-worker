@@ -51,28 +51,23 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(url.searchParams.get("limit") || "10", 10), 50);
 
     // Use service client to query — LIKE filter for aas-* domain types
+    // Batch query across all user orgs in a single IN clause (no N+1)
     const service = await createServiceClient();
 
-    // Fetch from the first org that has AAS artifacts
-    let artifacts: Array<Record<string, unknown>> = [];
+    const { data, error } = await service
+      .from("se_aas_artifacts")
+      .select("id, domain_type, metadata, created_at")
+      .in("organization_id", orgIds)
+      .like("domain_type", "aas-%")
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-    for (const orgId of orgIds) {
-      const { data, error } = await service
-        .from("se_aas_artifacts")
-        .select("id, domain_type, metadata, created_at")
-        .eq("organization_id", orgId)
-        .like("domain_type", "aas-%")
-        .order("created_at", { ascending: false })
-        .limit(limit);
-
-      if (!error && data && data.length > 0) {
-        artifacts = data.map((a) => ({
+    const artifacts = (!error && data)
+      ? data.map((a) => ({
           ...a,
           label: DOMAIN_LABELS[a.domain_type as string] || a.domain_type,
-        }));
-        break;
-      }
-    }
+        }))
+      : [];
 
     return NextResponse.json({ artifacts });
   } catch (err: any) {

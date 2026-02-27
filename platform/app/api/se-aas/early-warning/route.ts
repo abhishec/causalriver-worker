@@ -94,19 +94,24 @@ export async function GET(request: NextRequest) {
         }
 
         // 2. Record critical/high bottleneck predictions for Brain verification
-        for (const risk of report.bottleneckRisks ?? []) {
-          if (risk.giniCoefficient > 0.6) {
-            await service.from("prediction_records").insert({
+        // Batch insert (single query) instead of N+1 — one row per critical risk
+        const criticalRisks = (report.bottleneckRisks ?? []).filter(
+          (risk) => risk.giniCoefficient > 0.6
+        );
+        if (criticalRisks.length > 0) {
+          const today = new Date().toISOString().split("T")[0];
+          await service.from("prediction_records").insert(
+            criticalRisks.map((risk) => ({
               organization_id: orgId,
               domain: risk.domain ?? "bottleneck",
               prediction_type: "bottleneck_risk",
               entity_type: "early_warning",
-              entity_id: `bottleneck_${risk.domain ?? "unknown"}_${new Date().toISOString().split("T")[0]}`,
+              entity_id: `bottleneck_${risk.domain ?? "unknown"}_${today}`,
               predicted_outcome: `Bottleneck risk in ${risk.domain}: Gini ${risk.giniCoefficient.toFixed(2)}, bus factor ${risk.busFactor}`,
               predicted_value: risk.giniCoefficient,
               confidence: report.confidence,
-            });
-          }
+            }))
+          );
         }
 
         // 3. Emit early warning signal → Brain observes patterns
