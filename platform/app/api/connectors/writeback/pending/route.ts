@@ -57,7 +57,8 @@ export async function GET() {
       )
       .eq("organization_id", workspaceId)
       .eq("status", "pending")
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(100); // Cap at 100 pending approvals — prevents large payload on enterprise orgs
 
     if (error) {
       logger.warn("[writeback/pending/GET] Query error:", error.message);

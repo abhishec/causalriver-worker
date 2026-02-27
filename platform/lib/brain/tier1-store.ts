@@ -97,7 +97,8 @@ export type KnowledgeSourceType =
   | "code_file"
   | "ticket"
   | "pr_description"
-  | "slack_message";
+  | "slack_message"
+  | "causal_insight";
 
 export interface RawChunkInput {
   source_type: KnowledgeSourceType;

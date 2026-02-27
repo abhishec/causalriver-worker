@@ -30,6 +30,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { ingestRawChunk } from "@/lib/brain/tier1-store";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -464,12 +465,19 @@ async function writeToAiMemory(
   const memoryType =
     finding.causalChain.length >= 3 ? "insight" : "pattern";
 
+  // Bug fix: use a unique domain per (leadingIndicator, outcomeMeasure) pair.
+  // Without this, all findings with the same memory_type share domain="causal-discovery"
+  // and the upsert on (organization_id, memory_type, domain) overwrites the last one.
+  const findingDomain = `causal-discovery.${finding.leadingIndicator}.${finding.outcomeMeasure}`
+    .replace(/[^a-z0-9._-]/gi, "_")
+    .slice(0, 100);
+
   const { error } = await supabase
     .from("ai_memory")
     .upsert(
       {
         organization_id: orgId,
-        domain: "causal-discovery",
+        domain: findingDomain,
         memory_type: memoryType,
         content: finding.description,
         importance: finding.confidence,
@@ -523,8 +531,10 @@ async function writeToKnowledgeChunks(
     return false; // Already exists — skip
   }
 
-  const { error } = await supabase.from("knowledge_chunks").insert({
-    organization_id: orgId,
+  // Bug fix: use ingestRawChunk() so embeddings are generated (fire-and-forget).
+  // Direct insert bypassed the embedding pipeline — chunks had no embeddings
+  // and were invisible to semantic search (Tier-2 RAG pipeline).
+  const chunkId = await ingestRawChunk(orgId, {
     source_type: "causal_insight",
     source_id: sourceId,
     verbatim_text: finding.description,
@@ -539,15 +549,13 @@ async function writeToKnowledgeChunks(
       confidence: finding.confidence,
       computed_at: new Date().toISOString(),
     },
-    avg_quality: finding.confidence,
     ingested_by: "causal-discovery",
   });
 
-  if (error) {
+  if (!chunkId) {
     logger.warn("[causal-discovery] knowledge_chunks insert failed:", {
       orgId: orgId.slice(0, 8),
       leading: finding.leadingIndicator,
-      error: error.message,
     });
     return false;
   }

@@ -449,7 +449,7 @@ export async function GET(request: NextRequest) {
           const report = await runMonitoringReactions(service, org.id as string);
           monitoringReportsAll.push({ orgId: org.id as string, report });
           if (report.totalActioned > 0) {
-            console.warn("[monitoring-reactions]", JSON.stringify(report));
+            logger.warn("[monitoring-reactions]", JSON.stringify(report));
           }
         } catch (err) {
           logger.warn(`[CognitiveCycle] Monitoring reactions failed for org ${org.id as string}:`, err);

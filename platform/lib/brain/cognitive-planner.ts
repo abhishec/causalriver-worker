@@ -317,7 +317,7 @@ async function _runCognitivePlannerInner(
   try {
     const { data: qualityRows } = await supabase
       .from("prediction_records")
-      .select("domain_type, confidence")
+      .select("domain, confidence")
       .eq("organization_id", orgId)
       .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false })
@@ -325,7 +325,7 @@ async function _runCognitivePlannerInner(
 
     const domainQuality: Record<string, { sum: number; count: number }> = {};
     for (const row of qualityRows ?? []) {
-      const domain = (row as { domain_type: string | null }).domain_type ?? "unknown";
+      const domain = (row as { domain: string | null }).domain ?? "unknown";
       if (!domainQuality[domain]) domainQuality[domain] = { sum: 0, count: 0 };
       domainQuality[domain].sum += (row as { confidence: number | null }).confidence ?? 0;
       domainQuality[domain].count++;
@@ -364,7 +364,7 @@ async function _runCognitivePlannerInner(
   try {
     const { data: recentFailures } = await supabase
       .from("prediction_records")
-      .select("domain_type, confidence")
+      .select("domain, confidence")
       .eq("organization_id", orgId)
       .lt("confidence", 0.3)
       .gte("created_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
@@ -373,7 +373,7 @@ async function _runCognitivePlannerInner(
 
     const failureCounts: Record<string, number> = {};
     for (const row of recentFailures ?? []) {
-      const domain = (row as { domain_type: string | null }).domain_type ?? "unknown";
+      const domain = (row as { domain: string | null }).domain ?? "unknown";
       failureCounts[domain] = (failureCounts[domain] ?? 0) + 1;
     }
 
@@ -390,14 +390,14 @@ async function _runCognitivePlannerInner(
   try {
     const { data: demandRows } = await supabase
       .from("prediction_records")
-      .select("domain_type")
+      .select("domain")
       .eq("organization_id", orgId)
       .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .limit(300);
 
     const demandCounts: Record<string, number> = {};
     for (const row of demandRows ?? []) {
-      const domain = (row as { domain_type: string | null }).domain_type ?? "unknown";
+      const domain = (row as { domain: string | null }).domain ?? "unknown";
       if (domain !== "unknown") demandCounts[domain] = (demandCounts[domain] ?? 0) + 1;
     }
 

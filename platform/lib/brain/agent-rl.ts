@@ -165,18 +165,25 @@ export async function recordAgentOutcome(
     // Emit RL signal to cross_domain_signals (L1 Ingestion layer)
     // Maps quality → neurotransmitter: dopamine (reward) or gaba (inhibitory)
     const signalType = wasSuccess ? "dopamine" : "gaba";
-    const signalValue = wasSuccess ? params.quality : -(1 - params.quality);
+    // signal_value MUST be the string neurotransmitter name ("dopamine"/"gaba") so
+    // tier3-consolidation .in("signal_value", ["dopamine"]) matches correctly.
+    // signal_strength MUST be set (quality float) so .gte("signal_strength", 0.72) works.
+    // target_domain MUST be set so tier3 groupBy(target_domain) clusters by SE-aaS domain.
+    const numericQuality = wasSuccess ? params.quality : -(1 - params.quality);
 
     const now = new Date().toISOString();
     await supabase.from("cross_domain_signals").insert({
       organization_id: params.organizationId,
       source_domain: `se-aas.${params.domain}`,
+      target_domain: params.domain,
       signal_type: signalType,
-      signal_value: signalValue,
+      signal_value: signalType,        // string "dopamine"/"gaba" — required by tier3 filter
+      signal_strength: params.quality,  // numeric quality — required by tier3 threshold
       entity_type: "agent",
       entity_id: params.agentId,
       signal_metadata: {
         quality: params.quality,
+        numericSignalValue: numericQuality,
         executionMs: params.executionMs,
         taskDescription: params.taskDescription.slice(0, 100),
         wasSuccess,

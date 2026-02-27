@@ -356,12 +356,12 @@ export function OverviewClient({
               </div>
             </div>
 
-            <a
+            <Link
               href="/early-warning"
               className="text-[11px] text-accent hover:text-accent/80 font-medium transition-colors shrink-0 self-center"
             >
               See early warning →
-            </a>
+            </Link>
           </div>
         </div>
       )}

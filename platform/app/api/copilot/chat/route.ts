@@ -4111,7 +4111,7 @@ No connectors are configured yet. When the user asks for data from any source (S
     // Legacy brain-IQ gate (IQ < 10 → force Haiku) applied as secondary safety gate
     const { model: _legacyIqModel } = routeCallType('copilot-complex', brainIqForRouting);
     const v4SmartModel = brainIqForRouting < 10 ? _legacyIqModel : _daaResult.model;
-    console.warn(`[DAAO] model=${v4SmartModel} tier=${_daaResult.tier} iq=${brainIqForRouting} hasDomain=${hasDomainResults} followUp=${_isFollowUp} queryLen=${message.trim().length} rationale="${_daaResult.rationale}"`);
+    logger.warn(`[DAAO] model=${v4SmartModel} tier=${_daaResult.tier} iq=${brainIqForRouting} hasDomain=${hasDomainResults} followUp=${_isFollowUp} queryLen=${message.trim().length} rationale="${_daaResult.rationale}"`);
     // Legacy memStack selectModel call kept for decision record rationale field
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModelBase = selectSmartModel(message, {

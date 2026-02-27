@@ -904,7 +904,7 @@ export default function CopilotPageInner() {
                 <span className="font-semibold">Brain context quality is below your threshold</span>
                 {" — "}answers may be less accurate. Connect more data sources or wait for more signals to accumulate.
                 {" "}
-                <a href="/settings?tab=brain" className="underline hover:no-underline">Adjust threshold</a>
+                <Link href="/settings?tab=brain" className="underline hover:no-underline">Adjust threshold</Link>
               </span>
               <button
                 onClick={() => setBrainQualityWarningDismissed(true)}

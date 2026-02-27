@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, action: "rejected", approvalId });
     }
 
-    // action === "approve" — execute the write-back then mark approved
+    // action === "approve" — execute the write-back then update status based on result
     const execResult = await executeApprovedWriteback(supabase, {
       id: approval.id as string,
       organization_id: approval.organization_id as string,
@@ -134,11 +134,14 @@ export async function POST(request: NextRequest) {
       action_payload: approval.action_payload as Record<string, unknown>,
     });
 
-    // Update approval status regardless of execution result
+    // Update approval status to reflect actual execution outcome.
+    // If execution failed, mark as "failed" so admins know the action did not go through.
+    // If execution succeeded, mark as "approved".
+    const finalStatus = execResult.success ? "approved" : "failed";
     const { error: updateError } = await supabase
       .from("writeback_approvals")
       .update({
-        status: "approved",
+        status: finalStatus,
         reviewed_by: user.id,
         review_note: note ?? null,
         reviewed_at: now,
@@ -147,8 +150,8 @@ export async function POST(request: NextRequest) {
       .eq("organization_id", workspaceId);
 
     if (updateError) {
-      logger.error("[writeback/approve] Failed to mark approval as approved:", updateError.message);
-      // Don't return error here — execution may have succeeded
+      logger.error("[writeback/approve] Failed to update approval status:", updateError.message);
+      // Don't return error here — execution result is already determined
     }
 
     if (!execResult.success) {
@@ -160,11 +163,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          action: "approved",
+          action: "failed",
           approvalId,
           executionError: execResult.error,
         },
-        { status: 207 } // 207 Multi-Status: approved but execution failed
+        { status: 207 } // 207 Multi-Status: approval reviewed but execution failed
       );
     }
 

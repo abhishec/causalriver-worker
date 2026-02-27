@@ -136,6 +136,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: any) {
     logger.error("[integrations/jira/POST]", err);
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to connect Jira. Please check your credentials and try again." }, { status: 500 });
   }
 }

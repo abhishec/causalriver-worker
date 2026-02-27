@@ -120,6 +120,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, connector_id: connectorId });
   } catch (err: any) {
     logger.error("[integrations/slack/POST]", err);
-    return NextResponse.json({ error: err.message || "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to connect Slack. Please check your webhook URL and try again." }, { status: 500 });
   }
 }

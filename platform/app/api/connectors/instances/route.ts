@@ -356,7 +356,10 @@ export async function POST(request: NextRequest) {
     // DB/infra errors (Supabase PostgrestError has a .code property) return 500.
     const isValidationError = !err.code && err.message && typeof err.message === "string";
     const status = isValidationError ? 400 : 500;
-    return NextResponse.json({ error: err.message || "Internal error" }, { status });
+    // Never expose raw infra errors (stack traces, DB messages) to clients on 500.
+    // Only surface the message on user-facing 400 validation errors.
+    const clientMessage = isValidationError ? (err.message || "Invalid connector configuration") : "Internal error";
+    return NextResponse.json({ error: clientMessage }, { status });
   }
 }
 

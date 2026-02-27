@@ -27,6 +27,7 @@ import { validateApiKey } from "@/lib/api-key-auth";
 import { checkRateLimit, hashKey, setRateLimitHeaders } from "@/lib/rate-limiter";
 import { createServiceClient } from "@/lib/supabase/server";
 import { checkWorkspaceResources, incrementResource, decrementResource } from "@/lib/workspace-resource-guard";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes for long-running tools
@@ -158,7 +159,7 @@ export async function GET(request: NextRequest) {
   // Warn operators: SSE session state is in-memory. On Amplify multi-instance Lambda,
   // a subsequent POST for this sessionId may land on a different instance and lose the
   // SSE controller reference. Clients should use stateless POST mode for reliability.
-  console.warn(
+  logger.warn(
     `[mcp/sse] SSE session created (${sessionId}). ` +
     `In-memory sessions are NOT safe on multi-instance Lambda — use stateless POST mode for production.`
   );

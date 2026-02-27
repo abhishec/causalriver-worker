@@ -1,14 +1,14 @@
 -- Write-back Approvals: enterprise gate before agents execute connector actions
 -- Orgs with require_writeback_approval=true in metadata get a human approval step
 
-CREATE TABLE writeback_approvals (
+CREATE TABLE IF NOT EXISTS writeback_approvals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   job_id UUID REFERENCES agent_queue(id),
   connector_type TEXT NOT NULL, -- 'github', 'jira', 'slack', 'linear'
   action_type TEXT NOT NULL,    -- 'create_pr', 'create_ticket', 'send_message', 'create_branch'
   action_payload JSONB NOT NULL, -- the full write-back payload (PR title, body, target repo, etc.)
-  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected', 'failed'
   requested_by TEXT,            -- agent type that requested it
   reviewed_by UUID REFERENCES auth.users(id),
   review_note TEXT,
@@ -19,12 +19,14 @@ CREATE TABLE writeback_approvals (
 ALTER TABLE writeback_approvals ENABLE ROW LEVEL SECURITY;
 
 -- Members can read their org's approvals
+DROP POLICY IF EXISTS "org_read" ON writeback_approvals;
 CREATE POLICY "org_read" ON writeback_approvals FOR SELECT
   USING (organization_id IN (
     SELECT organization_id FROM org_members WHERE user_id = auth.uid()
   ));
 
 -- Members can update status (approve/reject) — admin/owner enforcement done in API layer
+DROP POLICY IF EXISTS "org_update" ON writeback_approvals;
 CREATE POLICY "org_update" ON writeback_approvals FOR UPDATE
   USING (organization_id IN (
     SELECT organization_id FROM org_members WHERE user_id = auth.uid()
@@ -36,5 +38,5 @@ CREATE POLICY "org_update" ON writeback_approvals FOR UPDATE
 GRANT SELECT, UPDATE ON writeback_approvals TO authenticated;
 
 -- Index for fast pending-approvals query per org
-CREATE INDEX idx_writeback_approvals_org_status
+CREATE INDEX IF NOT EXISTS idx_writeback_approvals_org_status
   ON writeback_approvals (organization_id, status, created_at DESC);
