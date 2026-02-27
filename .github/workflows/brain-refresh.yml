@@ -17,6 +17,8 @@ name: Brain Refresh Cycles
 #   - /api/cron/evolution             — brain evolution cycle (every 6h)
 #   - /api/cron/autonomous-monitor    — 4 threshold checks, Slack alerts (every 10m)
 #   - /api/cron/rlvr                  — ground-truth outcome verification (daily 3 AM)
+#   - /api/brain/ingest-cc-learnings  — CC case-log + retro → Core Brain + federated
+#                                        Tookitaki workspaces (daily 4 AM)
 #
 # Schedule design:
 #   All four schedules share a single job. The 10-min and 30-min cycles run on
@@ -40,6 +42,7 @@ on:
     - cron: '0 */4 * * *'    # Every 4 hours — learning cycle
     - cron: '0 */6 * * *'    # Every 6 hours — evolution cycle
     - cron: '0 3 * * *'      # Daily 3 AM UTC — RLVR ground-truth verification
+    - cron: '0 4 * * *'      # Daily 4 AM UTC — CC learnings ingestion (case-log + retro → brain)
   workflow_dispatch: {}      # Manual trigger — runs all endpoints
 
 # Minimal permissions: only needs to call HTTPS endpoints, nothing in the repo.
@@ -185,3 +188,65 @@ jobs:
             --max-time 300 \
             "${BASE_URL}/api/cron/rlvr" \
             || echo "rlvr verification failed (non-fatal)"
+
+      # ── CC Learnings Ingestion (daily 4 AM UTC) ───────────────────────────────
+      # Parses .claude/case-log.md and .claude/cc-retro.md and writes each section
+      # as an ai_memory row (domain=cc-learnings / cc-retro) and a knowledge_chunks
+      # row (Tier 1 RAG) into the Core Brain. High-priority entries ([USER CORRECTION],
+      # CRITICAL, ⚠️) are federated to both Tookitaki AI worker space org IDs.
+      # Idempotent: source_id hash deduplication prevents duplicate rows on re-runs.
+      - name: CC Learnings Ingestion (daily 4 AM UTC)
+        if: ${{ github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/brain/ingest-cc-learnings ..."
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 120 \
+            "${BASE_URL}/api/brain/ingest-cc-learnings" \
+            || echo "ingest-cc-learnings failed (non-fatal — will retry at next daily trigger)"
+
+      # ── Process Writeback Queue (every 10-min trigger) ────────────────────────
+      # Drains writeback_queue: sends Slack messages, creates Jira tickets, opens
+      # GitHub issues after SE-aaS domain executions. Keeps the Brain→Action→World
+      # loop closed. Max 3 attempts per item with exponential backoff.
+      - name: Process Writeback Queue
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/process-writeback ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 120 \
+            "${BASE_URL}/api/cron/process-writeback" \
+            || echo "process-writeback failed (non-fatal)"
+
+      # ── Memory Cleanup (daily 3 AM UTC) ──────────────────────────────────────
+      # Removes stale rows from cross_domain_signals (>90d), prediction_records
+      # (>90d), brain_case_log (>180d), agent_queue completed rows (>30d).
+      # Prevents unbounded table growth without losing meaningful learning history.
+      - name: Memory Cleanup
+        if: ${{ github.event.schedule == '0 3 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/cleanup-memory ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60 \
+            "${BASE_URL}/api/cron/cleanup-memory" \
+            || echo "cleanup-memory failed (non-fatal)"
+
+      # ── Brain Consolidation (only on 4-hour trigger or manual dispatch) ────────
+      # Tier-3 pattern consolidation: clusters high-quality cross_domain_signals
+      # (strength >= 0.72) and prediction_records (quality >= 0.75) into
+      # consolidated_patterns — the long-term compressed memory of the Brain.
+      - name: Brain Consolidation (4-hour boundary only)
+        if: ${{ github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/consolidate ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/consolidate" \
+            || echo "consolidate failed (non-fatal)"
