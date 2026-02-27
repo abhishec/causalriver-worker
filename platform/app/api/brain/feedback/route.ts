@@ -174,6 +174,57 @@ export async function POST(request: NextRequest) {
       } catch { /* non-critical — feedback already saved above */ }
     })();
 
+    // ── Fuse feedback into existing domain-executor prediction_records ──────
+    // The domain executor inserts prediction_records rows with heuristic quality
+    // scores (quality >= 0.7 = was_correct). This block finds the most recent
+    // unverified record for the same org + domain within a 5-minute window and
+    // overwrites was_correct + actual_outcome with the actual user signal.
+    // This is the authoritative close of the RL loop: user satisfaction overrides
+    // the automated heuristic.
+    void (async () => {
+      try {
+        const effectiveDomain = domainId ?? body.domain ?? body.domainType ?? body.serviceDomain ?? "";
+        if (!effectiveDomain) return; // cannot match without a domain
+
+        const isHelpful = rating === "helpful";
+        const isNegative = rating === "not_helpful" || rating === "incorrect";
+
+        const fiveMinutes = 5 * 60 * 1000;
+        const now = Date.now();
+        const windowStart = new Date(now - fiveMinutes).toISOString();
+        const windowEnd = new Date(now + fiveMinutes).toISOString();
+
+        // Find the most recent unverified prediction_record for this org + domain
+        // within a ±5-minute window (covers the domain execution that produced the
+        // response the user just rated).
+        const { data: predictions } = await service
+          .from("prediction_records")
+          .select("id")
+          .eq("organization_id", workspaceId)
+          .eq("domain", effectiveDomain)
+          .gte("created_at", windowStart)
+          .lte("created_at", windowEnd)
+          .is("verified_at", null) // only update records not yet user-verified
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (predictions && predictions.length > 0) {
+          await service
+            .from("prediction_records")
+            .update({
+              was_correct: isHelpful,
+              actual_outcome: isNegative
+                ? (correction ? `negative: ${correction.slice(0, 200)}` : "negative")
+                : "positive",
+              verified_at: new Date().toISOString(),
+            })
+            .eq("id", predictions[0].id);
+        }
+      } catch (err) {
+        logger.warn("[Feedback] Failed to fuse feedback into prediction_records", { err });
+      }
+    })();
+
     if (insertError) {
       // If brain_feedback_queue doesn't exist yet, fall back to ai_memory
       if (insertError.code === "42P01") {
