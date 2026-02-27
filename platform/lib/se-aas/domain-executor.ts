@@ -234,6 +234,116 @@ const overnightOrchestratorPassthroughDomain = {
   },
 };
 
+// ── Inline domain: early-warning ──────────────────────────────────────────
+// Queries engineer_health_snapshots for the current week to produce a
+// flight-risk / overallocation / velocity summary for this org.
+// Registered inline because the delivery handler (buildDeliveryIntelligenceResult)
+// enriches the result with the full engagement-health panel after execution.
+const earlyWarningDomain = {
+  async execute(ctx: any): Promise<Record<string, unknown>> {
+    const supabase = ctx.supabase as import("@supabase/supabase-js").SupabaseClient;
+    const orgId = ctx.organizationId as string;
+
+    if (!supabase || !orgId) {
+      return { domain: "early-warning", engineers: [], summary: null, error: "No org context available" };
+    }
+
+    // ISO Monday for current week — matches the week_start column in engineer_health_snapshots
+    const thisWeek = new Date();
+    thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay() + 1);
+    const weekStart = thisWeek.toISOString().split("T")[0];
+
+    const { data: snapshots, error } = await supabase
+      .from("engineer_health_snapshots")
+      .select("github_login, review_burden, velocity_index, flight_risk_score, overallocation_flag, week_start")
+      .eq("organization_id", orgId)
+      .gte("week_start", weekStart)
+      .order("flight_risk_score", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      logger.warn("[early-warning domain] engineer_health_snapshots query failed:", error.message);
+    }
+
+    const engineers = snapshots ?? [];
+    const atRisk = engineers.filter((e: Record<string, unknown>) => (e.flight_risk_score as number ?? 0) > 50);
+    const overallocated = engineers.filter((e: Record<string, unknown>) => e.overallocation_flag);
+    const avgVelocity = engineers.length > 0
+      ? Math.round(engineers.reduce((sum: number, e: Record<string, unknown>) => sum + ((e.velocity_index as number) ?? 0), 0) / engineers.length)
+      : 0;
+
+    return {
+      domain: "early-warning",
+      week_start: weekStart,
+      engineers,
+      summary: {
+        total_engineers: engineers.length,
+        at_risk_count: atRisk.length,
+        overallocated_count: overallocated.length,
+        avg_velocity_index: avgVelocity,
+        high_flight_risk: atRisk.slice(0, 5).map((e: Record<string, unknown>) => ({
+          github_login: e.github_login,
+          flight_risk_score: e.flight_risk_score,
+          overallocation_flag: e.overallocation_flag,
+        })),
+      },
+      narrative: engineers.length > 0
+        ? `${atRisk.length} of ${engineers.length} engineers are at flight risk this week. ${overallocated.length} are overallocated. Average velocity index: ${avgVelocity}.`
+        : "No engineer health data available for this week. Connect GitHub to start tracking sprint velocity and review burden.",
+    };
+  },
+};
+
+// ── Inline domain: scope-creep ─────────────────────────────────────────────
+// Queries scope_creep_alerts for this org to produce a scope drift summary.
+// Registered inline because the delivery handler (buildDeliveryIntelligenceResult)
+// enriches the result with the full engagement-health panel after execution.
+const scopeCreepDomain = {
+  async execute(ctx: any): Promise<Record<string, unknown>> {
+    const supabase = ctx.supabase as import("@supabase/supabase-js").SupabaseClient;
+    const orgId = ctx.organizationId as string;
+
+    if (!supabase || !orgId) {
+      return { domain: "scope-creep", alerts: [], summary: null, error: "No org context available" };
+    }
+
+    const { data: alerts, error } = await supabase
+      .from("scope_creep_alerts")
+      .select("id, engagement_id, severity, drift_percent, description, created_at, acknowledged, engagements(engagement_name, client_name)")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) {
+      logger.warn("[scope-creep domain] scope_creep_alerts query failed:", error.message);
+    }
+
+    const allAlerts = alerts ?? [];
+    const unacknowledged = allAlerts.filter((a: Record<string, unknown>) => !a.acknowledged);
+    const critical = unacknowledged.filter((a: Record<string, unknown>) => a.severity === "critical" || a.severity === "high");
+    const avgDrift = unacknowledged.length > 0
+      ? Math.round(unacknowledged.reduce((sum: number, a: Record<string, unknown>) => sum + ((a.drift_percent as number) ?? 0), 0) / unacknowledged.length)
+      : 0;
+
+    return {
+      domain: "scope-creep",
+      alerts: allAlerts,
+      unacknowledged_alerts: unacknowledged,
+      summary: {
+        total_alerts: allAlerts.length,
+        unacknowledged_count: unacknowledged.length,
+        critical_count: critical.length,
+        avg_drift_percent: avgDrift,
+      },
+      narrative: unacknowledged.length > 0
+        ? `${unacknowledged.length} active scope creep alerts (${critical.length} critical/high). Average drift: ${avgDrift}%. Immediate attention required on ${critical.length} engagement(s).`
+        : allAlerts.length > 0
+          ? "All scope creep alerts have been acknowledged. No active drift detected."
+          : "No scope creep alerts found. Connect Jira to start tracking story point drift and sprint boundary changes.",
+    };
+  },
+};
+
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
 // the CORE table on every domain call — we only push once per TTL window.
@@ -274,11 +384,13 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   // "delivery-intelligence" is handled by the dedicated API endpoint,
   // but can also be invoked via copilot as a pod-match + health score composite
   "delivery-intelligence": { domain: podMatchDomain, sync: true },
-  // P0 domains: early-warning + scope-creep also use podMatchDomain for the
-  // delivery context mesh. Full data comes from /api/se-aas/engagement-health
-  // which is fetched in the copilot route's DELIVERY_DOMAINS handler.
-  "early-warning": { domain: podMatchDomain, sync: true },
-  "scope-creep": { domain: podMatchDomain, sync: true },
+  // P0 Delivery Intelligence domains — each uses its own correct handler:
+  // early-warning queries engineer_health_snapshots (flight risk, velocity, overallocation)
+  // scope-creep queries scope_creep_alerts (drift %, severity, unacknowledged count)
+  // The delivery handler (buildDeliveryIntelligenceResult) enriches both with the
+  // full engagement-health panel after domain execution.
+  "early-warning": { domain: earlyWarningDomain, sync: true },
+  "scope-creep": { domain: scopeCreepDomain, sync: true },
   // P1-15 Architecture Extractor
   "architecture-extractor": { domain: architectureExtractorDomain, sync: false },
   // Spec Decomposition Engine — inline domain, no memory-stack module needed
