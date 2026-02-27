@@ -20,9 +20,9 @@ export default function AIWorkerError({
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold mb-1">Something went wrong</h2>
+      <h2 className="text-lg font-semibold mb-1">Failed to load AI Worker</h2>
       <p className="text-xs text-muted mb-1 max-w-md text-center">
-        An error occurred while loading this AI Worker. This has been logged for investigation.
+        This AI Worker couldn't load — check your connection and try again.
       </p>
       {error.digest && (
         <p className="text-[10px] text-muted font-mono mb-4">

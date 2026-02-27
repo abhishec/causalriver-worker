@@ -20,9 +20,9 @@ export default function AdminError({
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold mb-1">Admin Error</h2>
+      <h2 className="text-lg font-semibold mb-1">Failed to load admin panel</h2>
       <p className="text-xs text-muted mb-1 max-w-md text-center">
-        An error occurred in the admin dashboard. This has been logged for investigation.
+        The admin dashboard couldn't load — check your connection and try again.
       </p>
       {error.digest && (
         <p className="text-[10px] text-muted font-mono mb-4">
@@ -36,7 +36,7 @@ export default function AdminError({
       )}
       <button
         onClick={reset}
-        className="px-5 py-2 rounded-lg bg-amber-500/10 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors"
+        className="px-5 py-2 rounded-lg bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20 transition-colors"
       >
         Try again
       </button>

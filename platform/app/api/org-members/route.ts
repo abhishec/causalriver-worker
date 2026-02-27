@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { logAuditEvent, AuditAction } from "@/lib/audit";
 
 /**
  * GET /api/org-members?orgId=xxx
@@ -151,6 +152,17 @@ export async function PATCH(request: Request) {
     if (error)
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
 
+    // Audit log — role change is a security-relevant permission event
+    void logAuditEvent({
+      organizationId: orgId,
+      userId: user.id,
+      action: AuditAction.ROLE_ASSIGN,
+      resourceType: "org_member",
+      resourceId: memberId,
+      newValue: { role },
+      metadata: { assignedBy: user.id, newRole: role },
+    });
+
     return NextResponse.json({ success: true });
   } catch (err) {
     logger.error("[org-members PATCH] Unhandled error:", err);
@@ -211,6 +223,16 @@ export async function DELETE(request: Request) {
 
     if (error)
       return NextResponse.json({ error: "Internal error" }, { status: 500 });
+
+    // Audit log — member removal is a security-relevant event
+    void logAuditEvent({
+      organizationId: orgId,
+      userId: user.id,
+      action: AuditAction.MEMBER_REMOVE,
+      resourceType: "org_member",
+      resourceId: memberId,
+      metadata: { removedBy: user.id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

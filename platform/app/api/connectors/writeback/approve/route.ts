@@ -18,6 +18,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { requireOrgRole } from "@/lib/auth/check-org-role";
 import { executeApprovedWriteback } from "@/lib/connectors/writeback-dispatcher";
+import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
   let supabase: Awaited<ReturnType<typeof createClient>>;
@@ -122,6 +123,21 @@ export async function POST(request: NextRequest) {
         userId: user.id,
       });
 
+      // Audit log — writeback rejection is a security-relevant action
+      void logAuditEvent({
+        organizationId: workspaceId,
+        userId: user.id,
+        action: "writeback.rejected",
+        resourceType: "writeback_approval",
+        resourceId: approvalId,
+        metadata: {
+          connectorType: approval.connector_type,
+          actionType: approval.action_type,
+          note: note ?? null,
+        },
+        ...extractRequestContext(request),
+      });
+
       return NextResponse.json({ success: true, action: "rejected", approvalId });
     }
 
@@ -176,6 +192,23 @@ export async function POST(request: NextRequest) {
       connectorType: approval.connector_type,
       actionType: approval.action_type,
       workspaceId,
+    });
+
+    // Audit log — writeback approval + execution is a high-impact security event
+    void logAuditEvent({
+      organizationId: workspaceId,
+      userId: user.id,
+      action: AuditAction.DATA_UPDATE,
+      resourceType: "writeback_approval",
+      resourceId: approvalId,
+      metadata: {
+        connectorType: approval.connector_type,
+        actionType: approval.action_type,
+        externalRef: execResult.externalRef ?? null,
+        note: note ?? null,
+        auditAction: "writeback.approved_and_executed",
+      },
+      ...extractRequestContext(request),
     });
 
     return NextResponse.json({

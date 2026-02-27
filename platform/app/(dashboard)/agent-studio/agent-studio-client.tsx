@@ -167,6 +167,7 @@ export function AgentStudioClient({
             placeholder="Search agents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search agents"
             className="w-full pl-8 pr-3 py-1.5 text-xs bg-background border border-border-subtle rounded-lg focus:outline-none focus:ring-1 focus:ring-accent/40 text-foreground placeholder:text-muted"
           />
         </div>

@@ -66,19 +66,19 @@ function StatCard({ label, value, color, active, onClick }: {
 
 function getStatusBadge(status: TaskStatus) {
   switch (status) {
-    case "running": return { label: "Running", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" };
-    case "pending": return { label: "Pending", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" };
+    case "running": return { label: "Running", color: "bg-accent/10 text-accent border-accent/20" };
+    case "pending": return { label: "Pending", color: "bg-warning/10 text-warning border-warning/20" };
     case "awaiting_approval": return { label: "Approval", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" };
-    case "completed": return { label: "Completed", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" };
-    case "failed": return { label: "Failed", color: "bg-red-500/10 text-red-400 border-red-500/20" };
-    case "rejected": return { label: "Rejected", color: "bg-red-500/10 text-red-400 border-red-500/20" };
+    case "completed": return { label: "Completed", color: "bg-success/10 text-success border-success/20" };
+    case "failed": return { label: "Failed", color: "bg-danger/10 text-danger border-danger/20" };
+    case "rejected": return { label: "Rejected", color: "bg-danger/10 text-danger border-danger/20" };
     default: return { label: status, color: "bg-gray-500/10 text-gray-400 border-gray-500/20" };
   }
 }
 
 function getPriorityBadge(priority: string | null | undefined) {
   switch (priority) {
-    case "critical": return { label: "Critical", color: "text-red-400" };
+    case "critical": return { label: "Critical", color: "text-danger" };
     case "high": return { label: "High", color: "text-orange-400" };
     case "medium": return { label: "Medium", color: "text-amber-400" };
     case "low": return { label: "Low", color: "text-gray-400" };
@@ -215,7 +215,7 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
         <StatCard
           label="Running"
           value={liveStats.running}
-          color="text-blue-400"
+          color="text-accent"
           active={statusFilter === "running"}
           onClick={() => setStatusFilter(statusFilter === "running" ? "all" : "running")}
         />
@@ -243,7 +243,7 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
         <StatCard
           label="Failed"
           value={liveStats.failed}
-          color="text-red-400"
+          color="text-danger"
           active={statusFilter === "failed"}
           onClick={() => setStatusFilter(statusFilter === "failed" ? "all" : "failed")}
         />
@@ -354,7 +354,7 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
 
                       {/* Error */}
                       {task.error_message && (
-                        <div className="text-xs text-red-400 bg-red-500/10 px-3 py-2 rounded-lg">
+                        <div className="text-xs text-danger bg-danger/10 px-3 py-2 rounded-lg" role="alert">
                           {task.error_message}
                         </div>
                       )}

@@ -100,7 +100,7 @@ export default function AlertSettingsPage() {
   if (!thresholds || !notifPrefs) {
     return (
       <div className="p-6 max-w-3xl mx-auto">
-        <p className="text-red-500">{error || "Failed to load alert configuration"}</p>
+        <p className="text-danger" role="alert">{error || "Failed to load alert configuration — check your connection and try again"}</p>
       </div>
     );
   }
@@ -271,8 +271,8 @@ export default function AlertSettingsPage() {
           Reset to defaults
         </button>
         <div className="flex items-center gap-3">
-          {saved && <span className="text-sm text-green-500">Saved!</span>}
-          {error && <span className="text-sm text-red-500">{error}</span>}
+          {saved && <span className="text-sm text-success" role="status">Saved!</span>}
+          {error && <span className="text-sm text-danger" role="alert">{error}</span>}
           <button
             onClick={handleSave}
             disabled={saving}

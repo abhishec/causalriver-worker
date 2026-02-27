@@ -70,15 +70,15 @@ interface VelocityDrop {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const LABEL_COLORS = {
-  green: "bg-green-100 text-green-800 border-green-200",
-  amber: "bg-amber-100 text-amber-800 border-amber-200",
-  red:   "bg-red-100   text-red-800   border-red-200",
+  green: "bg-success/10 text-success border-success/20",
+  amber: "bg-warning/10 text-warning border-warning/20",
+  red:   "bg-danger/10  text-danger  border-danger/20",
 };
 
 const SCORE_BAR_COLORS = {
-  green: "bg-green-500",
-  amber: "bg-amber-400",
-  red:   "bg-red-500",
+  green: "bg-success",
+  amber: "bg-warning",
+  red:   "bg-danger",
 };
 
 function daysUntil(dateStr?: string): number | null {
@@ -206,8 +206,8 @@ export default function ReleaseDashboardClient({
   // ── No releases state ──────────────────────────────────────────────────────
   if (releases.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
-        <p className="text-lg font-medium mb-2">No active releases found</p>
+      <div className="p-8 text-center text-muted-foreground">
+        <p className="text-lg font-medium mb-2 text-foreground">No active releases found</p>
         <p className="text-sm">
           Connect GitHub and Jira, then register your releases via the Connectors page.
         </p>
@@ -220,8 +220,8 @@ export default function ReleaseDashboardClient({
   return (
     <div className="flex h-full">
       {/* ── Left sidebar: release list ──────────────────────────────────── */}
-      <aside className="w-64 border-r border-gray-200 bg-gray-50 p-4 flex-shrink-0">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+      <aside className="w-64 border-r border-border bg-surface p-4 flex-shrink-0">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
           Active Releases
         </h2>
         <ul className="space-y-1">
@@ -231,12 +231,12 @@ export default function ReleaseDashboardClient({
                 onClick={() => setSelected(r)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                   selected?.id === r.id
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-200"
+                    ? "bg-accent text-white"
+                    : "text-foreground hover:bg-surface-hover"
                 }`}
               >
                 <div className="font-medium">{r.release_name}</div>
-                <div className={`text-xs mt-0.5 ${selected?.id === r.id ? "text-blue-200" : "text-gray-400"}`}>
+                <div className={`text-xs mt-0.5 ${selected?.id === r.id ? "text-white/70" : "text-muted-foreground"}`}>
                   {r.branch_name}
                   {r.drop_number ? ` · Drop ${r.drop_number}` : ""}
                 </div>
@@ -253,21 +253,21 @@ export default function ReleaseDashboardClient({
             {/* Header */}
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-foreground">
                   {selected.release_name}
                   {selected.drop_number && (
-                    <span className="ml-2 text-base font-medium text-gray-500">
+                    <span className="ml-2 text-base font-medium text-muted-foreground">
                       Drop {selected.drop_number}
                     </span>
                   )}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {selected.branch_name}
                   {selected.base_version && ` · built on ${selected.base_version}`}
                   {selected.team_label && ` · ${selected.team_label}`}
                 </p>
                 {selected.team_members?.length > 0 && (
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Team: {selected.team_members.join(", ")}
                   </p>
                 )}
@@ -275,9 +275,9 @@ export default function ReleaseDashboardClient({
               <div className="flex items-center gap-3">
                 {days !== null && (
                   <div className={`text-sm font-medium px-3 py-1 rounded-full border ${
-                    days < 0 ? "bg-red-50 text-red-600 border-red-200" :
-                    days <= 7 ? "bg-amber-50 text-amber-600 border-amber-200" :
-                    "bg-gray-100 text-gray-600 border-gray-200"
+                    days < 0 ? "bg-danger/10 text-danger border-danger/20" :
+                    days <= 7 ? "bg-warning/10 text-warning border-warning/20" :
+                    "bg-surface-hover text-muted-foreground border-border"
                   }`}>
                     {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d to target`}
                   </div>
@@ -285,7 +285,7 @@ export default function ReleaseDashboardClient({
                 <button
                   onClick={handleSync}
                   disabled={syncing}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors"
                 >
                   {syncing ? "Syncing…" : "↺ Sync Now"}
                 </button>
@@ -293,13 +293,13 @@ export default function ReleaseDashboardClient({
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-lg text-sm text-danger" role="alert">
                 {error}
               </div>
             )}
 
             {/* Tabs */}
-            <div className="border-b border-gray-200 mb-6">
+            <div className="border-b border-border mb-6">
               <nav className="-mb-px flex gap-6">
                 {(["overview", "tickets", "diff", "velocity"] as const).map(tab => (
                   <button
@@ -307,8 +307,8 @@ export default function ReleaseDashboardClient({
                     onClick={() => setActiveTab(tab)}
                     className={`pb-3 text-sm font-medium capitalize border-b-2 transition-colors ${
                       activeTab === tab
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        ? "border-accent text-accent"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {tab === "overview" ? "Readiness" :
@@ -321,7 +321,7 @@ export default function ReleaseDashboardClient({
             </div>
 
             {loading && (
-              <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+              <div className="flex items-center justify-center py-16 text-muted-foreground text-sm" role="status" aria-label="Loading release data">
                 Loading…
               </div>
             )}
@@ -381,7 +381,7 @@ export default function ReleaseDashboardClient({
                 {/* Active team */}
                 {readiness.metrics.activeMembersLastWeek.length > 0 && (
                   <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                       Active last 7 days
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -404,7 +404,7 @@ export default function ReleaseDashboardClient({
             {/* ── Tickets Tab ──────────────────────────────────────── */}
             {!loading && activeTab === "tickets" && tickets !== null && (
               <div>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {tickets.length} Jira ticket{tickets.length !== 1 ? "s" : ""} in{" "}
                   <span className="font-medium">{selected.jira_fix_version ?? selected.release_name}</span>
                 </p>
@@ -413,28 +413,28 @@ export default function ReleaseDashboardClient({
                     <thead className="bg-gray-50">
                       <tr>
                         {["Key", "Summary", "Status", "Type", "Assignee"].map(h => (
-                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             {h}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-100">
+                    <tbody className="divide-y divide-border-subtle">
                       {tickets.map(t => (
-                        <tr key={t.key} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-blue-600 whitespace-nowrap">{t.key}</td>
-                          <td className="px-4 py-3 text-gray-700 max-w-xs truncate">{t.summary}</td>
+                        <tr key={t.key} className="hover:bg-surface-hover">
+                          <td className="px-4 py-3 font-medium text-accent whitespace-nowrap">{t.key}</td>
+                          <td className="px-4 py-3 text-foreground max-w-xs truncate">{t.summary}</td>
                           <td className="px-4 py-3">
                             <StatusBadge status={t.status} />
                           </td>
-                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{t.issue_type}</td>
-                          <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{t.assignee ?? "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{t.issue_type}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{t.assignee ?? "—"}</td>
                         </tr>
                       ))}
                       {tickets.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
-                            No tickets found. Run "Sync Now" to pull Jira data.
+                          <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                            No tickets found. Run &quot;Sync Now&quot; to pull Jira data.
                           </td>
                         </tr>
                       )}
@@ -447,35 +447,35 @@ export default function ReleaseDashboardClient({
             {/* ── Commits Diff Tab ─────────────────────────────────── */}
             {!loading && activeTab === "diff" && diff !== null && (
               <div>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {diff.length} commit{diff.length !== 1 ? "s" : ""} since{" "}
                   <span className="font-medium">{selected.base_version ?? "base"}</span>
                 </p>
                 <div className="space-y-2">
                   {diff.map(c => (
-                    <div key={c.sha} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-start gap-3">
-                      <code className="text-xs text-gray-400 font-mono mt-0.5 flex-shrink-0">
+                    <div key={c.sha} className="p-3 bg-surface rounded-lg border border-border-subtle flex items-start gap-3">
+                      <code className="text-xs text-muted font-mono mt-0.5 flex-shrink-0">
                         {c.sha.slice(0, 7)}
                       </code>
                       <div className="min-w-0">
-                        <p className="text-sm text-gray-800 font-medium truncate">
+                        <p className="text-sm text-foreground font-medium truncate">
                           {c.message.split("\n")[0]}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {c.author} · {new Date(c.date).toLocaleDateString()}
                         </p>
                       </div>
                       {c.url && (
                         <a href={c.url} target="_blank" rel="noreferrer"
-                           className="ml-auto text-xs text-blue-500 hover:underline flex-shrink-0">
+                           className="ml-auto text-xs text-accent hover:underline flex-shrink-0">
                           View →
                         </a>
                       )}
                     </div>
                   ))}
                   {diff.length === 0 && (
-                    <p className="text-center text-gray-400 py-8 text-sm">
-                      No commits found. Run "Sync Now" to pull GitHub data.
+                    <p className="text-center text-muted-foreground py-8 text-sm">
+                      No commits found. Run &quot;Sync Now&quot; to pull GitHub data.
                     </p>
                   )}
                 </div>
@@ -486,38 +486,38 @@ export default function ReleaseDashboardClient({
             {!loading && activeTab === "velocity" && velocity !== null && (
               <div className="space-y-4">
                 {velocity.length === 0 && (
-                  <p className="text-center text-gray-400 py-8 text-sm">
+                  <p className="text-center text-muted-foreground py-8 text-sm">
                     No drop data found. This release may not have drops configured.
                   </p>
                 )}
                 {velocity.map((drop: VelocityDrop) => (
-                  <div key={drop.dropNumber} className="p-4 border border-gray-200 rounded-xl">
+                  <div key={drop.dropNumber} className="p-4 border border-border-subtle rounded-xl">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-800">
+                      <h3 className="font-semibold text-foreground">
                         Drop {drop.dropNumber}
-                        <span className="ml-2 text-sm font-normal text-gray-400">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           {new Date(drop.dropDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                         </span>
                       </h3>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">{drop.mergedPRs}</p>
-                        <p className="text-xs text-blue-500 mt-1">PRs Merged</p>
+                      <div className="text-center p-3 bg-accent/5 rounded-lg">
+                        <p className="text-2xl font-bold text-accent">{drop.mergedPRs}</p>
+                        <p className="text-xs text-accent/70 mt-1">PRs Merged</p>
                       </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">{drop.resolvedTickets}</p>
-                        <p className="text-xs text-green-500 mt-1">Tickets Resolved</p>
+                      <div className="text-center p-3 bg-success/5 rounded-lg">
+                        <p className="text-2xl font-bold text-success">{drop.resolvedTickets}</p>
+                        <p className="text-xs text-success/70 mt-1">Tickets Resolved</p>
                       </div>
                     </div>
                     {Object.keys(drop.authorBreakdown).length > 0 && (
                       <div>
-                        <p className="text-xs text-gray-500 mb-2 font-medium">PR contributions:</p>
+                        <p className="text-xs text-muted-foreground mb-2 font-medium">PR contributions:</p>
                         <div className="flex flex-wrap gap-2">
                           {Object.entries(drop.authorBreakdown)
                             .sort(([, a], [, b]) => b - a)
                             .map(([author, count]) => (
-                              <span key={author} className="text-xs px-2 py-0.5 bg-gray-100 rounded text-gray-600">
+                              <span key={author} className="text-xs px-2 py-0.5 bg-surface-hover rounded text-foreground">
                                 {author}: {count}
                               </span>
                             ))}
@@ -545,13 +545,13 @@ function MetricCard({
   sub: string;
   color: "green" | "amber" | "red" | "blue";
 }) {
-  const bg = { green: "bg-green-50", amber: "bg-amber-50", red: "bg-red-50", blue: "bg-blue-50" }[color];
-  const text = { green: "text-green-700", amber: "text-amber-700", red: "text-red-700", blue: "text-blue-700" }[color];
+  const bg = { green: "bg-success/5", amber: "bg-warning/5", red: "bg-danger/5", blue: "bg-accent/5" }[color];
+  const text = { green: "text-success", amber: "text-warning", red: "text-danger", blue: "text-accent" }[color];
   return (
     <div className={`${bg} rounded-xl p-4`}>
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
+      <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
       <p className={`text-2xl font-bold ${text}`}>{value}</p>
-      <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+      <p className="text-xs text-muted mt-0.5">{sub}</p>
     </div>
   );
 }
@@ -560,10 +560,10 @@ function StatusBadge({ status }: { status: string }) {
   const s = status.toLowerCase();
   const cls =
     s === "done" || s === "closed" || s === "resolved"
-      ? "bg-green-100 text-green-700"
+      ? "bg-success/10 text-success"
       : s === "in progress" || s === "in review"
-      ? "bg-blue-100 text-blue-700"
-      : "bg-gray-100 text-gray-600";
+      ? "bg-accent/10 text-accent"
+      : "bg-surface-hover text-muted-foreground";
   return (
     <span className={`px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{status}</span>
   );

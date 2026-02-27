@@ -106,6 +106,24 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, [supabase.auth]);
 
+  // Detect session expiry / forced sign-out and redirect to login
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        if (event === "SIGNED_OUT") {
+          // Clear workspace state and redirect
+          try {
+            localStorage.removeItem("nexus_current_workspace");
+            localStorage.removeItem("nexus_current_org");
+            localStorage.removeItem("nexus_workspace_memberships");
+          } catch { /* ignore */ }
+          window.location.href = "/login";
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
   // Group workspaces by customer
   const { customerGroups, coreWorkspaces } = useMemo(() => {
     const groups = new Map<string, WorkspaceMembership[]>();

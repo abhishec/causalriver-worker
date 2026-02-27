@@ -161,7 +161,7 @@ function ApprovalRow({
               <button
                 onClick={() => handleAction("reject")}
                 disabled={loading !== null}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-danger/30 text-danger hover:bg-danger/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading === "reject" ? "Rejecting..." : "Reject"}
               </button>
@@ -177,7 +177,7 @@ function ApprovalRow({
         </div>
 
         {error && (
-          <p className="mt-1 text-xs text-red-400">{error}</p>
+          <p className="mt-1 text-xs text-danger" role="alert">{error}</p>
         )}
 
         {/* Payload preview */}

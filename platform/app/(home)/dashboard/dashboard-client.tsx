@@ -906,8 +906,8 @@ export function DashboardClient() {
 
                 <div className="rounded-xl border border-border-subtle bg-surface p-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <div className="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                     </div>
@@ -1128,9 +1128,9 @@ export function DashboardClient() {
                             </div>
                           </div>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide shrink-0 ml-3 ${
-                            worker.status === "active" ? "bg-emerald-500/10 text-emerald-400" :
-                            worker.status === "paused" ? "bg-amber-500/10 text-amber-400" :
-                            "bg-blue-500/10 text-blue-400"
+                            worker.status === "active" ? "bg-success/10 text-success" :
+                            worker.status === "paused" ? "bg-warning/10 text-warning" :
+                            "bg-accent/10 text-accent"
                           }`}>
                             {worker.status}
                           </span>
