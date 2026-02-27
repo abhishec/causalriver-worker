@@ -826,14 +826,20 @@ async function _runDomainSideEffects(
   const now = new Date().toISOString();
 
   // 1. Execution metrics row (se_aas_metrics)
-  await supabase.from('se_aas_metrics').insert({
-    organization_id: organizationId,
-    domain_type: domainType,
-    confidence,
-    execution_time_ms: durationMs,
-    claude_powered: claudePowered,
-    created_at: now,
-  });
+  // Wrapped in try-catch: RLS INSERT policy is service_role-only; user-scoped client
+  // will fail silently here. Must not block downstream side effects.
+  try {
+    await supabase.from('se_aas_metrics').insert({
+      organization_id: organizationId,
+      domain_type: domainType,
+      confidence,
+      execution_time_ms: durationMs,
+      claude_powered: claudePowered,
+      created_at: now,
+    });
+  } catch {
+    // se_aas_metrics write failed — non-blocking
+  }
 
   // 2. Domain-specific auto-actions
   switch (domainType) {

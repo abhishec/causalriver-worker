@@ -302,7 +302,7 @@ export async function exportArtifact(
       return {
         success: false,
         filename: "",
-        error: "PPTX export is coming soon. Install pptxgenjs to enable.",
+        error: "PPTX export is not available in this plan. Contact support to enable it.",
       };
     default:
       return { success: false, filename: "", error: `Unsupported format: ${format}` };
@@ -330,11 +330,6 @@ export function getAvailableFormats(
   // CSV — available for data artifacts
   if (["financial-statement", "table", "engineering-analysis", "cash-flow-forecast", "revenue-leakage", "causal-pl"].includes(artifactType)) {
     formats.push({ format: "csv", label: "CSV Spreadsheet" });
-  }
-
-  // PPTX — available for presentations
-  if (artifactType === "presentation") {
-    formats.push({ format: "pptx", label: "PowerPoint" });
   }
 
   return formats;

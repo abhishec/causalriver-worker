@@ -35,8 +35,10 @@ import { getAdminClient } from "@/lib/supabase/admin";
 // ── @nexus-ai/memory-stack: bypasses Turbopack bundling ──────────────────────
 // memory-stack embeds TypeScript's compiler which uses dynamic require("fs").
 // Turbopack replaces require() with __require() which doesn't support dynamic calls.
-// Solution: use eval("require") to force native Node.js require at runtime.
+// Solution: use createRequire (Node.js standard for ESM→CJS interop) instead of
+// eval("require"). createRequire is bundler-safe, Lambda-safe, and passes security scans.
 // Type definitions are inlined to avoid even `import type` triggering module resolution.
+import { createRequire } from "module";
 
 interface TrainedCausalEdge { source_domain: string; target_domain: string; effect_size: number; optimal_lag_days: number; confidence: number; method: string; [k: string]: unknown; }
 interface TrainedRule { id: string; title: string; natural_language: string; conditions: string[]; content: string; [k: string]: unknown; }
@@ -46,8 +48,7 @@ interface BrainContext { fullPrompt: string; intent: string; domains: string[]; 
 interface BrainRegions { [k: string]: unknown; }
 interface QueryInterpretation { intent: string; domains: string[]; requiredData: string[]; tokenBudget?: { system: number; history: number }; confidence: number; primaryDomain?: string; serviceRoute?: { type: string; seaasDomain?: string; seaasInput?: Record<string, unknown>; aasDomain?: string; aasInput?: Record<string, unknown>; agentSpec?: { name: string; description: string; domain: string; trigger: string; schedule?: string; requiredInputs?: string[] } }; complexity?: number; entities?: unknown[]; responseStrategy?: unknown; [k: string]: unknown; }
 
-// eslint-disable-next-line no-eval
-const _nativeRequire = eval("require") as NodeRequire;
+const _nativeRequire = createRequire(import.meta.url);
 let _memStackMod: Record<string, any> | null = null;
 function getMemoryStackSync() {
   if (!_memStackMod) {
@@ -4781,7 +4782,7 @@ A: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
               },
               {
                 onConflict: "id",
-                ignoreDuplicates: false,
+                ignoreDuplicates: true,
               }
             )
             .select("id")

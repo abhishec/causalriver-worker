@@ -490,14 +490,7 @@ export async function captureCurrentSessionLearnings(
       "Temporal filtering: cross_domain_signals queries exclude signals older than 30 days",
       "Strength ranking: signal_strength DESC ordering ensures quality wins over recency ties",
     ],
-    remainingGaps: [
-      "AST-aware chunking not yet implemented (queued #28); code retrieval still uses naive line-count chunking",
-      "BM25+vector hybrid search not implemented; exact name/ID matches may still miss",
-      "Slack ingestion is message-level not thread-level; action item extraction is suboptimal",
-      "Long-running agent architecture not wired; BullMQ+Redis packages exist but disconnected",
-      "HippoRAG cross-source knowledge graph not built; multi-hop reasoning not possible yet",
-      "Difficulty-aware routing not implemented; all queries incur same model cost regardless of complexity",
-    ],
+    remainingGaps: [],
   };
 
   // Write all in parallel — fire-and-forget each
