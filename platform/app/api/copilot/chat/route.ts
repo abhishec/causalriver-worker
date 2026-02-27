@@ -4042,7 +4042,38 @@ No connectors are configured yet. When the user asks for data from any source (S
           const ageMin = Math.round((Date.now() - new Date(j.created_at).getTime()) / 60_000);
           return `- ${j.task_type} (${j.status}) — started ${ageMin}m ago`;
         }).join("\n");
-        effectiveSystemPrompt += `\n\n## Active Agent Jobs\n${_jobLines}\n\nReference these naturally when relevant to the user's question. If the user asks about running agents or analysis progress, tell them specifically what's running and for how long. Use active voice: "Your ${_activeJobs[0].task_type} analysis has been running for X minutes."`;
+        // Domain → task_type mapping so Claude knows which agents affect which questions
+        const _domainMap: Record<string, string[]> = {
+          "pod": ["pod-match"],
+          "team": ["pod-match"],
+          "assignment": ["pod-match"],
+          "health": ["early-warning", "delivery-intelligence"],
+          "engineer": ["early-warning"],
+          "velocity": ["early-warning"],
+          "risk": ["early-warning"],
+          "flight risk": ["early-warning"],
+          "scope": ["scope-creep"],
+          "engagement": ["delivery-intelligence"],
+          "document": ["document-ingestion", "embed-documents"],
+          "ingestion": ["document-ingestion", "embed-documents"],
+          "typology": ["typology-analysis"],
+          "fincrime": ["typology-analysis"],
+          "connector": ["jira-sync", "confluence-sync", "slack-sync", "github-sync"],
+          "sync": ["jira-sync", "confluence-sync", "slack-sync", "github-sync"],
+        };
+        const _runningTypes = _activeJobs.map((j: { task_type: string }) => j.task_type);
+        const _domainMapStr = Object.entries(_domainMap)
+          .filter(([, types]) => types.some(t => _runningTypes.includes(t)))
+          .map(([keyword, types]) => `"${keyword}" → ${types.filter(t => _runningTypes.includes(t)).join(", ")}`)
+          .join("; ");
+        effectiveSystemPrompt += `\n\n## Active Agent Jobs\n${_jobLines}\n\n` +
+          `CRITICAL INSTRUCTION — Agent-Awareness Protocol:\n` +
+          `1. ALWAYS mention running agents at the START of your response before giving any analysis, not buried at the end.\n` +
+          `2. If the user's question relates to a topic where an agent is currently running, open with: "⚡ A [task_type] agent has been running for [X] minutes and is still gathering data. Here's what I know from the last completed analysis — for the freshest results, check back once it finishes."\n` +
+          `3. If ALL the data the user needs is being actively processed right now, say: "🔄 The [task_type] agent started [X] minutes ago and hasn't finished yet. I'll have much better answers once it completes — usually within a few minutes. Want me to give you a heads-up when the next sync runs?"\n` +
+          `4. Never silently return stale/empty results when a relevant agent is running. Always tell the user WHY results may be incomplete.\n` +
+          `5. Domain-to-agent mapping for questions asked right now: ${_domainMapStr || "N/A"}\n` +
+          `6. Use present tense and be specific: "Your pod-match analysis has been running for 5 minutes" not "an agent may be running".`;
       }
     } catch {
       // Non-fatal: agent status is enrichment only
