@@ -551,6 +551,7 @@ async function _runCognitivePlannerInner(
 - Poor quality domains (avg < ${plannerConfig.qualityFloor} last 24h): ${poorQualityDomains.join(", ") || "none"}
 - Good quality domains (avg >= 0.7 last 24h): ${goodQualityDomains.join(", ") || "none"}
 - Stuck domains (${plannerConfig.stuckDomainThreshold}+ failures last 2h): ${stuckDomains.join(", ") || "none"}
+- Globally broken domains (>10 failures across all orgs in 2h — NEVER schedule): ${[...globallyBrokenDomains].join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
 - IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition
 
@@ -604,13 +605,23 @@ ${pastReflectionsText}`;
               : "normal",
             rationale: d.rationale,
           }))
+          .filter((d) => {
+            if (globallyBrokenDomains.has(d.domain)) {
+              logger.warn(
+                "[CognitivePlanner] Global circuit breaker: excluding domain globally",
+                { domain: d.domain, orgId }
+              );
+              return false;
+            }
+            return true;
+          })
           .slice(0, maxDecisions);
       }
     } catch (parseErr) {
       logger.warn("[CognitivePlanner] Phase 2 JSON parse failed, using coverage gap fallback:", parseErr);
       // Fallback: top coverage gap domains (1 if in recovery, 2 otherwise)
       decisions = coverageGaps
-        .filter((d) => !stuckDomains.includes(d))
+        .filter((d) => !stuckDomains.includes(d) && !globallyBrokenDomains.has(d))
         .slice(0, recoveryMode ? 1 : 2)
         .map((domain) => ({
           domain,
@@ -626,7 +637,7 @@ ${pastReflectionsText}`;
     logger.warn("[CognitivePlanner] Phase 2 (plan) Haiku call failed:", err);
     // Fallback to coverage gaps
     decisions = coverageGaps
-      .filter((d) => !stuckDomains.includes(d))
+      .filter((d) => !stuckDomains.includes(d) && !globallyBrokenDomains.has(d))
       .slice(0, 2)
       .map((domain) => ({
         domain,
