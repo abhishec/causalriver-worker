@@ -3871,7 +3871,7 @@ BEHAVIORAL RULES FOR LEARNING TRANSPARENCY:
     try {
       const { getBrainContext } = await import("@/lib/brain/brain-context");
       const brainCtxTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5_000));
-      const brainCtx = await Promise.race([getBrainContext(service, workspaceId), brainCtxTimeout]);
+      const brainCtx = await Promise.race([getBrainContext(service, workspaceId, { query: message }), brainCtxTimeout]);
       // brainCtx is null only if the 5s timeout fires — skip enrichment, use safe defaults
       if (!brainCtx) throw new Error("getBrainContext timed out");
       brainIqForRouting = brainCtx.brainIq;

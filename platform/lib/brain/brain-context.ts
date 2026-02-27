@@ -30,7 +30,7 @@ export interface BrainContext {
 export async function getBrainContext(
   supabase: SupabaseClient,
   orgId: string,
-  { forceRefresh = false }: { forceRefresh?: boolean } = {},
+  { forceRefresh = false, query = "" }: { forceRefresh?: boolean; query?: string } = {},
 ): Promise<BrainContext> {
   // ── Cache hit: return stale-within-30s data immediately ──────────────
   const cached = _brainContextCache.get(orgId);
@@ -55,13 +55,15 @@ export async function getBrainContext(
         .select("orchestrator_config")
         .eq("organization_id", orgId)
         .maybeSingle(),
-      // Top 3 recent signals
+      // Top 5 recent signals — last 30 days, ranked by strength then recency
       supabase
         .from("cross_domain_signals")
         .select("source_domain, signal_type, signal_strength, signal_metadata")
         .eq("organization_id", orgId)
+        .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .order("signal_strength", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
-        .limit(3),
+        .limit(5),
       // Recent RL quality — uses "confidence" column (the actual prediction_records schema)
       supabase
         .from("prediction_records")
@@ -164,14 +166,22 @@ export async function getBrainContext(
       brainIq < 30  ? "haiku for data domains (pod-match, early-warning); sonnet for code domains" :
                       "sonnet for all domains (Brain IQ >= 30, full reasoning unlocked)";
 
-    // Fetch the 3 most recently ingested document chunks (empty query = latest by created_at)
-    // Called by getBrainContext() to include document knowledge in every LLM decision
+    // Fetch up to 5 relevant document chunks — query-aware if a user message is provided.
+    // Empty query falls back to most recently ingested chunks (recency-based).
+    // Called by getBrainContext() to include document knowledge in every LLM decision.
     let recentDocTitles: string[] = [];
+    let docChunkSnippets: string[] = [];
     try {
-      const docChunks = await searchDocumentChunks(supabase, orgId, "", 3);
+      const docChunks = await searchDocumentChunks(supabase, orgId, query, 5);
       recentDocTitles = docChunks
         .map(c => c.document_title)
         .filter((t): t is string => typeof t === "string" && t.length > 0);
+      // Build rich snippets (title + chunk index + first 500 chars of text) for top 3 chunks
+      docChunkSnippets = docChunks.slice(0, 3).map(c => {
+        const title = c.document_title ?? "Untitled";
+        const preview = (c.chunk_text ?? "").slice(0, 500);
+        return `[${title} (chunk ${c.chunk_index})]: ${preview}${preview.length >= 500 ? "..." : ""}`;
+      }).filter(s => s.length > 0);
     } catch {
       // non-fatal — document chunks are best-effort
     }
@@ -189,6 +199,7 @@ export async function getBrainContext(
       lastJobStatus,
       smartRouterRecommendation,
       recentDocTitles,
+      docChunkSnippets,
     });
 
     const result: BrainContext = {
@@ -233,7 +244,7 @@ export async function getBrainContext(
 }
 
 function buildContextSummary(
-  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[] }
+  ctx: Omit<BrainContext, "contextSummary" | "qualityPatterns" | "qualityPatternsSummary"> & { recentDocTitles?: string[]; docChunkSnippets?: string[] }
 ): string {
   const parts: string[] = [];
 
@@ -277,8 +288,10 @@ function buildContextSummary(
     parts.push(`Smart Router: ${ctx.smartRouterRecommendation}.`);
   }
 
-  // Layer 1: Context Engine — recent document knowledge
-  if (ctx.recentDocTitles && ctx.recentDocTitles.length > 0) {
+  // Layer 1: Context Engine — relevant document knowledge with chunk content
+  if (ctx.docChunkSnippets && ctx.docChunkSnippets.length > 0) {
+    parts.push(`Relevant document excerpts:\n${ctx.docChunkSnippets.join("\n")}`);
+  } else if (ctx.recentDocTitles && ctx.recentDocTitles.length > 0) {
     parts.push(`Recent document context: ${ctx.recentDocTitles.join(", ")}.`);
   }
 

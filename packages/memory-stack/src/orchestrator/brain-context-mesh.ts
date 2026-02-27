@@ -287,6 +287,7 @@ export interface SignalRow {
   signal_metadata: Record<string, unknown>;
   created_at: string;
   source_domain?: string;
+  signal_strength?: number | null;
 }
 
 export interface EntityLinkRow {
@@ -698,9 +699,10 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
-        .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
+        .select('signal_type, signal_value, signal_metadata, created_at, source_domain, signal_strength')
         .eq('organization_id', organizationId)
         .gte('created_at', sevenDaysAgo)
+        .order('signal_strength', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(50)
       ).catch(() => ({ data: [] as any[] })),
@@ -752,10 +754,11 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
-        .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
+        .select('signal_type, signal_value, signal_metadata, created_at, source_domain, signal_strength')
         .eq('organization_id', organizationId)
         .like('source_domain', 'engineering%')
         .gte('created_at', sevenDaysAgo)
+        .order('signal_strength', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(50)
       ).catch(() => ({ data: [] as any[] })),
@@ -918,10 +921,11 @@ export function createBrainContextMesh(config: BrainContextMeshConfig): BrainCon
       skipSignals ? Promise.resolve(emptyRes) :
       Promise.resolve(supabase
         .from('cross_domain_signals')
-        .select('signal_type, signal_value, signal_metadata, created_at, source_domain')
+        .select('signal_type, signal_value, signal_metadata, created_at, source_domain, signal_strength')
         .eq('organization_id', organizationId)
         .or('source_domain.like.aas%,source_domain.like.accounting%')
         .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString()) // 30 days (AAS retrains daily)
+        .order('signal_strength', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(50)
       ).catch(() => ({ data: [] as any[] })),
