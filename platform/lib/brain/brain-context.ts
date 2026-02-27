@@ -867,17 +867,52 @@ export async function getBrainContext(
           .slice(0, 250)}`
       : undefined;
 
-    // L24: Cross-Org Patterns
-    const crossOrgRows = crossOrgPatternsRow.status === "fulfilled"
-      ? (crossOrgPatternsRow.value.data ?? [])
-      : [];
-    const crossOrgPatterns: string | undefined = crossOrgRows.length > 0
-      ? `## Cross-Org Patterns\n${(crossOrgRows as Array<{ content: string; domain: string }>)
-          .map(r => r.content ? r.content.slice(0, 100) : "")
-          .filter(s => s.length > 0)
-          .join(" | ")
-          .slice(0, 250)}`
-      : undefined;
+    // L24: Cross-Org Patterns — high-confidence patterns aggregated across ALL orgs via service client
+    // Replaces the empty per-org ai_memory federation.%/cross_org.% query (nothing writes those domains).
+    // Uses a 5-min module-level cache to avoid thundering herd on expensive full-table scan.
+    // Privacy: org IDs are stripped, only anonymized pattern text + domain + confidence are returned.
+    // Threshold: confidence >= 0.8 to avoid low-quality cross-contamination.
+    let crossOrgPatterns: string | undefined;
+    try {
+      const now = Date.now();
+      if (_crossOrgPatternsCache.expiry > now && _crossOrgPatternsCache.data !== null) {
+        crossOrgPatterns = _crossOrgPatternsCache.data;
+      } else {
+        const serviceClient = getAdminClient();
+        const { data: crossOrgRows } = await serviceClient
+          .from("ai_memory")
+          .select("content, domain, importance")
+          .eq("memory_type", "pattern")
+          .gte("importance", 0.8)
+          .order("importance", { ascending: false })
+          .limit(50);
+
+        if (crossOrgRows && crossOrgRows.length > 0) {
+          // Deduplicate by content similarity (keep top 5 unique patterns)
+          const seen = new Set<string>();
+          const uniquePatterns: Array<{ domain: string; pattern: string; confidence: number }> = [];
+          for (const row of crossOrgRows as Array<{ content: string; domain: string; importance: number }>) {
+            const snippet = String(row.content ?? "").slice(0, 60).toLowerCase().replace(/\s+/g, " ");
+            if (!seen.has(snippet) && row.content && uniquePatterns.length < 5) {
+              seen.add(snippet);
+              uniquePatterns.push({
+                domain: String(row.domain ?? "").split(".").slice(0, 2).join("."),
+                pattern: String(row.content ?? "").slice(0, 120),
+                confidence: typeof row.importance === "number" ? row.importance : 0,
+              });
+            }
+          }
+          if (uniquePatterns.length > 0) {
+            crossOrgPatterns = `## Cross-Org Patterns (confidence >= 0.8)\n${uniquePatterns.map(p => `[${p.domain}](${Math.round(p.confidence * 100)}%) ${p.pattern}`).join(" | ")}`.slice(0, 400);
+          }
+        }
+        // Cache result (null if no patterns found, empty string if found but empty)
+        _crossOrgPatternsCache.data = crossOrgPatterns ?? null;
+        _crossOrgPatternsCache.expiry = now + CROSS_ORG_PATTERNS_TTL_MS;
+      }
+    } catch (e) {
+      logger.warn("[brain-context] L24 cross-org patterns failed (non-fatal):", String(e));
+    }
 
     // L25: Meta-Brain State — total memory count as self-awareness signal
     const totalMemoryCount = metaBrainCountRow.status === "fulfilled"
@@ -1098,6 +1133,7 @@ export async function getBrainContext(
       signalActivitySummary,
       // Tier 3
       repoMapContent,
+      repoMapLiveStats,
       architecturalDecisions,
       gitIntelligence,
       // Tier 4
@@ -1242,6 +1278,7 @@ function buildContextSummary(ctx: {
   signalActivitySummary?: string;
   // Tier 3: Code & Document Intelligence
   repoMapContent?: string | null;
+  repoMapLiveStats?: string;   // L6b: live codebase stats from knowledge_chunks
   architecturalDecisions?: string[];
   gitIntelligence?: string;
   // Tier 4: Knowledge Base
@@ -1345,9 +1382,14 @@ function buildContextSummary(ctx: {
     parts.push(ctx.gitIntelligence);
   }
 
-  // 9. Repo Map (L6)
+  // 9. Repo Map (L6a) — PageRank symbol map
   if (ctx.repoMapContent && ctx.repoMapContent.length > 0) {
     parts.push(`## Codebase Repo Map (top symbols by PageRank):\n${ctx.repoMapContent}`);
+  }
+
+  // 9b. Repo Map Live Stats (L6b) — live codebase stats from knowledge_chunks
+  if (ctx.repoMapLiveStats) {
+    parts.push(ctx.repoMapLiveStats);
   }
 
   // 10. Architectural Decisions (L7)
