@@ -41,9 +41,9 @@ export default function Error({
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4 text-foreground">Something went wrong</h1>
+          <h1 className="text-4xl font-bold mb-4 text-foreground">Failed to load</h1>
           <p className="text-muted-foreground mb-6">
-            Our team has been notified and is working on a fix.
+            This page couldn't load. Try again, or refresh the page.
           </p>
           {error.digest && (
             <p className="text-sm text-muted mb-6">

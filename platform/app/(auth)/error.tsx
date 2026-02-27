@@ -17,10 +17,10 @@ export default function AuthError({
       <div className="w-full max-w-md text-center space-y-6">
         <div className="text-5xl">⚠️</div>
         <h1 className="text-2xl font-semibold text-foreground">
-          Something went wrong
+          Failed to load page
         </h1>
         <p className="text-sm text-foreground/60">
-          We hit an unexpected error loading this page.
+          This page couldn't load — check your connection and try again.
           {error.digest && (
             <span className="block mt-1 font-mono text-xs text-foreground/40">
               Error ID: {error.digest}

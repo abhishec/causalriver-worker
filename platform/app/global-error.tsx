@@ -51,7 +51,7 @@ export default function GlobalError({
               marginBottom: "0.5rem",
             }}
           >
-            Something went wrong
+            BrainOS failed to load
           </h1>
 
           <p
@@ -62,8 +62,8 @@ export default function GlobalError({
               marginBottom: "1.5rem",
             }}
           >
-            Brain OS hit an unexpected error. Click below to try again, or
-            refresh the page.
+            An unexpected error occurred. Click below to try again, or refresh
+            the page. If it persists, check your connection.
           </p>
 
           {/* Dev-only error details */}

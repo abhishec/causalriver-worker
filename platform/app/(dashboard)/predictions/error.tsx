@@ -20,9 +20,9 @@ export default function PredictionsError({
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold mb-1">Predictions page error</h2>
+      <h2 className="text-lg font-semibold mb-1">Failed to load predictions</h2>
       <p className="text-xs text-muted mb-1 max-w-md text-center">
-        An error occurred while loading predictions. This has been logged.
+        Predictions couldn't load — check your connection and try again.
       </p>
       {error.digest && (
         <p className="text-[10px] text-muted font-mono mb-4">
