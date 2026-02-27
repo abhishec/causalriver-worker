@@ -23,6 +23,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { pullCorePatterns } from "@/lib/brain/se-aas-federation";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -504,6 +505,17 @@ async function _runCognitivePlannerInner(
         pastReflectionsText += `\nBrain Progress: ${progress.totalCyclesRun} cycles run, learning velocity: ${progress.learningVelocity > 0 ? '+' : ''}${progress.learningVelocity.toFixed(3)}, globally excluded: ${progress.domainsExcludedGlobally.join(', ') || 'none'}`;
       } catch { /* ignore */ }
     }
+
+    // Pull cross-org federated patterns from CORE brain
+    try {
+      const corePatterns = await pullCorePatterns(supabase, orgId);
+      if (corePatterns.length > 0) {
+        const patternText = corePatterns
+          .map(p => `${p.domainSequence.join('->'  )}: ${Math.round(p.successRate * 100)}% success (cross-org)`)
+          .join('\n');
+        pastReflectionsText += `\n\nCross-org proven sequences:\n${patternText}`;
+      }
+    } catch { /* non-fatal */ }
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 0 (prime) failed:", err);
   }
