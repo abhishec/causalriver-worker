@@ -269,6 +269,39 @@ jobs:
             "${BASE_URL}/api/cron/consolidate" \
             || echo "consolidate failed (non-fatal)"
 
+      # ── AST Codebase Re-Chunker (every 30-min or 4-hour trigger) ─────────────
+      # Re-chunks code documents from document_chunks (source_type=github) using
+      # AST-aware chunking (ts-morph). Gives the brain function-level granularity
+      # instead of random text splits — 65% better recall on code questions.
+      # Safe to call repeatedly — idempotent (skips already-chunked docs).
+      - name: AST Codebase Re-Chunker
+        if: ${{ github.event.schedule == '*/30 * * * *' || github.event.schedule == '0 */4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/brain/chunk-codebase ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/brain/chunk-codebase" \
+            || echo "chunk-codebase failed (non-fatal — will retry on next 30-min tick)"
+
+      # ── Repo Map Generator (daily 4 AM UTC) ──────────────────────────────────
+      # Builds a PageRank-weighted symbol map of the codebase (Aider pattern).
+      # Stored in ai_memory so the brain answers code architecture questions with
+      # real symbol-level context instead of generic responses.
+      # Runs for the Core Brain org (00000000-0000-4000-a000-000000000001).
+      - name: Repo Map Generator (daily 4 AM UTC)
+        if: ${{ github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          CORE_ORG="00000000-0000-4000-a000-000000000001"
+          echo "Calling ${BASE_URL}/api/brain/repo-map?organizationId=${CORE_ORG} ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/brain/repo-map?organizationId=${CORE_ORG}" \
+            || echo "repo-map failed (non-fatal — will retry at next daily trigger)"
+
       # ── Stale Job Watchdog (every 3-minute trigger) ───────────────────────────
       # Two responsibilities:
       #   1. Finds jobs stuck in 'running' with no heartbeat for > 3 min → marks
