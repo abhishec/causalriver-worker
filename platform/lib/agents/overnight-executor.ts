@@ -25,6 +25,7 @@ import {
 import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { postSlackMessage } from "@/lib/connectors/writeback/slack";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
+import { startJobHeartbeat, stopJobHeartbeat } from "@/lib/se-aas/job-heartbeat";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -199,6 +200,12 @@ export async function executeCodeAgentJob(
   const startMs = Date.now();
   const { ticket, repoOwner, repoName, githubToken, slackToken, slackChannel, brainContext } = payload;
 
+  // ── Heartbeat: prevent stale-job watchdog from killing long-running code-agent jobs ──
+  // Code-agent jobs can take 2–5 minutes (branch + codegen + PR). The watchdog
+  // threshold is 120s. Heartbeat every 30s gives 3 grace beats.
+  const heartbeatHandle = startJobHeartbeat(supabase, jobId);
+
+  try {
   // ── Step 1: Generate branch name ─────────────────────────────────────
   const sluggedTitle = slugify(ticket.title);
   const suffix = Date.now().toString(36);
@@ -505,4 +512,8 @@ Rules:
     filesCommitted: filesToCommit.length,
     branchName,
   };
+  } finally {
+    // Always stop heartbeat — interval must never leak after job completes or throws
+    stopJobHeartbeat(heartbeatHandle);
+  }
 }

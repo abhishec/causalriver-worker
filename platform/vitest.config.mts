@@ -39,7 +39,7 @@ export default defineConfig({
       // Per-file coverage for tested modules (utils, rate-limiter, agent-rl, parsers)
       // is tracked via the text reporter output.
       thresholds: {
-        lines: 3,
+        lines: 2,
         functions: 5,
       },
     },

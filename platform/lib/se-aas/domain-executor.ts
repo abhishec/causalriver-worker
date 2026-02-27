@@ -290,6 +290,143 @@ export function isSync(domainType: string): boolean {
 }
 
 // ============================================================================
+// DOMAIN MoA — Mixture of Agents for high-stakes domains
+// ============================================================================
+
+/**
+ * High-stakes domains that get 3-angle MoA synthesis.
+ * Only early-warning and delivery-intelligence — these carry the highest
+ * decision weight and benefit most from multi-perspective analysis.
+ */
+const DOMAIN_MOA_ENABLED = new Set(["early-warning", "delivery-intelligence"]);
+
+/**
+ * Run Domain MoA: 3 parallel Haiku calls with different analytical angles,
+ * then one Sonnet synthesis call.
+ *
+ * Angles:
+ *  1. Analytical   — data-driven, focus on numbers and trends
+ *  2. Risk-focused — surface risks, red flags, and worst-case scenarios
+ *  3. Trend-focused — identify patterns, velocity changes, trajectory
+ *
+ * The synthesizer merges the best insights from all 3.
+ * Falls back gracefully — returns null on any error (non-blocking).
+ */
+async function runDomainMoA(
+  domainType: string,
+  domainResult: Record<string, unknown>,
+  originalRequest: Record<string, unknown>
+): Promise<string | null> {
+  if (!DOMAIN_MOA_ENABLED.has(domainType)) return null;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+
+  const HAIKU_MODEL = "claude-haiku-4-5-20251001";
+  const SONNET_MODEL = "claude-sonnet-4-6";
+
+  // Compact result to avoid token bloat — trim to relevant fields only
+  const resultJson = JSON.stringify(domainResult, null, 0).slice(0, 4000);
+  const requestJson = JSON.stringify(originalRequest, null, 0).slice(0, 500);
+
+  const dataBlock = `Domain: ${domainType}
+Request context: ${requestJson}
+Analysis result data:
+${resultJson}`;
+
+  const ANGLES = [
+    {
+      name: "analytical",
+      system: `You are a data-driven analyst reviewing ${domainType} results.
+Focus: numbers, percentages, absolute values, time comparisons.
+Be precise and factual. Lead with the most significant metric.
+Keep response under 150 words. No preamble.`,
+    },
+    {
+      name: "risk-focused",
+      system: `You are a risk assessment expert reviewing ${domainType} results.
+Focus: risks, red flags, deteriorating signals, worst-case implications.
+Prioritize the highest-severity items. Be direct about consequences.
+Keep response under 150 words. No preamble.`,
+    },
+    {
+      name: "trend-focused",
+      system: `You are a trend analyst reviewing ${domainType} results.
+Focus: patterns over time, velocity changes, trajectory, what's accelerating or decelerating.
+Connect current data points to future trajectory.
+Keep response under 150 words. No preamble.`,
+    },
+  ];
+
+  try {
+    const Anthropic = (await import("@anthropic-ai/sdk")).default;
+    const anthropic = new Anthropic({ apiKey });
+
+    // Run all 3 Haiku angles in parallel for minimal latency
+    const [analyticalResp, riskResp, trendResp] = await Promise.all(
+      ANGLES.map((angle) =>
+        anthropic.messages.create({
+          model: HAIKU_MODEL,
+          max_tokens: 256,
+          system: angle.system,
+          messages: [{ role: "user", content: dataBlock }],
+        })
+      )
+    );
+
+    const analytical =
+      analyticalResp.content[0]?.type === "text" ? analyticalResp.content[0].text : "";
+    const risk =
+      riskResp.content[0]?.type === "text" ? riskResp.content[0].text : "";
+    const trend =
+      trendResp.content[0]?.type === "text" ? trendResp.content[0].text : "";
+
+    if (!analytical && !risk && !trend) return null;
+
+    // Sonnet synthesis: merge the three perspectives into one coherent answer
+    const synthesisPrompt = `Three expert perspectives on the same ${domainType} data:
+
+[ANALYTICAL VIEW]
+${analytical}
+
+[RISK VIEW]
+${risk}
+
+[TREND VIEW]
+${trend}
+
+Synthesize these into a single, coherent 150-200 word summary that:
+1. Opens with the most critical finding
+2. Incorporates the strongest insights from all three perspectives
+3. Ends with the single most important action item
+4. Avoids redundancy — no "the data shows" or "as noted above" framing
+Return ONLY the synthesis — no meta-commentary, no labels.`;
+
+    const synthesisResp = await anthropic.messages.create({
+      model: SONNET_MODEL,
+      max_tokens: 400,
+      messages: [{ role: "user", content: synthesisPrompt }],
+    });
+
+    const synthesized =
+      synthesisResp.content[0]?.type === "text" ? synthesisResp.content[0].text : null;
+
+    if (synthesized) {
+      logger.debug(
+        `[domain-moa] ${domainType} synthesis complete — ` +
+          `analytical=${analytical.length}c risk=${risk.length}c trend=${trend.length}c → ${synthesized.length}c`
+      );
+    }
+
+    return synthesized;
+  } catch (moaErr: any) {
+    // MoA is enhancement only — never block domain result delivery
+    logger.warn("[domain-moa] MoA failed (non-blocking):", moaErr?.message);
+    return null;
+  }
+}
+
+// ============================================================================
 // DOMAIN EXECUTION
 // ============================================================================
 
@@ -557,6 +694,17 @@ export async function executeDomain(
     : null;
   try {
     result = await info.domain.execute(ctx);
+
+    // ── Domain MoA: 3-angle Haiku synthesis + Sonnet for high-stakes domains ──
+    // Runs for early-warning and delivery-intelligence only.
+    // Non-blocking: runs in parallel with downstream steps, result is merged
+    // into the return value before returning to caller.
+    if (DOMAIN_MOA_ENABLED.has(params.domainType)) {
+      const moaSynthesis = await runDomainMoA(params.domainType, result, params.request);
+      if (moaSynthesis) {
+        result = { ...result, moaSynthesis, moaEnabled: true };
+      }
+    }
   } catch (domainExecErr: any) {
     domainError = domainExecErr?.message ?? "Unknown domain execution error";
     // Emit error comms before re-throwing
