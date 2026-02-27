@@ -834,3 +834,24 @@ function evaluateSingleClause(clause: string, output: Record<string, unknown>): 
 
   return compareValues(fieldVal as string | number, operator, compareVal as string | number);
 }
+
+// ── ProcessFSM Class Wrapper ─────────────────────────────────────────────────
+
+/**
+ * ProcessFSM — explicit class interface over the functional workflow engine.
+ * Wraps executeWorkflow for object-oriented callers.
+ */
+export class ProcessFSM {
+  constructor(private readonly supabase: SupabaseClient) {}
+
+  /**
+   * Execute a workflow or resume a paused run.
+   * If params.resumeRunId is set, resumes an existing paused run.
+   */
+  async execute(
+    params: WorkflowExecutionParams,
+    callbacks?: WorkflowProgressCallback,
+  ): Promise<WorkflowExecutionResult> {
+    return executeWorkflow(this.supabase, params, callbacks);
+  }
+}
