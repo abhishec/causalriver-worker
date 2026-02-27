@@ -97,6 +97,40 @@ async function loadPlannerConfig(
   }
 }
 
+// ── Global Circuit Breaker ────────────────────────────────────────────────────
+
+/**
+ * Returns the set of domains that have failed >10 times across ALL orgs in the
+ * last 2 hours (confidence < 0.3).  These are excluded from planning globally —
+ * a single bad domain cannot burn planner cycles fleet-wide.
+ */
+async function getGloballyBrokenDomains(supabase: SupabaseClient): Promise<Set<string>> {
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from("prediction_records")
+    .select("domain")
+    .lt("confidence", 0.3)
+    .gte("created_at", twoHoursAgo)
+    .not("domain", "is", null);
+
+  if (error || !data) return new Set();
+
+  // Count failures per domain across ALL orgs
+  const domainCounts: Record<string, number> = {};
+  for (const row of data) {
+    const domain = (row as { domain: string | null }).domain;
+    if (domain) domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+  }
+
+  // Globally exclude domains with >10 failures in last 2h
+  return new Set(
+    Object.entries(domainCounts)
+      .filter(([, count]) => count > 10)
+      .map(([domain]) => domain)
+  );
+}
+
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const SE_AAS_DOMAINS = [
@@ -352,6 +386,20 @@ async function _runCognitivePlannerInner(
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 1 — ASSESS (gap detection + RL signal)
   // ══════════════════════════════════════════════════════════════════════════
+
+  // Pre-flight: fetch globally broken domains (cross-org circuit breaker)
+  let globallyBrokenDomains: Set<string> = new Set();
+  try {
+    globallyBrokenDomains = await getGloballyBrokenDomains(supabase);
+    if (globallyBrokenDomains.size > 0) {
+      logger.warn(
+        "[CognitivePlanner] Global circuit breaker active — domains excluded fleet-wide:",
+        { domains: [...globallyBrokenDomains], orgId }
+      );
+    }
+  } catch (err) {
+    logger.warn("[CognitivePlanner] getGloballyBrokenDomains failed (non-fatal):", err);
+  }
 
   let coverageGaps: string[] = [...SE_AAS_DOMAINS];
   let poorQualityDomains: string[] = [];
