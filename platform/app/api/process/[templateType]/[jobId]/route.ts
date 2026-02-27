@@ -8,7 +8,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isProcessTemplate } from "@/lib/process-engine";
 import { logger } from "@/lib/logger";
 
@@ -34,9 +34,11 @@ export async function GET(
       !!process.env.SE_AAS_WORKER_SECRET &&
       workerSecret === process.env.SE_AAS_WORKER_SECRET;
 
+    // M2M uses service client (bypasses RLS, no user session needed);
+    // user calls use createClient which is RLS-scoped to the authenticated user.
     let supabase;
     try {
-      supabase = await createClient();
+      supabase = isM2M ? await createServiceClient() : await createClient();
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

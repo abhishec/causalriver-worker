@@ -65,6 +65,21 @@ interface CacheEntry {
 }
 
 const _cache = new Map<string, CacheEntry>();
+// Max entries: cap at 500 orgs to prevent unbounded growth in long-running Lambdas.
+const CONTEXT_AGENT_CACHE_MAX = 500;
+
+/** Evict expired entries; if still over max, evict oldest-expiry entries. */
+function _evictContextAgentCache(): void {
+  const now = Date.now();
+  for (const [k, v] of _cache) {
+    if (v.expiresAt <= now) _cache.delete(k);
+  }
+  if (_cache.size > CONTEXT_AGENT_CACHE_MAX) {
+    const sorted = [..._cache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
+    const toEvict = sorted.slice(0, _cache.size - CONTEXT_AGENT_CACHE_MAX);
+    for (const [k] of toEvict) _cache.delete(k);
+  }
+}
 
 // ── Internal helpers ────────────────────────────────────────────────────────
 
@@ -408,6 +423,8 @@ export async function runContextAgent(params: {
 
   // ── Cache result ─────────────────────────────────────────────────────────
   _cache.set(orgId, { result, expiresAt: now + ttl });
+  // Evict oversized cache after each write to prevent OOM in long-running Lambdas
+  if (_cache.size > CONTEXT_AGENT_CACHE_MAX) _evictContextAgentCache();
 
   return result;
 }

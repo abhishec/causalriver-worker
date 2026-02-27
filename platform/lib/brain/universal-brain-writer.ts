@@ -36,6 +36,8 @@ const COGNITIVE_REFRESH_THRESHOLD = 50;
 
 // Track per-org write counts in memory (resets per Lambda invocation — that's fine)
 const orgWriteCounts: Map<string, number> = new Map();
+// Max orgs tracked per Lambda instance — prevents unbounded Map growth under high cardinality
+const ORG_WRITE_COUNTS_MAX = 500;
 
 export async function universalBrainWrite(
   supabase: SupabaseClient,
@@ -110,6 +112,13 @@ export async function universalBrainWrite(
   // 3. Track write counts for threshold-based cognitive refresh
   const count = (orgWriteCounts.get(orgId) ?? 0) + 1;
   orgWriteCounts.set(orgId, count);
+
+  // Evict oldest entries if Map grows beyond max to prevent OOM in long-running Lambdas
+  if (orgWriteCounts.size > ORG_WRITE_COUNTS_MAX) {
+    // Remove the first (oldest-inserted) entry as a cheap approximation of LRU
+    const firstKey = orgWriteCounts.keys().next().value;
+    if (firstKey !== undefined) orgWriteCounts.delete(firstKey);
+  }
 
   // Every N writes, log that cognitive refresh should be triggered
   // (Actual refresh happens via cron — this just tracks the signal)

@@ -181,15 +181,20 @@ export async function executeBPaaSProcess(
     processInstanceId = runner.getContext().processInstanceId;
   } else {
     // Fresh execution — create new bpaas_process_instances row
+    // Column names per migration 20260228100001_bpaas_foundation.sql:
+    //   agent_job_id UUID — FK to agent_queue.id (NOT "job_id")
+    //   current_state TEXT — the FSM state name (NOT "fsm_state" which is JSONB working memory)
+    //   fsm_state JSONB — working memory for the FSM (NOT the state name)
     const { data: instanceRow, error: insertErr } = await supabase
       .from("bpaas_process_instances")
       .insert({
         organization_id: params.organizationId,
-        job_id: params.jobId,
+        agent_job_id: params.jobId,
         process_type: params.processType,
         input_payload: params.inputPayload,
         status: "running",
-        fsm_state: "DECOMPOSE",
+        current_state: "DECOMPOSE",
+        fsm_state: {},
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -641,13 +646,15 @@ export async function executeBPaaSProcess(
   }
 
   // Finalise bpaas_process_instances
+  // current_state = final FSM state name (TEXT column)
+  // fsm_state = final working-memory JSONB (leave as the last saved context)
   try {
     await supabase
       .from("bpaas_process_instances")
       .update({
         status: status === "completed" ? "completed" : status === "escalated" ? "escalated" : "failed",
         output_result: outputResult,
-        fsm_state: finalState,
+        current_state: finalState,
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })

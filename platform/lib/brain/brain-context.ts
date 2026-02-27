@@ -13,6 +13,9 @@ import { getAdminClient } from "@/lib/supabase/admin";
 // reflected quickly. Cache is per-org so org isolation is preserved.
 const _brainContextCache = new Map<string, { data: BrainContext; expiry: number }>();
 const BRAIN_CONTEXT_TTL_MS = 30_000; // 30 seconds
+// Max entries: Lambda instances can serve many orgs over their lifetime.
+// Cap at 500 orgs — evict oldest-expiry entries when exceeded to prevent OOM.
+const BRAIN_CONTEXT_CACHE_MAX = 500;
 
 // ── In-flight dedup: prevents thundering herd on cache misses ────────────────
 // When multiple concurrent requests for the same org arrive simultaneously after
@@ -22,6 +25,19 @@ const BRAIN_CONTEXT_TTL_MS = 30_000; // 30 seconds
 // result. The entry is deleted in a `finally` block so a failed fetch never
 // permanently blocks the org.
 const _inFlight = new Map<string, Promise<BrainContext>>();
+
+/** Evict expired entries from _brainContextCache; if still over max, evict oldest. */
+function _evictBrainContextCache(): void {
+  const now = Date.now();
+  for (const [k, v] of _brainContextCache) {
+    if (v.expiry <= now) _brainContextCache.delete(k);
+  }
+  if (_brainContextCache.size > BRAIN_CONTEXT_CACHE_MAX) {
+    const sorted = [..._brainContextCache.entries()].sort((a, b) => a[1].expiry - b[1].expiry);
+    const toEvict = sorted.slice(0, _brainContextCache.size - BRAIN_CONTEXT_CACHE_MAX);
+    for (const [k] of toEvict) _brainContextCache.delete(k);
+  }
+}
 
 // ── Cross-org patterns cache: 5-min TTL (expensive: full-table scan across orgs) ─
 // L24 cross-org query uses the service client to aggregate patterns across ALL orgs.
@@ -1340,6 +1356,8 @@ export async function getBrainContext(
 
     // ── Cache store: 30s TTL per org ──────────────────────────────────
     _brainContextCache.set(orgId, { data: result, expiry: Date.now() + BRAIN_CONTEXT_TTL_MS });
+    // Evict expired / oversized entries periodically to prevent OOM in long-running Lambdas
+    if (_brainContextCache.size > BRAIN_CONTEXT_CACHE_MAX) _evictBrainContextCache();
 
     return result;
   } catch (err) {

@@ -84,8 +84,11 @@ export async function POST(request: NextRequest) {
     const signalType = action === "approve" ? "task_approved" : "task_rejected";
     const now = new Date().toISOString();
 
-    // Process each task
+    // Partition tasks into valid (eligible for update) and invalid (pre-flight failures)
+    // This avoids N+1 queries: we do pre-flight checks in memory, then ONE batch update.
+    const eligibleIds: string[] = [];
     const signalInserts: Record<string, unknown>[] = [];
+    const _signalNow = new Date().toISOString();
 
     for (const task of tasks) {
       const taskResult: { taskId: string; success: boolean; error?: string } = {
@@ -107,22 +110,8 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      // Update task
-      const { error: updateError } = await service
-        .from("brain_agent_tasks")
-        .update({
-          status: newStatus,
-          completed_at: now,
-          updated_at: now,
-        })
-        .eq("id", task.id);
-
-      if (updateError) {
-        taskResult.error = updateError.message;
-        results.push(taskResult);
-        continue;
-      }
-
+      // Eligible — queue for batch update
+      eligibleIds.push(task.id);
       taskResult.success = true;
       results.push(taskResult);
 
@@ -131,7 +120,6 @@ export async function POST(request: NextRequest) {
         ? task.auto_execute_threshold - task.confidence_score
         : null;
 
-      const _signalNow = new Date().toISOString();
       signalInserts.push({
         organization_id: task.organization_id,
         source_domain: "brain.agents",
@@ -157,6 +145,30 @@ export async function POST(request: NextRequest) {
         signal_timestamp: _signalNow,
         created_at: _signalNow,
       });
+    }
+
+    // Batch update all eligible tasks in ONE query (fixes N+1)
+    if (eligibleIds.length > 0) {
+      const { error: batchUpdateError } = await service
+        .from("brain_agent_tasks")
+        .update({
+          status: newStatus,
+          completed_at: now,
+          updated_at: now,
+        })
+        .in("id", eligibleIds);
+
+      if (batchUpdateError) {
+        // Mark all eligible tasks as failed if the batch update fails
+        for (const result of results) {
+          if (eligibleIds.includes(result.taskId)) {
+            result.success = false;
+            result.error = batchUpdateError.message;
+          }
+        }
+        signalInserts.length = 0; // clear signals — update failed
+        logger.warn("[BatchTasks] Batch update failed", { error: batchUpdateError.message });
+      }
     }
 
     // Batch insert RL signals

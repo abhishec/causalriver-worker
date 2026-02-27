@@ -40,6 +40,22 @@ interface CacheEntry {
 
 const _cache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+// Max entries: cap at 1000 to prevent unbounded growth in long-running Lambdas.
+// Each entry is keyed by a 16-hex hash; at most ~1000 active plan contexts is safe.
+const PLAN_CACHE_MAX = 1000;
+
+/** Evict expired entries; if still over max, evict oldest-expiry entries. */
+function _evictPlanCache(): void {
+  const now = Date.now();
+  for (const [k, v] of _cache) {
+    if (v.expiresAt <= now) _cache.delete(k);
+  }
+  if (_cache.size > PLAN_CACHE_MAX) {
+    const sorted = [..._cache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
+    const toEvict = sorted.slice(0, _cache.size - PLAN_CACHE_MAX);
+    for (const [k] of toEvict) _cache.delete(k);
+  }
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -186,6 +202,8 @@ export function setCachedPlan<T>(
     cachedAt: now,
     orgId,
   });
+  // Evict oversized cache after each write to prevent OOM in long-running Lambdas
+  if (_cache.size > PLAN_CACHE_MAX) _evictPlanCache();
 }
 
 /**

@@ -1233,7 +1233,10 @@ async function notifyAdminSlackDeadLetter(
       void supabase
         .from("dead_letter_queue")
         .update({ slack_notified: true, slack_notified_at: new Date().toISOString() })
-        .eq("writeback_queue_id", item.id);
+        .eq("writeback_queue_id", item.id)
+        .then(null, (err: unknown) =>
+          logger.warn("[writeback-dispatcher] dead_letter_queue slack_notified update failed (non-fatal):", err)
+        );
     }
   } catch (err) {
     logger.warn("[writeback-dispatcher] notifyAdminSlackDeadLetter error (non-fatal):", err);

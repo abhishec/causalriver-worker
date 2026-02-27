@@ -23,6 +23,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { executeBPaaSProcess } from "./domain-executor";
 import { isBPaaSProcessType } from "./process-registry";
+import { MAX_CHAIN_DEPTH } from "@/lib/brain/chain-invoker";
 import { logger } from "@/lib/logger";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -77,8 +78,29 @@ export async function processBPaaSJob(
     (payload.organizationId as string | undefined) ?? job.organization_id;
   const inputPayload = (payload.inputPayload as Record<string, unknown> | undefined) ?? {};
   const resumeFromJobId = payload.resumeFromJobId as string | undefined;
-  const chainDepth = payload.chainDepth as number | undefined;
+  const chainDepth = (payload.chainDepth as number | undefined) ?? 0;
   const userId = payload.userId as string | undefined;
+
+  // ── 2b. Chain depth guard — prevent infinite Lambda chaining ──────────────
+  // MAX_CHAIN_DEPTH (20) matches the global chain-invoker limit.
+  // Without this check a process that always triggers shouldChain() would
+  // create an unbounded chain of pending jobs, exhausting the queue.
+  if (chainDepth >= MAX_CHAIN_DEPTH) {
+    logger.warn("[bpaas/job-worker] Max chain depth reached — aborting", {
+      jobId: job.id,
+      processType: payload.processType,
+      chainDepth,
+      maxChainDepth: MAX_CHAIN_DEPTH,
+    });
+    await supabase
+      .from("agent_queue")
+      .update({
+        status: "failed",
+        error_message: `Max chain depth (${MAX_CHAIN_DEPTH}) reached — process aborted to prevent infinite chaining`,
+      })
+      .eq("id", job.id);
+    return;
+  }
 
   // ── 3. Validate processType ────────────────────────────────────────────────
   if (!processType) {

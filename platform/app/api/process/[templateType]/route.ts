@@ -11,7 +11,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isProcessTemplate, PROCESS_ENGINE_TEMPLATES } from "@/lib/process-engine";
 import { logger } from "@/lib/logger";
 
@@ -133,9 +133,10 @@ async function enqueueProcess(
   inputPayload: Record<string, unknown>,
   source: "user" | "m2m"
 ): Promise<NextResponse> {
+  // M2M calls must use service client (no user session); user calls use createClient (RLS-scoped)
   let supabase;
   try {
-    supabase = await createClient();
+    supabase = source === "m2m" ? await createServiceClient() : await createClient();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

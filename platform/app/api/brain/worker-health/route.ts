@@ -61,35 +61,13 @@ export async function GET(req: NextRequest) {
     const admin = getAdminClient();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-    // Pending count — guard against missing agent_queue table
-    let pendingCount = 0;
-    try {
-      const { count, error } = await admin
-        .from("agent_queue")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", workspaceId)
-        .eq("status", "pending");
-      if (!error) pendingCount = count ?? 0;
-      else logger.warn("[worker-health] pending query error:", error.message);
-    } catch (e) {
-      logger.warn("[worker-health] agent_queue (pending) unavailable:", e);
-    }
+    // ── Batch fetch: 2 queries instead of 5 separate COUNT queries ───────────
+    // Query 1: Recent jobs (last 10) — gives us status breakdown for recents
+    // Query 2: Artifact IDs for those jobs
+    // Counts for pending/running derived from rows in-memory; succeeded/failed
+    // counts for the 1h window require a separate query since recentRows is
+    // capped at 10 and may not cover the full 1h window.
 
-    // Running count
-    let runningCount = 0;
-    try {
-      const { count, error } = await admin
-        .from("agent_queue")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", workspaceId)
-        .eq("status", "running");
-      if (!error) runningCount = count ?? 0;
-      else logger.warn("[worker-health] running query error:", error.message);
-    } catch (e) {
-      logger.warn("[worker-health] agent_queue (running) unavailable:", e);
-    }
-
-    // Recent jobs (last 10)
     type QueueRow = {
       id: string;
       task_type: string;
@@ -98,7 +76,61 @@ export async function GET(req: NextRequest) {
       started_at: string | null;
       completed_at: string | null;
     };
+
+    // Query 1a: Count by status for pending/running (all time, no date filter)
+    // and for success/error in the last 1h — single query with status + date
+    // We need 4 counts: pending (all), running (all), success (1h), error (1h).
+    // Supabase doesn't support GROUP BY in JS client, so we use 2 targeted queries:
+    //   - Query A: pending + running counts in one go using .in("status", [...])
+    //   - Query B: success + error counts in last 1h using .in("status", [...]) + .gte
+    // This reduces 5 queries → 3 queries (A + B + recent rows).
+
+    let pendingCount = 0;
+    let runningCount = 0;
+    let succeededLast1h = 0;
+    let failedLast1h = 0;
     let recentRows: QueueRow[] = [];
+
+    // Query A: active status counts (pending + running) — no date filter
+    try {
+      const { data: activeRows, error } = await admin
+        .from("agent_queue")
+        .select("status")
+        .eq("organization_id", workspaceId)
+        .in("status", ["pending", "running"]);
+      if (!error && activeRows) {
+        for (const row of activeRows) {
+          if (row.status === "pending") pendingCount++;
+          else if (row.status === "running") runningCount++;
+        }
+      } else if (error) {
+        logger.warn("[worker-health] active status query error:", error.message);
+      }
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (active counts) unavailable:", e);
+    }
+
+    // Query B: completed/failed counts in last 1h
+    try {
+      const { data: completedRows, error } = await admin
+        .from("agent_queue")
+        .select("status")
+        .eq("organization_id", workspaceId)
+        .in("status", ["success", "completed", "error", "failed"])
+        .gte("completed_at", oneHourAgo);
+      if (!error && completedRows) {
+        for (const row of completedRows) {
+          if (row.status === "success" || row.status === "completed") succeededLast1h++;
+          else if (row.status === "error" || row.status === "failed") failedLast1h++;
+        }
+      } else if (error) {
+        logger.warn("[worker-health] completed status query error:", error.message);
+      }
+    } catch (e) {
+      logger.warn("[worker-health] agent_queue (completed counts) unavailable:", e);
+    }
+
+    // Query C: Recent jobs (last 10)
     try {
       const { data, error } = await admin
         .from("agent_queue")
@@ -146,36 +178,6 @@ export async function GET(req: NextRequest) {
         hasArtifact: jobsWithArtifacts.has(j.id),
       };
     });
-
-    // Succeeded count in last 1h — full count query, not limited to recentRows sample
-    let succeededLast1h = 0;
-    try {
-      const { count, error } = await admin
-        .from("agent_queue")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", workspaceId)
-        .eq("status", "success")
-        .gte("completed_at", oneHourAgo);
-      if (!error) succeededLast1h = count ?? 0;
-      else logger.warn("[worker-health] succeeded count query error:", error.message);
-    } catch (e) {
-      logger.warn("[worker-health] agent_queue (succeeded) unavailable:", e);
-    }
-
-    // Failed count in last 1h — full count query, not limited to recentRows sample
-    let failedLast1h = 0;
-    try {
-      const { count, error } = await admin
-        .from("agent_queue")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", workspaceId)
-        .eq("status", "error")
-        .gte("completed_at", oneHourAgo);
-      if (!error) failedLast1h = count ?? 0;
-      else logger.warn("[worker-health] failed count query error:", error.message);
-    } catch (e) {
-      logger.warn("[worker-health] agent_queue (failed) unavailable:", e);
-    }
 
     return NextResponse.json({
       pendingJobs: pendingCount,

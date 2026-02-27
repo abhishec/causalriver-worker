@@ -530,12 +530,16 @@ export class BPaaSFSMRunner {
    */
   async save(supabase: SupabaseClient): Promise<void> {
     // Persist fine-grained BPaaS context to bpaas_process_instances
+    // Column names per migration 20260228100001_bpaas_foundation.sql:
+    //   current_state TEXT — the FSM state name (e.g. "ASSESS", "MUTATE")
+    //   fsm_state JSONB    — working memory / full BPaaSContext for restore
+    //   (there is NO fsm_context column — fsm_state IS the context store)
     try {
       const { error } = await supabase
         .from("bpaas_process_instances")
         .update({
-          fsm_state: this.state,
-          fsm_context: this.context as unknown as Record<string, unknown>,
+          current_state: this.state,
+          fsm_state: this.context as unknown as Record<string, unknown>,
           updated_at: new Date().toISOString(),
         })
         .eq("id", this.context.processInstanceId)
@@ -624,16 +628,19 @@ export class BPaaSFSMRunner {
         (payload?.bpaas_instance_id as string);
 
       // 2. Try bpaas_process_instances for full context (preferred path)
+      // Column names per migration:
+      //   current_state TEXT — the FSM state name
+      //   fsm_state JSONB    — working memory / full BPaaSContext
       if (processInstanceId) {
         const { data: instanceRow } = await supabase
           .from("bpaas_process_instances")
-          .select("fsm_state, fsm_context")
+          .select("current_state, fsm_state")
           .eq("id", processInstanceId)
           .single();
 
-        if (instanceRow?.fsm_context) {
-          const savedContext = instanceRow.fsm_context as BPaaSContext;
-          const savedState = (instanceRow.fsm_state as BPaaSState) ?? "DECOMPOSE";
+        if (instanceRow?.fsm_state) {
+          const savedContext = instanceRow.fsm_state as BPaaSContext;
+          const savedState = (instanceRow.current_state as BPaaSState) ?? "DECOMPOSE";
 
           logger.warn("[BPaaSFSMRunner] restore: restored from bpaas_process_instances", {
             jobId,

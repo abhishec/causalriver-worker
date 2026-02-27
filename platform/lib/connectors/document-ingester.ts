@@ -264,6 +264,8 @@ export async function ingestDocument(
     params.documentTitle ?? params.sourceUrl ?? "unknown",
     rows.map((r) => ({ id: String(r.chunk_index), chunk_text: r.chunk_text, chunk_index: r.chunk_index })),
     params.sourceType
+  ).catch((err: unknown) =>
+    logger.warn("[document-ingester] absorbDocumentChunks fire-and-forget failed (non-fatal):", String(err))
   );
 
   return {
