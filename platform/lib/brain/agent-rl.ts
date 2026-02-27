@@ -12,6 +12,79 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+// ── Domain Threshold Cache ─────────────────────────────────────────────────
+
+/** Module-level cache for per-domain adaptive thresholds (refreshed every 30 min) */
+const _domainThresholdCache = new Map<string, { threshold: number; cachedAt: number }>();
+const THRESHOLD_CACHE_TTL = 30 * 60 * 1000;
+
+/**
+ * Hardcoded fallbacks per domain family.
+ * Used when fewer than 10 historical samples exist for a domain.
+ * Conservative baselines reflect each domain's expected difficulty.
+ */
+const DOMAIN_THRESHOLD_DEFAULTS: Record<string, number> = {
+  'pod-match':             0.65,
+  'early-warning':         0.60,
+  'delivery-intelligence': 0.62,
+  'scope-creep':           0.60,
+  'test-data-generator':   0.70,
+  'sql-analyzer':          0.72,
+  'incident-diagnosis':    0.68,
+  'default':               0.70,
+};
+
+/**
+ * Returns an adaptive quality threshold for (orgId, domain) based on the last
+ * 30 days of execution history from prediction_records.
+ *
+ * Formula: mean − 0.5 × stddev, clamped to [0.4, 0.85].
+ * Requires >= 10 samples; falls back to DOMAIN_THRESHOLD_DEFAULTS otherwise.
+ *
+ * Results are cached per (orgId, domain) for 30 minutes to avoid per-request
+ * DB overhead on the hot path.
+ */
+export async function getDomainThreshold(
+  supabase: SupabaseClient,
+  orgId: string,
+  domain: string
+): Promise<number> {
+  const cacheKey = `${orgId}:${domain}`;
+  const cached = _domainThresholdCache.get(cacheKey);
+  if (cached && Date.now() - cached.cachedAt < THRESHOLD_CACHE_TTL) {
+    return cached.threshold;
+  }
+
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('prediction_records')
+      .select('confidence')
+      .eq('organization_id', orgId)
+      .eq('domain', domain)
+      .gte('created_at', thirtyDaysAgo)
+      .not('confidence', 'is', null);
+
+    if (data && data.length >= 10) {
+      const values = (data as { confidence: number }[]).map(r => r.confidence);
+      const mean = values.reduce((s, v) => s + v, 0) / values.length;
+      const variance = values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / values.length;
+      const stddev = Math.sqrt(variance);
+      // ~70% of executions "pass" with this formula (mean − 0.5σ)
+      const adaptiveThreshold = Math.max(0.4, Math.min(0.85, mean - 0.5 * stddev));
+
+      _domainThresholdCache.set(cacheKey, { threshold: adaptiveThreshold, cachedAt: Date.now() });
+      return adaptiveThreshold;
+    }
+  } catch {
+    // Fall through to domain-family default
+  }
+
+  const defaultThreshold = DOMAIN_THRESHOLD_DEFAULTS[domain] ?? DOMAIN_THRESHOLD_DEFAULTS['default'];
+  _domainThresholdCache.set(cacheKey, { threshold: defaultThreshold, cachedAt: Date.now() });
+  return defaultThreshold;
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface AgentOutcomeParams {
@@ -37,7 +110,7 @@ export interface AgentOutcomeParams {
 
 export interface LearningStats {
   totalTasks: number;
-  successRate: number;       // 0–1: fraction with quality >= 0.7
+  successRate: number;       // 0–1: fraction with quality >= adaptive threshold
   avgQuality: number;        // 0–1
   topDomain: string | null;  // domain with most executions
   learningVelocity: number;  // tasks completed in last 24h
@@ -137,12 +210,18 @@ export function computeAgentQuality(
 /**
  * Record agent task outcome to prediction_records + cross_domain_signals.
  * Fire-and-forget safe — swallows all errors.
+ *
+ * Uses getDomainThreshold() for the dopamine/gaba split so that domains with
+ * historically lower scores (e.g. early-warning avg ~0.60) are not penalised
+ * by the old global 0.7 cutoff.
  */
 export async function recordAgentOutcome(
   supabase: SupabaseClient,
   params: AgentOutcomeParams
 ): Promise<void> {
-  const wasSuccess = params.quality >= 0.7;
+  // Get adaptive threshold for this domain — replaces hardcoded 0.7
+  const threshold = await getDomainThreshold(supabase, params.organizationId, params.domain);
+  const wasSuccess = params.quality >= threshold;
 
   try {
     // Derive model family for analytics grouping
@@ -169,6 +248,7 @@ export async function recordAgentOutcome(
       created_at: new Date().toISOString(),
       metadata: {
         ...(params.modelId ? { modelId: params.modelId, modelFamily } : {}),
+        adaptiveThreshold: threshold,
       },
     });
   } catch (err) {
@@ -201,6 +281,7 @@ export async function recordAgentOutcome(
         executionMs: params.executionMs,
         taskDescription: params.taskDescription.slice(0, 100),
         wasSuccess,
+        adaptiveThreshold: threshold,
       },
       // signal_timestamp is required for rl-status hourly/daily/weekly window queries.
       // created_at alone is not sufficient — rl-status filters by signal_timestamp.

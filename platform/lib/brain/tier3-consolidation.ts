@@ -63,6 +63,9 @@ export function shouldConsolidate(signal: {
   signal_value?: string | null;
 }): boolean {
   const strength = signal.signal_strength ?? 0;
+  // TODO(Phase 3): make 0.72 adaptive via getDomainThreshold() from agent-rl.ts
+  // Currently a global threshold; can be per-domain in a future pass once
+  // tier3 consolidation is wired to receive orgId + domain context.
   return strength >= 0.72 || signal.signal_value === "dopamine";
 }
 
@@ -237,6 +240,8 @@ export async function runConsolidation(
         "id, target_domain, signal_type, signal_strength, signal_value, payload"
       )
       .eq("organization_id", orgId)
+      // TODO(Phase 3): 0.72 is a global threshold — can become per-domain via
+      // getDomainThreshold() from agent-rl.ts once orgId+domain context is available here.
       .gte("signal_strength", 0.72)
       .in("signal_value", ["dopamine"])
       .gte("created_at", since)
