@@ -17,13 +17,13 @@ export const dynamic = "force-dynamic";
  *   }
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     // ── Auth: isolate createClient() failures so env var errors return 401, never 500 ──
     let supabase;
@@ -44,7 +44,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const workspaceId = await getCurrentWorkspaceId();
+    // Accept organizationId as a query param (from AgentLiveMonitor / cockpit)
+    // so this route works even when the workspace cookie isn't set server-side.
+    const queryOrgId = req.nextUrl.searchParams.get("organizationId");
+    const workspaceId = queryOrgId || (await getCurrentWorkspaceId());
     if (!workspaceId) {
       return NextResponse.json({
         pendingJobs: 0,

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
 // ── SSR-safe entry point ──────────────────────────────────────────────────────
 // CopilotPageClient relies on localStorage (workspace, service mode) which is
@@ -8,6 +9,9 @@ import dynamic from "next/dynamic";
 // skip server-rendering entirely — the loading fallback is rendered on both
 // server and client during hydration, then swapped for the real component after
 // mount. This eliminates ALL hydration mismatches caused by localStorage reads.
+//
+// The Suspense wrapper is required for useSearchParams() inside CopilotPageClient
+// to work correctly on hard navigation (Turbopack app-build-manifest.json).
 
 const LOADING_FALLBACK = (
   <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
@@ -31,5 +35,9 @@ const CopilotPageClient = dynamic(
 );
 
 export default function CopilotPage() {
-  return <CopilotPageClient />;
+  return (
+    <Suspense fallback={LOADING_FALLBACK}>
+      <CopilotPageClient />
+    </Suspense>
+  );
 }

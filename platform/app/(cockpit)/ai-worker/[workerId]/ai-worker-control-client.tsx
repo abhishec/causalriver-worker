@@ -106,16 +106,30 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
   // Fetch all data from APIs (scoped to this specific worker when workerId is available)
   const fetchAll = useCallback(async () => {
     const workerParam = workerId ? `?workerId=${encodeURIComponent(workerId)}` : "";
-    const [rlRes, healthRes, connRes] = await Promise.allSettled([
+    // Evolution endpoint requires organizationId — use orgId if available
+    const evolutionUrl = orgId
+      ? `/api/brain/evolution?organizationId=${encodeURIComponent(orgId)}`
+      : null;
+
+    const [rlRes, healthRes, connRes, evolutionRes] = await Promise.allSettled([
       fetch(`/api/brain/rl-status${workerParam}`),
       fetch(`/api/brain/worker-health${workerParam}`),
       fetch("/api/connectors/health"),
+      evolutionUrl ? fetch(evolutionUrl) : Promise.resolve(null),
     ]);
+
+    // Derive IQ from evolution endpoint (same source as dashboard) — fallback to rl-status
+    let brainIq = 0;
+    if (evolutionRes.status === "fulfilled" && evolutionRes.value && evolutionRes.value.ok) {
+      const ev = await evolutionRes.value.json();
+      const state = ev?.evolution ?? ev?.state;
+      brainIq = state?.intelligenceScore ?? 0;
+    }
 
     if (rlRes.status === "fulfilled" && rlRes.value.ok) {
       const d = await rlRes.value.json();
       setRlStatus({
-        brainIq: d.brainIq ?? 0,
+        brainIq,
         totalSignals24h: d.totalSignals24h ?? d.signalsThisSession ?? 0,
         learningVelocity: d.learningVelocity ?? 0,
         improvementThisSession: d.improvementThisSession ?? 0,

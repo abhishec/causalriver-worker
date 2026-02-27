@@ -256,9 +256,17 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
 
         const safeId = `mermaid-${uniqueId.replace(/:/g, "-")}-${blockKey}`;
         const { svg: rendered } = await mermaid.render(safeId, code);
+        // Mermaid v11 may leave a hidden error container in <body> — clean it up
+        const orphan = document.getElementById(safeId);
+        if (orphan) orphan.remove();
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError("Failed to render diagram");
+        // Mermaid v11 can inject error SVG nodes directly into <body> before throwing.
+        // Remove all orphaned mermaid containers to prevent them leaking to other pages.
+        document.querySelectorAll('[id^="mermaid-"]').forEach((el) => {
+          if (el.closest("body") && !el.closest("[data-mermaid-host]")) el.remove();
+        });
+        if (!cancelled) setError("Diagram unavailable");
       }
     })();
 
@@ -267,14 +275,8 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
 
   if (error) {
     return (
-      <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-warning/20 bg-warning/5 px-4 py-3">
-        <div className="flex items-center gap-2 text-xs text-warning mb-2">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-          </svg>
-          <span className="font-medium">Diagram render error</span>
-        </div>
-        <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap">{code}</pre>
+      <div key={blockKey} className="my-3 text-sm text-muted-foreground p-3 border border-border-subtle rounded-lg bg-surface">
+        Diagram unavailable
       </div>
     );
   }

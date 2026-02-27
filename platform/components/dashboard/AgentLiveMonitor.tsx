@@ -111,7 +111,12 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
   /* ── Fetch stats from worker-health API ────────────────────────────── */
   const fetchStats = useCallback(async () => {
     try {
-      const resp = await fetch("/api/brain/worker-health");
+      // Pass orgId as query param so the server scopes the query to this workspace
+      // without relying solely on the workspace cookie (which may not be set).
+      const url = orgId
+        ? `/api/brain/worker-health?organizationId=${encodeURIComponent(orgId)}`
+        : "/api/brain/worker-health";
+      const resp = await fetch(url);
       if (resp.ok) {
         const data = await resp.json();
         setStats({
@@ -124,7 +129,7 @@ export function AgentLiveMonitor({ orgId }: AgentLiveMonitorProps) {
     } catch {
       // non-critical — stats are supplementary
     }
-  }, []);
+  }, [orgId]);
 
   /* ── Initial data load ─────────────────────────────────────────────── */
   useEffect(() => {

@@ -39,9 +39,16 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
         });
         const safeId = `mermaid-result-${uniqueId.replace(/:/g, "-")}`;
         const { svg: rendered } = await mermaid.render(safeId, code);
+        // Mermaid v11 may leave a hidden container in <body> — clean it up
+        const orphan = document.getElementById(safeId);
+        if (orphan) orphan.remove();
         if (!cancelled) setSvg(rendered);
       } catch (err) {
-        if (!cancelled) setError("Failed to render diagram");
+        // Remove any orphaned mermaid error SVG nodes injected into <body> by mermaid v11
+        document.querySelectorAll('[id^="mermaid-result-"]').forEach((el) => {
+          if (el.closest("body") && !el.closest("[data-mermaid-host]")) el.remove();
+        });
+        if (!cancelled) setError("Diagram unavailable");
       }
     })();
     return () => { cancelled = true; };
@@ -49,11 +56,8 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
 
   if (error) {
     return (
-      <div className="my-3 rounded-xl overflow-hidden border border-warning/20 bg-warning/5 px-4 py-3">
-        <div className="flex items-center gap-2 text-xs text-warning mb-2">
-          <span className="font-medium">Diagram render error</span>
-        </div>
-        <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap">{code}</pre>
+      <div className="my-3 text-sm text-muted-foreground p-3 border border-border-subtle rounded-lg bg-surface">
+        Diagram unavailable
       </div>
     );
   }
