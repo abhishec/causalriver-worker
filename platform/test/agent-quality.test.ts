@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { computeAgentQuality } from "../lib/brain/agent-rl";
+import { computeAgentQuality } from "@/lib/brain/agent-rl";
 
 // ── Error cases ───────────────────────────────────────────────────────────
 

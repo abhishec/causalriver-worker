@@ -1,16 +1,25 @@
 /**
  * Rate Limiter Helper Tests
  * =========================
- * Tests the pure helper functions in lib/rate-limiter.ts:
- * - hashKey: deterministic SHA-256 of an API key (no DB needed)
- * - setRateLimitHeaders: sets standard X-RateLimit-* headers on a Response
- *
- * The async checkRateLimit function requires Supabase + Redis and is tested
- * via integration/e2e tests only.
+ * Tests both the pure helpers and the async checkRateLimit function (mocked).
  */
 
-import { describe, it, expect } from "vitest";
-import { hashKey, setRateLimitHeaders } from "../lib/rate-limiter";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Mock Supabase server client and Redis before importing rate-limiter
+vi.mock("@/lib/supabase/server", () => ({
+  createServiceClient: vi.fn(),
+}));
+vi.mock("@/lib/redis", () => ({
+  checkRateLimit: vi.fn(),
+}));
+vi.mock("@/lib/logger", () => ({
+  logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
+
+import { hashKey, setRateLimitHeaders, checkRateLimit } from "@/lib/rate-limiter";
+import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit as redisCheckRateLimit } from "@/lib/redis";
 
 // ── hashKey ───────────────────────────────────────────────────────────────
 
@@ -92,5 +101,103 @@ describe("setRateLimitHeaders", () => {
     expect(headers.get("X-RateLimit-Limit")).not.toBeNull();
     expect(headers.get("X-RateLimit-Remaining")).not.toBeNull();
     expect(headers.get("X-RateLimit-Reset")).not.toBeNull();
+  });
+});
+
+// ── checkRateLimit (mocked Supabase + Redis) ──────────────────────────────
+
+describe("checkRateLimit — Supabase primary path", () => {
+  function makeMockRpc(data: number | null, error: null | { message: string }) {
+    return vi.fn().mockResolvedValue({ data, error });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns allowed=true when Supabase RPC returns positive remaining", async () => {
+    const mockRpc = makeMockRpc(15, null);
+    vi.mocked(createServiceClient).mockResolvedValue({ rpc: mockRpc } as never);
+
+    const result = await checkRateLimit("abc123hash", 30);
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(15);
+    expect(result.resetAt).toBeInstanceOf(Date);
+  });
+
+  it("returns allowed=false when Supabase RPC returns negative remaining (rate limited)", async () => {
+    const mockRpc = makeMockRpc(-1, null);
+    vi.mocked(createServiceClient).mockResolvedValue({ rpc: mockRpc } as never);
+
+    const result = await checkRateLimit("abc123hash", 30);
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
+    expect(result.error).toMatch(/Rate limit exceeded/);
+  });
+
+  it("returns allowed=true when RPC returns 0 remaining (exactly at limit)", async () => {
+    const mockRpc = makeMockRpc(0, null);
+    vi.mocked(createServiceClient).mockResolvedValue({ rpc: mockRpc } as never);
+
+    const result = await checkRateLimit("abc123hash", 30);
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(0);
+  });
+
+  it("falls back to Redis when Supabase RPC returns error", async () => {
+    const mockRpc = vi.fn().mockResolvedValue({ data: null, error: { message: "DB error" } });
+    vi.mocked(createServiceClient).mockResolvedValue({ rpc: mockRpc } as never);
+    vi.mocked(redisCheckRateLimit).mockResolvedValue({ allowed: true, remaining: 10 } as never);
+
+    const result = await checkRateLimit("abc123hash", 30);
+    expect(result.allowed).toBe(true);
+    expect(vi.mocked(redisCheckRateLimit)).toHaveBeenCalled();
+  });
+
+  it("falls back to Redis when Supabase throws", async () => {
+    vi.mocked(createServiceClient).mockRejectedValue(new Error("Connection refused"));
+    vi.mocked(redisCheckRateLimit).mockResolvedValue({ allowed: false, remaining: 0 } as never);
+
+    const result = await checkRateLimit("abc123hash", 30);
+    expect(result.allowed).toBe(false);
+    expect(vi.mocked(redisCheckRateLimit)).toHaveBeenCalled();
+  });
+});
+
+describe("checkRateLimit — Redis fallback path", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Make Supabase fail so Redis fallback is always triggered
+    vi.mocked(createServiceClient).mockRejectedValue(new Error("Supabase down"));
+  });
+
+  it("Redis allowed → returns allowed=true with Redis remaining", async () => {
+    vi.mocked(redisCheckRateLimit).mockResolvedValue({ allowed: true, remaining: 7 } as never);
+    const result = await checkRateLimit("hash123", 20);
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(7);
+  });
+
+  it("Redis denied → returns allowed=false", async () => {
+    vi.mocked(redisCheckRateLimit).mockResolvedValue({ allowed: false, remaining: 0 } as never);
+    const result = await checkRateLimit("hash123", 20);
+    expect(result.allowed).toBe(false);
+    expect(result.remaining).toBe(0);
+    expect(result.error).toMatch(/Rate limit exceeded.*fallback/);
+  });
+
+  it("Redis throws → fail open (allowed=true with conservative limit)", async () => {
+    vi.mocked(redisCheckRateLimit).mockRejectedValue(new Error("Redis down"));
+    const result = await checkRateLimit("hash123", 20);
+    // Conservative limit = Math.max(floor(20 * 0.5), 5) = 10
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(10);
+  });
+
+  it("conservative Redis limit = max(floor(limit * 0.5), 5)", async () => {
+    // For limit=6: floor(6*0.5)=3, max(3,5)=5
+    vi.mocked(redisCheckRateLimit).mockRejectedValue(new Error("Redis down"));
+    const result = await checkRateLimit("hash123", 6);
+    expect(result.remaining).toBe(5); // max(3, 5) = 5
   });
 });

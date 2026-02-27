@@ -32,8 +32,8 @@ export function createSSEStream() {
 
   const close = () => {
     if (closed) return;
+    send("[DONE]");   // must enqueue before marking closed, otherwise send() returns early
     closed = true;
-    send("[DONE]");
     try { controller?.close(); } catch { /* already closed */ }
   };
 

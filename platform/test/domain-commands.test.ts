@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ALL_SLASH_COMMANDS } from "../components/copilot/SlashCommandPicker";
 import { AAS_COMMANDS } from "../components/copilot/aas-commands";
-import { DOMAIN_CATALOGUE } from "../lib/se-aas/domain-catalogue";
+import { DOMAIN_CATALOGUE, groupByCategory } from "@/lib/se-aas/domain-catalogue";
 
 describe("Domain commands completeness", () => {
   it("should have all 17 SE-aaS domains as slash commands", () => {
@@ -57,5 +57,42 @@ describe("Domain commands completeness", () => {
     expect(ALL_SLASH_COMMANDS.length).toBe(
       DOMAIN_CATALOGUE.length + AAS_COMMANDS.length + generalCommands.length
     );
+  });
+});
+
+// ── groupByCategory ───────────────────────────────────────────────────────
+
+describe("groupByCategory", () => {
+  it("groups items by their category field", () => {
+    const items = [
+      { id: "a", category: "Engineering" },
+      { id: "b", category: "Engineering" },
+      { id: "c", category: "Finance" },
+    ];
+    const result = groupByCategory(items);
+    expect(result["Engineering"]).toHaveLength(2);
+    expect(result["Finance"]).toHaveLength(1);
+  });
+
+  it("groups items with undefined category under 'Other'", () => {
+    const items = [
+      { id: "a" },         // no category
+      { id: "b", category: "Engineering" },
+    ];
+    const result = groupByCategory(items);
+    expect(result["Other"]).toHaveLength(1);
+    expect(result["Other"][0].id).toBe("a");
+    expect(result["Engineering"]).toHaveLength(1);
+  });
+
+  it("returns empty object for empty input", () => {
+    expect(groupByCategory([])).toEqual({});
+  });
+
+  it("works correctly on DOMAIN_CATALOGUE entries", () => {
+    const grouped = groupByCategory(DOMAIN_CATALOGUE);
+    // Every entry in DOMAIN_CATALOGUE should appear in some group
+    const totalItems = Object.values(grouped).reduce((sum, arr) => sum + arr.length, 0);
+    expect(totalItems).toBe(DOMAIN_CATALOGUE.length);
   });
 });

@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { formatUSD, formatTokens, formatNumber, timeAgo } from "../lib/utils";
+import { cn, formatUSD, formatTokens, formatNumber, timeAgo } from "@/lib/utils";
 
 // ── formatUSD ─────────────────────────────────────────────────────────────
 
@@ -170,5 +170,40 @@ describe("timeAgo", () => {
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60_000);
     // Both string and Date forms should return the same result
     expect(timeAgo(fiveMinutesAgo.toISOString())).toBe(timeAgo(fiveMinutesAgo));
+  });
+});
+
+// ── cn (className merger) ─────────────────────────────────────────────────
+
+describe("cn", () => {
+  it("merges class strings", () => {
+    expect(cn("foo", "bar")).toBe("foo bar");
+  });
+
+  it("handles single class", () => {
+    expect(cn("foo")).toBe("foo");
+  });
+
+  it("removes falsy values", () => {
+    expect(cn("foo", false, "bar", null, undefined)).toBe("foo bar");
+  });
+
+  it("handles Tailwind conflict merging (later class wins)", () => {
+    // tailwind-merge resolves conflicts: 'p-4' wins over 'p-2' when both present
+    expect(cn("p-2", "p-4")).toBe("p-4");
+  });
+
+  it("handles conditional class (object syntax via clsx)", () => {
+    const active = true;
+    const disabled = false;
+    expect(cn({ "bg-blue-500": active, "opacity-50": disabled })).toBe("bg-blue-500");
+  });
+
+  it("handles empty input", () => {
+    expect(cn()).toBe("");
+  });
+
+  it("handles empty string", () => {
+    expect(cn("")).toBe("");
   });
 });

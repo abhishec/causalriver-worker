@@ -13,7 +13,7 @@
 
 import { describe, it, expect } from "vitest";
 import * as XLSX from "xlsx";
-import { parseGLFile, type GLTransaction } from "../lib/parsers/gl-file-parser";
+import { parseGLFile, type GLTransaction } from "@/lib/parsers/gl-file-parser";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -491,6 +491,36 @@ describe("GL File Parser", () => {
     it("should throw on non-array JSON", () => {
       const buffer = Buffer.from('{"key": "value"}', "utf-8");
       expect(() => parseGLFile(buffer, "bad.json")).toThrow("array");
+    });
+
+    it("should throw on CSV with only a header row (no data)", () => {
+      // This covers the rows.length < 2 branch in parseCSV (line 499)
+      const csv = `Date,Account,Debit,Credit\n`;
+      const buffer = Buffer.from(csv, "utf-8");
+      expect(() => parseGLFile(buffer, "header-only.csv")).toThrow(/too few rows/i);
+    });
+  });
+
+  describe("Row parse error counting", () => {
+    it("should count parse errors for rows with data but unparseable date", () => {
+      // A row that has non-empty cells, non-skip first cell, but no valid date.
+      // This exercises the parseErrors++ branch (lines 437-438).
+      const rows: (string | number | null)[][] = [
+        ["Date", "Account", "Description", "Debit", "Credit"],
+        ["2024-01-15", "Revenue", "Valid transaction", 0, 50000],
+        // Row with non-empty data but totally invalid "date" value
+        ["NOT-A-DATE-VALUE-XYZ", "Revenue", "Invalid date row", 100, 0],
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
+
+      const result = parseGLFile(buffer, "error-rows.xlsx");
+
+      // The valid row should be parsed, the invalid one counted as a parse error
+      expect(result.transactions.length).toBeGreaterThanOrEqual(1);
+      expect(result.metadata.parseErrors).toBeGreaterThanOrEqual(1);
     });
   });
 });
