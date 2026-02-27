@@ -358,6 +358,26 @@ export async function attemptRecovery(
     `emptyResult=${emptyResult} reason="${failureReason.slice(0, 100)}"`
   );
 
+  // Write recovery_mode marker to ai_memory so the cognitive planner backs off
+  // this domain for the next 2h (planner checks memory_type='recovery_mode' in Phase 1f)
+  void (async () => {
+    try {
+      await supabase.from("ai_memory").insert({
+        organization_id: orgId,
+        domain: "cognitive-planner",
+        memory_type: "recovery_mode",
+        content: `recovery triggered for domain=${originalDomain} job=${jobId}`,
+        importance: 0.9,
+        metadata: {
+          triggeredDomain: originalDomain,
+          failureReason: failureReason.slice(0, 200),
+          jobId,
+          suppressUntil: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        },
+      });
+    } catch { /* non-fatal — planner will not suppress but that's acceptable */ }
+  })();
+
   let attemptsCount = 0;
 
   // ── Step 1: Check static strategies ──────────────────────────────────────

@@ -32,6 +32,16 @@ export interface PlannerDecision {
   rationale: string;
 }
 
+export interface PlannerState {
+  coverageGaps: string[];
+  poorQualityDomains: string[];
+  goodQualityDomains: string[];
+  stuckDomains: string[];
+  highDemandDomains: string[];   // domains users queried most in last 24h
+  recoveryMode: boolean;         // true when recovery-agent has fired recently
+  engagementCount: number;
+}
+
 export interface CognitivePlannerResult {
   cycleId: string;
   decisionsQueued: number;
@@ -39,6 +49,8 @@ export interface CognitivePlannerResult {
   coverageGaps: string[];
   poorQualityDomains: string[];
   stuckDomains: string[];
+  highDemandDomains: string[];
+  recoveryMode: boolean;
   reflected: boolean;
 }
 
@@ -123,6 +135,8 @@ export async function runCognitivePlanner(
       coverageGaps: [],
       poorQualityDomains: [],
       stuckDomains: [],
+      highDemandDomains: [],
+      recoveryMode: false,
       reflected: false,
     };
   }
@@ -278,6 +292,8 @@ async function _runCognitivePlannerInner(
   let poorQualityDomains: string[] = [];
   let goodQualityDomains: string[] = [];
   let stuckDomains: string[] = [];
+  let highDemandDomains: string[] = [];
+  let recoveryMode = false;
   let engagementCount: number = 0;
 
   // 1a. Coverage gaps — what domains haven't run recently (last 6h)
@@ -368,16 +384,60 @@ async function _runCognitivePlannerInner(
     logger.warn("[CognitivePlanner] Phase 1d (stuck domains) failed:", err);
   }
 
+  // 1e. Demand signals — which domains are users actually querying?
+  // Count prediction_records per domain in last 24h: high count = real user demand
+  // This makes strategy demand-driven (not just coverage-driven)
+  try {
+    const { data: demandRows } = await supabase
+      .from("prediction_records")
+      .select("domain_type")
+      .eq("organization_id", orgId)
+      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .limit(300);
+
+    const demandCounts: Record<string, number> = {};
+    for (const row of demandRows ?? []) {
+      const domain = (row as { domain_type: string | null }).domain_type ?? "unknown";
+      if (domain !== "unknown") demandCounts[domain] = (demandCounts[domain] ?? 0) + 1;
+    }
+
+    highDemandDomains = Object.entries(demandCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([domain, count]) => `${domain}(${count}x)`);
+  } catch (err) {
+    logger.warn("[CognitivePlanner] Phase 1e (demand signals) failed:", err);
+  }
+
+  // 1f. Recovery mode check — if recovery-agent wrote a marker recently, go conservative
+  // Prevents planner from flooding a domain that's already failing
+  try {
+    const { count: recoveryCount } = await supabase
+      .from("ai_memory")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", orgId)
+      .eq("memory_type", "recovery_mode")
+      .gte("created_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
+    recoveryMode = (recoveryCount ?? 0) > 0;
+    if (recoveryMode) {
+      logger.info(`[CognitivePlanner] Recovery mode active for org=${orgId} — reducing to 1 decision`);
+    }
+  } catch (err) {
+    logger.warn("[CognitivePlanner] Phase 1f (recovery mode check) failed:", err);
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 2 — PLAN (one Claude Haiku call)
   // ══════════════════════════════════════════════════════════════════════════
 
   const stateSnapshot = `## Current State
 - Active engagements: ${engagementCount}
-- Domains not run in >6h: ${coverageGaps.join(", ") || "none"}
+- Domains not run in >6h (coverage gaps): ${coverageGaps.join(", ") || "none"}
+- High user demand domains (queried today): ${highDemandDomains.join(", ") || "none"}
 - Poor quality domains (avg < 0.4 last 24h): ${poorQualityDomains.join(", ") || "none"}
 - Good quality domains (avg >= 0.7 last 24h): ${goodQualityDomains.join(", ") || "none"}
 - Stuck domains (5+ failures last 2h): ${stuckDomains.join(", ") || "none"}
+- Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
 
 ## Past Planning Decisions and Lessons
 ${pastReflectionsText}`;
@@ -389,13 +449,13 @@ ${pastReflectionsText}`;
       model: PLANNER_MODEL,
       max_tokens: 400,
       system:
-        "You are BrainOS's autonomous cognitive planner. You decide which agent domains to run next for an engineering organization. Be concise and practical. Never queue stuck domains. Prioritize coverage gaps over re-running recent domains. Output ONLY valid JSON.",
+        "You are BrainOS's autonomous cognitive planner. You decide which agent domains to run next for an engineering organization. Be concise and practical. Never queue stuck domains. Output ONLY valid JSON.",
       messages: [
         {
           role: "user",
           content:
             stateSnapshot +
-            '\n\nGiven this state, output a JSON array of at most 4 decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- Prefer domains in coverage gaps\n- Skip domains with avg quality < 0.4 unless >12h since last run\n- Max 4 decisions total',
+            `\n\nGiven this state, output a JSON array of at most ${recoveryMode ? 1 : 4} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < 0.4 unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${recoveryMode ? 1 : 4} decisions total`,
         },
       ],
     });
@@ -433,10 +493,10 @@ ${pastReflectionsText}`;
       }
     } catch (parseErr) {
       logger.warn("[CognitivePlanner] Phase 2 JSON parse failed, using coverage gap fallback:", parseErr);
-      // Fallback: top 2 coverage gap domains
+      // Fallback: top coverage gap domains (1 if in recovery, 2 otherwise)
       decisions = coverageGaps
         .filter((d) => !stuckDomains.includes(d))
-        .slice(0, 2)
+        .slice(0, recoveryMode ? 1 : 2)
         .map((domain) => ({
           domain,
           priority: "normal" as const,
@@ -569,6 +629,8 @@ ${pastReflectionsText}`;
     coverageGaps,
     poorQualityDomains,
     stuckDomains,
+    highDemandDomains,
+    recoveryMode,
     reflected,
   };
 }

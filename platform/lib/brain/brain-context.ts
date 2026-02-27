@@ -40,6 +40,7 @@ export interface BrainContext {
   qualityPatternsSummary: string;     // single-line summary for direct LLM prompt injection
 
   // ── Tier 2: Live Operations ──
+  strategicObjectives?: string;       // L3 derived: cognitive planner's current focus
   monitorAlerts?: string[];           // L4: autonomous monitor alerts (last 24h)
   signalActivitySummary?: string;     // L5: connector signal activity (last 48h)
 
@@ -937,6 +938,41 @@ export async function getBrainContext(
         ).join("; ")
       : "No recent domain quality data";
 
+    // ── STRATEGIC OBJECTIVES (L3 derived: cognitive planner working memory) ─────
+    // Reads the planner's last cycle decisions so Copilot can answer
+    // "what is BrainOS working on?" with the actual strategic focus.
+    let strategicObjectives: string | undefined;
+    try {
+      const { data: plannerMem } = await supabase
+        .from("ai_memory")
+        .select("content, created_at")
+        .eq("organization_id", orgId)
+        .eq("domain", "cognitive-planner")
+        .eq("memory_type", "working")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (plannerMem?.content) {
+        const parsed = JSON.parse(plannerMem.content as string) as {
+          decisions?: Array<{ domain: string; priority: string; rationale: string }>;
+          coverageGaps?: string[];
+          assessedAt?: string;
+        };
+        if (parsed.decisions && parsed.decisions.length > 0) {
+          const focusList = parsed.decisions
+            .map(d => `${d.domain} [${d.priority}]`)
+            .join(", ");
+          const age = plannerMem.created_at
+            ? Math.round((Date.now() - new Date(plannerMem.created_at as string).getTime()) / 60000)
+            : null;
+          strategicObjectives = `BrainOS strategic focus (${age != null ? `${age}m ago` : "recent"}): ${focusList}`;
+        }
+      }
+    } catch {
+      // non-fatal — strategic context is best-effort
+    }
+
     // ── SMART ROUTER (L1 derived) ─────────────────────────────────────────────
     // Mirrors the Brain IQ gate logic in model-router.ts (routeModelWithIq):
     // IQ < 10  → brain not ready → Haiku (cheap, data lookup only, no heavy reasoning)
@@ -979,6 +1015,7 @@ export async function getBrainContext(
       smartRouterRecommendation,
       // Tier 2
       activeJobCount, pendingJobCount, lastJobStatus,
+      strategicObjectives,
       monitorAlerts,
       signalActivitySummary,
       // Tier 3
@@ -1034,6 +1071,7 @@ export async function getBrainContext(
       qualityPatterns,
       qualityPatternsSummary,
       // Tier 2
+      strategicObjectives,
       monitorAlerts,
       signalActivitySummary,
       // Tier 3
@@ -1121,6 +1159,7 @@ function buildContextSummary(ctx: {
   activeJobCount: number;
   pendingJobCount: number;
   lastJobStatus: string | null;
+  strategicObjectives?: string;
   monitorAlerts?: string[];
   signalActivitySummary?: string;
   // Tier 3: Code & Document Intelligence
@@ -1200,6 +1239,12 @@ function buildContextSummary(ctx: {
   }
   if (ctx.lastJobStatus) {
     parts.push(`Last completed job: ${ctx.lastJobStatus}.`);
+  }
+
+  // 4b. Strategic Objectives (L3 derived: cognitive planner decisions)
+  // Surfaces the Brain's autonomous focus so Copilot can answer "what are you working on?"
+  if (ctx.strategicObjectives) {
+    parts.push(ctx.strategicObjectives + ".");
   }
 
   // 5. Smart Router (L1 derived)
