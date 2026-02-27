@@ -34,6 +34,13 @@ import {
   sendEscalationNotification,
   loadResumeCheckpoint,
 } from "@/lib/se-aas/agent-checkpoint";
+import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
+import {
+  createGitHubBranch,
+  commitFilesToBranch,
+  createGitHubPR,
+} from "@/lib/connectors/writeback/github";
+import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -983,6 +990,16 @@ export async function executeDomain(
     // Non-blocking: side-effect failure should NEVER break domain execution
   });
 
+  // ── Step 6b: Boilerplate-scaffold → GitHub PR write-back (non-blocking) ──
+  // If the caller provided repoOwner + repoName in the request and the
+  // boilerplate domain generated files, create a GitHub branch + commit + PR.
+  // Uses the org's GitHub connector credentials (decrypted via RPC).
+  if (params.domainType === "boilerplate-scaffold") {
+    _runBoilerplateGitHubWriteback(supabase, params.organizationId, params.request, result).catch(() => {
+      // Non-blocking: GitHub write-back failure MUST NOT block the domain result
+    });
+  }
+
   // ── Step 7: Federated Causal Learning — ORG → CORE delta promotion ───────
   // NB-063: This was the missing piece in SE-AAS vs AAS. AAS had this since
   // NB-059; SE-AAS was learning internally (bus.triggerEvolution updates the
@@ -1223,6 +1240,111 @@ async function _runDomainSideEffects(
       }
       break;
     }
+  }
+}
+
+// ============================================================================
+// BOILERPLATE-SCAFFOLD — GitHub PR write-back (Step 6b)
+// Runs after the domain executor returns a result. If repoOwner + repoName
+// are in the request and the domain produced files[], create a branch, commit,
+// and open a PR. All failures are non-fatal — the domain result is already
+// returned to the caller before this runs.
+// ============================================================================
+
+async function _runBoilerplateGitHubWriteback(
+  supabase: SupabaseClient,
+  organizationId: string,
+  request: Record<string, unknown>,
+  result: Record<string, unknown>
+): Promise<void> {
+  const repoOwner = typeof request.repoOwner === "string" ? request.repoOwner : null;
+  const repoName = typeof request.repoName === "string" ? request.repoName : null;
+
+  // Skip write-back if no repo info was provided in the request
+  if (!repoOwner || !repoName) return;
+
+  // Fetch GitHub token via RPC decryption (never read .credentials directly)
+  const githubCreds = await getConnectorCredentials(supabase, organizationId, "github");
+  const githubToken = (githubCreds?.access_token as string | undefined)
+    ?? (githubCreds?.token as string | undefined);
+
+  if (!githubToken) {
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: no GitHub token found (skipping)", {
+      orgId: organizationId,
+    });
+    return;
+  }
+
+  // Extract generated files from domain result
+  // boilerplateScaffoldDomain returns result.data.files: BoilerplateFile[]
+  const resultData = (result as Record<string, unknown>).data as Record<string, unknown> | undefined;
+  const rawFiles = resultData?.files as Array<{ path: string; content: string }> | undefined;
+
+  if (!rawFiles || rawFiles.length === 0) {
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: no files in domain result (skipping)", {
+      orgId: organizationId,
+      repoOwner,
+      repoName,
+    });
+    return;
+  }
+
+  const scaffoldName = typeof request.name === "string" ? request.name : "scaffold";
+  const slugName = scaffoldName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-{2,}/g, "-").slice(0, 40);
+  const branchName = `agent/scaffold-${slugName}-${Date.now().toString(36)}`;
+
+  const filesToCommit: GitHubFileToCommit[] = rawFiles
+    .filter((f) => typeof f.path === "string" && typeof f.content === "string")
+    .slice(0, 10) // cap at 10 files
+    .map((f) => ({ path: f.path, content: f.content }));
+
+  try {
+    await createGitHubBranch(githubToken, repoOwner, repoName, branchName);
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: branch created", {
+      branchName,
+      repo: `${repoOwner}/${repoName}`,
+    });
+  } catch (branchErr) {
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: branch creation failed (non-fatal)", {
+      error: branchErr instanceof Error ? branchErr.message : String(branchErr),
+    });
+    return;
+  }
+
+  try {
+    await commitFilesToBranch(
+      githubToken,
+      repoOwner,
+      repoName,
+      branchName,
+      filesToCommit,
+      `feat: ${scaffoldName} scaffold [agent-generated]`
+    );
+  } catch (commitErr) {
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: commit failed (non-fatal)", {
+      error: commitErr instanceof Error ? commitErr.message : String(commitErr),
+    });
+    return;
+  }
+
+  try {
+    const pr = await createGitHubPR(
+      githubToken,
+      repoOwner,
+      repoName,
+      `feat: ${scaffoldName} scaffold`,
+      `## ${scaffoldName} Boilerplate Scaffold\n\nGenerated by [BrainOS SE-aaS Boilerplate Generator](https://platform.usebrainos.com).\n\n**Files committed:** ${filesToCommit.length}\n**Branch:** \`${branchName}\`\n\n> Auto-generated scaffold — please review before merging.`,
+      branchName
+    );
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: PR created", {
+      prNumber: pr.number,
+      prUrl: pr.url,
+      repo: `${repoOwner}/${repoName}`,
+    });
+  } catch (prErr) {
+    logger.warn("[domain-executor] boilerplate-scaffold write-back: PR creation failed (non-fatal)", {
+      error: prErr instanceof Error ? prErr.message : String(prErr),
+    });
   }
 }
 

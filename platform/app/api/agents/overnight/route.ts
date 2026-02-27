@@ -17,6 +17,7 @@ import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { getBrainContext } from "@/lib/brain/brain-context";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
+import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { logger } from "@/lib/logger";
 import type { DecomposedTicket } from "@/app/api/agents/decompose-spec/route";
 
@@ -99,7 +100,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "repoName is required" }, { status: 400 });
   }
 
-  // ── Step 4: Look up GitHub connector credentials ──────────────────────────
+  // ── Step 4: Look up GitHub connector credentials (via RPC decryption) ────
   let serviceClient;
   try {
     serviceClient = await createServiceClient();
@@ -107,18 +108,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: githubConnector, error: githubErr } = await serviceClient
-    .from("org_connectors")
-    .select("credentials")
-    .eq("organization_id", organizationId)
-    .eq("connector_type", "github")
-    .eq("status", "active")
-    .single();
+  // Use getConnectorCredentials() to decrypt via get_connector_credentials RPC.
+  // Direct .select("credentials") bypasses pgcrypto decryption — never use it.
+  const githubCreds = await getConnectorCredentials(serviceClient, organizationId, "github");
 
-  if (githubErr || !githubConnector?.credentials) {
+  if (!githubCreds) {
     logger.warn("[overnight/route] No active GitHub connector found", {
       orgId: organizationId,
-      error: githubErr?.message,
     });
     return NextResponse.json(
       { error: "No active GitHub connector found. Connect GitHub in Settings > Connectors." },
@@ -126,8 +122,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const githubCreds = githubConnector.credentials as Record<string, unknown>;
-  const githubToken = (githubCreds.access_token as string | undefined) ?? "";
+  const githubToken = (githubCreds.access_token as string | undefined)
+    ?? (githubCreds.token as string | undefined)
+    ?? "";
   if (!githubToken) {
     return NextResponse.json(
       { error: "GitHub connector is missing access_token. Please reconnect GitHub." },
@@ -135,21 +132,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Step 5: Look up Slack connector credentials (optional) ───────────────
+  // ── Step 5: Look up Slack connector credentials (optional, via RPC) ──────
   let slackToken: string | undefined;
   try {
-    const { data: slackConnector } = await serviceClient
-      .from("org_connectors")
-      .select("credentials")
-      .eq("organization_id", organizationId)
-      .eq("connector_type", "slack")
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (slackConnector?.credentials) {
-      const slackCreds = slackConnector.credentials as Record<string, unknown>;
-      slackToken = slackCreds.access_token as string | undefined
-        ?? slackCreds.bot_token as string | undefined;
+    const slackCreds = await getConnectorCredentials(serviceClient, organizationId, "slack");
+    if (slackCreds) {
+      slackToken = (slackCreds.access_token as string | undefined)
+        ?? (slackCreds.bot_token as string | undefined);
     }
   } catch {
     // Non-fatal — Slack notifications are optional
