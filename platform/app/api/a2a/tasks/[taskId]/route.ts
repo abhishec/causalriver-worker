@@ -74,14 +74,18 @@ export async function GET(
 
     const admin = getAdminClient();
 
-    // Fetch the A2A job — enforce agent_type='a2a' to prevent cross-type leakage
+    // Fetch the A2A job — include both 'a2a' (SE-aaS skills) and 'bpaas'
+    // (Process Engine skills submitted via A2A) agent types.
+    // The payload.source = 'a2a' filter prevents cross-type leakage: only rows
+    // that were submitted through the A2A endpoint will have source='a2a'.
     const { data: job, error } = await admin
       .from("agent_queue")
       .select(
         "id, organization_id, task_type, status, payload, result, error_message, created_at, started_at, completed_at, checkpoint_data, checkpoint_phase, escalation_question"
       )
       .eq("id", taskId)
-      .eq("agent_type", "a2a")
+      .in("agent_type", ["a2a", "bpaas"])
+      .eq("payload->>source", "a2a")
       .maybeSingle();
 
     if (error) {
