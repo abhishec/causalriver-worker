@@ -20,15 +20,25 @@ import type { ModelRoutingDecision } from "@/lib/se-aas/model-router";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // ── Auth: isolate createClient() + getUser() so Lambda env var errors return 401, not 500 ──
+  let supabase;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  try {
 
     const routes: ModelRoutingDecision[] = ALL_SEAAS_DOMAINS.map((domain) =>
       routeModel(domain)

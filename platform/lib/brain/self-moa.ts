@@ -161,6 +161,90 @@ Return ONLY the synthesized response — no meta-commentary, no "combining A and
 }
 
 // ============================================================================
+// selfMoaSynthesize — Single-function dual-temperature synthesis
+// ============================================================================
+//
+// Simplified interface for callers that just want "better answer from two
+// sampling strategies". Takes system prompt + user message, returns the best
+// synthesized response.
+//
+// Use ONLY for high-stakes decisions: overnight agent spec parsing,
+// architectural decisions, domain routing when confidence < 0.5.
+// Near-zero additional cost vs. single-sample — 2× Haiku + 1× Haiku synthesis.
+
+/**
+ * Run dual-temperature Self-MoA synthesis.
+ *
+ * Runs the LLM twice in parallel:
+ *   temperature 0.3 → conservative, focused, high-accuracy
+ *   temperature 0.8 → creative, exploratory, more nuanced
+ *
+ * A third Haiku call synthesizes the best of both.
+ * Falls back to conservative response on any error.
+ *
+ * @param systemPrompt - System prompt for both candidate calls
+ * @param userMessage  - User message for both candidate calls
+ * @param model        - Model to use for candidates (default: claude-haiku-4-5-20251001)
+ * @returns            - Best synthesized response string
+ */
+export async function selfMoaSynthesize(
+  systemPrompt: string,
+  userMessage: string,
+  model: string = 'claude-haiku-4-5-20251001'
+): Promise<string> {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  try {
+    // Run both temperature variants in parallel for minimal latency overhead
+    const [conservativeResp, creativeResp] = await Promise.all([
+      anthropic.messages.create({
+        model,
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }],
+        top_p: 0.3, // conservative: focused, high-accuracy
+      }),
+      anthropic.messages.create({
+        model,
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }],
+        top_p: 0.8, // creative: diverse sampling, more nuance
+      }),
+    ]);
+
+    const conservative = conservativeResp.content[0]?.type === 'text' ? conservativeResp.content[0].text : '';
+    const creative = creativeResp.content[0]?.type === 'text' ? creativeResp.content[0].text : '';
+
+    if (!conservative && !creative) return '';
+    if (!creative || conservative === creative) return conservative;
+
+    // Synthesize with Haiku: pick the better response or combine best of both
+    const synthesisResp = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `Two AI responses to the same question. Pick the BETTER one or synthesize the best of both. Return ONLY the response, no commentary.
+
+Response A (conservative): ${conservative.slice(0, 800)}
+
+Response B (exploratory): ${creative.slice(0, 800)}
+
+Original question: ${userMessage.slice(0, 300)}
+
+Return ONLY the best response verbatim, or a synthesis of both. No explanation.`,
+      }],
+    });
+
+    return synthesisResp.content[0]?.type === 'text' ? synthesisResp.content[0].text : conservative;
+  } catch (err) {
+    logger.warn('[selfMoaSynthesize] Failed, returning empty string:', err instanceof Error ? err.message : String(err));
+    return '';
+  }
+}
+
+// ============================================================================
 // Pattern 2: 3-Lens Multi-Agent Synthesis
 // ============================================================================
 

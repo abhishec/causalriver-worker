@@ -32,12 +32,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
+  // ── Auth: isolate createClient() + getUser() so Lambda env var errors return 401, not 500 ──
+  let supabase;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     const organizationId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
 
@@ -72,12 +85,26 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // ── Auth: isolate createClient() + getUser() so Lambda env var errors return 401, not 500 ──
+  let supabasePost;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    supabasePost = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let userPost = null;
+  try {
+    const { data } = await supabasePost.auth.getUser();
+    userPost = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!userPost) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const user = userPost;
+
+  try {
 
     const body = await request.json();
     const {

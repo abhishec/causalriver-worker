@@ -72,7 +72,7 @@ import { getConnectorsWithCredentials } from "@/lib/connectors/get-credentials";
 import { captureOrchestrationDecision, captureModelSelection } from "@/lib/brain/orchestration-capture";
 import { logDecision } from "@/lib/brain/decision-log";
 import { routeCallType } from "@/lib/se-aas/model-router";
-import { selectModel as selectModelDAA } from "@/lib/brain/model-router";
+import { selectModel as selectModelDAA, classifyQueryDifficulty } from "@/lib/brain/model-router";
 import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
@@ -3918,6 +3918,14 @@ No connectors are configured yet. When the user asks for data from any source (S
     const hasDomainResults = !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult;
     const _domainCount = [seaasResult, accountingResult, deliveryIntelligenceResult, pmAasResult].filter(Boolean).length;
     const _isFollowUp = !!(conversationHistory && conversationHistory.length > 0);
+
+    // Classify query difficulty for enhanced DAAO routing signal
+    const _queryDifficulty = classifyQueryDifficulty(message, {
+      domainType: seaasRoute?.domainType ?? undefined,
+      hasConnectorData: hasDomainResults,
+      historyLength: conversationHistory?.length ?? 0,
+    });
+
     const _daaResult = selectModelDAA(message, {
       hasDomainData: hasDomainResults,
       domainCount: _domainCount,
@@ -3927,7 +3935,7 @@ No connectors are configured yet. When the user asks for data from any source (S
     // Legacy brain-IQ gate (IQ < 10 → force Haiku) applied as secondary safety gate
     const { model: _legacyIqModel } = routeCallType('copilot-complex', brainIqForRouting);
     const v4SmartModel = brainIqForRouting < 10 ? _legacyIqModel : _daaResult.model;
-    logger.warn(`[DAAO] model=${v4SmartModel} tier=${_daaResult.tier} iq=${brainIqForRouting} hasDomain=${hasDomainResults} followUp=${_isFollowUp} queryLen=${message.trim().length} rationale="${_daaResult.rationale}"`);
+    logger.warn(`[DAAO] model=${v4SmartModel} tier=${_daaResult.tier} difficulty=${_queryDifficulty} iq=${brainIqForRouting} hasDomain=${hasDomainResults} followUp=${_isFollowUp} queryLen=${message.trim().length} rationale="${_daaResult.rationale}"`);
     // Legacy memStack selectModel call kept for decision record rationale field
     const { selectModel: selectSmartModel } = memStack;
     const v4SmartModelBase = selectSmartModel(message, {

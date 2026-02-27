@@ -167,6 +167,36 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // ── Step 5b: Self-MoA spec enrichment ────────────────────────────────────
+  // Use dual-temperature synthesis (conservative + creative) to produce a
+  // richer spec before decomposition. This surfaces edge cases and
+  // architectural considerations the original spec may have omitted.
+  // Fire-and-forget safe — falls back to original spec on any error.
+  let enrichedSpec = spec.trim();
+  try {
+    const { selfMoaSynthesize } = await import("@/lib/brain/self-moa");
+    const moaResult = await selfMoaSynthesize(
+      `You are a software architect analyzing a feature specification for an engineering team.
+Your task: enrich the spec with implementation considerations, edge cases, and
+architectural notes that will help engineers implement the feature correctly.
+Keep the original intent intact — only ADD clarity. Return the enriched spec.`,
+      `Original spec:\n${spec.trim().slice(0, 2000)}`,
+      'claude-haiku-4-5-20251001'
+    );
+    if (moaResult && moaResult.length > spec.trim().length * 0.5) {
+      enrichedSpec = moaResult;
+      logger.warn("[overnight/route] Self-MoA spec enrichment applied", {
+        originalLen: spec.trim().length,
+        enrichedLen: enrichedSpec.length,
+      });
+    }
+  } catch (moaErr) {
+    // Non-fatal — continue with original spec
+    logger.warn("[overnight/route] Self-MoA spec enrichment failed (non-fatal)", {
+      error: moaErr instanceof Error ? moaErr.message : String(moaErr),
+    });
+  }
+
   // ── Step 6: Decompose spec into tickets ───────────────────────────────────
   let tickets: DecomposedTicket[] = [];
   try {
@@ -183,7 +213,8 @@ export async function POST(req: NextRequest) {
         // cookie forwarding is unavailable.
         ...(req.headers.get("cookie") ? { cookie: req.headers.get("cookie")! } : {}),
       },
-      body: JSON.stringify({ spec: spec.trim(), projectKey, repoOwner, repoName }),
+      // Use enriched spec (Self-MoA enhanced) if available, else original
+      body: JSON.stringify({ spec: enrichedSpec, projectKey, repoOwner, repoName }),
     });
 
     if (decomposeRes.ok) {

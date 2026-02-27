@@ -19,16 +19,25 @@ import { logger } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 
 export async function POST(): Promise<NextResponse> {
+  // ── Auth: isolate createClient() + getUser() so Lambda env var errors return 401, not 500 ──
+  let supabase;
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    supabase = await createClient();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  let user = null;
+  try {
+    const { data, error: authError } = await supabase.auth.getUser();
+    if (authError || !data.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    user = data.user;
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
 
     // Get the user's org
     const { data: membership } = await supabase

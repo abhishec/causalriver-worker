@@ -160,3 +160,82 @@ export function selectModel(
     rationale: `Default routing — Sonnet for reliable quality on unclassified query pattern`,
   };
 }
+
+// ── DAAO: Difficulty Classification ──────────────────────────────────────────
+//
+// Classifies a query into 4 difficulty tiers based on linguistic signals.
+// Used as an additive signal to selectModel() for upstream routing decisions.
+//
+// trivial  → Haiku  (single-fact lookups, status checks, <50 chars)
+// standard → Haiku  (most conversational queries — Haiku handles 80%+ traffic)
+// complex  → Sonnet (multi-step analysis, recommendations, optimization)
+// expert   → Opus   (cross-system root cause, 3+ domain correlation, long queries)
+//
+// Research: DAAO with difficulty classification achieves ~84% cost reduction
+// vs. always-Sonnet baseline with +11% quality on complex/expert tiers.
+
+export type DifficultyLevel = 'trivial' | 'standard' | 'complex' | 'expert';
+
+export interface DifficultyContext {
+  /** Domain type being executed (e.g. 'pod-match', 'early-warning') */
+  domainType?: string;
+  /** Whether connector data is available for this query */
+  hasConnectorData?: boolean;
+  /** Number of prior conversation turns (longer history = higher complexity) */
+  historyLength?: number;
+}
+
+/**
+ * Classify a query into a difficulty tier.
+ *
+ * Rules (first match wins):
+ *   trivial  — very short (<50 chars) OR matches simple factual question patterns
+ *   expert   — 2+ cross-domain keywords OR query >500 chars OR history >20 turns
+ *   complex  — analysis/recommendation/optimization keywords
+ *   standard — everything else (Haiku default)
+ */
+export function classifyQueryDifficulty(
+  query: string,
+  context: DifficultyContext = {}
+): DifficultyLevel {
+  const q = query.toLowerCase().trim();
+  const len = q.length;
+  const { historyLength = 0 } = context;
+
+  // trivial: very short, or obvious single-fact lookup
+  if (len < 50 || /^(what is|show me|list|how many|status of)\b/i.test(q)) {
+    return 'trivial';
+  }
+
+  // expert: cross-domain reasoning signals (2+ triggers required)
+  const expertIndicators = ['why', 'root cause', 'correlat', 'pattern across', 'compare', 'investigate', 'debug', 'trace', 'diagnose'];
+  const expertHitCount = expertIndicators.filter(kw => q.includes(kw)).length;
+  if (expertHitCount >= 2 || len > 500 || historyLength > 20) {
+    return 'expert';
+  }
+
+  // complex: analytical or strategic queries
+  if (/analyz|recommend|should we|best approach|optim|strateg|architect|decision|tradeoff|trade-off/i.test(q)) {
+    return 'complex';
+  }
+
+  return 'standard';
+}
+
+/**
+ * Map a difficulty level to the cheapest Claude model that can handle it.
+ *
+ * trivial  → Haiku  (fast lookup, no synthesis needed)
+ * standard → Haiku  (most queries — default to cheap)
+ * complex  → Sonnet (structured analysis, recommendations)
+ * expert   → Opus   (cross-system root cause, deep synthesis)
+ */
+export function selectModelForDifficulty(difficulty: DifficultyLevel): CopilotModel {
+  const mapping: Record<DifficultyLevel, CopilotModel> = {
+    trivial:  'claude-haiku-4-5-20251001',
+    standard: 'claude-haiku-4-5-20251001', // Haiku handles the vast majority of queries
+    complex:  'claude-sonnet-4-6',
+    expert:   'claude-opus-4-6',
+  };
+  return mapping[difficulty];
+}

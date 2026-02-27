@@ -42,6 +42,7 @@ on:
     - cron: '0 */4 * * *'    # Every 4 hours — learning cycle
     - cron: '0 */6 * * *'    # Every 6 hours — evolution cycle
     - cron: '0 3 * * *'      # Daily 3 AM UTC — RLVR ground-truth verification
+    - cron: '0 3 * * 0'      # Weekly Sunday 3 AM UTC — RLVR prediction_records verification (30-60d)
     - cron: '0 4 * * *'      # Daily 4 AM UTC — CC learnings ingestion (case-log + retro → brain)
   workflow_dispatch: {}      # Manual trigger — runs all endpoints
 
@@ -221,6 +222,21 @@ jobs:
             --max-time 120 \
             "${BASE_URL}/api/cron/process-writeback" \
             || echo "process-writeback failed (non-fatal)"
+
+      # ── RLVR Prediction Records Verification (weekly Sunday 3 AM UTC) ──────────
+      # Verifies prediction_records created 30-60 days ago against actual connector
+      # outcomes. Updates was_correct with ground truth, emits RL signals.
+      # This closes the RL loop on the L4 Causal layer (not just rlvr_prediction_outcomes).
+      - name: RLVR Prediction Records Verification (weekly Sunday)
+        if: ${{ github.event.schedule == '0 3 * * 0' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/rlvr-verify ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 \
+            "${BASE_URL}/api/cron/rlvr-verify" \
+            || echo "rlvr-verify failed (non-fatal)"
 
       # ── Memory Cleanup (daily 3 AM UTC) ──────────────────────────────────────
       # Removes stale rows from cross_domain_signals (>90d), prediction_records
