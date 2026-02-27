@@ -46,9 +46,16 @@ export type BPaaSState =
   | "SCHEDULE_NOTIFY"
   | "COMPLETE"
   | "ESCALATE"
-  | "FAILED";
+  | "FAILED"
+  // Custom intermediate states used in specific process templates
+  | "FRAUD_REVIEW"
+  | "DUPLICATE_CHECK"
+  | "EVIDENCE_REVIEW"
+  | "RECONCILE"
+  | "RCA";
 
 export type BPaaSTransitionEvent =
+  // Core events
   | "decomposed"
   | "assessed"
   | "computed"
@@ -60,7 +67,35 @@ export type BPaaSTransitionEvent =
   | "mutated"
   | "notified"
   | "escalate"
-  | "error";
+  | "error"
+  // Custom state completion events
+  | "fraud_signals"
+  | "fraud_reviewed"
+  | "duplicates_resolved"
+  | "rca_complete"
+  | "evidence_reviewed"
+  | "reconciled"
+  // Process-specific transition events
+  | "variance_detected"
+  | "breach_confirmed"
+  | "pre_breach_warning"
+  | "escalated"
+  | "policy_violation"
+  | "conflicts_found"
+  | "all_conflicts_confirmed"
+  | "compliance_conflict"
+  | "inconclusive_evidence"
+  | "elevated_review_triggered"
+  | "resolved"
+  | "unidentified_transaction"
+  | "disputed_transaction"
+  | "rm_missing"
+  | "dependency_conflict"
+  | "active_enterprise_customer"
+  | "payment_plan_requested"
+  | "two_person_approval_required"
+  | "security_conflict"
+  | "cfo_review_required";
 
 export interface BPaaSContext {
   /** 'hr_offboarding' | 'procurement' | 'order_management' */
@@ -87,6 +122,8 @@ export interface BPaaSContext {
   approvalId?: string;
   /** Output of MUTATE state */
   mutationResult?: Record<string, unknown>;
+  /** Results from custom intermediate states (FRAUD_REVIEW, RECONCILE, etc.) */
+  customStateResults?: Record<string, Record<string, unknown>>;
   stateHistory: Array<{
     state: BPaaSState;
     enteredAt: number;
@@ -100,156 +137,76 @@ export interface BPaaSContext {
 // ── State Machine Transition Table ──────────────────────────────────────────
 
 /**
- * Legal state transitions.
- * Key: [currentState, event] → nextState
+ * Custom intermediate states that are handled generically.
+ * These states use the process definition's FSMTransition table to resolve
+ * their outgoing transitions — NOT the CORE_TRANSITIONS table.
  */
-const TRANSITIONS: Readonly<
-  Record<string, Record<BPaaSTransitionEvent, BPaaSState | null>>
+const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
+  "FRAUD_REVIEW",
+  "DUPLICATE_CHECK",
+  "EVIDENCE_REVIEW",
+  "RECONCILE",
+  "RCA",
+]);
+
+/**
+ * Core state transitions (partial — only non-null transitions are listed).
+ * Process definition transitions take priority over these when both match.
+ * Custom intermediate states use process definition transitions exclusively.
+ */
+const CORE_TRANSITIONS: Readonly<
+  Record<string, Partial<Record<BPaaSTransitionEvent, BPaaSState | null>>>
 > = {
   DECOMPOSE: {
     decomposed: "ASSESS",
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   ASSESS: {
-    decomposed: null,
     assessed: "COMPUTE",
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   COMPUTE: {
-    decomposed: null,
-    assessed: null,
     computed: "POLICY_CHECK",
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   POLICY_CHECK: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
     policy_pass: "APPROVAL_GATE",
     policy_fail: "ESCALATE",
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   APPROVAL_GATE: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
     requires_approval: "APPROVAL_GATE", // self-loop: stays awaiting
     approved: "MUTATE",
     rejected: "FAILED",
-    mutated: null,
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   MUTATE: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
     mutated: "SCHEDULE_NOTIFY",
-    notified: null,
     escalate: "ESCALATE",
     error: "FAILED",
   },
   SCHEDULE_NOTIFY: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
     notified: "COMPLETE",
     escalate: "ESCALATE",
     error: "FAILED",
   },
   COMPLETE: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
-    escalate: null,
     error: null,
   },
   ESCALATE: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
-    escalate: null,
+    escalated: "COMPLETE",
     error: "FAILED",
   },
-  FAILED: {
-    decomposed: null,
-    assessed: null,
-    computed: null,
-    policy_pass: null,
-    policy_fail: null,
-    requires_approval: null,
-    approved: null,
-    rejected: null,
-    mutated: null,
-    notified: null,
-    escalate: null,
-    error: null,
-  },
+  FAILED: {},
 };
 
 /** Map BPaaS fine-grained states to the coarse ProcessFSM states for agent_queue. */
-const BPAAS_TO_COARSE: Record<BPaaSState, ProcessFSM["state"]> = {
+const BPAAS_TO_COARSE: Record<string, ProcessFSM["state"]> = {
   DECOMPOSE: "running",
   ASSESS: "running",
   COMPUTE: "running",
@@ -260,6 +217,12 @@ const BPAAS_TO_COARSE: Record<BPaaSState, ProcessFSM["state"]> = {
   COMPLETE: "completed",
   ESCALATE: "paused",
   FAILED: "failed",
+  // Custom intermediate states — all map to "running"
+  FRAUD_REVIEW: "running",
+  DUPLICATE_CHECK: "running",
+  EVIDENCE_REVIEW: "running",
+  RECONCILE: "running",
+  RCA: "running",
 };
 
 // ── BPaaSFSMRunner ─────────────────────────────────────────────────────────
@@ -267,18 +230,28 @@ const BPAAS_TO_COARSE: Record<BPaaSState, ProcessFSM["state"]> = {
 export class BPaaSFSMRunner {
   private state: BPaaSState;
   private context: BPaaSContext;
+  /** Process definition transitions — resolves custom state and template overrides. */
+  private processTransitions: Array<{ from: string; to: string; on: string }>;
   /** Coarse-grained FSM used for agent_queue persistence. */
   private processFSM: ProcessFSM;
 
   constructor(
     context: BPaaSContext,
-    initialState: BPaaSState = "DECOMPOSE"
+    initialState: BPaaSState = "DECOMPOSE",
+    processTransitions: Array<{ from: string; to: string; on: string }> = []
   ) {
     this.context = { ...context };
     this.state = initialState;
+    this.processTransitions = processTransitions;
     this.processFSM = new ProcessFSM();
     // Sync coarse FSM to initial state
-    this.processFSM.transition(BPAAS_TO_COARSE[initialState]);
+    const coarseState = BPAAS_TO_COARSE[initialState] ?? "running";
+    this.processFSM.transition(coarseState);
+  }
+
+  /** Update process transitions (called after definition is loaded). */
+  setProcessTransitions(transitions: Array<{ from: string; to: string; on: string }>): void {
+    this.processTransitions = transitions;
   }
 
   // ── Accessors ───────────────────────────────────────────────────────────
@@ -323,18 +296,40 @@ export class BPaaSFSMRunner {
     event: BPaaSTransitionEvent,
     supabase?: SupabaseClient
   ): Promise<BPaaSState> {
-    const stateTransitions = TRANSITIONS[this.state];
-    if (!stateTransitions) {
-      throw new Error(
-        `[BPaaSFSMRunner] Unknown current state: ${this.state}`
-      );
-    }
+    let nextState: BPaaSState | null | undefined;
 
-    const nextState = stateTransitions[event];
-    if (nextState === null || nextState === undefined) {
-      throw new Error(
-        `[BPaaSFSMRunner] Illegal transition: ${this.state} --[${event}]--> (no target state)`
-      );
+    // 1. Process definition transitions take priority (handles custom states + overrides)
+    const defTransition = this.processTransitions.find(
+      (t) => t.from === this.state && t.on === event
+    );
+    if (defTransition) {
+      nextState = defTransition.to as BPaaSState;
+    } else if (CUSTOM_INTERMEDIATE_STATES.has(this.state)) {
+      // Custom intermediate state with no matching definition transition
+      if (event === "error") {
+        nextState = "FAILED";
+      } else if (event === "escalate") {
+        nextState = "ESCALATE";
+      } else {
+        throw new Error(
+          `[BPaaSFSMRunner] No transition for custom state ${this.state} --[${event}]-->` +
+          ` (add it to the process definition transitions)`
+        );
+      }
+    } else {
+      // 2. Fall back to CORE_TRANSITIONS
+      const stateTransitions = CORE_TRANSITIONS[this.state];
+      if (!stateTransitions) {
+        throw new Error(
+          `[BPaaSFSMRunner] Unknown current state: ${this.state}`
+        );
+      }
+      nextState = stateTransitions[event];
+      if (nextState === null || nextState === undefined) {
+        throw new Error(
+          `[BPaaSFSMRunner] Illegal transition: ${this.state} --[${event}]--> (no target state)`
+        );
+      }
     }
 
     const now = Date.now();
@@ -363,8 +358,8 @@ export class BPaaSFSMRunner {
     // Advance fine-grained state
     this.state = nextState;
 
-    // Sync coarse ProcessFSM
-    const coarseState = BPAAS_TO_COARSE[nextState];
+    // Sync coarse ProcessFSM — unknown custom states default to "running"
+    const coarseState = BPAAS_TO_COARSE[nextState] ?? "running";
     this.processFSM.transition(coarseState);
 
     const durationMs = now - stepStartMs;

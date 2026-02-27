@@ -91,45 +91,83 @@ export function evaluatePolicyRules(
 }
 
 /**
- * Evaluate a simple condition string against a context object.
- * Supports: >, <, >=, <=, ==, ===, boolean field checks.
+ * Evaluate a single atomic condition: "!field", "field op value", or bare "field".
+ */
+function evaluateAtom(atom: string, context: PolicyContext): boolean {
+  const trimmed = atom.trim();
+
+  // Negation: "!field"
+  if (trimmed.startsWith("!")) {
+    const field = trimmed.slice(1).trim();
+    return !Boolean(context[field]);
+  }
+
+  // Comparison: "field op value"
+  const comparisonMatch = trimmed.match(/^(\w+)\s*(>=|<=|===|!==|==|!=|>|<)\s*(.+)$/);
+  if (comparisonMatch) {
+    const [, field, operator, rawValue] = comparisonMatch;
+    const contextValue = context[field];
+    if (contextValue === undefined) return false;
+
+    const numValue = parseFloat(rawValue);
+    // Strip surrounding quotes for string comparison
+    const strValue = rawValue.trim().replace(/^['"]|['"]$/g, "");
+
+    switch (operator) {
+      case ">":
+        return (contextValue as number) > numValue;
+      case "<":
+        return (contextValue as number) < numValue;
+      case ">=":
+        return (contextValue as number) >= numValue;
+      case "<=":
+        return (contextValue as number) <= numValue;
+      case "===":
+      case "==":
+        return String(contextValue) === strValue;
+      case "!==":
+      case "!=":
+        return String(contextValue) !== strValue;
+    }
+  }
+
+  // Boolean field check: "has_unvested_equity", "vendor_is_new"
+  if (/^\w+$/.test(trimmed)) {
+    return Boolean(context[trimmed]);
+  }
+
+  return false;
+}
+
+/**
+ * Evaluate a condition string against a context object.
+ * Supports: >, <, >=, <=, ==, ===, !=, !==, &&, ||, !, and boolean field checks.
+ * Handles compound expressions like:
+ *   "days_since_incident > 30 && !hospitalization_exception"
+ *   "notification_hour >= 22 || notification_hour < 6"
+ *   "requested_class === 'business' && flight_duration_hours < 6"
  * Fully deterministic — no eval(), no LLM.
+ *
+ * Operator precedence: NOT (!) > AND (&&) > OR (||), evaluated left-to-right.
  */
 function evaluateCondition(condition: string, context: PolicyContext): boolean {
   try {
-    // Match patterns like: "field > number", "field < number", "boolean_field"
-    const comparisonMatch = condition.match(/^(\w+)\s*(>|<|>=|<=|===|==|!=)\s*(.+)$/);
-    if (comparisonMatch) {
-      const [, field, operator, rawValue] = comparisonMatch;
-      const contextValue = context[field];
-      if (contextValue === undefined) return false;
+    const trimmed = condition.trim();
 
-      const numValue = parseFloat(rawValue);
-      const strValue = rawValue.replace(/['"]/g, "");
-
-      switch (operator) {
-        case ">":
-          return (contextValue as number) > numValue;
-        case "<":
-          return (contextValue as number) < numValue;
-        case ">=":
-          return (contextValue as number) >= numValue;
-        case "<=":
-          return (contextValue as number) <= numValue;
-        case "===":
-        case "==":
-          return String(contextValue) === strValue;
-        case "!=":
-          return String(contextValue) !== strValue;
-      }
+    // OR — lowest precedence (split on " || " with spaces)
+    if (trimmed.includes(" || ")) {
+      const orParts = trimmed.split(" || ");
+      return orParts.some((part) => evaluateCondition(part.trim(), context));
     }
 
-    // Boolean field check: "has_unvested_equity", "vendor_is_new"
-    if (/^\w+$/.test(condition)) {
-      return Boolean(context[condition]);
+    // AND — higher precedence than OR (split on " && " with spaces)
+    if (trimmed.includes(" && ")) {
+      const andParts = trimmed.split(" && ");
+      return andParts.every((part) => evaluateCondition(part.trim(), context));
     }
 
-    return false;
+    // Base case: single atom
+    return evaluateAtom(trimmed, context);
   } catch (err) {
     logger.warn("[BPaaS/PolicyChecker] Condition evaluation error", {
       condition,

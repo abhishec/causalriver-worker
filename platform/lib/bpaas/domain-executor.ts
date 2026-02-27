@@ -26,7 +26,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { BPaaSFSMRunner } from "./fsm-runner";
-import type { BPaaSContext, BPaaSState } from "./fsm-runner";
+import type { BPaaSContext, BPaaSState, BPaaSTransitionEvent } from "./fsm-runner";
 import { getProcessDefinition, bpaasDomain } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
@@ -61,6 +61,21 @@ export interface BPaaSExecutionResult {
   chainDepth?: number;
   durationMs: number;
 }
+
+// ── Custom intermediate states ────────────────────────────────────────────────
+
+/**
+ * States handled generically via process definition transitions.
+ * The domain executor uses LLM analysis to determine the outgoing event.
+ * Add new custom states here if they appear in future process templates.
+ */
+const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
+  "FRAUD_REVIEW",
+  "DUPLICATE_CHECK",
+  "EVIDENCE_REVIEW",
+  "RECONCILE",
+  "RCA",
+]);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -160,6 +175,27 @@ export async function executeBPaaSProcess(
     });
   }
 
+  // ── Load process definition (needed for custom state transitions) ─────────
+  // Loaded once here so that custom states (FRAUD_REVIEW, RECONCILE, etc.) have
+  // the process definition's FSMTransition table available throughout the loop.
+  let definition;
+  try {
+    definition = await getProcessDefinition(
+      params.processType,
+      params.organizationId,
+      supabase
+    );
+  } catch (defErr) {
+    return {
+      status: "failed",
+      processInstanceId: params.jobId,
+      processType: params.processType,
+      finalState: "FAILED",
+      errorMessage: `getProcessDefinition failed: ${defErr instanceof Error ? defErr.message : String(defErr)}`,
+      durationMs: Date.now() - startedAt,
+    };
+  }
+
   // ── Step 0: Resume or create ──────────────────────────────────────────────
   let runner: BPaaSFSMRunner;
   let processInstanceId: string;
@@ -178,6 +214,8 @@ export async function executeBPaaSProcess(
       };
     }
     runner = restored;
+    // Wire process transitions into restored runner so custom states resolve correctly
+    runner.setProcessTransitions(definition.transitions);
     processInstanceId = runner.getContext().processInstanceId;
   } else {
     // Fresh execution — create new bpaas_process_instances row
@@ -224,7 +262,7 @@ export async function executeBPaaSProcess(
       startedAt,
     };
 
-    runner = new BPaaSFSMRunner(context, "DECOMPOSE");
+    runner = new BPaaSFSMRunner(context, "DECOMPOSE", definition.transitions);
   }
 
   // ── State machine loop ────────────────────────────────────────────────────
@@ -285,9 +323,9 @@ export async function executeBPaaSProcess(
         // Mutate context directly through runner's exposed context reference
         const ctx = runner.getContext();
         const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan };
-        // Re-construct runner in same state with updated context
+        // Re-construct runner in same state with updated context + process transitions
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState);
+        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         await runner.transition("decomposed", supabase);
         await runner.save(supabase);
@@ -330,7 +368,7 @@ export async function executeBPaaSProcess(
 
         const updatedCtx: BPaaSContext = { ...ctx, assessedFacts };
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState);
+        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         await runner.transition("assessed", supabase);
         await runner.save(supabase);
@@ -379,28 +417,110 @@ export async function executeBPaaSProcess(
 
         const updatedCtx: BPaaSContext = { ...ctx, computedValues };
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState);
+        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         await runner.transition("computed", supabase);
+        await runner.save(supabase);
+      }
+
+      // ── CUSTOM INTERMEDIATE STATES ────────────────────────────────────────
+      // Handles FRAUD_REVIEW, DUPLICATE_CHECK, EVIDENCE_REVIEW, RECONCILE, RCA
+      // and any future custom states added to process templates.
+      // Uses LLM (Haiku) to evaluate the context and choose the correct outgoing event
+      // from the process definition's transitions table.
+      else if (CUSTOM_INTERMEDIATE_STATES.has(currentState)) {
+        const ctx = runner.getContext();
+
+        // Get valid outgoing transitions for this state from the process definition
+        const validTransitions = definition.transitions.filter(
+          (t) => t.from === currentState
+        );
+
+        if (validTransitions.length === 0) {
+          throw new Error(
+            `[BPaaS/DomainExecutor] No outgoing transitions defined for custom state ${currentState} in process ${params.processType}`
+          );
+        }
+
+        const validEvents = validTransitions.map((t) => t.on);
+
+        // Use Haiku LLM to determine which event fires based on context
+        const systemPrompt = [
+          `You are a BPaaS state handler for the ${currentState} state in a ${params.processType} process.`,
+          `Analyse the business context and determine which transition event should fire.`,
+          `Available events: ${validEvents.join(", ")}`,
+          `Return a JSON object with: { "event": "<one of the available events>", "reason": "<brief explanation>", "findings": { <key-value pairs of findings> } }`,
+          `Choose the event that best reflects the business outcome of the ${currentState} review.`,
+          brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
+
+        const userContent = [
+          `Process type: ${params.processType}`,
+          `Current state: ${currentState}`,
+          `Input payload: ${JSON.stringify(ctx.inputPayload, null, 2)}`,
+          ctx.decomposedPlan ? `Decomposed plan: ${JSON.stringify(ctx.decomposedPlan, null, 2)}` : "",
+          ctx.assessedFacts ? `Assessed facts: ${JSON.stringify(ctx.assessedFacts, null, 2)}` : "",
+          ctx.computedValues ? `Computed values: ${JSON.stringify(ctx.computedValues, null, 2)}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+
+        let customStateResultText = "";
+        try {
+          customStateResultText = await callHaiku({ apiKey, systemPrompt, userContent });
+        } catch (llmErr) {
+          throw new Error(
+            `${currentState} LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`
+          );
+        }
+
+        let customStateResult: Record<string, unknown>;
+        let chosenEvent: string;
+        try {
+          customStateResult = JSON.parse(customStateResultText) as Record<string, unknown>;
+          chosenEvent = (customStateResult.event as string) ?? validEvents[0];
+        } catch {
+          customStateResult = { raw: customStateResultText };
+          chosenEvent = validEvents[0];
+        }
+
+        // Validate the chosen event is one of the valid outgoing events
+        if (!validEvents.includes(chosenEvent)) {
+          logger.warn(`[BPaaS/DomainExecutor] LLM chose invalid event "${chosenEvent}" for ${currentState}, defaulting to "${validEvents[0]}"`, {
+            processInstanceId,
+            validEvents,
+            chosenEvent,
+          });
+          chosenEvent = validEvents[0];
+        }
+
+        // Persist custom state result into context
+        const existingCustomResults = ctx.customStateResults ?? {};
+        const updatedCustomResults = {
+          ...existingCustomResults,
+          [currentState]: { ...customStateResult, chosenEvent },
+        };
+        const updatedCtx: BPaaSContext = {
+          ...ctx,
+          customStateResults: updatedCustomResults,
+        };
+        runner = new BPaaSFSMRunner(updatedCtx, runner.getCurrentState(), definition.transitions);
+
+        await runner.transition(chosenEvent as BPaaSTransitionEvent, supabase);
         await runner.save(supabase);
       }
 
       // ── POLICY_CHECK ──────────────────────────────────────────────────────
       else if (currentState === "POLICY_CHECK") {
         // Deterministic — delegates to policy-checker.ts, zero LLM
+        // `definition` is already loaded at the top of executeBPaaSProcess — reuse it.
         const ctx = runner.getContext();
 
-        let definition;
-        try {
-          definition = await getProcessDefinition(
-            params.processType,
-            params.organizationId,
-            supabase
-          );
-        } catch (defErr) {
-          throw new Error(
-            `POLICY_CHECK: getProcessDefinition failed: ${defErr instanceof Error ? defErr.message : String(defErr)}`
-          );
+        // Validate definition is loaded (should always be true at this point)
+        if (!definition) {
+          throw new Error(`POLICY_CHECK: process definition not loaded for ${params.processType}`);
         }
 
         const policyCtx: PolicyContext = extractPolicyContext(
@@ -423,7 +543,7 @@ export async function executeBPaaSProcess(
 
         const updatedCtx: BPaaSContext = { ...ctx, policyOutcome };
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState);
+        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         if (policyResult.passed) {
           await runner.transition("policy_pass", supabase);
@@ -518,7 +638,7 @@ export async function executeBPaaSProcess(
 
         const updatedCtx: BPaaSContext = { ...ctx, mutationResult };
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState);
+        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         await runner.transition("mutated", supabase);
         await runner.save(supabase);
@@ -603,6 +723,7 @@ export async function executeBPaaSProcess(
     finalState,
     computedValues: ctx.computedValues,
     mutationResult: ctx.mutationResult,
+    customStateResults: ctx.customStateResults,
     stateCount: ctx.stateHistory.length,
     durationMs,
   };
