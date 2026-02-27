@@ -131,6 +131,12 @@ function addSecurityHeaders(response: NextResponse) {
   // Remove server identification headers
   response.headers.delete('X-Powered-By');
   response.headers.delete('Server');
+
+  // ── Enterprise API metadata headers ────────────────────────────────────
+  // X-API-Version: signals the current API contract version to enterprise consumers
+  // X-BrainOS-Env: lets consumers distinguish production from non-production responses
+  response.headers.set('X-API-Version', '1.0');
+  response.headers.set('X-BrainOS-Env', process.env.NODE_ENV === 'production' ? 'production' : 'development');
 }
 
 /* ── Main middleware ──────────────────────────────────────────────── */

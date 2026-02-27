@@ -54,19 +54,19 @@ interface AgentJob {
 // ── Status helpers ────────────────────────────────────────────────────────────
 
 const STATUS_DOT: Record<string, string> = {
-  running: "bg-blue-400 animate-pulse",
-  pending: "bg-yellow-400",
-  success: "bg-green-400",
-  error: "bg-red-400",
-  waiting: "bg-orange-400",
+  running: "bg-accent animate-pulse",
+  pending: "bg-warning",
+  success: "bg-success",
+  error: "bg-danger",
+  waiting: "bg-warning",
 };
 
 const STATUS_TEXT: Record<string, string> = {
-  running: "text-blue-400",
-  pending: "text-yellow-400",
-  success: "text-green-400",
-  error: "text-red-400",
-  waiting: "text-orange-400",
+  running: "text-accent",
+  pending: "text-warning",
+  success: "text-success",
+  error: "text-danger",
+  waiting: "text-warning",
 };
 
 function timeAgo(date: string): string {
@@ -529,14 +529,14 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
               ) : (
                 <>
                   <div className="flex items-end gap-2 mb-1">
-                    <span className="text-4xl font-bold text-blue-400">
+                    <span className="text-4xl font-bold text-accent">
                       {rlStatus?.brainIq ?? 0}
                     </span>
                     <span className="text-sm text-white/30 mb-1.5">IQ</span>
                   </div>
                   <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-4">
                     <div
-                      className="h-full bg-blue-500/60 rounded-full transition-all duration-1000"
+                      className="h-full bg-accent/60 rounded-full transition-all duration-1000"
                       style={{
                         width: `${Math.min(100, rlStatus?.brainIq ?? 0)}%`,
                       }}
@@ -573,14 +573,14 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
               <div className="space-y-2.5">
                 {/* Tier 1 */}
                 <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
-                  <div className="w-5 h-5 rounded flex items-center justify-center bg-blue-500/15 flex-shrink-0">
-                    <span className="text-[9px] font-bold text-blue-400">T1</span>
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-accent/15 flex-shrink-0">
+                    <span className="text-[9px] font-bold text-accent">T1</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-white/60">Raw Knowledge</p>
                     <p className="text-[10px] text-white/25">knowledge_chunks</p>
                   </div>
-                  <span className="text-sm font-bold text-blue-400">
+                  <span className="text-sm font-bold text-accent">
                     {tierStats ? tierStats.tier1Count.toLocaleString() : "—"}
                   </span>
                 </div>
@@ -601,14 +601,14 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
 
                 {/* Tier 3 */}
                 <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
-                  <div className="w-5 h-5 rounded flex items-center justify-center bg-emerald-500/15 flex-shrink-0">
-                    <span className="text-[9px] font-bold text-emerald-400">T3</span>
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-success/15 flex-shrink-0">
+                    <span className="text-[9px] font-bold text-success">T3</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-white/60">Consolidated</p>
                     <p className="text-[10px] text-white/25">consolidated_patterns</p>
                   </div>
-                  <span className="text-sm font-bold text-emerald-400">
+                  <span className="text-sm font-bold text-success">
                     {tierStats ? tierStats.tier3Count.toLocaleString() : "—"}
                   </span>
                 </div>
@@ -617,7 +617,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
               {/* Run Consolidation button */}
               <div className="mt-4">
                 {consolidationMsg ? (
-                  <p className="text-xs text-emerald-400/80 text-center py-2">
+                  <p className="text-xs text-success/80 text-center py-2">
                     {consolidationMsg}
                   </p>
                 ) : (
@@ -669,7 +669,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                            connected ? "bg-emerald-400" : "bg-white/15"
+                            connected ? "bg-success" : "bg-white/15"
                           }`}
                         />
                         <span className="text-sm text-white/60 capitalize flex-1">
@@ -681,7 +681,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                           </span>
                         )}
                         {!connected && (
-                          <span className="text-[11px] text-red-400/60">
+                          <span className="text-[11px] text-danger/60">
                             {c.status}
                           </span>
                         )}
@@ -732,11 +732,11 @@ function Stat({
   dim?: boolean;
 }) {
   const accentColors: Record<string, string> = {
-    blue: "text-blue-400",
-    emerald: "text-emerald-400",
+    blue: "text-accent",
+    emerald: "text-success",
     purple: "text-purple-400",
-    yellow: "text-yellow-400",
-    red: "text-red-400",
+    yellow: "text-warning",
+    red: "text-danger",
     orange: "text-orange-400",
     gray: "text-white/25",
   };
