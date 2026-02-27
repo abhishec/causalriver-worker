@@ -2,13 +2,15 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { TaskQueueClient } from "./task-queue-client";
 import { logger } from "@/lib/logger";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "Task Queue" };
 
 export default async function TaskQueuePage() {
-  const supabase = await createClient();
-  const workspaceId = await getCurrentWorkspaceId();
-  const service = await createServiceClient();
+  // ── 500→401 Lambda pattern: wrap each init separately ──
+  const supabase = await createClient().catch(() => redirect("/login"));
+  const workspaceId = await getCurrentWorkspaceId().catch(() => redirect("/login"));
+  const service = await createServiceClient().catch(() => redirect("/login"));
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {

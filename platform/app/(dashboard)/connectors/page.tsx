@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { ConnectorsClient } from "./connectors-client";
 import { logger } from "@/lib/logger";
+import { redirect } from "next/navigation";
 
 
 export const metadata = { title: "Connectors" };
@@ -37,8 +38,9 @@ const CONNECTORS = [
 ] as const;
 
 export default async function ConnectorsPage() {
-  const supabase = await createClient();
-  const workspaceId = await getCurrentWorkspaceId();
+  // ── 500→401 Lambda pattern: wrap each init separately ──
+  const supabase = await createClient().catch(() => redirect("/login"));
+  const workspaceId = await getCurrentWorkspaceId().catch(() => redirect("/login"));
 
   const safe = <T,>(p: PromiseLike<{ data: T | null; error: any }>): Promise<{ data: T | null; error: any }> =>
     Promise.resolve(p).catch((err) => {
@@ -47,7 +49,7 @@ export default async function ConnectorsPage() {
     });
 
   // Fetch the current user so we can look up their role
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
   // Fetch signal counts, all connectors, sync progress, last brain training run, and user role in parallel
   const [signalsResult, connectorsResult, checkpointsResult, lastBrainRunResult, membershipResult] = await Promise.all([

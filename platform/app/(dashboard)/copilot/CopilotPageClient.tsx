@@ -73,7 +73,7 @@ const EXAMPLE_PROMPTS: Record<ServiceMode, string[]> = {
 // ─── Inner Page (needs Suspense for useSearchParams) ──────────────────────────
 
 export default function CopilotPageInner() {
-  const { currentWorkspace, isLoading: workspaceLoading, workspaces, switchWorkspace } = useWorkspace();
+  const { currentWorkspace, isLoading: workspaceLoading, workspaces, switchWorkspace, fetchError: workspaceFetchError } = useWorkspace();
   const searchParams = useSearchParams();
 
   // Guard against SSR/client hydration mismatch: WorkspaceProvider reads localStorage
@@ -763,6 +763,29 @@ export default function CopilotPageInner() {
             <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
           </div>
           <span className="text-xs text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Workspace fetch error: surface actionable message instead of infinite spinner ──
+  if (workspaceFetchError) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="text-center max-w-sm">
+          <div className="w-12 h-12 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h2 className="text-sm font-semibold text-foreground mb-2">Unable to load AI Workers</h2>
+          <p className="text-xs text-muted-foreground mb-4">{workspaceFetchError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 text-sm rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

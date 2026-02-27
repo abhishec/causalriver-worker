@@ -292,11 +292,11 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
                   {/* Title + agent */}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-foreground truncate">
-                      {task.prompt.slice(0, 80)}{task.prompt.length > 80 ? "..." : ""}
+                      {(task.prompt ?? "").slice(0, 80)}{(task.prompt ?? "").length > 80 ? "..." : ""}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-muted">
-                        {task.agent_type.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                        {(task.agent_type ?? "unknown").replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
                       </span>
                       {task.source && task.source !== "copilot" && (
                         <span className="text-[9px] text-muted/60">via {task.source}</span>
@@ -339,7 +339,7 @@ export function TaskQueueClient({ initialTasks, stats, workspaceId }: TaskQueueC
                       {/* Full prompt */}
                       <div>
                         <label className="text-[10px] font-medium text-muted uppercase tracking-wider">Prompt</label>
-                        <p className="text-xs text-foreground mt-1">{task.prompt}</p>
+                        <p className="text-xs text-foreground mt-1">{task.prompt ?? "—"}</p>
                       </div>
 
                       {/* Result summary */}
