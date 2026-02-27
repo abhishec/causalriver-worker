@@ -127,6 +127,16 @@ export async function GET(req: NextRequest) {
 
     let definitions = (rows ?? []).map(rowToDefinition);
 
+    // Deduplicate by name — keep the most recent entry per agent name.
+    // Rows are already ordered by created_at DESC so first occurrence wins.
+    const seenNames = new Set<string>();
+    definitions = definitions.filter((d) => {
+      const key = d.name.trim().toLowerCase();
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    });
+
     // Client-side domain filter if requested
     if (domain) {
       definitions = definitions.filter((d) => d.domain === domain);

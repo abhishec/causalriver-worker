@@ -55,13 +55,13 @@ export function TabGroup({ tabs, activeTab, onChange, variant = "default", class
 
   if (variant === "underline") {
     return (
-      <div className={cn("flex items-center gap-6 border-b border-border-subtle", className)}>
+      <div className={cn("flex items-center gap-6 border-b border-border-subtle overflow-x-auto scrollbar-none", className)}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 pb-2.5 text-sm font-medium transition-colors relative",
+              "flex items-center gap-1.5 pb-2.5 text-sm font-medium transition-colors relative shrink-0 whitespace-nowrap",
               currentTab === tab.id
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"

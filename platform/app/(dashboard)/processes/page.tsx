@@ -211,12 +211,71 @@ function StartProcessModal({
 }) {
   const router = useRouter();
   const meta = PROCESS_META[template];
-  const prompt = `Start a ${meta.name} process`;
+  const [context, setContext] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/process/${template}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: context.trim() || `Start a ${meta.name} process` }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setJobId(data.jobId || data.id || "queued");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to start process");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (jobId) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="bg-card border border-border-subtle rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 text-center">
+          <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <h2 className="text-sm font-semibold text-foreground mb-1">Process queued</h2>
+          <p className="text-xs text-muted mb-5">
+            <span className="font-medium text-foreground">{meta.name}</span> has been queued and will run shortly.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 rounded-lg border border-border-subtle text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => router.push("/copilot")}
+              className="flex-1 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+            >
+              View in Copilot
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-card border border-border-subtle rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
-        <div className="flex items-start justify-between mb-4">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{meta.icon}</span>
             <div>
@@ -234,28 +293,82 @@ function StartProcessModal({
             </svg>
           </button>
         </div>
-        <p className="text-xs text-muted mb-5">{meta.description}</p>
-        <div className="space-y-3">
-          <button
-            onClick={() => {
-              const encodedCmd = encodeURIComponent("process-start");
-              const encodedMsg = encodeURIComponent(prompt);
-              router.push(`/copilot?cmd=${encodedCmd}&msg=${encodedMsg}`);
-            }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors text-sm font-medium"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            Ask Copilot to start this process
-          </button>
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2 rounded-lg border border-border-subtle text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
+
+        {/* Description */}
+        <p className="text-xs text-muted mb-4 leading-relaxed">{meta.description}</p>
+
+        {/* Context form */}
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">
+              Process context / input
+              <span className="text-muted font-normal ml-1">(optional)</span>
+            </label>
+            <textarea
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+              placeholder={`e.g. Employee: Jane Smith, departure date: March 15, final salary: $85,000\u2026`}
+              rows={4}
+              className="w-full px-3 py-2 text-sm bg-background border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/50 resize-none text-foreground placeholder:text-muted transition-colors"
+            />
+            <p className="text-[10px] text-muted mt-1">
+              Provide any specific data or context the AI should use when running this process.
+            </p>
+          </div>
+
+          {error && (
+            <div className="text-xs text-danger bg-danger/5 border border-danger/10 px-3 py-2 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <>
+                  <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Starting\u2026
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+                  </svg>
+                  Start Process
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const encodedCmd = encodeURIComponent("process-start");
+                const encodedMsg = encodeURIComponent(context.trim() || `Start a ${meta.name} process`);
+                router.push(`/copilot?cmd=${encodedCmd}&msg=${encodedMsg}&template=${template}`);
+              }}
+              className="px-3 py-2.5 rounded-lg border border-border-subtle text-xs text-muted hover:text-foreground hover:bg-surface-hover transition-colors flex items-center gap-1.5"
+              title="Run via Copilot instead"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Copilot
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-2.5 rounded-lg border border-border-subtle text-xs text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
