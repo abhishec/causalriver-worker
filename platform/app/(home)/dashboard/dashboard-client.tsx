@@ -367,7 +367,7 @@ export function DashboardClient() {
     // Dispatch event so sidebar picks up the new service mode without page reload
     window.dispatchEvent(new Event("nexus-service-mode-changed"));
     switchWorkspace(worker.workspaceId, { skipReload: true });
-    router.push(`/copilot?workerId=${encodeURIComponent(worker.id)}&service=${encodeURIComponent(worker.service)}`);
+    router.push(`/ai-worker/${encodeURIComponent(worker.id)}`);
   }, [switchWorkspace, router]);
 
   const handleSignOut = useCallback(async () => {
@@ -1111,10 +1111,10 @@ export function DashboardClient() {
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             ) : (
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                               </svg>
                             )}
-                            Launch
+                            Open
                           </button>
                         </div>
                       </div>
