@@ -23,6 +23,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
+import { processA2ATasks } from "@/lib/a2a/task-processor";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -123,11 +124,24 @@ export async function GET(request: NextRequest) {
       "processCodeAgentJobs"
     );
 
+    // ── Phase 4: Process pending A2A tasks ───────────────────────
+    // A2A tasks are created by POST /api/a2a/tasks from external agents.
+    // Run up to 3 A2A tasks per cron tick (they execute domain logic, so
+    // budget 3 on top of the SE-aaS and code-agent loads).
+    const phaseElapsed2 = Date.now() - startMs;
+    const remainingBudget2 = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsed2);
+    const a2aResult = await withTimeout(
+      processA2ATasks(service, 3),
+      remainingBudget2 > 2_000 ? remainingBudget2 : 2_000,
+      "processA2ATasks"
+    );
+
     const durationMs = Date.now() - startMs;
     logger.warn(
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
-      `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) took=${durationMs}ms`
+      `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
+      `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -136,6 +150,7 @@ export async function GET(request: NextRequest) {
       staleJobsRecovered,
       ...result,
       codeAgent: codeAgentResult,
+      a2a: a2aResult,
       durationMs,
     });
   } catch (err) {
