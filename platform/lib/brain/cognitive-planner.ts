@@ -54,6 +54,49 @@ export interface CognitivePlannerResult {
   reflected: boolean;
 }
 
+// ── Config ────────────────────────────────────────────────────────────────────
+
+/**
+ * B5: Configurable planner thresholds — loaded from ai_worker_config.cognitive_planner_config.
+ * Falls back to defaults silently on any error.
+ */
+export interface CognitivePlannerConfig {
+  qualityFloor: number;           // default 0.4 — domains below this avg quality are "poor quality"
+  coverageGapHours: number;       // default 6  — how old before a domain is "missing coverage"
+  maxDomainsPerCycle: number;     // default 3  — max decisions per non-recovery cycle
+  stuckDomainThreshold: number;   // default 5  — failure count to mark domain stuck
+}
+
+const DEFAULT_PLANNER_CONFIG: CognitivePlannerConfig = {
+  qualityFloor: 0.4,
+  coverageGapHours: 6,
+  maxDomainsPerCycle: 3,
+  stuckDomainThreshold: 5,
+};
+
+async function loadPlannerConfig(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<CognitivePlannerConfig> {
+  try {
+    const { data } = await supabase
+      .from("ai_worker_config")
+      .select("cognitive_planner_config")
+      .eq("organization_id", orgId)
+      .maybeSingle();
+
+    const saved = (data?.cognitive_planner_config ?? {}) as Partial<CognitivePlannerConfig>;
+    return {
+      qualityFloor: typeof saved.qualityFloor === "number" ? saved.qualityFloor : DEFAULT_PLANNER_CONFIG.qualityFloor,
+      coverageGapHours: typeof saved.coverageGapHours === "number" ? saved.coverageGapHours : DEFAULT_PLANNER_CONFIG.coverageGapHours,
+      maxDomainsPerCycle: typeof saved.maxDomainsPerCycle === "number" ? saved.maxDomainsPerCycle : DEFAULT_PLANNER_CONFIG.maxDomainsPerCycle,
+      stuckDomainThreshold: typeof saved.stuckDomainThreshold === "number" ? saved.stuckDomainThreshold : DEFAULT_PLANNER_CONFIG.stuckDomainThreshold,
+    };
+  } catch {
+    return { ...DEFAULT_PLANNER_CONFIG };
+  }
+}
+
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const SE_AAS_DOMAINS = [
@@ -80,10 +123,16 @@ async function generateReflection(
     decisions?: Array<{ domain: string; rationale: string }>;
     cycleId?: string;
   },
-  jobs: Array<{ task_type: string; status: string; result: unknown }>,
+  jobs: Array<{ task_type: string; status: string; error_message?: string | null; result: unknown }>,
   successes: number,
   failures: number
 ): Promise<string> {
+  // B3: Build error summary from failed jobs so the planner knows WHY things fail
+  const errorSummary = jobs
+    .filter((j) => j.status === "error" && j.error_message)
+    .map((j) => `${j.task_type}: ${(j.error_message ?? "").slice(0, 120)}`)
+    .join("; ");
+
   try {
     const response = await anthropic.messages.create({
       model: PLANNER_MODEL,
@@ -95,7 +144,7 @@ async function generateReflection(
 
 Planned: ${JSON.stringify(priorDecisions.decisions?.map((d) => d.domain))}
 Actual outcomes: ${successes} succeeded, ${failures} failed
-Jobs: ${JSON.stringify(jobs.map((j) => ({ type: j.task_type, status: j.status })))}
+Jobs: ${JSON.stringify(jobs.map((j) => ({ type: j.task_type, status: j.status })))}${errorSummary ? `\nFailure details: ${errorSummary}` : ""}
 
 Write a 2-3 sentence verbal reflection: what worked, what failed, and one specific lesson for next time. Be concrete.`,
         },
@@ -150,7 +199,13 @@ async function _runCognitivePlannerInner(
   cycleId: string,
   anthropic: Anthropic
 ): Promise<CognitivePlannerResult> {
-  logger.info(`[CognitivePlanner] Starting cycle=${cycleId} org=${orgId}`);
+  // B5: Load configurable thresholds — falls back to defaults silently
+  const plannerConfig = await loadPlannerConfig(supabase, orgId);
+  logger.info(
+    `[CognitivePlanner] Starting cycle=${cycleId} org=${orgId} ` +
+      `qualityFloor=${plannerConfig.qualityFloor} coverageGapHours=${plannerConfig.coverageGapHours} ` +
+      `maxDomainsPerCycle=${plannerConfig.maxDomainsPerCycle} stuckThreshold=${plannerConfig.stuckDomainThreshold}`
+  );
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 5 — REFLECT (runs at start, reflects on PRIOR cycle outcomes)
@@ -184,9 +239,10 @@ async function _runCognitivePlannerInner(
       const priorDomains = priorDecisions.decisions?.map((d) => d.domain) ?? [];
 
       if (priorDomains.length > 0) {
+        // B3: SELECT error_message so reflection knows WHY jobs failed
         const { data: priorJobs } = await supabase
           .from("agent_queue")
-          .select("task_type, status, result")
+          .select("task_type, status, error_message, result")
           .eq("organization_id", orgId)
           .in("task_type", priorDomains)
           .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
@@ -195,25 +251,34 @@ async function _runCognitivePlannerInner(
           const successCount = priorJobs.filter((j) => j.status === "success").length;
           const failCount = priorJobs.filter((j) => j.status === "error").length;
 
+          // B3: Build error summary from failed jobs for reflection context
+          const typedJobs = priorJobs as Array<{ task_type: string; status: string; error_message?: string | null; result: unknown }>;
+          const errorSummary = typedJobs
+            .filter((j) => j.status === "error" && j.error_message)
+            .map((j) => `${j.task_type}: ${(j.error_message ?? "").slice(0, 100)}`)
+            .join("; ");
+
           const reflection = await generateReflection(
             anthropic,
             priorDecisions,
-            priorJobs,
+            typedJobs,
             successCount,
             failCount
           );
 
           // Store as episodic memory (Reflexion episodic buffer, bounded at 10)
+          // B3: Include error patterns in content so future Phase 0 retrieval sees them
           await supabase.from("ai_memory").insert({
             organization_id: orgId,
             domain: "cognitive-planner",
             memory_type: "episodic",
-            content: reflection,
+            content: errorSummary ? `${reflection} Recent failures: ${errorSummary}` : reflection,
             importance: 0.8,
             metadata: {
               cycleId: priorDecisions.cycleId,
               successCount,
               failCount,
+              errorSummary: errorSummary || null,
             },
           });
 
@@ -303,7 +368,7 @@ async function _runCognitivePlannerInner(
       .select("task_type, status, completed_at, created_at")
       .eq("organization_id", orgId)
       .in("status", ["success", "running", "pending"])
-      .gte("created_at", new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
+      .gte("created_at", new Date(Date.now() - plannerConfig.coverageGapHours * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false });
 
     const recentlyRunDomains = new Set((recentJobs ?? []).map((j: { task_type: string }) => j.task_type));
@@ -337,7 +402,7 @@ async function _runCognitivePlannerInner(
     }
 
     poorQualityDomains = Object.entries(domainAvgQuality)
-      .filter(([, avg]) => avg < 0.4)
+      .filter(([, avg]) => avg < plannerConfig.qualityFloor)
       .map(([domain]) => domain);
 
     goodQualityDomains = Object.entries(domainAvgQuality)
@@ -378,7 +443,7 @@ async function _runCognitivePlannerInner(
     }
 
     stuckDomains = Object.entries(failureCounts)
-      .filter(([, count]) => count >= 5)
+      .filter(([, count]) => count >= plannerConfig.stuckDomainThreshold)
       .map(([domain]) => domain);
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 1d (stuck domains) failed:", err);
@@ -430,13 +495,14 @@ async function _runCognitivePlannerInner(
   // PHASE 2 — PLAN (one Claude Haiku call)
   // ══════════════════════════════════════════════════════════════════════════
 
+  const maxDecisions = recoveryMode ? 1 : plannerConfig.maxDomainsPerCycle;
   const stateSnapshot = `## Current State
 - Active engagements: ${engagementCount}
-- Domains not run in >6h (coverage gaps): ${coverageGaps.join(", ") || "none"}
+- Domains not run in >${plannerConfig.coverageGapHours}h (coverage gaps): ${coverageGaps.join(", ") || "none"}
 - High user demand domains (queried today): ${highDemandDomains.join(", ") || "none"}
-- Poor quality domains (avg < 0.4 last 24h): ${poorQualityDomains.join(", ") || "none"}
+- Poor quality domains (avg < ${plannerConfig.qualityFloor} last 24h): ${poorQualityDomains.join(", ") || "none"}
 - Good quality domains (avg >= 0.7 last 24h): ${goodQualityDomains.join(", ") || "none"}
-- Stuck domains (5+ failures last 2h): ${stuckDomains.join(", ") || "none"}
+- Stuck domains (${plannerConfig.stuckDomainThreshold}+ failures last 2h): ${stuckDomains.join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
 - IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition
 
@@ -456,7 +522,7 @@ ${pastReflectionsText}`;
           role: "user",
           content:
             stateSnapshot +
-            `\n\nGiven this state, output a JSON array of at most ${recoveryMode ? 1 : 4} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < 0.4 unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${recoveryMode ? 1 : 4} decisions total`,
+            `\n\nGiven this state, output a JSON array of at most ${maxDecisions} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < ${plannerConfig.qualityFloor} unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${maxDecisions} decisions total`,
         },
       ],
     });
@@ -490,7 +556,7 @@ ${pastReflectionsText}`;
               : "normal",
             rationale: d.rationale,
           }))
-          .slice(0, 4);
+          .slice(0, maxDecisions);
       }
     } catch (parseErr) {
       logger.warn("[CognitivePlanner] Phase 2 JSON parse failed, using coverage gap fallback:", parseErr);

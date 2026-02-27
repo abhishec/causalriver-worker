@@ -146,6 +146,10 @@ function rowToConfig(row: Record<string, any>): AIWorkerConfig {
       ...(row.recovery_config ?? {}),
     },
     status: row.status ?? "active",
+    // H2: Extended fields added in migration 20260330000050
+    activatedServices: row.activated_services ?? undefined,
+    aaasConfig: row.aaas_config ?? undefined,
+    writebackEnabled: row.writeback_enabled ?? undefined,
   };
 }
 
