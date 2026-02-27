@@ -29,11 +29,11 @@ interface WorkflowsClientProps {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "running": return "bg-blue-500";
+    case "running": return "bg-accent";
     case "paused": return "bg-purple-500";
-    case "completed": return "bg-emerald-500";
-    case "failed": return "bg-red-500";
-    default: return "bg-gray-500";
+    case "completed": return "bg-success";
+    case "failed": return "bg-danger";
+    default: return "bg-muted";
   }
 }
 
@@ -111,9 +111,9 @@ export function WorkflowsClient({ workflows, recentRuns, stats, workspaceId, use
       <div className="flex gap-3">
         {[
           { label: "Total", value: stats.total, color: "text-foreground" },
-          { label: "Running", value: stats.running, color: "text-blue-400" },
-          { label: "Completed", value: stats.completed, color: "text-emerald-400" },
-          { label: "Failed", value: stats.failed, color: "text-red-400" },
+          { label: "Running", value: stats.running, color: "text-accent" },
+          { label: "Completed", value: stats.completed, color: "text-success" },
+          { label: "Failed", value: stats.failed, color: "text-danger" },
         ].map(stat => (
           <div key={stat.label} className="bg-card border border-border-subtle rounded-xl px-4 py-3 flex-1">
             <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1">{stat.label}</div>
