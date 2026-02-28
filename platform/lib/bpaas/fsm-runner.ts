@@ -12,7 +12,7 @@
  * - Composes ProcessFSM (coarse states) for agent_queue persistence
  * - Fine-grained BPaaS states stored in bpaas_process_instances.fsm_state
  * - Every state transition emits a step-level RL signal via recordStepOutcome()
- * - POLICY_CHECK gate calls evaluateConstraints() from policy-enforcer.ts
+ * - POLICY_CHECK gate delegates to runPolicyCheck() from policy-checker.ts (domain-executor.ts)
  * - APPROVAL_GATE calls checkHitlGate() and pauses via pauseJobAtDecisionGate()
  * - Lambda budget checked via shouldChain(); caller should checkpointAndChain() if true
  * - All gate decisions logged fire-and-forget via logDecision()
@@ -31,7 +31,6 @@ import {
 import { shouldChain } from "@/lib/brain/chain-invoker";
 import { recordStepOutcome } from "@/lib/brain/agent-rl";
 import { logDecision } from "@/lib/brain/decision-log";
-import { evaluateConstraints } from "@/lib/brain/policy-enforcer";
 import { logger } from "@/lib/logger";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -405,36 +404,6 @@ export class BPaaSFSMRunner {
     });
 
     return nextState;
-  }
-
-  // ── POLICY_CHECK gate ───────────────────────────────────────────────────
-
-  /**
-   * Run policy constraints for this org.
-   * Updates context.policyOutcome and transitions accordingly.
-   *
-   * - policy_pass → APPROVAL_GATE
-   * - policy_fail → ESCALATE
-   *
-   * Returns the resulting state.
-   */
-  async runPolicyCheck(supabase: SupabaseClient): Promise<BPaaSState> {
-    if (this.state !== "POLICY_CHECK") {
-      throw new Error(
-        `[BPaaSFSMRunner] runPolicyCheck() called in wrong state: ${this.state}`
-      );
-    }
-
-    const result = await evaluateConstraints(supabase, this.context.organizationId);
-
-    this.context.policyOutcome = {
-      passed: result.allowed,
-      rules: result.policyName ? [result.policyName] : [],
-      escalationLevel: result.allowed ? undefined : "policy_block",
-    };
-
-    const event: BPaaSTransitionEvent = result.allowed ? "policy_pass" : "policy_fail";
-    return this.transition(event, supabase);
   }
 
   // ── APPROVAL_GATE ────────────────────────────────────────────────────────
