@@ -403,6 +403,7 @@ export function buildPrivacyRefusal(flags: string[]): string {
     ? primaryFlag.replace(/-/g, " ")
     : flags.map((f) => f.replace(/-/g, " ")).join(" and ");
 
-  const phrase = PRIVACY_REFUSAL_PHRASES[idx];
+  // idx is always in-bounds: _phraseIndex returns h % PRIVACY_REFUSAL_PHRASES.length
+  const phrase = PRIVACY_REFUSAL_PHRASES[idx] ?? PRIVACY_REFUSAL_PHRASES[0]!;
   return phrase.replace("[FLAG]", flagLabel);
 }

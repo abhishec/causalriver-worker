@@ -29,6 +29,8 @@ const FITNESS_THRESHOLD = 0.5;
 const EVOLUTION_RATE_LIMIT_MS = 60 * 60 * 1000; // 1 hour
 const DURATION_TARGET_MS = 120_000; // 2 minutes = ideal process duration
 const MIN_INSTANCES_FOR_FITNESS = 3; // need at least 3 runs to score
+/** Approval timeout multiplier applied on mutation — +20% gives more time, reducing HITL pressure */
+const APPROVAL_TIMEOUT_MUTATION_FACTOR = 1.2;
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -155,7 +157,7 @@ function mutateTriggerConditions(
   // Mutate approval_timeout_ms +20% (give more time — reduces HITL pressure)
   if (typeof mutated["approval_timeout_ms"] === "number") {
     const current = mutated["approval_timeout_ms"] as number;
-    mutated["approval_timeout_ms"] = Math.round(current * 1.2);
+    mutated["approval_timeout_ms"] = Math.round(current * APPROVAL_TIMEOUT_MUTATION_FACTOR);
   }
 
   return mutated;

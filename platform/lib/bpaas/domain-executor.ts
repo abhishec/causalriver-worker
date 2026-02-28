@@ -496,7 +496,6 @@ export async function executeBPaaSProcess(
           decomposedPlan = { raw: decomposedText };
         }
 
-        runner.getContext(); // side-effect: ensure context is current
         // Mutate context directly through runner's exposed context reference
         const ctx = runner.getContext();
         const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan };
@@ -982,7 +981,12 @@ export async function executeBPaaSProcess(
       organizationId: params.organizationId,
       userId: params.userId ?? params.organizationId,
       modelId: "claude-haiku-4-5-20251001",
-    });
+    }).catch((e: unknown) =>
+      logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (task-level) failed (non-fatal)", {
+        processInstanceId,
+        error: String(e),
+      })
+    );
   } catch (rlErr) {
     logger.warn("[BPaaS/DomainExecutor] RL outcome recording failed (non-fatal)", {
       processInstanceId,
@@ -1027,7 +1031,12 @@ export async function executeBPaaSProcess(
       organizationId: params.organizationId,
       userId: params.userId ?? params.organizationId,
       modelId: "process-engine",
-    });
+    }).catch((e: unknown) =>
+      logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (process-level) failed (non-fatal)", {
+        processInstanceId,
+        error: String(e),
+      })
+    );
   } catch (processRlErr) {
     logger.warn("[BPaaS/DomainExecutor] process-level RL recording failed (non-fatal)", {
       processInstanceId,
@@ -1044,7 +1053,12 @@ export async function executeBPaaSProcess(
       predictedRisk: initialPrediction.riskLevel,
       actualOutcome: status === "completed" ? "success" : "failure",
       executionMs: durationMs,
-    });
+    }).catch((e: unknown) =>
+      logger.warn("[BPaaS/DomainExecutor] recordPredictionAccuracy failed (non-fatal)", {
+        processInstanceId,
+        error: String(e),
+      })
+    );
   }
 
   // ── Federation: CORE → ORG real-time injection (NB-065) ───────────────────
@@ -1054,7 +1068,8 @@ export async function executeBPaaSProcess(
   // per org per process instance. Fire-and-forget on failure (non-fatal).
   if ((Date.now() - (_corePushLastMs.get(params.organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
     _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
-    void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- pushCoreInsightsToOrg accepts SupabaseClient<any>; service_health not yet in generated types
+  void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
       logger.warn("[BPaaS/federation] CORE→ORG push failed (non-fatal):", err instanceof Error ? err.message : String(err));
     });
   }
@@ -1092,15 +1107,15 @@ export async function executeBPaaSProcess(
           maxPairsPerRun: 20,       // Limit CORE updates per process run
         },
       );
-      logger.debug(
+      logger.warn(
         `[BPaaS/federation] org=${params.organizationId.slice(0, 8)} process=${params.processType} ` +
         `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
         `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
         `took=${federationResult.durationMs}ms`
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Federation is best-effort — never block process response
-      logger.warn("[BPaaS/federation] Delta promotion failed (non-fatal):", err?.message);
+      logger.warn("[BPaaS/federation] Delta promotion failed (non-fatal):", err instanceof Error ? err.message : String(err));
     }
   })();
 

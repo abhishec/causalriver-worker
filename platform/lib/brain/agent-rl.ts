@@ -65,7 +65,8 @@ export async function getDomainThreshold(
       .eq('organization_id', orgId)
       .eq('domain', domain)
       .gte('created_at', thirtyDaysAgo)
-      .not('confidence', 'is', null);
+      .not('confidence', 'is', null)
+      .limit(200); // cap to prevent unbounded scan on active domains
 
     if (data && data.length >= 10) {
       const values = (data as { confidence: number }[]).map(r => r.confidence);
@@ -273,7 +274,9 @@ export async function recordAgentOutcome(
     confidence: params.quality,
     modelUsed: params.modelId,
     domain: params.domain,
-  });
+  }).catch((e: unknown) =>
+    logger.warn("[agent-rl] logDecision failed (non-fatal)", { error: String(e) })
+  );
 
   try {
     // Derive model family for analytics grouping
@@ -396,7 +399,8 @@ export async function getRecentQualityPatterns(
       .select("domain, confidence, created_at")
       .eq("organization_id", organizationId)
       .gte("created_at", since)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(500); // bounded scan — 500 records is ample for trend detection
 
     if (error || !data || data.length === 0) return [];
 

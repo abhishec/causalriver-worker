@@ -37,9 +37,10 @@ async function fetchServiceHealthCache(
   serviceType: "se-aas" | "aas" | "process-engine"
 ): Promise<{ data: { context_string: string; updated_at: string } | null; error: unknown }> {
   try {
-    // Supabase JS accepts any table name at runtime regardless of generated types
-    const result = await supabase
-      .from("service_health" as string)
+    // service_health table is not yet in generated Supabase types (migration pending).
+    // The `as string` cast is intentional — Supabase JS client accepts any table name at runtime.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (supabase as any).from("service_health")
       .select("context_string, updated_at")
       .eq("organization_id", orgId)
       .eq("service_type", serviceType)
