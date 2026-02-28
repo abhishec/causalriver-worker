@@ -628,7 +628,8 @@ export async function getLearningStats(
         .from("copilot_response_feedback")
         .select("rating")
         .eq("organization_id", organizationId)
-        .gte("created_at", since7d),
+        .gte("created_at", since7d)
+        .limit(500), // cap to prevent full-table scan on active orgs
     ]);
 
     const all = recordsResult.data ?? [];
