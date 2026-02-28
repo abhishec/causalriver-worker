@@ -112,6 +112,19 @@ export async function GET(
     const engineStatus = statusMap[jobStatus] ?? jobStatus;
     const jobResult = job.result as Record<string, unknown> | null;
 
+    // Compute durationMs from DB timestamps when the job has completed or is running.
+    // Falls back to null for queued jobs that have not yet started.
+    const durationMs: number | null = (() => {
+      if (job.started_at && job.completed_at) {
+        return new Date(job.completed_at).getTime() - new Date(job.started_at).getTime();
+      }
+      if (job.started_at && !job.completed_at) {
+        // Still running — return elapsed time so callers can detect stalls.
+        return Date.now() - new Date(job.started_at).getTime();
+      }
+      return null;
+    })();
+
     return NextResponse.json({
       jobId: job.id,
       templateType,
@@ -125,6 +138,7 @@ export async function GET(
       policyOutcome: processInstance?.policy_outcome ?? null,
       escalationLevel: processInstance?.escalation_level ?? null,
       approvalId: jobResult?.approvalId ?? null,
+      durationMs,
       errorMessage: (job.error_message as string | null) ?? null,
       startedAt: job.started_at,
       completedAt: job.completed_at,

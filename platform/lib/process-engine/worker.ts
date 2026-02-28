@@ -97,18 +97,56 @@ export async function processProcessEngineJobs(
       // We own this job — process it.
       result.processed++;
       result.jobIds.push(job.id);
+
+      // Structured job-start log — machine-parseable for incident triage
+      logger.warn("[ProcessEngine/Worker] Job claimed, starting execution", {
+        jobId: job.id,
+        orgId: job.organization_id,
+        agentType: job.agent_type,
+        taskType: job.task_type,
+        priority: job.priority,
+      });
+
       try {
         // Pass a pre-claimed copy of the job so processBPaaSJob's step 4
         // (status → running) is idempotent and does not re-race.
         const claimedJob: AgentQueueJob = { ...(job as AgentQueueJob), status: "running" };
         await processBPaaSJob(supabase, claimedJob);
         result.succeeded++;
+
+        logger.warn("[ProcessEngine/Worker] Job completed successfully", {
+          jobId: job.id,
+          orgId: job.organization_id,
+          taskType: job.task_type,
+        });
       } catch (err: unknown) {
         result.failed++;
-        logger.warn("[ProcessEngine/Worker] Job failed unexpectedly", {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        logger.error("[ProcessEngine/Worker] Job failed unexpectedly", {
           jobId: job.id,
-          error: err instanceof Error ? err.message : String(err),
+          orgId: job.organization_id,
+          taskType: job.task_type,
+          error: errMsg,
         });
+
+        // Write error_message back to agent_queue for operator visibility
+        // Fire-and-forget — update failure must not throw or mask the original error
+        void supabase
+          .from("agent_queue")
+          .update({
+            status: "failed",
+            error_message: errMsg,
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", job.id)
+          .then(({ error: updateErr }) => {
+            if (updateErr) {
+              logger.warn("[ProcessEngine/Worker] Failed to write error_message back to agent_queue", {
+                jobId: job.id,
+                error: updateErr.message,
+              });
+            }
+          });
       }
     }
   } catch (err: unknown) {

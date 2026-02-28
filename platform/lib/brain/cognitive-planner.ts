@@ -1228,12 +1228,18 @@ ${pastReflectionsText}`;
     reflectionsStored: reflected ? 1 : 0,
   });
 
-  logger.warn(
-    `[CognitivePlanner] Cycle complete: ` +
-      `cycle=${cycleId} org=${orgId} ` +
-      `queued=${decisionsQueued} gaps=${coverageGaps.length} ` +
-      `stuck=${stuckDomains.length} reflected=${reflected}`
-  );
+  logger.warn("[CognitivePlanner] Cycle complete", {
+    cycleId,
+    orgId,
+    decisionsQueued,
+    decisionsCount: decisions.length,
+    decisions: decisions.map((d) => ({ domain: d.domain, priority: d.priority })),
+    coverageGapCount: coverageGaps.length,
+    stuckDomainCount: stuckDomains.length,
+    poorQualityCount: poorQualityDomains.length,
+    recoveryMode,
+    reflected,
+  });
 
   return {
     cycleId,
