@@ -58,6 +58,14 @@ export interface ReactionsReport {
  */
 const HIGH_RISK_HEALTH_THRESHOLD = 30;
 
+/**
+ * GABA signal strength for a stalled agent.
+ * Using -0.5 (not -0.3) to ensure the penalty is clearly distinguishable from
+ * low-quality results (confidence < 0.3) and sits well above the stuck-domain
+ * detection threshold.  -0.3 was ambiguous; -0.5 is unambiguously penalizing.
+ */
+const GABA_STALLED_AGENT = -0.5;
+
 /** Agents running for longer than this are considered stalled */
 const STALLED_AGENT_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -266,7 +274,7 @@ async function reactStalledAgents(
         organization_id: orgId,
         source_domain: "brain.monitoring",
         signal_type: "gaba",
-        signal_value: -0.3,
+        signal_value: GABA_STALLED_AGENT,
         signal_timestamp: new Date().toISOString(),
         entity_type: "agent_queue",
         entity_id: jobId,
