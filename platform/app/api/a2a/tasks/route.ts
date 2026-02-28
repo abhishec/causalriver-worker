@@ -18,15 +18,34 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-// ── A2A skill → SE-aaS domain mapping ─────────────────────────────────────
+// ── A2A skill → domain mapping ─────────────────────────────────────────────
 // Translates the A2A skill IDs from the agent card to the internal domain
-// identifiers used by the SE-aaS domain executor.
+// identifiers used by the SE-aaS, AaaS, PM-aaS, and Process Engine executors.
 const SKILL_TO_DOMAIN: Record<string, string> = {
+  // ── SE-aaS: Delivery Intelligence domains ──────────────────────────────────
   "pod-match": "pod-match",
   "early-warning": "early-warning",
   "scope-creep": "scope-creep",
   "delivery-health": "delivery-intelligence",
-  // Process Engine templates — available to any workspace regardless of service activation.
+  // ── AaaS: Accounting as a Service domains ──────────────────────────────────
+  // Routes to agent_type='aas' so the AaaS executor processes them.
+  "aas-bookkeep":          "bookkeep",
+  "aas-reconcile":         "reconcile",
+  "aas-statements":        "statements",
+  "aas-tax":               "tax",
+  "aas-audit":             "audit",
+  "aas-anomaly":           "anomaly",
+  "aas-causal-analysis":   "causal-analysis",
+  // ── PM-aaS: Product Management as a Service domains ────────────────────────
+  // Routes to agent_type='pm-aas' so the PM-aaS executor processes them.
+  "pm-roadmap-planner":    "roadmap-planner",
+  "pm-sprint-health":      "sprint-health",
+  "pm-backlog-prioritizer":"backlog-prioritizer",
+  "pm-stakeholder-alignment":"stakeholder-alignment",
+  "pm-release-risk":       "release-risk",
+  "pm-feature-impact":     "feature-impact",
+  "pm-capacity-planner":   "capacity-planner",
+  // ── Process Engine templates — available to any workspace ──────────────────
   // Routes to agent_type='bpaas' (not 'a2a') so process-jobs Phase 5 picks them up.
   "hr-offboarding":           "hr_offboarding",
   "procurement":              "procurement",
@@ -66,6 +85,28 @@ const BPAAS_DOMAINS = new Set([
   "ar_collections",
   "incident_response",
   "qbr_preparation",
+]);
+
+// Domains that route to agent_type='aas' (Accounting as a Service executor)
+const AAS_DOMAINS = new Set([
+  "bookkeep",
+  "reconcile",
+  "statements",
+  "tax",
+  "audit",
+  "anomaly",
+  "causal-analysis",
+]);
+
+// Domains that route to agent_type='pm-aas' (Product Management as a Service executor)
+const PM_AAS_DOMAINS = new Set([
+  "roadmap-planner",
+  "sprint-health",
+  "backlog-prioritizer",
+  "stakeholder-alignment",
+  "release-risk",
+  "feature-impact",
+  "capacity-planner",
 ]);
 
 const VALID_SKILLS = new Set(Object.keys(SKILL_TO_DOMAIN));
@@ -200,9 +241,21 @@ export async function POST(request: NextRequest) {
     const taskSessionId = sessionId ?? crypto.randomUUID();
     const domainType = SKILL_TO_DOMAIN[skill];
 
-    // Process Engine skills use agent_type='bpaas' so process-jobs Phase 5 picks them up.
-    // All other A2A skills use agent_type='a2a'.
-    const agentType = BPAAS_DOMAINS.has(domainType) ? "bpaas" : "a2a";
+    // Route to the correct agent_type based on the domain:
+    // - 'bpaas'  — Process Engine templates (process-jobs Phase 5)
+    // - 'aas'    — Accounting as a Service executor
+    // - 'pm-aas' — Product Management as a Service executor
+    // - 'a2a'    — Default: SE-aaS delivery intelligence domains via A2A task processor
+    let agentType: string;
+    if (BPAAS_DOMAINS.has(domainType)) {
+      agentType = "bpaas";
+    } else if (AAS_DOMAINS.has(domainType)) {
+      agentType = "aas";
+    } else if (PM_AAS_DOMAINS.has(domainType)) {
+      agentType = "pm-aas";
+    } else {
+      agentType = "a2a";
+    }
 
     // Build job payload — context_id is optional (omitted when null for backward compat)
     const jobPayload: Record<string, unknown> = {

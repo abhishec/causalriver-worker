@@ -23,7 +23,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
-import { processA2ATasks } from "@/lib/a2a/task-processor";
+import { processA2ATasks, processA2AAasTasks, processA2APmAasTasks } from "@/lib/a2a/task-processor";
 import { processProcessEngineJobs } from "@/lib/process-engine/worker";
 import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
 import { evolveProcessTemplates } from "@/lib/brain/process-evolver";
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       "processCodeAgentJobs"
     );
 
-    // ── Phase 4: Process pending A2A tasks ───────────────────────
+    // ── Phase 4: Process pending A2A tasks (SE-aaS delivery intelligence) ──
     // A2A tasks are created by POST /api/a2a/tasks from external agents.
     // Run up to 3 A2A tasks per cron tick (they execute domain logic, so
     // budget 3 on top of the SE-aaS and code-agent loads).
@@ -138,6 +138,46 @@ export async function GET(request: NextRequest) {
       remainingBudget2 > 2_000 ? remainingBudget2 : 2_000,
       "processA2ATasks"
     );
+
+    // ── Phase 4b: Process pending AaaS A2A tasks ─────────────────
+    // agent_type='aas' jobs submitted via POST /api/a2a/tasks with AaaS skills.
+    // Routes to the AaaS domain executor (bookkeep, reconcile, statements, etc.).
+    let a2aAasResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
+    const phaseElapsedAas = Date.now() - startMs;
+    const remainingForAas = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsedAas);
+    if (remainingForAas > 2_000) {
+      try {
+        a2aAasResult = await withTimeout(
+          processA2AAasTasks(service, 3),
+          remainingForAas,
+          "processA2AAasTasks"
+        );
+      } catch (err) {
+        logger.warn("[cron/process-jobs] Phase 4b AaaS A2A failed (non-fatal)", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    // ── Phase 4c: Process pending PM-aaS A2A tasks ───────────────
+    // agent_type='pm-aas' jobs submitted via POST /api/a2a/tasks with PM-aaS skills.
+    // Routes to the PM-aaS domain executor (roadmap-planner, sprint-health, etc.).
+    let a2aPmAasResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
+    const phaseElapsedPm = Date.now() - startMs;
+    const remainingForPm = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsedPm);
+    if (remainingForPm > 2_000) {
+      try {
+        a2aPmAasResult = await withTimeout(
+          processA2APmAasTasks(service, 3),
+          remainingForPm,
+          "processA2APmAasTasks"
+        );
+      } catch (err) {
+        logger.warn("[cron/process-jobs] Phase 4c PM-aaS A2A failed (non-fatal)", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
 
     // ── Phase 5: Process Engine Jobs ─────────────────────────────
     // Picks up agent_type='bpaas' jobs — process engine templates are
@@ -211,6 +251,8 @@ export async function GET(request: NextRequest) {
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
       `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) ` +
+      `a2aAas=${a2aAasResult.processed}(ok=${a2aAasResult.succeeded}) ` +
+      `a2aPmAas=${a2aPmAasResult.processed}(ok=${a2aPmAasResult.succeeded}) ` +
       `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) took=${durationMs}ms`
     );
 
@@ -221,6 +263,8 @@ export async function GET(request: NextRequest) {
       ...result,
       codeAgent: codeAgentResult,
       a2a: a2aResult,
+      a2aAas: a2aAasResult,
+      a2aPmAas: a2aPmAasResult,
       processEngine: processEngineResult,
       durationMs,
     });
