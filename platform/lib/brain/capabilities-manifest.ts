@@ -482,3 +482,596 @@ export function buildManifestSummary(excludeDomainId?: string): string {
 
   return `AVAILABLE DOMAINS:\n${domains}\n\nRECOVERY STRATEGIES:\n${strategies}`;
 }
+
+// ── A2A Agent Card Skills ─────────────────────────────────────────────────
+//
+// The following section is the SINGLE SOURCE OF TRUTH for all skills exposed
+// via the A2A agent card at GET /api/a2a/agent-card.
+//
+// When adding a new domain or service area, add an entry here — the agent card
+// rebuilds dynamically from AGENT_SKILLS on every request.
+//
+// Service areas:
+//   se-aas        — Software Engineering as a Service (code intelligence, delivery)
+//   aas           — Accounting as a Service (bookkeeping, reconciliation, compliance)
+//   pm-aas        — Product Management as a Service (roadmaps, sprint health, backlog)
+//   process-engine — Business Process Automation (HR, procurement, finance workflows)
+//   brain         — Brain meta-capabilities (RL, cognitive planning, orchestration)
+
+export interface AgentSkill {
+  id: string;          // kebab-case unique ID (used in A2A protocol)
+  name: string;        // Human-readable name
+  description: string; // What this skill does
+  serviceArea: "se-aas" | "aas" | "pm-aas" | "process-engine" | "brain";
+  inputModes: string[];  // e.g. ["text", "json"]
+  outputModes: string[]; // e.g. ["text", "json"]
+  tags: string[];
+  examples?: string[];   // optional sample prompts for this skill
+}
+
+export const AGENT_SKILLS: AgentSkill[] = [
+  // ── SE-aaS: Delivery Intelligence ─────────────────────────────────────────
+  {
+    id: "pod-match",
+    name: "Pod Matching",
+    description: "Match engineers to delivery pods based on skills, availability, and engagement requirements",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["delivery", "team", "matching", "staffing"],
+    examples: [
+      "Find the best pod for a fintech engagement starting Q2",
+      "Which engineers are available for the Acme Corp project?",
+    ],
+  },
+  {
+    id: "early-warning",
+    name: "Early Warning Detection",
+    description: "Detect at-risk engineers and velocity bottlenecks — flight risk, overallocation, review burden — before they escalate",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["delivery", "risk", "velocity", "engineers"],
+    examples: [
+      "Which engineers are at flight risk this week?",
+      "Show me velocity trends across all engagements",
+    ],
+  },
+  {
+    id: "scope-creep",
+    name: "Scope Creep Detection",
+    description: "Identify and alert on scope changes threatening delivery timelines via story point drift and sprint boundary violations",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["delivery", "scope", "risk", "alerts"],
+    examples: [
+      "Are there any active scope creep alerts?",
+      "Which engagements have exceeded their estimated story points?",
+    ],
+  },
+  {
+    id: "delivery-intelligence",
+    name: "Delivery Health Assessment",
+    description: "Full engagement health snapshot across all active delivery pods — combines engagement health, engineer signals, scope alerts, and pod recommendations",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["delivery", "health", "engagement", "assessment"],
+    examples: [
+      "What is the overall delivery health of my portfolio?",
+      "Give me a health snapshot for the Tookitaki engagement",
+    ],
+  },
+
+  // ── SE-aaS: Code Intelligence (Sprint 1-3, original 8) ────────────────────
+  {
+    id: "test-data-generator",
+    name: "Test Data Generator",
+    description: "Generate realistic, schema-aware test data sets for any database schema or API contract",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["json"],
+    tags: ["testing", "data", "quality", "engineering"],
+  },
+  {
+    id: "sql-analyzer",
+    name: "SQL Analyzer",
+    description: "Analyze SQL queries for performance issues, N+1 patterns, missing indexes, and query plan optimization",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["sql", "database", "performance", "engineering"],
+  },
+  {
+    id: "test-case-generator",
+    name: "Test Case Generator",
+    description: "Generate comprehensive unit and integration test cases with edge cases from code or spec input",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["testing", "quality", "engineering"],
+  },
+  {
+    id: "tdd-code-generator",
+    name: "TDD Code Generator",
+    description: "Generate production code from failing tests following Test-Driven Development principles",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["tdd", "testing", "code", "engineering"],
+  },
+  {
+    id: "incident-diagnosis",
+    name: "Incident Diagnosis",
+    description: "Diagnose production incidents using logs, traces, and error patterns to identify root cause and recommend remediation",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["incident", "diagnosis", "reliability", "engineering"],
+  },
+  {
+    id: "impact-analysis",
+    name: "Impact Analysis",
+    description: "Analyze the blast radius of a code change across the dependency graph — downstream effects, risk score, affected services",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["impact", "risk", "dependencies", "engineering"],
+  },
+  {
+    id: "data-lineage",
+    name: "Data Lineage",
+    description: "Trace data lineage across pipelines — where data comes from, how it transforms, and where it flows",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["data", "lineage", "tracing", "engineering"],
+  },
+  {
+    id: "log-query",
+    name: "Log Query",
+    description: "Query and analyze structured logs to surface error clusters, anomaly patterns, and operational insights",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["logs", "observability", "engineering"],
+  },
+
+  // ── SE-aaS: P1 Gap Closure (4 from CTO spec) ─────────────────────────────
+  {
+    id: "dependency-upgrade",
+    name: "Dependency Upgrade",
+    description: "Analyze and plan dependency upgrades — breaking changes, migration paths, compatibility matrix, and rollout risk",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["dependencies", "upgrades", "engineering"],
+  },
+  {
+    id: "design-doc-generator",
+    name: "Design Doc Generator",
+    description: "Generate technical design documents from feature specs — architecture decisions, trade-offs, API contracts, and data models",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["design", "documentation", "architecture", "engineering"],
+  },
+  {
+    id: "performance-profiler",
+    name: "Performance Profiler",
+    description: "Profile application performance — CPU hotspots, memory leaks, latency distributions, and optimization recommendations",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["performance", "profiling", "optimization", "engineering"],
+  },
+  {
+    id: "dead-code-detector",
+    name: "Dead Code Detector",
+    description: "Identify unreachable code, unused exports, and deprecated patterns that can be safely removed",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["code-quality", "cleanup", "engineering"],
+  },
+
+  // ── SE-aaS: SWE Gap Closure (3 remaining capabilities) ────────────────────
+  {
+    id: "pr-review",
+    name: "PR Review",
+    description: "Automated pull request review — code quality, security vulnerabilities, style violations, and logic errors",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["pr", "review", "quality", "engineering"],
+  },
+  {
+    id: "boilerplate-scaffold",
+    name: "Boilerplate Scaffold",
+    description: "Generate production-ready boilerplate for new services, components, or modules following org-specific conventions",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["scaffold", "boilerplate", "engineering"],
+  },
+  {
+    id: "codebase-qa",
+    name: "Codebase Q&A",
+    description: "Answer natural-language questions about the codebase — architecture, patterns, where logic lives, how systems connect",
+    serviceArea: "se-aas",
+    inputModes: ["text"],
+    outputModes: ["text"],
+    tags: ["codebase", "qa", "documentation", "engineering"],
+  },
+
+  // ── SE-aaS: P1-15 Architecture & Spec Decomposition ──────────────────────
+  {
+    id: "architecture-extractor",
+    name: "Architecture Extractor",
+    description: "Extract and visualize system architecture from code — service boundaries, dependencies, data flows, and integration points",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["architecture", "visualization", "engineering"],
+  },
+  {
+    id: "decompose-spec",
+    name: "Spec Decomposition",
+    description: "Decompose a feature specification into actionable engineering tickets with estimates, dependencies, and domain classification",
+    serviceArea: "se-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["json"],
+    tags: ["spec", "tickets", "planning", "engineering"],
+  },
+
+  // ── AaaS: Accounting as a Service ─────────────────────────────────────────
+  {
+    id: "aas-bookkeep",
+    name: "AI Bookkeeping",
+    description: "Categorize and book GL transactions using double-entry accounting principles with brain-augmented pattern matching",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "bookkeeping", "finance", "gl"],
+  },
+  {
+    id: "aas-reconcile",
+    name: "Account Reconciliation",
+    description: "Reconcile bank statements against GL entries — detect discrepancies, missing entries, and unmatched transactions",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "reconciliation", "finance", "bank"],
+  },
+  {
+    id: "aas-statements",
+    name: "Financial Statement Generation",
+    description: "Generate P&L, balance sheet, and cash flow statements from GL data with revenue recognition rules applied",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "statements", "finance", "reporting"],
+  },
+  {
+    id: "aas-tax",
+    name: "Tax Compliance",
+    description: "Identify tax obligations, compute GST/VAT, and flag jurisdiction-specific compliance requirements across territories",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "tax", "compliance", "finance"],
+  },
+  {
+    id: "aas-audit",
+    name: "Audit Preparation",
+    description: "Prepare audit-ready financial packages — reconciled trial balance, supporting schedules, and evidence packages",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "audit", "compliance", "finance"],
+  },
+  {
+    id: "aas-anomaly",
+    name: "Financial Anomaly Detection",
+    description: "Detect anomalous transactions — duplicate payments, unusual amounts, timing irregularities, and fraud signals",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "anomaly", "fraud", "finance"],
+  },
+  {
+    id: "aas-causal-analysis",
+    name: "Causal Financial Analysis",
+    description: "Causal root-cause analysis of financial outcomes — why revenue changed, what drove expense variance, causal chain explanation",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "causal", "analysis", "finance"],
+  },
+  {
+    id: "aas-cash-forecast",
+    name: "Cash Flow Forecast",
+    description: "AI-powered cash flow forecasting — 90-day runway projection, burn rate analysis, and scenario modeling",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "forecast", "cash-flow", "finance"],
+  },
+  {
+    id: "aas-revenue-leakage",
+    name: "Revenue Leakage Detection",
+    description: "Identify unbilled work, missed invoices, contract overruns, and revenue recognition gaps that erode recognized revenue",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["accounting", "revenue", "leakage", "finance"],
+  },
+  {
+    id: "aas-causal-pl",
+    name: "Causal P&L Narrative",
+    description: "Generate a plain-English causal narrative explaining P&L movements — what drove each line item change and why",
+    serviceArea: "aas",
+    inputModes: ["json"],
+    outputModes: ["text", "json"],
+    tags: ["accounting", "pl", "narrative", "finance"],
+  },
+
+  // ── PM-aaS: Product Management as a Service ───────────────────────────────
+  {
+    id: "pm-roadmap-planner",
+    name: "Roadmap Planner",
+    description: "Generate a structured product roadmap from goals and constraints — themes, milestones, quarterly priorities, and OKR alignment",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "roadmap", "planning", "strategy"],
+  },
+  {
+    id: "pm-sprint-health",
+    name: "Sprint Health",
+    description: "Assess current sprint status — velocity, blockers, scope changes, completion forecast, and risk to delivery",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "sprint", "health", "velocity"],
+  },
+  {
+    id: "pm-backlog-prioritizer",
+    name: "Backlog Prioritizer",
+    description: "Score and rank backlog items by business value, effort, risk, and strategic alignment using RICE or custom models",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "backlog", "prioritization", "planning"],
+  },
+  {
+    id: "pm-stakeholder-alignment",
+    name: "Stakeholder Alignment",
+    description: "Generate stakeholder-tailored update communications — executive summaries, engineering status, customer-facing updates",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "stakeholder", "communication", "alignment"],
+  },
+  {
+    id: "pm-release-risk",
+    name: "Release Risk Assessment",
+    description: "Evaluate release readiness — open blockers, test coverage gaps, infrastructure dependencies, and go/no-go recommendation",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "release", "risk", "readiness"],
+  },
+  {
+    id: "pm-feature-impact",
+    name: "Feature Impact Analysis",
+    description: "Analyze a feature's effort, risk, dependency graph, and expected customer impact before committing to the roadmap",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "feature", "impact", "analysis"],
+  },
+  {
+    id: "pm-capacity-planner",
+    name: "Capacity Planner",
+    description: "Model team capacity against planned work — headcount gaps, sprint overload risks, and rebalancing recommendations",
+    serviceArea: "pm-aas",
+    inputModes: ["text", "json"],
+    outputModes: ["text", "json"],
+    tags: ["product", "capacity", "planning", "team"],
+  },
+
+  // ── Process Engine: Business Process Automation ───────────────────────────
+  {
+    id: "hr-offboarding",
+    name: "HR Offboarding",
+    description: "Automated HR offboarding workflow — PTO settlement, severance calculation, equity review, and manager/HR/legal approval gates",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["hr", "process", "offboarding", "workflow"],
+  },
+  {
+    id: "procurement",
+    name: "Procurement Approval",
+    description: "Purchase order processing with multi-tier approval routing — budget policy checks, new vendor vetting, committee escalation",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["procurement", "process", "approval", "workflow"],
+  },
+  {
+    id: "order-management",
+    name: "Order Management",
+    description: "Customer order modification processing — refund/charge recalculation, gift card policy, substitute item approval, fulfillment routing",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["orders", "process", "fulfillment", "workflow"],
+  },
+  {
+    id: "expense-approval",
+    name: "Expense Approval",
+    description: "Employee expense claim processing — receipt validation, policy enforcement, manager approval, and out-of-policy escalation",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["expense", "process", "approval", "workflow"],
+  },
+  {
+    id: "customer-onboarding",
+    name: "Customer Onboarding",
+    description: "New customer onboarding workflow — KYC verification, high-risk country escalation, account provisioning, and welcome communications",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["onboarding", "kyc", "process", "workflow"],
+  },
+  {
+    id: "insurance-claim",
+    name: "Insurance Claim Processing",
+    description: "End-to-end insurance claim evaluation — coverage sublimit application, fraud detection, partial approval, and rider processing",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["insurance", "claims", "process", "workflow"],
+  },
+  {
+    id: "invoice-reconciliation",
+    name: "Invoice Reconciliation",
+    description: "Multi-vendor invoice matching against POs — duplicate detection, price variance checks, FX rate validation, and early payment discounts",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["invoice", "reconciliation", "finance", "workflow"],
+  },
+  {
+    id: "sla-breach-escalation",
+    name: "SLA Breach Escalation",
+    description: "SLA compliance monitoring — breach calculation, service credit computation, quiet-hours notification scheduling, cascading escalation",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["sla", "escalation", "compliance", "workflow"],
+  },
+  {
+    id: "travel-rebooking",
+    name: "Travel Rebooking",
+    description: "Complex travel itinerary modification — fare class rules, loyalty tier benefits, company policy enforcement, downstream cancellation",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["travel", "rebooking", "process", "workflow"],
+  },
+  {
+    id: "compliance-audit",
+    name: "Regulatory Compliance Audit",
+    description: "KYC/AML compliance verification — document gap detection, PEP screening, remediation deadline assignment, RM escalation",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["compliance", "kyc", "aml", "workflow"],
+  },
+  {
+    id: "subscription-migration",
+    name: "Subscription Migration",
+    description: "Plan downgrade/upgrade processing — prorated refund calculation, feature conflict detection, compliance warnings, early termination fees",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["subscription", "migration", "billing", "workflow"],
+  },
+  {
+    id: "dispute-resolution",
+    name: "Dispute Resolution",
+    description: "E-commerce dispute handling — evidence review, buyer frequency checks, mandatory escalation for elevated-risk buyers, transaction hold",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["dispute", "resolution", "ecommerce", "workflow"],
+  },
+  {
+    id: "financial-close",
+    name: "Month-End Financial Close",
+    description: "Month-end close process — bank reconciliation, P&L generation with revenue recognition, cash flow statement, suspense account audit trail",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["finance", "close", "accounting", "workflow"],
+  },
+  {
+    id: "product-workflow",
+    name: "Product Story to Engineering Workflow",
+    description: "PM brief to Confluence PRD to Jira epic decomposition — sprint allocation with capacity and dependency checks, stakeholder notifications",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["product", "engineering", "jira", "workflow"],
+  },
+  {
+    id: "ar-collections",
+    name: "Accounts Receivable Collections",
+    description: "AR aging analysis with 6-path collection routing — enterprise exemption, credit notes, payment plans, bankruptcy write-off, government terms",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["ar", "collections", "finance", "workflow"],
+  },
+  {
+    id: "incident-response",
+    name: "IT Incident Response",
+    description: "Production incident triage — root cause analysis, PCI-compliant remediation, 2-person approval for credential changes, blameless post-mortem",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["incident", "response", "sre", "workflow"],
+  },
+  {
+    id: "qbr-preparation",
+    name: "QBR Preparation",
+    description: "Quarterly Business Review data aggregation — multi-source reconciliation, insight generation, stakeholder-specific deck variants, sequenced distribution",
+    serviceArea: "process-engine",
+    inputModes: ["json"],
+    outputModes: ["json"],
+    tags: ["qbr", "reporting", "finance", "workflow"],
+  },
+];
+
+/**
+ * Get all skills for a specific service area.
+ */
+export function getSkillsByServiceArea(serviceArea: AgentSkill["serviceArea"]): AgentSkill[] {
+  return AGENT_SKILLS.filter((s) => s.serviceArea === serviceArea);
+}
+
+/**
+ * Look up a skill by its ID.
+ */
+export function getSkillById(id: string): AgentSkill | undefined {
+  return AGENT_SKILLS.find((s) => s.id === id);
+}
+
+/**
+ * Return all skill IDs. Useful for validation.
+ */
+export function getAllSkillIds(): string[] {
+  return AGENT_SKILLS.map((s) => s.id);
+}
+
+/**
+ * Return skill count broken down by service area. Useful for health endpoints and logging.
+ */
+export function getSkillCountByServiceArea(): Record<AgentSkill["serviceArea"], number> {
+  const counts: Record<AgentSkill["serviceArea"], number> = {
+    "se-aas": 0,
+    "aas": 0,
+    "pm-aas": 0,
+    "process-engine": 0,
+    "brain": 0,
+  };
+  for (const skill of AGENT_SKILLS) {
+    counts[skill.serviceArea]++;
+  }
+  return counts;
+}
