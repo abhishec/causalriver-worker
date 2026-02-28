@@ -288,7 +288,7 @@ export async function writeProcessEngineHealth(
     // L28a: bpaas_process_instances current_state+status last 7d
     // L28b: agent_queue agent_type=bpaas task_type+status last 7d
 
-    const [instancesRow, bpaasJobsRow, stateSignalsRow] = await Promise.all([
+    const [instancesRow, bpaasJobsRow, stateSignalsRow, topTemplatesRow] = await Promise.all([
       supabase
         .from("bpaas_process_instances")
         .select("current_state, status, created_at")
@@ -313,6 +313,15 @@ export async function writeProcessEngineHealth(
         .like("source_domain", "process.%")
         .gte("signal_timestamp", sevenDaysAgo)
         .limit(100),
+
+      // L28d: Top 3 templates by fitness_score (Phase 7 — AlphaEvolve)
+      supabase
+        .from("process_templates")
+        .select("name, fitness_score, success_rate")
+        .eq("organization_id", orgId)
+        .not("fitness_score", "is", null)
+        .order("fitness_score", { ascending: false })
+        .limit(3),
     ]);
 
     // Parse state patterns: per processType+state, what is the fail rate?
@@ -390,6 +399,25 @@ export async function writeProcessEngineHealth(
         .map((p) => `${p.processType} ${p.state} ${Math.round(p.failRate * 100)}% fail`)
         .join(" | ");
       if (patternSummary) parts.push(`Process patterns: ${patternSummary}`);
+    }
+
+    // L28d: Top templates by AlphaEvolve fitness score (Phase 7)
+    if (topTemplatesRow.data && topTemplatesRow.data.length > 0) {
+      const topTemplateList = (
+        topTemplatesRow.data as Array<{
+          name: string;
+          fitness_score: number | null;
+          success_rate: number;
+        }>
+      )
+        .map((t) => {
+          // Shorten the template name for compactness (strip success% suffix if present)
+          const shortName = t.name.replace(/\s*\(\d+%\s+success\)\s*$/, "").trim();
+          const fitness = t.fitness_score !== null ? t.fitness_score.toFixed(2) : "?";
+          return `${shortName}(${fitness})`;
+        })
+        .join(", ");
+      if (topTemplateList) parts.push(`Top templates: ${topTemplateList}`);
     }
 
     const contextString =
