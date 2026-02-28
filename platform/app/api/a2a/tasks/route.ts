@@ -119,6 +119,10 @@ export async function POST(request: NextRequest) {
       message?: { role: string; parts: Array<{ text: string }> };
       organizationId?: string;
       sessionId?: string;
+      /** Multi-turn context ID — groups related A2A tasks into a conversation thread */
+      context_id?: string;
+      /** Alias for context_id (camelCase variant) */
+      contextId?: string;
     };
 
     try {
@@ -128,6 +132,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { skill, message, organizationId, sessionId } = body;
+
+    // Multi-turn context support — optional, preserves backward compatibility
+    const contextId = body.context_id ?? body.contextId ?? null;
 
     // Validate required fields
     if (!skill) {
@@ -197,6 +204,17 @@ export async function POST(request: NextRequest) {
     // All other A2A skills use agent_type='a2a'.
     const agentType = BPAAS_DOMAINS.has(domainType) ? "bpaas" : "a2a";
 
+    // Build job payload — context_id is optional (omitted when null for backward compat)
+    const jobPayload: Record<string, unknown> = {
+      skill,
+      message,
+      userText,
+      sessionId: taskSessionId,
+      userId: auth.userId,
+      source: "a2a",
+      ...(contextId ? { context_id: contextId } : {}),
+    };
+
     // Insert A2A task into agent_queue
     const { data: job, error: insertError } = await admin
       .from("agent_queue")
@@ -205,14 +223,7 @@ export async function POST(request: NextRequest) {
         agent_type: agentType,
         task_type: domainType,
         priority: 5,
-        payload: {
-          skill,
-          message,
-          userText,
-          sessionId: taskSessionId,
-          userId: auth.userId,
-          source: "a2a",
-        },
+        payload: jobPayload,
         status: "pending",
       })
       .select("id, created_at")
@@ -230,13 +241,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} org=${organizationId}`);
+    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} org=${organizationId}${contextId ? ` context=${contextId}` : ""}`);
 
     // Return A2A-compliant task submission response
     return NextResponse.json(
       {
         id: job.id,
         sessionId: taskSessionId,
+        ...(contextId ? { context_id: contextId } : {}),
         status: {
           state: "submitted",
           timestamp: job.created_at,
@@ -268,6 +280,8 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(params.get("limit") ?? "20"), 100);
     const offset = Math.max(parseInt(params.get("offset") ?? "0"), 0);
     const status = params.get("status"); // optional filter
+    // Multi-turn: filter by context_id to retrieve all tasks in a conversation thread
+    const contextId = params.get("context_id"); // optional filter
 
     if (!organizationId) {
       return NextResponse.json(
@@ -306,6 +320,11 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       query = query.eq("status", status);
+    }
+
+    // Filter by context_id — only returns tasks that belong to this multi-turn thread
+    if (contextId) {
+      query = query.contains("payload", { context_id: contextId });
     }
 
     const { data: jobs, error, count } = await query;
@@ -362,6 +381,8 @@ export function mapJobToA2ATask(job: {
   const payload = (job.payload ?? {}) as Record<string, unknown>;
   const sessionId = (payload.sessionId as string) ?? null;
   const skill = (payload.skill as string) ?? job.task_type;
+  // Multi-turn: surface context_id from payload so callers can group related tasks
+  const contextId = (payload.context_id as string) ?? null;
 
   const a2aState = mapStatusToA2AState(job.status);
 
@@ -412,6 +433,7 @@ export function mapJobToA2ATask(job: {
   return {
     id: job.id,
     sessionId,
+    ...(contextId ? { context_id: contextId } : {}),
     skill,
     status: {
       state: a2aState,
