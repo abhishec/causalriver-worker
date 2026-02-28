@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden — platform admin required" }, { status: 403 });
     }
 
+    // Use service/admin client for all cross-tenant queries — user-scoped client
+    // has RLS enabled which would filter results to only the admin's own orgs.
+    const adminClient = getAdminClient();
+
     const { searchParams } = new URL(request.url);
     const hours = parseInt(searchParams.get("hours") || "72", 10) || 72;
     const orgFilter = searchParams.get("org") || null;
@@ -46,7 +51,7 @@ export async function GET(request: NextRequest) {
     const since = new Date(Date.now() - hours * 3600 * 1000).toISOString();
 
     // Fetch orgs for display names
-    const { data: orgs } = await supabase
+    const { data: orgs } = await adminClient
       .from("organizations")
       .select("id, name, slug, is_core_brain")
       .order("is_core_brain", { ascending: false });
@@ -70,7 +75,7 @@ export async function GET(request: NextRequest) {
       obsAgentResult,
     ] = await Promise.all([
       addOrgFilter(
-        supabase
+        adminClient
           .from("ai_agent_activity")
           .select(
             "id, organization_id, agent_type, run_id, action_type, output_summary, tokens_used, duration_ms, status, metadata, created_at"
@@ -81,7 +86,7 @@ export async function GET(request: NextRequest) {
       ),
 
       addOrgFilter(
-        supabase
+        adminClient
           .from("agent_run_history")
           .select(
             "id, organization_id, agent_name, agent_version, status, signals_stored, packs_processed, discoveries, run_mode, completed_at, created_at"
@@ -92,7 +97,7 @@ export async function GET(request: NextRequest) {
       ),
 
       addOrgFilter(
-        supabase
+        adminClient
           .from("scheduled_jobs")
           .select(
             "id, organization_id, job_name, job_type, schedule, enabled, last_run_at, next_run_at, run_count, error_count, last_error"
@@ -101,7 +106,7 @@ export async function GET(request: NextRequest) {
       ),
 
       addOrgFilter(
-        supabase
+        adminClient
           .from("agent_queue")
           .select(
             "id, organization_id, agent_type, task_type, priority, status, error_message, started_at, completed_at, created_at"
@@ -112,7 +117,7 @@ export async function GET(request: NextRequest) {
       ),
 
       addOrgFilter(
-        supabase
+        adminClient
           .from("consolidation_runs")
           .select(
             "id, organization_id, is_core_brain, started_at, completed_at, total_duration_ms, status, report, errors"
@@ -123,7 +128,7 @@ export async function GET(request: NextRequest) {
       ),
 
       addOrgFilter(
-        supabase
+        adminClient
           .from("obs_agent_executions")
           .select(
             "id, organization_id, agent_type, agent_level, agent_run_id, trigger_type, status, output_summary, error_message, execution_latency_ms, tokens_consumed, llm_calls_made, cost_usd, started_at, completed_at"

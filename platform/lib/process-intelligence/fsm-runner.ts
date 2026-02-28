@@ -398,8 +398,12 @@ export class BPaaSFSMRunner {
     const isTerminalFailure = nextState === "FAILED";
     const domain = `process.${this.context.processType}.${prevState}`;
 
+    // Skip RL recording for self-loop transitions (e.g. APPROVAL_GATE waiting for human)
+    // Self-loops would inflate prediction_records with quality=1.0 on every poll tick.
+    const isSelfLoop = prevState === nextState;
+
     // RL signal — fire-and-forget
-    if (supabase) {
+    if (supabase && !isSelfLoop) {
       void recordStepOutcome(supabase, {
         organizationId: this.context.organizationId,
         domain,

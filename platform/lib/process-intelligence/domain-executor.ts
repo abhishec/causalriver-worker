@@ -54,6 +54,8 @@ import {
 } from "@nexus-ai/memory-stack";
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { startJobHeartbeat, stopJobHeartbeat } from "@/lib/se-aas/job-heartbeat";
+import type { HeartbeatHandle } from "@/lib/se-aas/job-heartbeat";
 import { executeAgenticState } from "./agentic-state-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
@@ -500,6 +502,10 @@ export async function executeBPaaSProcess(
   let lastError: string | undefined;
   const domain = bpaasDomain(params.processType);
 
+  // Heartbeat — prevents stale job watchdog from marking this job as failed during
+  // long-running FSM execution (>120s). The watchdog fires at 120s; we ping every 30s.
+  const heartbeatHandle: HeartbeatHandle = startJobHeartbeat(supabase, params.jobId);
+
   // Core terminal states — loop exits when any of these is reached.
   // Using Set<string> so custom states that route to ESCALATE/FAILED are handled correctly.
   //
@@ -525,6 +531,7 @@ export async function executeBPaaSProcess(
     // Lambda budget check — chain if near 75s limit
     if (runner.shouldChain()) {
       await runner.saveChainCheckpoint(supabase, chainDepth);
+      stopJobHeartbeat(heartbeatHandle);
       return {
         status: "chained",
         processInstanceId,
@@ -598,6 +605,7 @@ export async function executeBPaaSProcess(
           });
 
           if (gateResult.blocked) {
+            stopJobHeartbeat(heartbeatHandle);
             return {
               status: "awaiting_approval",
               processInstanceId,
@@ -696,6 +704,7 @@ export async function executeBPaaSProcess(
         const nextState = runner.getCurrentState();
         if (nextState === "ESCALATE" || nextState === "FAILED") {
           const escalationLvl = policyResult.escalationLevel ?? "policy_block";
+          stopJobHeartbeat(heartbeatHandle);
           return {
             status: "escalated",
             processInstanceId,
@@ -1028,6 +1037,8 @@ export async function executeBPaaSProcess(
     stateCount: ctx.stateHistory.length,
     errorMessage: status === "failed" ? (lastError ?? null) : null,
   });
+
+  stopJobHeartbeat(heartbeatHandle);
 
   return {
     status,
