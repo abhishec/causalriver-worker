@@ -30,7 +30,7 @@ mkdir -p "$PLATFORM_DIR/.next/server"
 
 # ── Set Node options ─────────────────────────────────────────────────────────
 SUPPRESS_SCRIPT="$SCRIPT_DIR/suppress-document-error.cjs"
-export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192 --require $SUPPRESS_SCRIPT"
+export NODE_OPTIONS="--max-old-space-size=3584 --require $SUPPRESS_SCRIPT"
 
 echo "🔨 Building Next.js 15.5 (App Router, webpack)..."
 
