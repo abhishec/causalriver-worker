@@ -22,6 +22,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from "@/lib/logger";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
+import { extractAndStoreKnowledge } from "@/lib/brain/knowledge-extractor";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import {
   buildAgentCommsPayload,
@@ -541,6 +542,23 @@ export async function executeAccountingAgent(
     modelUsed: routeCallType('aas-artifact-complex').model,
     outputSummary: JSON.stringify(finalResult).slice(0, 200),
   }).catch(() => {/* non-fatal */});
+
+  // ── Step 9: Knowledge Extraction (ADR-019, fire-and-forget) ──────────────
+  // Extract 1-2 reusable insights from this AaaS execution and store them in
+  // federated_knowledge as workspace-specific rows (quality gate: >= 0.65).
+  if (rlQuality >= 0.65) {
+    extractAndStoreKnowledge(supabase, {
+      domain: `aas.${action}`,
+      taskType: action,
+      inputSummary: `AAS ${action} (${jurisdiction}, ${transactions.length} txns)`,
+      outputSummary: JSON.stringify(finalResult).slice(0, 200),
+      qualityScore: rlQuality,
+      orgId: organizationId,
+      aiWorkerId: params.aiWorkerId ?? undefined,
+    }).catch((err: unknown) =>
+      logger.warn("[aas] knowledge extraction failed (non-fatal)", { error: String(err) })
+    );
+  }
 
   // ── Final: Emit completion comms ──────────────────────────────────────────
   if (params.onComms) {

@@ -45,6 +45,7 @@ import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { getCachedPlan, setCachedPlan, normaliseQueryKey } from "@/lib/brain/plan-cache";
 import { checkHitlGate } from "@/lib/brain/hitl-gate";
 import { logAuditEvent, AuditAction } from "@/lib/audit";
+import { extractAndStoreKnowledge } from "@/lib/brain/knowledge-extractor";
 
 // Import all 15 SE-aaS domains (8 original + 4 P1 gap closure + 3 SWE gap closure = 17 capabilities)
 import { logger } from "@/lib/logger";
@@ -1506,6 +1507,24 @@ export async function executeDomain(
     } catch {
       // Non-fatal — RLVR recording must never block domain response
     }
+  }
+
+  // ── Step 10: Knowledge Extraction (ADR-019, fire-and-forget) ─────────────
+  // After every domain execution with quality >= 0.65, extract 1-2 reusable
+  // insights and store in federated_knowledge as workspace-specific rows.
+  // Non-blocking — never delays or blocks the caller.
+  if (rlQuality >= 0.65) {
+    extractAndStoreKnowledge(supabase, {
+      domain: params.domainType,
+      taskType: params.domainType,
+      inputSummary: JSON.stringify(params.request).slice(0, 200),
+      outputSummary: JSON.stringify(result).slice(0, 200),
+      qualityScore: rlQuality,
+      orgId: params.organizationId,
+      aiWorkerId: params.aiWorkerId ?? undefined,
+    }).catch((err: unknown) =>
+      logger.warn("[se-aas] knowledge extraction failed (non-fatal)", { error: String(err) })
+    );
   }
 
   // ── Final: Emit completion comms — full heart/mind/speech payload ─────────
