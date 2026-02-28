@@ -496,7 +496,6 @@ export async function executeBPaaSProcess(
           decomposedPlan = { raw: decomposedText };
         }
 
-        // Mutate context directly through runner's exposed context reference
         const ctx = runner.getContext();
         const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan };
         // Re-construct runner in same state with updated context + process transitions
@@ -962,6 +961,7 @@ export async function executeBPaaSProcess(
   }
 
   // RL outcome recording (fire-and-forget)
+  // Compute resultJson and task-level quality ONCE; reuse for both task-level and process-level signals.
   try {
     const resultJson = JSON.stringify(outputResult);
     const quality = computeAgentQuality(
@@ -971,6 +971,7 @@ export async function executeBPaaSProcess(
       domain
     );
 
+    // Task-level RL signal
     void recordAgentOutcome(supabase, {
       agentId: processInstanceId,
       domain,
@@ -987,23 +988,8 @@ export async function executeBPaaSProcess(
         error: String(e),
       })
     );
-  } catch (rlErr) {
-    logger.warn("[BPaaS/DomainExecutor] RL outcome recording failed (non-fatal)", {
-      processInstanceId,
-      error: rlErr instanceof Error ? rlErr.message : String(rlErr),
-    });
-  }
 
-  // Process-level RL quality (supplements task-level quality)
-  try {
-    const resultJson = JSON.stringify(outputResult);
-    const quality = computeAgentQuality(
-      resultJson,
-      status === "failed" ? new Error(lastError ?? "process failed") : null,
-      durationMs,
-      domain
-    );
-
+    // Process-level RL signal (supplements task-level quality)
     // policyOutcome.passed=true → gates respected; passed=false → escalation required
     const policyPassed = ctx.policyOutcome?.passed !== false;
     const escalationRequired = ctx.policyOutcome !== undefined && !ctx.policyOutcome.passed;
@@ -1020,7 +1006,6 @@ export async function executeBPaaSProcess(
     // Use the higher of task-level and process-level quality for RL
     const bestQuality = Math.max(quality, processQuality);
 
-    // Emit a process-level RL outcome signal (separate from the task-level one)
     void recordAgentOutcome(supabase, {
       agentId: `process-quality-${processInstanceId}`,
       domain: `process.${params.processType}`,
@@ -1037,10 +1022,10 @@ export async function executeBPaaSProcess(
         error: String(e),
       })
     );
-  } catch (processRlErr) {
-    logger.warn("[BPaaS/DomainExecutor] process-level RL recording failed (non-fatal)", {
+  } catch (rlErr) {
+    logger.warn("[BPaaS/DomainExecutor] RL outcome recording failed (non-fatal)", {
       processInstanceId,
-      error: processRlErr instanceof Error ? processRlErr.message : String(processRlErr),
+      error: rlErr instanceof Error ? rlErr.message : String(rlErr),
     });
   }
 

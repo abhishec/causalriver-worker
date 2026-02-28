@@ -478,7 +478,8 @@ export async function getBrainContext(
       supabase
         .from("org_connectors")
         .select("connector_type, status, last_sync_at, error_message")
-        .eq("organization_id", orgId),
+        .eq("organization_id", orgId)
+        .limit(50),
 
       // L19 — AI Worker Fleet: agent_queue last 24h, task_type+status+completed_at, limit 50
       supabase
