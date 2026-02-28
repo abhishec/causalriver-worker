@@ -398,12 +398,16 @@ async function emitVerifiedRlSignal(
 ): Promise<void> {
   try {
     const now = new Date().toISOString();
+    // signal_value MUST be a string — cross_domain_signals.signal_value is TEXT.
+    // Store the neurotransmitter name so tier3-consolidation .in("signal_value", ["dopamine"])
+    // can filter RLVR signals. rlScoreDelta is carried in payload for numeric use.
+    const signalValueStr = matched ? "rl_verified_correct" : "rl_verified_incorrect";
     await supabase.from("cross_domain_signals").insert({
       organization_id: orgId,
       source_domain: `rlvr.${prediction.domain_type}`,
       target_domain: "brain.rl",
       signal_type: matched ? "rl_verified_correct" : "rl_verified_incorrect",
-      signal_value: rlScoreDelta,
+      signal_value: signalValueStr,
       signal_strength: Math.abs(rlScoreDelta),
       entity_type: prediction.entity_type,
       entity_id: prediction.entity_id,
