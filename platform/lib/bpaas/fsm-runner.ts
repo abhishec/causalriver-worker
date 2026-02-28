@@ -364,7 +364,7 @@ export class BPaaSFSMRunner {
 
     const durationMs = now - stepStartMs;
     const isTerminalFailure = nextState === "FAILED";
-    const domain = `bpaas.${this.context.processType}`;
+    const domain = `process.${this.context.processType}.${prevState}`;
 
     // RL signal — fire-and-forget
     if (supabase) {

@@ -32,7 +32,7 @@ import type { FSMTransition } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
 import { getBrainContext } from "@/lib/brain/brain-context";
-import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { recordAgentOutcome, computeAgentQuality, computeProcessQuality } from "@/lib/brain/agent-rl";
 import { logger } from "@/lib/logger";
 
 // ── Public API Types ─────────────────────────────────────────────────────────
@@ -889,6 +889,51 @@ export async function executeBPaaSProcess(
     logger.warn("[BPaaS/DomainExecutor] RL outcome recording failed (non-fatal)", {
       processInstanceId,
       error: rlErr instanceof Error ? rlErr.message : String(rlErr),
+    });
+  }
+
+  // Process-level RL quality (supplements task-level quality)
+  try {
+    const resultJson = JSON.stringify(outputResult);
+    const quality = computeAgentQuality(
+      resultJson,
+      status === "failed" ? new Error(lastError ?? "process failed") : null,
+      durationMs,
+      domain
+    );
+
+    // policyOutcome.passed=true → gates respected; passed=false → escalation required
+    const policyPassed = ctx.policyOutcome?.passed !== false;
+    const escalationRequired = ctx.policyOutcome !== undefined && !ctx.policyOutcome.passed;
+    const ctxUnknown = ctx as unknown as Record<string, unknown>;
+    const processQuality = computeProcessQuality({
+      allStatesCompleted: finalState === "COMPLETE",
+      policyGatesRespected: policyPassed,
+      escalationFiredWhenRequired: escalationRequired === (status === "escalated"),
+      humanApprovalReceived:
+        ctxUnknown.approvalStatus === "approved" || ctxUnknown.approvalStatus === undefined,
+      totalDurationMs: durationMs,
+    });
+
+    // Use the higher of task-level and process-level quality for RL
+    const bestQuality = Math.max(quality, processQuality);
+
+    // Emit a process-level RL outcome signal (separate from the task-level one)
+    void recordAgentOutcome(supabase, {
+      agentId: `process-quality-${processInstanceId}`,
+      domain: `process.${params.processType}`,
+      taskDescription: `BPaaS ${params.processType} process-level quality`,
+      resultSummary: `finalState=${finalState} states=${ctx.stateHistory.length} duration=${durationMs}ms`,
+      quality: bestQuality,
+      executionMs: durationMs,
+      organizationId: params.organizationId,
+      userId: params.userId ?? params.organizationId,
+      modelId: "process-engine",
+    });
+  } catch (processRlErr) {
+    logger.warn("[BPaaS/DomainExecutor] process-level RL recording failed (non-fatal)", {
+      processInstanceId,
+      error: processRlErr instanceof Error ? processRlErr.message : String(processRlErr),
     });
   }
 

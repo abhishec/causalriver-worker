@@ -206,6 +206,45 @@ export function computeAgentQuality(
   return Math.max(0, Math.min(1, Math.round(score * 100) / 100));
 }
 
+// ── Process-level quality scoring ─────────────────────────────────────────
+
+export interface ProcessQualityParams {
+  allStatesCompleted: boolean;
+  policyGatesRespected: boolean;
+  escalationFiredWhenRequired: boolean;
+  humanApprovalReceived?: boolean;
+  totalDurationMs: number;
+}
+
+/**
+ * Scores the quality of a BPaaS process execution at the process level.
+ * Complements computeAgentQuality() (task-level) with process-specific signals.
+ *
+ * Scoring:
+ *   +0.40 — All FSM states completed successfully (reached COMPLETE)
+ *   +0.30 — Policy gates respected (no violations detected)
+ *   +0.20 — Escalation fired when required (or not required and didn't fire)
+ *   +0.10 — Human approval received when HITL gate triggered
+ *   -0.10 — Execution took > 60s (slow process)
+ *   -0.05 — Execution took > 30s (moderately slow)
+ *
+ * Returns a value clamped to [0, 1].
+ */
+export function computeProcessQuality(params: ProcessQualityParams): number {
+  let quality = 0;
+
+  if (params.allStatesCompleted) quality += 0.40;
+  if (params.policyGatesRespected) quality += 0.30;
+  if (params.escalationFiredWhenRequired) quality += 0.20;
+  if (params.humanApprovalReceived) quality += 0.10;
+
+  // Duration penalty
+  if (params.totalDurationMs > 60_000) quality -= 0.10;
+  else if (params.totalDurationMs > 30_000) quality -= 0.05;
+
+  return Math.max(0, Math.min(1, quality));
+}
+
 // ── Outcome Recording ──────────────────────────────────────────────────────
 
 /**
