@@ -288,7 +288,7 @@ export async function writeProcessEngineHealth(
     // L28a: bpaas_process_instances current_state+status last 7d
     // L28b: agent_queue agent_type=bpaas task_type+status last 7d
 
-    const [instancesRow, bpaasJobsRow] = await Promise.all([
+    const [instancesRow, bpaasJobsRow, stateSignalsRow] = await Promise.all([
       supabase
         .from("bpaas_process_instances")
         .select("current_state, status, created_at")
@@ -304,7 +304,53 @@ export async function writeProcessEngineHealth(
         .eq("agent_type", "bpaas")
         .gte("created_at", sevenDaysAgo)
         .limit(20),
+
+      // L28c: State-level RL signals from cross_domain_signals (Phase 5)
+      supabase
+        .from("cross_domain_signals")
+        .select("signal_metadata, signal_type, source_domain, signal_value")
+        .eq("organization_id", orgId)
+        .like("source_domain", "process.%")
+        .gte("signal_timestamp", sevenDaysAgo)
+        .limit(100),
     ]);
+
+    // Parse state patterns: per processType+state, what is the fail rate?
+    const stateStats: Record<string, { total: number; failures: number }> = {};
+
+    if (stateSignalsRow.data) {
+      for (const signal of stateSignalsRow.data as Array<{
+        source_domain: string;
+        signal_type: string;
+        signal_value: number | null;
+      }>) {
+        const domain = signal.source_domain;
+        if (!domain?.startsWith("process.")) continue;
+        // domain format: process.TYPE.STATE
+        const parts_domain = domain.split(".");
+        if (parts_domain.length < 3) continue;
+        const key = `${parts_domain[1]}.${parts_domain[2]}`; // TYPE.STATE
+        const stats = stateStats[key] ?? { total: 0, failures: 0 };
+        stats.total++;
+        if (signal.signal_type === "gaba" || (typeof signal.signal_value === "number" && signal.signal_value < 0)) {
+          stats.failures++;
+        }
+        stateStats[key] = stats;
+      }
+    }
+
+    // Build statePatterns array for summary JSONB
+    const statePatterns = Object.entries(stateStats)
+      .filter(([, s]) => s.total >= 3) // only meaningful patterns
+      .map(([key, s]) => {
+        const [processType, state] = key.split(".");
+        return {
+          processType,
+          state,
+          failRate: s.total > 0 ? s.failures / s.total : 0,
+          sampleSize: s.total,
+        };
+      });
 
     const parts: string[] = [];
 
@@ -337,6 +383,15 @@ export async function writeProcessEngineHealth(
       if (templateSummary) parts.push(`Templates: ${templateSummary}`);
     }
 
+    // Add pattern summary to context_string
+    if (statePatterns.length > 0) {
+      const patternSummary = statePatterns
+        .filter((p) => p.failRate > 0.3)
+        .map((p) => `${p.processType} ${p.state} ${Math.round(p.failRate * 100)}% fail`)
+        .join(" | ");
+      if (patternSummary) parts.push(`Process patterns: ${patternSummary}`);
+    }
+
     const contextString =
       parts.length > 0
         ? `## Process Engine (L28)\n${parts.join(" | ")}`.slice(0, 300)
@@ -352,8 +407,7 @@ export async function writeProcessEngineHealth(
           summary: {
             processCount7d: instancesRow.data?.length ?? 0,
             jobCount7d: bpaasJobsRow.data?.length ?? 0,
-            // Phase 5 will enrich statePatterns with cross_domain_signals
-            statePatterns: [],
+            statePatterns, // Now populated with actual signal data
           },
           context_string: contextString,
           updated_at: new Date().toISOString(),

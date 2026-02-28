@@ -55,6 +55,7 @@ export interface PlannerState {
   highDemandDomains: string[];   // domains users queried most in last 24h
   recoveryMode: boolean;         // true when recovery-agent has fired recently
   engagementCount: number;
+  processBottlenecks?: Array<{ processType: string; state: string; failRate: number }>;
 }
 
 export interface CognitivePlannerResult {
@@ -824,6 +825,56 @@ async function _runCognitivePlannerInner(
     // Non-fatal — process engine health is informational only
   }
 
+  // ── Phase 1h: Process bottleneck detection ────────────────────────────────
+  // Reads state-level fail rates from service_health to surface process
+  // templates that need policy knowledge enrichment.
+  // Non-blocking — failure here must NOT prevent planning from proceeding.
+  let processBottlenecks: Array<{ processType: string; state: string; failRate: number }> = [];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const processHealthRow = await (supabase as any)
+      .from("service_health")
+      .select("summary, context_string")
+      .eq("organization_id", orgId)
+      .eq("service_type", "process-engine")
+      .maybeSingle();
+
+    interface StateBottleneck {
+      processType: string;
+      state: string;
+      failRate: number;
+      sampleSize?: number;
+    }
+
+    const summaryData = processHealthRow?.data?.summary as
+      | {
+          statePatterns?: Array<{
+            processType: string;
+            state: string;
+            failRate: number;
+            sampleSize?: number;
+          }>;
+        }
+      | null
+      | undefined;
+
+    if (summaryData?.statePatterns) {
+      for (const pattern of summaryData.statePatterns) {
+        if (pattern.failRate > 0.5) {
+          processBottlenecks.push({
+            processType: pattern.processType,
+            state: pattern.state,
+            failRate: pattern.failRate,
+          });
+        }
+      }
+    }
+
+    logger.warn(`[CognitivePlanner] Phase 1h: ${processBottlenecks.length} process bottleneck(s) detected for org=${orgId}`);
+  } catch (err) {
+    logger.warn("[CognitivePlanner] Phase 1h (process bottlenecks) failed:", err);
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 2 — PLAN (one Claude Haiku call)
   // ══════════════════════════════════════════════════════════════════════════
@@ -832,6 +883,11 @@ async function _runCognitivePlannerInner(
   const processEngineHealthSummary = processEngineSignals.length > 0
     ? processEngineSignals.map((s) => `${s.domain}(conf:${s.confidence.toFixed(2)})`).join(", ")
     : "no recent data";
+  const processBottleneckSummary = processBottlenecks.length > 0
+    ? processBottlenecks
+        .map((b) => `${b.processType} at ${b.state}: ${Math.round(b.failRate * 100)}% fail rate`)
+        .join(", ")
+    : "none";
   const stateSnapshot = `## Current State
 - Active engagements: ${engagementCount}
 - Domains not run in >${plannerConfig.coverageGapHours}h (coverage gaps): ${coverageGaps.join(", ") || "none"}
@@ -842,6 +898,7 @@ async function _runCognitivePlannerInner(
 - Globally broken domains (>10 failures across all orgs in 2h — NEVER schedule): ${[...globallyBrokenDomains].join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
 - Process Engine (bpaas) recent signals (informational, NOT schedulable): ${processEngineHealthSummary}
+- Process FSM bottlenecks (states with >50% fail rate, may need policy enrichment): ${processBottleneckSummary}
 - IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition, bpaas.*, process.*
 
 ## Past Planning Decisions and Lessons
@@ -860,7 +917,10 @@ ${pastReflectionsText}`;
           role: "user",
           content:
             stateSnapshot +
-            `\n\nGiven this state, output a JSON array of at most ${maxDecisions} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < ${plannerConfig.qualityFloor} unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${maxDecisions} decisions total`,
+            `\n\nGiven this state, output a JSON array of at most ${maxDecisions} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < ${plannerConfig.qualityFloor} unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${maxDecisions} decisions total` +
+            (processBottlenecks.length > 0
+              ? `\n\nProcess Intelligence: The following process FSM states are experiencing high failure rates and may need policy knowledge enrichment: ${processBottleneckSummary}. Consider scheduling policy enrichment for these templates.`
+              : ""),
         },
       ],
     });
