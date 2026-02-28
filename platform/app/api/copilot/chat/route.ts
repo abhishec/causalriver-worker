@@ -74,6 +74,7 @@ import { logDecision } from "@/lib/brain/decision-log";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { selectModel as selectModelDAA, classifyQueryDifficulty } from "@/lib/brain/model-router";
 import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
+import { classifyTaskIntent, buildPrivacyRefusal } from "@/lib/brain/task-intent-classifier";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -240,6 +241,21 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // ── G8 Privacy Firewall — runs BEFORE any LLM or brain context call ──────
+    // Synchronous, < 5ms, no DB. Blocks PII before it reaches the LLM.
+    const _classification = classifyTaskIntent({
+      message,
+      organizationId: requestedWorkspaceId ?? undefined,
+    });
+    if (_classification.intent === "privacy-block") {
+      return new Response(
+        JSON.stringify({ error: buildPrivacyRefusal(_classification.privacyFlags) }),
+        { status: 422, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    // Attach to request context — downstream RL recording uses this for intent distribution
+    const taskIntent = _classification.intent;
 
     // ── Pre-flight: auth + rate limit + API key + memStack + brain init ──
     const preFlightResult = await runPreFlight(
@@ -4074,6 +4090,7 @@ No connectors are configured yet. When the user asks for data from any source (S
         entityId: `copilot_${Date.now()}`,
         metadata: {
           intent: detectedIntent,
+          taskIntent,                // G8: classified intent for RL distribution tracking
           domains: detectedDomains,
           model: v4SmartModel,
           hadBrainContext: !!brainContext,
@@ -4424,6 +4441,7 @@ No connectors are configured yet. When the user asks for data from any source (S
               entityId: `copilot_${Date.now()}`,
               metadata: {
                 intent: detectedIntent,
+                taskIntent,                // G8: classifier intent for distribution tracking
                 domains: detectedDomains,
                 model: v4SmartModel,
                 hadBrainContext: !!brainContext,
