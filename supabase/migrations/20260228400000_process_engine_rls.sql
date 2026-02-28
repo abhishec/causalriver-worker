@@ -15,7 +15,7 @@
 DROP POLICY IF EXISTS "service_role_write" ON process_templates;
 
 -- Re-create with both USING and WITH CHECK so all DML operations work
-CREATE POLICY "service_role_all" ON process_templates
+CREATE POLICY IF NOT EXISTS "service_role_all" ON process_templates
   FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
