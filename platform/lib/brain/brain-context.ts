@@ -1240,6 +1240,30 @@ export async function getBrainContext(
       // Non-fatal — process engine context is best-effort
     }
 
+    // L28e: Predictor risk profile (best-effort, fire-and-forget cache)
+    // Augments the process engine layer with high-risk state warnings for LLM context.
+    let processRiskSummary: string | undefined;
+    try {
+      const { getOrgRiskProfile } = await import("@/lib/brain/process-predictor");
+      const riskProfile = await getOrgRiskProfile(supabase, orgId);
+      const highRiskStates = Object.entries(riskProfile)
+        .filter(([, score]) => score > 0.6)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([key, score]) => `${key}(${Math.round(score * 100)}%)`);
+      if (highRiskStates.length > 0) {
+        processRiskSummary = `High-risk states: ${highRiskStates.join(", ")}`;
+        // Append to processEngineLayer if it exists
+        if (processEngineLayer) {
+          processEngineLayer = `${processEngineLayer} | ${processRiskSummary}`.slice(0, 400);
+        } else {
+          processEngineLayer = `## Process Engine (L28)\n${processRiskSummary}`.slice(0, 400);
+        }
+      }
+    } catch {
+      // Non-fatal — predictor risk profile is best-effort
+    }
+
     // ── RL QUALITY PATTERNS (post-allSettled, awaited separately) ────────────
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);

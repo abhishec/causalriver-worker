@@ -32,7 +32,9 @@ import type { FSMTransition } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
 import { getBrainContext } from "@/lib/brain/brain-context";
-import { recordAgentOutcome, computeAgentQuality, computeProcessQuality } from "@/lib/brain/agent-rl";
+import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordPredictionAccuracy } from "@/lib/brain/agent-rl";
+import { predictStateRisk } from "@/lib/brain/process-predictor";
+import type { PredictionResult } from "@/lib/brain/process-predictor";
 import { logger } from "@/lib/logger";
 
 // ── Public API Types ─────────────────────────────────────────────────────────
@@ -271,6 +273,30 @@ export async function executeBPaaSProcess(
     });
   }
 
+  // ── Step -1b: Pre-execution prediction (DECOMPOSE risk assessment) ────────
+  // Called before FSM starts so high-risk flag can be set on context before DECOMPOSE.
+  // Non-blocking, non-fatal — predictor failure must never stop process execution.
+  let initialPrediction: PredictionResult | null = null;
+  try {
+    initialPrediction = await predictStateRisk({
+      supabase,
+      orgId: params.organizationId,
+      processType: params.processType,
+      currentState: "DECOMPOSE",
+    });
+    if (initialPrediction.riskLevel === "high") {
+      logger.warn("[BPaaS/Predictor] High risk process — pre-emptive escalation flag set", {
+        processType: params.processType,
+        riskScore: initialPrediction.riskScore,
+        reasoning: initialPrediction.reasoning,
+      });
+    }
+  } catch (predErr) {
+    logger.warn("[BPaaS/Predictor] Pre-execution prediction failed (non-fatal)", {
+      error: predErr instanceof Error ? predErr.message : String(predErr),
+    });
+  }
+
   // ── Load process definition (needed for custom state transitions) ─────────
   // Loaded once here so that custom states (FRAUD_REVIEW, RECONCILE, etc.) have
   // the process definition's FSMTransition table available throughout the loop.
@@ -356,6 +382,8 @@ export async function executeBPaaSProcess(
       inputPayload: params.inputPayload,
       stateHistory: [{ state: "DECOMPOSE", enteredAt: Date.now() }],
       startedAt,
+      // Inject pre-execution prediction flag so downstream states are risk-aware
+      predictedHighRisk: initialPrediction?.riskLevel === "high",
     };
 
     runner = new BPaaSFSMRunner(context, "DECOMPOSE", definition.transitions);
@@ -906,6 +934,18 @@ export async function executeBPaaSProcess(
     logger.warn("[BPaaS/DomainExecutor] process-level RL recording failed (non-fatal)", {
       processInstanceId,
       error: processRlErr instanceof Error ? processRlErr.message : String(processRlErr),
+    });
+  }
+
+  // RLVR capstone: record prediction accuracy to close the predictor feedback loop
+  // Only fires when we had an initial prediction to evaluate against the actual outcome.
+  if (initialPrediction !== null) {
+    void recordPredictionAccuracy(supabase, {
+      orgId: params.organizationId,
+      processType: params.processType,
+      predictedRisk: initialPrediction.riskLevel,
+      actualOutcome: status === "completed" ? "success" : "failure",
+      executionMs: durationMs,
     });
   }
 
