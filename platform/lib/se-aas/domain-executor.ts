@@ -348,6 +348,165 @@ const scopeCreepDomain = {
   },
 };
 
+// ── Inline domain: delivery-intelligence ──────────────────────────────────
+// Composite snapshot across ALL four delivery intelligence tables:
+//   1. engagement_health_latest  — bottom-5 engagements by health_score
+//   2. engineer_health_snapshots — engineers with flight_risk_score > 50
+//   3. scope_creep_alerts        — unacknowledged alerts
+//   4. pod_match_history         — latest 3 pod recommendations
+//
+// This is the ONLY handler that should be bound to the "delivery-intelligence"
+// domain key in DOMAIN_MAP. Do NOT route this to podMatchDomain — that handler
+// only touches pod_match_history and produces incorrect RL signals for the
+// broader delivery-intelligence use case.
+const deliveryIntelligenceDomain = {
+  async execute(ctx: any): Promise<Record<string, unknown>> {
+    const supabase = ctx.supabase as import("@supabase/supabase-js").SupabaseClient;
+    const orgId = ctx.organizationId as string;
+
+    if (!supabase || !orgId) {
+      return {
+        domain: "delivery-intelligence",
+        engagements: [],
+        engineers: [],
+        alerts: [],
+        pod_recommendations: [],
+        summary: null,
+        error: "No org context available",
+      };
+    }
+
+    // ── 1. engagement_health_latest — bottom 5 by health_score ─────────────
+    const { data: engagementsRaw, error: engErr } = await supabase
+      .from("engagement_health_latest")
+      .select("engagement_id, health_score, computed_at, client_name, engagement_name, status, forecast_at_risk, forecast_days_remaining, delivery_velocity, jira_resolution_rate, scope_drift")
+      .eq("organization_id", orgId)
+      .order("health_score", { ascending: true })
+      .limit(5);
+
+    if (engErr) {
+      logger.warn("[delivery-intelligence domain] engagement_health_latest query failed:", engErr.message);
+    }
+    const engagements = engagementsRaw ?? [];
+
+    // ── 2. engineer_health_snapshots — flight_risk_score > 50 ──────────────
+    const thisWeek = new Date();
+    thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay() + 1);
+    const weekStart = thisWeek.toISOString().split("T")[0];
+
+    const { data: engineersRaw, error: engSnapshotErr } = await supabase
+      .from("engineer_health_snapshots")
+      .select("github_login, flight_risk_score, velocity_index, overallocation_flag, review_burden, week_start")
+      .eq("organization_id", orgId)
+      .gte("week_start", weekStart)
+      .gt("flight_risk_score", 50)
+      .order("flight_risk_score", { ascending: false })
+      .limit(20);
+
+    if (engSnapshotErr) {
+      logger.warn("[delivery-intelligence domain] engineer_health_snapshots query failed:", engSnapshotErr.message);
+    }
+    const engineers = engineersRaw ?? [];
+
+    // ── 3. scope_creep_alerts — unresolved alerts ───────────────────────────
+    const { data: alertsRaw, error: alertErr } = await supabase
+      .from("scope_creep_alerts")
+      .select("id, engagement_id, severity, delta_pct, sprint_name, alert_message, created_at, acknowledged")
+      .eq("organization_id", orgId)
+      .eq("acknowledged", false)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (alertErr) {
+      logger.warn("[delivery-intelligence domain] scope_creep_alerts query failed:", alertErr.message);
+    }
+    const alerts = alertsRaw ?? [];
+
+    // ── 4. pod_match_history — latest 3 recommendations ────────────────────
+    const { data: podRaw, error: podErr } = await supabase
+      .from("pod_match_history")
+      .select("id, engagement_id, recommended_pod_name, confidence, rank, was_accepted, created_at")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (podErr) {
+      logger.warn("[delivery-intelligence domain] pod_match_history query failed:", podErr.message);
+    }
+    const podRecommendations = podRaw ?? [];
+
+    // ── Build summary ───────────────────────────────────────────────────────
+    const criticalEngagements = engagements.filter(
+      (e: Record<string, unknown>) => (e.health_score as number ?? 100) < 40
+    );
+    const avgHealthScore =
+      engagements.length > 0
+        ? Math.round(
+            engagements.reduce(
+              (sum: number, e: Record<string, unknown>) => sum + ((e.health_score as number) ?? 0),
+              0
+            ) / engagements.length
+          )
+        : null;
+    const criticalAlerts = alerts.filter(
+      (a: Record<string, unknown>) => a.severity === "critical"
+    );
+    const atRiskEngineers = engineers.filter(
+      (e: Record<string, unknown>) => (e.flight_risk_score as number ?? 0) > 70
+    );
+
+    const narrativeParts: string[] = [];
+    if (engagements.length > 0) {
+      narrativeParts.push(
+        `${criticalEngagements.length} of ${engagements.length} engagements are in critical health (score < 40). Average health score across bottom-5: ${avgHealthScore ?? "N/A"}.`
+      );
+    }
+    if (engineers.length > 0) {
+      narrativeParts.push(
+        `${atRiskEngineers.length} engineer(s) at high flight risk this week (score > 70 of ${engineers.length} flagged).`
+      );
+    }
+    if (alerts.length > 0) {
+      narrativeParts.push(
+        `${alerts.length} unacknowledged scope creep alert(s) including ${criticalAlerts.length} critical.`
+      );
+    }
+    if (podRecommendations.length > 0) {
+      const topPod = podRecommendations[0] as Record<string, unknown>;
+      narrativeParts.push(
+        `Latest pod recommendation: ${topPod.recommended_pod_name ?? "Unknown"} (confidence: ${typeof topPod.confidence === "number" ? Math.round((topPod.confidence as number) * 100) : "N/A"}%).`
+      );
+    }
+    const narrative =
+      narrativeParts.length > 0
+        ? narrativeParts.join(" ")
+        : "No delivery intelligence data available. Connect GitHub, Jira, and Slack to start tracking engagement health.";
+
+    return {
+      domain: "delivery-intelligence",
+      week_start: weekStart,
+      engagements,
+      engineers,
+      alerts,
+      pod_recommendations: podRecommendations,
+      summary: {
+        engagement_count: engagements.length,
+        critical_engagement_count: criticalEngagements.length,
+        avg_health_score: avgHealthScore,
+        at_risk_engineer_count: engineers.length,
+        high_flight_risk_engineer_count: atRiskEngineers.length,
+        unacknowledged_alert_count: alerts.length,
+        critical_alert_count: criticalAlerts.length,
+        pod_recommendation_count: podRecommendations.length,
+        top_pod_recommendation: podRecommendations.length > 0
+          ? (podRecommendations[0] as Record<string, unknown>).recommended_pod_name ?? null
+          : null,
+      },
+      narrative,
+    };
+  },
+};
+
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
 // the CORE table on every domain call — we only push once per TTL window.
@@ -385,14 +544,14 @@ const DOMAIN_MAP: Record<string, { domain: any; sync: boolean }> = {
   "codebase-qa": { domain: codebaseQADomain, sync: false },
   // === SE-aaS Delivery Intelligence (Sprint 5 — WOW Artifacts) ===
   "pod-match": { domain: podMatchDomain, sync: true },
-  // "delivery-intelligence" is handled by the dedicated API endpoint,
-  // but can also be invoked via copilot as a pod-match + health score composite
-  "delivery-intelligence": { domain: podMatchDomain, sync: true },
+  // delivery-intelligence: composite snapshot across all 4 delivery intel tables
+  // (engagement_health_latest, engineer_health_snapshots, scope_creep_alerts, pod_match_history).
+  // MUST point to deliveryIntelligenceDomain — NOT podMatchDomain.
+  // Routing to podMatchDomain corrupts RL signals for both domains.
+  "delivery-intelligence": { domain: deliveryIntelligenceDomain, sync: true },
   // P0 Delivery Intelligence domains — each uses its own correct handler:
   // early-warning queries engineer_health_snapshots (flight risk, velocity, overallocation)
   // scope-creep queries scope_creep_alerts (drift %, severity, unacknowledged count)
-  // The delivery handler (buildDeliveryIntelligenceResult) enriches both with the
-  // full engagement-health panel after domain execution.
   "early-warning": { domain: earlyWarningDomain, sync: true },
   "scope-creep": { domain: scopeCreepDomain, sync: true },
   // P1-15 Architecture Extractor
