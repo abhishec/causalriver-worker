@@ -217,7 +217,7 @@ export interface ProcessQualityParams {
 }
 
 /**
- * Scores the quality of a BPaaS process execution at the process level.
+ * Scores the quality of a Process Engine execution at the process level.
  * Complements computeAgentQuality() (task-level) with process-specific signals.
  *
  * Scoring:

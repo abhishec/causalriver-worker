@@ -235,7 +235,7 @@ export async function evolveProcessTemplates(
       try {
         // Derive process_type from domain_sequence or template name.
         // domain_sequence e.g. ['pod-match', 'early-warning'] — pick the primary domain.
-        // For process templates, the sequence may encode BPaaS type in name (e.g. "hr_offboarding").
+        // For process templates, the sequence may encode process template type in name (e.g. "hr_offboarding").
         // We match instances by querying bpaas_process_instances filtered by process_type
         // derived from the template name (process_templates are named after domain sequences,
         // not BPaaS process types). We match on both approaches.

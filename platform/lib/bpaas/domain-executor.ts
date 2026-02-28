@@ -36,6 +36,19 @@ import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordP
 import { predictStateRisk } from "@/lib/brain/process-predictor";
 import type { PredictionResult } from "@/lib/brain/process-predictor";
 import { logger } from "@/lib/logger";
+import {
+  snapshotCausalWeights,
+  computeAndPromoteCausalDeltas,
+  // Federated Brain — CORE → ORG real-time injection (NB-065)
+  pushCoreInsightsToOrg,
+} from "@nexus-ai/memory-stack";
+
+// ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
+// Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
+// the CORE table on every agent call — we only push once per TTL window.
+// Module-level so it persists across requests within the same process instance.
+const _corePushLastMs = new Map<string, number>();
+const CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 // ── Public API Types ─────────────────────────────────────────────────────────
 
@@ -948,6 +961,63 @@ export async function executeBPaaSProcess(
       executionMs: durationMs,
     });
   }
+
+  // ── Federation: CORE → ORG real-time injection (NB-065) ───────────────────
+  // pushCoreInsightsToOrg writes strong CORE causal priors (evidence_weight ≥ 10,
+  // effect_size ≥ 0.7) into the ORG's own causal_relationships_statistical rows.
+  // TTL guard prevents hammering on every request — at most once per 10 minutes
+  // per org per process instance. Fire-and-forget on failure (non-fatal).
+  if ((Date.now() - (_corePushLastMs.get(params.organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
+    _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
+    void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
+      logger.warn("[BPaaS/federation] CORE→ORG push failed (non-fatal):", err instanceof Error ? err.message : String(err));
+    });
+  }
+
+  // ── Federation: ORG → CORE delta promotion (G2 — federation parity) ───────
+  // After RL outcome recording, compute what CHANGED in the org's causal graph
+  // and promote only the deltas to the CORE brain using FedAvg. This implements
+  // privacy-preserving federated learning: only the CHANGE (delta), not the raw
+  // data, leaves the org boundary.
+  //
+  // The domain for federation uses "process.<processType>" — consistent with the
+  // process-level RL domain string recorded above.
+  //
+  // Fire-and-forget: NEVER slows down the process response returned to the caller.
+  (async () => {
+    try {
+      // Snapshot causal weights for federation delta computation.
+      // We snapshot at the END (post-RL) so we capture any weight updates from
+      // the RL outcome recording above. The federation diff is against the CORE
+      // baseline — not a before/after within this execution — so snapshotting here
+      // captures the current org state for the delta computation.
+      const causalWeightsSnapshot = await snapshotCausalWeights(supabase, params.organizationId);
+      if (causalWeightsSnapshot.size === 0) return; // No org causal data to federate
+      const federationCycleId = `bpaas_${params.processType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
+      const federationResult = await computeAndPromoteCausalDeltas(
+        supabase,
+        params.organizationId,
+        causalWeightsSnapshot,
+        federationCycleId,
+        {
+          fedAvgLearningRate: 0.3,  // New deltas get 30% weight vs existing CORE
+          maxDelta: 0.15,           // Max effect-size change per cycle (outlier clip)
+          minDelta: 0.01,           // Ignore noise — only promote meaningful changes
+          minSampleSize: 10,        // Only promote if enough observations back it up
+          maxPairsPerRun: 20,       // Limit CORE updates per process run
+        },
+      );
+      logger.debug(
+        `[BPaaS/federation] org=${params.organizationId.slice(0, 8)} process=${params.processType} ` +
+        `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
+        `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
+        `took=${federationResult.durationMs}ms`
+      );
+    } catch (err: any) {
+      // Federation is best-effort — never block process response
+      logger.warn("[BPaaS/federation] Delta promotion failed (non-fatal):", err?.message);
+    }
+  })();
 
   // Finalise bpaas_process_instances
   // current_state = final FSM state name (TEXT column)
