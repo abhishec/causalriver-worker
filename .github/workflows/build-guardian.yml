@@ -27,6 +27,7 @@ jobs:
       - name: Build memory-stack (required for platform tsc)
         # The platform imports @nexus-ai/memory-stack which resolves to dist/index.d.ts.
         # dist/ is gitignored — must be built before tsc can type-check platform routes.
+        # OOM guard: ubuntu-latest = 7 GB RAM — 4096 MB leaves 3 GB headroom for OS/pnpm
         run: pnpm --filter @nexus-ai/memory-stack run build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
@@ -45,6 +46,14 @@ jobs:
         if: failure()
         run: |
           echo "::error::Build failed! TypeScript or lint errors found."
+          echo ""
+          # OOM guard: exit 137 = Node killed by OS (out of memory)
+          if [ "$?" = "137" ] || grep -q "Killed" /proc/1/status 2>/dev/null; then
+            echo "::error::OOM KILL DETECTED (exit 137) — Node exceeded available RAM."
+            echo "Current limit: NODE_OPTIONS=--max-old-space-size=4096 (4 GB)"
+            echo "GitHub Actions ubuntu-latest RAM: ~7 GB"
+            echo "Fix: lower NODE_OPTIONS or split build into separate jobs"
+          fi
           echo "Local diagnosis:"
           echo "  TypeScript: cd platform && npx tsc --noEmit"
           echo "  Lint:       cd platform && npx next lint --max-warnings 50"

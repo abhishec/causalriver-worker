@@ -70,5 +70,19 @@ if [ "$COMPILED" -gt 0 ] && [ "$HAS_MANIFEST" = true ] && [ "$HAS_APP_DIR" = tru
   exit 0
 fi
 
+# ── OOM guard: exit 137 = SIGKILL (out of memory) ────────────────────────────
+if [ $EXIT_CODE -eq 137 ]; then
+  echo "💥 OOM KILL DETECTED (exit 137)"
+  echo "   Node was killed by the OS because it exceeded available RAM."
+  echo "   Current limit: --max-old-space-size=3584 (3.5 GB)"
+  echo "   Machine RAM: ~7 GB (Amplify Standard / GitHub Actions ubuntu-latest)"
+  echo "   Fix options:"
+  echo "     1. Reduce memory: lower --max-old-space-size in build.sh"
+  echo "     2. Upgrade machine: Amplify → App settings → Build settings → computeType: LARGE"
+  echo "     3. Split the build: separate tsc and next build into sequential jobs"
+  echo "   See: https://docs.aws.amazon.com/amplify/latest/userguide/custom-build-image.html"
+  exit 137
+fi
+
 echo "❌ Build failed (exit $EXIT_CODE, compiled=$COMPILED, manifest=$HAS_MANIFEST, app=$HAS_APP_DIR)"
 exit $EXIT_CODE
