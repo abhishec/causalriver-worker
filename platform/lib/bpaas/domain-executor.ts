@@ -25,7 +25,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { BPaaSFSMRunner } from "./fsm-runner";
+import { BPaaSFSMRunner, CUSTOM_INTERMEDIATE_STATES } from "./fsm-runner";
 import type { BPaaSContext, BPaaSTransitionEvent } from "./fsm-runner";
 import { getProcessDefinition, bpaasDomain } from "./process-registry";
 import type { FSMTransition } from "./process-registry";
@@ -64,19 +64,8 @@ export interface BPaaSExecutionResult {
 }
 
 // ── Custom intermediate states ────────────────────────────────────────────────
-
-/**
- * States handled generically via process definition transitions.
- * The domain executor uses LLM analysis to determine the outgoing event.
- * Add new custom states here if they appear in future process templates.
- */
-const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
-  "FRAUD_REVIEW",
-  "DUPLICATE_CHECK",
-  "EVIDENCE_REVIEW",
-  "RECONCILE",
-  "RCA",
-]);
+// MINOR-3: CUSTOM_INTERMEDIATE_STATES imported from fsm-runner.ts (single source of truth).
+// Previously duplicated here — removed duplicate. Add new states in fsm-runner.ts only.
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

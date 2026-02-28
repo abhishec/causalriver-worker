@@ -297,7 +297,7 @@ export async function extractAndUpdateMemory(
     }
   }
 
-  logger.debug(
+  logger.warn(
     `[Mem0] org=${orgId.slice(0, 8)} domain=${domain} ` +
       `tokens=${tokensProcessed} add=${factsAdded} update=${factsUpdated} delete=${factsDeleted}`
   );

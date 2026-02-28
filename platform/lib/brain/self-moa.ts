@@ -141,7 +141,7 @@ Return ONLY the synthesized response — no meta-commentary, no "combining A and
         ? synthesisResp.content[0].text
         : conservative; // fallback to conservative if synthesis fails
 
-    logger.debug(
+    logger.warn(
       `[Self-MoA] Synthesis complete — conservative=${conservative.length}chars creative=${creative.length}chars synthesized=${synthesized.length}chars`
     );
 

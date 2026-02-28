@@ -140,7 +140,9 @@ export interface BPaaSContext {
  * These states use the process definition's FSMTransition table to resolve
  * their outgoing transitions — NOT the CORE_TRANSITIONS table.
  */
-const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
+// Exported so domain-executor.ts can import this single definition.
+// MINOR-3: was duplicated in both files — now single source of truth in fsm-runner.ts.
+export const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
   "FRAUD_REVIEW",
   "DUPLICATE_CHECK",
   "EVIDENCE_REVIEW",
