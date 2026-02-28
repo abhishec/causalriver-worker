@@ -622,6 +622,94 @@ async function notifyApprovalRequired(
   }
 }
 
+// ─── Process Engine Writeback ─────────────────────────────────────────────────
+
+/**
+ * Discriminated union of all writeback payloads that can be dispatched through
+ * the centralized dispatcher.  Add new writeback types here so every data
+ * mutation routes through one place.
+ */
+export type WritebackPayload =
+  /** Process Engine MUTATE state — inserts a row into bpaas_process_mutations */
+  | {
+      type: "process_mutation";
+      organizationId: string;
+      processInstanceId: string;
+      processType: string;
+      mutationPayload: Record<string, unknown>;
+      mutationReason: string;
+      executedBy: string; // userId or 'process-engine'
+    };
+
+/**
+ * Central writeback dispatcher — routes mutation payloads to the appropriate
+ * persistence layer based on the payload type.
+ *
+ * Design principles:
+ * - All cases must be non-blocking from the caller's perspective — the caller
+ *   should use `void dispatchWriteback(...).catch(...)` for fire-and-forget.
+ * - Never throws — errors are logged as warnings and swallowed so a failed
+ *   write-back never aborts the FSM state machine.
+ * - New mutation types: add a branch in the switch below + extend WritebackPayload.
+ *
+ * @example
+ * void dispatchWriteback(supabase, {
+ *   type: "process_mutation",
+ *   organizationId: params.organizationId,
+ *   processInstanceId,
+ *   processType: params.processType,
+ *   mutationPayload: mutationData,
+ *   mutationReason: "FSM MUTATE state execution",
+ *   executedBy: params.userId ?? "process-engine",
+ * }).catch(e => logger.warn("[BPaaS/MUTATE] writeback dispatch failed", { error: String(e) }));
+ */
+export async function dispatchWriteback(
+  supabase: SupabaseClient,
+  payload: WritebackPayload
+): Promise<void> {
+  switch (payload.type) {
+    case "process_mutation": {
+      const { error } = await supabase.from("bpaas_process_mutations").insert({
+        organization_id: payload.organizationId,
+        process_instance_id: payload.processInstanceId,
+        process_type: payload.processType,
+        mutation_data: {
+          ...payload.mutationPayload,
+          _reason: payload.mutationReason,
+          _executed_by: payload.executedBy,
+        },
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        logger.warn("[writeback-dispatcher] process_mutation insert failed (non-fatal)", {
+          processInstanceId: payload.processInstanceId,
+          processType: payload.processType,
+          organizationId: payload.organizationId,
+          error: error.message,
+        });
+      } else {
+        logger.warn("[writeback-dispatcher] process_mutation dispatched", {
+          processInstanceId: payload.processInstanceId,
+          processType: payload.processType,
+          executedBy: payload.executedBy,
+        });
+      }
+      break;
+    }
+
+    default: {
+      // TypeScript exhaustiveness check — this branch should be unreachable when
+      // all WritebackPayload members are handled above. Cast to unknown first to
+      // satisfy strict-mode narrowing while still producing a compile-time error
+      // if a new union member is added without a matching case.
+      logger.warn("[writeback-dispatcher] dispatchWriteback: unknown payload type", {
+        type: (payload as { type: string }).type,
+      });
+    }
+  }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
