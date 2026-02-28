@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
         // ── Load signals (last 7 days, up to 500) ──────────────────
         const { data: rawSignals } = await service
           .from("cross_domain_signals")
-          .select("id, source, domain, entity_type, entity_id, signal_value, created_at, signal_metadata")
+          .select("id, source_domain, signal_type, entity_type, entity_id, signal_value, created_at, signal_metadata")
           .eq("organization_id", orgId)
           .gte("created_at", since)
           .order("created_at", { ascending: false })
@@ -150,8 +150,8 @@ export async function GET(request: NextRequest) {
 
         const signals = (rawSignals ?? []).map((s) => ({
           id: s.id,
-          source: String(s.source ?? "unknown"),
-          domain: String(s.domain ?? "unknown"),
+          source: String(s.source_domain ?? "unknown"),
+          domain: String(s.signal_type ?? "unknown"),
           entityType: String(s.entity_type ?? "unknown"),
           entityId: String(s.entity_id ?? "unknown"),
           value: typeof s.signal_value === "number" ? s.signal_value : 0,

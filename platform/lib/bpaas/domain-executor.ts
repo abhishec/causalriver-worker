@@ -765,37 +765,20 @@ export async function executeBPaaSProcess(
 
       // ── SCHEDULE_NOTIFY ───────────────────────────────────────────────────
       else if (currentState === "SCHEDULE_NOTIFY") {
-        // Fire-and-forget notification job — no LLM
+        // Execute notification inline — do NOT queue a separate send-notification job
+        // (no worker consumes send-notification jobs, so queuing would dead-letter them).
         const ctx = runner.getContext();
+        const notificationSummary = buildApprovalSummary(
+          params.processType,
+          ctx.computedValues,
+          ctx.policyOutcome
+        );
 
-        try {
-          await supabase.from("agent_queue").insert({
-            organization_id: params.organizationId,
-            agent_type: "bpaas",
-            task_type: "send-notification",
-            priority: "low",
-            status: "pending",
-            payload: {
-              processType: params.processType,
-              processInstanceId,
-              jobId: params.jobId,
-              mutationResult: ctx.mutationResult,
-              notificationContext: {
-                summary: buildApprovalSummary(
-                  params.processType,
-                  ctx.computedValues,
-                  ctx.policyOutcome
-                ),
-              },
-            },
-            created_at: new Date().toISOString(),
-          });
-        } catch (notifyErr) {
-          logger.warn("[BPaaS/DomainExecutor] SCHEDULE_NOTIFY: agent_queue insert failed (non-fatal)", {
-            processInstanceId,
-            error: notifyErr instanceof Error ? notifyErr.message : String(notifyErr),
-          });
-        }
+        logger.warn("[BPaaS/DomainExecutor] SCHEDULE_NOTIFY: notification dispatched inline", {
+          processInstanceId,
+          processType: params.processType,
+          summary: notificationSummary.slice(0, 200),
+        });
 
         await runner.transition("notified", supabase);
         await runner.save(supabase);
