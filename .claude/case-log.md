@@ -274,3 +274,36 @@
 - **Root cause**: `settings-client.tsx` used `connectors.length` and `apiKeys.length` in the `tabs` array definition before the `if (!org)` guard. If these props arrive as `null` at runtime, `.length` throws. Also `cust.name.charAt(0)` and `cust.role.charAt(0)` crash on null customer data.
 - **Fix**: `(connectors || []).length`, `(apiKeys || []).length`, `cust.name?.charAt(0) || "?"`, `cust.role ? cust.role.charAt(0)... : "Member"`, `<ApiKeysSection initialKeys={apiKeys || []} />`.
 - **Pattern**: Array props from server components can be null even with `|| []` fallback in page.tsx if RSC hydration or Suspense boundary has edge cases. Always guard array operations with `|| []`.
+
+---
+
+## Case 029 — Deep Stub + Wiring Audit (2026-02-28)
+**Auditor:** Staff Engineer agent (a63c4a76)
+**Scope:** 17 files — brain/, bpaas/, process-engine/, se-aas/, cron/
+
+### CRITICAL (4) — Competition blockers:
+- CRIT-1: cognitive-cycle/route.ts line 143 — wrong column names: `source`→`source_domain`, `domain`→`signal_type`. Planner reads ALL NULL cross-domain signals.
+- CRIT-2: service-health-writer.ts — signal_value is string "gaba"/"dopamine" not number. Process engine health always shows 0% fail rate.
+- CRIT-3: send-notification jobs queued in SCHEDULE_NOTIFY but NO worker handles them. Dead queue forever.
+- CRIT-4: brain-context.ts L24 — crossOrgPatternsRow is hardcoded `Promise.resolve({data:null})`. Cross-org patterns always null.
+
+### MAJOR (11):
+- WIRE-2: checkDomainDrift() defined, never called from autonomous-monitor
+- WIRE-3: extractStructuredMemory() writes 'structured-outcome' memory type — nothing reads it
+- WIRE-6: BPaaSFSMRunner.runPolicyCheck() — dead method, never called
+- WIRE-8: bpaas_process_mutations written but never read by any system
+- STUB-2: BPaaSFSMRunner.restore() — bpaas_fsm_context never written to agent_queue.metadata, fallback unreachable
+- ENT-1: writeAllServiceHealth — void Promise.all silently drops per-org errors
+- ENT-2: getGloballyBrokenDomains() — unbounded query, no .limit(), will OOM in production
+- ENT-3: service_health table not in generated Supabase types → supabase as any everywhere
+- ENT-6: recordStepOutcome() inserts `payload` field — should be `signal_metadata` (JSONB column name)
+- ENT-7: Cognitive planner schedules heavy domains (tdd-code-generator, pr-review) without time budget guard
+- STUB-1: evolveProcessTemplates() — referenced in architecture, does not exist
+
+### MINOR (8): logger.debug lint, CUSTOM_INTERMEDIATE_STATES duplicated, catch(err:any), backpressure min-1 leak, etc.
+
+### Missing files:
+- platform/lib/brain/process-predictor.ts (Phase 8)
+- platform/lib/brain/process-evolver.ts (Phase 7)
+
+[USER CORRECTION NOTE]: Do not start G1-G9 until these criticals are fixed. Fix CRIT-1/3/4 now (no conflict with running Phase 5/6). Fix CRIT-2, ENT-6 after Phase 5/6 land.
