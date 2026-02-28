@@ -24,9 +24,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
 import { processA2ATasks, processA2AAasTasks, processA2APmAasTasks } from "@/lib/a2a/task-processor";
-import { processProcessEngineJobs } from "@/lib/process-engine/worker";
 import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
-import { evolveProcessTemplates } from "@/lib/brain/process-evolver";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -182,33 +180,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // ── Phase 5: Process Engine Jobs ─────────────────────────────
-    // Picks up agent_type='bpaas' jobs — process engine templates are
-    // available to all AI Workers regardless of SE-aaS/AaaS activation.
-    // Runs up to 5 BPaaS jobs per cron tick.
-    //
-    // Budget: uses LAMBDA_TIMEOUT_MS (25s) as the base — NOT a different
-    // constant. Using 28_000 here would allow Phase 5 to run 3s past the
-    // safe Lambda wall-clock budget set in LAMBDA_TIMEOUT_MS, potentially
-    // leaving jobs stuck in 'running' on Lambda kill.
-    let processEngineResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
-    const phaseElapsed3 = Date.now() - startMs;
-    const remainingForProcessEngine = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsed3);
-    if (remainingForProcessEngine > 2_000) {
-      try {
-        processEngineResult = await withTimeout(
-          processProcessEngineJobs(service, 5),
-          remainingForProcessEngine,
-          "processProcessEngineJobs"
-        );
-      } catch (err) {
-        logger.warn("[cron/process-jobs] Phase 5 Process Engine failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
-
-    // ── Phase 6: Service Health snapshot ─────────────────────────
+    // ── Phase 5: Service Health snapshot ─────────────────────────
     // Fire-and-forget health writes for active orgs. Non-blocking.
     // Provides service_health table data for brain-context.ts L26/L27/L28.
     void writeAllServiceHealth(service).catch((err: unknown) => {
@@ -217,42 +189,6 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // ── Phase 7: Process Template Evolution (fire-and-forget per org) ──────────
-    // Runs once per hour per org — evolveProcessTemplates() has its own rate-limit guard.
-    // Derive active org IDs from recent BPaaS agent_queue activity (last 24h, max 5 orgs).
-    try {
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: activeOrgRows } = await service
-        .from("agent_queue")
-        .select("organization_id")
-        .eq("agent_type", "bpaas")
-        .gte("created_at", oneDayAgo)
-        .limit(20);
-
-      if (activeOrgRows && activeOrgRows.length > 0) {
-        const activeOrgsForEvolution = [
-          ...new Set(
-            (activeOrgRows as Array<{ organization_id: string }>).map(
-              (r) => r.organization_id
-            )
-          ),
-        ].slice(0, 5); // max 5 orgs per cron run
-
-        for (const orgId of activeOrgsForEvolution) {
-          void evolveProcessTemplates(service, orgId).catch((e) =>
-            logger.warn("[cron/process-jobs] Phase 7 evolution failed", {
-              orgId,
-              error: String(e),
-            })
-          );
-        }
-      }
-    } catch (evolveErr) {
-      logger.warn("[cron/process-jobs] Phase 7 org query failed (non-fatal)", {
-        error: evolveErr instanceof Error ? evolveErr.message : String(evolveErr),
-      });
-    }
-
     const durationMs = Date.now() - startMs;
     logger.warn(
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
@@ -260,8 +196,7 @@ export async function GET(request: NextRequest) {
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
       `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) ` +
       `a2aAas=${a2aAasResult.processed}(ok=${a2aAasResult.succeeded}) ` +
-      `a2aPmAas=${a2aPmAasResult.processed}(ok=${a2aPmAasResult.succeeded}) ` +
-      `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) took=${durationMs}ms`
+      `a2aPmAas=${a2aPmAasResult.processed}(ok=${a2aPmAasResult.succeeded}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -273,7 +208,6 @@ export async function GET(request: NextRequest) {
       a2a: a2aResult,
       a2aAas: a2aAasResult,
       a2aPmAas: a2aPmAasResult,
-      processEngine: processEngineResult,
       durationMs,
     });
   } catch (err: unknown) {

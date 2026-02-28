@@ -431,7 +431,7 @@ export async function writeProcessEngineHealth(
       .upsert(
         {
           organization_id: orgId,
-          service_type: "process-engine",
+          service_type: "pm-aas",
           summary: {
             processCount7d: instancesRow.data?.length ?? 0,
             jobCount7d: bpaasJobsRow.data?.length ?? 0,

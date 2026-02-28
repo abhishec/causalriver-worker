@@ -70,47 +70,7 @@ const SKILL_TO_DOMAIN: Record<string, string> = {
   "pm-release-risk":         "release-risk",
   "pm-feature-impact":       "feature-impact",
   "pm-capacity-planner":     "capacity-planner",
-  // ── Process Engine templates — available to any workspace ──────────────────
-  // Routes to agent_type='bpaas' (not 'a2a') so process-jobs Phase 5 picks them up.
-  "hr-offboarding":           "hr_offboarding",
-  "procurement":              "procurement",
-  "order-management":         "order_management",
-  "expense-approval":         "expense_approval",
-  "customer-onboarding":      "customer_onboarding",
-  "insurance-claim":          "insurance_claim",
-  "invoice-reconciliation":   "invoice_reconciliation",
-  "sla-breach-escalation":    "sla_breach_escalation",
-  "travel-rebooking":         "travel_rebooking",
-  "compliance-audit":         "compliance_audit",
-  "subscription-migration":   "subscription_migration",
-  "dispute-resolution":       "dispute_resolution",
-  "financial-close":          "financial_close",
-  "product-workflow":         "product_workflow",
-  "ar-collections":           "ar_collections",
-  "incident-response":        "incident_response",
-  "qbr-preparation":          "qbr_preparation",
 };
-
-// Domains that route to agent_type='bpaas' (Process Engine) instead of 'a2a'
-const BPAAS_DOMAINS = new Set([
-  "hr_offboarding",
-  "procurement",
-  "order_management",
-  "expense_approval",
-  "customer_onboarding",
-  "insurance_claim",
-  "invoice_reconciliation",
-  "sla_breach_escalation",
-  "travel_rebooking",
-  "compliance_audit",
-  "subscription_migration",
-  "dispute_resolution",
-  "financial_close",
-  "product_workflow",
-  "ar_collections",
-  "incident_response",
-  "qbr_preparation",
-]);
 
 // Domains that route to agent_type='aas' (Accounting as a Service executor)
 const AAS_DOMAINS = new Set([
@@ -273,14 +233,11 @@ export async function POST(request: NextRequest) {
     const domainType = SKILL_TO_DOMAIN[skill];
 
     // Route to the correct agent_type based on the domain:
-    // - 'bpaas'  — Process Engine templates (process-jobs Phase 5)
     // - 'aas'    — Accounting as a Service executor
     // - 'pm-aas' — Product Management as a Service executor
     // - 'a2a'    — Default: SE-aaS delivery intelligence domains via A2A task processor
     let agentType: string;
-    if (BPAAS_DOMAINS.has(domainType)) {
-      agentType = "bpaas";
-    } else if (AAS_DOMAINS.has(domainType)) {
+    if (AAS_DOMAINS.has(domainType)) {
       agentType = "aas";
     } else if (PM_AAS_DOMAINS.has(domainType)) {
       agentType = "pm-aas";

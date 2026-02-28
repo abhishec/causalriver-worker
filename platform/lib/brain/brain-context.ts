@@ -34,7 +34,7 @@ const _inFlight = new Map<string, Promise<BrainContext>>();
 async function fetchServiceHealthCache(
   supabase: SupabaseClient,
   orgId: string,
-  serviceType: "se-aas" | "aas" | "process-engine"
+  serviceType: "se-aas" | "aas" | "pm-aas"
 ): Promise<{ data: { context_string: string; updated_at: string } | null; error: unknown }> {
   try {
     // service_health table is not yet in generated Supabase types (migration pending).
@@ -107,8 +107,7 @@ const CROSS_ORG_PATTERNS_TTL_MS = 5 * 60_000; // 5 minutes
 // Tier 5: RL Intelligence   (L13-L17) — quality, RLVR, predictive, causal, evolution
 // Tier 6: Platform Intel    (L18-L22) — connectors, fleet, LLM decisions, intent, temporal
 // Tier 7: Meta & Cross-cut  (L23-L25) — 24h signals, cross-org, meta-brain
-// Tier 8: Service Layers    (L26-L27) — SE-aaS, AaaS (grows as new services ship)
-// Tier 9: Process Execution (L28)     — Process Engine state (always present, not service-conditional)
+// Tier 8: Service Layers    (L26-L28) — SE-aaS (L26), AaaS (L27), PM-aaS (L28)
 
 export interface BrainContext {
   // ── Core fields (always present) ──
@@ -160,13 +159,10 @@ export interface BrainContext {
   crossOrgPatterns?: string;          // L24: platform-wide patterns
   metaBrainState?: string;            // L25: brain self-awareness (total memory count)
 
-  // ── Tier 8: Service Layers (one layer per service, grows as new services ship) ──
-  // L26 = SE-aaS, L27 = AaaS
+  // ── Tier 8: Service Layers (L26 = SE-aaS, L27 = AaaS, L28 = PM-aaS) ──
   seaasServiceLayer?: string;         // L26: SE-aaS holistic service activity (last 7d)
   aaasServiceLayer?: string;          // L27: AaaS artifact output and agent activity (24h)
-
-  // ── Tier 9: Process Execution (always present, not service-conditional) ──
-  processEngineLayer?: string;        // L28: Process Engine state across all templates (last 7d)
+  pmaasServiceLayer?: string;         // L28: PM-aaS agent activity (last 7d)
 
   // ── 3-Tier Knowledge Architecture ──
   consolidatedPatterns?: string;      // Tier 3: stable behavioral rules + domain expertise
@@ -259,16 +255,16 @@ export async function getBrainContext(
       aaasArtifactsRow,        // L27a: se_aas_artifacts last 24h domain_type
       aaasAgentQueueRow,       // L27b: agent_queue agent_type=aas last 7d status
 
-      // L28: Process Engine (Tier 9 — Process Execution, 2 sub-queries)
-      l28ProcessInstancesRow,  // L28a: bpaas_process_instances status+created_at last 7d
-      l28BpaasJobsRow,         // L28b: agent_queue agent_type=bpaas task_type+status last 7d
+      // L28: PM-aaS Service Layer (Tier 8 — 2 sub-queries)
+      l28PmaasJobsRow,         // L28a: agent_queue agent_type=pm-aas task_type+status last 7d
+      l28PmaasArtifactsRow,    // L28b: placeholder (pm-aas artifact table not yet created)
 
       // ── SERVICE HEALTH CACHE READS (Phase 4) ──
       // Read cached context_string from service_health table (< 15 min = fresh).
       // Falls back to direct queries above if stale or missing.
       seaasHealthCacheRow,     // service_health cache for L26 (SE-aaS)
       aaasHealthCacheRow,      // service_health cache for L27 (AaaS)
-      processEngineHealthCacheRow, // service_health cache for L28 (Process Engine)
+      pmaasHealthCacheRow,     // service_health cache for L28 (PM-aaS)
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -635,26 +631,20 @@ export async function getBrainContext(
         .order("created_at", { ascending: false })
         .limit(10),
 
-      // ── TIER 9: PROCESS EXECUTION ──
+      // ── TIER 8: PM-aaS SERVICE LAYER (L28) ──
 
-      // L28a — Process Engine instances: bpaas_process_instances current_state+status last 7d, limit 20
-      // Note: DB tables use 'bpaas_' prefix (internal) but labeled "Process Engine" in context.
-      supabase
-        .from("bpaas_process_instances")
-        .select("current_state, status, created_at")
-        .eq("organization_id", orgId)
-        .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-        .order("created_at", { ascending: false })
-        .limit(20),
-
-      // L28b — Process Engine jobs: agent_queue agent_type=bpaas last 7d, task_type+status, limit 20
+      // L28a — PM-aaS agent queue: agent_type=pm-aas last 7d, task_type+status, limit 20
       supabase
         .from("agent_queue")
         .select("task_type, status, created_at")
         .eq("organization_id", orgId)
-        .eq("agent_type", "bpaas")
+        .eq("agent_type", "pm-aas")
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order("created_at", { ascending: false })
         .limit(20),
+
+      // L28b — PM-aaS placeholder: pm-aas artifact table not yet created — dummy query
+      Promise.resolve({ data: null, error: null }),
 
       // ── SERVICE HEALTH CACHE READS (Phase 4) ──────────────────────────────────
       // Read cached snapshots from service_health table.
@@ -662,15 +652,13 @@ export async function getBrainContext(
       // Falls back to direct queries above if stale, missing, or table not yet created.
 
       // service_health cache for L26 (SE-aaS)
-      // service_health is a new table not yet in generated Supabase types.
-      // Using fetchServiceHealthCache helper to avoid type errors.
       fetchServiceHealthCache(supabase, orgId, "se-aas"),
 
       // service_health cache for L27 (AaaS)
       fetchServiceHealthCache(supabase, orgId, "aas"),
 
-      // service_health cache for L28 (Process Engine)
-      fetchServiceHealthCache(supabase, orgId, "process-engine"),
+      // service_health cache for L28 (PM-aaS)
+      fetchServiceHealthCache(supabase, orgId, "pm-aas"),
     ]);
 
     // ── TIER 1: IDENTITY ─────────────────────────────────────────────────────
@@ -1208,91 +1196,52 @@ export async function getBrainContext(
       logger.warn("[brain-context] L27 AaaS service layer failed:", { error: String(err) });
     }
 
-    // ── TIER 9: PROCESS EXECUTION ─────────────────────────────────────────────
+    // ── TIER 8 (L28): PM-aaS SERVICE LAYER ───────────────────────────────────
 
-    // L28: Process Engine Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
-    // Always assembled regardless of service activations. Covers all process templates.
-    let processEngineLayer: string | undefined;
+    // L28: PM-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to direct query
+    let pmaasServiceLayer: string | undefined;
     try {
       // Check service_health cache freshness (< 15 minutes = fresh)
-      const processEngineHealthCacheData =
-        processEngineHealthCacheRow.status === "fulfilled"
-          ? (processEngineHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
+      const pmaasHealthCacheData =
+        pmaasHealthCacheRow.status === "fulfilled"
+          ? (pmaasHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
           : null;
-      const processEngineHealthAge = processEngineHealthCacheData?.updated_at
-        ? Date.now() - new Date(processEngineHealthCacheData.updated_at).getTime()
+      const pmaasHealthAge = pmaasHealthCacheData?.updated_at
+        ? Date.now() - new Date(pmaasHealthCacheData.updated_at).getTime()
         : Infinity;
-      const processEngineUsedCache =
-        processEngineHealthAge < 15 * 60 * 1000 && !!processEngineHealthCacheData?.context_string;
+      const pmaasUsedCache =
+        pmaasHealthAge < 15 * 60 * 1000 && !!pmaasHealthCacheData?.context_string;
 
-      if (processEngineUsedCache) {
-        // Use cached context string from service_health table (written by process-jobs cron)
-        processEngineLayer = processEngineHealthCacheData!.context_string;
+      if (pmaasUsedCache) {
+        pmaasServiceLayer = pmaasHealthCacheData!.context_string;
       } else {
-        // FALLBACK: run original 2 L28 direct queries (kept permanently as safety net)
-        const processInstances = l28ProcessInstancesRow.status === "fulfilled"
-          ? (l28ProcessInstancesRow.value.data ?? [])
-          : [];
-        const processJobs = l28BpaasJobsRow.status === "fulfilled"
-          ? (l28BpaasJobsRow.value.data ?? [])
+        // FALLBACK: direct query of agent_queue for pm-aas jobs (last 7d)
+        const pmaasJobRows = l28PmaasJobsRow.status === "fulfilled"
+          ? (l28PmaasJobsRow.value.data ?? [])
           : [];
 
-        if (processInstances.length > 0 || processJobs.length > 0) {
-          // Aggregate by status from instances
+        if (pmaasJobRows.length > 0) {
           const statusCounts: Record<string, number> = {};
-          for (const inst of processInstances) {
-            const s = (inst as { status: string }).status ?? "unknown";
+          const taskTypeCounts: Record<string, number> = {};
+          for (const row of pmaasJobRows as Array<{ task_type: string; status: string }>) {
+            const s = row.status ?? "unknown";
             statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+            const t = row.task_type ?? "unknown";
+            taskTypeCounts[t] = (taskTypeCounts[t] ?? 0) + 1;
           }
-
-          // Aggregate by template type from jobs
-          const templateCounts: Record<string, number> = {};
-          for (const job of processJobs) {
-            const t = (job as { task_type: string }).task_type ?? "unknown";
-            templateCounts[t] = (templateCounts[t] ?? 0) + 1;
-          }
-
-          const statusSummary = Object.entries(statusCounts)
-            .map(([s, n]) => `${n} ${s}`)
+          const succeeded = statusCounts["success"] ?? 0;
+          const failed = statusCounts["error"] ?? 0;
+          const running = statusCounts["running"] ?? 0;
+          const topTasks = Object.entries(taskTypeCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 3)
+            .map(([t, c]) => `${t}:${c}`)
             .join(", ");
-
-          const templateSummary = Object.entries(templateCounts)
-            .map(([t, n]) => `${t}×${n}`)
-            .join(", ");
-
-          const l28Parts: string[] = [];
-          if (statusSummary) l28Parts.push(`Status(7d): ${statusSummary}`);
-          if (templateSummary) l28Parts.push(`Templates: ${templateSummary}`);
-
-          processEngineLayer = `## Process Engine (L28)\n${l28Parts.join(" | ")}`.slice(0, 300);
+          pmaasServiceLayer = `## PM-aaS Service Layer\nAgents(7d): ${succeeded} succeeded, ${failed} failed, ${running} running | Top tasks: ${topTasks}`.slice(0, 300);
         }
       }
     } catch {
-      // Non-fatal — process engine context is best-effort
-    }
-
-    // L28e: Predictor risk profile (best-effort, fire-and-forget cache)
-    // Augments the process engine layer with high-risk state warnings for LLM context.
-    let processRiskSummary: string | undefined;
-    try {
-      const { getOrgRiskProfile } = await import("@/lib/brain/process-predictor");
-      const riskProfile = await getOrgRiskProfile(supabase, orgId);
-      const highRiskStates = Object.entries(riskProfile)
-        .filter(([, score]) => score > 0.6)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 3)
-        .map(([key, score]) => `${key}(${Math.round(score * 100)}%)`);
-      if (highRiskStates.length > 0) {
-        processRiskSummary = `High-risk states: ${highRiskStates.join(", ")}`;
-        // Append to processEngineLayer if it exists
-        if (processEngineLayer) {
-          processEngineLayer = `${processEngineLayer} | ${processRiskSummary}`.slice(0, 400);
-        } else {
-          processEngineLayer = `## Process Engine (L28)\n${processRiskSummary}`.slice(0, 400);
-        }
-      }
-    } catch {
-      // Non-fatal — predictor risk profile is best-effort
+      // Non-fatal — PM-aaS layer is best-effort
     }
 
     // ── RL QUALITY PATTERNS (post-allSettled, awaited separately) ────────────
@@ -1425,8 +1374,7 @@ export async function getBrainContext(
       // Tier 8
       seaasServiceLayer,
       aaasServiceLayer,
-      // Tier 9
-      processEngineLayer,
+      pmaasServiceLayer,
       // 3-Tier Knowledge Architecture
       consolidatedPatterns: consolidatedPatternsStr,
       // rawKnowledgeChunks appended to contextSummary after Tier 1 fetch below
@@ -1478,8 +1426,7 @@ export async function getBrainContext(
       // Tier 8
       seaasServiceLayer,
       aaasServiceLayer,
-      // Tier 9
-      processEngineLayer,
+      pmaasServiceLayer,
       // 3-Tier Knowledge Architecture
       // Tier 3: Consolidated patterns as formatted string (reuse pre-computed value)
       consolidatedPatterns: consolidatedPatternsStr,
@@ -1603,11 +1550,10 @@ function buildContextSummary(ctx: {
   // Document chunks (query-aware)
   recentDocTitles?: string[];
   docChunkSnippets?: string[];
-  // Tier 8: Service Layers
+  // Tier 8: Service Layers (L26=SE-aaS, L27=AaaS, L28=PM-aaS)
   seaasServiceLayer?: string;
   aaasServiceLayer?: string;
-  // Tier 9: Process Execution
-  processEngineLayer?: string;
+  pmaasServiceLayer?: string;
   // 3-Tier Knowledge Architecture
   consolidatedPatterns?: string;
   rawKnowledgeChunks?: string;
@@ -1795,9 +1741,9 @@ function buildContextSummary(ctx: {
     parts.push(ctx.aaasServiceLayer);
   }
 
-  // 30. Process Engine (L28 — Tier 9, always present when processes have run)
-  if (ctx.processEngineLayer) {
-    parts.push(ctx.processEngineLayer);
+  // 30. PM-aaS Service Layer (L28)
+  if (ctx.pmaasServiceLayer) {
+    parts.push(ctx.pmaasServiceLayer);
   }
 
   // Tier 1 LAST: Raw Knowledge — verbatim grounding data

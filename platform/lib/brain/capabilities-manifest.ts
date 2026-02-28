@@ -492,17 +492,19 @@ export function buildManifestSummary(excludeDomainId?: string): string {
 // rebuilds dynamically from AGENT_SKILLS on every request.
 //
 // Service areas:
-//   se-aas        — Software Engineering as a Service (code intelligence, delivery)
-//   aas           — Accounting as a Service (bookkeeping, reconciliation, compliance)
-//   pm-aas        — Product Management as a Service (roadmaps, sprint health, backlog)
-//   process-engine — Business Process Automation (HR, procurement, finance workflows)
-//   brain         — Brain meta-capabilities (RL, cognitive planning, orchestration)
+//   se-aas  — Software Engineering as a Service (code intelligence, delivery)
+//   aas     — Accounting as a Service (bookkeeping, reconciliation, compliance)
+//   pm-aas  — Product Management as a Service (roadmaps, sprint health, backlog)
+//   brain   — Brain meta-capabilities (RL, cognitive planning, orchestration)
+//
+// NOTE: Process Intelligence (FSM, HITL, state RL) is a cross-cutting capability
+// available to ANY executor — it is NOT a service area and has no skills in this catalog.
 
 export interface AgentSkill {
   id: string;          // kebab-case unique ID (used in A2A protocol)
   name: string;        // Human-readable name
   description: string; // What this skill does
-  serviceArea: "se-aas" | "aas" | "pm-aas" | "process-engine" | "brain";
+  serviceArea: "se-aas" | "aas" | "pm-aas" | "brain";
   inputModes: string[];  // e.g. ["text", "json"]
   outputModes: string[]; // e.g. ["text", "json"]
   tags: string[];
@@ -882,160 +884,6 @@ export const AGENT_SKILLS: AgentSkill[] = [
     tags: ["product", "capacity", "planning", "team"],
   },
 
-  // ── Process Engine: Business Process Automation ───────────────────────────
-  {
-    id: "hr-offboarding",
-    name: "HR Offboarding",
-    description: "Automated HR offboarding workflow — PTO settlement, severance calculation, equity review, and manager/HR/legal approval gates",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["hr", "process", "offboarding", "workflow"],
-  },
-  {
-    id: "procurement",
-    name: "Procurement Approval",
-    description: "Purchase order processing with multi-tier approval routing — budget policy checks, new vendor vetting, committee escalation",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["procurement", "process", "approval", "workflow"],
-  },
-  {
-    id: "order-management",
-    name: "Order Management",
-    description: "Customer order modification processing — refund/charge recalculation, gift card policy, substitute item approval, fulfillment routing",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["orders", "process", "fulfillment", "workflow"],
-  },
-  {
-    id: "expense-approval",
-    name: "Expense Approval",
-    description: "Employee expense claim processing — receipt validation, policy enforcement, manager approval, and out-of-policy escalation",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["expense", "process", "approval", "workflow"],
-  },
-  {
-    id: "customer-onboarding",
-    name: "Customer Onboarding",
-    description: "New customer onboarding workflow — KYC verification, high-risk country escalation, account provisioning, and welcome communications",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["onboarding", "kyc", "process", "workflow"],
-  },
-  {
-    id: "insurance-claim",
-    name: "Insurance Claim Processing",
-    description: "End-to-end insurance claim evaluation — coverage sublimit application, fraud detection, partial approval, and rider processing",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["insurance", "claims", "process", "workflow"],
-  },
-  {
-    id: "invoice-reconciliation",
-    name: "Invoice Reconciliation",
-    description: "Multi-vendor invoice matching against POs — duplicate detection, price variance checks, FX rate validation, and early payment discounts",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["invoice", "reconciliation", "finance", "workflow"],
-  },
-  {
-    id: "sla-breach-escalation",
-    name: "SLA Breach Escalation",
-    description: "SLA compliance monitoring — breach calculation, service credit computation, quiet-hours notification scheduling, cascading escalation",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["sla", "escalation", "compliance", "workflow"],
-  },
-  {
-    id: "travel-rebooking",
-    name: "Travel Rebooking",
-    description: "Complex travel itinerary modification — fare class rules, loyalty tier benefits, company policy enforcement, downstream cancellation",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["travel", "rebooking", "process", "workflow"],
-  },
-  {
-    id: "compliance-audit",
-    name: "Regulatory Compliance Audit",
-    description: "KYC/AML compliance verification — document gap detection, PEP screening, remediation deadline assignment, RM escalation",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["compliance", "kyc", "aml", "workflow"],
-  },
-  {
-    id: "subscription-migration",
-    name: "Subscription Migration",
-    description: "Plan downgrade/upgrade processing — prorated refund calculation, feature conflict detection, compliance warnings, early termination fees",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["subscription", "migration", "billing", "workflow"],
-  },
-  {
-    id: "dispute-resolution",
-    name: "Dispute Resolution",
-    description: "E-commerce dispute handling — evidence review, buyer frequency checks, mandatory escalation for elevated-risk buyers, transaction hold",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["dispute", "resolution", "ecommerce", "workflow"],
-  },
-  {
-    id: "financial-close",
-    name: "Month-End Financial Close",
-    description: "Month-end close process — bank reconciliation, P&L generation with revenue recognition, cash flow statement, suspense account audit trail",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["finance", "close", "accounting", "workflow"],
-  },
-  {
-    id: "product-workflow",
-    name: "Product Story to Engineering Workflow",
-    description: "PM brief to Confluence PRD to Jira epic decomposition — sprint allocation with capacity and dependency checks, stakeholder notifications",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["product", "engineering", "jira", "workflow"],
-  },
-  {
-    id: "ar-collections",
-    name: "Accounts Receivable Collections",
-    description: "AR aging analysis with 6-path collection routing — enterprise exemption, credit notes, payment plans, bankruptcy write-off, government terms",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["ar", "collections", "finance", "workflow"],
-  },
-  {
-    id: "incident-response",
-    name: "IT Incident Response",
-    description: "Production incident triage — root cause analysis, PCI-compliant remediation, 2-person approval for credential changes, blameless post-mortem",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["incident", "response", "sre", "workflow"],
-  },
-  {
-    id: "qbr-preparation",
-    name: "QBR Preparation",
-    description: "Quarterly Business Review data aggregation — multi-source reconciliation, insight generation, stakeholder-specific deck variants, sequenced distribution",
-    serviceArea: "process-engine",
-    inputModes: ["json"],
-    outputModes: ["json"],
-    tags: ["qbr", "reporting", "finance", "workflow"],
-  },
 ];
 
 /**
@@ -1067,7 +915,6 @@ export function getSkillCountByServiceArea(): Record<AgentSkill["serviceArea"], 
     "se-aas": 0,
     "aas": 0,
     "pm-aas": 0,
-    "process-engine": 0,
     "brain": 0,
   };
   for (const skill of AGENT_SKILLS) {

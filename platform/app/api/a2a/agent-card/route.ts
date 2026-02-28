@@ -26,11 +26,10 @@ export async function GET() {
     schemaVersion: "0.1",
     name: "BrainOS AI Worker",
     description: [
-      "Multi-service AI orchestration brain across four service areas:",
+      "Multi-service AI orchestration brain across three service areas:",
       `SE-aaS (${skillCounts["se-aas"]} skills) — code intelligence, delivery health, pod matching, early warning;`,
       `AaaS (${skillCounts["aas"]} skills) — bookkeeping, reconciliation, tax compliance, anomaly detection;`,
-      `PM-aaS (${skillCounts["pm-aas"]} skills) — roadmap planning, sprint health, backlog prioritization;`,
-      `Process Engine (${skillCounts["process-engine"]} skills) — HR, procurement, finance, compliance workflows.`,
+      `PM-aaS (${skillCounts["pm-aas"]} skills) — roadmap planning, sprint health, backlog prioritization.`,
     ].join(" "),
     url: "https://platform.usebrainos.com/api/a2a",
     version: "2.0.0",

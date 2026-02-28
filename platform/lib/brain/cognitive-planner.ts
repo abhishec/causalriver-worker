@@ -841,7 +841,7 @@ async function _runCognitivePlannerInner(
       .from("service_health")
       .select("summary, context_string")
       .eq("organization_id", orgId)
-      .eq("service_type", "process-engine")
+      .eq("service_type", "pm-aas")
       .maybeSingle();
 
     interface StateBottleneck {
