@@ -53,6 +53,7 @@ import {
 } from "@nexus-ai/memory-stack";
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { executeAgenticState } from "./agentic-state-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -527,310 +528,100 @@ export async function executeBPaaSProcess(
     });
 
     try {
-      // ── DECOMPOSE ─────────────────────────────────────────────────────────
-      if (currentState === "DECOMPOSE") {
-        // Load RL-learned parameters for this state — may be defaults on first run.
-        // These params are updated by gradient descent in recordAndLearnStateOutcome()
-        // after each execution. This closes the state RL closed loop: learn → read → act.
-        let decomposeSrlParams: StateRLParams | null = null;
-        try {
-          decomposeSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, "DECOMPOSE");
-        } catch (srlErr) {
-          logger.warn("[BPaaS/DomainExecutor] loadStateParams DECOMPOSE failed (using LLM defaults)", {
-            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
+      // ── AGENTIC STATE EXECUTOR ────────────────────────────────────────────
+      // All generic FSM states (DECOMPOSE, ASSESS, COMPUTE, MUTATE, SCHEDULE_NOTIFY,
+      // COMPLETE, and all CUSTOM_INTERMEDIATE_STATES) are handled by the single
+      // generic agentic executor. It reads state_instructions from the DB process
+      // definition, builds Claude tool schemas from connected connectors, calls
+      // Claude with tool_use, executes the tool calls via writeback_queue, and
+      // returns the FSM event to fire.
+      //
+      // POLICY_CHECK and APPROVAL_GATE retain their deterministic handlers below.
+      if (
+        currentState === "DECOMPOSE" ||
+        currentState === "ASSESS" ||
+        currentState === "COMPUTE" ||
+        currentState === "MUTATE" ||
+        currentState === "SCHEDULE_NOTIFY" ||
+        currentState === "COMPLETE" ||
+        CUSTOM_INTERMEDIATE_STATES.has(currentState)
+      ) {
+        const ctx = runner.getContext();
+        const stateHistory = (ctx.stateHistory ?? []).map((h) => ({
+          state: h.state,
+          outcome: (h as Record<string, unknown>).outcome as string | undefined,
+          summary: (h as Record<string, unknown>).summary as string | undefined,
+        }));
+
+        const agenticResult = await executeAgenticState(supabase, {
+          processType: params.processType,
+          currentState,
+          processDefinition: definition,
+          inputPayload: params.inputPayload,
+          stateHistory,
+          brainContext: brainContextSummary || undefined,
+          organizationId: params.organizationId,
+          jobId: params.jobId,
+          processInstanceId,
+        });
+
+        if (agenticResult.requiresApproval) {
+          // Use existing HITL mechanism via runner.runApprovalGate()
+          const summary = agenticResult.approvalDetails ?? agenticResult.summary;
+          const gateResult = await runner.runApprovalGate(supabase, {
+            summary,
+            details: {
+              agenticFindings: agenticResult.findings,
+              processType: params.processType,
+              currentState,
+            },
+            confidence: recentQuality,
           });
-        }
-        const decomposeRlHint = decomposeSrlParams
-          ? `## State RL Parameters (DECOMPOSE)\nEscalation threshold: ${decomposeSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${decomposeSrlParams.confidenceWeight.toFixed(3)} | Retry budget: ${decomposeSrlParams.retryBudget}\nThese are learned parameters — apply them when deciding whether to escalate ambiguous inputs.`
-          : "";
 
-        const systemPrompt = [
-          "You are a BPaaS process decomposer. Break the input payload into a structured execution plan.",
-          "Return a JSON object with fields: steps (array of step names), entities (key business objects), constraints (rules to check), metadata (any useful context).",
-          brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
-          bpaasPatterns ? `\n## BPaaS Quality Patterns\n${bpaasPatterns}` : "",
-          decomposeRlHint,
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        const userContent = [
-          `Process type: ${params.processType}`,
-          `Input payload: ${JSON.stringify(params.inputPayload, null, 2)}`,
-        ].join("\n\n");
-
-        let decomposedText = "";
-        if (shouldSkipLLMCall(tokenBudget)) {
-          // Budget exhausted — use a deterministic fallback to avoid blocking execution
-          decomposedText = JSON.stringify({
-            steps: ["assess", "compute", "policy_check", "mutate"],
-            entities: {},
-            constraints: [],
-            metadata: { budget_exhausted: true },
-          });
+          if (gateResult.blocked) {
+            return {
+              status: "awaiting_approval",
+              processInstanceId,
+              processType: params.processType,
+              finalState: runner.getCurrentState(),
+              approvalId: gateResult.approvalId,
+              durationMs: Date.now() - startedAt,
+            };
+          }
+          // Not blocked — runner already transitioned inside runApprovalGate; continue loop
         } else {
-          try {
-            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
-            decomposedText = haikuResult.text;
-            tokenBudget = recordTokenUsage(tokenBudget, "DECOMPOSE", haikuResult.tokensUsed);
-          } catch (llmErr) {
-            throw new Error(`DECOMPOSE LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
-          }
-        }
-
-        // Parse JSON result — fall back to wrapping raw text
-        let decomposedPlan: Record<string, unknown>;
-        try {
-          decomposedPlan = JSON.parse(decomposedText) as Record<string, unknown>;
-        } catch {
-          decomposedPlan = { raw: decomposedText };
-        }
-
-        const ctx = runner.getContext();
-        const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan };
-        // Re-construct runner in same state with updated context + process transitions
-        const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
-
-        await runner.transition("decomposed", supabase);
-        await runner.save(supabase);
-      }
-
-      // ── ASSESS ────────────────────────────────────────────────────────────
-      else if (currentState === "ASSESS") {
-        const ctx = runner.getContext();
-
-        // Load RL-learned parameters for ASSESS state — closes the state RL closed loop.
-        // escalation_threshold drives whether the assessor flags edge-case entities for review.
-        let assessSrlParams: StateRLParams | null = null;
-        try {
-          assessSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, "ASSESS");
-        } catch (srlErr) {
-          logger.warn("[BPaaS/DomainExecutor] loadStateParams ASSESS failed (using LLM defaults)", {
-            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
-          });
-        }
-        const assessRlHint = assessSrlParams
-          ? `## State RL Parameters (ASSESS)\nEscalation threshold: ${assessSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${assessSrlParams.confidenceWeight.toFixed(3)}\nFlag entities for escalation only when confidence drops below ${(1 - assessSrlParams.escalationThreshold).toFixed(3)} — this threshold is RL-tuned.`
-          : "";
-
-        const systemPrompt = [
-          "You are a BPaaS process assessor. Analyse the decomposed plan and extract assessed facts.",
-          "Return a JSON object with fields: entities (key-value map of business entities and their values), ",
-          "numeric_values (map of field names to numbers for policy evaluation), ",
-          "boolean_flags (map of flag names to booleans), ",
-          "business_rules (array of applicable rule descriptions).",
-          brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
-          assessRlHint,
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        const userContent = [
-          `Process type: ${params.processType}`,
-          `Original payload: ${JSON.stringify(ctx.inputPayload, null, 2)}`,
-          `Decomposed plan: ${JSON.stringify(ctx.decomposedPlan, null, 2)}`,
-        ].join("\n\n");
-
-        let assessedText = "";
-        if (shouldSkipLLMCall(tokenBudget)) {
-          // Budget exhausted — derive facts deterministically from inputPayload
-          assessedText = JSON.stringify({
-            entities: ctx.inputPayload,
-            numeric_values: {},
-            boolean_flags: {},
-            business_rules: [],
-            budget_exhausted: true,
-          });
-        } else {
-          try {
-            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
-            assessedText = haikuResult.text;
-            tokenBudget = recordTokenUsage(tokenBudget, "ASSESS", haikuResult.tokensUsed);
-          } catch (llmErr) {
-            throw new Error(`ASSESS LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
-          }
-        }
-
-        let assessedFacts: Record<string, unknown>;
-        try {
-          assessedFacts = JSON.parse(assessedText) as Record<string, unknown>;
-        } catch {
-          assessedFacts = { raw: assessedText };
-        }
-
-        const updatedCtx: BPaaSContext = { ...ctx, assessedFacts };
-        const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
-
-        await runner.transition("assessed", supabase);
-        await runner.save(supabase);
-      }
-
-      // ── COMPUTE ───────────────────────────────────────────────────────────
-      else if (currentState === "COMPUTE") {
-        // Deterministic arithmetic — NO LLM
-        const ctx = runner.getContext();
-        const computedValues: Record<string, unknown> = {};
-
-        // Extract from inputPayload first
-        for (const [k, v] of Object.entries(ctx.inputPayload)) {
-          if (typeof v === "number") computedValues[k] = v;
-          else if (typeof v === "boolean") computedValues[k] = v;
-          else if (typeof v === "string") {
-            const n = parseFloat(v);
-            if (!isNaN(n)) computedValues[k] = n;
-          }
-        }
-
-        // Overlay with assessed facts (more accurate, post-LLM extraction)
-        if (ctx.assessedFacts) {
-          const numericValues = ctx.assessedFacts.numeric_values;
-          const booleanFlags = ctx.assessedFacts.boolean_flags;
-
-          if (numericValues && typeof numericValues === "object") {
-            for (const [k, v] of Object.entries(numericValues as Record<string, unknown>)) {
-              if (typeof v === "number") computedValues[k] = v;
-            }
-          }
-          if (booleanFlags && typeof booleanFlags === "object") {
-            for (const [k, v] of Object.entries(booleanFlags as Record<string, unknown>)) {
-              if (typeof v === "boolean") computedValues[k] = v;
-            }
-          }
-
-          // Also scan top-level assessedFacts for numeric scalars
-          for (const [k, v] of Object.entries(ctx.assessedFacts)) {
-            if (k !== "numeric_values" && k !== "boolean_flags") {
-              if (typeof v === "number") computedValues[k] = v;
-              else if (typeof v === "boolean") computedValues[k] = v;
-            }
-          }
-        }
-
-        const updatedCtx: BPaaSContext = { ...ctx, computedValues };
-        const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
-
-        await runner.transition("computed", supabase);
-        await runner.save(supabase);
-      }
-
-      // ── CUSTOM INTERMEDIATE STATES ────────────────────────────────────────
-      // Handles FRAUD_REVIEW, DUPLICATE_CHECK, EVIDENCE_REVIEW, RECONCILE, RCA
-      // and any future custom states added to process templates.
-      // Uses LLM (Haiku) to evaluate the context and choose the correct outgoing event
-      // from the process definition's transitions table.
-      else if (CUSTOM_INTERMEDIATE_STATES.has(currentState)) {
-        const ctx = runner.getContext();
-
-        // Load RL-learned parameters for this custom state — e.g. FRAUD_REVIEW, RECONCILE
-        // escalation_threshold affects how aggressively the LLM routes to escalation vs proceeding.
-        let customSrlParams: StateRLParams | null = null;
-        try {
-          customSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, currentState);
-        } catch (srlErr) {
-          logger.warn("[BPaaS/DomainExecutor] loadStateParams custom state failed (using LLM defaults)", {
-            state: currentState,
-            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
-          });
-        }
-
-        // Get valid outgoing transitions for this state from the process definition
-        const validTransitions = definition.transitions.filter(
-          (t) => t.from === currentState
-        );
-
-        if (validTransitions.length === 0) {
-          throw new Error(
-            `[BPaaS/DomainExecutor] No outgoing transitions defined for custom state ${currentState} in process ${params.processType}`
+          // Store findings in FSM context and fire the chosen event
+          const updatedCtx: BPaaSContext = {
+            ...ctx,
+            [`${currentState.toLowerCase()}Result`]: agenticResult.findings,
+            // Back-fill computed values from COMPUTE state so POLICY_CHECK can see them
+            ...(currentState === "COMPUTE"
+              ? { computedValues: agenticResult.findings as Record<string, unknown> }
+              : {}),
+            // Back-fill assessed facts from ASSESS state so COMPUTE can overlay them
+            ...(currentState === "ASSESS"
+              ? { assessedFacts: agenticResult.findings as Record<string, unknown> }
+              : {}),
+          };
+          runner = new BPaaSFSMRunner(
+            updatedCtx,
+            runner.getCurrentState(),
+            definition.transitions
           );
+
+          // Guard: validate the event exists in FSM transitions before firing
+          const validEventsForState = definition.transitions
+            .filter((t) => t.from === currentState)
+            .map((t) => t.on);
+
+          const safeEvent =
+            validEventsForState.includes(agenticResult.nextEvent)
+              ? agenticResult.nextEvent
+              : (validEventsForState[0] ?? "completed");
+
+          await runner.transition(safeEvent as BPaaSTransitionEvent, supabase);
+          await runner.save(supabase);
         }
-
-        const validEvents = validTransitions.map((t) => t.on);
-
-        const customRlHint = customSrlParams
-          ? `## State RL Parameters (${currentState})\nEscalation threshold: ${customSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${customSrlParams.confidenceWeight.toFixed(3)} | Retry budget: ${customSrlParams.retryBudget}\nOnly choose an escalation event when your confidence is below ${(1 - customSrlParams.escalationThreshold).toFixed(3)} — this threshold is RL-tuned from historical outcomes.`
-          : "";
-
-        // Use Haiku LLM to determine which event fires based on context
-        const systemPrompt = [
-          `You are a BPaaS state handler for the ${currentState} state in a ${params.processType} process.`,
-          `Analyse the business context and determine which transition event should fire.`,
-          `Available events: ${validEvents.join(", ")}`,
-          `Return a JSON object with: { "event": "<one of the available events>", "reason": "<brief explanation>", "findings": { <key-value pairs of findings> } }`,
-          `Choose the event that best reflects the business outcome of the ${currentState} review.`,
-          brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
-          customRlHint,
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        const userContent = [
-          `Process type: ${params.processType}`,
-          `Current state: ${currentState}`,
-          `Input payload: ${JSON.stringify(ctx.inputPayload, null, 2)}`,
-          ctx.decomposedPlan ? `Decomposed plan: ${JSON.stringify(ctx.decomposedPlan, null, 2)}` : "",
-          ctx.assessedFacts ? `Assessed facts: ${JSON.stringify(ctx.assessedFacts, null, 2)}` : "",
-          ctx.computedValues ? `Computed values: ${JSON.stringify(ctx.computedValues, null, 2)}` : "",
-        ]
-          .filter(Boolean)
-          .join("\n\n");
-
-        let customStateResultText = "";
-        if (shouldSkipLLMCall(tokenBudget)) {
-          // Budget exhausted — default to first valid outgoing event to keep FSM moving
-          customStateResultText = JSON.stringify({
-            event: validEvents[0],
-            reason: "token budget exhausted — defaulting to first available transition",
-            findings: { budget_exhausted: true },
-          });
-        } else {
-          try {
-            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
-            customStateResultText = haikuResult.text;
-            tokenBudget = recordTokenUsage(tokenBudget, currentState, haikuResult.tokensUsed);
-          } catch (llmErr) {
-            throw new Error(
-              `${currentState} LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`
-            );
-          }
-        }
-
-        let customStateResult: Record<string, unknown>;
-        let chosenEvent: string;
-        try {
-          customStateResult = JSON.parse(customStateResultText) as Record<string, unknown>;
-          chosenEvent = (customStateResult.event as string) ?? validEvents[0];
-        } catch {
-          customStateResult = { raw: customStateResultText };
-          chosenEvent = validEvents[0];
-        }
-
-        // Validate the chosen event is one of the valid outgoing events
-        if (!validEvents.includes(chosenEvent)) {
-          logger.warn(`[BPaaS/DomainExecutor] LLM chose invalid event "${chosenEvent}" for ${currentState}, defaulting to "${validEvents[0]}"`, {
-            processInstanceId,
-            validEvents,
-            chosenEvent,
-          });
-          chosenEvent = validEvents[0];
-        }
-
-        // Persist custom state result into context
-        const existingCustomResults = ctx.customStateResults ?? {};
-        const updatedCustomResults = {
-          ...existingCustomResults,
-          [currentState]: { ...customStateResult, chosenEvent },
-        };
-        const updatedCtx: BPaaSContext = {
-          ...ctx,
-          customStateResults: updatedCustomResults,
-        };
-        runner = new BPaaSFSMRunner(updatedCtx, runner.getCurrentState(), definition.transitions);
-
-        await runner.transition(chosenEvent as BPaaSTransitionEvent, supabase);
-        await runner.save(supabase);
       }
 
       // ── POLICY_CHECK ──────────────────────────────────────────────────────
@@ -931,82 +722,6 @@ export async function executeBPaaSProcess(
         // Continue loop
       }
 
-      // ── MUTATE ────────────────────────────────────────────────────────────
-      else if (currentState === "MUTATE") {
-        // Deterministic DB write — NO LLM
-        const ctx = runner.getContext();
-
-        const mutationData = {
-          ...ctx.inputPayload,
-          ...(ctx.computedValues ?? {}),
-          process_instance_id: processInstanceId,
-          mutated_at: new Date().toISOString(),
-          mutated_by_job: params.jobId,
-        };
-
-        // Route the business entity change through the centralized writeback dispatcher.
-        // Fire-and-forget — MUTATE state does not wait for the dispatch to complete.
-        void dispatchWriteback(supabase, {
-          type: "process_mutation",
-          organizationId: params.organizationId,
-          processInstanceId,
-          processType: params.processType,
-          mutationPayload: mutationData,
-          mutationReason: "FSM MUTATE state execution",
-          executedBy: params.userId ?? "process-engine",
-        }).catch((e: unknown) =>
-          logger.warn("[BPaaS/MUTATE] writeback dispatch failed (non-fatal)", {
-            processInstanceId,
-            error: String(e),
-          })
-        );
-
-        const mutationResult: Record<string, unknown> = {
-          mutated: true,
-          mutatedAt: new Date().toISOString(),
-          fields: Object.keys(mutationData),
-        };
-
-        const updatedCtx: BPaaSContext = { ...ctx, mutationResult };
-        const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
-
-        await runner.transition("mutated", supabase);
-        await runner.save(supabase);
-      }
-
-      // ── SCHEDULE_NOTIFY ───────────────────────────────────────────────────
-      else if (currentState === "SCHEDULE_NOTIFY") {
-        // Execute notification inline — do NOT queue a separate send-notification job
-        // (no worker consumes send-notification jobs, so queuing would dead-letter them).
-        const ctx = runner.getContext();
-        const notificationSummary = buildApprovalSummary(
-          params.processType,
-          ctx.computedValues,
-          ctx.policyOutcome
-        );
-
-        logger.warn("[BPaaS/DomainExecutor] SCHEDULE_NOTIFY: notification dispatched inline", {
-          processInstanceId,
-          processType: params.processType,
-          summary: notificationSummary.slice(0, 200),
-        });
-
-        await runner.transition("notified", supabase);
-        await runner.save(supabase);
-      }
-
-      else {
-        // Unhandled state — not a core state and not in CUSTOM_INTERMEDIATE_STATES.
-        // This should never happen if all process templates are correctly defined.
-        // Throw so the outer catch block transitions to FAILED with a descriptive error.
-        throw new Error(
-          `Unhandled state: ${currentState}. ` +
-          `If this is a custom intermediate state, add it to CUSTOM_INTERMEDIATE_STATES ` +
-          `in domain-executor.ts. Core states: DECOMPOSE, ASSESS, COMPUTE, POLICY_CHECK, ` +
-          `APPROVAL_GATE, MUTATE, SCHEDULE_NOTIFY. Custom states: ${Array.from(CUSTOM_INTERMEDIATE_STATES).join(", ")}.`
-        );
-      }
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
       logger.warn("[BPaaS/DomainExecutor] State execution failed", {
