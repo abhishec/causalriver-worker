@@ -47,10 +47,19 @@ export async function GET(request: NextRequest) {
     let coreBrainHealth: { healthy: boolean; orgExists: boolean; templateCount: number; issues: string[] } | null = null;
 
     try {
-      // Use getAdminClient() (plain supabase-js, no cookie complexity) for the health check.
-      // createServiceClient() uses @supabase/ssr's createServerClient which requires cookie
-      // handling — unnecessary overhead for this public liveness endpoint.
-      const service = getAdminClient();
+      // Build a fresh plain Supabase client directly — no cookie complexity,
+      // no singleton state, no SSR client. Bypass both createServiceClient()
+      // and getAdminClient() to rule out any singleton/import-chain issues.
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        || process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!supabaseUrl || !supabaseKey || supabaseKey === "undefined") {
+        throw new Error(`Health check env missing: url=${!!supabaseUrl} key=${!!supabaseKey} keyValid=${supabaseKey !== "undefined"}`);
+      }
+      const { createClient: createDirectClient } = await import("@supabase/supabase-js");
+      const service = createDirectClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
 
       // Supabase connectivity check + queue metrics + CORE brain health in parallel
       const [pendingResult, stuckResult, coreBrainResult] = await Promise.all([
