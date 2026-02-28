@@ -223,7 +223,12 @@ export function formatCompetitionAnswer(
   try {
     const full = JSON.stringify(result, null, 2);
     resultJson = full.length > 4096 ? full.slice(0, 4093) + "..." : full;
-  } catch {
+  } catch (err: unknown) {
+    // JSON.stringify can throw on circular references — fall back to String()
+    logger.warn("[TokenBudget] formatCompetitionAnswer: JSON.stringify failed on result", {
+      processType,
+      error: err instanceof Error ? err.message : String(err),
+    });
     resultJson = String(result);
   }
 

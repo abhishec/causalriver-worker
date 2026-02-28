@@ -373,9 +373,11 @@ export function classifyTaskIntent(params: ClassifierParams): ClassificationResu
       matchedKeywords: best.keywords,
       processingMs: Date.now() - startMs,
     };
-  } catch (err) {
+  } catch (err: unknown) {
     // Never throw — return safe fallback
-    logger.warn("[TaskIntentClassifier] Unexpected error during classification:", err instanceof Error ? err.message : String(err));
+    logger.warn("[TaskIntentClassifier] Unexpected error during classification", {
+      error: err instanceof Error ? err.message : String(err),
+    });
     return {
       intent: "general",
       confidence: 0,

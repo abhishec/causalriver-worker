@@ -139,8 +139,11 @@ async function authenticateA2A(
     if (!error && data.user) {
       return { userId: data.user.id, isWorker: false };
     }
-  } catch {
+  } catch (err: unknown) {
     // Supabase client may throw on Lambda cold start — fall through to reject
+    logger.warn("[A2A authenticateA2A] createClient/getUser threw — Lambda cold-start or missing env", {
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 
   return null;
@@ -330,8 +333,10 @@ export async function GET(request: NextRequest) {
 
     const params = request.nextUrl.searchParams;
     const organizationId = params.get("organizationId");
-    const limit = Math.min(parseInt(params.get("limit") ?? "20"), 100);
-    const offset = Math.max(parseInt(params.get("offset") ?? "0"), 0);
+    const rawLimit = parseInt(params.get("limit") ?? "20", 10);
+    const rawOffset = parseInt(params.get("offset") ?? "0", 10);
+    const limit = Math.min(isNaN(rawLimit) ? 20 : rawLimit, 100);
+    const offset = Math.max(isNaN(rawOffset) ? 0 : rawOffset, 0);
     const status = params.get("status"); // optional filter
     // Multi-turn: filter by context_id to retrieve all tasks in a conversation thread
     const contextId = params.get("context_id"); // optional filter

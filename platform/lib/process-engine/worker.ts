@@ -48,7 +48,7 @@ export async function processProcessEngineJobs(
       try {
         await processBPaaSJob(supabase, job as AgentQueueJob);
         result.succeeded++;
-      } catch (err) {
+      } catch (err: unknown) {
         result.failed++;
         logger.warn("[ProcessEngine/Worker] Job failed unexpectedly", {
           jobId: job.id,
@@ -56,7 +56,7 @@ export async function processProcessEngineJobs(
         });
       }
     }
-  } catch (err) {
+  } catch (err: unknown) {
     logger.warn("[ProcessEngine/Worker] processProcessEngineJobs threw", {
       error: err instanceof Error ? err.message : String(err),
     });

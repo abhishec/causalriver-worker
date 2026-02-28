@@ -99,9 +99,12 @@ export async function GET(request: NextRequest) {
           );
         }
       }
-    } catch (recoverErr) {
+    } catch (recoverErr: unknown) {
       // Non-fatal: stale recovery failure must NOT prevent new jobs from running
-      logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", { error: (recoverErr as Error)?.message ?? String(recoverErr), route: "/api/cron/process-jobs" });
+      logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", {
+        error: recoverErr instanceof Error ? recoverErr.message : String(recoverErr),
+        route: "/api/cron/process-jobs",
+      });
     }
 
     // ── Phase 2: Process pending SE-aaS jobs ─────────────────────
@@ -268,9 +271,9 @@ export async function GET(request: NextRequest) {
       processEngine: processEngineResult,
       durationMs,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     const durationMs = Date.now() - startMs;
-    const errorMessage = (err as Error)?.message ?? String(err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
     const isTimeout = errorMessage.startsWith("lambda_timeout");
 
     if (isTimeout) {
