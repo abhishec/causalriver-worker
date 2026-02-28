@@ -298,11 +298,37 @@ export class BPaaSFSMRunner {
    * avoid a save mid-batch when multiple transitions happen in sequence.
    *
    * @throws Error if the transition is illegal (no target state defined)
+   * @throws Error if called from a terminal state (COMPLETE or FAILED)
    */
   async transition(
     event: BPaaSTransitionEvent,
     supabase?: SupabaseClient
   ): Promise<BPaaSState> {
+    // ── Terminal-state guard ──────────────────────────────────────────────────
+    // COMPLETE and FAILED are hard terminal states: no transition is ever valid.
+    // ESCALATE is semi-terminal: it can advance to COMPLETE via "escalated" or
+    // to FAILED via "error", so it is NOT blocked here.
+    //
+    // Without this explicit guard, the accidental behavior is:
+    //   COMPLETE → throws "Illegal transition" (from null in table)
+    //   FAILED   → throws "Illegal transition" (from undefined in table)
+    // Both would throw, but with an opaque error. This guard surfaces a clear
+    // diagnostic message so debugging is unambiguous.
+    if (this.state === "COMPLETE") {
+      throw new Error(
+        `[BPaaSFSMRunner] transition() called on terminal state COMPLETE ` +
+        `(event=${event}, jobId=${this.context.jobId}). ` +
+        `COMPLETE is a hard terminal state — no further transitions are valid.`
+      );
+    }
+    if (this.state === "FAILED") {
+      throw new Error(
+        `[BPaaSFSMRunner] transition() called on terminal state FAILED ` +
+        `(event=${event}, jobId=${this.context.jobId}). ` +
+        `FAILED is a hard terminal state — no further transitions are valid.`
+      );
+    }
+
     let nextState: BPaaSState | null | undefined;
 
     // 1. Process definition transitions take priority (handles custom states + overrides)
@@ -515,13 +541,40 @@ export class BPaaSFSMRunner {
 
   /**
    * Persist the current runner state to:
-   * 1. bpaas_process_instances.fsm_state (full BPaaSContext + fine-grained state)
-   * 2. agent_queue.metadata via processFSM.save() (coarse state for job worker)
+   * 1. agent_queue.metadata via processFSM.save() (coarse state — written first)
+   * 2. bpaas_process_instances.fsm_state (full BPaaSContext — written second)
    *
-   * Non-fatal — logs warnings on failure but never throws.
+   * Write order for crash-safety:
+   *   The coarse queue state is written FIRST. bpaas_process_instances is the
+   *   authoritative resume source (restore() reads it preferentially), so it is
+   *   written LAST — a crash between the two writes leaves the instance row
+   *   behind by at most one state, which is safe to replay on resume.
+   *
+   *   The inverse order (instance first, then queue) would cause restore() to
+   *   replay from an advanced fine-grained state that the queue does not yet
+   *   reflect — a silent double-execution risk on resume.
+   *
+   * Returns true if BOTH writes succeeded. Returns false (with warnings) if
+   * either write failed — the FSM loop continues (non-fatal) but the partial
+   * write is logged so operators can investigate via the job's error log.
    */
-  async save(supabase: SupabaseClient): Promise<void> {
-    // Persist fine-grained BPaaS context to bpaas_process_instances
+  async save(supabase: SupabaseClient): Promise<boolean> {
+    let coarseOk = false;
+    let fineOk = false;
+
+    // ── 1. Coarse state first — agent_queue.metadata ─────────────────────────
+    try {
+      await this.processFSM.save(supabase, this.context.jobId);
+      coarseOk = true;
+    } catch (err) {
+      logger.warn("[BPaaSFSMRunner] save: processFSM.save (coarse) threw", {
+        jobId: this.context.jobId,
+        state: this.state,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+
+    // ── 2. Fine-grained state second — bpaas_process_instances ───────────────
     // Column names per migration 20260228100001_bpaas_foundation.sql:
     //   current_state TEXT — the FSM state name (e.g. "ASSESS", "MUTATE")
     //   fsm_state JSONB    — working memory / full BPaaSContext for restore
@@ -540,18 +593,31 @@ export class BPaaSFSMRunner {
       if (error) {
         logger.warn("[BPaaSFSMRunner] save: bpaas_process_instances update failed", {
           processInstanceId: this.context.processInstanceId,
+          state: this.state,
           error: error.message,
         });
+      } else {
+        fineOk = true;
       }
     } catch (err) {
       logger.warn("[BPaaSFSMRunner] save: bpaas_process_instances threw", {
         processInstanceId: this.context.processInstanceId,
-        err,
+        state: this.state,
+        error: err instanceof Error ? err.message : String(err),
       });
     }
 
-    // Persist coarse state to agent_queue.metadata via ProcessFSM
-    await this.processFSM.save(supabase, this.context.jobId);
+    if (!coarseOk || !fineOk) {
+      logger.warn("[BPaaSFSMRunner] save: partial write — one of two DB writes failed", {
+        jobId: this.context.jobId,
+        processInstanceId: this.context.processInstanceId,
+        state: this.state,
+        coarseOk,
+        fineOk,
+      });
+    }
+
+    return coarseOk && fineOk;
   }
 
   /**

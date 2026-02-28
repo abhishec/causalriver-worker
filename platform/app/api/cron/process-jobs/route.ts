@@ -186,9 +186,14 @@ export async function GET(request: NextRequest) {
     // Picks up agent_type='bpaas' jobs — process engine templates are
     // available to all AI Workers regardless of SE-aaS/AaaS activation.
     // Runs up to 5 BPaaS jobs per cron tick.
+    //
+    // Budget: uses LAMBDA_TIMEOUT_MS (25s) as the base — NOT a different
+    // constant. Using 28_000 here would allow Phase 5 to run 3s past the
+    // safe Lambda wall-clock budget set in LAMBDA_TIMEOUT_MS, potentially
+    // leaving jobs stuck in 'running' on Lambda kill.
     let processEngineResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
     const phaseElapsed3 = Date.now() - startMs;
-    const remainingForProcessEngine = Math.max(0, 28_000 - phaseElapsed3);
+    const remainingForProcessEngine = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsed3);
     if (remainingForProcessEngine > 2_000) {
       try {
         processEngineResult = await withTimeout(

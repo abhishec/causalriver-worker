@@ -31,7 +31,7 @@ import { getProcessDefinition, bpaasDomain } from "./process-registry";
 import type { FSMTransition } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
-import { getBrainContext } from "@/lib/brain/brain-context";
+import { getBrainContext, invalidateBrainContextCache } from "@/lib/brain/brain-context";
 import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordPredictionAccuracy } from "@/lib/brain/agent-rl";
 import { predictStateRisk } from "@/lib/brain/process-predictor";
 import type { PredictionResult } from "@/lib/brain/process-predictor";
@@ -240,6 +240,14 @@ interface HaikuCallResult {
   tokensUsed: number;
 }
 
+/**
+ * Per-LLM-call timeout for FSM states.
+ * Haiku responds in <5s under normal load; 20s gives 4× headroom for
+ * throttling and cold-start delays without blocking the FSM loop indefinitely.
+ * The outer Lambda budget (shouldChain) is the last-resort backstop.
+ */
+const LLM_CALL_TIMEOUT_MS = 20_000;
+
 async function callHaiku(params: {
   apiKey: string;
   systemPrompt: string;
@@ -247,17 +255,35 @@ async function callHaiku(params: {
 }): Promise<HaikuCallResult> {
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const anthropic = new Anthropic({ apiKey: params.apiKey });
-  const response = await anthropic.messages.create({
-    model: routeCallType("pm-aas-structured").model,
-    max_tokens: 1024,
-    system: params.systemPrompt,
-    messages: [{ role: "user", content: params.userContent }],
+
+  // Wrap every Anthropic call with a hard timeout.
+  // Without this, a stalled Haiku call blocks the entire FSM state loop and
+  // consumes the Lambda budget silently — leaving jobs in 'running' forever.
+  let timeoutHandle: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error(`LLM call timed out after ${LLM_CALL_TIMEOUT_MS}ms`));
+    }, LLM_CALL_TIMEOUT_MS);
   });
-  const content = response.content[0];
-  const text = content.type === "text" ? content.text : "";
-  const tokensUsed =
-    (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
-  return { text, tokensUsed };
+
+  try {
+    const response = await Promise.race([
+      anthropic.messages.create({
+        model: routeCallType("pm-aas-structured").model,
+        max_tokens: 1024,
+        system: params.systemPrompt,
+        messages: [{ role: "user", content: params.userContent }],
+      }),
+      timeoutPromise,
+    ]);
+    const content = response.content[0];
+    const text = content.type === "text" ? content.text : "";
+    const tokensUsed =
+      (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
+    return { text, tokensUsed };
+  } finally {
+    clearTimeout(timeoutHandle!);
+  }
 }
 
 // ── Main Executor ─────────────────────────────────────────────────────────────
@@ -410,6 +436,12 @@ export async function executeBPaaSProcess(
 
     processInstanceId = instanceRow.id as string;
 
+    // Invalidate the brain context cache for this org immediately after creating
+    // the process instance row. Without this, getBrainContext() would serve stale
+    // pendingJobCount / activeJobCount data for up to 30s, causing the cognitive
+    // planner to potentially re-queue domains that are already in-flight.
+    invalidateBrainContextCache(params.organizationId);
+
     // Update budget to use the real processInstanceId now that it's available
     tokenBudget = { ...tokenBudget, processInstanceId };
 
@@ -434,7 +466,24 @@ export async function executeBPaaSProcess(
 
   // Core terminal states — loop exits when any of these is reached.
   // Using Set<string> so custom states that route to ESCALATE/FAILED are handled correctly.
-  const coreTerminalStates = new Set<string>(["COMPLETE", "FAILED", "ESCALATE", "APPROVAL_GATE"]);
+  //
+  // CRITICAL: APPROVAL_GATE is intentionally NOT in this set.
+  //
+  // Rationale: APPROVAL_GATE is a *handler* state — when reached (e.g. via
+  // POLICY_CHECK --[policy_pass]--> APPROVAL_GATE), the loop MUST continue so
+  // the APPROVAL_GATE handler inside the loop body can execute. That handler
+  // either:
+  //   a) Returns early with status='awaiting_approval' (human review required), or
+  //   b) Calls runner.runApprovalGate() which auto-approves and advances to MUTATE
+  //
+  // Placing APPROVAL_GATE in coreTerminalStates would cause the loop to exit
+  // BEFORE the handler runs — the process would finish with finalState='APPROVAL_GATE'
+  // and status='failed' without ever attempting the gate check. That is a silent
+  // correctness bug: all processes that require approval would silently fail.
+  //
+  // The loop correctly handles APPROVAL_GATE exit via the early return inside the
+  // APPROVAL_GATE handler block (gateResult.blocked === true path).
+  const coreTerminalStates = new Set<string>(["COMPLETE", "FAILED", "ESCALATE"]);
 
   while (!coreTerminalStates.has(runner.getCurrentState())) {
     // Lambda budget check — chain if near 75s limit
@@ -1125,6 +1174,11 @@ export async function executeBPaaSProcess(
       error: updateErr instanceof Error ? updateErr.message : String(updateErr),
     });
   }
+
+  // Invalidate brain context cache after process completion so the next
+  // getBrainContext() call for this org reads the fresh activeJobCount /
+  // lastJobStatus instead of serving stale 30s-old data to the cognitive planner.
+  invalidateBrainContextCache(params.organizationId);
 
   return {
     status,

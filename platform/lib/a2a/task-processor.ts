@@ -28,6 +28,17 @@ import { executeAndCompleteJob } from "@/lib/se-aas/job-queue";
 import { executeDomain } from "@/lib/se-aas/domain-executor";
 import type { WorkerResult } from "@/lib/se-aas/job-worker";
 
+/**
+ * Per-A2A-job timeout.
+ *
+ * Each domain executor (SE-aaS, AaaS, PM-aaS) calls LLM APIs internally.
+ * A stalled call blocks all remaining jobs in the same batch because the loop
+ * is sequential. 30s gives generous headroom for normal execution while
+ * ensuring the cron phase budget (set by withTimeout in process-jobs/route.ts)
+ * is not entirely consumed by a single hung job.
+ */
+const A2A_JOB_TIMEOUT_MS = 30_000;
+
 // ── A2A skill → SE-aaS domain mapping ─────────────────────────────────────
 // Must stay in sync with the SKILL_TO_DOMAIN map in /api/a2a/tasks/route.ts.
 const SKILL_TO_SEAAS_DOMAIN: Record<string, string> = {
@@ -118,21 +129,32 @@ export async function processA2ATasks(
 
         logger.warn(`[a2a-task-processor] Executing A2A task ${job.id}: skill=${skill} domain=${domainType}`);
 
-        // Execute the domain with the user's text as the primary request
-        const execOutput = await executeDomain(supabase, {
-          domainType,
-          request: {
-            ...payload,
-            query: userText,
-            message: payload.message,
-            skill,
-            source: "a2a",
-          },
-          organizationId: job.organization_id,
-          userId,
-          jobId: job.id,
-          anthropicApiKey,
+        // Execute the domain with the user's text as the primary request.
+        // Wrap with a per-job timeout — a stalled domain call must not block
+        // the remaining A2A jobs in this batch.
+        let a2aTimeoutHandle: ReturnType<typeof setTimeout>;
+        const a2aTimeoutPromise = new Promise<never>((_, reject) => {
+          a2aTimeoutHandle = setTimeout(() => {
+            reject(new Error(`A2A SE-aaS job ${job.id} timed out after ${A2A_JOB_TIMEOUT_MS}ms`));
+          }, A2A_JOB_TIMEOUT_MS);
         });
+        const execOutput = await Promise.race([
+          executeDomain(supabase, {
+            domainType,
+            request: {
+              ...payload,
+              query: userText,
+              message: payload.message,
+              skill,
+              source: "a2a",
+            },
+            organizationId: job.organization_id,
+            userId,
+            jobId: job.id,
+            anthropicApiKey,
+          }),
+          a2aTimeoutPromise,
+        ]).finally(() => clearTimeout(a2aTimeoutHandle!));
 
         // Store result in A2A artifact format so the /tasks/:id endpoint
         // can return it as-is without re-serialization.
@@ -214,14 +236,25 @@ export async function processA2AAasTasks(
         logger.warn(`[a2a-task-processor] Executing AaaS A2A task ${job.id}: skill=${skill} action=${action}`);
 
         const { executeAccountingAgent } = await import("@/lib/aas/domain-executor");
-        const execOutput = await executeAccountingAgent(supabase, {
-          action,
-          organizationId: job.organization_id,
-          userId,
-          transactions: (payload.transactions as Array<Record<string, unknown>>) ?? [],
-          period: payload.period as { from: string; to: string } | undefined,
-          jurisdiction: (payload.jurisdiction as string) ?? "SG",
+        // Wrap with a per-job timeout to prevent a stalled AaaS executor from
+        // blocking the remaining jobs in this batch.
+        let aasTimeoutHandle: ReturnType<typeof setTimeout>;
+        const aasTimeoutPromise = new Promise<never>((_, reject) => {
+          aasTimeoutHandle = setTimeout(() => {
+            reject(new Error(`A2A AaaS job ${job.id} timed out after ${A2A_JOB_TIMEOUT_MS}ms`));
+          }, A2A_JOB_TIMEOUT_MS);
         });
+        const execOutput = await Promise.race([
+          executeAccountingAgent(supabase, {
+            action,
+            organizationId: job.organization_id,
+            userId,
+            transactions: (payload.transactions as Array<Record<string, unknown>>) ?? [],
+            period: payload.period as { from: string; to: string } | undefined,
+            jurisdiction: (payload.jurisdiction as string) ?? "SG",
+          }),
+          aasTimeoutPromise,
+        ]).finally(() => clearTimeout(aasTimeoutHandle!));
 
         const a2aArtifact = {
           parts: [{ text: JSON.stringify(execOutput.result) }],
@@ -297,17 +330,28 @@ export async function processA2APmAasTasks(
         logger.warn(`[a2a-task-processor] Executing PM-aaS A2A task ${job.id}: skill=${skill} domain=${domainType}`);
 
         const { executePmDomain } = await import("@/lib/pm-aas/domain-executor");
-        const execOutput = await executePmDomain(supabase, {
-          domainType,
-          request: {
-            ...payload,
-            query: userText,
-            source: "a2a",
-          },
-          organizationId: job.organization_id,
-          userId,
-          anthropicApiKey,
+        // Wrap with a per-job timeout to prevent a stalled PM-aaS executor from
+        // blocking the remaining jobs in this batch.
+        let pmTimeoutHandle: ReturnType<typeof setTimeout>;
+        const pmTimeoutPromise = new Promise<never>((_, reject) => {
+          pmTimeoutHandle = setTimeout(() => {
+            reject(new Error(`A2A PM-aaS job ${job.id} timed out after ${A2A_JOB_TIMEOUT_MS}ms`));
+          }, A2A_JOB_TIMEOUT_MS);
         });
+        const execOutput = await Promise.race([
+          executePmDomain(supabase, {
+            domainType,
+            request: {
+              ...payload,
+              query: userText,
+              source: "a2a",
+            },
+            organizationId: job.organization_id,
+            userId,
+            anthropicApiKey,
+          }),
+          pmTimeoutPromise,
+        ]).finally(() => clearTimeout(pmTimeoutHandle!));
 
         const a2aArtifact = {
           parts: [{ text: JSON.stringify(execOutput.result) }],

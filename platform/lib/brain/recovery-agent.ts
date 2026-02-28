@@ -253,12 +253,27 @@ Given this failure, what is the best alternative approach? Consider:
 If no viable alternative exists (confidence < 0.4), set alternativeDomain to null and use graceful-degradation.
 Respond with ONLY the JSON object.`;
 
-    const message = await anthropic.messages.create({
-      model: routeCallType('recovery-agent').model,
-      max_tokens: 256,
-      messages: [{ role: "user", content: userPrompt }],
-      system: systemPrompt,
+    // Hard timeout on the recovery-agent LLM call.
+    // consultClaude is called on every domain failure — a stalled API call
+    // would hang the recovery path for the full Lambda wall-clock limit and
+    // block job-worker from marking the job done or failed.
+    const RECOVERY_LLM_TIMEOUT_MS = 15_000;
+    let recoveryTimeoutHandle: ReturnType<typeof setTimeout>;
+    const recoveryTimeoutPromise = new Promise<never>((_, reject) => {
+      recoveryTimeoutHandle = setTimeout(() => {
+        reject(new Error(`recovery-agent LLM timed out after ${RECOVERY_LLM_TIMEOUT_MS}ms`));
+      }, RECOVERY_LLM_TIMEOUT_MS);
     });
+
+    const message = await Promise.race([
+      anthropic.messages.create({
+        model: routeCallType('recovery-agent').model,
+        max_tokens: 256,
+        messages: [{ role: "user", content: userPrompt }],
+        system: systemPrompt,
+      }),
+      recoveryTimeoutPromise,
+    ]).finally(() => clearTimeout(recoveryTimeoutHandle!));
 
     const text =
       message.content[0]?.type === "text" ? message.content[0].text.trim() : "";

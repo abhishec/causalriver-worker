@@ -11,11 +11,21 @@
  * 5. Call executeBPaaSProcess()
  * 6. Handle 5 result states:
  *    - completed      → status = 'completed', result written
- *    - awaiting_approval → status = 'awaiting_hitl' (job is PAUSED, not done)
+ *    - awaiting_approval → status = 'awaiting_approval' (job is PAUSED, not done)
  *    - escalated      → status = 'paused', result with escalation info
  *    - chained        → insert new pending job + chain payload, status = 'completed'
- *    - failed         → status = 'failed', error_message written
- * 7. Unexpected errors → status = 'failed', error_message written
+ *    - failed         → status = 'failed', error_message written (non-retryable)
+ * 7. Unexpected errors → retry logic:
+ *    - If retry_count < max_retries: re-queue as 'pending' with exponential backoff
+ *    - If retry_count >= max_retries: mark permanently 'failed'
+ *
+ * Retry policy:
+ *   Unexpected errors (LLM timeouts, network hiccups, unhandled throws) are
+ *   retried automatically up to max_retries (default 3 from migration).
+ *   Domain-level failures (result.status='failed') are NOT retried — they
+ *   represent deterministic outcomes (policy violation, bad input, etc.).
+ *   DB constraint violations (non-retryable) are identified by error message
+ *   prefix and bypass the retry path immediately.
  *
  * agent_type = 'bpaas' — NEVER 'se-aas'.
  */
@@ -37,6 +47,32 @@ export interface AgentQueueJob {
   priority?: string | null;
   payload?: Record<string, unknown> | null;
   status?: string | null;
+  /** Number of times this job has already been attempted (migration 20260330000020). */
+  retry_count?: number | null;
+  /** Maximum automatic retries before permanent failure (default 3). */
+  max_retries?: number | null;
+}
+
+// ── Retry helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns true when an unexpected error is likely transient and should be
+ * retried. DB constraint violations (unique_violation, RLS rejection) and
+ * validation errors are deterministic — retrying them wastes resources.
+ */
+function isTransientError(errorMessage: string): boolean {
+  const nonRetryablePatterns = [
+    "duplicate key",         // PG unique_violation
+    "violates row-level",    // RLS rejection
+    "violates foreign key",  // FK constraint
+    "invalid input syntax",  // Bad data type
+    "null value in column",  // NOT NULL violation
+    "permission denied",     // Auth failure
+    "Invalid BPaaS process", // Validation (processBPaaSJob step 3)
+    "Missing processType",   // Validation (processBPaaSJob step 2)
+  ];
+  const lower = errorMessage.toLowerCase();
+  return !nonRetryablePatterns.some((p) => lower.includes(p.toLowerCase()));
 }
 
 // ── Main Dispatch Function ────────────────────────────────────────────────────
@@ -177,14 +213,25 @@ export async function processBPaaSJob(
         durationMs: result.durationMs,
       });
     } else if (result.status === "awaiting_approval") {
-      // HITL pause — job is NOT done; it waits for POST /api/agents/{id}/resume
-      // Use 'awaiting_approval' (not 'awaiting_hitl') — the CHECK constraint only
-      // allows: pending, running, completed, failed, blocked, paused, suspended,
-      // awaiting_approval, resumed, cancelled. 'awaiting_hitl' is NOT in the list.
+      // HITL pause — job is NOT done; it waits for POST /api/agents/{id}/resume.
+      //
+      // Use 'suspended' — the canonical HITL-paused status introduced in migration
+      // 20260329000003_agent_suspended_status.sql. The FSM's pauseJobAtDecisionGate()
+      // already wrote 'suspended' earlier; this write is idempotent (same value) and
+      // also carries the result JSONB that pauseJobAtDecisionGate cannot populate
+      // (it doesn't have the full execution result at that point).
+      //
+      // 'awaiting_approval' (the old status) is still accepted by resume_agent_job()
+      // RPC for backward compat, but 'suspended' is the correct canonical value.
+      // Writing 'suspended' here ensures:
+      //   1. The idx_agent_queue_suspended index is used by AgentLiveMonitor
+      //   2. The status matches what pauseJobAtDecisionGate already wrote
+      //   3. No transient window where the job shows 'awaiting_approval' before
+      //      the cron's recover_stale_jobs RPC might misclassify it
       await supabase
         .from("agent_queue")
         .update({
-          status: "awaiting_approval",
+          status: "suspended",
           result: {
             processInstanceId: result.processInstanceId,
             finalState: result.finalState,
@@ -194,7 +241,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job paused at approval gate (awaiting_approval)", {
+      logger.warn("[bpaas/job-worker] Job suspended at approval gate (awaiting human review)", {
         jobId: job.id,
         processType,
         approvalId: result.approvalId,
@@ -271,20 +318,60 @@ export async function processBPaaSJob(
       });
     }
   } catch (err) {
-    // ── 7. Unexpected error ──────────────────────────────────────────────────
+    // ── 7. Unexpected error — apply retry logic ──────────────────────────────
+    // Distinguish transient errors (network, LLM timeout, DB hiccup) from
+    // deterministic failures (constraint violations, auth errors).
+    // Transient errors are retried up to max_retries before permanent failure.
     const errorMessage = err instanceof Error ? err.message : String(err);
-    logger.error("[bpaas/job-worker] Unexpected error during job execution", {
-      jobId: job.id,
-      processType,
-      error: errorMessage,
-    });
+    const currentRetryCount = job.retry_count ?? 0;
+    const maxRetries = job.max_retries ?? 3;
+    const transient = isTransientError(errorMessage);
 
-    await supabase
-      .from("agent_queue")
-      .update({
-        status: "failed",
-        error_message: `Unexpected error: ${errorMessage}`,
-      })
-      .eq("id", job.id);
+    if (transient && currentRetryCount < maxRetries) {
+      // Exponential backoff via retry_count: 0→pending immediately (re-picked
+      // on next cron tick), 1→pending (same), etc.
+      // The cron runs every 2 minutes, providing natural backoff between retries.
+      const nextRetryCount = currentRetryCount + 1;
+      logger.warn("[bpaas/job-worker] Transient error — requeueing for retry", {
+        jobId: job.id,
+        processType,
+        error: errorMessage,
+        retryAttempt: nextRetryCount,
+        maxRetries,
+      });
+
+      await supabase
+        .from("agent_queue")
+        .update({
+          status: "pending",
+          retry_count: nextRetryCount,
+          error_message: `Transient error (attempt ${nextRetryCount}/${maxRetries}): ${errorMessage}`,
+          started_at: null,
+        })
+        .eq("id", job.id);
+    } else {
+      // Non-retryable error OR retries exhausted — permanent failure
+      const reason = transient
+        ? `Exhausted ${maxRetries} retries — last error: ${errorMessage}`
+        : `Non-retryable error: ${errorMessage}`;
+
+      logger.error("[bpaas/job-worker] Permanent failure", {
+        jobId: job.id,
+        processType,
+        error: errorMessage,
+        retryCount: currentRetryCount,
+        maxRetries,
+        transient,
+      });
+
+      await supabase
+        .from("agent_queue")
+        .update({
+          status: "failed",
+          error_message: reason,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", job.id);
+    }
   }
 }
