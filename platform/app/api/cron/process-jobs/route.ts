@@ -25,6 +25,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
 import { processA2ATasks } from "@/lib/a2a/task-processor";
 import { processProcessEngineJobs } from "@/lib/process-engine/worker";
+import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -157,6 +158,15 @@ export async function GET(request: NextRequest) {
         });
       }
     }
+
+    // ── Phase 6: Service Health snapshot ─────────────────────────
+    // Fire-and-forget health writes for active orgs. Non-blocking.
+    // Provides service_health table data for brain-context.ts L26/L27/L28.
+    void writeAllServiceHealth(service).catch((err: unknown) => {
+      logger.warn("[cron/process-jobs] writeAllServiceHealth failed (non-fatal)", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
 
     const durationMs = Date.now() - startMs;
     logger.warn(

@@ -26,6 +26,29 @@ const BRAIN_CONTEXT_CACHE_MAX = 500;
 // permanently blocks the org.
 const _inFlight = new Map<string, Promise<BrainContext>>();
 
+/** Fetch a service_health cache row for a given service type.
+ * service_health is not yet in generated Supabase types (migration pending).
+ * This helper uses a safe runtime query and returns a typed result.
+ */
+async function fetchServiceHealthCache(
+  supabase: SupabaseClient,
+  orgId: string,
+  serviceType: "se-aas" | "aas" | "process-engine"
+): Promise<{ data: { context_string: string; updated_at: string } | null; error: unknown }> {
+  try {
+    // Supabase JS accepts any table name at runtime regardless of generated types
+    const result = await supabase
+      .from("service_health" as string)
+      .select("context_string, updated_at")
+      .eq("organization_id", orgId)
+      .eq("service_type", serviceType)
+      .maybeSingle();
+    return result as { data: { context_string: string; updated_at: string } | null; error: unknown };
+  } catch {
+    return { data: null, error: null };
+  }
+}
+
 /** Evict expired entries from _brainContextCache; if still over max, evict oldest. */
 function _evictBrainContextCache(): void {
   const now = Date.now();
@@ -209,6 +232,13 @@ export async function getBrainContext(
       // L28: Process Engine (Tier 9 — Process Execution, 2 sub-queries)
       l28ProcessInstancesRow,  // L28a: bpaas_process_instances status+created_at last 7d
       l28BpaasJobsRow,         // L28b: agent_queue agent_type=bpaas task_type+status last 7d
+
+      // ── SERVICE HEALTH CACHE READS (Phase 4) ──
+      // Read cached context_string from service_health table (< 15 min = fresh).
+      // Falls back to direct queries above if stale or missing.
+      seaasHealthCacheRow,     // service_health cache for L26 (SE-aaS)
+      aaasHealthCacheRow,      // service_health cache for L27 (AaaS)
+      processEngineHealthCacheRow, // service_health cache for L28 (Process Engine)
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -594,6 +624,22 @@ export async function getBrainContext(
         .eq("agent_type", "bpaas")
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .limit(20),
+
+      // ── SERVICE HEALTH CACHE READS (Phase 4) ──────────────────────────────────
+      // Read cached snapshots from service_health table.
+      // If fresh (< 15 minutes), use cached context_string instead of direct queries.
+      // Falls back to direct queries above if stale, missing, or table not yet created.
+
+      // service_health cache for L26 (SE-aaS)
+      // service_health is a new table not yet in generated Supabase types.
+      // Using fetchServiceHealthCache helper to avoid type errors.
+      fetchServiceHealthCache(supabase, orgId, "se-aas"),
+
+      // service_health cache for L27 (AaaS)
+      fetchServiceHealthCache(supabase, orgId, "aas"),
+
+      // service_health cache for L28 (Process Engine)
+      fetchServiceHealthCache(supabase, orgId, "process-engine"),
     ]);
 
     // ── TIER 1: IDENTITY ─────────────────────────────────────────────────────
@@ -985,155 +1031,210 @@ export async function getBrainContext(
 
     // ── TIER 8: SERVICE LAYERS ────────────────────────────────────────────────
 
-    // L26: SE-aaS Service Layer — 5 sub-queries combined
+    // L26: SE-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 5 sub-queries
     let seaasServiceLayer: string | undefined;
     try {
-      const seaasJobRows = seaasJobsRow.status === "fulfilled"
-        ? (seaasJobsRow.value.data ?? [])
-        : [];
-      const scopeCreepCount = seaasScopeCreepRow.status === "fulfilled"
-        ? (seaasScopeCreepRow.value.count ?? 0)
-        : 0;
-      const criticalEngagements = seaasEngagementHealthRow.status === "fulfilled"
-        ? (seaasEngagementHealthRow.value.data ?? [])
-        : [];
-      const engineerRiskRows = seaasEngineerRiskRow.status === "fulfilled"
-        ? (seaasEngineerRiskRow.value.data ?? [])
-        : [];
-      const podMatchRows = seaasPodMatchRow.status === "fulfilled"
-        ? (seaasPodMatchRow.value.data ?? [])
-        : [];
+      // Check service_health cache freshness (< 15 minutes = fresh)
+      const seaasHealthCacheData =
+        seaasHealthCacheRow.status === "fulfilled"
+          ? (seaasHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
+          : null;
+      const seaasHealthAge = seaasHealthCacheData?.updated_at
+        ? Date.now() - new Date(seaasHealthCacheData.updated_at).getTime()
+        : Infinity;
+      const seaasUsedCache =
+        seaasHealthAge < 15 * 60 * 1000 && !!seaasHealthCacheData?.context_string;
 
-      const seaasL26Parts: string[] = [];
+      if (seaasUsedCache) {
+        // Use cached context string from service_health table (written by process-jobs cron)
+        seaasServiceLayer = seaasHealthCacheData!.context_string;
+      } else {
+        // FALLBACK: run original 5 L26 direct queries (kept permanently as safety net)
+        const seaasJobRows = seaasJobsRow.status === "fulfilled"
+          ? (seaasJobsRow.value.data ?? [])
+          : [];
+        const scopeCreepCount = seaasScopeCreepRow.status === "fulfilled"
+          ? (seaasScopeCreepRow.value.count ?? 0)
+          : 0;
+        const criticalEngagements = seaasEngagementHealthRow.status === "fulfilled"
+          ? (seaasEngagementHealthRow.value.data ?? [])
+          : [];
+        const engineerRiskRows = seaasEngineerRiskRow.status === "fulfilled"
+          ? (seaasEngineerRiskRow.value.data ?? [])
+          : [];
+        const podMatchRows = seaasPodMatchRow.status === "fulfilled"
+          ? (seaasPodMatchRow.value.data ?? [])
+          : [];
 
-      // 26a: Job activity by domain
-      if (seaasJobRows.length > 0) {
-        const byDomain: Record<string, { total: number; success: number; error: number }> = {};
-        for (const row of seaasJobRows as Array<{ task_type: string; status: string }>) {
-          const d = row.task_type ?? "unknown";
-          if (!byDomain[d]) byDomain[d] = { total: 0, success: 0, error: 0 };
-          byDomain[d].total++;
-          if (row.status === "success") byDomain[d].success++;
-          if (row.status === "error") byDomain[d].error++;
+        const seaasL26Parts: string[] = [];
+
+        // 26a: Job activity by domain
+        if (seaasJobRows.length > 0) {
+          const byDomain: Record<string, { total: number; success: number; error: number }> = {};
+          for (const row of seaasJobRows as Array<{ task_type: string; status: string }>) {
+            const d = row.task_type ?? "unknown";
+            if (!byDomain[d]) byDomain[d] = { total: 0, success: 0, error: 0 };
+            byDomain[d].total++;
+            if (row.status === "success") byDomain[d].success++;
+            if (row.status === "error") byDomain[d].error++;
+          }
+          const jobSummary = Object.entries(byDomain)
+            .map(([d, c]) => `${d}:${c.total}r/${c.success}ok`)
+            .join(", ");
+          seaasL26Parts.push(`Jobs(7d): ${jobSummary}`);
         }
-        const jobSummary = Object.entries(byDomain)
-          .map(([d, c]) => `${d}:${c.total}r/${c.success}ok`)
-          .join(", ");
-        seaasL26Parts.push(`Jobs(7d): ${jobSummary}`);
-      }
 
-      // 26b: Scope creep
-      seaasL26Parts.push(`Open scope alerts: ${scopeCreepCount}`);
+        // 26b: Scope creep
+        seaasL26Parts.push(`Open scope alerts: ${scopeCreepCount}`);
 
-      // 26c: Critical engagements
-      if (criticalEngagements.length > 0) {
-        const engList = (criticalEngagements as Array<{ engagement_id: string; engagement_name: string | null; health_score: number }>)
-          .map(e => `${e.engagement_name ?? e.engagement_id}: ${Math.round(e.health_score)}`)
-          .join(", ");
-        seaasL26Parts.push(`Critical engagements: ${engList}`);
-      }
+        // 26c: Critical engagements
+        if (criticalEngagements.length > 0) {
+          const engList = (criticalEngagements as Array<{ engagement_id: string; engagement_name: string | null; health_score: number }>)
+            .map(e => `${e.engagement_name ?? e.engagement_id}: ${Math.round(e.health_score)}`)
+            .join(", ");
+          seaasL26Parts.push(`Critical engagements: ${engList}`);
+        }
 
-      // 26d: Engineer risk
-      if (engineerRiskRows.length > 0) {
-        const riskList = (engineerRiskRows as Array<{ github_login: string; flight_risk_score: number }>)
-          .map(e => `${e.github_login}: ${Math.round(e.flight_risk_score)}%`)
-          .join(", ");
-        seaasL26Parts.push(`Engineer risk: ${riskList}`);
-      }
+        // 26d: Engineer risk
+        if (engineerRiskRows.length > 0) {
+          const riskList = (engineerRiskRows as Array<{ github_login: string; flight_risk_score: number }>)
+            .map(e => `${e.github_login}: ${Math.round(e.flight_risk_score)}%`)
+            .join(", ");
+          seaasL26Parts.push(`Engineer risk: ${riskList}`);
+        }
 
-      // 26e: Pod matches
-      if (podMatchRows.length > 0) {
-        const podList = (podMatchRows as Array<{ recommended_pod_name: string | null }>)
-          .map(m => m.recommended_pod_name ?? "")
-          .filter(n => n.length > 0)
-          .join(", ");
-        if (podList) seaasL26Parts.push(`Pod matches: ${podList}`);
-      }
+        // 26e: Pod matches
+        if (podMatchRows.length > 0) {
+          const podList = (podMatchRows as Array<{ recommended_pod_name: string | null }>)
+            .map(m => m.recommended_pod_name ?? "")
+            .filter(n => n.length > 0)
+            .join(", ");
+          if (podList) seaasL26Parts.push(`Pod matches: ${podList}`);
+        }
 
-      if (seaasL26Parts.length > 0) {
-        seaasServiceLayer = `## SE-aaS Service Layer\n${seaasL26Parts.join(" | ")}`.slice(0, 400);
+        if (seaasL26Parts.length > 0) {
+          seaasServiceLayer = `## SE-aaS Service Layer\n${seaasL26Parts.join(" | ")}`.slice(0, 400);
+        }
       }
     } catch (e) {
       logger.warn("[brain-context] L26 SE-aaS service layer failed:", e);
     }
 
-    // L27: AaaS Service Layer — 2 sub-queries combined
+    // L27: AaaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
     let aaasServiceLayer: string | undefined;
-    const aaasArtifactRows = aaasArtifactsRow.status === "fulfilled"
-      ? (aaasArtifactsRow.value.data ?? [])
-      : [];
-    const aaasQueueRows = aaasAgentQueueRow.status === "fulfilled"
-      ? (aaasAgentQueueRow.value.data ?? [])
-      : [];
-    const aaasL27Parts: string[] = [];
-    if (aaasArtifactRows.length > 0) {
-      const domainCounts: Record<string, number> = {};
-      for (const row of aaasArtifactRows as Array<{ domain_type: string }>) {
-        const d = row.domain_type ?? "unknown";
-        domainCounts[d] = (domainCounts[d] ?? 0) + 1;
+    try {
+      // Check service_health cache freshness (< 15 minutes = fresh)
+      const aaasHealthCacheData =
+        aaasHealthCacheRow.status === "fulfilled"
+          ? (aaasHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
+          : null;
+      const aaasHealthAge = aaasHealthCacheData?.updated_at
+        ? Date.now() - new Date(aaasHealthCacheData.updated_at).getTime()
+        : Infinity;
+      const aaasUsedCache =
+        aaasHealthAge < 15 * 60 * 1000 && !!aaasHealthCacheData?.context_string;
+
+      if (aaasUsedCache) {
+        // Use cached context string from service_health table (written by process-jobs cron)
+        aaasServiceLayer = aaasHealthCacheData!.context_string;
+      } else {
+        // FALLBACK: run original 2 L27 direct queries (kept permanently as safety net)
+        const aaasArtifactRows = aaasArtifactsRow.status === "fulfilled"
+          ? (aaasArtifactsRow.value.data ?? [])
+          : [];
+        const aaasQueueRows = aaasAgentQueueRow.status === "fulfilled"
+          ? (aaasAgentQueueRow.value.data ?? [])
+          : [];
+        const aaasL27Parts: string[] = [];
+        if (aaasArtifactRows.length > 0) {
+          const domainCounts: Record<string, number> = {};
+          for (const row of aaasArtifactRows as Array<{ domain_type: string }>) {
+            const d = row.domain_type ?? "unknown";
+            domainCounts[d] = (domainCounts[d] ?? 0) + 1;
+          }
+          const summary = Object.entries(domainCounts)
+            .sort(([, a], [, b]) => b - a)
+            .map(([d, c]) => `${d}:${c}`)
+            .join(", ");
+          aaasL27Parts.push(`Artifacts(24h): ${summary}`);
+        }
+        if (aaasQueueRows.length > 0) {
+          const statusCounts: Record<string, number> = {};
+          for (const row of aaasQueueRows as Array<{ status: string }>) {
+            const s = row.status ?? "unknown";
+            statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+          }
+          const succeeded = statusCounts["success"] ?? 0;
+          const failed = statusCounts["error"] ?? 0;
+          const running = statusCounts["running"] ?? 0;
+          aaasL27Parts.push(`Agents(7d): ${succeeded} succeeded, ${failed} failed, ${running} running`);
+        }
+        if (aaasL27Parts.length > 0) {
+          aaasServiceLayer = `## AaaS Service Layer\n${aaasL27Parts.join(" | ")}`.slice(0, 250);
+        }
       }
-      const summary = Object.entries(domainCounts)
-        .sort(([, a], [, b]) => b - a)
-        .map(([d, c]) => `${d}:${c}`)
-        .join(", ");
-      aaasL27Parts.push(`Artifacts(24h): ${summary}`);
-    }
-    if (aaasQueueRows.length > 0) {
-      const statusCounts: Record<string, number> = {};
-      for (const row of aaasQueueRows as Array<{ status: string }>) {
-        const s = row.status ?? "unknown";
-        statusCounts[s] = (statusCounts[s] ?? 0) + 1;
-      }
-      const succeeded = statusCounts["success"] ?? 0;
-      const failed = statusCounts["error"] ?? 0;
-      const running = statusCounts["running"] ?? 0;
-      aaasL27Parts.push(`Agents(7d): ${succeeded} succeeded, ${failed} failed, ${running} running`);
-    }
-    if (aaasL27Parts.length > 0) {
-      aaasServiceLayer = `## AaaS Service Layer\n${aaasL27Parts.join(" | ")}`.slice(0, 250);
+    } catch (e) {
+      logger.warn("[brain-context] L27 AaaS service layer failed:", e);
     }
 
     // ── TIER 9: PROCESS EXECUTION ─────────────────────────────────────────────
 
-    // L28: Process Engine Layer — 2 sub-queries combined
+    // L28: Process Engine Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
     // Always assembled regardless of service activations. Covers all process templates.
     let processEngineLayer: string | undefined;
     try {
-      const processInstances = l28ProcessInstancesRow.status === "fulfilled"
-        ? (l28ProcessInstancesRow.value.data ?? [])
-        : [];
-      const processJobs = l28BpaasJobsRow.status === "fulfilled"
-        ? (l28BpaasJobsRow.value.data ?? [])
-        : [];
+      // Check service_health cache freshness (< 15 minutes = fresh)
+      const processEngineHealthCacheData =
+        processEngineHealthCacheRow.status === "fulfilled"
+          ? (processEngineHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
+          : null;
+      const processEngineHealthAge = processEngineHealthCacheData?.updated_at
+        ? Date.now() - new Date(processEngineHealthCacheData.updated_at).getTime()
+        : Infinity;
+      const processEngineUsedCache =
+        processEngineHealthAge < 15 * 60 * 1000 && !!processEngineHealthCacheData?.context_string;
 
-      if (processInstances.length > 0 || processJobs.length > 0) {
-        // Aggregate by status from instances
-        const statusCounts: Record<string, number> = {};
-        for (const inst of processInstances) {
-          const s = (inst as { status: string }).status ?? "unknown";
-          statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+      if (processEngineUsedCache) {
+        // Use cached context string from service_health table (written by process-jobs cron)
+        processEngineLayer = processEngineHealthCacheData!.context_string;
+      } else {
+        // FALLBACK: run original 2 L28 direct queries (kept permanently as safety net)
+        const processInstances = l28ProcessInstancesRow.status === "fulfilled"
+          ? (l28ProcessInstancesRow.value.data ?? [])
+          : [];
+        const processJobs = l28BpaasJobsRow.status === "fulfilled"
+          ? (l28BpaasJobsRow.value.data ?? [])
+          : [];
+
+        if (processInstances.length > 0 || processJobs.length > 0) {
+          // Aggregate by status from instances
+          const statusCounts: Record<string, number> = {};
+          for (const inst of processInstances) {
+            const s = (inst as { status: string }).status ?? "unknown";
+            statusCounts[s] = (statusCounts[s] ?? 0) + 1;
+          }
+
+          // Aggregate by template type from jobs
+          const templateCounts: Record<string, number> = {};
+          for (const job of processJobs) {
+            const t = (job as { task_type: string }).task_type ?? "unknown";
+            templateCounts[t] = (templateCounts[t] ?? 0) + 1;
+          }
+
+          const statusSummary = Object.entries(statusCounts)
+            .map(([s, n]) => `${n} ${s}`)
+            .join(", ");
+
+          const templateSummary = Object.entries(templateCounts)
+            .map(([t, n]) => `${t}×${n}`)
+            .join(", ");
+
+          const l28Parts: string[] = [];
+          if (statusSummary) l28Parts.push(`Status(7d): ${statusSummary}`);
+          if (templateSummary) l28Parts.push(`Templates: ${templateSummary}`);
+
+          processEngineLayer = `## Process Engine (L28)\n${l28Parts.join(" | ")}`.slice(0, 300);
         }
-
-        // Aggregate by template type from jobs
-        const templateCounts: Record<string, number> = {};
-        for (const job of processJobs) {
-          const t = (job as { task_type: string }).task_type ?? "unknown";
-          templateCounts[t] = (templateCounts[t] ?? 0) + 1;
-        }
-
-        const statusSummary = Object.entries(statusCounts)
-          .map(([s, n]) => `${n} ${s}`)
-          .join(", ");
-
-        const templateSummary = Object.entries(templateCounts)
-          .map(([t, n]) => `${t}×${n}`)
-          .join(", ");
-
-        const l28Parts: string[] = [];
-        if (statusSummary) l28Parts.push(`Status(7d): ${statusSummary}`);
-        if (templateSummary) l28Parts.push(`Templates: ${templateSummary}`);
-
-        processEngineLayer = `## Process Engine (L28)\n${l28Parts.join(" | ")}`.slice(0, 300);
       }
     } catch {
       // Non-fatal — process engine context is best-effort
