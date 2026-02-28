@@ -17,7 +17,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { executeBPaaSProcess, type BPaaSExecutionResult } from "@/lib/bpaas/domain-executor";
+import { executeBPaaSProcess, type BPaaSExecutionResult } from "@/lib/process-intelligence/domain-executor";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

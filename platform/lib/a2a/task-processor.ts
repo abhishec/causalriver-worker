@@ -17,9 +17,9 @@
  * This allows /api/a2a/tasks/[taskId] to return the result directly as
  * A2A artifacts without re-serialization.
  *
+ * agent_type='se-aas' → executeDomain()      (SE-aaS executor)
  * agent_type='aas'    → executeAccounting() (AaaS executor)
  * agent_type='pm-aas' → executePmDomain()   (PM-aaS executor)
- * agent_type='a2a'    → executeDomain()      (SE-aaS executor, default)
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -75,7 +75,7 @@ const PM_AAS_TASK_TO_DOMAIN: Record<string, string> = {
 /**
  * Process pending A2A tasks from the agent_queue.
  *
- * Handles SE-aaS delivery intelligence domains (agent_type='a2a').
+ * Handles SE-aaS domains (agent_type='se-aas').
  * AaaS (agent_type='aas') and PM-aaS (agent_type='pm-aas') are
  * processed by processA2AAasTasks() and processA2APmAasTasks() respectively.
  *
@@ -92,7 +92,7 @@ export async function processA2ATasks(
   const { data: pendingJobs, error } = await supabase
     .from("agent_queue")
     .select("id, organization_id, task_type, payload")
-    .eq("agent_type", "a2a")
+    .eq("agent_type", "se-aas")
     .eq("status", "pending")
     .order("priority", { ascending: false })
     .order("created_at", { ascending: true })

@@ -41,5 +41,5 @@ export type {
 } from "./types";
 
 // Core execution (re-export for callers who need it directly)
-export { executeBPaaSProcess as executeProcess } from "@/lib/bpaas/domain-executor";
-export { BPaaSFSMRunner as ProcessEngineRunner } from "@/lib/bpaas/fsm-runner";
+export { executeBPaaSProcess as executeProcess } from "@/lib/process-intelligence/domain-executor";
+export { BPaaSFSMRunner as ProcessEngineRunner } from "@/lib/process-intelligence/fsm-runner";

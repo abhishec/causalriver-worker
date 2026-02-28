@@ -3,7 +3,7 @@
  * =====================================================
  * Implements the Agent-to-Agent (A2A) task submission and listing endpoints.
  *
- * POST — Submit a new A2A task. Creates an agent_queue row with agent_type='a2a'.
+ * POST — Submit a new A2A task. Routes to agent_type='se-aas'|'aas'|'pm-aas'.
  * GET  — List A2A tasks for an organization (paginated).
  *
  * Auth: Bearer token — accepts SE_AAS_WORKER_SECRET (M2M) or valid Supabase JWT.
@@ -71,6 +71,31 @@ const SKILL_TO_DOMAIN: Record<string, string> = {
   "pm-feature-impact":       "feature-impact",
   "pm-capacity-planner":     "capacity-planner",
 };
+
+// Domains that route to agent_type='se-aas' (Software Engineering as a Service executor)
+const SEAAS_DOMAINS = new Set([
+  "pod-match",
+  "early-warning",
+  "scope-creep",
+  "delivery-intelligence",
+  "test-data-generator",
+  "sql-analyzer",
+  "test-case-generator",
+  "tdd-code-generator",
+  "incident-diagnosis",
+  "impact-analysis",
+  "data-lineage",
+  "log-query",
+  "dependency-upgrade",
+  "design-doc-generator",
+  "performance-profiler",
+  "dead-code-detector",
+  "pr-review",
+  "boilerplate-scaffold",
+  "codebase-qa",
+  "architecture-extractor",
+  "decompose-spec",
+]);
 
 // Domains that route to agent_type='aas' (Accounting as a Service executor)
 const AAS_DOMAINS = new Set([
@@ -233,16 +258,18 @@ export async function POST(request: NextRequest) {
     const domainType = SKILL_TO_DOMAIN[skill];
 
     // Route to the correct agent_type based on the domain:
-    // - 'aas'    — Accounting as a Service executor
-    // - 'pm-aas' — Product Management as a Service executor
-    // - 'a2a'    — Default: SE-aaS delivery intelligence domains via A2A task processor
+    // - 'se-aas'  — Software Engineering as a Service executor
+    // - 'aas'     — Accounting as a Service executor
+    // - 'pm-aas'  — Product Management as a Service executor
     let agentType: string;
-    if (AAS_DOMAINS.has(domainType)) {
+    if (SEAAS_DOMAINS.has(domainType)) {
+      agentType = "se-aas";
+    } else if (AAS_DOMAINS.has(domainType)) {
       agentType = "aas";
     } else if (PM_AAS_DOMAINS.has(domainType)) {
       agentType = "pm-aas";
     } else {
-      agentType = "a2a";
+      agentType = "se-aas"; // default to SE-aaS for unknown domains
     }
 
     // Build job payload — context_id is optional (omitted when null for backward compat)

@@ -812,24 +812,6 @@ async function _runCognitivePlannerInner(
     logger.warn("[CognitivePlanner] Phase 1f (recovery mode check) failed:", err);
   }
 
-  // 1g. Process Engine health signals (non-blocking, best-effort)
-  // Read bpaas.* RL signals so the planner is aware of process engine health
-  // even though it never autonomously schedules these domains.
-  let processEngineSignals: Array<{ domain: string; confidence: number }> = [];
-  try {
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-    const { data: peSignals } = await supabase
-      .from("prediction_records")
-      .select("domain, confidence")
-      .eq("organization_id", orgId)
-      .like("domain", "bpaas.%")
-      .gte("created_at", twoHoursAgo)
-      .limit(10);
-    processEngineSignals = (peSignals ?? []) as typeof processEngineSignals;
-  } catch {
-    // Non-fatal — process engine health is informational only
-  }
-
   // ── Phase 1h: Process bottleneck detection ────────────────────────────────
   // Reads state-level fail rates from service_health to surface process
   // templates that need policy knowledge enrichment.
@@ -885,9 +867,6 @@ async function _runCognitivePlannerInner(
   // ══════════════════════════════════════════════════════════════════════════
 
   const maxDecisions = recoveryMode ? 1 : plannerConfig.maxDomainsPerCycle;
-  const processEngineHealthSummary = processEngineSignals.length > 0
-    ? processEngineSignals.map((s) => `${s.domain}(conf:${s.confidence.toFixed(2)})`).join(", ")
-    : "no recent data";
   const processBottleneckSummary = processBottlenecks.length > 0
     ? processBottlenecks
         .map((b) => `${b.processType} at ${b.state}: ${Math.round(b.failRate * 100)}% fail rate`)
@@ -902,9 +881,7 @@ async function _runCognitivePlannerInner(
 - Stuck domains (${plannerConfig.stuckDomainThreshold}+ failures last 2h): ${stuckDomains.join(", ") || "none"}
 - Globally broken domains (>10 failures across all orgs in 2h — NEVER schedule): ${[...globallyBrokenDomains].join(", ") || "none"}
 - Recovery mode active: ${recoveryMode ? "YES — limit to 1 decision maximum" : "no"}
-- Process Engine (bpaas) recent signals (informational, NOT schedulable): ${processEngineHealthSummary}
-- Process FSM bottlenecks (states with >50% fail rate, may need policy enrichment): ${processBottleneckSummary}
-- IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition, bpaas.*, process.*
+- IMPORTANT: These domains are user-triggered ONLY — do NOT schedule them: code-agent, overnight-orchestrator, spec-decomposition
 
 ## Past Planning Decisions and Lessons
 ${pastReflectionsText}`;
@@ -1054,37 +1031,10 @@ ${pastReflectionsText}`;
         }
       }
 
-      // Process Engine templates are USER-TRIGGERED ONLY — never schedule autonomously.
-      // bpaas.* prefix = process engine domain (hr_offboarding, procurement, etc.)
-      // Also block known Process Engine domains that LLM might suggest without the prefix.
-      // All 17 process engine templates — both underscore and hyphen variants.
-      // Primary guard is startsWith("bpaas.") but this catches bare template names
-      // in case the LLM omits the prefix.
-      const BPAAS_PROCESS_TYPES = new Set([
-        "hr_offboarding", "hr-offboarding",
-        "procurement",
-        "order_management", "order-management",
-        "expense_approval", "expense-approval",
-        "customer_onboarding", "customer-onboarding",
-        "insurance_claim", "insurance-claim",
-        "invoice_reconciliation", "invoice-reconciliation",
-        "sla_breach_escalation", "sla-breach-escalation",
-        "travel_rebooking", "travel-rebooking",
-        "compliance_audit", "compliance-audit",
-        "subscription_migration", "subscription-migration",
-        "dispute_resolution", "dispute-resolution",
-        "financial_close", "financial-close",
-        "product_workflow", "product-workflow",
-        "ar_collections", "ar-collections",
-        "incident_response", "incident-response",
-        "qbr_preparation", "qbr-preparation",
-      ]);
-      if (
-        decision.domain.startsWith("bpaas.") ||
-        decision.domain.startsWith("process.") ||
-        BPAAS_PROCESS_TYPES.has(decision.domain)
-      ) {
-        logger.warn("[CognitivePlanner] Skipping process engine domain (user-triggered only)", {
+      // Process Intelligence (internal FSM) is user-triggered only — never schedule autonomously.
+      // Guard against the bpaas.* RL prefix appearing in suggestions.
+      if (decision.domain.startsWith("bpaas.")) {
+        logger.warn("[CognitivePlanner] Skipping internal process-intelligence domain", {
           domain: decision.domain,
           orgId,
         });

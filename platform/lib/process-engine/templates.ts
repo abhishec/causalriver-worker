@@ -6,7 +6,7 @@
  *
  * Templates describe the FSM shape (states, transitions, policy rules) for
  * each process type (hr_offboarding, procurement, order_management, etc.).
- * The actual execution logic lives in lib/bpaas/domain-executor.ts.
+ * The actual execution logic lives in lib/process-intelligence/domain-executor.ts.
  */
 
 import {
@@ -18,7 +18,7 @@ import {
   type ProcessDefinition,
   type PolicyRule,
   type FSMTransition,
-} from "@/lib/bpaas/process-registry";
+} from "@/lib/process-intelligence/process-registry";
 
 // Backward-compat re-exports — old names preserved so existing callers don't break
 export {

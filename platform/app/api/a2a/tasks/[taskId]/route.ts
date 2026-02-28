@@ -84,7 +84,7 @@ export async function GET(
         "id, organization_id, task_type, status, payload, result, error_message, created_at, started_at, completed_at, checkpoint_data, checkpoint_phase, escalation_question"
       )
       .eq("id", taskId)
-      .in("agent_type", ["a2a", "bpaas"])
+      .in("agent_type", ["se-aas", "aas", "pm-aas"])
       .eq("payload->>source", "a2a")
       .maybeSingle();
 

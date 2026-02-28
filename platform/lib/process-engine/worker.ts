@@ -23,8 +23,8 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { processBPaaSJob } from "@/lib/bpaas/job-worker";
-import type { AgentQueueJob } from "@/lib/bpaas/job-worker";
+import { processBPaaSJob } from "@/lib/process-intelligence/job-worker";
+import type { AgentQueueJob } from "@/lib/process-intelligence/job-worker";
 import { logger } from "@/lib/logger";
 import type { ProcessEngineWorkerResult } from "./types";
 
