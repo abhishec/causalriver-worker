@@ -457,11 +457,15 @@ export async function writeAllServiceHealth(
 
     // Write health for each org — all 3 services — fire and forget per org
     for (const orgId of uniqueOrgIds) {
-      void Promise.all([
-        writeSeaasHealth(supabase, orgId),
-        writeAaasHealth(supabase, orgId),
-        writeProcessEngineHealth(supabase, orgId),
-      ]);
+      writeSeaasHealth(supabase, orgId).catch((e: unknown) =>
+        logger.warn("[ServiceHealth] org write failed (se-aas)", { orgId, error: String(e) })
+      );
+      writeAaasHealth(supabase, orgId).catch((e: unknown) =>
+        logger.warn("[ServiceHealth] org write failed (aas)", { orgId, error: String(e) })
+      );
+      writeProcessEngineHealth(supabase, orgId).catch((e: unknown) =>
+        logger.warn("[ServiceHealth] org write failed (process-engine)", { orgId, error: String(e) })
+      );
     }
 
     return { orgsProcessed: uniqueOrgIds.length };

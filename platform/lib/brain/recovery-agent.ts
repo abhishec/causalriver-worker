@@ -178,8 +178,8 @@ async function reExecuteDomain(
     });
 
     return output;
-  } catch (err: any) {
-    logger.warn("[recovery-agent] re-execution failed:", err?.message);
+  } catch (err: unknown) {
+    logger.warn("[recovery-agent] re-execution failed:", err instanceof Error ? err.message : String(err));
     return null;
   }
 }
@@ -278,8 +278,8 @@ Respond with ONLY the JSON object.`;
     }
 
     return parsed;
-  } catch (err: any) {
-    logger.warn("[recovery-agent] Claude consultation failed:", err?.message);
+  } catch (err: unknown) {
+    logger.warn("[recovery-agent] Claude consultation failed:", err instanceof Error ? err.message : String(err));
     return null;
   }
 }

@@ -703,7 +703,7 @@ export async function recordStepOutcome(
       signal_timestamp: new Date().toISOString(),
       entity_type: "process_step",
       entity_id: `${params.domain}:${params.stepName}:${params.stepIndex}`,
-      payload: {
+      signal_metadata: {
         stepName: params.stepName,
         stepIndex: params.stepIndex,
         durationMs: params.durationMs,
@@ -774,7 +774,7 @@ export async function checkDomainDrift(
         signal_timestamp: new Date().toISOString(),
         entity_type: "domain_health",
         entity_id: domain,
-        payload: { currentAvg, baselineAvg, dropPct },
+        signal_metadata: { currentAvg, baselineAvg, dropPct },
       });
     } catch {
       // Non-fatal — drift signal emission must never throw

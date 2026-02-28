@@ -519,10 +519,10 @@ export async function checkAndStartWaitingJobs(
             created_at: new Date().toISOString(),
           })
       ).catch(() => {});
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.warn(
         `[orchestrator] Error starting waiting job ${entry.job_id}:`,
-        err?.message
+        err instanceof Error ? err.message : String(err)
       );
     }
   }
@@ -623,10 +623,10 @@ export async function checkAndStartBrainDependentJobs(
             created_at: new Date().toISOString(),
           })
       ).catch(() => {});
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.warn(
         `[orchestrator] Error starting brain-dependent job ${entry.job_id}:`,
-        err?.message
+        err instanceof Error ? err.message : String(err)
       );
     }
   }

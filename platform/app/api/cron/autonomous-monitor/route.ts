@@ -37,6 +37,7 @@ import {
   runAutonomousMonitoring,
   type MonitoringResult,
 } from "@/lib/brain/autonomous-monitor";
+import { checkDomainDrift } from "@/lib/brain/agent-rl";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes — 10 orgs × ~30s each
@@ -138,6 +139,26 @@ export async function GET(request: NextRequest) {
               `dur=${orgDuration}ms`
           );
         }
+
+        // WIRE-2: Domain drift detection — fire-and-forget per org
+        // Checks each active SE-aaS domain for >15% quality drop vs prior 7d baseline.
+        void (async () => {
+          const domainsToCheck = [
+            "pod-match",
+            "early-warning",
+            "scope-creep",
+            "delivery-intelligence",
+          ];
+          for (const domain of domainsToCheck) {
+            void checkDomainDrift(service, orgId, domain).catch((e: unknown) =>
+              logger.warn("[CronAutonomousMonitor] checkDomainDrift failed", {
+                orgId,
+                domain,
+                error: e instanceof Error ? e.message : String(e),
+              })
+            );
+          }
+        })();
       } catch (err) {
         const msg = `org=${orgId} threw: ${String(err)}`;
         logger.error(`[CronAutonomousMonitor] ${msg}`);

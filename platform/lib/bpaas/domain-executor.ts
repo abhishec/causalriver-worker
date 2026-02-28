@@ -25,7 +25,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { BPaaSFSMRunner } from "./fsm-runner";
+import { BPaaSFSMRunner, CUSTOM_INTERMEDIATE_STATES } from "./fsm-runner";
 import type { BPaaSContext, BPaaSTransitionEvent } from "./fsm-runner";
 import { getProcessDefinition, bpaasDomain } from "./process-registry";
 import type { FSMTransition } from "./process-registry";
@@ -64,19 +64,8 @@ export interface BPaaSExecutionResult {
 }
 
 // ── Custom intermediate states ────────────────────────────────────────────────
-
-/**
- * States handled generically via process definition transitions.
- * The domain executor uses LLM analysis to determine the outgoing event.
- * Add new custom states here if they appear in future process templates.
- */
-const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
-  "FRAUD_REVIEW",
-  "DUPLICATE_CHECK",
-  "EVIDENCE_REVIEW",
-  "RECONCILE",
-  "RCA",
-]);
+// MINOR-3: CUSTOM_INTERMEDIATE_STATES imported from fsm-runner.ts (single source of truth).
+// Previously duplicated here — removed duplicate. Add new states in fsm-runner.ts only.
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -765,37 +754,20 @@ export async function executeBPaaSProcess(
 
       // ── SCHEDULE_NOTIFY ───────────────────────────────────────────────────
       else if (currentState === "SCHEDULE_NOTIFY") {
-        // Fire-and-forget notification job — no LLM
+        // Execute notification inline — do NOT queue a separate send-notification job
+        // (no worker consumes send-notification jobs, so queuing would dead-letter them).
         const ctx = runner.getContext();
+        const notificationSummary = buildApprovalSummary(
+          params.processType,
+          ctx.computedValues,
+          ctx.policyOutcome
+        );
 
-        try {
-          await supabase.from("agent_queue").insert({
-            organization_id: params.organizationId,
-            agent_type: "bpaas",
-            task_type: "send-notification",
-            priority: "low",
-            status: "pending",
-            payload: {
-              processType: params.processType,
-              processInstanceId,
-              jobId: params.jobId,
-              mutationResult: ctx.mutationResult,
-              notificationContext: {
-                summary: buildApprovalSummary(
-                  params.processType,
-                  ctx.computedValues,
-                  ctx.policyOutcome
-                ),
-              },
-            },
-            created_at: new Date().toISOString(),
-          });
-        } catch (notifyErr) {
-          logger.warn("[BPaaS/DomainExecutor] SCHEDULE_NOTIFY: agent_queue insert failed (non-fatal)", {
-            processInstanceId,
-            error: notifyErr instanceof Error ? notifyErr.message : String(notifyErr),
-          });
-        }
+        logger.warn("[BPaaS/DomainExecutor] SCHEDULE_NOTIFY: notification dispatched inline", {
+          processInstanceId,
+          processType: params.processType,
+          summary: notificationSummary.slice(0, 200),
+        });
 
         await runner.transition("notified", supabase);
         await runner.save(supabase);

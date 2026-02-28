@@ -157,7 +157,8 @@ export async function getGloballyBrokenDomains(
     .select("domain, organization_id")
     .lt("confidence", 0.3)
     .gte("created_at", twoHoursAgo)
-    .not("domain", "is", null);
+    .not("domain", "is", null)
+    .limit(500);
 
   if (error || !data?.length) return { broken: [], status: [] };
 
@@ -1028,8 +1029,27 @@ ${pastReflectionsText}`;
 
   let decisionsQueued = 0;
 
+  // ENT-7: Heavy domains that are expensive and require strict scheduling limits.
+  // Only 1 max per cognitive cycle, and only if fewer than 2 jobs queued so far.
+  const HEAVY_DOMAINS = new Set(["tdd-code-generator", "pr-review", "full-audit", "causal-analysis"]);
+
   for (const decision of decisions) {
     try {
+      // ENT-7: Guard heavy domains — at most 1 per cycle and only if low queue pressure
+      if (HEAVY_DOMAINS.has(decision.domain)) {
+        const heavyAlreadyQueued = decisions
+          .slice(0, decisions.indexOf(decision))
+          .some((d) => HEAVY_DOMAINS.has(d.domain));
+        if (heavyAlreadyQueued || decisionsQueued >= 2) {
+          logger.warn("[CognitivePlanner] Skipping heavy domain (time budget guard)", {
+            domain: decision.domain,
+            decisionsQueued,
+            orgId,
+          });
+          continue;
+        }
+      }
+
       // Process Engine templates are USER-TRIGGERED ONLY — never schedule autonomously.
       // bpaas.* prefix = process engine domain (hr_offboarding, procurement, etc.)
       // Also block known BPaaS process types that LLM might suggest without the prefix.
