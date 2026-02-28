@@ -275,35 +275,14 @@
 - **Fix**: `(connectors || []).length`, `(apiKeys || []).length`, `cust.name?.charAt(0) || "?"`, `cust.role ? cust.role.charAt(0)... : "Member"`, `<ApiKeysSection initialKeys={apiKeys || []} />`.
 - **Pattern**: Array props from server components can be null even with `|| []` fallback in page.tsx if RSC hydration or Suspense boundary has edge cases. Always guard array operations with `|| []`.
 
----
-
-## Case 029 — Deep Stub + Wiring Audit (2026-02-28)
-**Auditor:** Staff Engineer agent (a63c4a76)
-**Scope:** 17 files — brain/, bpaas/, process-engine/, se-aas/, cron/
-
-### CRITICAL (4) — Competition blockers:
-- CRIT-1: cognitive-cycle/route.ts line 143 — wrong column names: `source`→`source_domain`, `domain`→`signal_type`. Planner reads ALL NULL cross-domain signals.
-- CRIT-2: service-health-writer.ts — signal_value is string "gaba"/"dopamine" not number. Process engine health always shows 0% fail rate.
-- CRIT-3: send-notification jobs queued in SCHEDULE_NOTIFY but NO worker handles them. Dead queue forever.
-- CRIT-4: brain-context.ts L24 — crossOrgPatternsRow is hardcoded `Promise.resolve({data:null})`. Cross-org patterns always null.
-
-### MAJOR (11):
-- WIRE-2: checkDomainDrift() defined, never called from autonomous-monitor
-- WIRE-3: extractStructuredMemory() writes 'structured-outcome' memory type — nothing reads it
-- WIRE-6: BPaaSFSMRunner.runPolicyCheck() — dead method, never called
-- WIRE-8: bpaas_process_mutations written but never read by any system
-- STUB-2: BPaaSFSMRunner.restore() — bpaas_fsm_context never written to agent_queue.metadata, fallback unreachable
-- ENT-1: writeAllServiceHealth — void Promise.all silently drops per-org errors
-- ENT-2: getGloballyBrokenDomains() — unbounded query, no .limit(), will OOM in production
-- ENT-3: service_health table not in generated Supabase types → supabase as any everywhere
-- ENT-6: recordStepOutcome() inserts `payload` field — should be `signal_metadata` (JSONB column name)
-- ENT-7: Cognitive planner schedules heavy domains (tdd-code-generator, pr-review) without time budget guard
-- STUB-1: evolveProcessTemplates() — referenced in architecture, does not exist
-
-### MINOR (8): logger.debug lint, CUSTOM_INTERMEDIATE_STATES duplicated, catch(err:any), backpressure min-1 leak, etc.
-
-### Missing files:
-- platform/lib/brain/process-predictor.ts (Phase 8)
-- platform/lib/brain/process-evolver.ts (Phase 7)
-
-[USER CORRECTION NOTE]: Do not start G1-G9 until these criticals are fixed. Fix CRIT-1/3/4 now (no conflict with running Phase 5/6). Fix CRIT-2, ENT-6 after Phase 5/6 land.
+## Case 028: Production "No Workspaces Found" — Amplify SSM Wrong Path (2026-02-28)
+- **Symptom**: Login at platform.usebrainos.com shows "No workspaces found" for all users. Health endpoint shows `supabase: "unreachable"`, `envVars: "ok"` (misleading!).
+- **Red herrings**: `envVars: "ok"` looked fine because SUPABASE_URL was set via NEXT_PUBLIC_ in Amplify Console. `SUPABASE_SERVICE_ROLE_KEY` was baked as the literal string `"undefined"` (not undefined/null).
+- **Root cause**: Amplify SSM path was wrong. Secrets were stored at `/nexusbrain/` but Amplify reads from `/amplify/{appId}/{branch}/`. The correct path `/amplify/d2he3kt4s9dp2w/main/` was completely EMPTY. Result: service role key baked as `"undefined"` string → all admin DB calls fail.
+- **Fix step 1**: Copy all secrets to correct path: `aws ssm put-parameter --name "/amplify/d2he3kt4s9dp2w/main/SUPABASE_SERVICE_ROLE_KEY" --value "..."` (5 secrets total). Trigger redeploy.
+- **Fix step 2**: Health endpoint still showed `supabase: "unreachable"` after SSM fix — next error: `requireEnv("NEXT_PUBLIC_SUPABASE_URL")`. Root cause: `createClient()` and `createServiceClient()` call `requireEnv()` at module initialization through the import chain, even when those functions aren't called in the request path.
+- **Fix step 3**: Bypass ALL import chains in health check. Use dynamic inline client: `const { createClient } = await import("@supabase/supabase-js")` with explicit env var fallback and `"undefined"` string guard.
+- **Pattern**: ALWAYS check `key !== "undefined"` (string) not just `!!key`. Amplify can bake the literal `"undefined"` if SSM path is wrong at build time.
+- **Pattern**: For public endpoints (no cookies), NEVER use `createServiceClient()` or `createClient()` from `@/lib/supabase/server` — they call `requireEnv()` in the module body. Use `getAdminClient()` OR inline `@supabase/supabase-js` direct.
+- **Pattern**: Health check `envVars: "ok"` can be a false positive if you only check one of two required vars. Check ALL required vars including service key.
+- **Debugging workflow**: Health endpoint `supabaseError` field now shows the actual error message — use it as first diagnostic step.
