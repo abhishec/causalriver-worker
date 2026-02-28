@@ -19,32 +19,32 @@ async function collectOrgPatterns(
 
   const { data } = await supabase
     .from('engagement_outcomes')
-    .select('domain_sequence, quality_scores, outcome_label')
+    .select('domain_sequence, confidence, outcome_label')
     .eq('organization_id', orgId)
     .gte('created_at', thirtyDaysAgo)
     .not('domain_sequence', 'is', null);
 
   if (!data?.length) return [];
 
-  const seqMap = new Map<string, { qualities: number[]; successCount: number }>();
+  const seqMap = new Map<string, { confidences: number[]; successCount: number }>();
   for (const row of data) {
     if (!row.domain_sequence?.length) continue;
     const key = JSON.stringify(row.domain_sequence);
-    const entry = seqMap.get(key) ?? { qualities: [], successCount: 0 };
-    const avgQ = Object.values((row.quality_scores as Record<string, number>) ?? {})
-      .reduce((a: number, b: number) => a + b, 0) / Math.max(Object.keys((row.quality_scores as Record<string, number>) ?? {}).length, 1);
-    entry.qualities.push(avgQ);
+    const entry = seqMap.get(key) ?? { confidences: [], successCount: 0 };
+    // confidence is a scalar float (0-1) stored directly on the row
+    const conf = typeof row.confidence === 'number' ? row.confidence : 0;
+    entry.confidences.push(conf);
     if (row.outcome_label === 'successful_delivery' || row.outcome_label === 'on_track') entry.successCount++;
     seqMap.set(key, entry);
   }
 
   return Array.from(seqMap.entries())
-    .filter(([, s]) => s.qualities.length >= 2)
+    .filter(([, s]) => s.confidences.length >= 2)
     .map(([key, s]) => ({
       domainSequence: JSON.parse(key) as string[],
-      avgQuality: s.qualities.reduce((a, b) => a + b, 0) / s.qualities.length,
-      occurrenceCount: s.qualities.length,
-      successRate: s.successCount / s.qualities.length,
+      avgQuality: s.confidences.reduce((a, b) => a + b, 0) / s.confidences.length,
+      occurrenceCount: s.confidences.length,
+      successRate: s.successCount / s.confidences.length,
       sourceOrgCount: 1,
     }));
 }

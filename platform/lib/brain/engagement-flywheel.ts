@@ -38,7 +38,7 @@ export type EngagementMilestone = {
   scopeCreepDetected?: boolean;
   podName?: string;
   domainSequence?: string[];
-  qualityScores?: Record<string, number>;
+  confidence?: number;
   outcomeLabel?: "successful_delivery" | "at_risk" | "churned" | "on_track";
 };
 
@@ -63,7 +63,7 @@ export async function depositEngagementMilestone(
       scope_creep_detected: milestone.scopeCreepDetected ?? false,
       pod_name: milestone.podName ?? null,
       domain_sequence: milestone.domainSequence ?? [],
-      quality_scores: milestone.qualityScores ?? {},
+      confidence: milestone.confidence ?? 0,
       outcome_label: milestone.outcomeLabel ?? null,
     });
 
@@ -140,7 +140,7 @@ export async function depositDomainExecutionOutcome(
       quality: params.qualityScore,
     },
     domainSequence: [params.domainType],
-    qualityScores: { [params.domainType]: params.qualityScore },
+    confidence: params.qualityScore,
     flightRiskCount,
     scopeCreepDetected,
     podName,

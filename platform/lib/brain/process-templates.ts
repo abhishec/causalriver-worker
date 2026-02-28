@@ -52,7 +52,7 @@ export async function extractProcessTemplates(
 
     const { data: outcomes, error } = await supabase
       .from("engagement_outcomes")
-      .select("domain_sequence, quality_scores, outcome_label")
+      .select("domain_sequence, confidence, outcome_label")
       .eq("organization_id", orgId)
       .not("domain_sequence", "is", null)
       .gte("created_at", since);
@@ -67,7 +67,7 @@ export async function extractProcessTemplates(
     // Group by domain_sequence (serialize as JSON string for Map key)
     const sequenceMap = new Map<
       string,
-      { count: number; qualities: number[]; successCount: number }
+      { count: number; confidences: number[]; successCount: number }
     >();
 
     for (const outcome of outcomes) {
@@ -78,22 +78,15 @@ export async function extractProcessTemplates(
       const key = JSON.stringify(outcome.domain_sequence);
       const existing = sequenceMap.get(key) ?? {
         count: 0,
-        qualities: [],
+        confidences: [],
         successCount: 0,
       };
 
-      // Compute avg quality from the {domain: score} map stored in quality_scores
-      const qualityMap = (outcome.quality_scores ?? {}) as Record<string, number>;
-      const qualityValues = Object.values(qualityMap).filter(
-        (v) => typeof v === "number"
-      );
-      const avgQuality =
-        qualityValues.length > 0
-          ? qualityValues.reduce((a, b) => a + b, 0) / qualityValues.length
-          : 0;
+      // confidence is a scalar float (0-1) stored directly on the row
+      const conf = typeof outcome.confidence === "number" ? outcome.confidence : 0;
 
       existing.count++;
-      existing.qualities.push(avgQuality);
+      existing.confidences.push(conf);
 
       if (
         outcome.outcome_label === "successful_delivery" ||
@@ -112,9 +105,11 @@ export async function extractProcessTemplates(
 
       const sequence: string[] = JSON.parse(key) as string[];
       const avgConf =
-        stats.qualities.length > 0
-          ? stats.qualities.reduce((a, b) => a + b, 0) / stats.qualities.length
+        stats.confidences.length > 0
+          ? stats.confidences.reduce((a, b) => a + b, 0) / stats.confidences.length
           : 0;
+
+      if (avgConf < 0.7) continue;
       const successRate = stats.count > 0 ? stats.successCount / stats.count : 0;
 
       const name = `${sequence.join(" → ")} (${Math.round(successRate * 100)}% success)`;
