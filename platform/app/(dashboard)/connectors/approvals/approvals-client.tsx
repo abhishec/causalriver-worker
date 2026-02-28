@@ -194,6 +194,180 @@ function ApprovalRow({
   );
 }
 
+// ─── BPaaS HITL approvals ────────────────────────────────────────────────────
+
+interface BPaaSJob {
+  id: string;
+  process_type: string | null;
+  escalation_question: string | null;
+  status: string;
+  created_at: string;
+  payload: Record<string, unknown> | null;
+}
+
+function formatProcessType(type: string): string {
+  return type.replace(/_/g, " ").replace(/\w/g, (c) => c.toUpperCase());
+}
+
+function BPaaSApprovalRow({
+  job,
+  onResolved,
+}: {
+  job: BPaaSJob;
+  onResolved: () => void;
+}) {
+  const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const processLabel = job.process_type ? formatProcessType(job.process_type) : "Process";
+  const question = job.escalation_question ?? "Human approval required";
+
+  async function handleAction(action: "approve" | "reject") {
+    if (loading) return;
+    setLoading(action);
+    setError(null);
+    const response =
+      action === "approve" ? "Approved by workspace member" : "Rejected by workspace member";
+    try {
+      const res = await fetch(`/api/agents/${job.id}/resume`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ response }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error((data as { error?: string }).error ?? "Request failed");
+      }
+      onResolved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed");
+      setLoading(null);
+    }
+  }
+
+  return (
+    <div className="flex items-start gap-4 p-4 rounded-xl border border-border-subtle bg-surface hover:bg-surface-hover transition-colors">
+      {/* Process type badge */}
+      <div className="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
+        <svg
+          className="w-4 h-4 text-amber-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"
+          />
+        </svg>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{processLabel}</p>
+            <p className="text-xs text-amber-400/90 mt-0.5 leading-relaxed">{question}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Suspended{" "}
+              <span>{timeAgo(job.created_at)}</span>
+              {" · "}
+              <span className="font-mono text-muted/60">{job.id.slice(0, 8)}</span>
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1 items-end shrink-0">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleAction("reject")}
+                disabled={loading !== null}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading === "reject" ? "Rejecting..." : "Reject"}
+              </button>
+              <button
+                onClick={() => handleAction("approve")}
+                disabled={loading !== null}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading === "approve" ? "Approving..." : "Approve"}
+              </button>
+            </div>
+            {error && (
+              <p className="text-[11px] text-red-400" role="alert">{error}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BPaaSHitlSection() {
+  const [jobs, setJobs] = useState<BPaaSJob[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/processes/instances");
+      if (!res.ok) return;
+      const data = await res.json() as { instances: Array<{
+        agent_job_id: string;
+        process_type: string | null;
+        escalation_question: string | null;
+        job_status: string | null;
+        created_at: string;
+        payload?: Record<string, unknown> | null;
+      }> };
+      // Filter to only suspended/awaiting_approval bpaas jobs
+      const suspended = (data.instances ?? [])
+        .filter((i) => i.job_status === "suspended" || i.job_status === "awaiting_approval")
+        .map((i) => ({
+          id: i.agent_job_id,
+          process_type: i.process_type,
+          escalation_question: i.escalation_question,
+          status: i.job_status ?? "suspended",
+          created_at: i.created_at,
+          payload: null,
+        }));
+      setJobs(suspended);
+    } catch (err) {
+      logger.warn("[BPaaSHitlSection] fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchJobs();
+    const interval = setInterval(fetchJobs, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchJobs]);
+
+  if (loading || jobs.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-foreground">Process Approvals</h2>
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
+          {jobs.length} pending
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground -mt-2">
+        Automated business processes paused at human-in-the-loop gates.
+      </p>
+      <div className="space-y-3">
+        {jobs.map((job) => (
+          <BPaaSApprovalRow key={job.id} job={job} onResolved={fetchJobs} />
+        ))}
+      </div>
+      <div className="h-px bg-border-subtle" />
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface ApprovalsClientProps {
@@ -247,6 +421,9 @@ export function ApprovalsClient({ initialApprovals, canApprove }: ApprovalsClien
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* BPaaS Process Approvals — HITL gates */}
+      <BPaaSHitlSection />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
