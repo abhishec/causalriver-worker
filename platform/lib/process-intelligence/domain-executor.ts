@@ -54,6 +54,10 @@ import {
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { decomposeProductWorkflow, mutateProductWorkflow } from "./product-workflow-executor";
+import { executeIncidentResponse } from "./incident-response-executor";
+import type { IncidentInput } from "./incident-response-executor";
+import { executeSLABreach } from "./sla-breach-executor";
+import type { SLABreachInput } from "./sla-breach-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -730,6 +734,80 @@ export async function executeBPaaSProcess(
         await runner.save(supabase);
       }
 
+      // ── INCIDENT RESPONSE: RCA STATE ─────────────────────────────────────
+      // When processType === "incident_response" and we reach the RCA state,
+      // delegate to the specialized incident-response-executor (Claude Sonnet)
+      // which performs root cause analysis, rollback decision, and enqueues
+      // write-backs to Jira, Confluence, GitHub, and Slack.
+      else if (currentState === "RCA" && params.processType === "incident_response") {
+        const ctx = runner.getContext();
+        const incidentInput: IncidentInput = {
+          incidentTitle:
+            (ctx.inputPayload?.incidentTitle as string) ??
+            (ctx.inputPayload?.title as string) ??
+            "Production Incident",
+          incidentDescription:
+            (ctx.inputPayload?.incidentDescription as string) ??
+            (ctx.inputPayload?.description as string) ??
+            "",
+          severity:
+            ((ctx.inputPayload?.severity as string) as IncidentInput["severity"]) ?? "P2",
+          affectedServices: Array.isArray(ctx.inputPayload?.affectedServices)
+            ? (ctx.inputPayload.affectedServices as string[])
+            : [],
+          detectedAt:
+            (ctx.inputPayload?.detectedAt as string) ?? new Date().toISOString(),
+          resolvedAt: ctx.inputPayload?.resolvedAt as string | undefined,
+          impactedUsers: ctx.inputPayload?.impactedUsers as number | undefined,
+          errorLogs: ctx.inputPayload?.errorLogs as string | undefined,
+          recentDeployments: Array.isArray(ctx.inputPayload?.recentDeployments)
+            ? (ctx.inputPayload.recentDeployments as string[])
+            : undefined,
+          jiraProjectKey: ctx.inputPayload?.jiraProjectKey as string | undefined,
+          confluenceSpaceKey: ctx.inputPayload?.confluenceSpaceKey as string | undefined,
+          githubRepo: ctx.inputPayload?.githubRepo as string | undefined,
+          slackChannel: ctx.inputPayload?.slackChannel as string | undefined,
+        };
+
+        let incidentResult;
+        try {
+          incidentResult = await executeIncidentResponse(
+            supabase,
+            params.organizationId,
+            incidentInput,
+            params.jobId
+          );
+        } catch (irErr) {
+          logger.warn("[BPaaS/IncidentResponse] RCA executor failed", {
+            error: irErr instanceof Error ? irErr.message : String(irErr),
+            processInstanceId,
+          });
+          incidentResult = null;
+        }
+
+        if (incidentResult) {
+          const updatedCtx: BPaaSContext = {
+            ...ctx,
+            customStateResults: {
+              ...(ctx.customStateResults ?? {}),
+              RCA: {
+                rcaSummary: incidentResult.rcaSummary,
+                rootCause: incidentResult.rootCause,
+                rollbackDecision: incidentResult.rollbackDecision,
+                changeRequest: incidentResult.changeRequest,
+                preventionRecommendations: incidentResult.preventionRecommendations,
+                chosenEvent: "rca_complete",
+              },
+            },
+          };
+          runner = new BPaaSFSMRunner(updatedCtx, runner.getCurrentState(), definition.transitions);
+          await runner.transition("rca_complete", supabase);
+          await runner.save(supabase);
+        } else {
+          throw new Error("[BPaaS/IncidentResponse] RCA executor returned null — aborting process for safety");
+        }
+      }
+
       // ── CUSTOM INTERMEDIATE STATES ────────────────────────────────────────
       // Handles FRAUD_REVIEW, DUPLICATE_CHECK, EVIDENCE_REVIEW, RECONCILE, RCA
       // and any future custom states added to process templates.
@@ -900,6 +978,21 @@ export async function executeBPaaSProcess(
         const nextState = runner.getCurrentState();
         if (nextState === "ESCALATE" || nextState === "FAILED") {
           const escalationLvl = policyResult.escalationLevel ?? "policy_block";
+
+          // ── sla_breach_escalation: fire write-backs on breach_confirmed → ESCALATE ──
+          if (params.processType === "sla_breach_escalation" && nextState === "ESCALATE") {
+            const slaCtx = runner.getContext();
+            const slaInput = slaCtx.inputPayload as unknown as SLABreachInput;
+            try {
+              await executeSLABreach(supabase, params.organizationId, slaInput, params.jobId);
+            } catch (slaErr) {
+              logger.warn("[BPaaS/SLABreach] ESCALATE executor failed (non-fatal)", {
+                error: slaErr instanceof Error ? slaErr.message : String(slaErr),
+                processInstanceId,
+              });
+            }
+          }
+
           return {
             status: "escalated",
             processInstanceId,
@@ -1022,6 +1115,19 @@ export async function executeBPaaSProcess(
           processType: params.processType,
           summary: notificationSummary.slice(0, 200),
         });
+
+        // ── sla_breach_escalation: fire write-backs on pre_breach_warning → SCHEDULE_NOTIFY ──
+        if (params.processType === "sla_breach_escalation") {
+          const slaInput = ctx.inputPayload as unknown as SLABreachInput;
+          try {
+            await executeSLABreach(supabase, params.organizationId, slaInput, params.jobId);
+          } catch (slaErr) {
+            logger.warn("[BPaaS/SLABreach] SCHEDULE_NOTIFY executor failed (non-fatal)", {
+              error: slaErr instanceof Error ? slaErr.message : String(slaErr),
+              processInstanceId,
+            });
+          }
+        }
 
         await runner.transition("notified", supabase);
         await runner.save(supabase);
