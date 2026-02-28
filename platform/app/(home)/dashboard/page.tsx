@@ -1,7 +1,7 @@
-import { DashboardClient } from "./dashboard-client";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default function DashboardPage() {
-  return <DashboardClient />;
+  redirect("/workspace");
 }

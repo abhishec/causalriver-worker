@@ -67,7 +67,7 @@ function _evictBrainContextCache(): void {
  * Invalidate the brain context cache for a specific org immediately.
  *
  * Must be called after any mutation that changes the data read by getBrainContext:
- *   - Creating / updating a bpaas_process_instances row (changes L28 process layer)
+ *   - Creating / updating a bpaas_process_instances row (changes L26 Process Intelligence layer)
  *   - Inserting a new agent_queue job (changes activeJobCount / pendingJobCount in L3)
  *   - Completing or failing an agent_queue job (changes lastJobStatus in L3)
  *
