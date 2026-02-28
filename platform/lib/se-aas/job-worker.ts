@@ -22,6 +22,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { executeAndCompleteJob } from "./job-queue";
 import { executeDomain } from "./domain-executor";
+import { hasProcessDefinition, executeWithFSM } from "@/lib/process-engine/universal-executor";
 import { recordJobOutcome } from "@/lib/rl/outcome-recorder";
 import { attemptRecovery } from "@/lib/brain/recovery-agent";
 import { checkAndQueueWriteback } from "@/lib/connectors/writeback-dispatcher";
@@ -177,6 +178,73 @@ export async function processSeAaSJobs(
         err: policyErr instanceof Error ? policyErr.message : String(policyErr),
       });
     }
+
+    // ── Universal FSM capability check ─────────────────────────────────────
+    // Any job of any agent_type can opt into FSM execution by declaring
+    // process_definition in its payload. Check BEFORE domain dispatch.
+    if (hasProcessDefinition(job.payload)) {
+      await supabase
+        .from("agent_queue")
+        .update({ status: "running", started_at: new Date().toISOString() })
+        .eq("id", job.id);
+
+      try {
+        const fsmResult = await executeWithFSM(
+          supabase,
+          job.id as string,
+          job.organization_id as string,
+          job.payload,
+          (job.payload as unknown as Record<string, unknown>)?.userId as string | undefined
+        );
+
+        // Map FSM result to queue status
+        let finalStatus: string;
+        let errorMessage: string | undefined;
+
+        if (fsmResult.status === "completed") {
+          finalStatus = "success";
+        } else if (fsmResult.status === "awaiting_approval") {
+          finalStatus = "awaiting_approval"; // PAUSED — not terminal
+        } else if (fsmResult.status === "escalated") {
+          finalStatus = "paused";
+        } else {
+          // failed or chained
+          finalStatus = "error";
+          errorMessage = fsmResult.errorMessage ?? "FSM execution failed";
+        }
+
+        if (finalStatus !== "awaiting_approval") {
+          await supabase
+            .from("agent_queue")
+            .update({
+              status: finalStatus,
+              completed_at: new Date().toISOString(),
+              result: fsmResult as unknown as Record<string, unknown>,
+              ...(errorMessage ? { error_message: errorMessage } : {}),
+            })
+            .eq("id", job.id);
+        }
+
+        if (finalStatus === "success") {
+          result.succeeded++;
+        } else if (finalStatus !== "awaiting_approval") {
+          result.failed++;
+        }
+      } catch (fsmErr) {
+        const errMsg = fsmErr instanceof Error ? fsmErr.message : String(fsmErr);
+        await supabase
+          .from("agent_queue")
+          .update({
+            status: "error",
+            completed_at: new Date().toISOString(),
+            error_message: `Universal FSM error: ${errMsg}`,
+          })
+          .eq("id", job.id);
+        result.failed++;
+      }
+      continue; // skip executeDomain() for this job
+    }
+    // ── End Universal FSM check ─────────────────────────────────────────────
 
     try {
       await executeAndCompleteJob(supabase, job.id, async () => {
