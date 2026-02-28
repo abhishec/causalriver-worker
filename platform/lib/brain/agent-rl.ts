@@ -809,14 +809,16 @@ export async function checkDomainDrift(
       .select("confidence")
       .eq("organization_id", orgId)
       .eq("domain", domain)
-      .gte("created_at", sevenDaysAgo),
+      .gte("created_at", sevenDaysAgo)
+      .limit(500),
     supabase
       .from("prediction_records")
       .select("confidence")
       .eq("organization_id", orgId)
       .eq("domain", domain)
       .gte("created_at", fourteenDaysAgo)
-      .lt("created_at", sevenDaysAgo),
+      .lt("created_at", sevenDaysAgo)
+      .limit(500),
   ]);
 
   const avg = (rows: { confidence: number }[]) =>

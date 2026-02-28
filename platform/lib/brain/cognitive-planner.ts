@@ -412,7 +412,7 @@ async function _runCognitivePlannerInner(
   try {
     const { data: priorCycle } = await supabase
       .from("ai_memory")
-      .select("content, metadata")
+      .select("id, content, metadata")
       .eq("organization_id", orgId)
       .eq("domain", "cognitive-planner")
       .eq("memory_type", "working")
@@ -440,7 +440,8 @@ async function _runCognitivePlannerInner(
           .select("task_type, status, error_message, result")
           .eq("organization_id", orgId)
           .in("task_type", priorDomains)
-          .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+          .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString())
+          .limit(50);
 
         if (priorJobs && priorJobs.length > 0) {
           const successCount = priorJobs.filter((j) => j.status === "success").length;
@@ -505,7 +506,8 @@ async function _runCognitivePlannerInner(
             },
           }).catch(() => {/* non-fatal */});
 
-          // Mark prior cycle as reflected
+          // Mark prior cycle as reflected — use the stable row id (not content) to avoid
+          // fragile large-string equality matches that can silently fail on long JSON blobs.
           await supabase
             .from("ai_memory")
             .update({
@@ -514,10 +516,8 @@ async function _runCognitivePlannerInner(
                 reflected: true,
               },
             })
-            .eq("content", priorCycle.content)
-            .eq("organization_id", orgId)
-            .eq("memory_type", "working")
-            .eq("domain", "cognitive-planner");
+            .eq("id", (priorCycle as unknown as { id: string }).id)
+            .eq("organization_id", orgId);
 
           // Bound episodic memory at 10 entries (Reflexion: Ω=3-10)
           const { data: allReflections } = await supabase
