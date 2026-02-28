@@ -383,7 +383,7 @@ export async function GET(request: NextRequest) {
         "id, task_type, status, payload, result, error_message, created_at, started_at, completed_at",
         { count: "exact" }
       )
-      .eq("agent_type", "a2a")
+      .in("agent_type", ["se-aas", "aas", "pm-aas"])
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);

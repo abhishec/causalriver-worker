@@ -23,7 +23,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/se-aas/job-worker";
-import { processA2ATasks, processA2AAasTasks, processA2APmAasTasks } from "@/lib/a2a/task-processor";
 import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
 import { logger } from "@/lib/logger";
 
@@ -128,55 +127,22 @@ export async function GET(request: NextRequest) {
       "processCodeAgentJobs"
     );
 
-    // ── Phase 4: Process pending A2A tasks (SE-aaS delivery intelligence) ──
-    // A2A tasks are created by POST /api/a2a/tasks from external agents.
-    // Run up to 3 A2A tasks per cron tick (they execute domain logic, so
-    // budget 3 on top of the SE-aaS and code-agent loads).
-    const phaseElapsed2 = Date.now() - startMs;
-    const remainingBudget2 = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsed2);
-    const a2aResult = await withTimeout(
-      processA2ATasks(service, 3),
-      remainingBudget2 > 2_000 ? remainingBudget2 : 2_000,
-      "processA2ATasks"
-    );
-
-    // ── Phase 4b: Process pending AaaS A2A tasks ─────────────────
-    // agent_type='aas' jobs submitted via POST /api/a2a/tasks with AaaS skills.
-    // Routes to the AaaS domain executor (bookkeep, reconcile, statements, etc.).
-    let a2aAasResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
-    const phaseElapsedAas = Date.now() - startMs;
-    const remainingForAas = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsedAas);
-    if (remainingForAas > 2_000) {
+    // ── Phase 4: Process Engine Jobs (FSM/HITL — available to all workers regardless of service) ──
+    // Processes jobs that have a process_definition in their payload (BPaaS/FSM).
+    // These are submitted via any SE-aaS/AaaS/PM-aaS job payload with process_definition set.
+    // Without this phase, FSM/HITL jobs sit pending forever.
+    let processEngineResult = { processed: 0, succeeded: 0, failed: 0, jobIds: [] as string[] };
+    const remainingForProcessEngine = Math.max(0, 28_000 - (Date.now() - startMs));
+    if (remainingForProcessEngine > 2_000) {
       try {
-        a2aAasResult = await withTimeout(
-          processA2AAasTasks(service, 3),
-          remainingForAas,
-          "processA2AAasTasks"
+        const { processProcessEngineJobs } = await import("@/lib/process-engine/worker");
+        processEngineResult = await withTimeout(
+          processProcessEngineJobs(service, 5),
+          remainingForProcessEngine,
+          "processProcessEngineJobs"
         );
       } catch (err) {
-        logger.warn("[cron/process-jobs] Phase 4b AaaS A2A failed (non-fatal)", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
-
-    // ── Phase 4c: Process pending PM-aaS A2A tasks ───────────────
-    // agent_type='pm-aas' jobs submitted via POST /api/a2a/tasks with PM-aaS skills.
-    // Routes to the PM-aaS domain executor (roadmap-planner, sprint-health, etc.).
-    let a2aPmAasResult: { processed: number; succeeded: number; failed: number; jobIds: string[] } = { processed: 0, succeeded: 0, failed: 0, jobIds: [] };
-    const phaseElapsedPm = Date.now() - startMs;
-    const remainingForPm = Math.max(0, LAMBDA_TIMEOUT_MS - phaseElapsedPm);
-    if (remainingForPm > 2_000) {
-      try {
-        a2aPmAasResult = await withTimeout(
-          processA2APmAasTasks(service, 3),
-          remainingForPm,
-          "processA2APmAasTasks"
-        );
-      } catch (err) {
-        logger.warn("[cron/process-jobs] Phase 4c PM-aaS A2A failed (non-fatal)", {
-          error: err instanceof Error ? err.message : String(err),
-        });
+        logger.error("[process-jobs] processEngine phase error", { error: err });
       }
     }
 
@@ -194,9 +160,7 @@ export async function GET(request: NextRequest) {
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
-      `a2a=${a2aResult.processed}(ok=${a2aResult.succeeded}) ` +
-      `a2aAas=${a2aAasResult.processed}(ok=${a2aAasResult.succeeded}) ` +
-      `a2aPmAas=${a2aPmAasResult.processed}(ok=${a2aPmAasResult.succeeded}) took=${durationMs}ms`
+      `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -205,9 +169,7 @@ export async function GET(request: NextRequest) {
       staleJobsRecovered,
       ...result,
       codeAgent: codeAgentResult,
-      a2a: a2aResult,
-      a2aAas: a2aAasResult,
-      a2aPmAas: a2aPmAasResult,
+      processEngine: processEngineResult,
       durationMs,
     });
   } catch (err: unknown) {
