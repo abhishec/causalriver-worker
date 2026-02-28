@@ -1,25 +1,30 @@
 /**
- * AI Workers CRUD API
- * ====================
+ * AI Worker detail + update API
+ * ==============================
  *
- * GET  /api/ai-workers  → list non-archived workers for the current workspace
- * POST /api/ai-workers  → create a new AI Worker + trigger bootstrap
+ * GET   /api/ai-workers/[workerId]  → fetch single worker (org-scoped)
+ * PATCH /api/ai-workers/[workerId]  → partial update (name, description, service_type, status)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
-import { triggerWorkerBootstrap } from "@/lib/brain/worker-bootstrap";
 
 export const dynamic = "force-dynamic";
 
 const VALID_SERVICE_TYPES = new Set(["se-aas", "aas", "pm-aas"]);
+const VALID_STATUSES = new Set(["active", "provisioning", "paused", "archived"]);
 
-// ── GET /api/ai-workers ──────────────────────────────────────────────────────
+// ── GET /api/ai-workers/[workerId] ───────────────────────────────────────────
 
-export async function GET(_request: NextRequest) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ workerId: string }> }
+) {
   try {
+    const { workerId } = await params;
+
     let supabase;
     try {
       supabase = await createClient();
@@ -54,23 +59,29 @@ export async function GET(_request: NextRequest) {
     const { data, error } = await service
       .from("ai_workers")
       .select("id, name, description, service_type, status, config, created_by, created_at, updated_at")
+      .eq("id", workerId)
       .eq("organization_id", orgId)
-      .neq("status", "archived")
-      .order("created_at", { ascending: false });
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    return NextResponse.json({ workers: data || [] });
+    return NextResponse.json({ worker: data });
   } catch (err: unknown) {
-    logger.error("[ai-workers/GET]", err);
+    logger.error("[ai-workers/[workerId]/GET]", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
-// ── POST /api/ai-workers ─────────────────────────────────────────────────────
+// ── PATCH /api/ai-workers/[workerId] ─────────────────────────────────────────
 
-export async function POST(request: NextRequest) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ workerId: string }> }
+) {
   try {
+    const { workerId } = await params;
+
     let supabase;
     try {
       supabase = await createClient();
@@ -96,22 +107,40 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, service_type } = body as {
+    const { name, description, service_type, status } = body as {
       name?: string;
       description?: string;
-      service_type?: string;
+      service_type?: string | null;
+      status?: string;
     };
 
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    // Validate provided fields
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim().length === 0) {
+        return NextResponse.json({ error: "name must be a non-empty string" }, { status: 400 });
+      }
     }
-
     if (service_type !== undefined && service_type !== null && !VALID_SERVICE_TYPES.has(service_type)) {
       return NextResponse.json(
         { error: "service_type must be 'se-aas', 'aas', 'pm-aas', or null" },
         { status: 400 }
       );
     }
+    if (status !== undefined && !VALID_STATUSES.has(status)) {
+      return NextResponse.json(
+        { error: "status must be 'active', 'provisioning', 'paused', or 'archived'" },
+        { status: 400 }
+      );
+    }
+
+    // Build update object — only include provided fields
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (name !== undefined) updates.name = name.trim();
+    if (description !== undefined) updates.description = description;
+    if (service_type !== undefined) updates.service_type = service_type;
+    if (status !== undefined) updates.status = status;
 
     let service;
     try {
@@ -120,31 +149,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const insertPayload: Record<string, unknown> = {
-      organization_id: orgId,
-      name: name.trim(),
-      created_by: user.id,
-    };
-    if (description !== undefined) insertPayload.description = description;
-    if (service_type !== undefined) insertPayload.service_type = service_type;
-
-    const { data: inserted, error } = await service
+    const { data, error } = await service
       .from("ai_workers")
-      .insert(insertPayload)
+      .update(updates)
+      .eq("id", workerId)
+      .eq("organization_id", orgId)
       .select("id, name, description, service_type, status, config, created_by, created_at, updated_at")
       .maybeSingle();
 
-    if (error || !inserted) {
-      logger.error("[ai-workers/POST] insert failed:", error);
-      throw error || new Error("Insert returned no rows");
-    }
+    if (error) throw error;
+    if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Fire-and-forget bootstrap — non-fatal, must not block response
-    void triggerWorkerBootstrap(inserted.id, orgId);
-
-    return NextResponse.json({ worker: inserted }, { status: 201 });
+    return NextResponse.json({ worker: data });
   } catch (err: unknown) {
-    logger.error("[ai-workers/POST]", err);
+    logger.error("[ai-workers/[workerId]/PATCH]", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

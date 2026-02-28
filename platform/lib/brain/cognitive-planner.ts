@@ -309,6 +309,29 @@ const SE_AAS_DOMAINS = [
   "boilerplate-scaffold",
 ];
 
+const AAS_DOMAINS = [
+  "accounting-analysis",
+  "tax-advisory",
+  "financial-close",
+  "reconciliation",
+  "accounts-payable",
+  "accounts-receivable",
+];
+
+/** Domains that are only Brain/general — no service-specific domains needed. */
+const BRAIN_ONLY_DOMAINS: string[] = [];
+
+/**
+ * Returns the allowed domain list for a worker based on its service_type.
+ * Workers with no service_type can only schedule Brain/general tasks (empty list = no domain jobs).
+ */
+function getAllowedDomainsForWorker(serviceType: string | null | undefined): string[] {
+  if (serviceType === "se-aas") return SE_AAS_DOMAINS;
+  if (serviceType === "aas") return AAS_DOMAINS;
+  // pm-aas process templates are user-triggered only — planner does not schedule them
+  return BRAIN_ONLY_DOMAINS;
+}
+
 const PLANNER_MODEL = routeCallType("context-agent").model;
 
 // ── Reflection Helper ─────────────────────────────────────────────────────────
@@ -355,24 +378,37 @@ Write a 2-3 sentence verbal reflection: what worked, what failed, and one specif
   }
 }
 
+// ── Worker Config ─────────────────────────────────────────────────────────────
+
+export interface WorkerPlannerConfig {
+  service_type: string | null | undefined;
+}
+
 // ── Main Entry Point ──────────────────────────────────────────────────────────
 
 /**
- * Run one full cognitive planning cycle for a single org.
+ * Run one full cognitive planning cycle for a single AI Worker.
  * Never throws — all errors are caught and logged internally.
+ *
+ * @param supabase      Service-role Supabase client
+ * @param orgId         The workspace/organization ID the worker belongs to
+ * @param aiWorkerId    The specific AI Worker to plan for (jobs will be scoped to this worker)
+ * @param workerConfig  Worker metadata (service_type drives which domains are considered)
  */
 export async function runCognitivePlanner(
   supabase: SupabaseClient,
-  orgId: string
+  orgId: string,
+  aiWorkerId?: string,
+  workerConfig?: WorkerPlannerConfig
 ): Promise<CognitivePlannerResult> {
   const cycleId = crypto.randomUUID();
   const anthropic = new Anthropic();
 
   // Outer safety net — planners should never crash the cron
   try {
-    return await _runCognitivePlannerInner(supabase, orgId, cycleId, anthropic);
+    return await _runCognitivePlannerInner(supabase, orgId, cycleId, anthropic, aiWorkerId, workerConfig);
   } catch (err) {
-    logger.warn(`[CognitivePlanner] Fatal error for org=${orgId} cycle=${cycleId}:`, err);
+    logger.warn(`[CognitivePlanner] Fatal error for org=${orgId} worker=${aiWorkerId ?? "unscoped"} cycle=${cycleId}:`, err);
     return {
       cycleId,
       decisionsQueued: 0,
@@ -393,15 +429,42 @@ async function _runCognitivePlannerInner(
   supabase: SupabaseClient,
   orgId: string,
   cycleId: string,
-  anthropic: Anthropic
+  anthropic: Anthropic,
+  aiWorkerId?: string,
+  workerConfig?: WorkerPlannerConfig
 ): Promise<CognitivePlannerResult> {
   // B5: Load configurable thresholds — falls back to defaults silently
   const plannerConfig = await loadPlannerConfig(supabase, orgId);
+
+  // Determine allowed domains based on the worker's service_type (ADR-012)
+  const allowedDomains = getAllowedDomainsForWorker(workerConfig?.service_type);
+
   logger.warn(
-    `[CognitivePlanner] Starting cycle=${cycleId} org=${orgId} ` +
+    `[CognitivePlanner] Starting cycle=${cycleId} org=${orgId} worker=${aiWorkerId ?? "unscoped"} ` +
+      `serviceType=${workerConfig?.service_type ?? "none"} allowedDomains=${allowedDomains.length} ` +
       `qualityFloor=${plannerConfig.qualityFloor} coverageGapHours=${plannerConfig.coverageGapHours} ` +
       `maxDomainsPerCycle=${plannerConfig.maxDomainsPerCycle} stuckThreshold=${plannerConfig.stuckDomainThreshold}`
   );
+
+  // If this worker has no allowed domains (e.g. no service_type), skip domain scheduling.
+  // Brain-only workers still run the full reflection/assessment loop for Brain context,
+  // but exit early before queuing any domain jobs.
+  if (allowedDomains.length === 0) {
+    logger.warn(
+      `[CognitivePlanner] Worker ${aiWorkerId ?? "unscoped"} has no service_type — skipping domain job scheduling`
+    );
+    return {
+      cycleId,
+      decisionsQueued: 0,
+      decisions: [],
+      coverageGaps: [],
+      poorQualityDomains: [],
+      stuckDomains: [],
+      highDemandDomains: [],
+      recoveryMode: false,
+      reflected: false,
+    };
+  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 5 — REFLECT (runs at start, reflects on PRIOR cycle outcomes)
@@ -673,7 +736,7 @@ async function _runCognitivePlannerInner(
   } catch (err) {
     logger.warn("[CognitivePlanner] getGloballyBrokenDomains failed (non-fatal):", err);
   }
-  let coverageGaps: string[] = [...SE_AAS_DOMAINS];
+  let coverageGaps: string[] = [...allowedDomains];
   let poorQualityDomains: string[] = [];
   let goodQualityDomains: string[] = [];
   let stuckDomains: string[] = [];
@@ -683,17 +746,24 @@ async function _runCognitivePlannerInner(
 
   // 1a. Coverage gaps — what domains haven't run recently (last 6h)
   try {
-    const { data: recentJobs } = await supabase
+    const since1a = new Date(Date.now() - plannerConfig.coverageGapHours * 60 * 60 * 1000).toISOString();
+    // Build base query then optionally scope to the specific AI Worker (ADR-012 LRU)
+    let recentJobsQuery = supabase
       .from("agent_queue")
       .select("task_type, status, completed_at, created_at")
       .eq("organization_id", orgId)
       .in("status", ["success", "running", "pending"])
-      .gte("created_at", new Date(Date.now() - plannerConfig.coverageGapHours * 60 * 60 * 1000).toISOString())
+      .gte("created_at", since1a)
       .order("created_at", { ascending: false })
       .limit(200); // cap to prevent full-table scan on busy orgs
 
+    if (aiWorkerId) {
+      recentJobsQuery = recentJobsQuery.eq("ai_worker_id", aiWorkerId) as typeof recentJobsQuery;
+    }
+
+    const { data: recentJobs } = await recentJobsQuery;
     const recentlyRunDomains = new Set((recentJobs ?? []).map((j: { task_type: string }) => j.task_type));
-    coverageGaps = SE_AAS_DOMAINS.filter((d) => !recentlyRunDomains.has(d));
+    coverageGaps = allowedDomains.filter((d) => !recentlyRunDomains.has(d));
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 1a (coverage gaps) failed:", err);
   }
@@ -1032,11 +1102,21 @@ ${pastReflectionsText}`;
       }
 
       // Process Intelligence (internal FSM) is user-triggered only — never schedule autonomously.
-      // Guard against the bpaas.* RL prefix appearing in suggestions.
-      if (decision.domain.startsWith("bpaas.")) {
+      // Guard against bpaas.* and process.* domains appearing in suggestions.
+      if (decision.domain.startsWith("bpaas.") || decision.domain.startsWith("process.")) {
         logger.warn("[CognitivePlanner] Skipping internal process-intelligence domain", {
           domain: decision.domain,
           orgId,
+        });
+        continue;
+      }
+
+      // Domain must be in the worker's allowed list (service_type guard — ADR-012)
+      if (!allowedDomains.includes(decision.domain)) {
+        logger.warn("[CognitivePlanner] Skipping domain not allowed for worker's service_type", {
+          domain: decision.domain,
+          serviceType: workerConfig?.service_type,
+          aiWorkerId,
         });
         continue;
       }
@@ -1092,10 +1172,13 @@ ${pastReflectionsText}`;
         continue;
       }
 
-      // Insert to agent_queue
-      const { error: queueError } = await supabase.from("agent_queue").insert({
+      // Determine agent_type from the worker's service_type (ADR-012)
+      const agentType = workerConfig?.service_type === "aas" ? "aas" : "se-aas";
+
+      // Insert to agent_queue — scoped to the specific AI Worker (ADR-012)
+      const queueRow: Record<string, unknown> = {
         organization_id: orgId,
-        agent_type: "se-aas",
+        agent_type: agentType,
         task_type: decision.domain,
         priority: decision.priority === "high" ? "high" : "normal",
         status: "pending",
@@ -1105,7 +1188,12 @@ ${pastReflectionsText}`;
           plannerCycleId: cycleId,
           coverageGap: coverageGaps.includes(decision.domain),
         },
-      });
+      };
+      // Only set ai_worker_id if provided — preserves backward compat for legacy unscoped calls
+      if (aiWorkerId) {
+        queueRow.ai_worker_id = aiWorkerId;
+      }
+      const { error: queueError } = await supabase.from("agent_queue").insert(queueRow);
 
       if (queueError) {
         logger.warn(

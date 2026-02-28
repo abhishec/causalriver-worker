@@ -418,28 +418,109 @@ export async function GET(request: NextRequest) {
 
     const durationMs = Date.now() - startMs;
 
-    // ── Cognitive Planner: autonomous proactive agent scheduling ──────────
-    // Runs for each active org (not just orgs with cross_domain_signals).
-    // Capped at 10 orgs to control cost — Haiku is cheap but not free.
-    const plannerResults: Array<{ orgId: string; result: unknown }> = [];
-    try {
-      const { data: activeOrgs } = await service
-        .from("organizations")
-        .select("id")
-        .eq("is_core_brain", false)
-        .limit(10);
+    // ── Cognitive Planner: autonomous proactive agent scheduling (ADR-012) ─
+    // Runs per AI Worker (not per org) using LRU ordering — the worker whose
+    // last job ran longest ago is scheduled first.
+    // Cap: 50 workers per cron run. Per-worker 20s timeout.
+    const MAX_WORKERS_PER_RUN = 50;
+    const WORKER_TIMEOUT_MS = 20_000;
 
-      for (const org of activeOrgs ?? []) {
+    /**
+     * withTimeout: races a promise against a deadline.
+     * Rejects with a descriptive message if the deadline fires first.
+     */
+    function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(`[timeout] ${label} exceeded ${ms}ms`)), ms)
+        ),
+      ]);
+    }
+
+    const plannerResults: Array<{ workerId: string; orgId: string; result?: unknown; error?: string }> = [];
+    try {
+      // Fetch active workers in LRU order (least-recently-used job first)
+      // Workers with no jobs at all sort first (COALESCE to created_at).
+      const { data: workers, error: workersError } = await service
+        .from("ai_workers")
+        .select("id, organization_id, service_type, name, status, created_at")
+        .eq("status", "active")
+        .limit(MAX_WORKERS_PER_RUN);
+
+      if (workersError) {
+        logger.warn("[CognitiveCycle] Failed to fetch ai_workers for planner:", {
+          error: workersError.message,
+          route: "/api/cron/cognitive-cycle",
+        });
+      }
+
+      const activeWorkers = workers ?? [];
+
+      // Sort by last job time (LRU: oldest last_job_at = schedule first).
+      // We do a separate query per-batch to get last_job_at rather than a join
+      // (Supabase JS client doesn't support aggregating FK child rows in select).
+      // For simplicity and to keep DB round-trips low, we use created_at as fallback
+      // for workers with no jobs — they'll always sort to the front.
+      const workerIds = activeWorkers.map((w) => w.id as string);
+
+      // Fetch last job time per worker in one query
+      const lastJobByWorker = new Map<string, string>();
+      if (workerIds.length > 0) {
         try {
-          const result = await runCognitivePlanner(service, org.id as string);
-          plannerResults.push({ orgId: org.id as string, result });
-          // After planner runs, promote successful SE-aaS patterns to CORE (fire-and-forget)
-          void promotePatternsToCore(service, org.id as string);
-          // Fire-and-forget: extract process templates from successful domain sequences.
-          // Runs after planner so any newly completed outcomes are included.
-          void extractProcessTemplates(service, org.id as string);
+          const { data: lastJobRows } = await service
+            .from("agent_queue")
+            .select("ai_worker_id, created_at")
+            .in("ai_worker_id", workerIds)
+            .order("created_at", { ascending: false })
+            .limit(workerIds.length * 5); // over-fetch to ensure we catch 1 row per worker
+
+          for (const row of lastJobRows ?? []) {
+            const wid = row.ai_worker_id as string | null;
+            if (wid && !lastJobByWorker.has(wid)) {
+              lastJobByWorker.set(wid, row.created_at as string);
+            }
+          }
+        } catch {
+          // Non-fatal — fallback to created_at ordering
+        }
+      }
+
+      // Sort: workers with no recent jobs sort first (LRU)
+      const sortedWorkers = [...activeWorkers].sort((a, b) => {
+        const aLast = lastJobByWorker.get(a.id as string) ?? (a.created_at as string);
+        const bLast = lastJobByWorker.get(b.id as string) ?? (b.created_at as string);
+        return aLast < bLast ? -1 : aLast > bLast ? 1 : 0;
+      });
+
+      logger.info(
+        `[CognitiveCycle] Planner running for ${sortedWorkers.length} active workers (LRU order)`
+      );
+
+      for (const worker of sortedWorkers) {
+        const workerId = worker.id as string;
+        const workerOrgId = worker.organization_id as string;
+        try {
+          const result = await withTimeout(
+            runCognitivePlanner(service, workerOrgId, workerId, {
+              service_type: worker.service_type as string | null,
+            }),
+            WORKER_TIMEOUT_MS,
+            `planner-${workerId}`
+          );
+          plannerResults.push({ workerId, orgId: workerOrgId, result });
+
+          // Fire-and-forget: promote SE-aaS patterns + extract FSM process templates
+          void promotePatternsToCore(service, workerOrgId);
+          void extractProcessTemplates(service, workerOrgId);
         } catch (err) {
-          logger.warn(`[CognitiveCycle] Planner failed for org ${org.id as string}:`, { error: (err as Error)?.message ?? String(err), route: "/api/cron/cognitive-cycle", orgId: (org.id as string)?.slice(0, 8) });
+          const errMsg = (err as Error)?.message ?? String(err);
+          logger.warn(`[CognitiveCycle] Planner failed/timed-out for worker=${workerId}:`, {
+            error: errMsg,
+            route: "/api/cron/cognitive-cycle",
+            workerId: workerId.slice(0, 8),
+          });
+          plannerResults.push({ workerId, orgId: workerOrgId, error: errMsg });
         }
       }
 
@@ -449,7 +530,7 @@ export async function GET(request: NextRequest) {
       }, 0);
 
       logger.info(
-        `[CognitiveCycle] Planner ran for ${plannerResults.length} orgs, ` +
+        `[CognitiveCycle] Planner ran for ${plannerResults.length} workers, ` +
           `queued ${totalQueued} total agent jobs`
       );
     } catch (err) {
