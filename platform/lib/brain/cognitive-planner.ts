@@ -189,7 +189,8 @@ export async function getGloballyBrokenDomains(
         .select("content")
         .eq("organization_id", requestingOrgId)
         .eq("domain", "brain-config")
-        .eq("memory_type", "circuit-breaker-override");
+        .eq("memory_type", "circuit-breaker-override")
+        .limit(100);
       if (overrides?.length) {
         for (const row of overrides) {
           try {
@@ -526,7 +527,8 @@ async function _runCognitivePlannerInner(
             .eq("organization_id", orgId)
             .eq("domain", "cognitive-planner")
             .eq("memory_type", "episodic")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(20); // bound at 2× the episodic buffer cap (10) to safely identify overflow
 
           if (allReflections && allReflections.length > 10) {
             const toDelete = allReflections.slice(10).map((r: { id: string }) => r.id);
@@ -687,7 +689,8 @@ async function _runCognitivePlannerInner(
       .eq("organization_id", orgId)
       .in("status", ["success", "running", "pending"])
       .gte("created_at", new Date(Date.now() - plannerConfig.coverageGapHours * 60 * 60 * 1000).toISOString())
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(200); // cap to prevent full-table scan on busy orgs
 
     const recentlyRunDomains = new Set((recentJobs ?? []).map((j: { task_type: string }) => j.task_type));
     coverageGaps = SE_AAS_DOMAINS.filter((d) => !recentlyRunDomains.has(d));
@@ -833,7 +836,7 @@ async function _runCognitivePlannerInner(
   // Non-blocking — failure here must NOT prevent planning from proceeding.
   let processBottlenecks: Array<{ processType: string; state: string; failRate: number }> = [];
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // service_health not yet in generated Supabase types — cast required for runtime access
     const processHealthRow = await (supabase as any)
       .from("service_health")
       .select("summary, context_string")
