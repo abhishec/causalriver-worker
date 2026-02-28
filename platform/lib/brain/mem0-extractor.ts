@@ -11,7 +11,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureMemExtraction } from "@/lib/brain/claude-learning-capture";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -179,6 +180,17 @@ export async function extractAndUpdateMemory(
 
     const text =
       response.content[0].type === "text" ? response.content[0].text : "";
+
+    // Capture extracted memory operations as a learning signal (fire-and-forget)
+    if (text && text.length > 30) {
+      _captureMemExtraction(text.slice(0, 500), 0, {
+        supabase,
+        organizationId: orgId,
+        domain: `mem0.${domain}`,
+        inputSummary: conversationText.slice(0, 200),
+        qualityThreshold: 0.35,
+      });
+    }
 
     // Parse JSON — find the first [...] array in the response
     const arrayMatch = text.match(/\[[\s\S]*\]/);

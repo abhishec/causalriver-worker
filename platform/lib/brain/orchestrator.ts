@@ -12,7 +12,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { MODEL_DEEP } from '@nexus-ai/memory-stack';
 import { logger } from "@/lib/logger";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureOrchestratorAnswer } from "@/lib/brain/claude-learning-capture";
 
 export interface BrainQueryRequest {
   query: string;
@@ -317,6 +318,18 @@ export async function executeUnifiedQuery(
     domainResults,
     request.anthropicApiKey
   );
+
+  // Capture the synthesized answer as a learning signal (fire-and-forget)
+  if (unifiedAnswer && unifiedAnswer.length > 50 && orgId && supabaseUrl && supabaseKey) {
+    const _captureSupabase = createSupabaseClient(supabaseUrl, supabaseKey);
+    _captureOrchestratorAnswer(unifiedAnswer, 0, {
+      supabase: _captureSupabase as any,
+      organizationId: orgId,
+      domain: 'brain.orchestrator.synthesis',
+      inputSummary: request.query.slice(0, 200),
+      qualityThreshold: 0.4,
+    });
+  }
 
   return {
     query: request.query,

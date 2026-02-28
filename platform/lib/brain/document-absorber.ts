@@ -16,7 +16,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureDocKnowledge } from "@/lib/brain/claude-learning-capture";
 
 interface ChunkAbsorption {
   entities: Array<{ name: string; type: string; description: string }>;
@@ -132,6 +133,15 @@ Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 rel
               }
             )
         ).catch(() => {});
+
+        // Also capture to federated_knowledge for cross-org learning
+        _captureDocKnowledge(memoryContent, 0, {
+          supabase,
+          organizationId: orgId,
+          domain: `document.${absorption.domain}`,
+          inputSummary: `${documentTitle} chunk ${batch[0]?.chunk_index ?? 0}`,
+          qualityThreshold: 0.4,
+        });
       }
 
       // Store relationships as cross_domain_signals — single batch insert (was N individual inserts)

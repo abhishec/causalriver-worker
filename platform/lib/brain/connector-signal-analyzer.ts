@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureConnectorInsight } from "@/lib/brain/claude-learning-capture";
 
 /**
  * Analyze recent connector signals for an org and extract brain knowledge.
@@ -177,6 +178,14 @@ Return JSON only (no markdown):
 
       if (!upsertErr) {
         insightsCreated++;
+        // Also capture to federated_knowledge for cross-org learning
+        _captureConnectorInsight(memContent, 0, {
+          supabase,
+          organizationId: orgId,
+          domain: `connector.${domain}`,
+          inputSummary: `${domainSignals.length} signals from ${domain} last ${lookbackHours}h`,
+          qualityThreshold: 0.4,
+        });
         logger.warn(
           `[connector-analyzer] ${domain}: ${domainSignals.length} signals → insight stored (health: ${analysis.healthScore ?? "n/a"})`
         );

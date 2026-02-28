@@ -25,7 +25,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { universalBrainWrite } from "@/lib/brain/universal-brain-writer";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureSlackSignal } from "@/lib/brain/claude-learning-capture";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -139,6 +140,17 @@ export async function processSlackThreads(
             llmErr
           );
           continue;
+        }
+
+        // Capture the thread signals summary as a learning signal (fire-and-forget)
+        if (signals.summary && signals.summary.length > 20) {
+          _captureSlackSignal(signals.summary, 0, {
+            supabase,
+            organizationId: orgId,
+            domain: 'connector.slack',
+            inputSummary: `#${thread.channelName} thread (${thread.messageCount} msgs)`,
+            qualityThreshold: 0.35,
+          });
         }
 
         // Skip threads with zero signal (no actions, decisions, or risks)

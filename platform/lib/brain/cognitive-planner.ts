@@ -27,7 +27,7 @@ import { pullCorePatterns } from "@/lib/brain/se-aas-federation";
 import { logDecision } from "@/lib/brain/decision-log";
 import { retrieveRelevantMemories } from "@/lib/brain/memory-retrieval";
 import { logAuditEvent, AuditAction } from "@/lib/audit";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

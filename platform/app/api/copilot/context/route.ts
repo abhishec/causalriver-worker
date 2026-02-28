@@ -4,6 +4,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import Anthropic from "@anthropic-ai/sdk";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { captureStreamedResponse as _captureContextSummary } from "@/lib/brain/claude-learning-capture";
 import { checkSessionRateLimit } from "@/lib/security-middleware";
 
 // Must be force-dynamic: reads auth cookies per request
@@ -207,6 +208,18 @@ Write a compact summary that lets the conversation continue with full context.`,
         summary = summaryResponse.content[0]?.type === "text"
           ? summaryResponse.content[0].text
           : "";
+
+        // Capture the compression summary as a learning signal (fire-and-forget)
+        if (summary && summary.length > 50) {
+          const _adminCapture = getAdminClient();
+          _captureContextSummary(summary, 0, {
+            supabase: _adminCapture,
+            organizationId: orgId,
+            domain: 'copilot.context-compress',
+            inputSummary: `${middleMessages.length} messages compressed`,
+            qualityThreshold: 0.4,
+          });
+        }
       } catch (claudeErr) {
         logger.warn("[context/compress] Claude summarization failed, falling back to prune-only:", { error: (claudeErr as Error)?.message ?? String(claudeErr), route: "/api/copilot/context" });
         summary = "";

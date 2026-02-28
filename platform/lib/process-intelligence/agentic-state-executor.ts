@@ -18,6 +18,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { captureStreamedResponse as _captureAgenticState } from "@/lib/brain/claude-learning-capture";
 import {
   getWorkspaceTools,
   toAnthropicTools,
@@ -233,6 +234,17 @@ export async function executeAgenticState(
     requiresApproval: parsed.requiresApproval,
     jobId,
   });
+
+  // Capture the FSM state outcome as a learning signal (fire-and-forget)
+  if (parsed.summary && parsed.summary.length > 20) {
+    _captureAgenticState(parsed.summary, 0, {
+      supabase,
+      organizationId,
+      domain: `process.${processType}.${currentState}`,
+      inputSummary: `${processType} state=${currentState} event=${parsed.nextEvent}`,
+      qualityThreshold: 0.35,
+    });
+  }
 
   return parsed;
 }

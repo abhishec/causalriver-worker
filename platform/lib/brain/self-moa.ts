@@ -17,7 +17,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
 
 export interface MoAResult {
   synthesizedResponse: string;

@@ -20,7 +20,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
 import { getBrainContext } from "@/lib/brain/brain-context";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
 import {
   CAPABILITIES_MANIFEST,
   findApplicableStrategies,

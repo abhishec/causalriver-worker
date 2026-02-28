@@ -23,7 +23,8 @@ import { createBrainContextMesh } from "@nexus-ai/memory-stack";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { getAIWorkerConfig, type AIWorkerConfig } from "./ai-worker-config";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureContextBrief } from "@/lib/brain/claude-learning-capture";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -411,6 +412,18 @@ export async function runContextAgent(params: {
           ? [`Missing connectors: ${missingConnectors.join(", ")} — some domains will have limited data`]
           : [],
     };
+  }
+
+  // Capture the strategic brief as a learning signal (fire-and-forget)
+  if (strategicBrief?.recommendation && strategicBrief.recommendation.length > 30) {
+    const _captureSupabase = getAdminClient();
+    _captureContextBrief(strategicBrief.recommendation, 0, {
+      supabase: _captureSupabase,
+      organizationId: orgId,
+      domain: 'context-agent.brief',
+      inputSummary: query.slice(0, 200),
+      qualityThreshold: 0.35,
+    });
   }
 
   const result: ContextAgentResult = {

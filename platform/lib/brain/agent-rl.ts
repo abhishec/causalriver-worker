@@ -12,7 +12,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { logDecision } from "@/lib/brain/decision-log";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
 
 // ── Domain Threshold Cache ─────────────────────────────────────────────────
 

@@ -94,11 +94,37 @@ export async function GET(request: Request) {
       );
     }
 
+    // Recent federated_knowledge captures (last 24h) — shows what the brain learned
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    let recentCaptures: Array<{ domain: string; content: string; confidence: number; captured_at: string }> = [];
+    try {
+      const { data: captureRows } = await admin
+        .from("federated_knowledge")
+        .select("domain, content, confidence, metadata")
+        .eq("organization_id", organizationId)
+        .gte("created_at", since24h)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (captureRows) {
+        recentCaptures = captureRows.map((r: { domain: string; content: string; confidence: number; metadata: Record<string, unknown> | null }) => ({
+          domain: r.domain,
+          content: (r.content ?? "").slice(0, 100),
+          confidence: r.confidence ?? 0,
+          captured_at: (r.metadata as { capturedAt?: string } | null)?.capturedAt ?? "",
+        }));
+      }
+    } catch {
+      // Non-fatal — learning stats still returned without recentCaptures
+    }
+
+    const totalCaptures24h = recentCaptures.length;
+
     logger.info(
-      `[/api/brain/learning-stats] org=${organizationId} tasks=${stats.totalTasks} velocity=${stats.learningVelocity}`
+      `[/api/brain/learning-stats] org=${organizationId} tasks=${stats.totalTasks} velocity=${stats.learningVelocity} captures=${totalCaptures24h}`
     );
 
-    return NextResponse.json(stats);
+    return NextResponse.json({ ...stats, recentCaptures, totalCaptures24h });
   } catch (err) {
     logger.error("[/api/brain/learning-stats] error:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/learning-stats" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
