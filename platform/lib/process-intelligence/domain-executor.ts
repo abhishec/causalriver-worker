@@ -53,6 +53,7 @@ import {
 } from "@nexus-ai/memory-stack";
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { decomposeProductWorkflow, mutateProductWorkflow } from "./product-workflow-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -529,6 +530,19 @@ export async function executeBPaaSProcess(
     try {
       // ── DECOMPOSE ─────────────────────────────────────────────────────────
       if (currentState === "DECOMPOSE") {
+        // ── product_workflow: specialized Sonnet-powered PRD + Jira + Confluence plan ──
+        if (params.processType === "product_workflow") {
+          const pwPlan = await decomposeProductWorkflow(apiKey, params.inputPayload);
+          const ctx = runner.getContext();
+          const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan: pwPlan };
+          const currentFsmState = runner.getCurrentState();
+          runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
+          await runner.transition("decomposed", supabase);
+          await runner.save(supabase);
+          // Skip the generic Haiku DECOMPOSE — product_workflow uses Sonnet above
+          continue; // NOSONAR — intentional FSM state advance
+        }
+
         // Load RL-learned parameters for this state — may be defaults on first run.
         // These params are updated by gradient descent in recordAndLearnStateOutcome()
         // after each execution. This closes the state RL closed loop: learn → read → act.
@@ -935,6 +949,23 @@ export async function executeBPaaSProcess(
       else if (currentState === "MUTATE") {
         // Deterministic DB write — NO LLM
         const ctx = runner.getContext();
+
+        // ── product_workflow: enqueue Confluence/Jira/Slack write-backs ──────────
+        if (params.processType === "product_workflow") {
+          const pwMutationResult = await mutateProductWorkflow(
+            supabase,
+            params.organizationId,
+            params.jobId,
+            processInstanceId,
+            ctx.decomposedPlan as Record<string, unknown>
+          );
+          const pwUpdatedCtx: BPaaSContext = { ...ctx, mutationResult: pwMutationResult };
+          const pwFsmState = runner.getCurrentState();
+          runner = new BPaaSFSMRunner(pwUpdatedCtx, pwFsmState, definition.transitions);
+          await runner.transition("mutated", supabase);
+          await runner.save(supabase);
+          continue; // NOSONAR — product_workflow MUTATE handled above
+        }
 
         const mutationData = {
           ...ctx.inputPayload,
