@@ -572,6 +572,24 @@ export class BPaaSFSMRunner {
     try {
       await this.processFSM.save(supabase, this.context.jobId);
       coarseOk = true;
+
+      // ── Heartbeat: FSM transition = proof of liveness ─────────────────────
+      // Update agent_queue.heartbeat_at so recover_stale_jobs() does NOT mark
+      // this job as stale. Each save() call is a state transition — i.e., the
+      // process IS alive. This replaces the SE-aaS polling timer pattern.
+      // Fire-and-forget: never block the FSM loop on this write.
+      void supabase
+        .from("agent_queue")
+        .update({ heartbeat_at: new Date().toISOString() })
+        .eq("id", this.context.jobId)
+        .then(
+          () => {},
+          (e: unknown) =>
+            logger.warn("[BPaaSFSMRunner] save: heartbeat_at update failed (non-fatal)", {
+              jobId: this.context.jobId,
+              error: String(e),
+            })
+        );
     } catch (err) {
       logger.warn("[BPaaSFSMRunner] save: processFSM.save (coarse) threw", {
         jobId: this.context.jobId,
