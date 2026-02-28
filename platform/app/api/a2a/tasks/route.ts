@@ -23,10 +23,32 @@ export const dynamic = "force-dynamic";
 // identifiers used by the SE-aaS, AaaS, PM-aaS, and Process Engine executors.
 const SKILL_TO_DOMAIN: Record<string, string> = {
   // ── SE-aaS: Delivery Intelligence domains ──────────────────────────────────
-  "pod-match": "pod-match",
-  "early-warning": "early-warning",
-  "scope-creep": "scope-creep",
-  "delivery-health": "delivery-intelligence",
+  "pod-match":             "pod-match",
+  "early-warning":         "early-warning",
+  "scope-creep":           "scope-creep",
+  // Canonical ID from AGENT_SKILLS is "delivery-intelligence" (not "delivery-health").
+  // Both aliases are accepted for backward compatibility with existing A2A callers.
+  "delivery-intelligence": "delivery-intelligence",
+  "delivery-health":       "delivery-intelligence",   // backward-compat alias
+  // ── SE-aaS: Code Intelligence domains ─────────────────────────────────────
+  // These 17 skills route to agent_type='a2a' — processed by the SE-aaS A2A handler.
+  "test-data-generator":   "test-data-generator",
+  "sql-analyzer":          "sql-analyzer",
+  "test-case-generator":   "test-case-generator",
+  "tdd-code-generator":    "tdd-code-generator",
+  "incident-diagnosis":    "incident-diagnosis",
+  "impact-analysis":       "impact-analysis",
+  "data-lineage":          "data-lineage",
+  "log-query":             "log-query",
+  "dependency-upgrade":    "dependency-upgrade",
+  "design-doc-generator":  "design-doc-generator",
+  "performance-profiler":  "performance-profiler",
+  "dead-code-detector":    "dead-code-detector",
+  "pr-review":             "pr-review",
+  "boilerplate-scaffold":  "boilerplate-scaffold",
+  "codebase-qa":           "codebase-qa",
+  "architecture-extractor":"architecture-extractor",
+  "decompose-spec":        "decompose-spec",
   // ── AaaS: Accounting as a Service domains ──────────────────────────────────
   // Routes to agent_type='aas' so the AaaS executor processes them.
   "aas-bookkeep":          "bookkeep",
@@ -36,15 +58,18 @@ const SKILL_TO_DOMAIN: Record<string, string> = {
   "aas-audit":             "audit",
   "aas-anomaly":           "anomaly",
   "aas-causal-analysis":   "causal-analysis",
+  "aas-cash-forecast":     "cash-forecast",
+  "aas-revenue-leakage":   "revenue-leakage",
+  "aas-causal-pl":         "causal-pl",
   // ── PM-aaS: Product Management as a Service domains ────────────────────────
   // Routes to agent_type='pm-aas' so the PM-aaS executor processes them.
-  "pm-roadmap-planner":    "roadmap-planner",
-  "pm-sprint-health":      "sprint-health",
-  "pm-backlog-prioritizer":"backlog-prioritizer",
+  "pm-roadmap-planner":      "roadmap-planner",
+  "pm-sprint-health":        "sprint-health",
+  "pm-backlog-prioritizer":  "backlog-prioritizer",
   "pm-stakeholder-alignment":"stakeholder-alignment",
-  "pm-release-risk":       "release-risk",
-  "pm-feature-impact":     "feature-impact",
-  "pm-capacity-planner":   "capacity-planner",
+  "pm-release-risk":         "release-risk",
+  "pm-feature-impact":       "feature-impact",
+  "pm-capacity-planner":     "capacity-planner",
   // ── Process Engine templates — available to any workspace ──────────────────
   // Routes to agent_type='bpaas' (not 'a2a') so process-jobs Phase 5 picks them up.
   "hr-offboarding":           "hr_offboarding",
@@ -96,6 +121,9 @@ const AAS_DOMAINS = new Set([
   "audit",
   "anomaly",
   "causal-analysis",
+  "cash-forecast",
+  "revenue-leakage",
+  "causal-pl",
 ]);
 
 // Domains that route to agent_type='pm-aas' (Product Management as a Service executor)

@@ -299,6 +299,15 @@ export async function executeBPaaSProcess(
     process.env.ANTHROPIC_API_KEY ??
     "";
 
+  // ── Structured job-start log — machine-parseable for production incident debugging ──
+  logger.warn("[BPaaS/DomainExecutor] Job start", {
+    jobId: params.jobId,
+    processType: params.processType,
+    orgId: params.organizationId,
+    chainDepth,
+    resumeFromJobId: params.resumeFromJobId ?? null,
+  });
+
   // ── Token budget — tracks LLM token consumption across FSM states ──────────
   // Pure synchronous state — never blocks execution.
   // processInstanceId not known yet (created in Step 0) — use jobId as placeholder;
@@ -500,6 +509,15 @@ export async function executeBPaaSProcess(
     }
 
     const currentState = runner.getCurrentState();
+
+    // Structured job-start log on every state entry for production traceability
+    logger.warn("[BPaaS/DomainExecutor] State enter", {
+      state: currentState,
+      jobId: params.jobId,
+      processInstanceId,
+      processType: params.processType,
+      orgId: params.organizationId,
+    });
 
     try {
       // ── DECOMPOSE ─────────────────────────────────────────────────────────
@@ -939,6 +957,9 @@ export async function executeBPaaSProcess(
       logger.warn("[BPaaS/DomainExecutor] State execution failed", {
         state: currentState,
         processInstanceId,
+        processType: params.processType,
+        orgId: params.organizationId,
+        jobId: params.jobId,
         error: lastError,
       });
 
@@ -1179,6 +1200,19 @@ export async function executeBPaaSProcess(
   // getBrainContext() call for this org reads the fresh activeJobCount /
   // lastJobStatus instead of serving stale 30s-old data to the cognitive planner.
   invalidateBrainContextCache(params.organizationId);
+
+  // ── Structured job-end log — machine-parseable for SLA/alerting ─────────
+  logger.warn("[BPaaS/DomainExecutor] Job end", {
+    jobId: params.jobId,
+    processInstanceId,
+    processType: params.processType,
+    orgId: params.organizationId,
+    status,
+    finalState,
+    durationMs,
+    stateCount: ctx.stateHistory.length,
+    errorMessage: status === "failed" ? (lastError ?? null) : null,
+  });
 
   return {
     status,

@@ -45,6 +45,14 @@ export async function GET(request: NextRequest) {
     const hasAnthropicKey = !!(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== "undefined");
     const envOk = hasSupabaseUrl && hasServiceKey && hasAnthropicKey;
     let coreBrainHealth: { healthy: boolean; orgExists: boolean; templateCount: number; issues: string[] } | null = null;
+    // Process Engine subsystem health — monitors bpaas_process_instances table
+    let processEngineHealth: { ok: boolean; activeInstances: number; failedInstances24h: number; note?: string } | null = null;
+    // State RL subsystem health — monitors process_state_rl_params table
+    let stateRLHealth: { ok: boolean; paramCount: number; note?: string } | null = null;
+    // Task intent classifier — smoke-test: module loads and classifies a benign sample
+    let taskIntentClassifierOk: boolean | null = null;
+    // Token budget tracker — smoke-test: module loads and creates a budget object
+    let tokenBudgetOk: boolean | null = null;
 
     try {
       // Build a fresh plain Supabase client directly — no cookie complexity,
@@ -61,8 +69,15 @@ export async function GET(request: NextRequest) {
         auth: { persistSession: false, autoRefreshToken: false },
       });
 
-      // Supabase connectivity check + queue metrics + CORE brain health in parallel
-      const [pendingResult, stuckResult, coreBrainResult] = await Promise.all([
+      // Supabase connectivity check + queue metrics + CORE brain health + subsystems in parallel
+      const [
+        pendingResult,
+        stuckResult,
+        coreBrainResult,
+        processActiveResult,
+        processFailed24hResult,
+        stateRLCountResult,
+      ] = await Promise.all([
         service
           .from("agent_queue")
           .select("id", { count: "exact", head: true })
@@ -73,12 +88,53 @@ export async function GET(request: NextRequest) {
           .eq("status", "running")
           .lt("started_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()),
         checkCoreBrainHealth(service),
+        // Process Engine: count active (running) bpaas_process_instances
+        service
+          .from("bpaas_process_instances")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "running"),
+        // Process Engine: count failed instances in the last 24h
+        service
+          .from("bpaas_process_instances")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "failed")
+          .gte("updated_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+        // State RL: count how many RL param rows exist (non-zero = subsystem seeded)
+        service
+          .from("process_state_rl_params")
+          .select("id", { count: "exact", head: true }),
       ]);
 
       supabaseOk = !pendingResult.error && !stuckResult.error;
       queueDepth = pendingResult.count ?? 0;
       stuckJobs = stuckResult.count ?? 0;
       coreBrainHealth = coreBrainResult;
+
+      // Process Engine health — table accessibility is the primary check; counts are informational
+      processEngineHealth = {
+        ok: !processActiveResult.error && !processFailed24hResult.error,
+        activeInstances: processActiveResult.count ?? 0,
+        failedInstances24h: processFailed24hResult.count ?? 0,
+        ...(processActiveResult.error
+          ? { note: `bpaas_process_instances query failed: ${processActiveResult.error.message}` }
+          : {}),
+      };
+
+      // State RL health — table accessible and has been seeded with params
+      stateRLHealth = {
+        ok: !stateRLCountResult.error,
+        paramCount: stateRLCountResult.count ?? 0,
+        ...(stateRLCountResult.error
+          ? { note: `process_state_rl_params query failed: ${stateRLCountResult.error.message}` }
+          : {}),
+      };
+
+      if (processEngineHealth && !processEngineHealth.ok) {
+        logger.warn("[brain/health] Process Engine table unreachable", { route: "/api/brain/health" });
+      }
+      if (stateRLHealth && !stateRLHealth.ok) {
+        logger.warn("[brain/health] State RL table unreachable", { route: "/api/brain/health" });
+      }
 
       // Log actual Supabase errors for diagnostics — helps identify auth/network issues
       if (pendingResult.error) {
@@ -113,8 +169,39 @@ export async function GET(request: NextRequest) {
       logger.error("[brain/health] Failed to query agent_queue metrics:", { error: errMsg, route: "/api/brain/health" });
     }
 
+    // Task intent classifier smoke-test — synchronous module import + classify call
+    try {
+      const { classifyTaskIntent } = await import("@/lib/brain/task-intent-classifier");
+      const probe = classifyTaskIntent({ message: "health check probe" });
+      taskIntentClassifierOk = typeof probe.intent === "string";
+    } catch (err) {
+      taskIntentClassifierOk = false;
+      logger.warn("[brain/health] Task intent classifier smoke-test failed", {
+        error: err instanceof Error ? err.message : String(err),
+        route: "/api/brain/health",
+      });
+    }
+
+    // Token budget smoke-test — synchronous module import + createTokenBudget call
+    try {
+      const { createTokenBudget } = await import("@/lib/brain/token-budget");
+      const probe = createTokenBudget("health-probe", "health-probe");
+      tokenBudgetOk = typeof probe.budgetTokens === "number" && probe.budgetTokens > 0;
+    } catch (err) {
+      tokenBudgetOk = false;
+      logger.warn("[brain/health] Token budget smoke-test failed", {
+        error: err instanceof Error ? err.message : String(err),
+        route: "/api/brain/health",
+      });
+    }
+
     const coreBrainMissing = coreBrainHealth !== null && !coreBrainHealth.orgExists;
-    const status = (!supabaseOk || stuckJobs > 5 || queueDepth > 200 || coreBrainMissing) ? "degraded" : "ok";
+    const processEngineDown = processEngineHealth !== null && !processEngineHealth.ok;
+    const stateRLDown = stateRLHealth !== null && !stateRLHealth.ok;
+    const status = (
+      !supabaseOk || stuckJobs > 5 || queueDepth > 200 || coreBrainMissing ||
+      processEngineDown || stateRLDown
+    ) ? "degraded" : "ok";
 
     return NextResponse.json({
       status,
@@ -127,12 +214,26 @@ export async function GET(request: NextRequest) {
       queueDepth,
       stuckJobs,
       coreBrainHealth,
+      subsystems: {
+        processEngine: processEngineHealth,
+        stateRL: stateRLHealth,
+        taskIntentClassifier: taskIntentClassifierOk === null
+          ? { ok: null, note: "not checked" }
+          : { ok: taskIntentClassifierOk },
+        tokenBudget: tokenBudgetOk === null
+          ? { ok: null, note: "not checked" }
+          : { ok: tokenBudgetOk },
+      },
       alerts: [
         ...(queueDepth > 100 ? [`Queue depth ${queueDepth} exceeds 100 — worker may be stalled`] : []),
         ...(stuckJobs > 0 ? [`${stuckJobs} job(s) stuck in running state for >30m — check Lambda logs`] : []),
         ...(!supabaseOk ? ["Supabase connectivity check failed"] : []),
         ...(!envOk ? ["One or more required env vars missing"] : []),
         ...(coreBrainMissing ? ["CORE brain org row is missing — federation is broken"] : []),
+        ...(processEngineDown ? ["Process Engine (bpaas_process_instances) table unreachable"] : []),
+        ...(stateRLDown ? ["State RL (process_state_rl_params) table unreachable"] : []),
+        ...(!taskIntentClassifierOk ? ["Task intent classifier smoke-test failed"] : []),
+        ...(!tokenBudgetOk ? ["Token budget tracker smoke-test failed"] : []),
         ...(coreBrainHealth?.issues.filter(i => i !== "CORE brain org row is missing from organizations table") ?? []),
       ],
       timestamp: new Date().toISOString(),
