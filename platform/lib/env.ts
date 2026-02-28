@@ -33,6 +33,31 @@ const RULES: EnvRule[] = [
   { key: "AWS_SECRET_ACCESS_KEY", required: false },
 ];
 
+/**
+ * Snapshot of env vars captured using STATIC property access.
+ *
+ * Why this exists: webpack/Next.js only inlines env vars when accessed via static
+ * member expressions (e.g. `process.env.MY_KEY`). Dynamic bracket access
+ * (`process.env[someVar]`) is NOT inlined at build time. In AWS Amplify SSR Lambda,
+ * the Amplify Console env vars are inlined into the server bundle at build time via
+ * `next.config.ts env:` block — but that only works for static access.
+ *
+ * Without this snapshot, `validateEnv()` reports all 4 required vars as missing
+ * in Lambda even though the app works fine (the actual code uses static access).
+ */
+const ENV_SNAPSHOT: Record<string, string | undefined> = {
+  // NEXT_PUBLIC_ vars also fall back to non-prefixed version (Amplify Lambda pattern)
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
+  AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
+  AWS_S3_REGION: process.env.AWS_S3_REGION,
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+};
+
 /** Strings that indicate a placeholder value, not a real credential */
 const PLACEHOLDERS = ["your-", "xxx", "...", "todo", "replace", "changeme"];
 
@@ -45,17 +70,13 @@ export function validateEnv(): void {
   if (_validated) return;
   _validated = true;
 
-  const isProd = process.env.NODE_ENV === "production";
   const errors: string[] = [];
   const warnings: string[] = [];
 
   for (const rule of RULES) {
-    // Try the exact key first, then fall back to non-NEXT_PUBLIC_ version.
-    // AWS Amplify SSR Lambda may only pass non-prefixed vars to Node.js runtime.
-    const value = process.env[rule.key]
-      || (rule.key.startsWith("NEXT_PUBLIC_")
-          ? process.env[rule.key.replace("NEXT_PUBLIC_", "")]
-          : undefined);
+    // Use the pre-computed snapshot (static access) — dynamic bracket access is not
+    // inlined by webpack and always reads undefined in Amplify Lambda runtime.
+    const value = ENV_SNAPSHOT[rule.key];
 
     if (!value || value.trim() === "") {
       if (rule.required) {
