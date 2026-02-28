@@ -5,6 +5,7 @@ import { getRecentQualityPatterns, type QualityPattern } from "@/lib/brain/agent
 import { getConsolidatedPatterns } from "@/lib/brain/tier3-consolidation";
 import { searchKnowledgeChunks, recordChunkUsage } from "@/lib/brain/tier2-signals";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { filterContextRot } from "@/lib/brain/schema-drift-handler";
 
 // ── Module-level cache: 30s TTL per org ──────────────────────────────────────
 // getBrainContext() fires DB queries on every copilot message. Under concurrent
@@ -1774,5 +1775,10 @@ function buildContextSummary(ctx: {
     parts.push(ctx.rawKnowledgeChunks);
   }
 
-  return parts.join(" ");
+  const rawContext = parts.join(" ");
+
+  // Context rot filter: remove stale timestamps and low-confidence signals
+  // before the assembled string reaches the LLM. Conservative — returns
+  // original if more than 80% would be pruned.
+  return filterContextRot(rawContext, 7);
 }
