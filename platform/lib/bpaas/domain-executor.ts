@@ -42,6 +42,7 @@ import {
   // Federated Brain — CORE → ORG real-time injection (NB-065)
   pushCoreInsightsToOrg,
 } from "@nexus-ai/memory-stack";
+import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -762,22 +763,22 @@ export async function executeBPaaSProcess(
           mutated_by_job: params.jobId,
         };
 
-        // Upsert the business entity change into bpaas_process_mutations
-        // Non-fatal: mutation table may not exist in all deployments
-        try {
-          await supabase.from("bpaas_process_mutations").insert({
-            organization_id: params.organizationId,
-            process_instance_id: processInstanceId,
-            process_type: params.processType,
-            mutation_data: mutationData,
-            created_at: new Date().toISOString(),
-          });
-        } catch (mutErr) {
-          logger.warn("[BPaaS/DomainExecutor] MUTATE: bpaas_process_mutations insert failed (non-fatal)", {
+        // Route the business entity change through the centralized writeback dispatcher.
+        // Fire-and-forget — MUTATE state does not wait for the dispatch to complete.
+        void dispatchWriteback(supabase, {
+          type: "process_mutation",
+          organizationId: params.organizationId,
+          processInstanceId,
+          processType: params.processType,
+          mutationPayload: mutationData,
+          mutationReason: "FSM MUTATE state execution",
+          executedBy: params.userId ?? "process-engine",
+        }).catch((e: unknown) =>
+          logger.warn("[BPaaS/MUTATE] writeback dispatch failed (non-fatal)", {
             processInstanceId,
-            error: mutErr instanceof Error ? mutErr.message : String(mutErr),
-          });
-        }
+            error: String(e),
+          })
+        );
 
         const mutationResult: Record<string, unknown> = {
           mutated: true,
