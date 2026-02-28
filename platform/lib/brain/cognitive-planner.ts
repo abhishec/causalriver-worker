@@ -27,6 +27,7 @@ import { pullCorePatterns } from "@/lib/brain/se-aas-federation";
 import { logDecision } from "@/lib/brain/decision-log";
 import { retrieveRelevantMemories } from "@/lib/brain/memory-retrieval";
 import { logAuditEvent, AuditAction } from "@/lib/audit";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -307,7 +308,7 @@ const SE_AAS_DOMAINS = [
   "boilerplate-scaffold",
 ];
 
-const PLANNER_MODEL = "claude-haiku-4-5-20251001";
+const PLANNER_MODEL = routeCallType("context-agent").model;
 
 // ── Reflection Helper ─────────────────────────────────────────────────────────
 

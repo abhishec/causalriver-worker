@@ -12,6 +12,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { logDecision } from "@/lib/brain/decision-log";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Domain Threshold Cache ─────────────────────────────────────────────────
 
@@ -438,8 +439,8 @@ export async function getRecentQualityPatterns(
 
 // ── Structured Memory Extraction ───────────────────────────────────────────
 
-/** Haiku model for fast, cheap memory extraction */
-const MEMORY_EXTRACTION_MODEL = "claude-haiku-4-5-20251001";
+/** Model for fast, cheap memory extraction — routed via smart router (mem0-extract → Haiku) */
+const MEMORY_EXTRACTION_MODEL = routeCallType("mem0-extract").model;
 
 /** Max structured-outcome entries to retain per domain per org */
 const MAX_STRUCTURED_OUTCOMES_PER_DOMAIN = 20;

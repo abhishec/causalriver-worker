@@ -31,6 +31,7 @@ import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { postSlackMessage } from "@/lib/connectors/writeback/slack";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 import { startJobHeartbeat, stopJobHeartbeat } from "@/lib/se-aas/job-heartbeat";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -250,7 +251,7 @@ Rules:
 - Return ONLY the JSON array, no markdown fences`;
 
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: routeCallType("cc-learning").model,
       max_tokens: 8192,
       system: systemPrompt,
       messages: [

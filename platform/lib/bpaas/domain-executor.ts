@@ -43,6 +43,7 @@ import {
   pushCoreInsightsToOrg,
 } from "@nexus-ai/memory-stack";
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -235,7 +236,7 @@ async function callHaiku(params: {
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const anthropic = new Anthropic({ apiKey: params.apiKey });
   const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: routeCallType("pm-aas-structured").model,
     max_tokens: 1024,
     system: params.systemPrompt,
     messages: [{ role: "user", content: params.userContent }],

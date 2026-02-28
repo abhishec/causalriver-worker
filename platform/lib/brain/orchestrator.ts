@@ -12,6 +12,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { MODEL_DEEP } from '@nexus-ai/memory-stack';
 import { logger } from "@/lib/logger";
+import { routeCallType } from "@/lib/se-aas/model-router";
 
 export interface BrainQueryRequest {
   query: string;
@@ -135,7 +136,7 @@ Return ONLY the JSON array, no other text.`;
 
   try {
     const response = await anthropic.messages.create({
-      model: MODEL_DEEP,
+      model: routeCallType('workspace-orchestrate').model,
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -366,7 +367,7 @@ Keep the response concise (2-4 paragraphs max).`;
 
   try {
     const response = await anthropic.messages.create({
-      model: MODEL_DEEP,
+      model: routeCallType('workspace-orchestrate').model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     });

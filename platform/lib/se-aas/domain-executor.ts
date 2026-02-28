@@ -22,7 +22,7 @@ import { recordAgentOutcome, computeAgentQuality, recordStepOutcome } from "@/li
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
 import { depositDomainExecutionOutcome } from "@/lib/brain/engagement-flywheel";
-import { selectModelForDomain, routeModelWithIq } from "./model-router";
+import { selectModelForDomain, routeModelWithIq, routeCallType } from "./model-router";
 import {
   buildAgentCommsPayload,
   buildIntroSpeech,
@@ -124,7 +124,7 @@ const decomposeSpecDomain = {
 
     const anthropic = new Anthropic({ apiKey });
     const response = await anthropic.messages.create({
-      model: ctx.input?.model ?? "claude-sonnet-4-6",
+      model: ctx.input?.model ?? routeCallType("agent-compose").model,
       max_tokens: 4096,
       system: DECOMPOSE_SPEC_SYSTEM_PROMPT,
       messages: [{ role: "user", content: userContent }],
@@ -152,7 +152,7 @@ const decomposeSpecDomain = {
       spec: spec.trim(),
       repoOwner: repoOwner ?? null,
       repoName: repoName ?? null,
-      model: ctx.input?.model ?? "claude-sonnet-4-6",
+      model: ctx.input?.model ?? routeCallType("agent-compose").model,
     };
   },
 };
@@ -604,8 +604,8 @@ async function runDomainMoA(
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
 
-  const HAIKU_MODEL = "claude-haiku-4-5-20251001";
-  const SONNET_MODEL = "claude-sonnet-4-6";
+  const HAIKU_MODEL = routeCallType("context-agent").model;
+  const SONNET_MODEL = routeCallType("self-moa").model;
 
   // Compact result to avoid token bloat — trim to relevant fields only
   const resultJson = JSON.stringify(domainResult, null, 0).slice(0, 4000);
