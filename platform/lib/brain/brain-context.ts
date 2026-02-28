@@ -587,7 +587,7 @@ export async function getBrainContext(
 
       // ── TIER 8: SERVICE LAYERS ──
 
-      // L26a — SE-aaS jobs: agent_queue SE-aaS task types, last 7d, task_type+status, limit 30
+      // L27a — SE-aaS jobs: agent_queue SE-aaS task types, last 7d, task_type+status, limit 30
       supabase
         .from("agent_queue")
         .select("task_type, status")
@@ -597,14 +597,14 @@ export async function getBrainContext(
         .order("created_at", { ascending: false })
         .limit(30),
 
-      // L26b — SE-aaS scope creep: scope_creep_alerts unresolved count
+      // L27b — SE-aaS scope creep: scope_creep_alerts unresolved count
       supabase
         .from("scope_creep_alerts")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", orgId)
         .eq("acknowledged", false),
 
-      // L26c — SE-aaS engagement health: engagement_health_latest bottom 3 health scores
+      // L27c — SE-aaS engagement health: engagement_health_latest bottom 3 health scores
       supabase
         .from("engagement_health_latest")
         .select("engagement_id, engagement_name, health_score")
@@ -612,7 +612,7 @@ export async function getBrainContext(
         .order("health_score", { ascending: true })
         .limit(3),
 
-      // L26d — SE-aaS engineer risk: engineer_health_snapshots flight_risk_score > 50, limit 3
+      // L27d — SE-aaS engineer risk: engineer_health_snapshots flight_risk_score > 50, limit 3
       supabase
         .from("engineer_health_snapshots")
         .select("github_login, flight_risk_score")
@@ -621,7 +621,7 @@ export async function getBrainContext(
         .order("flight_risk_score", { ascending: false })
         .limit(3),
 
-      // L26e — SE-aaS pod match: pod_match_history latest 3
+      // L27e — SE-aaS pod match: pod_match_history latest 3
       supabase
         .from("pod_match_history")
         .select("recommended_pod_name")

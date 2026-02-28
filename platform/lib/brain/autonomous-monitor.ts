@@ -487,7 +487,7 @@ async function queueAgentForAlert(
   try {
     const { error } = await supabase.from("agent_queue").insert({
       organization_id: alert.organizationId,
-      agent_type: "seaas",
+      agent_type: "se-aas",
       task_type: alert.domain,
       priority: alert.severity === "critical" ? 10 : 5,
       payload: {

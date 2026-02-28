@@ -77,7 +77,7 @@ export async function authenticateSeAaSRequest(
     }
 
     // Verify the user is actually a member of the resolved workspace.
-    // getCurrentWorkspaceId() can fall back to CORE_WORKSPACE_ID for platform admins
+    // getCurrentWorkspaceId() falls back to CORE_WORKSPACE_ID ONLY for confirmed platform admins — never as a general fallback
     // or return the first non-core membership — double-check to prevent privilege confusion.
     const membership = await verifyWorkspaceMembership(userId!, workspaceId);
     if (!membership) {

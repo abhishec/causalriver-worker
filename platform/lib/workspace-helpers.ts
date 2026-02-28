@@ -153,8 +153,8 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
       .limit(1)
       .maybeSingle();
 
+    // Platform admin with no org memberships — admin-only path, never a general fallback
     if (adminCheck) return CORE_WORKSPACE_ID;
-
     // Non-admin with no workspace memberships — return empty string
     // (callers should handle this by returning 400 or redirecting)
     return "";
