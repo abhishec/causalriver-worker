@@ -28,6 +28,13 @@ vi.mock("@/lib/brain/tier2-signals", () => ({
   recordChunkUsage: vi.fn().mockResolvedValue(undefined),
 }));
 
+// logDecision is fire-and-forget inside recordAgentOutcome. Without this mock
+// it calls supabase.from("brain_decision_log").insert() synchronously, shifting
+// all insertMock.mock.calls indices by +1 and breaking index-based assertions.
+vi.mock("@/lib/brain/decision-log", () => ({
+  logDecision: vi.fn().mockResolvedValue(undefined),
+}));
+
 // ── Imports (after mocks) ──────────────────────────────────────────────────
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -173,13 +180,15 @@ describe("recordAgentOutcome", () => {
     expect(signalInsert.signal_metadata.wasSuccess).toBe(false);
   });
 
-  it("sets was_correct=false for quality exactly at threshold boundary (0.699)", async () => {
+  it("sets was_correct=false for quality below pod-match domain threshold (0.649 < 0.65)", async () => {
+    // pod-match domain has a default threshold of 0.65 (DOMAIN_THRESHOLD_DEFAULTS).
+    // 0.649 is below that threshold → was_correct=false, gaba signal.
     const insertMock = vi.fn().mockResolvedValue({ data: null, error: null });
     const supabase = {
       from: vi.fn().mockReturnValue({ insert: insertMock }),
     } as unknown as SupabaseClient;
 
-    await recordAgentOutcome(supabase, { ...BASE_OUTCOME, quality: 0.699 });
+    await recordAgentOutcome(supabase, { ...BASE_OUTCOME, quality: 0.649 });
 
     const predInsert = insertMock.mock.calls[0][0];
     expect(predInsert.was_correct).toBe(false);
