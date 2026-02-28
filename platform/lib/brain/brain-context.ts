@@ -169,6 +169,12 @@ export interface BrainContext {
   // ── 3-Tier Knowledge Architecture ──
   consolidatedPatterns?: string;      // Tier 3: stable behavioral rules + domain expertise
   rawKnowledgeChunks?: string;        // Tier 1: relevant raw knowledge (git, docs, conversations)
+
+  // ── Federated Knowledge (Fix 1) ──
+  federatedKnowledgeLayer?: string;   // Universal + org-specific federated_knowledge insights
+
+  // ── Structured Outcome Learnings (Fix 3) ──
+  structuredOutcomeSummary?: string;  // Mem0-style structured-outcome memories (all domain executions)
 }
 
 export async function getBrainContext(
@@ -268,6 +274,13 @@ export async function getBrainContext(
       seaasHealthCacheRow,     // service_health cache for L27 (SE-aaS)
       aaasHealthCacheRow,      // service_health cache for L28 (AaaS)
       pmaasHealthCacheRow,     // service_health cache for L29 (PM-aaS)
+
+      // ── FEDERATED KNOWLEDGE ──
+      federatedKnowledgeUniversalRow, // Universal insights promoted from all orgs (organization_id IS NULL)
+      federatedKnowledgeOrgRow,       // Org-specific high-confidence federated insights (confidence >= 0.7)
+
+      // ── STRUCTURED OUTCOMES (Fix 3) ──
+      structuredOutcomesRow,          // ai_memory structured-outcome entries (all domains, not just session.%)
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -665,6 +678,37 @@ export async function getBrainContext(
 
       // service_health cache for L29 (PM-aaS)
       fetchServiceHealthCache(supabase, orgId, "pm-aas"),
+
+      // ── FEDERATED KNOWLEDGE ────────────────────────────────────────────────
+      // federated_knowledge — universal insights promoted from all orgs (organization_id IS NULL)
+      // These are workspace-agnostic learnings that apply to every AI worker.
+      supabase.from("federated_knowledge")
+        .select("domain, insight, confidence, promoted_at")
+        .is("organization_id", null)
+        .order("promoted_at", { ascending: false })
+        .limit(10),
+
+      // federated_knowledge — org-specific insights with high confidence (>= 0.7)
+      // These are learnings extracted from this org's executions that scored well.
+      supabase.from("federated_knowledge")
+        .select("domain, insight, confidence, promoted_at")
+        .eq("organization_id", orgId)
+        .gte("confidence", 0.7)
+        .order("promoted_at", { ascending: false })
+        .limit(10),
+
+      // ── STRUCTURED OUTCOMES (Fix 3) ────────────────────────────────────────
+      // ai_memory structured-outcome entries — domains like pod-match, delivery-intelligence, etc.
+      // L10a queries session.% which is CC session learnings — NOT the same as structured outcomes.
+      // structured-outcome memory_type is written by extractStructuredMemory() in agent-rl.ts
+      // with domain = the actual SE-aaS/AaaS domain name (NOT session.%).
+      supabase.from("ai_memory")
+        .select("content, importance, domain, created_at")
+        .eq("organization_id", orgId)
+        .eq("memory_type", "structured-outcome")
+        .not("domain", "like", "system.%")
+        .order("created_at", { ascending: false })
+        .limit(10),
     ]);
 
     // ── TIER 1: IDENTITY ─────────────────────────────────────────────────────
@@ -1270,6 +1314,67 @@ export async function getBrainContext(
       // Non-fatal — PM-aaS layer is best-effort
     }
 
+    // ── FEDERATED KNOWLEDGE (Fix 1: universal + org-specific) ──────────────
+
+    // Universal insights (organization_id IS NULL) — promoted cross-workspace learnings
+    const fedUniversalRows = federatedKnowledgeUniversalRow.status === "fulfilled"
+      ? (federatedKnowledgeUniversalRow.value.data ?? [])
+      : [];
+
+    // Org-specific high-confidence insights (confidence >= 0.7)
+    const fedOrgRows = federatedKnowledgeOrgRow.status === "fulfilled"
+      ? (federatedKnowledgeOrgRow.value.data ?? [])
+      : [];
+
+    let federatedKnowledgeLayer: string | undefined;
+    try {
+      const fedParts: string[] = [];
+
+      if (fedUniversalRows.length > 0) {
+        const universalLines = (fedUniversalRows as Array<{ domain: string; insight: string; confidence: number; promoted_at: string }>)
+          .map(r => `[${r.domain}] ${r.insight} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
+          .join("\n");
+        fedParts.push(`### Universal Knowledge (cross-workspace)\n${universalLines}`);
+      }
+
+      if (fedOrgRows.length > 0) {
+        const orgLines = (fedOrgRows as Array<{ domain: string; insight: string; confidence: number; promoted_at: string }>)
+          .map(r => `[${r.domain}] ${r.insight} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
+          .join("\n");
+        fedParts.push(`### Workspace Knowledge (org-specific, confidence >= 70%)\n${orgLines}`);
+      }
+
+      if (fedParts.length > 0) {
+        federatedKnowledgeLayer = `## Federated Knowledge Base\n${fedParts.join("\n")}`.slice(0, 600);
+      }
+    } catch (fedErr: unknown) {
+      logger.warn("[brain-context] federated_knowledge assembly failed (non-fatal):", { error: String(fedErr) });
+    }
+
+    // ── STRUCTURED OUTCOMES (Fix 3: memory_type='structured-outcome', all domains) ──────
+    // These are Mem0-style learning records written by extractStructuredMemory() in agent-rl.ts.
+    // Domains are real SE-aaS/AaaS domain names (pod-match, delivery-intelligence, etc.)
+    // NOT session.% — those are CC session learnings captured by session-learning-capture.ts.
+    const structuredOutcomeRows = structuredOutcomesRow.status === "fulfilled"
+      ? (structuredOutcomesRow.value.data ?? [])
+      : [];
+
+    let structuredOutcomeSummary: string | undefined;
+    if (structuredOutcomeRows.length > 0) {
+      const outcomeLines = (structuredOutcomeRows as Array<{ content: string; importance: number; domain: string; created_at: string }>)
+        .map(r => {
+          try {
+            const parsed = JSON.parse(r.content) as { worked?: string; failed?: string; pattern?: string };
+            return `[${r.domain}] worked: ${parsed.worked ?? "?"} | pattern: ${parsed.pattern ?? "?"}`;
+          } catch {
+            return `[${r.domain}] ${r.content.slice(0, 80)}`;
+          }
+        })
+        .filter(s => s.length > 0)
+        .join("\n");
+      structuredOutcomeSummary = `## Structured Outcome Learnings (from domain executions)\n${outcomeLines}`.slice(0, 500);
+    }
+
     // ── RL QUALITY PATTERNS (post-allSettled, awaited separately) ────────────
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -1405,6 +1510,9 @@ export async function getBrainContext(
       // 3-Tier Knowledge Architecture
       consolidatedPatterns: consolidatedPatternsStr,
       // rawKnowledgeChunks appended to contextSummary after Tier 1 fetch below
+      // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
+      federatedKnowledgeLayer,
+      structuredOutcomeSummary,
     });
 
     const result: BrainContext = {
@@ -1460,6 +1568,9 @@ export async function getBrainContext(
       consolidatedPatterns: consolidatedPatternsStr,
       // Tier 1: Raw knowledge chunks (query-aware, fetched below)
       rawKnowledgeChunks: undefined as string | undefined,
+      // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
+      federatedKnowledgeLayer,
+      structuredOutcomeSummary,
     };
 
     // Tier 1: Raw Knowledge — query-aware retrieval using the current query
@@ -1586,6 +1697,9 @@ function buildContextSummary(ctx: {
   // 3-Tier Knowledge Architecture
   consolidatedPatterns?: string;
   rawKnowledgeChunks?: string;
+  // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
+  federatedKnowledgeLayer?: string;
+  structuredOutcomeSummary?: string;
 }): string {
   const parts: string[] = [];
 
@@ -1778,6 +1892,16 @@ function buildContextSummary(ctx: {
   // 31. PM-aaS Service Layer (L29)
   if (ctx.pmaasServiceLayer) {
     parts.push(ctx.pmaasServiceLayer);
+  }
+
+  // 32. Federated Knowledge (Fix 1: universal + org-specific federated_knowledge)
+  if (ctx.federatedKnowledgeLayer) {
+    parts.push(ctx.federatedKnowledgeLayer);
+  }
+
+  // 33. Structured Outcome Learnings (Fix 3: memory_type=structured-outcome, all SE-aaS/AaaS domains)
+  if (ctx.structuredOutcomeSummary) {
+    parts.push(ctx.structuredOutcomeSummary);
   }
 
   // Tier 1 LAST: Raw Knowledge — verbatim grounding data

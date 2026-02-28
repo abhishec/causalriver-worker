@@ -33,6 +33,7 @@ import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
 import { getBrainContext, invalidateBrainContextCache } from "@/lib/brain/brain-context";
 import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordPredictionAccuracy } from "@/lib/brain/agent-rl";
+import { extractAndStoreKnowledge } from "@/lib/brain/knowledge-extractor";
 import { predictStateRisk } from "@/lib/brain/process-predictor";
 import type { PredictionResult } from "@/lib/brain/process-predictor";
 import {
@@ -904,6 +905,30 @@ export async function executeBPaaSProcess(
         error: String(e),
       })
     );
+  }
+
+  // ── Knowledge Extraction (ADR-019, Fix 2) ────────────────────────────────
+  // Extract reusable learnings from process execution and store in federated_knowledge.
+  // Only fires when execution quality is >= 0.65.
+  // Fire-and-forget — never blocks the process response returned to the caller.
+  {
+    const resultQuality = status === "completed" ? 0.8 : status === "escalated" ? 0.5 : 0.2;
+    if (resultQuality >= 0.65) {
+      extractAndStoreKnowledge(supabase, {
+        domain: `process.${params.processType}`,
+        taskType: params.processType,
+        inputSummary: JSON.stringify(params.inputPayload ?? {}).slice(0, 200),
+        outputSummary: `finalState=${finalState} states=${ctx.stateHistory.length} duration=${durationMs}ms`,
+        qualityScore: resultQuality,
+        orgId: params.organizationId,
+        aiWorkerId: params.aiWorkerId ?? undefined,
+      }).catch((e: unknown) =>
+        logger.warn("[BPaaS/DomainExecutor] knowledge extraction failed (non-fatal)", {
+          processInstanceId,
+          error: String(e),
+        })
+      );
+    }
   }
 
   // ── Federation: CORE → ORG real-time injection (NB-065) ───────────────────
