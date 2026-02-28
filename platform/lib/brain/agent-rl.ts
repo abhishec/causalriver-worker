@@ -609,16 +609,29 @@ export async function getLearningStats(
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // All agent task outcomes for this org
-    const { data: records } = await supabase
-      .from("prediction_records")
-      .select("domain, confidence, was_correct, created_at")
-      .eq("organization_id", organizationId)
-      .eq("prediction_type", "agent_task_outcome")
-      .order("created_at", { ascending: false })
-      .limit(500);
+    // Fire all three queries in parallel — prediction_records, pending feedback,
+    // and copilot feedback have no dependencies on each other.
+    const [recordsResult, pendingFeedbackResult, recentFeedbackResult] = await Promise.all([
+      supabase
+        .from("prediction_records")
+        .select("domain, confidence, was_correct, created_at")
+        .eq("organization_id", organizationId)
+        .eq("prediction_type", "agent_task_outcome")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      supabase
+        .from("brain_feedback_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("status", "pending"),
+      supabase
+        .from("copilot_response_feedback")
+        .select("rating")
+        .eq("organization_id", organizationId)
+        .gte("created_at", since7d),
+    ]);
 
-    const all = records ?? [];
+    const all = recordsResult.data ?? [];
     const totalTasks = all.length;
 
     // Quality metrics
@@ -640,19 +653,9 @@ export async function getLearningStats(
     // Learning velocity: tasks in last 24h
     const learningVelocity = all.filter(r => r.created_at >= since24h).length;
 
-    // Pending feedback
-    const { count: pendingFeedback } = await supabase
-      .from("brain_feedback_queue")
-      .select("id", { count: "exact", head: true })
-      .eq("organization_id", organizationId)
-      .eq("status", "pending");
-
-    // Recent helpful / not_helpful (7d)
-    const { data: recentFeedback } = await supabase
-      .from("copilot_response_feedback")
-      .select("rating")
-      .eq("organization_id", organizationId)
-      .gte("created_at", since7d);
+    // Feedback results from parallel queries
+    const pendingFeedback = pendingFeedbackResult.count;
+    const recentFeedback = recentFeedbackResult.data;
 
     const fb = recentFeedback ?? [];
     const helpfulFeedback = fb.filter(f => f.rating === "helpful").length;
@@ -803,12 +806,15 @@ export async function checkDomainDrift(
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
+  // Filter to agent_task_outcome only — predictor records (domain = "process.predictor.*")
+  // use a different scale and would corrupt SE-aaS domain drift comparisons.
   const [recentResult, baselineResult] = await Promise.all([
     supabase
       .from("prediction_records")
       .select("confidence")
       .eq("organization_id", orgId)
       .eq("domain", domain)
+      .eq("prediction_type", "agent_task_outcome")
       .gte("created_at", sevenDaysAgo)
       .limit(500),
     supabase
@@ -816,6 +822,7 @@ export async function checkDomainDrift(
       .select("confidence")
       .eq("organization_id", orgId)
       .eq("domain", domain)
+      .eq("prediction_type", "agent_task_outcome")
       .gte("created_at", fourteenDaysAgo)
       .lt("created_at", sevenDaysAgo)
       .limit(500),

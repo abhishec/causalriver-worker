@@ -41,6 +41,20 @@ const _orgRiskProfileCache = new Map<
 >();
 const ORG_RISK_PROFILE_TTL_MS = 30_000; // 30 seconds
 
+/**
+ * Per-(org, processType) cache for recent failure streak and template age.
+ * These are the two additional DB queries fired by predictStateRisk() on every
+ * FSM state transition.  They change slowly (at most once per process run),
+ * so a 60s TTL is safe and eliminates the per-state hot-path overhead.
+ */
+interface PredictorAuxCache {
+  recentFailStreak: number;
+  isNewTemplate: boolean;
+  expiry: number;
+}
+const _predictorAuxCache = new Map<string, PredictorAuxCache>();
+const PREDICTOR_AUX_TTL_MS = 60_000; // 60 seconds
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface PredictionResult {
@@ -175,48 +189,71 @@ export async function predictStateRisk(
     const patternKey = `${processType}.${currentState}`;
     const historicalFailRate = statePatterns[patternKey] ?? 0;
 
-    // ── 2. Load last 5 process instances for this processType ─────────────────
-    let recentFailStreak = 0;
-    try {
-      const { data: recentInstances } = await supabase
-        .from("bpaas_process_instances")
-        .select("status, created_at")
-        .eq("organization_id", orgId)
-        .eq("process_type", processType)
-        .order("created_at", { ascending: false })
-        .limit(5);
+    // ── 2. Load recent failure streak + template age (cached per org+processType) ──
+    // These two queries fired on every FSM state transition (several times per
+    // process run). They change at most once per process run, so a 60s cache
+    // eliminates hot-path overhead without meaningfully reducing freshness.
+    const auxCacheKey = `${orgId}:${processType}`;
+    const cachedAux = _predictorAuxCache.get(auxCacheKey);
 
-      if (recentInstances && recentInstances.length >= 3) {
-        const last3 = (recentInstances as Array<{ status: string }>).slice(0, 3);
-        const allFailed = last3.every(
-          (inst) => inst.status === "failed" || inst.status === "escalated"
-        );
-        if (allFailed) recentFailStreak = 3;
+    let recentFailStreak: number;
+    let isNewTemplate: boolean;
+
+    if (cachedAux && Date.now() < cachedAux.expiry) {
+      recentFailStreak = cachedAux.recentFailStreak;
+      isNewTemplate = cachedAux.isNewTemplate;
+    } else {
+      recentFailStreak = 0;
+      isNewTemplate = false;
+
+      // ── 2a. Recent failure streak ─────────────────────────────────────────
+      try {
+        const { data: recentInstances } = await supabase
+          .from("bpaas_process_instances")
+          .select("status, created_at")
+          .eq("organization_id", orgId)
+          .eq("process_type", processType)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (recentInstances && recentInstances.length >= 3) {
+          const last3 = (recentInstances as Array<{ status: string }>).slice(0, 3);
+          const allFailed = last3.every(
+            (inst) => inst.status === "failed" || inst.status === "escalated"
+          );
+          if (allFailed) recentFailStreak = 3;
+        }
+      } catch {
+        // Non-fatal — skip streak detection
       }
-    } catch {
-      // Non-fatal — skip streak detection
-    }
 
-    // ── 3. Load template metadata for new-template risk ───────────────────────
-    let isNewTemplate = false;
-    try {
-      const { data: templateRow } = await supabase
-        .from("process_templates")
-        .select("evolution_generation, usage_count")
-        .eq("organization_id", orgId)
-        .eq("process_type", processType)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // ── 2b. Template age risk ─────────────────────────────────────────────
+      try {
+        const { data: templateRow } = await supabase
+          .from("process_templates")
+          .select("evolution_generation, usage_count")
+          .eq("organization_id", orgId)
+          .eq("process_type", processType)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (templateRow) {
-        const row = templateRow as { evolution_generation: number | null; usage_count: number | null };
-        const generation = row.evolution_generation ?? 0;
-        const usageCount = row.usage_count ?? 0;
-        isNewTemplate = generation === 0 && usageCount < 5;
+        if (templateRow) {
+          const row = templateRow as { evolution_generation: number | null; usage_count: number | null };
+          const generation = row.evolution_generation ?? 0;
+          const usageCount = row.usage_count ?? 0;
+          isNewTemplate = generation === 0 && usageCount < 5;
+        }
+      } catch {
+        // Non-fatal — skip template age risk
       }
-    } catch {
-      // Non-fatal — skip template age risk
+
+      // Write aux results to cache
+      _predictorAuxCache.set(auxCacheKey, {
+        recentFailStreak,
+        isNewTemplate,
+        expiry: Date.now() + PREDICTOR_AUX_TTL_MS,
+      });
     }
 
     // ── 4. Compute composite risk score ───────────────────────────────────────

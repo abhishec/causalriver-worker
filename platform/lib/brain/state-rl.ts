@@ -345,7 +345,12 @@ export function computeStateGradient(
 
 /**
  * Load current params, apply one gradient descent step, and upsert to DB.
- * Invalidates the module cache for this key after the write.
+ *
+ * Cache strategy: write-through — after computing the merged params we
+ * immediately update the module cache BEFORE the DB write.  This prevents
+ * a thundering-herd of concurrent FSM state transitions from all reading
+ * the same stale cached values, each computing independent gradients, and
+ * then racing each other to the DB (last-write-wins discards earlier updates).
  *
  * Fire-and-forget safe — all errors are caught and logged.
  */
@@ -361,6 +366,14 @@ export async function updateStateParams(
     const updates = computeStateGradient(current, quality);
 
     const merged: StateRLParams = { ...current, ...updates };
+
+    // Write-through cache: update in-memory state immediately so that any
+    // concurrent caller that reads this key within the next 5 minutes sees
+    // the post-gradient params rather than the pre-update baseline.
+    // We do this BEFORE the DB write to avoid a race where another concurrent
+    // updateStateParams call loads the same stale cached value.
+    const key = _cacheKey(orgId, processType, stateName);
+    _paramsCache.set(key, { params: merged, cachedAt: Date.now() });
 
     const { error } = await supabase
       .from("process_state_rl_params")
@@ -391,17 +404,19 @@ export async function updateStateParams(
         processType,
         stateName,
       });
+      // On DB failure: invalidate cache so the next load re-fetches from DB
+      // rather than serving the optimistic merged value indefinitely.
+      _invalidateCache(orgId, processType, stateName);
       return;
     }
-
-    // Invalidate cache so next load reflects the new values
-    _invalidateCache(orgId, processType, stateName);
   } catch (err) {
     logger.warn("[state-rl] updateStateParams: threw unexpectedly (non-fatal)", {
       error: String(err),
       processType,
       stateName,
     });
+    // On unexpected error: invalidate cache so the next read is from DB.
+    _invalidateCache(orgId, processType, stateName);
     // Never re-throw — gradient descent failure must not affect the FSM
   }
 }

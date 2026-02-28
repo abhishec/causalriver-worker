@@ -228,41 +228,59 @@ export async function evolveProcessTemplates(
       return; // Rate-limited — evolved less than 1 hour ago
     }
 
-    // ── Step 3: Score each template ──────────────────────────────────────────
+    // ── Step 3: Batch-load ALL instances for this org (single query) ─────────
+    // N+1 fix: instead of one DB round-trip per template, load all instances for
+    // the org in a single query and group them by process_type in memory.
+    const allProcessTypes = rows
+      .map((t) => (t.domain_sequence.length > 0 ? t.domain_sequence[0] : null))
+      .filter((pt): pt is string => pt !== null);
+
+    let allInstancesByProcessType = new Map<string, ProcessInstanceRow[]>();
+    try {
+      const instancesQuery = supabase
+        .from("bpaas_process_instances")
+        .select("id, process_type, status, current_state, started_at, completed_at")
+        .eq("organization_id", orgId)
+        .gte("created_at", thirtyDaysAgo)
+        .limit(500); // cap to prevent unbounded scan
+
+      if (allProcessTypes.length > 0) {
+        instancesQuery.in("process_type", allProcessTypes);
+      }
+
+      const { data: allInstances } = await instancesQuery;
+      for (const inst of (allInstances ?? []) as ProcessInstanceRow[]) {
+        const pt = inst.process_type;
+        if (!allInstancesByProcessType.has(pt)) {
+          allInstancesByProcessType.set(pt, []);
+        }
+        allInstancesByProcessType.get(pt)!.push(inst);
+      }
+    } catch (instanceLoadErr) {
+      logger.warn("[ProcessEvolver] Failed to batch-load instances (non-fatal)", {
+        orgId,
+        error: instanceLoadErr instanceof Error ? instanceLoadErr.message : String(instanceLoadErr),
+      });
+      // Continue with empty map — templates will be skipped due to low data
+      allInstancesByProcessType = new Map();
+    }
+
+    // ── Step 4: Score each template ──────────────────────────────────────────
     let evolved = 0;
     let scored = 0;
     let skippedLowData = 0;
 
     for (const template of rows) {
       try {
-        // Derive process_type from domain_sequence or template name.
-        // domain_sequence e.g. ['pod-match', 'early-warning'] — pick the primary domain.
-        // For process templates, the sequence may encode process template type in name (e.g. "hr_offboarding").
-        // We match instances by querying bpaas_process_instances filtered by process_type
-        // derived from the template name (process_templates are named after domain sequences,
-        // not BPaaS process types). We match on both approaches.
         const primaryDomain =
           template.domain_sequence.length > 0
             ? template.domain_sequence[0]
             : null;
 
-        // Query bpaas_process_instances last 30d for this org
-        // Match instances where process_type appears in the template's domain_sequence
-        // (best-effort: sequences may encode bpaas types or SE-aaS domains)
-        const instanceQuery = supabase
-          .from("bpaas_process_instances")
-          .select("id, process_type, status, current_state, started_at, completed_at")
-          .eq("organization_id", orgId)
-          .gte("created_at", thirtyDaysAgo)
-          .limit(100);
-
-        if (primaryDomain) {
-          instanceQuery.eq("process_type", primaryDomain);
-        }
-
-        const { data: instances } = await instanceQuery;
-
-        const instanceRows = (instances ?? []) as ProcessInstanceRow[];
+        // Use pre-loaded instances grouped by process_type (no per-template DB query)
+        const instanceRows: ProcessInstanceRow[] = primaryDomain
+          ? (allInstancesByProcessType.get(primaryDomain) ?? [])
+          : [];
 
         // Skip scoring if insufficient data
         if (instanceRows.length < MIN_INSTANCES_FOR_FITNESS) {
