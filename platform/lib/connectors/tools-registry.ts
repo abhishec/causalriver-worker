@@ -381,7 +381,7 @@ export async function executeToolCall(
       return { success: false, error: `Unknown tool: ${toolName}` };
     }
 
-    const { error } = await supabase.from("writeback_queue").insert({
+    const { data: insertedRow, error } = await supabase.from("writeback_queue").insert({
       organization_id: organizationId,
       rule_id: null,
       artifact_id: null,
@@ -393,13 +393,22 @@ export async function executeToolCall(
       attempts: 0,
       last_error: null,
       external_ref: null,
-    });
+    }).select("id").maybeSingle();
 
     if (error) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, result: { queued: true, actionType, toolName } };
+    return {
+      success: true,
+      result: {
+        queued: true,
+        pendingExecution: true,
+        writebackQueueId: insertedRow?.id ?? null,
+        actionType,
+        toolName,
+      },
+    };
   } catch (err) {
     return {
       success: false,

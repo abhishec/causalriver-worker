@@ -79,7 +79,7 @@ export function validateCsrf(request: NextRequest): boolean {
  */
 
 const SESSION_RATE_LIMITS: Record<string, number> = {
-  "/api/copilot/chat": 30,           // 30 req/min — chat is expensive
+  "/api/copilot/chat": 30,           // 30 req/min per user — chat is expensive
   "/api/brain/query": 60,            // 60 req/min — brain queries
   "/api/brain/execute": 20,          // 20 req/min — executions
   "/api/brain/cycle": 10,            // 10 req/min — brain cycles are heavy
@@ -105,6 +105,21 @@ const SESSION_RATE_LIMITS: Record<string, number> = {
 };
 
 /**
+ * Per-org rate limits (10x the per-user limit, caps org-wide API cost).
+ * Key pattern: org:<workspaceId>:<path>
+ */
+const ORG_RATE_LIMITS: Record<string, number> = {
+  "/api/copilot/chat": 300,          // 300 req/min per org (10x user × 10 concurrent users)
+  "/api/brain/execute": 200,
+  "/api/agents/create": 100,
+  "/api/agents/chain": 100,
+  "/api/agents/run": 100,
+  "/api/jobs/trigger": 50,
+  "/api/connectors/sync-all": 50,
+  "/api/brain/ingest-document": 100,
+};
+
+/**
  * Per-path window overrides (in seconds).
  * If a path is NOT listed here, the default 60-second window is used.
  * Use this for endpoints that need hourly (3600s) or daily (86400s) limits
@@ -114,9 +129,38 @@ const SESSION_RATE_WINDOWS: Record<string, number> = {
   "/api/agents/overnight": 3600,     // 2 req/hour — prevent runaway overnight job spawning
 };
 
+/**
+ * Conservative in-memory fallback used when Redis is unavailable.
+ * Prevents fail-open while maintaining approximate rate limiting.
+ */
+let _memRateLimits: Map<string, { count: number; resetAt: number }> | null = null;
+
+function checkMemRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number
+): { allowed: boolean; remaining: number } {
+  if (!_memRateLimits) _memRateLimits = new Map();
+  const now = Date.now();
+  const memKey = `${key}:mem`;
+  const entry = _memRateLimits.get(memKey);
+
+  if (entry && now - entry.resetAt < windowMs && entry.count >= limit) {
+    return { allowed: false, remaining: 0 };
+  }
+  if (!entry || now - entry.resetAt >= windowMs) {
+    _memRateLimits.set(memKey, { count: 1, resetAt: now });
+  } else {
+    entry.count++;
+  }
+  const current = _memRateLimits.get(memKey);
+  return { allowed: true, remaining: limit - (current?.count ?? 1) };
+}
+
 export async function checkSessionRateLimit(
   userId: string,
-  pathname: string
+  pathname: string,
+  workspaceId?: string
 ): Promise<{ allowed: boolean; remaining: number }> {
   // Find matching rate limit
   const matchingPath = Object.keys(SESSION_RATE_LIMITS).find((p) => p !== "default" && pathname.startsWith(p));
@@ -124,17 +168,48 @@ export async function checkSessionRateLimit(
 
   // Use per-path window override if available (e.g. 3600s for overnight endpoint)
   const windowSeconds = matchingPath ? (SESSION_RATE_WINDOWS[matchingPath] ?? 60) : 60;
+  const windowMs = windowSeconds * 1000;
 
-  const key = `session:${userId}:${matchingPath || "default"}`;
+  const userKey = `session:${userId}:${matchingPath || "default"}`;
 
+  // ── Per-user check ────────────────────────────────────────────────
   try {
-    const result = await redisCheckRateLimit(key, limit, windowSeconds);
-    return { allowed: result.allowed, remaining: result.remaining };
+    const result = await redisCheckRateLimit(userKey, limit, windowSeconds);
+    if (!result.allowed) {
+      return { allowed: false, remaining: 0 };
+    }
   } catch (err) {
-    // Fail open — if Redis is down, allow the request but log
-    logger.warn(`[RateLimit] Redis error, failing open: ${err}`);
-    return { allowed: true, remaining: limit };
+    logger.warn(`[RateLimit] Redis error on user key, using in-memory fallback: ${err}`);
+    const memResult = checkMemRateLimit(userKey, limit, windowMs);
+    if (!memResult.allowed) {
+      return { allowed: false, remaining: 0 };
+    }
   }
+
+  // ── Per-org check (only for paths with an org limit configured) ───
+  if (workspaceId && matchingPath && ORG_RATE_LIMITS[matchingPath] !== undefined) {
+    const orgLimit = ORG_RATE_LIMITS[matchingPath];
+    const orgKey = `org:${workspaceId}:${matchingPath}`;
+
+    try {
+      const orgResult = await redisCheckRateLimit(orgKey, orgLimit, windowSeconds);
+      if (!orgResult.allowed) {
+        logger.warn(`[RateLimit] Org rate limit hit`, { workspaceId, pathname, orgLimit });
+        return { allowed: false, remaining: 0 };
+      }
+      return { allowed: true, remaining: orgResult.remaining };
+    } catch (err) {
+      logger.warn(`[RateLimit] Redis error on org key, using in-memory fallback: ${err}`);
+      const memOrgResult = checkMemRateLimit(orgKey, orgLimit, windowMs);
+      if (!memOrgResult.allowed) {
+        return { allowed: false, remaining: 0 };
+      }
+      return { allowed: true, remaining: memOrgResult.remaining };
+    }
+  }
+
+  // No org limit for this path — return from user check
+  return { allowed: true, remaining: limit };
 }
 
 // ── Request Size Validation ───────────────────────────────────────────
@@ -209,7 +284,7 @@ export function createRequestLogger(request: NextRequest) {
 
 export async function enforceSessionSecurity(
   request: NextRequest,
-  options: { requireAuth?: boolean; requireAdmin?: boolean } = {}
+  options: { requireAuth?: boolean; requireAdmin?: boolean; workspaceId?: string } = {}
 ): Promise<
   | { ok: true; userId: string; supabase: Awaited<ReturnType<typeof createClient>> }
   | { ok: false; response: NextResponse }
@@ -240,10 +315,10 @@ export async function enforceSessionSecurity(
     return { ok: true, userId: "anonymous", supabase };
   }
 
-  // Session rate limit (Redis-backed, async)
-  const rateLimit = await checkSessionRateLimit(user.id, request.nextUrl.pathname);
+  // Session rate limit (Redis-backed, async) — includes per-org check when workspaceId provided
+  const rateLimit = await checkSessionRateLimit(user.id, request.nextUrl.pathname, options.workspaceId);
   if (!rateLimit.allowed) {
-    logger.warn("session_rate_limited", { userId: user.id });
+    logger.warn("session_rate_limited", { userId: user.id, orgId: options.workspaceId });
     return {
       ok: false,
       response: NextResponse.json(

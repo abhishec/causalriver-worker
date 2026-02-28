@@ -176,6 +176,8 @@ export async function executeAgenticState(
   const toolCallsExecuted: Array<{
     tool: string;
     success: boolean;
+    pendingExecution?: boolean;
+    writebackQueueId?: string | null;
     error?: string;
   }> = [];
 
@@ -188,9 +190,12 @@ export async function executeAgenticState(
         block.name,
         block.input as Record<string, unknown>
       );
+      const resultData = result.result as Record<string, unknown> | undefined;
       toolCallsExecuted.push({
         tool: block.name,
         success: result.success,
+        pendingExecution: resultData?.pendingExecution === true,
+        writebackQueueId: (resultData?.writebackQueueId as string | null | undefined) ?? null,
         error: result.error,
       });
     }
@@ -203,6 +208,22 @@ export async function executeAgenticState(
     .join("\n");
 
   const parsed = parseAgenticResponse(textContent, validEvents, toolCallsExecuted);
+
+  // Reduce RL quality score for pending (unconfirmed) tool executions
+  const pendingCount = toolCallsExecuted.filter((t) => t.pendingExecution).length;
+  if (pendingCount > 0) {
+    const penalty = pendingCount * 0.1;
+    const existingQuality = typeof parsed.findings.agenticQualityScore === "number"
+      ? parsed.findings.agenticQualityScore
+      : 1.0;
+    parsed.findings.agenticQualityScore = Math.max(0.3, existingQuality - penalty);
+    parsed.findings.pendingToolCount = pendingCount;
+    // Inject warning so the FSM context carries forward the uncertainty
+    if (!Array.isArray(parsed.findings.warnings)) parsed.findings.warnings = [];
+    (parsed.findings.warnings as string[]).push(
+      "Note: Some tool calls are pending confirmation (connector execution queued)"
+    );
+  }
 
   logger.warn("[AgenticExecutor] State complete", {
     processType,
