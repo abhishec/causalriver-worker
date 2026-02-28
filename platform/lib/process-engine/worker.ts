@@ -66,7 +66,8 @@ export async function processProcessEngineJobs(
     // invocation that wins the UPDATE race gets to process the job.
     for (const job of candidateJobs) {
       // Attempt to claim by flipping status pending → running atomically.
-      // If rowCount === 0 another cron won the race — skip this job.
+      // SELECT the id so we can tell if any row was actually updated (claimed).
+      // If data is empty or null, another cron won the race — skip this job.
       const { data: claimedRows, error: claimErr } = await supabase
         .from("agent_queue")
         .update({

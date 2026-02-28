@@ -64,6 +64,35 @@ function _evictBrainContextCache(): void {
   }
 }
 
+/**
+ * Invalidate the brain context cache for a specific org immediately.
+ *
+ * Must be called after any mutation that changes the data read by getBrainContext:
+ *   - Creating / updating a bpaas_process_instances row (changes L28 process layer)
+ *   - Inserting a new agent_queue job (changes activeJobCount / pendingJobCount in L3)
+ *   - Completing or failing an agent_queue job (changes lastJobStatus in L3)
+ *
+ * Why this matters:
+ *   getBrainContext() has a 30s module-level cache. Without invalidation, the
+ *   cognitive planner reads stale activeJobCount / pendingJobCount for up to 30s
+ *   after a BPaaS process starts, and may queue duplicate jobs for the same domain.
+ *   The DB-level dedup marker in cognitive-planner.ts catches this for SE-aaS
+ *   domains, but the brain context itself will silently misreport live operations.
+ *
+ * Safety: also cancels any in-flight fetch for this org so the next caller gets
+ * a fresh fetch rather than joining a now-stale in-progress query.
+ *
+ * This is safe on serverless (AWS Lambda) because each Lambda instance has its own
+ * module-level state — the invalidation only affects the current instance's cache.
+ * Across multiple Lambda instances, the 30s TTL is the eventual-consistency bound.
+ */
+export function invalidateBrainContextCache(orgId: string): void {
+  _brainContextCache.delete(orgId);
+  // Also cancel any in-flight dedup entry so the next caller fires a fresh fetch.
+  // This prevents a caller from joining a fetch that started BEFORE the mutation.
+  _inFlight.delete(orgId);
+}
+
 // ── Cross-org patterns cache: 5-min TTL (expensive: full-table scan across orgs) ─
 // L24 cross-org query uses the service client to aggregate patterns across ALL orgs.
 // This is intentionally slow and expensive — 5-min TTL prevents thundering herd.
