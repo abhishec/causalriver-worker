@@ -28,6 +28,7 @@ import { logDecision } from "@/lib/brain/decision-log";
 import { retrieveRelevantMemories } from "@/lib/brain/memory-retrieval";
 import { logAuditEvent, AuditAction } from "@/lib/audit";
 import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -526,6 +527,16 @@ async function _runCognitivePlannerInner(
             failCount
           );
 
+          // Capture the reflection as a learning signal (fire-and-forget)
+          _captureStreamedResponse(reflection, 0, {
+            supabase,
+            organizationId: orgId,
+            domain: 'cognitive-planner.reflection',
+            aiWorkerId,
+            inputSummary: priorDomains.join(', ').slice(0, 200),
+            qualityThreshold: 0.4,
+          });
+
           // Store as episodic memory (Reflexion episodic buffer, bounded at 10)
           // B3: Store structured ReflectionSchema JSON so Phase 0 can extract avoidPatterns
           const reflectionSchema: ReflectionSchema = {
@@ -979,6 +990,18 @@ ${pastReflectionsText}`;
 
     const firstBlock = response.content[0];
     const rawText = firstBlock.type === "text" ? firstBlock.text.trim() : "[]";
+
+    // Capture the planning decision as a learning signal (fire-and-forget)
+    if (rawText && rawText !== "[]") {
+      _captureStreamedResponse(rawText, 0, {
+        supabase,
+        organizationId: orgId,
+        domain: 'cognitive-planner.schedule',
+        aiWorkerId,
+        inputSummary: stateSnapshot.slice(0, 200),
+        qualityThreshold: 0.4,
+      });
+    }
 
     try {
       // Strip markdown code fences if present

@@ -143,6 +143,21 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
     }
   } catch { /* non-fatal */ }
 
+  // ── 2.5. Federated Knowledge Capture ──────────────────────────────────────
+  // Write the raw response to federated_knowledge for cross-org learning.
+  // Complements ai_memory (per-org patterns) with federated_knowledge (promoted cross-org).
+  if (streamedAssistantText && streamedAssistantText.length > 100 && _rlQuality >= 0.45) {
+    void import("@/lib/brain/claude-learning-capture").then(({ captureStreamedResponse }) => {
+      captureStreamedResponse(streamedAssistantText, _rlExecutionMs, {
+        supabase: service,
+        organizationId: workspaceId,
+        domain: `copilot.${detectedIntent ?? 'general'}`,
+        inputSummary: message.trim().slice(0, 200),
+        qualityThreshold: 0.45,
+      });
+    }).catch(() => {}); // fire-and-forget
+  }
+
   // ── 3. Response Harvesting (Haiku key fact extraction → ai_memory) ─────────
   if (streamedAssistantText && streamedAssistantText.length > 200) {
     void (async () => {

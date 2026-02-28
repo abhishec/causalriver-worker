@@ -1,6 +1,7 @@
 import { logger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
+import { captureStreamedResponse as _captureFivePhase } from "@/lib/brain/claude-learning-capture";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -250,9 +251,17 @@ Use markdown formatting. Be concise and actionable.`,
     durationMs: Date.now() - startTime,
   });
 
-  // Suppress unused variable warning — supabase is available for future phases
-  // that may need DB writes (e.g., persisting artifacts, logging insight records).
-  void supabase;
+  // Capture the final synthesis as a learning signal (fire-and-forget)
+  if (finalOutput && finalOutput.length > 50 && params.orgId) {
+    _captureFivePhase(finalOutput, Date.now() - startTime, {
+      supabase,
+      organizationId: params.orgId,
+      domain: `five-phase.${params.domain}`,
+      aiWorkerId: params.aiWorkerId,
+      inputSummary: params.taskDescription.slice(0, 200),
+      qualityThreshold: 0.4,
+    });
+  }
 
   return {
     phases,

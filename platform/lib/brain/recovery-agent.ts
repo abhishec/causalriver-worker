@@ -21,6 +21,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
 import { getBrainContext } from "@/lib/brain/brain-context";
 import { routeCallType } from "@/lib/brain/call-type-router";
+import { captureStreamedResponse as _captureRecoveryLearning } from "@/lib/brain/claude-learning-capture";
 import {
   CAPABILITIES_MANIFEST,
   findApplicableStrategies,
@@ -199,7 +200,9 @@ async function consultClaude(
   emptyResult: boolean,
   connectedConnectors: Set<string>,
   rlHistory: { avgQuality: number; successRate: number; totalOutcomes: number } | null,
-  recoveryContext?: string
+  recoveryContext?: string,
+  supabaseCapture?: SupabaseClient,
+  orgIdCapture?: string
 ): Promise<ClaudeSuggestion | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -290,6 +293,17 @@ Respond with ONLY the JSON object.`;
       typeof parsed.alternativeQuery !== "string"
     ) {
       throw new Error("Invalid response shape from Claude");
+    }
+
+    // Capture the recovery diagnosis as a learning signal (fire-and-forget)
+    if (supabaseCapture && orgIdCapture) {
+      _captureRecoveryLearning(parsed.explanation, 0, {
+        supabase: supabaseCapture,
+        organizationId: orgIdCapture,
+        domain: 'recovery-agent.diagnosis',
+        inputSummary: `${originalDomain}: ${failureReason}`.slice(0, 200),
+        qualityThreshold: 0.35,
+      });
     }
 
     return parsed;
@@ -484,7 +498,9 @@ export async function attemptRecovery(
     emptyResult,
     connectedConnectors,
     rlHistory,
-    recoveryContext || undefined
+    recoveryContext || undefined,
+    supabase,
+    orgId
   );
 
   // ── Step 4: Act on Claude's suggestion ────────────────────────────────────
