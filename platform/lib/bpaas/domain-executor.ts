@@ -35,6 +35,13 @@ import { getBrainContext } from "@/lib/brain/brain-context";
 import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordPredictionAccuracy } from "@/lib/brain/agent-rl";
 import { predictStateRisk } from "@/lib/brain/process-predictor";
 import type { PredictionResult } from "@/lib/brain/process-predictor";
+import {
+  createTokenBudget,
+  recordTokenUsage,
+  shouldSkipLLMCall,
+  formatCompetitionAnswer,
+} from "@/lib/brain/token-budget";
+import type { TokenBudget } from "@/lib/brain/token-budget";
 import { logger } from "@/lib/logger";
 import {
   snapshotCausalWeights,
@@ -227,11 +234,16 @@ function pickPolicyCheckEvent(
 
 // ── LLM Caller ───────────────────────────────────────────────────────────────
 
+interface HaikuCallResult {
+  text: string;
+  tokensUsed: number;
+}
+
 async function callHaiku(params: {
   apiKey: string;
   systemPrompt: string;
   userContent: string;
-}): Promise<string> {
+}): Promise<HaikuCallResult> {
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const anthropic = new Anthropic({ apiKey: params.apiKey });
   const response = await anthropic.messages.create({
@@ -241,7 +253,10 @@ async function callHaiku(params: {
     messages: [{ role: "user", content: params.userContent }],
   });
   const content = response.content[0];
-  return content.type === "text" ? content.text : "";
+  const text = content.type === "text" ? content.text : "";
+  const tokensUsed =
+    (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
+  return { text, tokensUsed };
 }
 
 // ── Main Executor ─────────────────────────────────────────────────────────────
@@ -256,6 +271,12 @@ export async function executeBPaaSProcess(
     params.anthropicApiKey ??
     process.env.ANTHROPIC_API_KEY ??
     "";
+
+  // ── Token budget — tracks LLM token consumption across FSM states ──────────
+  // Pure synchronous state — never blocks execution.
+  // processInstanceId not known yet (created in Step 0) — use jobId as placeholder;
+  // budget is local to this invocation and is not persisted to DB.
+  let tokenBudget: TokenBudget = createTokenBudget(params.jobId, params.processType);
 
   // ── Step -1: Brain context prime ─────────────────────────────────────────
   let brainContextSummary = "";
@@ -388,6 +409,9 @@ export async function executeBPaaSProcess(
 
     processInstanceId = instanceRow.id as string;
 
+    // Update budget to use the real processInstanceId now that it's available
+    tokenBudget = { ...tokenBudget, processInstanceId };
+
     const context: BPaaSContext = {
       processType: params.processType,
       processInstanceId,
@@ -445,10 +469,22 @@ export async function executeBPaaSProcess(
         ].join("\n\n");
 
         let decomposedText = "";
-        try {
-          decomposedText = await callHaiku({ apiKey, systemPrompt, userContent });
-        } catch (llmErr) {
-          throw new Error(`DECOMPOSE LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
+        if (shouldSkipLLMCall(tokenBudget)) {
+          // Budget exhausted — use a deterministic fallback to avoid blocking execution
+          decomposedText = JSON.stringify({
+            steps: ["assess", "compute", "policy_check", "mutate"],
+            entities: {},
+            constraints: [],
+            metadata: { budget_exhausted: true },
+          });
+        } else {
+          try {
+            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
+            decomposedText = haikuResult.text;
+            tokenBudget = recordTokenUsage(tokenBudget, "DECOMPOSE", haikuResult.tokensUsed);
+          } catch (llmErr) {
+            throw new Error(`DECOMPOSE LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
+          }
         }
 
         // Parse JSON result — fall back to wrapping raw text
@@ -493,10 +529,23 @@ export async function executeBPaaSProcess(
         ].join("\n\n");
 
         let assessedText = "";
-        try {
-          assessedText = await callHaiku({ apiKey, systemPrompt, userContent });
-        } catch (llmErr) {
-          throw new Error(`ASSESS LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
+        if (shouldSkipLLMCall(tokenBudget)) {
+          // Budget exhausted — derive facts deterministically from inputPayload
+          assessedText = JSON.stringify({
+            entities: ctx.inputPayload,
+            numeric_values: {},
+            boolean_flags: {},
+            business_rules: [],
+            budget_exhausted: true,
+          });
+        } else {
+          try {
+            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
+            assessedText = haikuResult.text;
+            tokenBudget = recordTokenUsage(tokenBudget, "ASSESS", haikuResult.tokensUsed);
+          } catch (llmErr) {
+            throw new Error(`ASSESS LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`);
+          }
         }
 
         let assessedFacts: Record<string, unknown>;
@@ -608,12 +657,23 @@ export async function executeBPaaSProcess(
           .join("\n\n");
 
         let customStateResultText = "";
-        try {
-          customStateResultText = await callHaiku({ apiKey, systemPrompt, userContent });
-        } catch (llmErr) {
-          throw new Error(
-            `${currentState} LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`
-          );
+        if (shouldSkipLLMCall(tokenBudget)) {
+          // Budget exhausted — default to first valid outgoing event to keep FSM moving
+          customStateResultText = JSON.stringify({
+            event: validEvents[0],
+            reason: "token budget exhausted — defaulting to first available transition",
+            findings: { budget_exhausted: true },
+          });
+        } else {
+          try {
+            const haikuResult = await callHaiku({ apiKey, systemPrompt, userContent });
+            customStateResultText = haikuResult.text;
+            tokenBudget = recordTokenUsage(tokenBudget, currentState, haikuResult.tokensUsed);
+          } catch (llmErr) {
+            throw new Error(
+              `${currentState} LLM failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}`
+            );
+          }
         }
 
         let customStateResult: Record<string, unknown>;
@@ -866,6 +926,29 @@ export async function executeBPaaSProcess(
     firedPolicyRules,
     stateCount: ctx.stateHistory.length,
     durationMs,
+    // Token budget summary — included for observability and RL signals
+    tokenBudget: {
+      budgetTokens: tokenBudget.budgetTokens,
+      usedTokens: tokenBudget.usedTokens,
+      percentUsed: Math.round((tokenBudget.usedTokens / tokenBudget.budgetTokens) * 100),
+      stateBreakdown: tokenBudget.stateBreakdown,
+      warningFired: tokenBudget.warningFired,
+      hardLimitReached: tokenBudget.hardLimitReached,
+    },
+    // Structured competition answer format — readable by AgentX judge
+    competitionAnswer: formatCompetitionAnswer(
+      {
+        processType: params.processType,
+        processInstanceId,
+        finalState,
+        computedValues: ctx.computedValues,
+        mutationResult: ctx.mutationResult,
+        firedPolicyRules,
+        stateCount: ctx.stateHistory.length,
+      },
+      params.processType,
+      durationMs
+    ),
   };
 
   // Determine status from final FSM state
