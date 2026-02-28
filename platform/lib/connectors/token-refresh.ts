@@ -13,6 +13,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
+import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 
 /**
  * Refreshes an expired Jira OAuth token and writes the new credentials back
@@ -100,14 +101,24 @@ export async function refreshJiraToken(
   const expiresIn = tokenData.expires_in ?? 3600;
   const newExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
 
-  // Fetch the current credentials to merge (preserve cloud_id, site_url, etc.)
-  const { data: row } = await supabase
+  // Fetch connector metadata to resolve org + type for RPC call
+  const { data: connRow } = await supabase
     .from("org_connectors")
-    .select("credentials")
+    .select("organization_id, connector_type")
     .eq("id", connectorId)
     .maybeSingle();
 
-  const existingCreds = (row?.credentials as Record<string, unknown>) ?? {};
+  // Use secure RPC to get decrypted credentials (Phase 2: no plaintext read)
+  // Falls back to empty object if RPC fails — token fields are set below regardless
+  let existingCreds: Record<string, unknown> = {};
+  if (connRow?.organization_id && connRow?.connector_type) {
+    const rpcCreds = await getConnectorCredentials(
+      supabase,
+      connRow.organization_id as string,
+      connRow.connector_type as string
+    );
+    existingCreds = rpcCreds ?? {};
+  }
 
   const updatedCredentials: Record<string, unknown> = {
     ...existingCreds,

@@ -24,6 +24,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { refreshJiraToken } from "@/lib/connectors/token-refresh";
+import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 
 /** Connectors that use expiring OAuth 2.0 tokens and support refresh */
 const REFRESHABLE_CONNECTOR_TYPES = new Set(["jira", "confluence"]);
@@ -68,10 +69,10 @@ export async function getConnectorTokenWithId(
   connectorType: "jira" | "github" | "slack" | "confluence"
 ): Promise<ConnectorTokenResult> {
   try {
-    // Fetch the connector row — only active connectors
+    // Fetch the connector row — only active connectors (no plaintext credentials column)
     const { data: row, error } = await supabase
       .from("org_connectors")
-      .select("id, credentials, status")
+      .select("id, status")
       .eq("organization_id", organizationId)
       .eq("connector_type", connectorType)
       .in("status", ["active", "connected"])
@@ -93,11 +94,13 @@ export async function getConnectorTokenWithId(
       return { token: null, connectorId: null };
     }
 
-    const credentials = row.credentials as Record<string, unknown> | null;
     const connectorId = row.id as string;
 
+    // Use secure RPC to get decrypted credentials (Phase 2: no plaintext read)
+    const credentials = await getConnectorCredentials(supabase, organizationId, connectorType);
+
     if (!credentials) {
-      logger.warn("[get-connector-token] Connector has no credentials", {
+      logger.warn("[get-connector-token] Connector has no credentials (encrypted lookup returned null)", {
         connectorId,
         connectorType,
       });
