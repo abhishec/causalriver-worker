@@ -371,7 +371,7 @@ export async function runCognitivePlanner(
   try {
     return await _runCognitivePlannerInner(supabase, orgId, cycleId, anthropic);
   } catch (err) {
-    logger.error(`[CognitivePlanner] Fatal error for org=${orgId} cycle=${cycleId}:`, err);
+    logger.warn(`[CognitivePlanner] Fatal error for org=${orgId} cycle=${cycleId}:`, err);
     return {
       cycleId,
       decisionsQueued: 0,
@@ -396,7 +396,7 @@ async function _runCognitivePlannerInner(
 ): Promise<CognitivePlannerResult> {
   // B5: Load configurable thresholds — falls back to defaults silently
   const plannerConfig = await loadPlannerConfig(supabase, orgId);
-  logger.info(
+  logger.warn(
     `[CognitivePlanner] Starting cycle=${cycleId} org=${orgId} ` +
       `qualityFloor=${plannerConfig.qualityFloor} coverageGapHours=${plannerConfig.coverageGapHours} ` +
       `maxDomainsPerCycle=${plannerConfig.maxDomainsPerCycle} stuckThreshold=${plannerConfig.stuckDomainThreshold}`
@@ -534,7 +534,7 @@ async function _runCognitivePlannerInner(
           }
 
           reflected = true;
-          logger.info(
+          logger.warn(
             `[CognitivePlanner] Reflected on prior cycle: ${successCount} successes, ${failCount} failures`
           );
         }
@@ -656,7 +656,7 @@ async function _runCognitivePlannerInner(
           decisionMade: { excluded: true, reason: "global_circuit_breaker" },
           rationale: "Domain excluded by global circuit breaker (>10 failures/2h)",
           domain,
-        });
+        }).catch((e: unknown) => logger.warn("[CognitivePlanner] logDecision (circuit_breaker) failed:", e));
       }
     }
     // Log poisoning warnings — these domains are filtered to protect the fleet
@@ -803,7 +803,7 @@ async function _runCognitivePlannerInner(
       .gte("created_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
     recoveryMode = (recoveryCount ?? 0) > 0;
     if (recoveryMode) {
-      logger.info(`[CognitivePlanner] Recovery mode active for org=${orgId} — reducing to 1 decision`);
+      logger.warn(`[CognitivePlanner] Recovery mode active for org=${orgId} — reducing to 1 decision`);
     }
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 1f (recovery mode check) failed:", err);
@@ -981,7 +981,7 @@ ${pastReflectionsText}`;
         }));
     }
 
-    logger.info(
+    logger.warn(
       `[CognitivePlanner] Phase 2 planned ${decisions.length} decisions for org=${orgId}`
     );
   } catch (err) {
@@ -1022,7 +1022,7 @@ ${pastReflectionsText}`;
       : 0.5,
     modelUsed: PLANNER_MODEL,
     domain: decisions[0]?.domain ?? undefined,
-  });
+  }).catch((e: unknown) => logger.warn("[CognitivePlanner] logDecision (agent_dispatch) failed:", e));
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 3 — EXECUTE (dedup + queue)
@@ -1100,7 +1100,7 @@ ${pastReflectionsText}`;
         .gte("created_at", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
 
       if ((existingMarker ?? 0) > 0) {
-        logger.info(
+        logger.warn(
           `[CognitivePlanner] DEDUP skip — ${decision.domain} already queued in last 2h`
         );
         continue;
@@ -1140,7 +1140,7 @@ ${pastReflectionsText}`;
       });
 
       decisionsQueued++;
-      logger.info(
+      logger.warn(
         `[CognitivePlanner] Queued ${decision.domain} (priority=${decision.priority}) for org=${orgId}`
       );
     } catch (err) {
@@ -1195,7 +1195,7 @@ ${pastReflectionsText}`;
     reflectionsStored: reflected ? 1 : 0,
   });
 
-  logger.info(
+  logger.warn(
     `[CognitivePlanner] Cycle complete: ` +
       `cycle=${cycleId} org=${orgId} ` +
       `queued=${decisionsQueued} gaps=${coverageGaps.length} ` +

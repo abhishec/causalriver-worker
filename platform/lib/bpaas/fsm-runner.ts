@@ -420,7 +420,9 @@ export class BPaaSFSMRunner {
         rationale: `BPaaS state transition: ${prevState} --[${event}]--> ${nextState}`,
         domain,
         jobId: this.context.jobId,
-      });
+      }).catch((e: unknown) =>
+        logger.warn("[BPaaSFSMRunner] logDecision failed (non-fatal)", { error: String(e) })
+      );
     }
 
     logger.warn(`[BPaaSFSMRunner] Transition: ${prevState} --[${event}]--> ${nextState}`, {

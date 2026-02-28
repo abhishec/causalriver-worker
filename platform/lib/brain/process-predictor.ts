@@ -104,8 +104,9 @@ async function loadStatePatterns(
   orgId: string
 ): Promise<Record<string, number>> {
   try {
-    const result = await supabase
-      .from("service_health" as string)
+    // service_health table is not yet in generated Supabase types (migration pending).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (supabase as any).from("service_health")
       .select("summary, updated_at")
       .eq("organization_id", orgId)
       .eq("service_type", "process-engine")
