@@ -93,6 +93,11 @@ export interface ExecuteAccountingParams {
    * Called at intro and completion with Heart/Mind/Speech payloads.
    */
   onComms?: (payload: AgentCommsPayload) => void;
+  /**
+   * Optional: AI worker UUID from ai_workers table (ADR-020).
+   * When provided, written to RL tables to enable per-worker threshold adaptation.
+   */
+  aiWorkerId?: string;
 }
 
 export interface ExecuteAccountingResult {
@@ -524,6 +529,7 @@ export async function executeAccountingAgent(
     executionMs: durationMs,
     organizationId,
     userId,
+    aiWorkerId: params.aiWorkerId ?? undefined,
   }).catch(() => {/* non-fatal */});
 
   logAgentRetro({

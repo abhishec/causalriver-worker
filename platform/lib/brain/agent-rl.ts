@@ -43,15 +43,20 @@ const DOMAIN_THRESHOLD_DEFAULTS: Record<string, number> = {
  * Formula: mean − 0.5 × stddev, clamped to [0.4, 0.85].
  * Requires >= 10 samples; falls back to DOMAIN_THRESHOLD_DEFAULTS otherwise.
  *
- * Results are cached per (orgId, domain) for 30 minutes to avoid per-request
+ * Results are cached per (orgId, domain[, aiWorkerId]) for 30 minutes to avoid per-request
  * DB overhead on the hot path.
+ *
+ * When aiWorkerId is provided, the query is scoped to that specific AI worker's
+ * history, giving per-worker adaptive thresholds that are more accurate than
+ * workspace-wide averages.
  */
 export async function getDomainThreshold(
   supabase: SupabaseClient,
   orgId: string,
-  domain: string
+  domain: string,
+  aiWorkerId?: string
 ): Promise<number> {
-  const cacheKey = `${orgId}:${domain}`;
+  const cacheKey = aiWorkerId ? `${orgId}:${domain}:${aiWorkerId}` : `${orgId}:${domain}`;
   const cached = _domainThresholdCache.get(cacheKey);
   if (cached && Date.now() - cached.cachedAt < THRESHOLD_CACHE_TTL) {
     return cached.threshold;
@@ -59,7 +64,7 @@ export async function getDomainThreshold(
 
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data } = await supabase
+    let query = supabase
       .from('prediction_records')
       .select('confidence')
       .eq('organization_id', orgId)
@@ -67,6 +72,13 @@ export async function getDomainThreshold(
       .gte('created_at', thirtyDaysAgo)
       .not('confidence', 'is', null)
       .limit(200); // cap to prevent unbounded scan on active domains
+
+    // Per-worker threshold: scope to this AI worker's history for more accurate signals
+    if (aiWorkerId) {
+      query = query.eq('ai_worker_id', aiWorkerId);
+    }
+
+    const { data } = await query;
 
     if (data && data.length >= 10) {
       const values = (data as { confidence: number }[]).map(r => r.confidence);
@@ -109,6 +121,12 @@ export interface AgentOutcomeParams {
   chunkIds?: string[];
   /** Optional: Claude model ID used (e.g. "claude-haiku-4-5-20251001", "claude-sonnet-4-6") */
   modelId?: string;
+  /**
+   * Optional: AI worker UUID from ai_workers table.
+   * When provided, written to prediction_records.ai_worker_id and
+   * cross_domain_signals.ai_worker_id to enable per-worker RL thresholds (ADR-020).
+   */
+  aiWorkerId?: string;
 }
 
 export interface LearningStats {
@@ -120,6 +138,8 @@ export interface LearningStats {
   pendingFeedback: number;   // brain_feedback_queue pending count
   helpfulFeedback: number;   // copilot_response_feedback helpful count (7d)
   notHelpfulFeedback: number;
+  /** 7-day rolling average quality score across all agent executions (ADR-020) */
+  qualityScore7d: number;    // 0–1
 }
 
 // ── Quality Heuristic ──────────────────────────────────────────────────────
@@ -261,8 +281,8 @@ export async function recordAgentOutcome(
   supabase: SupabaseClient,
   params: AgentOutcomeParams
 ): Promise<void> {
-  // Get adaptive threshold for this domain — replaces hardcoded 0.7
-  const threshold = await getDomainThreshold(supabase, params.organizationId, params.domain);
+  // Get adaptive threshold for this domain — per-worker when aiWorkerId provided (ADR-020)
+  const threshold = await getDomainThreshold(supabase, params.organizationId, params.domain, params.aiWorkerId);
   const wasSuccess = params.quality >= threshold;
 
   // EU AI Act Article 13: log the model quality decision
@@ -301,6 +321,8 @@ export async function recordAgentOutcome(
       was_correct: wasSuccess,
       verified_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
+      // Per-worker RL tracking (ADR-020) — null for legacy/system jobs
+      ai_worker_id: params.aiWorkerId ?? null,
       metadata: {
         ...(params.modelId ? { modelId: params.modelId, modelFamily } : {}),
         adaptiveThreshold: threshold,
@@ -330,6 +352,8 @@ export async function recordAgentOutcome(
       signal_strength: params.quality,  // numeric quality — required by tier3 threshold
       entity_type: "agent",
       entity_id: params.agentId,
+      // Per-worker RL tracking (ADR-020) — null for legacy/system jobs
+      ai_worker_id: params.aiWorkerId ?? null,
       signal_metadata: {
         quality: params.quality,
         numericSignalValue: numericQuality,
@@ -609,9 +633,9 @@ export async function getLearningStats(
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Fire all three queries in parallel — prediction_records, pending feedback,
-    // and copilot feedback have no dependencies on each other.
-    const [recordsResult, pendingFeedbackResult, recentFeedbackResult] = await Promise.all([
+    // Fire all four queries in parallel — prediction_records, pending feedback,
+    // copilot feedback, and 7d quality have no dependencies on each other.
+    const [recordsResult, pendingFeedbackResult, recentFeedbackResult, quality7dResult] = await Promise.all([
       supabase
         .from("prediction_records")
         .select("domain, confidence, was_correct, created_at")
@@ -630,6 +654,16 @@ export async function getLearningStats(
         .eq("organization_id", organizationId)
         .gte("created_at", since7d)
         .limit(500), // cap to prevent full-table scan on active orgs
+      // 7-day rolling quality: fetch confidence scores for recent executions (ADR-020)
+      supabase
+        .from("prediction_records")
+        .select("confidence, ai_worker_id, created_at")
+        .eq("organization_id", organizationId)
+        .eq("prediction_type", "agent_task_outcome")
+        .gte("created_at", since7d)
+        .not("confidence", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
     const all = recordsResult.data ?? [];
@@ -662,6 +696,15 @@ export async function getLearningStats(
     const helpfulFeedback = fb.filter(f => f.rating === "helpful").length;
     const notHelpfulFeedback = fb.filter(f => f.rating === "not_helpful").length;
 
+    // 7-day rolling quality score (ADR-020)
+    const qualityRows = (quality7dResult.data ?? []) as { confidence: number }[];
+    const qualityScore7d =
+      qualityRows.length > 0
+        ? Math.round(
+            (qualityRows.reduce((sum, r) => sum + (r.confidence ?? 0), 0) / qualityRows.length) * 100
+          ) / 100
+        : 0;
+
     return {
       totalTasks,
       successRate: Math.round(successRate * 100) / 100,
@@ -671,6 +714,7 @@ export async function getLearningStats(
       pendingFeedback: pendingFeedback ?? 0,
       helpfulFeedback,
       notHelpfulFeedback,
+      qualityScore7d,
     };
   } catch (err) {
     logger.warn("[agent-rl] getLearningStats failed:", err);

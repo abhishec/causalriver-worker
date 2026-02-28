@@ -41,6 +41,11 @@ export interface JobOutcomeParams {
   artifactGenerated: boolean;
   /** Artifact ID if generated */
   artifactId?: string | null;
+  /**
+   * Optional: AI worker UUID from ai_workers table (ADR-020).
+   * When provided, written to RL tables to enable per-worker threshold adaptation.
+   */
+  aiWorkerId?: string;
 }
 
 export interface DomainRLStats {
@@ -129,6 +134,7 @@ export async function recordJobOutcome(
     executionMs: params.executionMs,
     organizationId: params.organizationId,
     userId: params.userId,
+    aiWorkerId: params.aiWorkerId ?? undefined,
   });
 
   // ── 2b. Mem0-style structured memory extraction ────────────────────────

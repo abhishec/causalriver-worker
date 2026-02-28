@@ -79,6 +79,7 @@ export async function GET(request: Request) {
           pendingFeedback: 0,
           helpfulFeedback: 0,
           notHelpfulFeedback: 0,
+          qualityScore7d: 0,
         },
         { status: 200 }
       );

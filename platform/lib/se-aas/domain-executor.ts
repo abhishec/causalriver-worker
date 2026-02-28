@@ -728,6 +728,11 @@ export interface ExecuteDomainParams {
    * so the frontend can render live agent state updates.
    */
   onComms?: (payload: AgentCommsPayload) => void;
+  /**
+   * Optional: AI worker UUID from ai_workers table (ADR-020).
+   * When provided, written to RL tables to enable per-worker threshold adaptation.
+   */
+  aiWorkerId?: string;
 }
 
 export interface ExecuteDomainResult {
@@ -1435,6 +1440,7 @@ export async function executeDomain(
     organizationId: params.organizationId,
     userId: params.userId,
     modelId: selectedModel,
+    aiWorkerId: params.aiWorkerId ?? undefined,
   }).catch(() => {/* non-fatal */});
 
   void logAgentRetro({

@@ -74,6 +74,11 @@ export interface BPaaSExecutionParams {
   anthropicApiKey?: string;
   /** Optional userId for RL outcome recording */
   userId?: string;
+  /**
+   * Optional: AI worker UUID from ai_workers table (ADR-020).
+   * When provided, written to RL tables to enable per-worker threshold adaptation.
+   */
+  aiWorkerId?: string;
 }
 
 export interface BPaaSExecutionResult {
@@ -1102,6 +1107,7 @@ export async function executeBPaaSProcess(
       organizationId: params.organizationId,
       userId: params.userId ?? params.organizationId,
       modelId: "claude-haiku-4-5-20251001",
+      aiWorkerId: params.aiWorkerId ?? undefined,
     }).catch((e: unknown) =>
       logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (task-level) failed (non-fatal)", {
         processInstanceId,
@@ -1136,6 +1142,7 @@ export async function executeBPaaSProcess(
       organizationId: params.organizationId,
       userId: params.userId ?? params.organizationId,
       modelId: "process-engine",
+      aiWorkerId: params.aiWorkerId ?? undefined,
     }).catch((e: unknown) =>
       logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (process-level) failed (non-fatal)", {
         processInstanceId,

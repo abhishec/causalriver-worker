@@ -38,6 +38,11 @@ export interface ExecutePmDomainParams {
   organizationId: string;
   userId: string;
   anthropicApiKey?: string;
+  /**
+   * Optional: AI worker UUID from ai_workers table (ADR-020).
+   * When provided, written to RL tables to enable per-worker threshold adaptation.
+   */
+  aiWorkerId?: string;
 }
 
 export interface ExecutePmDomainResult {
@@ -583,6 +588,7 @@ export async function executePmDomain(
     executionMs: durationMs,
     organizationId,
     userId,
+    aiWorkerId: params.aiWorkerId ?? undefined,
   }).catch(() => {/* non-fatal */});
 
   logAgentRetro({
