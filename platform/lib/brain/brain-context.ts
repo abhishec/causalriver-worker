@@ -38,8 +38,7 @@ async function fetchServiceHealthCache(
 ): Promise<{ data: { context_string: string; updated_at: string } | null; error: unknown }> {
   try {
     // service_health table is not yet in generated Supabase types (migration pending).
-    // The `as string` cast is intentional — Supabase JS client accepts any table name at runtime.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // The cast is intentional — Supabase JS client accepts any table name at runtime.
     const result = await (supabase as any).from("service_health")
       .select("context_string, updated_at")
       .eq("organization_id", orgId)
@@ -195,8 +194,8 @@ export async function getBrainContext(
     let consolidatedPatternsData: Array<{ pattern_type: string; title: string; description: string; confidence: number }> = [];
     try {
       consolidatedPatternsData = await getConsolidatedPatterns(orgId, supabase, 8);
-    } catch (e) {
-      logger.warn("[brain-context] Tier 3 consolidated patterns failed", { error: String(e) });
+    } catch (err: unknown) {
+      logger.warn("[brain-context] Tier 3 consolidated patterns failed", { error: String(err) });
     }
 
     // Run all fetches in parallel — non-blocking, fail gracefully
@@ -1049,8 +1048,8 @@ export async function getBrainContext(
         _crossOrgPatternsCache.data = crossOrgPatterns ?? null;
         _crossOrgPatternsCache.expiry = now + CROSS_ORG_PATTERNS_TTL_MS;
       }
-    } catch (e) {
-      logger.warn("[brain-context] L24 cross-org patterns failed (non-fatal):", String(e));
+    } catch (err: unknown) {
+      logger.warn("[brain-context] L24 cross-org patterns failed (non-fatal):", String(err));
     }
 
     // L25: Meta-Brain State — total memory count as self-awareness signal
@@ -1148,8 +1147,8 @@ export async function getBrainContext(
           seaasServiceLayer = `## SE-aaS Service Layer\n${seaasL26Parts.join(" | ")}`.slice(0, 400);
         }
       }
-    } catch (e) {
-      logger.warn("[brain-context] L26 SE-aaS service layer failed:", e);
+    } catch (err: unknown) {
+      logger.warn("[brain-context] L26 SE-aaS service layer failed:", { error: String(err) });
     }
 
     // L27: AaaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
@@ -1205,8 +1204,8 @@ export async function getBrainContext(
           aaasServiceLayer = `## AaaS Service Layer\n${aaasL27Parts.join(" | ")}`.slice(0, 250);
         }
       }
-    } catch (e) {
-      logger.warn("[brain-context] L27 AaaS service layer failed:", e);
+    } catch (err: unknown) {
+      logger.warn("[brain-context] L27 AaaS service layer failed:", { error: String(err) });
     }
 
     // ── TIER 9: PROCESS EXECUTION ─────────────────────────────────────────────
@@ -1506,8 +1505,8 @@ export async function getBrainContext(
             chunks.map(c => recordChunkUsage(c.id, Math.max(0.5, c.similarity), "knowledge_chunks"))
           );
         }
-      } catch (e) {
-        logger.warn("[brain-context] Tier 1 raw knowledge search failed", { error: String(e) });
+      } catch (err: unknown) {
+        logger.warn("[brain-context] Tier 1 raw knowledge search failed", { error: String(err) });
       }
     }
 

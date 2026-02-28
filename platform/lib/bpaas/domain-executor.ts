@@ -42,6 +42,8 @@ import {
   formatCompetitionAnswer,
 } from "@/lib/brain/token-budget";
 import type { TokenBudget } from "@/lib/brain/token-budget";
+import { loadStateParams } from "@/lib/brain/state-rl";
+import type { StateRLParams } from "@/lib/brain/state-rl";
 import { logger } from "@/lib/logger";
 import {
   snapshotCausalWeights,
@@ -522,11 +524,27 @@ export async function executeBPaaSProcess(
     try {
       // ── DECOMPOSE ─────────────────────────────────────────────────────────
       if (currentState === "DECOMPOSE") {
+        // Load RL-learned parameters for this state — may be defaults on first run.
+        // These params are updated by gradient descent in recordAndLearnStateOutcome()
+        // after each execution. This closes the state RL closed loop: learn → read → act.
+        let decomposeSrlParams: StateRLParams | null = null;
+        try {
+          decomposeSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, "DECOMPOSE");
+        } catch (srlErr) {
+          logger.warn("[BPaaS/DomainExecutor] loadStateParams DECOMPOSE failed (using LLM defaults)", {
+            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
+          });
+        }
+        const decomposeRlHint = decomposeSrlParams
+          ? `## State RL Parameters (DECOMPOSE)\nEscalation threshold: ${decomposeSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${decomposeSrlParams.confidenceWeight.toFixed(3)} | Retry budget: ${decomposeSrlParams.retryBudget}\nThese are learned parameters — apply them when deciding whether to escalate ambiguous inputs.`
+          : "";
+
         const systemPrompt = [
           "You are a BPaaS process decomposer. Break the input payload into a structured execution plan.",
           "Return a JSON object with fields: steps (array of step names), entities (key business objects), constraints (rules to check), metadata (any useful context).",
           brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
           bpaasPatterns ? `\n## BPaaS Quality Patterns\n${bpaasPatterns}` : "",
+          decomposeRlHint,
         ]
           .filter(Boolean)
           .join("\n");
@@ -577,6 +595,20 @@ export async function executeBPaaSProcess(
       else if (currentState === "ASSESS") {
         const ctx = runner.getContext();
 
+        // Load RL-learned parameters for ASSESS state — closes the state RL closed loop.
+        // escalation_threshold drives whether the assessor flags edge-case entities for review.
+        let assessSrlParams: StateRLParams | null = null;
+        try {
+          assessSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, "ASSESS");
+        } catch (srlErr) {
+          logger.warn("[BPaaS/DomainExecutor] loadStateParams ASSESS failed (using LLM defaults)", {
+            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
+          });
+        }
+        const assessRlHint = assessSrlParams
+          ? `## State RL Parameters (ASSESS)\nEscalation threshold: ${assessSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${assessSrlParams.confidenceWeight.toFixed(3)}\nFlag entities for escalation only when confidence drops below ${(1 - assessSrlParams.escalationThreshold).toFixed(3)} — this threshold is RL-tuned.`
+          : "";
+
         const systemPrompt = [
           "You are a BPaaS process assessor. Analyse the decomposed plan and extract assessed facts.",
           "Return a JSON object with fields: entities (key-value map of business entities and their values), ",
@@ -584,6 +616,7 @@ export async function executeBPaaSProcess(
           "boolean_flags (map of flag names to booleans), ",
           "business_rules (array of applicable rule descriptions).",
           brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
+          assessRlHint,
         ]
           .filter(Boolean)
           .join("\n");
@@ -686,6 +719,18 @@ export async function executeBPaaSProcess(
       else if (CUSTOM_INTERMEDIATE_STATES.has(currentState)) {
         const ctx = runner.getContext();
 
+        // Load RL-learned parameters for this custom state — e.g. FRAUD_REVIEW, RECONCILE
+        // escalation_threshold affects how aggressively the LLM routes to escalation vs proceeding.
+        let customSrlParams: StateRLParams | null = null;
+        try {
+          customSrlParams = await loadStateParams(supabase, params.organizationId, params.processType, currentState);
+        } catch (srlErr) {
+          logger.warn("[BPaaS/DomainExecutor] loadStateParams custom state failed (using LLM defaults)", {
+            state: currentState,
+            error: srlErr instanceof Error ? srlErr.message : String(srlErr),
+          });
+        }
+
         // Get valid outgoing transitions for this state from the process definition
         const validTransitions = definition.transitions.filter(
           (t) => t.from === currentState
@@ -699,6 +744,10 @@ export async function executeBPaaSProcess(
 
         const validEvents = validTransitions.map((t) => t.on);
 
+        const customRlHint = customSrlParams
+          ? `## State RL Parameters (${currentState})\nEscalation threshold: ${customSrlParams.escalationThreshold.toFixed(3)} | Confidence weight: ${customSrlParams.confidenceWeight.toFixed(3)} | Retry budget: ${customSrlParams.retryBudget}\nOnly choose an escalation event when your confidence is below ${(1 - customSrlParams.escalationThreshold).toFixed(3)} — this threshold is RL-tuned from historical outcomes.`
+          : "";
+
         // Use Haiku LLM to determine which event fires based on context
         const systemPrompt = [
           `You are a BPaaS state handler for the ${currentState} state in a ${params.processType} process.`,
@@ -707,6 +756,7 @@ export async function executeBPaaSProcess(
           `Return a JSON object with: { "event": "<one of the available events>", "reason": "<brief explanation>", "findings": { <key-value pairs of findings> } }`,
           `Choose the event that best reflects the business outcome of the ${currentState} review.`,
           brainContextSummary ? `\n## Brain Context\n${brainContextSummary}` : "",
+          customRlHint,
         ]
           .filter(Boolean)
           .join("\n");
@@ -1123,8 +1173,8 @@ export async function executeBPaaSProcess(
   // per org per process instance. Fire-and-forget on failure (non-fatal).
   if ((Date.now() - (_corePushLastMs.get(params.organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
     _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- pushCoreInsightsToOrg accepts SupabaseClient<any>; service_health not yet in generated types
-  void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
+    // pushCoreInsightsToOrg accepts SupabaseClient<any>; service_health not yet in generated types
+    void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
       logger.warn("[BPaaS/federation] CORE→ORG push failed (non-fatal):", err instanceof Error ? err.message : String(err));
     });
   }
