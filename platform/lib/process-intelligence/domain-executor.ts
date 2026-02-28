@@ -58,7 +58,6 @@ import { executeIncidentResponse } from "./incident-response-executor";
 import type { IncidentInput } from "./incident-response-executor";
 import { executeSLABreach } from "./sla-breach-executor";
 import type { SLABreachInput } from "./sla-breach-executor";
-import { decomposeQBRPreparation, mutateQBRPreparation } from "./qbr-preparation-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
 // Tracks when we last pushed CORE priors DOWN to each org. Prevents hammering
@@ -548,23 +547,6 @@ export async function executeBPaaSProcess(
           continue; // NOSONAR — intentional FSM state advance
         }
 
-        // ── qbr_preparation: specialized multi-source Sonnet QBR aggregation ──────
-        if (params.processType === "qbr_preparation") {
-          const qbrPlan = await decomposeQBRPreparation(
-            supabase,
-            params.organizationId,
-            apiKey,
-            params.inputPayload
-          );
-          const ctx = runner.getContext();
-          const updatedCtx: BPaaSContext = { ...ctx, decomposedPlan: qbrPlan };
-          const currentFsmState = runner.getCurrentState();
-          runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
-          await runner.transition("decomposed", supabase);
-          await runner.save(supabase);
-          // Skip generic Haiku DECOMPOSE — qbr_preparation uses Sonnet + parallel data fetch above
-          continue; // NOSONAR — intentional FSM state advance
-        }
         // Load RL-learned parameters for this state — may be defaults on first run.
         // These params are updated by gradient descent in recordAndLearnStateOutcome()
         // after each execution. This closes the state RL closed loop: learn → read → act.
@@ -1060,23 +1042,6 @@ export async function executeBPaaSProcess(
       else if (currentState === "MUTATE") {
         // Deterministic DB write — NO LLM
         const ctx = runner.getContext();
-        // ── qbr_preparation: enqueue Confluence pages + Slack notification ────────
-        if (params.processType === "qbr_preparation") {
-          const qbrMutationResult = await mutateQBRPreparation(
-            supabase,
-            params.organizationId,
-            params.jobId,
-            processInstanceId,
-            ctx.decomposedPlan as Record<string, unknown>
-          );
-          const qbrUpdatedCtx: BPaaSContext = { ...ctx, mutationResult: qbrMutationResult };
-          const qbrFsmState = runner.getCurrentState();
-          runner = new BPaaSFSMRunner(qbrUpdatedCtx, qbrFsmState, definition.transitions);
-          await runner.transition("mutated", supabase);
-          await runner.save(supabase);
-          continue; // NOSONAR — qbr_preparation MUTATE handled above
-        }
-
 
         // ── product_workflow: enqueue Confluence/Jira/Slack write-backs ──────────
         if (params.processType === "product_workflow") {
