@@ -26,6 +26,7 @@ import { processSeAaSJobs, processCodeAgentJobs, type WorkerType } from "@/lib/s
 import { processA2ATasks } from "@/lib/a2a/task-processor";
 import { processProcessEngineJobs } from "@/lib/process-engine/worker";
 import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
+import { evolveProcessTemplates } from "@/lib/brain/process-evolver";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -167,6 +168,42 @@ export async function GET(request: NextRequest) {
         error: err instanceof Error ? err.message : String(err),
       });
     });
+
+    // ── Phase 7: Process Template Evolution (fire-and-forget per org) ──────────
+    // Runs once per hour per org — evolveProcessTemplates() has its own rate-limit guard.
+    // Derive active org IDs from recent BPaaS agent_queue activity (last 24h, max 5 orgs).
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: activeOrgRows } = await service
+        .from("agent_queue")
+        .select("organization_id")
+        .eq("agent_type", "bpaas")
+        .gte("created_at", oneDayAgo)
+        .limit(20);
+
+      if (activeOrgRows && activeOrgRows.length > 0) {
+        const activeOrgsForEvolution = [
+          ...new Set(
+            (activeOrgRows as Array<{ organization_id: string }>).map(
+              (r) => r.organization_id
+            )
+          ),
+        ].slice(0, 5); // max 5 orgs per cron run
+
+        for (const orgId of activeOrgsForEvolution) {
+          void evolveProcessTemplates(service, orgId).catch((e) =>
+            logger.warn("[cron/process-jobs] Phase 7 evolution failed", {
+              orgId,
+              error: String(e),
+            })
+          );
+        }
+      }
+    } catch (evolveErr) {
+      logger.warn("[cron/process-jobs] Phase 7 org query failed (non-fatal)", {
+        error: evolveErr instanceof Error ? evolveErr.message : String(evolveErr),
+      });
+    }
 
     const durationMs = Date.now() - startMs;
     logger.warn(
