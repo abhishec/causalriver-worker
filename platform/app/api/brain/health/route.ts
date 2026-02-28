@@ -22,6 +22,7 @@ export const dynamic = "force-dynamic";
  */
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import { logger } from "@/lib/logger";
 import { NextRequest, NextResponse } from "next/server";
@@ -46,7 +47,10 @@ export async function GET(request: NextRequest) {
     let coreBrainHealth: { healthy: boolean; orgExists: boolean; templateCount: number; issues: string[] } | null = null;
 
     try {
-      const service = await createServiceClient();
+      // Use getAdminClient() (plain supabase-js, no cookie complexity) for the health check.
+      // createServiceClient() uses @supabase/ssr's createServerClient which requires cookie
+      // handling — unnecessary overhead for this public liveness endpoint.
+      const service = getAdminClient();
 
       // Supabase connectivity check + queue metrics + CORE brain health in parallel
       const [pendingResult, stuckResult, coreBrainResult] = await Promise.all([
