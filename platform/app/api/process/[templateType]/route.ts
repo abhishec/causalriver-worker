@@ -212,6 +212,24 @@ export async function POST(
       );
     }
 
+    // Patch the agent_queue payload with instanceId so domain-executor can reuse
+    // the pre-created instance row and skip its own INSERT (Fix 1: double-INSERT guard).
+    // Fire-and-forget — if this update fails, domain-executor will create a fresh row
+    // (the fallback path) rather than surfacing an error to the caller.
+    void serviceClient
+      .from("agent_queue")
+      .update({ payload: { ...((queueRow.payload as Record<string, unknown>) ?? {}), instanceId: instance.id } })
+      .eq("id", job.id)
+      .then(({ error: patchErr }) => {
+        if (patchErr) {
+          logger.warn("[process/[templateType] POST] Failed to patch instanceId into agent_queue payload (non-fatal)", {
+            jobId: job.id,
+            instanceId: instance.id,
+            error: patchErr.message,
+          });
+        }
+      });
+
     logger.warn(
       `[process/[templateType] POST] Queued: job=${job.id} instance=${instance.id} template=${templateType} org=${organizationId}`
     );

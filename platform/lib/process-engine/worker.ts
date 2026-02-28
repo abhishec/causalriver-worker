@@ -45,7 +45,7 @@ export async function processProcessEngineJobs(
     // the same rows here. The claim step below resolves the race.
     const { data: candidateJobs, error } = await supabase
       .from("agent_queue")
-      .select("id, organization_id, agent_type, task_type, priority, payload, status")
+      .select("id, organization_id, agent_type, task_type, priority, payload, status, retry_count, max_retries, ai_worker_id") // Fix 4: include retry + worker fields
       .eq("agent_type", "bpaas")
       .eq("status", "pending")
       .order("priority", { ascending: false }) // high priority first

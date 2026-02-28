@@ -47,12 +47,16 @@ export async function GET() {
     created_at: string;
   }> = [];
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("ai_workers")
       .select("id, name, service_type, status, created_at")
       .eq("organization_id", orgId)
       .neq("status", "archived")
       .order("created_at", { ascending: false });
+    if (error) {
+      logger.warn("[workspace/workers] ai_workers query error (table may not exist yet)", { code: error.code, message: error.message });
+      return NextResponse.json({ workers: [], updatedAt: new Date().toISOString() });
+    }
     workers = data ?? [];
   } catch (err) {
     logger.warn("[workspace/workers] Failed to fetch workers", { err });

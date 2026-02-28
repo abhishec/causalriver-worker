@@ -544,12 +544,15 @@ function ChatTab({
         Direct chat interface for this AI worker space is coming soon. Use the
         Copilot for now.
       </p>
-      <a
-        href="/copilot"
+      <button
+        type="button"
+        onClick={() => {
+          document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+        }}
         className="text-xs px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
       >
         Open Copilot
-      </a>
+      </button>
     </div>
   );
 }

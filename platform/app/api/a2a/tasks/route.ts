@@ -441,6 +441,29 @@ export async function POST(request: NextRequest) {
           jobId: job.id,
           processTemplateType,
         });
+      } else {
+        // Patch the agent_queue payload with instanceId so domain-executor skips its own INSERT.
+        // Fire-and-forget — failure falls back to domain-executor creating a fresh row.
+        const { data: instanceRow } = await admin
+          .from("bpaas_process_instances")
+          .select("id")
+          .eq("agent_job_id", job.id)
+          .maybeSingle();
+        if (instanceRow?.id) {
+          void admin
+            .from("agent_queue")
+            .update({ payload: { ...jobPayload, instanceId: instanceRow.id } })
+            .eq("id", job.id)
+            .then(({ error: patchErr }) => {
+              if (patchErr) {
+                logger.warn("[A2A /tasks POST] Failed to patch instanceId into agent_queue payload (non-fatal)", {
+                  jobId: job.id,
+                  instanceId: instanceRow.id,
+                  error: patchErr.message,
+                });
+              }
+            });
+        }
       }
     }
 
@@ -520,7 +543,7 @@ export async function GET(request: NextRequest) {
         "id, task_type, status, payload, result, error_message, created_at, started_at, completed_at",
         { count: "exact" }
       )
-      .in("agent_type", ["se-aas", "aas", "pm-aas"])
+      .in("agent_type", ["se-aas", "aas", "pm-aas", "bpaas"]) // Fix 2: include bpaas jobs
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
@@ -664,8 +687,10 @@ export function mapStatusToA2AState(
     case "running":
       return "working";
     case "success":
+    case "completed": // Fix 3: bpaas jobs write status="completed" (not "success")
       return "completed";
     case "error":
+    case "failed": // Fix 3: bpaas jobs write status="failed" (not "error")
       return "failed";
     case "suspended":
       return "input-required";

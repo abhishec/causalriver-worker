@@ -15,6 +15,65 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { consumeSSEStream } from "@/components/copilot/CopilotChat";
 
 /* ── Lightweight inline markdown for overlay responses ─────────────────────── */
+/* ── JSON Data Card: renders structured JSON as a readable table/card ────────── */
+function JsonDataCard({ data }: { data: Record<string, unknown> }): React.ReactElement {
+  const entries = Object.entries(data).filter(
+    ([, v]) => v !== null && v !== undefined && v !== ""
+  );
+
+  // If the value is an array of objects, render as a mini-table
+  const arrayEntry = entries.find(([, v]) => Array.isArray(v) && (v as unknown[]).length > 0 && typeof (v as unknown[])[0] === "object");
+  if (arrayEntry) {
+    const [arrayKey, arrayVal] = arrayEntry;
+    const rows = arrayVal as Record<string, unknown>[];
+    const keys = Object.keys(rows[0]);
+    return (
+      <div className="my-2 rounded-lg border border-white/10 bg-[#0d1117] overflow-hidden text-xs">
+        <div className="px-3 py-1.5 border-b border-white/5 text-gray-400 font-medium capitalize">{arrayKey}</div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[11px] text-gray-300">
+            <thead>
+              <tr className="border-b border-white/5">
+                {keys.map((k) => <th key={k} className="text-left px-3 py-1.5 text-gray-500 font-medium capitalize">{k.replace(/_/g, " ")}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.slice(0, 10).map((row, ri) => (
+                <tr key={ri} className="border-b border-white/5 hover:bg-white/2">
+                  {keys.map((k) => <td key={k} className="px-3 py-1.5">{String(row[k] ?? "—")}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Render remaining scalar entries */}
+        {entries.filter(([k]) => k !== arrayKey).length > 0 && (
+          <div className="px-3 py-2 border-t border-white/5 flex flex-wrap gap-3">
+            {entries.filter(([k]) => k !== arrayKey).map(([k, v]) => (
+              <span key={k} className="text-[10px]">
+                <span className="text-gray-500 capitalize">{k.replace(/_/g, " ")}: </span>
+                <span className="text-gray-300">{String(v)}</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Simple key-value card
+  return (
+    <div className="my-2 rounded-lg border border-white/10 bg-[#0d1117] p-3 text-[11px] grid grid-cols-2 gap-x-4 gap-y-1.5">
+      {entries.map(([k, v]) => (
+        <div key={k} className="flex gap-1.5 min-w-0">
+          <span className="text-gray-500 capitalize shrink-0">{k.replace(/_/g, " ")}:</span>
+          <span className="text-gray-300 truncate">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function renderOverlayMarkdown(text: string): React.ReactNode[] {
   const lines = text.split("\n");
   const elements: React.ReactNode[] = [];
@@ -30,9 +89,23 @@ function renderOverlayMarkdown(text: string): React.ReactNode[] {
         codeBlock = [];
         codeLang = line.slice(3).trim();
       } else {
+        const rawCode = codeBlock.join("\n");
+        // Try to parse JSON data blocks and render as a readable card
+        if ((codeLang === "json" || codeLang === "") && rawCode.trim().startsWith("{")) {
+          let parsed: Record<string, unknown> | null = null;
+          try { parsed = JSON.parse(rawCode); } catch { /* not valid JSON */ }
+          if (parsed && typeof parsed === "object") {
+            elements.push(
+              <JsonDataCard key={`json-${i}`} data={parsed} />
+            );
+            codeBlock = null;
+            codeLang = "";
+            continue;
+          }
+        }
         elements.push(
           <pre key={`code-${i}`} className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
-            <code className="text-xs font-mono text-gray-300 leading-relaxed">{codeBlock.join("\n")}</code>
+            <code className="text-xs font-mono text-gray-300 leading-relaxed">{rawCode}</code>
           </pre>
         );
         codeBlock = null;
@@ -83,11 +156,18 @@ function renderOverlayMarkdown(text: string): React.ReactNode[] {
 
   // Unclosed code block
   if (codeBlock !== null) {
-    elements.push(
-      <pre key="code-unclosed" className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
-        <code className="text-xs font-mono text-gray-300 leading-relaxed">{codeBlock.join("\n")}</code>
-      </pre>
-    );
+    const rawUnclosed = codeBlock.join("\n");
+    let parsedUnclosed: Record<string, unknown> | null = null;
+    try { parsedUnclosed = JSON.parse(rawUnclosed); } catch { /* not valid JSON */ }
+    if (parsedUnclosed && typeof parsedUnclosed === "object") {
+      elements.push(<JsonDataCard key="json-unclosed" data={parsedUnclosed} />);
+    } else {
+      elements.push(
+        <pre key="code-unclosed" className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
+          <code className="text-xs font-mono text-gray-300 leading-relaxed">{rawUnclosed}</code>
+        </pre>
+      );
+    }
   }
 
   return elements;

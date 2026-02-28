@@ -419,45 +419,63 @@ export async function executeBPaaSProcess(
     runner.setProcessTransitions(definition.transitions);
     processInstanceId = runner.getContext().processInstanceId;
   } else {
-    // Fresh execution — create new bpaas_process_instances row
+    // Fresh execution — create new bpaas_process_instances row (unless caller already created one)
+    //
+    // Fix 1 (double-INSERT guard): The API route POST /api/process/[templateType] already
+    // inserts a bpaas_process_instances row and passes its ID via payload.instanceId.
+    // The A2A route does the same for process skills. If instanceId is present, reuse it
+    // and skip the INSERT to avoid a duplicate row.
+    //
     // Column names per migration 20260228100001_bpaas_foundation.sql:
     //   agent_job_id UUID — FK to agent_queue.id (NOT "job_id")
     //   current_state TEXT — the FSM state name (NOT "fsm_state" which is JSONB working memory)
     //   fsm_state JSONB — working memory for the FSM (NOT the state name)
-    const { data: instanceRow, error: insertErr } = await supabase
-      .from("bpaas_process_instances")
-      .insert({
-        organization_id: params.organizationId,
-        agent_job_id: params.jobId,
-        process_type: params.processType,
-        input_payload: params.inputPayload,
-        status: "running",
-        current_state: "DECOMPOSE",
-        fsm_state: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select("id")
-      .single();
+    const preCreatedInstanceId = params.inputPayload.instanceId as string | undefined;
 
-    if (insertErr || !instanceRow) {
-      return {
-        status: "failed",
-        processInstanceId: params.jobId,
-        processType: params.processType,
-        finalState: "FAILED",
-        errorMessage: `Failed to create process instance: ${insertErr?.message ?? "unknown"}`,
-        durationMs: Date.now() - startedAt,
-      };
+    if (preCreatedInstanceId) {
+      // Instance row already exists (created by API route or A2A route) — skip INSERT.
+      processInstanceId = preCreatedInstanceId;
+      logger.warn("[BPaaS/DomainExecutor] Reusing pre-created instance row (skip INSERT)", {
+        jobId: params.jobId,
+        processInstanceId,
+      });
+      invalidateBrainContextCache(params.organizationId);
+    } else {
+      const { data: instanceRow, error: insertErr } = await supabase
+        .from("bpaas_process_instances")
+        .insert({
+          organization_id: params.organizationId,
+          agent_job_id: params.jobId,
+          process_type: params.processType,
+          input_payload: params.inputPayload,
+          status: "running",
+          current_state: "DECOMPOSE",
+          fsm_state: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+
+      if (insertErr || !instanceRow) {
+        return {
+          status: "failed",
+          processInstanceId: params.jobId,
+          processType: params.processType,
+          finalState: "FAILED",
+          errorMessage: `Failed to create process instance: ${insertErr?.message ?? "unknown"}`,
+          durationMs: Date.now() - startedAt,
+        };
+      }
+
+      processInstanceId = instanceRow.id as string;
+
+      // Invalidate the brain context cache for this org immediately after creating
+      // the process instance row. Without this, getBrainContext() would serve stale
+      // pendingJobCount / activeJobCount data for up to 30s, causing the cognitive
+      // planner to potentially re-queue domains that are already in-flight.
+      invalidateBrainContextCache(params.organizationId);
     }
-
-    processInstanceId = instanceRow.id as string;
-
-    // Invalidate the brain context cache for this org immediately after creating
-    // the process instance row. Without this, getBrainContext() would serve stale
-    // pendingJobCount / activeJobCount data for up to 30s, causing the cognitive
-    // planner to potentially re-queue domains that are already in-flight.
-    invalidateBrainContextCache(params.organizationId);
 
     // Update budget to use the real processInstanceId now that it's available
     tokenBudget = { ...tokenBudget, processInstanceId };

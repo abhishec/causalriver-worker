@@ -51,6 +51,8 @@ export interface AgentQueueJob {
   retry_count?: number | null;
   /** Maximum automatic retries before permanent failure (default 3). */
   max_retries?: number | null;
+  /** AI worker UUID — propagated to RL tables for per-worker threshold adaptation (ADR-020). */
+  ai_worker_id?: string | null;
 }
 
 // ── Retry helpers ─────────────────────────────────────────────────────────────
@@ -116,6 +118,10 @@ export async function processBPaaSJob(
   const resumeFromJobId = payload.resumeFromJobId as string | undefined;
   const chainDepth = (payload.chainDepth as number | undefined) ?? 0;
   const userId = payload.userId as string | undefined;
+  // Fix 6: Propagate ai_worker_id from the job row to executeBPaaSProcess → RL tables.
+  // The worker SELECT now includes ai_worker_id so this is non-null when the job
+  // was submitted with a worker context (API key auth or ADR-013 body param).
+  const aiWorkerId = job.ai_worker_id ?? (payload.ai_worker_id as string | undefined) ?? undefined;
 
   // ── 2b. Chain depth guard — prevent infinite Lambda chaining ──────────────
   // MAX_CHAIN_DEPTH (20) matches the global chain-invoker limit.
@@ -190,6 +196,7 @@ export async function processBPaaSJob(
         chainDepth,
         anthropicApiKey: process.env.ANTHROPIC_API_KEY,
         userId,
+        aiWorkerId,
       },
       supabase
     );

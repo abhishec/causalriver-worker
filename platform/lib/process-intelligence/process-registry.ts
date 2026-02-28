@@ -109,7 +109,7 @@ export async function isValidProcessType(
       .eq("is_active", true)
       .or(`organization_id.is.null,organization_id.eq.${organizationId}`)
       .limit(1)
-      .single();
+      .maybeSingle(); // Fix 5: maybeSingle avoids throwing when 2 rows match (global + org-specific)
     return !error && !!data;
   } catch {
     return false;
