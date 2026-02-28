@@ -34,7 +34,7 @@ const _inFlight = new Map<string, Promise<BrainContext>>();
 async function fetchServiceHealthCache(
   supabase: SupabaseClient,
   orgId: string,
-  serviceType: "se-aas" | "aas" | "pm-aas"
+  serviceType: "process-intelligence" | "se-aas" | "aas" | "pm-aas"
 ): Promise<{ data: { context_string: string; updated_at: string } | null; error: unknown }> {
   try {
     // service_health table is not yet in generated Supabase types (migration pending).
@@ -99,7 +99,7 @@ export function invalidateBrainContextCache(orgId: string): void {
 const _crossOrgPatternsCache = { data: null as string | null, expiry: 0 };
 const CROSS_ORG_PATTERNS_TTL_MS = 5 * 60_000; // 5 minutes
 
-// ── 9-Tier 28-Layer Brain Architecture ────────────────────────────────────────
+// ── 9-Tier 29-Layer Brain Architecture (ADR-009) ──────────────────────────────
 // Tier 1: Identity          (L1-L2)   — workspace + brain state
 // Tier 2: Live Operations   (L3-L5)   — orchestrator, monitors, signal stream
 // Tier 3: Code & Docs       (L6-L8)   — repo map, arch decisions, git intel
@@ -107,7 +107,8 @@ const CROSS_ORG_PATTERNS_TTL_MS = 5 * 60_000; // 5 minutes
 // Tier 5: RL Intelligence   (L13-L17) — quality, RLVR, predictive, causal, evolution
 // Tier 6: Platform Intel    (L18-L22) — connectors, fleet, LLM decisions, intent, temporal
 // Tier 7: Meta & Cross-cut  (L23-L25) — 24h signals, cross-org, meta-brain
-// Tier 8: Service Layers    (L26-L28) — SE-aaS (L26), AaaS (L27), PM-aaS (L28)
+// Tier 8: Service Layers    (L25-L29) — InfraSignals (L25), ProcessIntel/FSM (L26),
+//                                        SE-aaS (L27), AaaS (L28), PM-aaS (L29)
 
 export interface BrainContext {
   // ── Core fields (always present) ──
@@ -159,10 +160,11 @@ export interface BrainContext {
   crossOrgPatterns?: string;          // L24: platform-wide patterns
   metaBrainState?: string;            // L25: brain self-awareness (total memory count)
 
-  // ── Tier 8: Service Layers (L26 = SE-aaS, L27 = AaaS, L28 = PM-aaS) ──
-  seaasServiceLayer?: string;         // L26: SE-aaS holistic service activity (last 7d)
-  aaasServiceLayer?: string;          // L27: AaaS artifact output and agent activity (24h)
-  pmaasServiceLayer?: string;         // L28: PM-aaS agent activity (last 7d)
+  // ── Tier 8: Service Layers (ADR-009: L25=InfraSignals, L26=ProcessIntel, L27=SE-aaS, L28=AaaS, L29=PM-aaS) ──
+  processIntelligenceLayer?: string;  // L26: Process Intelligence — FSM/HITL state (always present, not service-conditional)
+  seaasServiceLayer?: string;         // L27: SE-aaS holistic service activity (last 7d)
+  aaasServiceLayer?: string;          // L28: AaaS artifact output and agent activity (24h)
+  pmaasServiceLayer?: string;         // L29: PM-aaS agent activity (last 7d)
 
   // ── 3-Tier Knowledge Architecture ──
   consolidatedPatterns?: string;      // Tier 3: stable behavioral rules + domain expertise
@@ -243,28 +245,29 @@ export async function getBrainContext(
       crossOrgPatternsRow,      // L24: (unused slot — fetched separately via service client with TTL cache)
       metaBrainCountRow,        // L25: ai_memory total count for this org
 
-      // ── TIER 8: SERVICE LAYERS ──
-      // L26: SE-aaS Service Layer (5 sub-queries)
-      seaasJobsRow,            // L26a: agent_queue SE-aaS task types last 7d
-      seaasScopeCreepRow,      // L26b: scope_creep_alerts unresolved count
-      seaasEngagementHealthRow, // L26c: engagement_health_latest bottom 3
-      seaasEngineerRiskRow,    // L26d: engineer_health_snapshots flight_risk > 50
-      seaasPodMatchRow,        // L26e: pod_match_history latest 3
+      // ── TIER 8: SERVICE LAYERS (ADR-009) ──
+      // L27: SE-aaS Service Layer (5 sub-queries)
+      seaasJobsRow,            // L27a: agent_queue SE-aaS task types last 7d
+      seaasScopeCreepRow,      // L27b: scope_creep_alerts unresolved count
+      seaasEngagementHealthRow, // L27c: engagement_health_latest bottom 3
+      seaasEngineerRiskRow,    // L27d: engineer_health_snapshots flight_risk > 50
+      seaasPodMatchRow,        // L27e: pod_match_history latest 3
 
-      // L27: AaaS Service Layer (2 sub-queries)
-      aaasArtifactsRow,        // L27a: se_aas_artifacts last 24h domain_type
-      aaasAgentQueueRow,       // L27b: agent_queue agent_type=aas last 7d status
+      // L28: AaaS Service Layer (2 sub-queries)
+      aaasArtifactsRow,        // L28a: se_aas_artifacts last 24h domain_type
+      aaasAgentQueueRow,       // L28b: agent_queue agent_type=aas last 7d status
 
-      // L28: PM-aaS Service Layer (Tier 8 — 2 sub-queries)
-      l28PmaasJobsRow,         // L28a: agent_queue agent_type=pm-aas task_type+status last 7d
-      l28PmaasArtifactsRow,    // L28b: placeholder (pm-aas artifact table not yet created)
+      // L29: PM-aaS Service Layer (Tier 8 — 2 sub-queries)
+      l29PmaasJobsRow,         // L29a: agent_queue agent_type=pm-aas task_type+status last 7d
+      l29PmaasArtifactsRow,    // L29b: placeholder (pm-aas artifact table not yet created)
 
       // ── SERVICE HEALTH CACHE READS (Phase 4) ──
       // Read cached context_string from service_health table (< 15 min = fresh).
       // Falls back to direct queries above if stale or missing.
-      seaasHealthCacheRow,     // service_health cache for L26 (SE-aaS)
-      aaasHealthCacheRow,      // service_health cache for L27 (AaaS)
-      pmaasHealthCacheRow,     // service_health cache for L28 (PM-aaS)
+      processIntelHealthCacheRow, // service_health cache for L26 (Process Intelligence/FSM)
+      seaasHealthCacheRow,     // service_health cache for L27 (SE-aaS)
+      aaasHealthCacheRow,      // service_health cache for L28 (AaaS)
+      pmaasHealthCacheRow,     // service_health cache for L29 (PM-aaS)
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -631,9 +634,9 @@ export async function getBrainContext(
         .order("created_at", { ascending: false })
         .limit(10),
 
-      // ── TIER 8: PM-aaS SERVICE LAYER (L28) ──
+      // ── TIER 8: PM-aaS SERVICE LAYER (L29) ──
 
-      // L28a — PM-aaS agent queue: agent_type=pm-aas last 7d, task_type+status, limit 20
+      // L29a — PM-aaS agent queue: agent_type=pm-aas last 7d, task_type+status, limit 20
       supabase
         .from("agent_queue")
         .select("task_type, status, created_at")
@@ -643,7 +646,7 @@ export async function getBrainContext(
         .order("created_at", { ascending: false })
         .limit(20),
 
-      // L28b — PM-aaS placeholder: pm-aas artifact table not yet created — dummy query
+      // L29b — PM-aaS placeholder: pm-aas artifact table not yet created — dummy query
       Promise.resolve({ data: null, error: null }),
 
       // ── SERVICE HEALTH CACHE READS (Phase 4) ──────────────────────────────────
@@ -651,13 +654,16 @@ export async function getBrainContext(
       // If fresh (< 15 minutes), use cached context_string instead of direct queries.
       // Falls back to direct queries above if stale, missing, or table not yet created.
 
-      // service_health cache for L26 (SE-aaS)
+      // service_health cache for L26 (Process Intelligence / FSM state)
+      fetchServiceHealthCache(supabase, orgId, "process-intelligence"),
+
+      // service_health cache for L27 (SE-aaS)
       fetchServiceHealthCache(supabase, orgId, "se-aas"),
 
-      // service_health cache for L27 (AaaS)
+      // service_health cache for L28 (AaaS)
       fetchServiceHealthCache(supabase, orgId, "aas"),
 
-      // service_health cache for L28 (PM-aaS)
+      // service_health cache for L29 (PM-aaS)
       fetchServiceHealthCache(supabase, orgId, "pm-aas"),
     ]);
 
@@ -1048,9 +1054,29 @@ export async function getBrainContext(
       ? `## Meta-Brain State\nTotal memories: ${totalMemoryCount} | Brain IQ: ${brainIq} | Signals: ${signalCount}`
       : undefined;
 
-    // ── TIER 8: SERVICE LAYERS ────────────────────────────────────────────────
+    // ── TIER 8: SERVICE LAYERS (ADR-009: L26=ProcessIntel, L27=SE-aaS, L28=AaaS, L29=PM-aaS) ────
 
-    // L26: SE-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 5 sub-queries
+    // L26: Process Intelligence Layer — FSM/HITL state (always present, not service-conditional)
+    // Uses service_health cache written by writeProcessIntelligenceHealth() in service-health-writer.ts.
+    let processIntelligenceLayer: string | undefined;
+    try {
+      const processIntelCacheData =
+        processIntelHealthCacheRow.status === "fulfilled"
+          ? (processIntelHealthCacheRow.value as { data: { context_string: string; updated_at: string } | null; error: unknown }).data
+          : null;
+      const processIntelAge = processIntelCacheData?.updated_at
+        ? Date.now() - new Date(processIntelCacheData.updated_at).getTime()
+        : Infinity;
+      if (processIntelAge < 15 * 60 * 1000 && !!processIntelCacheData?.context_string) {
+        processIntelligenceLayer = processIntelCacheData.context_string;
+      }
+      // No direct fallback query here: FSM data is bpaas_process_instances which is heavy.
+      // The service-health-writer cron keeps it fresh every 10 min via writeProcessIntelligenceHealth().
+    } catch (err: unknown) {
+      logger.warn("[brain-context] L26 Process Intelligence layer failed (non-fatal):", { error: String(err) });
+    }
+
+    // L27: SE-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 5 sub-queries
     let seaasServiceLayer: string | undefined;
     try {
       // Check service_health cache freshness (< 15 minutes = fresh)
@@ -1068,7 +1094,7 @@ export async function getBrainContext(
         // Use cached context string from service_health table (written by process-jobs cron)
         seaasServiceLayer = seaasHealthCacheData!.context_string;
       } else {
-        // FALLBACK: run original 5 L26 direct queries (kept permanently as safety net)
+        // FALLBACK: run original 5 L27 direct queries (kept permanently as safety net)
         const seaasJobRows = seaasJobsRow.status === "fulfilled"
           ? (seaasJobsRow.value.data ?? [])
           : [];
@@ -1085,7 +1111,7 @@ export async function getBrainContext(
           ? (seaasPodMatchRow.value.data ?? [])
           : [];
 
-        const seaasL26Parts: string[] = [];
+        const seaasL27Parts: string[] = [];
 
         // 26a: Job activity by domain
         if (seaasJobRows.length > 0) {
@@ -1100,46 +1126,46 @@ export async function getBrainContext(
           const jobSummary = Object.entries(byDomain)
             .map(([d, c]) => `${d}:${c.total}r/${c.success}ok`)
             .join(", ");
-          seaasL26Parts.push(`Jobs(7d): ${jobSummary}`);
+          seaasL27Parts.push(`Jobs(7d): ${jobSummary}`);
         }
 
-        // 26b: Scope creep
-        seaasL26Parts.push(`Open scope alerts: ${scopeCreepCount}`);
+        // 27b: Scope creep
+        seaasL27Parts.push(`Open scope alerts: ${scopeCreepCount}`);
 
-        // 26c: Critical engagements
+        // 27c: Critical engagements
         if (criticalEngagements.length > 0) {
           const engList = (criticalEngagements as Array<{ engagement_id: string; engagement_name: string | null; health_score: number }>)
             .map(e => `${e.engagement_name ?? e.engagement_id}: ${Math.round(e.health_score)}`)
             .join(", ");
-          seaasL26Parts.push(`Critical engagements: ${engList}`);
+          seaasL27Parts.push(`Critical engagements: ${engList}`);
         }
 
-        // 26d: Engineer risk
+        // 27d: Engineer risk
         if (engineerRiskRows.length > 0) {
           const riskList = (engineerRiskRows as Array<{ github_login: string; flight_risk_score: number }>)
             .map(e => `${e.github_login}: ${Math.round(e.flight_risk_score)}%`)
             .join(", ");
-          seaasL26Parts.push(`Engineer risk: ${riskList}`);
+          seaasL27Parts.push(`Engineer risk: ${riskList}`);
         }
 
-        // 26e: Pod matches
+        // 27e: Pod matches
         if (podMatchRows.length > 0) {
           const podList = (podMatchRows as Array<{ recommended_pod_name: string | null }>)
             .map(m => m.recommended_pod_name ?? "")
             .filter(n => n.length > 0)
             .join(", ");
-          if (podList) seaasL26Parts.push(`Pod matches: ${podList}`);
+          if (podList) seaasL27Parts.push(`Pod matches: ${podList}`);
         }
 
-        if (seaasL26Parts.length > 0) {
-          seaasServiceLayer = `## SE-aaS Service Layer\n${seaasL26Parts.join(" | ")}`.slice(0, 400);
+        if (seaasL27Parts.length > 0) {
+          seaasServiceLayer = `## SE-aaS Service Layer\n${seaasL27Parts.join(" | ")}`.slice(0, 400);
         }
       }
     } catch (err: unknown) {
-      logger.warn("[brain-context] L26 SE-aaS service layer failed:", { error: String(err) });
+      logger.warn("[brain-context] L27 SE-aaS service layer failed:", { error: String(err) });
     }
 
-    // L27: AaaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
+    // L28: AaaS Service Layer — use service_health cache if fresh (< 15 min), fallback to 2 sub-queries
     let aaasServiceLayer: string | undefined;
     try {
       // Check service_health cache freshness (< 15 minutes = fresh)
@@ -1157,14 +1183,14 @@ export async function getBrainContext(
         // Use cached context string from service_health table (written by process-jobs cron)
         aaasServiceLayer = aaasHealthCacheData!.context_string;
       } else {
-        // FALLBACK: run original 2 L27 direct queries (kept permanently as safety net)
+        // FALLBACK: run original 2 L28 direct queries (kept permanently as safety net)
         const aaasArtifactRows = aaasArtifactsRow.status === "fulfilled"
           ? (aaasArtifactsRow.value.data ?? [])
           : [];
         const aaasQueueRows = aaasAgentQueueRow.status === "fulfilled"
           ? (aaasAgentQueueRow.value.data ?? [])
           : [];
-        const aaasL27Parts: string[] = [];
+        const aaasL28Parts: string[] = [];
         if (aaasArtifactRows.length > 0) {
           const domainCounts: Record<string, number> = {};
           for (const row of aaasArtifactRows as Array<{ domain_type: string }>) {
@@ -1175,7 +1201,7 @@ export async function getBrainContext(
             .sort(([, a], [, b]) => b - a)
             .map(([d, c]) => `${d}:${c}`)
             .join(", ");
-          aaasL27Parts.push(`Artifacts(24h): ${summary}`);
+          aaasL28Parts.push(`Artifacts(24h): ${summary}`);
         }
         if (aaasQueueRows.length > 0) {
           const statusCounts: Record<string, number> = {};
@@ -1186,19 +1212,19 @@ export async function getBrainContext(
           const succeeded = statusCounts["success"] ?? 0;
           const failed = statusCounts["error"] ?? 0;
           const running = statusCounts["running"] ?? 0;
-          aaasL27Parts.push(`Agents(7d): ${succeeded} succeeded, ${failed} failed, ${running} running`);
+          aaasL28Parts.push(`Agents(7d): ${succeeded} succeeded, ${failed} failed, ${running} running`);
         }
-        if (aaasL27Parts.length > 0) {
-          aaasServiceLayer = `## AaaS Service Layer\n${aaasL27Parts.join(" | ")}`.slice(0, 250);
+        if (aaasL28Parts.length > 0) {
+          aaasServiceLayer = `## AaaS Service Layer\n${aaasL28Parts.join(" | ")}`.slice(0, 250);
         }
       }
     } catch (err: unknown) {
-      logger.warn("[brain-context] L27 AaaS service layer failed:", { error: String(err) });
+      logger.warn("[brain-context] L28 AaaS service layer failed:", { error: String(err) });
     }
 
-    // ── TIER 8 (L28): PM-aaS SERVICE LAYER ───────────────────────────────────
+    // ── TIER 8 (L29): PM-aaS SERVICE LAYER ───────────────────────────────────
 
-    // L28: PM-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to direct query
+    // L29: PM-aaS Service Layer — use service_health cache if fresh (< 15 min), fallback to direct query
     let pmaasServiceLayer: string | undefined;
     try {
       // Check service_health cache freshness (< 15 minutes = fresh)
@@ -1216,8 +1242,8 @@ export async function getBrainContext(
         pmaasServiceLayer = pmaasHealthCacheData!.context_string;
       } else {
         // FALLBACK: direct query of agent_queue for pm-aas jobs (last 7d)
-        const pmaasJobRows = l28PmaasJobsRow.status === "fulfilled"
-          ? (l28PmaasJobsRow.value.data ?? [])
+        const pmaasJobRows = l29PmaasJobsRow.status === "fulfilled"
+          ? (l29PmaasJobsRow.value.data ?? [])
           : [];
 
         if (pmaasJobRows.length > 0) {
@@ -1371,7 +1397,8 @@ export async function getBrainContext(
       // Document chunks (query-aware, near end)
       recentDocTitles,
       docChunkSnippets,
-      // Tier 8
+      // Tier 8 (ADR-009: L26=ProcessIntel, L27=SE-aaS, L28=AaaS, L29=PM-aaS)
+      processIntelligenceLayer,
       seaasServiceLayer,
       aaasServiceLayer,
       pmaasServiceLayer,
@@ -1423,7 +1450,8 @@ export async function getBrainContext(
       crossDomainSignals24h,
       crossOrgPatterns,
       metaBrainState,
-      // Tier 8
+      // Tier 8 (ADR-009: L26=ProcessIntel, L27=SE-aaS, L28=AaaS, L29=PM-aaS)
+      processIntelligenceLayer,
       seaasServiceLayer,
       aaasServiceLayer,
       pmaasServiceLayer,
@@ -1550,7 +1578,8 @@ function buildContextSummary(ctx: {
   // Document chunks (query-aware)
   recentDocTitles?: string[];
   docChunkSnippets?: string[];
-  // Tier 8: Service Layers (L26=SE-aaS, L27=AaaS, L28=PM-aaS)
+  // Tier 8: Service Layers (ADR-009: L26=ProcessIntel, L27=SE-aaS, L28=AaaS, L29=PM-aaS)
+  processIntelligenceLayer?: string;
   seaasServiceLayer?: string;
   aaasServiceLayer?: string;
   pmaasServiceLayer?: string;
@@ -1731,17 +1760,22 @@ function buildContextSummary(ctx: {
     parts.push(`Recent document context: ${ctx.recentDocTitles.join(", ")}.`);
   }
 
-  // 28. SE-aaS Service Layer (L26) — LAST before AaaS
+  // 28. Process Intelligence Layer (L26) — FSM/HITL state (always present)
+  if (ctx.processIntelligenceLayer) {
+    parts.push(ctx.processIntelligenceLayer);
+  }
+
+  // 29. SE-aaS Service Layer (L27)
   if (ctx.seaasServiceLayer) {
     parts.push(ctx.seaasServiceLayer);
   }
 
-  // 29. AaaS Service Layer (L27)
+  // 30. AaaS Service Layer (L28)
   if (ctx.aaasServiceLayer) {
     parts.push(ctx.aaasServiceLayer);
   }
 
-  // 30. PM-aaS Service Layer (L28)
+  // 31. PM-aaS Service Layer (L29)
   if (ctx.pmaasServiceLayer) {
     parts.push(ctx.pmaasServiceLayer);
   }
