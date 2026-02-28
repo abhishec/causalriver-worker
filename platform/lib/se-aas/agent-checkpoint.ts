@@ -133,7 +133,7 @@ export async function pauseJobAtDecisionGate(
   jobId: string,
   orgId: string,
   checkpoint: CheckpointState
-): Promise<void> {
+): Promise<boolean> {
   const escalationType: EscalationType = checkpoint.escalationType ?? "human-review";
 
   try {
@@ -154,8 +154,8 @@ export async function pauseJobAtDecisionGate(
       .eq("organization_id", orgId);
 
     if (error) {
-      logger.error("Failed to save checkpoint to agent_queue", { jobId, error });
-      return;
+      logger.error("pauseJobAtDecisionGate: DB write failed — aborting for safety", { jobId, error });
+      return false;
     }
 
     logger.warn("Agent suspended at decision gate", {
@@ -164,8 +164,10 @@ export async function pauseJobAtDecisionGate(
       escalationType,
       question: checkpoint.escalationQuestion.slice(0, 100),
     });
+    return true;
   } catch (err) {
-    logger.error("pauseJobAtDecisionGate threw unexpectedly", { jobId, err });
+    logger.error("pauseJobAtDecisionGate threw unexpectedly — aborting for safety", { jobId, err });
+    return false;
   }
 }
 

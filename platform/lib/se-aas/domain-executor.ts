@@ -1161,13 +1161,16 @@ export async function executeDomain(
           : `Engagement health is LOW (score: ${healthScore}/100). Should I escalate to the client now or proceed with internal mitigation plan?`;
         const partialSummary = `${criticalEngineers.length} critical engineer(s) flagged.${healthScore !== null ? ` Engagement health: ${healthScore}/100.` : ""}`;
 
-        await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
+        const gateResultA = await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
           phase: "risk_assessment",
           entityIds: engagementId ? [engagementId] : [],
           partialResults: { criticalEngineers, healthScore, engineersAnalyzed: engineers.length },
           escalationQuestion,
           resumeInstruction: `Continue early-warning analysis with human decision: {human_response}`,
         });
+        if (!gateResultA) {
+          throw new Error("HITL gate (early-warning) failed to persist — aborting for safety");
+        }
 
         await sendEscalationNotification(
           supabase,
@@ -1212,13 +1215,16 @@ export async function executeDomain(
           (typeof (resultData as any)?.engagement_id === "string" ? (resultData as any).engagement_id : null) ??
           (typeof params.request.engagement_id === "string" ? params.request.engagement_id : null);
 
-        await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
+        const gateResultB = await pauseJobAtDecisionGate(supabase, params.jobId, params.organizationId, {
           phase: "health_assessment",
           entityIds: engagementId ? [engagementId] : [],
           partialResults: { healthScore, deliverySnapshot: resultData ?? {} },
           escalationQuestion,
           resumeInstruction: `Continue delivery-intelligence analysis with human decision: {human_response}`,
         });
+        if (!gateResultB) {
+          throw new Error("HITL gate (delivery-intelligence) failed to persist — aborting for safety");
+        }
 
         await sendEscalationNotification(
           supabase,

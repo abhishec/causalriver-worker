@@ -7,7 +7,7 @@
 
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getAdminClient, verifyWorkspaceMembership } from "@/lib/supabase/admin";
-import { CORE_WORKSPACE_ID } from "@/lib/workspace-helpers";
+// CORE_WORKSPACE_ID intentionally not imported — never use as fallback (cross-tenant leak risk)
 import { logger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -50,12 +50,11 @@ export async function resolveSession(
   //   - customer_id (billing parent) is NEVER used here — organization_id is the
   //     sole isolation boundary for all brain/SE-AAS/copilot paths.
   //
-  // CORE_WORKSPACE_ID fallback:
-  //   - Only hit when workspaceId is not provided (e.g. unauthenticated
-  //     embed, API callers without workspace context).
-  //   - The membership check below enforces access — a regular user who is
-  //     not a member of CORE will receive a 403. This is correct behaviour.
-  let workspaceId = requestedWorkspaceId || CORE_WORKSPACE_ID;
+  // Workspace must be supplied by the authenticated frontend.
+  // We do NOT fall back to CORE_WORKSPACE_ID — that would expose cross-tenant data
+  // to unauthenticated or workspace-less callers. If no workspace is resolved
+  // after auto-resolution below, the request is rejected with 403.
+  let workspaceId: string = requestedWorkspaceId ?? "";
 
   // Authenticate via Supabase
   // Step 1: createClient in isolated try-catch — throws when env vars missing in Lambda cold start
@@ -97,7 +96,7 @@ export async function resolveSession(
       workspaceId = nonCore?.organization_id ?? userOrgs[0].organization_id;
       logger.debug("[Chat] Auto-resolved workspace:", workspaceId);
     }
-    // If no memberships found, workspaceId stays as CORE_WORKSPACE_ID → membership check will 403 (correct)
+    // If no memberships found, workspaceId stays empty → membership check below will 403 (correct)
   }
 
   // ── Validate user is a member of the requested org ──────────────────

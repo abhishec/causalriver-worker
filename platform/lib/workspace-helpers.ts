@@ -86,7 +86,7 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
     const supabase = await createClient();
     const user = await getAuthUser();
 
-    if (!user) return CORE_WORKSPACE_ID;
+    if (!user) return ""; // Unauthenticated — callers must validate and reject empty string
 
     /* 1. Cookie override — user explicitly switched workspaces */
     const cookieStore = await cookies();
@@ -156,10 +156,10 @@ export const getCurrentWorkspaceId = cache(async (): Promise<string> => {
     if (adminCheck) return CORE_WORKSPACE_ID;
 
     // Non-admin with no workspace memberships — return empty string
-    // (callers should handle this by redirecting to workspace selection)
+    // (callers should handle this by returning 400 or redirecting)
     return "";
   } catch {
-    return CORE_WORKSPACE_ID;
+    return ""; // Error resolving workspace — callers must validate and reject empty string
   }
 });
 

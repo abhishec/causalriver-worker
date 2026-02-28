@@ -41,7 +41,7 @@ export function TopBar() {
   const pageLabel = ROUTE_LABELS[pathname] || pathname.split("/").pop() || "";
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border-subtle bg-background px-6">
+    <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border-subtle bg-background px-6 pl-14 md:pl-6">
       {/* ── Left: Page title ─────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium text-foreground">{pageLabel}</span>

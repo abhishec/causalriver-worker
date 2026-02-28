@@ -504,7 +504,7 @@ export class BPaaSFSMRunner {
       this.context.approvalId = approvalId;
 
       // Suspend the agent_queue job — human must respond via POST /api/agents/{id}/resume
-      await pauseJobAtDecisionGate(
+      const fsmGateResult = await pauseJobAtDecisionGate(
         supabase,
         this.context.jobId,
         this.context.organizationId,
@@ -527,6 +527,9 @@ export class BPaaSFSMRunner {
           },
         }
       );
+      if (!fsmGateResult) {
+        throw new Error("HITL gate (FSM APPROVAL_GATE) failed to persist — aborting for safety");
+      }
 
       return { blocked: true, approvalId };
     }

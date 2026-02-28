@@ -54,17 +54,24 @@ const MAX_CONTENT_WIDTH = 340;
 
 export function Sidebar() {
   const pathname = usePathname() ?? "";
-  const [collapsed, setCollapsed] = useState(false);
+  // Mobile: collapse by default below 768px; desktop: restore from localStorage
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false; // SSR — default open
+    return window.innerWidth < 768 ? true : false;   // Mobile collapses immediately
+  });
+  const [mobileOpen, setMobileOpen] = useState(false); // Mobile overlay toggle
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
   const { currentWorkspace, isLoading: workspaceLoading, workspaces } = useWorkspace();
 
-  // Restore persisted state
+  // Restore persisted state (desktop only — mobile always starts collapsed)
   useEffect(() => {
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    if (saved === "true") setCollapsed(true);
+    if (window.innerWidth >= 768) {
+      const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      if (saved === "true") setCollapsed(true);
+    }
     const savedWidth = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     if (savedWidth) {
       const total = Number(savedWidth);
@@ -72,15 +79,31 @@ export function Sidebar() {
     }
   }, []);
 
+  // Collapse sidebar when viewport drops below 768px; expand when above
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCollapsed(true);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const totalWidth = ICON_RAIL_WIDTH + contentWidth;
 
   function toggleCollapse() {
     const next = !collapsed;
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    // Only persist collapse state on desktop; mobile state is transient
+    if (window.innerWidth >= 768) {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    }
     window.dispatchEvent(new CustomEvent("sidebar-collapse", {
       detail: { collapsed: next, width: next ? ICON_RAIL_WIDTH : totalWidth },
     }));
     setCollapsed(next);
+    if (next) setMobileOpen(false); // closing sidebar clears mobile overlay
   }
 
   // ── Resize drag handlers ──────────────────────────────────────────────
@@ -131,7 +154,33 @@ export function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   return (
+    <>
+      {/* Mobile hamburger button — only shown when sidebar is collapsed on mobile */}
+      {collapsed && (
+        <button
+          onClick={() => { setCollapsed(false); setMobileOpen(true); }}
+          className="fixed top-3 left-3 z-50 md:hidden w-8 h-8 rounded-lg bg-background border border-border-subtle flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-hover transition-colors shadow-sm"
+          aria-label="Open sidebar"
+          title="Open sidebar"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      )}
+
+      {/* Mobile overlay backdrop */}
+      {mobileOpen && !collapsed && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => { setCollapsed(true); setMobileOpen(false); }}
+          aria-hidden="true"
+        />
+      )}
+
     <div className="flex h-screen fixed left-0 top-0 z-40">
       {/* ═══════════════════════════════════════════════════════════════════
           PANE 1 — Icon Rail (always visible)
@@ -282,5 +331,6 @@ export function Sidebar() {
         />
       )}
     </div>
+    </>
   );
 }
