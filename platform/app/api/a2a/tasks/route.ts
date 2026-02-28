@@ -6,7 +6,10 @@
  * POST — Submit a new A2A task. Routes to agent_type='se-aas'|'aas'|'pm-aas'.
  * GET  — List A2A tasks for an organization (paginated).
  *
- * Auth: Bearer token — accepts SE_AAS_WORKER_SECRET (M2M) or valid Supabase JWT.
+ * Auth (two modes):
+ *   1. Bearer <SE_AAS_WORKER_SECRET>  — M2M service account
+ *   2. Bearer <supabase-jwt>          — user auth
+ *   3. X-API-Key: nxb_xxx             — per-worker API key (ADR-008)
  *
  * Reference: https://google.github.io/A2A/specification/
  */
@@ -15,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -128,24 +132,72 @@ const VALID_SKILLS = new Set(Object.keys(SKILL_TO_DOMAIN));
 
 /**
  * Authenticate an A2A request.
- * Accepts: SE_AAS_WORKER_SECRET (M2M) OR a valid Supabase JWT (user auth).
- * Returns the user ID on success, or null on failure.
+ *
+ * Three auth modes (checked in order):
+ *   1. X-API-Key: nxb_xxx  — per-worker API key (ADR-008). Returns organizationId + aiWorkerId.
+ *   2. Bearer <SE_AAS_WORKER_SECRET>  — M2M service account. isWorker=true.
+ *   3. Bearer <supabase-jwt>          — normal user auth.
+ *
+ * Returns null on failure (caller returns 401).
  */
 async function authenticateA2A(
   request: NextRequest
-): Promise<{ userId: string; isWorker: boolean } | null> {
+): Promise<{
+  userId: string;
+  isWorker: boolean;
+  /** Set when auth came from an API key row — scopes the job to this worker */
+  apiKeyWorkerId?: string;
+  /** Set when auth came from an API key row — avoids duplicate org lookup downstream */
+  apiKeyOrgId?: string;
+} | null> {
+  const admin = getAdminClient();
+
+  // ── Mode 1: X-API-Key header (ADR-008, per-worker API keys) ──────────────
+  const apiKeyHeader = request.headers.get("x-api-key");
+  if (apiKeyHeader) {
+    const keyHash = crypto
+      .createHash("sha256")
+      .update(apiKeyHeader)
+      .digest("hex");
+
+    const { data: keyRow } = await admin
+      .from("api_keys")
+      .select("id, organization_id, ai_worker_id")
+      .eq("key_hash", keyHash)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (!keyRow) {
+      return null; // Invalid or revoked key
+    }
+
+    // Fire-and-forget: update last_used_at (non-blocking)
+    void admin
+      .from("api_keys")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("id", keyRow.id);
+
+    return {
+      userId: "api-key",
+      isWorker: true,
+      apiKeyWorkerId: keyRow.ai_worker_id ?? undefined,
+      apiKeyOrgId: keyRow.organization_id,
+    };
+  }
+
+  // ── Mode 2 & 3: Bearer token ──────────────────────────────────────────────
   const authHeader = request.headers.get("authorization") ?? "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
 
   if (!token) return null;
 
-  // 1. Accept SE_AAS_WORKER_SECRET (machine-to-machine auth)
+  // Mode 2: SE_AAS_WORKER_SECRET (machine-to-machine)
   const workerSecret = process.env.SE_AAS_WORKER_SECRET;
   if (workerSecret && token === workerSecret) {
     return { userId: "a2a-worker", isWorker: true };
   }
 
-  // 2. Accept valid Supabase JWT (user auth)
+  // Mode 3: Supabase JWT (user auth)
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.getUser(token);
@@ -180,6 +232,11 @@ export async function POST(request: NextRequest) {
       context_id?: string;
       /** Alias for context_id (camelCase variant) */
       contextId?: string;
+      /**
+       * ADR-013: Caller can pass ai_worker_id to scope the job to a specific worker.
+       * When auth came from an API key, this is overridden by the key's ai_worker_id.
+       */
+      ai_worker_id?: string;
     };
 
     try {
@@ -188,7 +245,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const { skill, message, organizationId, sessionId } = body;
+    const { skill, message, sessionId } = body;
+
+    // API key auth provides organizationId from the key row (no need for caller to pass it)
+    const organizationId = auth.apiKeyOrgId ?? body.organizationId;
 
     // Multi-turn context support — optional, preserves backward compatibility
     const contextId = body.context_id ?? body.contextId ?? null;
@@ -254,6 +314,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ADR-013: resolve ai_worker_id.
+    // API key auth takes precedence (the key is bound to a specific worker).
+    // Otherwise, the caller may pass ai_worker_id in the request body.
+    const resolvedWorkerIdForJob: string | null =
+      auth.apiKeyWorkerId ?? body.ai_worker_id ?? null;
+
     const taskSessionId = sessionId ?? crypto.randomUUID();
     const domainType = SKILL_TO_DOMAIN[skill];
 
@@ -283,17 +349,22 @@ export async function POST(request: NextRequest) {
       ...(contextId ? { context_id: contextId } : {}),
     };
 
-    // Insert A2A task into agent_queue
+    // Insert A2A task into agent_queue — include ai_worker_id when available (ADR-013)
+    const queueRow: Record<string, unknown> = {
+      organization_id: organizationId,
+      agent_type: agentType,
+      task_type: domainType,
+      priority: 5,
+      payload: jobPayload,
+      status: "pending",
+    };
+    if (resolvedWorkerIdForJob) {
+      queueRow.ai_worker_id = resolvedWorkerIdForJob;
+    }
+
     const { data: job, error: insertError } = await admin
       .from("agent_queue")
-      .insert({
-        organization_id: organizationId,
-        agent_type: agentType,
-        task_type: domainType,
-        priority: 5,
-        payload: jobPayload,
-        status: "pending",
-      })
+      .insert(queueRow)
       .select("id, created_at")
       .single();
 
@@ -309,7 +380,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} org=${organizationId}${contextId ? ` context=${contextId}` : ""}`);
+    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} org=${organizationId}${resolvedWorkerIdForJob ? ` worker=${resolvedWorkerIdForJob}` : ""}${contextId ? ` context=${contextId}` : ""}`);
 
     // Return A2A-compliant task submission response
     return NextResponse.json(
@@ -317,6 +388,7 @@ export async function POST(request: NextRequest) {
         id: job.id,
         sessionId: taskSessionId,
         ...(contextId ? { context_id: contextId } : {}),
+        ...(resolvedWorkerIdForJob ? { ai_worker_id: resolvedWorkerIdForJob } : {}),
         status: {
           state: "submitted",
           timestamp: job.created_at,
