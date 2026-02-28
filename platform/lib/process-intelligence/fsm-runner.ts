@@ -27,7 +27,7 @@ import { checkHitlGate } from "@/lib/brain/hitl-gate";
 import {
   pauseJobAtDecisionGate,
   saveDeepCheckpoint,
-} from "@/lib/se-aas/agent-checkpoint";
+} from "@/lib/brain/agent-checkpoint";
 import { shouldChain } from "@/lib/brain/chain-invoker";
 import { recordStepOutcome } from "@/lib/brain/agent-rl";
 import { recordAndLearnStateOutcome } from "@/lib/brain/state-rl";

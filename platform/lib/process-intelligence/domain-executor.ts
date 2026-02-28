@@ -53,7 +53,7 @@ import {
   pushCoreInsightsToOrg,
 } from "@nexus-ai/memory-stack";
 import { dispatchWriteback } from "@/lib/connectors/writeback-dispatcher";
-import { routeCallType } from "@/lib/se-aas/model-router";
+import { routeCallType } from "@/lib/brain/call-type-router";
 import { executeAgenticState } from "./agentic-state-executor";
 
 // ── NB-065: CORE → ORG TTL guard ──────────────────────────────────────────
