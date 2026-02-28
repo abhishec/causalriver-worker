@@ -27,6 +27,7 @@ import { saveArtifact } from "@/lib/se-aas/job-queue";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 
 // ============================================================================
 // TYPES
@@ -524,6 +525,15 @@ export async function executePmDomain(
   }
 
   const durationMs = Date.now() - startMs;
+
+  // Capture raw Claude output to federated_knowledge (fire-and-forget, never blocks)
+  if (rawContent) {
+    captureStreamedResponse(rawContent, durationMs, {
+      supabase,
+      organizationId,
+      domain: `pm-aas.${domainType}`,
+    });
+  }
 
   // Parse JSON response — strip any markdown fences if present
   let result: Record<string, unknown>;

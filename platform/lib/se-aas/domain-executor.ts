@@ -23,6 +23,7 @@ import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
 import { depositDomainExecutionOutcome } from "@/lib/brain/engagement-flywheel";
 import { selectModelForDomain, routeModelWithIq, routeCallType } from "./model-router";
+import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 import {
   buildAgentCommsPayload,
   buildIntroSpeech,
@@ -598,7 +599,9 @@ const DOMAIN_MOA_ENABLED = new Set(["early-warning", "delivery-intelligence"]);
 async function runDomainMoA(
   domainType: string,
   domainResult: Record<string, unknown>,
-  originalRequest: Record<string, unknown>
+  originalRequest: Record<string, unknown>,
+  supabase?: SupabaseClient,
+  organizationId?: string
 ): Promise<string | null> {
   if (!DOMAIN_MOA_ENABLED.has(domainType)) return null;
 
@@ -644,6 +647,7 @@ Keep response under 150 words. No preamble.`,
   try {
     const Anthropic = (await import("@anthropic-ai/sdk")).default;
     const anthropic = new Anthropic({ apiKey });
+    const _moaStartMs = Date.now();
 
     // Run all 3 Haiku angles in parallel for minimal latency
     const [analyticalResp, riskResp, trendResp] = await Promise.all(
@@ -699,6 +703,14 @@ Return ONLY the synthesis — no meta-commentary, no labels.`;
         `[domain-moa] ${domainType} synthesis complete — ` +
           `analytical=${analytical.length}c risk=${risk.length}c trend=${trend.length}c → ${synthesized.length}c`
       );
+      // Capture MoA synthesis to federated_knowledge (fire-and-forget)
+      if (supabase && organizationId) {
+        captureStreamedResponse(synthesized, Date.now() - _moaStartMs, {
+          supabase,
+          organizationId,
+          domain: `se-aas.moa.${domainType}`,
+        });
+      }
     }
 
     return synthesized;
@@ -1073,7 +1085,7 @@ export async function executeDomain(
     // Non-blocking: runs in parallel with downstream steps, result is merged
     // into the return value before returning to caller.
     if (DOMAIN_MOA_ENABLED.has(params.domainType)) {
-      const moaSynthesis = await runDomainMoA(params.domainType, result, params.request);
+      const moaSynthesis = await runDomainMoA(params.domainType, result, params.request, supabase, params.organizationId);
       if (moaSynthesis) {
         result = { ...result, moaSynthesis, moaEnabled: true };
       }

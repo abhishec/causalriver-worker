@@ -32,6 +32,7 @@ import { postSlackMessage } from "@/lib/connectors/writeback/slack";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
 import { startJobHeartbeat, stopJobHeartbeat } from "@/lib/se-aas/job-heartbeat";
 import { routeCallType } from "@/lib/se-aas/model-router";
+import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -264,6 +265,14 @@ Rules:
 
     const rawText =
       response.content[0]?.type === "text" ? response.content[0].text : "[]";
+
+    // Capture code generation output to federated_knowledge (fire-and-forget)
+    captureStreamedResponse(rawText, Date.now() - startMs, {
+      supabase,
+      organizationId: orgId,
+      domain: `overnight-agent.${ticket.domain || "code-agent"}`,
+      inputSummary: ticket.title.slice(0, 200),
+    });
 
     // Strip markdown fences if Claude wrapped the JSON
     const stripped = rawText
