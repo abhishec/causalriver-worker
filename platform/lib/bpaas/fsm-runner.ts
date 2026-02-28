@@ -309,11 +309,10 @@ export class BPaaSFSMRunner {
     // ESCALATE is semi-terminal: it can advance to COMPLETE via "escalated" or
     // to FAILED via "error", so it is NOT blocked here.
     //
-    // Without this explicit guard, the accidental behavior is:
-    //   COMPLETE → throws "Illegal transition" (from null in table)
+    // Without this explicit guard, the behavior is accidentally correct but opaque:
+    //   COMPLETE → throws "Illegal transition" (from null/undefined in table)
     //   FAILED   → throws "Illegal transition" (from undefined in table)
-    // Both would throw, but with an opaque error. This guard surfaces a clear
-    // diagnostic message so debugging is unambiguous.
+    // This guard surfaces a clear diagnostic message so debugging is unambiguous.
     if (this.state === "COMPLETE") {
       throw new Error(
         `[BPaaSFSMRunner] transition() called on terminal state COMPLETE ` +

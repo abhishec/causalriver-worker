@@ -1088,7 +1088,22 @@ ${pastReflectionsText}`;
         continue;
       }
 
-      // Dedup check: 2-hour cooldown per domain per org
+      // ── Dedup check (two layers) ─────────────────────────────────────────
+      //
+      // Layer 1: ai_memory dedup marker — 2-hour cooldown per domain per org.
+      // This is the primary dedup mechanism. The marker is written AFTER a
+      // successful agent_queue insert and survives up to 2h.
+      //
+      // Layer 2: in-flight agent_queue check — guards against the case where
+      // the 2h marker has expired but a prior cycle's job is still running or
+      // queued. Without this second layer, a long-running job (>2h) would get
+      // a duplicate queued at the 2h mark.
+      //
+      // Note on serverless safety: both checks query the database directly.
+      // Module-level in-process state (e.g. a Map) is NOT a reliable dedup
+      // mechanism on serverless because each Lambda invocation is an isolated
+      // process — concurrent cron invocations running in different Lambdas share
+      // no in-process state. The database IS the shared, durable state store.
       const dedupKey = `cognitive-planner:${decision.domain}:${orgId}`;
       const { count: existingMarker } = await supabase
         .from("ai_memory")
@@ -1101,7 +1116,25 @@ ${pastReflectionsText}`;
 
       if ((existingMarker ?? 0) > 0) {
         logger.warn(
-          `[CognitivePlanner] DEDUP skip — ${decision.domain} already queued in last 2h`
+          `[CognitivePlanner] DEDUP skip — ${decision.domain} already queued in last 2h (ai_memory marker)`
+        );
+        continue;
+      }
+
+      // Layer 2: check agent_queue for in-flight jobs for this domain + org.
+      // Statuses 'pending' and 'running' mean a job is actively being executed
+      // or is waiting to be picked up. Skip insertion to avoid duplication.
+      const { count: inFlightCount } = await supabase
+        .from("agent_queue")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId)
+        .eq("task_type", decision.domain)
+        .in("status", ["pending", "running"]);
+
+      if ((inFlightCount ?? 0) > 0) {
+        logger.warn(
+          `[CognitivePlanner] DEDUP skip — ${decision.domain} has ${inFlightCount} in-flight job(s) (pending/running in agent_queue)`,
+          { orgId, domain: decision.domain }
         );
         continue;
       }
