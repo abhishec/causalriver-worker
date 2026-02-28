@@ -126,7 +126,31 @@ const PM_AAS_DOMAINS = new Set([
   "capacity-planner",
 ]);
 
-const VALID_SKILLS = new Set(Object.keys(SKILL_TO_DOMAIN));
+
+// ── Process Engine skill → template mapping ──────────────────────────────────
+// These skills route to agent_type='bpaas' (not 'se-aas'/'aas'/'pm-aas').
+// The A2A caller uses the same skill/message interface — routing is transparent.
+const PROCESS_SKILL_MAP: Record<string, string> = {
+  "hr-offboarding":           "hr_offboarding",
+  "procurement-approval":     "procurement",
+  "order-management":         "order_management",
+  "expense-approval":         "expense_approval",
+  "customer-onboarding":      "customer_onboarding",
+  "insurance-claim":          "insurance_claim",
+  "invoice-reconciliation":   "invoice_reconciliation",
+  "sla-breach-escalation":    "sla_breach_escalation",
+  "travel-rebooking":         "travel_rebooking",
+  "compliance-audit":         "compliance_audit",
+  "subscription-migration":   "subscription_migration",
+  "dispute-resolution":       "dispute_resolution",
+  "financial-close":          "financial_close",
+  "product-workflow":         "product_workflow",
+  "ar-collections":           "ar_collections",
+  "incident-response":        "incident_response",
+  "qbr-preparation":          "qbr_preparation",
+};
+
+const VALID_SKILLS = new Set([...Object.keys(SKILL_TO_DOMAIN), ...Object.keys(PROCESS_SKILL_MAP)]);
 
 // ── Auth helper ─────────────────────────────────────────────────────────────
 
@@ -323,12 +347,19 @@ export async function POST(request: NextRequest) {
     const taskSessionId = sessionId ?? crypto.randomUUID();
     const domainType = SKILL_TO_DOMAIN[skill];
 
+    // Check if this is a Process Engine skill (routes to agent_type='bpaas')
+    const isProcessSkill = skill in PROCESS_SKILL_MAP;
+    const processTemplateType = isProcessSkill ? PROCESS_SKILL_MAP[skill] : null;
+
     // Route to the correct agent_type based on the domain:
+    // - 'bpaas'   — Process Engine executor (FSM templates)
     // - 'se-aas'  — Software Engineering as a Service executor
     // - 'aas'     — Accounting as a Service executor
     // - 'pm-aas'  — Product Management as a Service executor
     let agentType: string;
-    if (SEAAS_DOMAINS.has(domainType)) {
+    if (isProcessSkill) {
+      agentType = "bpaas";
+    } else if (SEAAS_DOMAINS.has(domainType)) {
       agentType = "se-aas";
     } else if (AAS_DOMAINS.has(domainType)) {
       agentType = "aas";
@@ -337,6 +368,13 @@ export async function POST(request: NextRequest) {
     } else {
       agentType = "se-aas"; // default to SE-aaS for unknown domains
     }
+
+    // For process skills, the task_type is the template type (e.g. 'hr_offboarding').
+    // For other skills, domainType may be undefined when the skill is a process skill
+    // (it won't be in SKILL_TO_DOMAIN), so fall back to the skill name.
+    const resolvedTaskType = isProcessSkill
+      ? (processTemplateType ?? skill)
+      : (domainType ?? skill);
 
     // Build job payload — context_id is optional (omitted when null for backward compat)
     const jobPayload: Record<string, unknown> = {
@@ -353,7 +391,7 @@ export async function POST(request: NextRequest) {
     const queueRow: Record<string, unknown> = {
       organization_id: organizationId,
       agent_type: agentType,
-      task_type: domainType,
+      task_type: resolvedTaskType,
       priority: 5,
       payload: jobPayload,
       status: "pending",
@@ -380,7 +418,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} org=${organizationId}${resolvedWorkerIdForJob ? ` worker=${resolvedWorkerIdForJob}` : ""}${contextId ? ` context=${contextId}` : ""}`);
+    // For process skills, also create a bpaas_process_instances tracking row.
+    // All 17 built-in process templates use DECOMPOSE as their initial FSM state.
+    if (isProcessSkill && processTemplateType) {
+      const { error: instanceError } = await admin
+        .from("bpaas_process_instances")
+        .insert({
+          organization_id: organizationId,
+          process_type: processTemplateType,
+          agent_job_id: job.id,
+          current_state: "DECOMPOSE",
+          status: "running",
+          input_payload: { skill, userText, ...jobPayload },
+          initiated_by: "a2a",
+          created_by: auth.isWorker ? null : auth.userId,
+        });
+
+      if (instanceError) {
+        // Non-fatal: job is queued, log and continue
+        logger.warn("[A2A /tasks POST] bpaas_process_instances insert failed (non-fatal)", {
+          error: instanceError.message,
+          jobId: job.id,
+          processTemplateType,
+        });
+      }
+    }
+
+    logger.warn(`[A2A /tasks POST] Task submitted: ${job.id} skill=${skill} agentType=${agentType} org=${organizationId}${resolvedWorkerIdForJob ? ` worker=${resolvedWorkerIdForJob}` : ""}${contextId ? ` context=${contextId}` : ""}`);
 
     // Return A2A-compliant task submission response
     return NextResponse.json(
@@ -395,6 +459,7 @@ export async function POST(request: NextRequest) {
         },
         skill,
         organizationId,
+        ...(isProcessSkill ? { processTemplateType, agentType: "bpaas" } : {}),
       },
       { status: 202 }
     );
