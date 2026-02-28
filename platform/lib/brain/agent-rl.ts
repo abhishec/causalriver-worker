@@ -715,6 +715,71 @@ export async function recordStepOutcome(
   }
 }
 
+// ── Prediction Accuracy Tracking (RLVR Capstone) ──────────────────────────
+
+/**
+ * RLVR: Record whether the predictor's risk assessment was accurate.
+ * Called after process completion to close the prediction loop.
+ *
+ * Scoring matrix:
+ *   high risk + failure  → correct prediction    → quality = 1.0 (reward)
+ *   high risk + success  → false positive         → quality = 0.3 (mild penalty)
+ *   low risk  + success  → correct prediction    → quality = 1.0 (reward)
+ *   low risk  + failure  → missed prediction     → quality = 0.0 (penalty)
+ *   medium risk (any)    → partial signal        → quality = 0.6
+ *
+ * Calls recordAgentOutcome with domain = "process.predictor.<processType>".
+ * Fire-and-forget safe — never throws.
+ */
+export async function recordPredictionAccuracy(
+  supabase: SupabaseClient,
+  params: {
+    orgId: string;
+    processType: string;
+    predictedRisk: "low" | "medium" | "high";
+    actualOutcome: "success" | "failure";
+    executionMs: number;
+  }
+): Promise<void> {
+  try {
+    let predictionQuality: number;
+
+    if (params.predictedRisk === "medium") {
+      // Medium is ambiguous — use a neutral partial signal
+      predictionQuality = 0.6;
+    } else if (params.predictedRisk === "high" && params.actualOutcome === "failure") {
+      // Correct: predicted high risk, process indeed failed
+      predictionQuality = 1.0;
+    } else if (params.predictedRisk === "high" && params.actualOutcome === "success") {
+      // False positive: predicted high risk but process succeeded (over-cautious)
+      predictionQuality = 0.3;
+    } else if (params.predictedRisk === "low" && params.actualOutcome === "success") {
+      // Correct: predicted low risk, process succeeded
+      predictionQuality = 1.0;
+    } else {
+      // Missed prediction: predicted low risk but process failed
+      predictionQuality = 0.0;
+    }
+
+    await recordAgentOutcome(supabase, {
+      agentId: `predictor-${params.processType}-${Date.now()}`,
+      domain: `process.predictor.${params.processType}`,
+      taskDescription: `Predictor accuracy for ${params.processType}: predicted=${params.predictedRisk}, actual=${params.actualOutcome}`,
+      resultSummary: `predictedRisk=${params.predictedRisk} actualOutcome=${params.actualOutcome} quality=${predictionQuality.toFixed(2)}`,
+      quality: predictionQuality,
+      executionMs: params.executionMs,
+      organizationId: params.orgId,
+      userId: params.orgId,
+      modelId: "process-predictor",
+    });
+  } catch (err) {
+    logger.warn("[agent-rl] recordPredictionAccuracy failed (non-fatal)", {
+      error: err instanceof Error ? err.message : String(err),
+      processType: params.processType,
+    });
+  }
+}
+
 // ── Domain Drift Detection ─────────────────────────────────────────────────
 
 /**

@@ -123,6 +123,11 @@ export interface BPaaSContext {
   mutationResult?: Record<string, unknown>;
   /** Results from custom intermediate states (FRAUD_REVIEW, RECONCILE, etc.) */
   customStateResults?: Record<string, Record<string, unknown>>;
+  /**
+   * Set by the process predictor at DECOMPOSE if risk is "high".
+   * Downstream states use this flag for pre-emptive escalation awareness.
+   */
+  predictedHighRisk?: boolean;
   stateHistory: Array<{
     state: BPaaSState;
     enteredAt: number;
