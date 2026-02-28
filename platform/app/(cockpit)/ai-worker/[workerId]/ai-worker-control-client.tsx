@@ -283,12 +283,12 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 flex items-center gap-3 px-5 h-12 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-sm">
+      <header className="sticky top-0 z-20 flex items-center gap-3 px-5 h-12 border-b border-border/[0.06] bg-background/90 backdrop-blur-sm">
         <button
           onClick={() => router.push("/dashboard")}
-          className="flex items-center gap-1.5 text-white/30 hover:text-white/70 transition-colors text-sm"
+          className="flex items-center gap-1.5 text-muted hover:text-foreground transition-colors text-sm"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path
@@ -302,8 +302,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
           BrainOS
         </button>
 
-        <span className="text-white/10 text-lg">/</span>
-        <span className="text-sm font-medium text-white/80 truncate max-w-[200px]">
+        <span className="text-foreground/10 text-lg">/</span>
+        <span className="text-sm font-medium text-foreground/80 truncate max-w-[200px]">
           {workerName}
         </span>
         <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-orange-500/15 text-orange-400 border border-orange-500/20 uppercase tracking-wide">
@@ -312,7 +312,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
 
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-success" />
-          <span className="text-xs text-white/30">Active</span>
+          <span className="text-xs text-muted">Active</span>
         </div>
 
         <div className="flex-1" />
@@ -342,7 +342,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
       </header>
 
       {/* ── Stats strip ──────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-8 px-6 py-3.5 border-b border-white/[0.06] bg-[#0d0d0d] overflow-x-auto">
+      <div className="flex items-center gap-8 px-6 py-3.5 border-b border-border/[0.06] bg-surface overflow-x-auto">
         {isLoading ? (
           /* Skeleton loader for stats strip */
           <>
@@ -409,7 +409,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
       {/* ── Main content ──────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
         {/* Left: Live Agent Activity (60%) */}
-        <div className="flex-[3] overflow-y-auto border-r border-white/[0.06]">
+        <div className="flex-[3] overflow-y-auto border-r border-border">
           <div className="p-6">
             {/* Skeleton while initial load */}
             {isLoading && recentJobs.length === 0 && (
@@ -460,7 +460,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                       height="18"
                       viewBox="0 0 18 18"
                       fill="none"
-                      className="text-white/20"
+                      className="text-muted/80"
                     >
                       <path
                         d="M9 3v6l4 2"
@@ -477,8 +477,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                       />
                     </svg>
                   </div>
-                  <p className="text-sm text-white/25">No recent jobs</p>
-                  <p className="text-xs text-white/15 mt-1">
+                  <p className="text-sm text-muted">No recent jobs</p>
+                  <p className="text-xs text-muted/60 mt-1">
                     Run a query in Copilot to see activity here
                   </p>
                 </div>
@@ -497,7 +497,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
         <div className="flex-[2] overflow-y-auto">
           <div className="p-6 space-y-6">
             {/* Brain IQ card */}
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+            <div className="rounded-xl border border-border bg-white/[0.03] p-5">
               <div className="flex items-center justify-between mb-4">
                 <SectionLabel>Brain Intelligence</SectionLabel>
                 {isLearning && (
@@ -532,7 +532,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                     <span className="text-4xl font-bold text-accent">
                       {rlStatus?.brainIq ?? 0}
                     </span>
-                    <span className="text-sm text-white/30 mb-1.5">IQ</span>
+                    <span className="text-sm text-muted mb-1.5">IQ</span>
                   </div>
                   <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-4">
                     <div
@@ -565,7 +565,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
             </div>
 
             {/* Knowledge Tiers */}
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-5">
+            <div className="rounded-xl border border-border bg-white/[0.03] p-5">
               <div className="flex items-center justify-between mb-4">
                 <SectionLabel>Knowledge Tiers</SectionLabel>
               </div>
@@ -577,8 +577,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                     <span className="text-[9px] font-bold text-accent">T1</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-white/60">Raw Knowledge</p>
-                    <p className="text-[10px] text-white/25">knowledge_chunks</p>
+                    <p className="text-xs text-foreground/60">Raw Knowledge</p>
+                    <p className="text-[10px] text-muted">knowledge_chunks</p>
                   </div>
                   <span className="text-sm font-bold text-accent">
                     {tierStats ? tierStats.tier1Count.toLocaleString() : "—"}
@@ -591,8 +591,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                     <span className="text-[9px] font-bold text-purple-400">T2</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-white/60">Signals (24h)</p>
-                    <p className="text-[10px] text-white/25">cross_domain_signals</p>
+                    <p className="text-xs text-foreground/60">Signals (24h)</p>
+                    <p className="text-[10px] text-muted">cross_domain_signals</p>
                   </div>
                   <span className="text-sm font-bold text-purple-400">
                     {tierStats ? tierStats.tier2Count.toLocaleString() : "—"}
@@ -605,8 +605,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                     <span className="text-[9px] font-bold text-success">T3</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-white/60">Consolidated</p>
-                    <p className="text-[10px] text-white/25">consolidated_patterns</p>
+                    <p className="text-xs text-foreground/60">Consolidated</p>
+                    <p className="text-[10px] text-muted">consolidated_patterns</p>
                   </div>
                   <span className="text-sm font-bold text-success">
                     {tierStats ? tierStats.tier3Count.toLocaleString() : "—"}
@@ -624,7 +624,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                   <button
                     onClick={runConsolidation}
                     disabled={isConsolidating}
-                    className="w-full py-2 rounded-lg border border-white/10 text-xs text-white/40 hover:border-success/30 hover:text-success/70 hover:bg-success/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2 rounded-lg border border-border text-xs text-muted hover:border-success/30 hover:text-success/70 hover:bg-success/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
                     {isConsolidating ? (
                       <>
@@ -645,7 +645,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                 <SectionLabel>Connectors</SectionLabel>
                 <button
                   onClick={() => router.push("/connectors")}
-                  className="text-[11px] text-white/25 hover:text-white/50 transition-colors"
+                  className="text-[11px] text-muted hover:text-foreground/50 transition-colors"
                 >
                   Manage →
                 </button>
@@ -653,7 +653,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
               {connectors.length === 0 ? (
                 <button
                   onClick={() => router.push("/connectors")}
-                  className="w-full py-4 rounded-lg border border-dashed border-white/10 text-xs text-white/25 hover:border-orange-500/30 hover:text-orange-400/50 transition-colors text-center"
+                  className="w-full py-4 rounded-lg border border-dashed border-border text-xs text-muted hover:border-orange-500/30 hover:text-orange-400/50 transition-colors text-center"
                 >
                   + Connect GitHub, Jira, Slack
                 </button>
@@ -672,11 +672,11 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
                             connected ? "bg-success" : "bg-white/15"
                           }`}
                         />
-                        <span className="text-sm text-white/60 capitalize flex-1">
+                        <span className="text-sm text-foreground/60 capitalize flex-1">
                           {c.connector_type}
                         </span>
                         {c.last_sync_at && connected && (
-                          <span className="text-[11px] text-white/20">
+                          <span className="text-[11px] text-muted">
                             {timeAgo(c.last_sync_at)} ago
                           </span>
                         )}
@@ -701,8 +701,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function JobRow({ job }: { job: AgentJob }) {
-  const dotClass = STATUS_DOT[job.status] ?? "bg-white/20";
-  const textClass = STATUS_TEXT[job.status] ?? "text-white/40";
+  const dotClass = STATUS_DOT[job.status] ?? "bg-muted";
+  const textClass = STATUS_TEXT[job.status] ?? "text-muted";
   const displayName =
     job.task_type
       ?.replace(/-/g, " ")
@@ -711,9 +711,9 @@ function JobRow({ job }: { job: AgentJob }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors group">
       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotClass}`} />
-      <span className="text-sm text-white/70 flex-1 truncate">{displayName}</span>
+      <span className="text-sm text-foreground/70 flex-1 truncate">{displayName}</span>
       <span className={`text-xs ${textClass}`}>{job.status}</span>
-      <span className="text-xs text-white/20 group-hover:text-white/30 transition-colors">
+      <span className="text-xs text-muted group-hover:text-foreground/30 transition-colors">
         {timeAgo(job.created_at)}
       </span>
     </div>
@@ -738,17 +738,17 @@ function Stat({
     yellow: "text-warning",
     red: "text-danger",
     orange: "text-orange-400",
-    gray: "text-white/25",
+    gray: "text-muted",
   };
   return (
     <div
       className={`flex flex-col gap-0.5 flex-shrink-0 ${dim ? "opacity-60" : ""}`}
     >
-      <span className="text-[10px] font-medium uppercase tracking-widest text-white/25">
+      <span className="text-[10px] font-medium uppercase tracking-widest text-muted">
         {label}
       </span>
       <span
-        className={`text-lg font-bold ${accentColors[accent] ?? "text-white"}`}
+        className={`text-lg font-bold ${accentColors[accent] ?? "text-foreground"}`}
       >
         {value}
       </span>
@@ -757,12 +757,12 @@ function Stat({
 }
 
 function StatDivider() {
-  return <div className="w-px h-7 bg-white/[0.06] flex-shrink-0" />;
+  return <div className="w-px h-7 bg-border flex-shrink-0" />;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 mb-3">
+    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted mb-3">
       {children}
     </p>
   );
@@ -771,8 +771,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-white/35 text-xs">{label}</span>
-      <span className="text-white/70 text-xs font-medium">{value}</span>
+      <span className="text-muted text-xs">{label}</span>
+      <span className="text-foreground/70 text-xs font-medium">{value}</span>
     </div>
   );
 }

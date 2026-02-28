@@ -14,6 +14,9 @@
  *   - agent_queue (done rows)     older than 30 days  (status: success | error | recovered)
  *   - ai_memory (working)         memory_type='working', domain='cognitive-planner', older than 1 hour
  *   - ai_memory (dedup markers)   memory_type='dedup', older than 3 hours
+ *   - ai_memory (conversation/bootstrap/planner-schedule)  older than 30 days
+ *   - ai_memory (federated)       older than 90 days
+ *   Keep: memory_type='correction' and memory_type='dedup' (dedup handled above with 3h window)
  *
  * Each table is deleted independently — a failure on one does NOT abort the rest.
  * Returns a JSON summary with the deleted row counts per table.
@@ -131,6 +134,27 @@ export async function GET(request: NextRequest) {
           .delete({ count: "exact" })
           .eq("memory_type", "dedup")
           .lt("created_at", hoursAgoISO(3))
+      ),
+
+      // ai_memory conversation/bootstrap/planner-schedule entries older than 30 days
+      // These are high-volume ephemeral types: conversation turns, worker bootstrap seeds, planner schedules
+      // Keep: correction (indefinite), dedup (handled above)
+      safeDelete("ai_memory(conversation/bootstrap/planner-schedule)", () =>
+        admin
+          .from("ai_memory")
+          .delete({ count: "exact" })
+          .in("memory_type", ["conversation", "bootstrap", "planner-schedule"])
+          .lt("created_at", daysAgoISO(30))
+      ),
+
+      // ai_memory federated entries older than 90 days
+      // Federated knowledge ages out — promoted entries live in federated_knowledge table instead
+      safeDelete("ai_memory(federated)", () =>
+        admin
+          .from("ai_memory")
+          .delete({ count: "exact" })
+          .eq("memory_type", "federated")
+          .lt("created_at", daysAgoISO(90))
       ),
     ]);
 

@@ -12,7 +12,7 @@ export default function CockpitLayout({
 }) {
   return (
     <WorkspaceProvider>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-background text-foreground">
         {children}
       </div>
     </WorkspaceProvider>
