@@ -6,6 +6,9 @@
  * (hr_offboarding, procurement, order_management) are FSM configurations,
  * not analytical domains.
  *
+ * Process types are DB-driven — any type in bpaas_process_definitions is valid.
+ * The hardcoded BPAAS_PROCESS_TYPES array has been removed.
+ *
  * DB value: agent_type='bpaas' (internal, for backward compat)
  * API route: /api/process/[templateType]
  * Brain layer: L28 (Tier 9 — Process Execution, always present)
@@ -15,18 +18,16 @@
 export { processProcessEngineJobs } from "./worker";
 export type { ProcessEngineWorkerResult } from "./types";
 
-// Templates — process configurations
+// Templates — process configurations (DB-driven, no hardcoded list)
 export {
-  PROCESS_ENGINE_TEMPLATES,
+  isValidProcessType,
   isProcessTemplate,
+  getProcessDefinition,
   getProcessTemplate,
   processEngineDomain,
-  type ProcessTemplateType,
-  // Backward compat
-  BPAAS_PROCESS_TYPES,
-  isBPaaSProcessType,
-  getProcessDefinition,
   bpaasDomain,
+  type ProcessTemplateType,
+  type BPaaSProcessType,
 } from "./templates";
 
 // Types

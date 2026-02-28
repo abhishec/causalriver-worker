@@ -7,11 +7,13 @@
  * Templates describe the FSM shape (states, transitions, policy rules) for
  * each process type (hr_offboarding, procurement, order_management, etc.).
  * The actual execution logic lives in lib/process-intelligence/domain-executor.ts.
+ *
+ * Process types are now DB-driven — any type in bpaas_process_definitions is valid.
+ * The hardcoded BPAAS_PROCESS_TYPES array and BUILTIN_DEFINITIONS have been removed.
  */
 
 import {
-  BPAAS_PROCESS_TYPES,
-  isBPaaSProcessType,
+  isValidProcessType,
   getProcessDefinition,
   bpaasDomain,
   type BPaaSProcessType,
@@ -20,19 +22,17 @@ import {
   type FSMTransition,
 } from "@/lib/process-intelligence/process-registry";
 
-// Backward-compat re-exports — old names preserved so existing callers don't break
+// Canonical exports
 export {
-  BPAAS_PROCESS_TYPES,
-  isBPaaSProcessType,
+  isValidProcessType,
   getProcessDefinition,
   bpaasDomain,
 };
 export type { BPaaSProcessType, ProcessDefinition, PolicyRule, FSMTransition };
 
-// New canonical names for the Process Engine framing
-export const PROCESS_ENGINE_TEMPLATES = BPAAS_PROCESS_TYPES;
-export const isProcessTemplate = isBPaaSProcessType;
-export const getProcessTemplate = getProcessDefinition;
+// Aliases for backward compat where needed
+export { getProcessDefinition as getProcessTemplate };
+export { isValidProcessType as isProcessTemplate };
 
 /** Process Engine RL domain prefix: "bpaas.<templateType>" */
 export function processEngineDomain(templateType: string): string {

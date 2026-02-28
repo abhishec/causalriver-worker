@@ -23,7 +23,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { isProcessTemplate } from "@/lib/process-engine/templates";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -72,14 +71,6 @@ export async function GET(
   try {
     const { templateType, jobId } = await params;
 
-    // Basic validation — templateType must be a known process template
-    if (!isProcessTemplate(templateType)) {
-      return NextResponse.json(
-        { error: `Unknown process template: ${templateType}` },
-        { status: 400 }
-      );
-    }
-
     const auth = await authenticate(request);
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -87,7 +78,7 @@ export async function GET(
 
     const admin = getAdminClient();
 
-    // Fetch the agent_queue job
+    // Fetch the agent_queue job — existence check proves templateType is valid
     const { data: job, error: jobError } = await admin
       .from("agent_queue")
       .select(
@@ -95,6 +86,7 @@ export async function GET(
       )
       .eq("id", jobId)
       .eq("agent_type", "bpaas")
+      .eq("task_type", templateType)
       .maybeSingle();
 
     if (jobError) {

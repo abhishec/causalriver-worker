@@ -15,7 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { isProcessTemplate } from "@/lib/process-engine/templates";
+import { isValidProcessType } from "@/lib/process-engine/templates";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -73,16 +73,6 @@ export async function POST(
   try {
     const { templateType } = await params;
 
-    // Validate templateType against the registered process templates
-    if (!isProcessTemplate(templateType)) {
-      return NextResponse.json(
-        {
-          error: `Unknown process template: ${templateType}. Use GET /api/process/templates to list valid templates.`,
-        },
-        { status: 400 }
-      );
-    }
-
     const auth = await authenticate(request);
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -121,11 +111,23 @@ export async function POST(
       );
     }
 
-    const admin = getAdminClient();
+    const serviceClient = getAdminClient();
+
+    // Validate templateType against DB — any type in bpaas_process_definitions is valid.
+    // This replaces the old sync isBPaaSProcessType() check against the hardcoded array.
+    const isValid = await isValidProcessType(templateType, organizationId, serviceClient);
+    if (!isValid) {
+      return NextResponse.json(
+        {
+          error: `Unknown process type: ${templateType}. Create a process definition in bpaas_process_definitions first.`,
+        },
+        { status: 400 }
+      );
+    }
 
     // For non-worker auth, verify org membership
     if (!auth.isWorker) {
-      const { data: membership } = await admin
+      const { data: membership } = await serviceClient
         .from("org_members")
         .select("role")
         .eq("user_id", auth.userId)
@@ -137,10 +139,7 @@ export async function POST(
       }
     }
 
-    // All 17 built-in process templates use DECOMPOSE as their initial FSM state.
-    // getProcessTemplate() is async (DB lookup) — using the hardcoded constant here
-    // avoids an extra DB round-trip in the hot path. If custom templates are added
-    // with a different initial state, update this lookup.
+    // All process templates use DECOMPOSE as their initial FSM state by default.
     const initialState = "DECOMPOSE";
 
     // 1. Insert to agent_queue
@@ -157,7 +156,7 @@ export async function POST(
       status: "pending",
     };
 
-    const { data: job, error: jobError } = await admin
+    const { data: job, error: jobError } = await serviceClient
       .from("agent_queue")
       .insert(queueRow)
       .select("id, created_at")
@@ -187,7 +186,7 @@ export async function POST(
       created_by: auth.isWorker ? null : auth.userId,
     };
 
-    const { data: instance, error: instanceError } = await admin
+    const { data: instance, error: instanceError } = await serviceClient
       .from("bpaas_process_instances")
       .insert(instanceRow)
       .select("id")

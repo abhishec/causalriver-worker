@@ -6,7 +6,7 @@
  * Flow:
  * 1. Validate agent_type is 'bpaas'
  * 2. Extract processType, organizationId, inputPayload from payload
- * 3. Validate processType via isBPaaSProcessType()
+ * 3. Validate processType via isValidProcessType() — DB query, not hardcoded array
  * 4. Mark job running (status → 'running', started_at = now())
  * 5. Call executeBPaaSProcess()
  * 6. Handle 5 result states:
@@ -32,7 +32,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { executeBPaaSProcess } from "./domain-executor";
-import { isBPaaSProcessType } from "./process-registry";
+import { isValidProcessType } from "./process-registry";
 import { MAX_CHAIN_DEPTH } from "@/lib/brain/chain-invoker";
 import { logger } from "@/lib/logger";
 
@@ -151,8 +151,11 @@ export async function processBPaaSJob(
     return;
   }
 
-  if (!isBPaaSProcessType(processType)) {
-    logger.warn("[bpaas/job-worker] Invalid processType", {
+  // DB-driven validation — any type in bpaas_process_definitions is valid.
+  // Replaces the old sync isBPaaSProcessType() check against the hardcoded array.
+  const isValid = await isValidProcessType(processType, organizationId, supabase);
+  if (!isValid) {
+    logger.warn("[bpaas/job-worker] Unknown process type — skipping", {
       jobId: job.id,
       processType,
     });
@@ -160,7 +163,7 @@ export async function processBPaaSJob(
       .from("agent_queue")
       .update({
         status: "failed",
-        error_message: `Invalid BPaaS process type: '${processType}'`,
+        error_message: `Unknown process type: ${processType}`,
       })
       .eq("id", job.id);
     return;
