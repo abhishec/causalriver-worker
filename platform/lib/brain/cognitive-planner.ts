@@ -973,11 +973,27 @@ ${pastReflectionsText}`;
       // Process Engine templates are USER-TRIGGERED ONLY — never schedule autonomously.
       // bpaas.* prefix = process engine domain (hr_offboarding, procurement, etc.)
       // Also block known BPaaS process types that LLM might suggest without the prefix.
+      // All 17 process engine templates — both underscore and hyphen variants.
+      // Primary guard is startsWith("bpaas.") but this catches bare template names
+      // in case the LLM omits the prefix.
       const BPAAS_PROCESS_TYPES = new Set([
         "hr_offboarding", "hr-offboarding",
         "procurement",
         "order_management", "order-management",
         "expense_approval", "expense-approval",
+        "customer_onboarding", "customer-onboarding",
+        "insurance_claim", "insurance-claim",
+        "invoice_reconciliation", "invoice-reconciliation",
+        "sla_breach_escalation", "sla-breach-escalation",
+        "travel_rebooking", "travel-rebooking",
+        "compliance_audit", "compliance-audit",
+        "subscription_migration", "subscription-migration",
+        "dispute_resolution", "dispute-resolution",
+        "financial_close", "financial-close",
+        "product_workflow", "product-workflow",
+        "ar_collections", "ar-collections",
+        "incident_response", "incident-response",
+        "qbr_preparation", "qbr-preparation",
       ]);
       if (
         decision.domain.startsWith("bpaas.") ||

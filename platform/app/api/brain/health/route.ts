@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
     let queueDepth = 0;
     let stuckJobs = 0;
     let supabaseOk = false;
-    const envOk = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.ANTHROPIC_API_KEY);
+    let supabaseError: string | null = null;
+    // Check env vars — distinguish between missing vs wrong (both are problems but different root causes)
+    const hasSupabaseUrl = !!(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL);
+    const hasServiceKey = !!(process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== "undefined");
+    const hasAnthropicKey = !!(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== "undefined");
+    const envOk = hasSupabaseUrl && hasServiceKey && hasAnthropicKey;
     let coreBrainHealth: { healthy: boolean; orgExists: boolean; templateCount: number; issues: string[] } | null = null;
 
     try {
@@ -62,6 +67,24 @@ export async function GET(request: NextRequest) {
       stuckJobs = stuckResult.count ?? 0;
       coreBrainHealth = coreBrainResult;
 
+      // Log actual Supabase errors for diagnostics — helps identify auth/network issues
+      if (pendingResult.error) {
+        supabaseError = `${pendingResult.error.code}: ${pendingResult.error.message}`;
+        logger.error("[brain/health] Supabase pending query error:", {
+          code: pendingResult.error.code,
+          message: pendingResult.error.message,
+          hint: pendingResult.error.hint,
+          route: "/api/brain/health",
+        });
+      }
+      if (stuckResult.error && !supabaseError) {
+        supabaseError = `${stuckResult.error.code}: ${stuckResult.error.message}`;
+        logger.error("[brain/health] Supabase stuck query error:", {
+          code: stuckResult.error.code,
+          message: stuckResult.error.message,
+          route: "/api/brain/health",
+        });
+      }
       if (queueDepth > 100) {
         logger.warn("[brain/health] Agent queue depth exceeds 100", { queueDepth, route: "/api/brain/health" });
       }
@@ -72,7 +95,9 @@ export async function GET(request: NextRequest) {
         logger.warn("[brain/health] CORE brain unhealthy", { issues: coreBrainHealth.issues, route: "/api/brain/health" });
       }
     } catch (err) {
-      logger.error("[brain/health] Failed to query agent_queue metrics:", { error: (err as Error)?.message ?? String(err), route: "/api/brain/health" });
+      const errMsg = (err as Error)?.message ?? String(err);
+      supabaseError = `exception: ${errMsg}`;
+      logger.error("[brain/health] Failed to query agent_queue metrics:", { error: errMsg, route: "/api/brain/health" });
     }
 
     const coreBrainMissing = coreBrainHealth !== null && !coreBrainHealth.orgExists;
@@ -83,7 +108,9 @@ export async function GET(request: NextRequest) {
       service: "nexusbrain",
       version: "1.0.0",
       supabase: supabaseOk ? "ok" : "unreachable",
+      supabaseError: supabaseOk ? null : supabaseError,  // diagnostic — null when healthy
       envVars: envOk ? "ok" : "missing",
+      envDetail: !envOk ? { hasUrl: hasSupabaseUrl, hasServiceKey, hasAnthropicKey } : undefined,
       queueDepth,
       stuckJobs,
       coreBrainHealth,
