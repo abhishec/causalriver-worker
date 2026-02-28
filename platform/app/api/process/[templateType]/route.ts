@@ -68,7 +68,10 @@ export async function POST(
     let supabase;
     try {
       supabase = await createClient();
-    } catch {
+    } catch (err: unknown) {
+      logger.warn("[/api/process POST] createClient threw — Lambda cold-start or missing env", {
+        error: err instanceof Error ? err.message : String(err),
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -76,7 +79,10 @@ export async function POST(
     try {
       const { data } = await supabase.auth.getUser();
       user = data?.user;
-    } catch {
+    } catch (err: unknown) {
+      logger.warn("[/api/process POST] getUser threw — session invalid or env missing", {
+        error: err instanceof Error ? err.message : String(err),
+      });
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -137,7 +143,12 @@ async function enqueueProcess(
   let supabase;
   try {
     supabase = source === "m2m" ? await createServiceClient() : await createClient();
-  } catch {
+  } catch (err: unknown) {
+    logger.warn("[/api/process enqueueProcess] createClient/createServiceClient threw", {
+      source,
+      organizationId,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -208,11 +219,29 @@ async function enqueueProcess(
     );
   }
 
-  // Update process instance with the agent_queue job id now that we have it
-  void supabase
-    .from("bpaas_process_instances")
-    .update({ agent_job_id: job.id })
-    .eq("id", instance.id);
+  // Update process instance with the agent_queue job id now that we have it.
+  // Fire-and-forget: failure here does not block the response — the job row already
+  // has the processInstanceId in its payload, so the FSM runner can recover it.
+  void Promise.resolve(
+    supabase
+      .from("bpaas_process_instances")
+      .update({ agent_job_id: job.id })
+      .eq("id", instance.id)
+  ).then(({ error: updateErr }) => {
+    if (updateErr) {
+      logger.warn("[/api/process] Failed to backfill agent_job_id on process instance", {
+        processInstanceId: instance.id,
+        jobId: job.id,
+        error: updateErr.message,
+      });
+    }
+  }).catch((e: unknown) => {
+    logger.warn("[/api/process] agent_job_id backfill threw unexpectedly", {
+      processInstanceId: instance.id,
+      jobId: job.id,
+      error: e instanceof Error ? e.message : String(e),
+    });
+  });
 
   logger.warn("[/api/process] Process enqueued", {
     templateType,

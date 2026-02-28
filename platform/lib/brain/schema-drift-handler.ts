@@ -328,11 +328,11 @@ export async function executeQueryWithDriftResistance<T = Record<string, unknown
     }
 
     return retryData ?? [];
-  } catch (caught) {
+  } catch (caught: unknown) {
     // Catch any unexpected throws (network errors, timeouts, etc.)
     logger.warn("[SchemaDrift] Unexpected error during drift-resistant query", {
       table,
-      error: String(caught),
+      error: caught instanceof Error ? caught.message : String(caught),
     });
     return [];
   }

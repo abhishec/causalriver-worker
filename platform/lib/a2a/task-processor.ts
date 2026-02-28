@@ -205,7 +205,10 @@ export async function processA2AAasTasks(
           throw new Error("ANTHROPIC_API_KEY not configured — cannot execute AaaS A2A task");
         }
 
-        // Map task_type → AaaS action
+        // Map task_type → AaaS action.
+        // The cast is safe: AAS_TASK_TO_ACTION values are a strict subset of AccountingAction,
+        // and the fallback "full" is also a valid AccountingAction value.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = (AAS_TASK_TO_ACTION[job.task_type] ?? "full") as import("@/lib/aas/domain-executor").AccountingAction;
 
         logger.warn(`[a2a-task-processor] Executing AaaS A2A task ${job.id}: skill=${skill} action=${action}`);
