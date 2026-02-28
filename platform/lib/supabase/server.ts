@@ -2,22 +2,28 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { cache } from "react";
 
-function requireEnv(key: string): string {
-  // Try the exact key first, then fall back to non-NEXT_PUBLIC_ prefixed version.
-  // AWS Amplify SSR Lambda may not pass NEXT_PUBLIC_ vars to the Node.js runtime
-  // even though they're set in the Amplify Console (they're baked into the client
-  // bundle at build time but may not be in process.env at SSR runtime).
-  const val = process.env[key] || process.env[key.replace("NEXT_PUBLIC_", "")];
-  if (!val) throw new Error(`Missing required env var: ${key}. Check your .env.local`);
-  return val;
-}
+// ── Static env captures (MUST use static member access, NOT process.env[key]) ─
+//
+// AWS Amplify SSR Lambda inlines env vars at BUILD TIME via webpack DefinePlugin.
+// Static member access (`process.env.MY_KEY`) is replaced with the literal value.
+// Dynamic bracket access (`process.env[someVar]`) is NOT replaced and reads
+// undefined at Lambda runtime (Amplify Console vars are build-time only).
+//
+// These constants capture the values once using static access so they are
+// correctly inlined into the server bundle for Lambda cold starts.
+const _SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const _SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const _SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function createClient() {
+  if (!_SUPABASE_URL || !_SUPABASE_ANON_KEY) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Check your .env.local");
+  }
   const cookieStore = await cookies();
 
   return createServerClient(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    _SUPABASE_URL,
+    _SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -55,11 +61,14 @@ export const getAuthUser = cache(async () => {
 
 /** Service-role client for admin operations (bypasses RLS) */
 export async function createServiceClient() {
+  if (!_SUPABASE_URL || !_SERVICE_ROLE_KEY) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Check your .env.local");
+  }
   const cookieStore = await cookies();
 
   return createServerClient(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    _SUPABASE_URL,
+    _SERVICE_ROLE_KEY,
     {
       cookies: {
         getAll() {
