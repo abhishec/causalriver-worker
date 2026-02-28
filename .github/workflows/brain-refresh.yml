@@ -42,7 +42,7 @@ on:
     - cron: '0 */4 * * *'    # Every 4 hours — learning cycle
     - cron: '0 */6 * * *'    # Every 6 hours — evolution cycle
     - cron: '0 3 * * *'      # Daily 3 AM UTC — RLVR ground-truth verification
-    - cron: '0 3 * * 0'      # Weekly Sunday 3 AM UTC — RLVR prediction_records verification (30-60d)
+    - cron: '0 3 * * 0'      # Weekly Sunday 3 AM UTC — RLVR prediction_records verification + federate-knowledge
     - cron: '0 4 * * *'      # Daily 4 AM UTC — CC learnings ingestion (case-log + retro → brain)
     - cron: '*/3 * * * *'   # Every 3 min   — stale job watchdog + chain continuation re-queue
   workflow_dispatch: {}      # Manual trigger — runs all endpoints
@@ -301,6 +301,21 @@ jobs:
             --max-time 300 \
             "${BASE_URL}/api/brain/repo-map?organizationId=${CORE_ORG}" \
             || echo "repo-map failed (non-fatal — will retry at next daily trigger)"
+
+      # ── Federated Knowledge Promotion (weekly Sunday 3 AM UTC) ────────────────
+      # Promotes workspace-specific insights in federated_knowledge to universal
+      # (organization_id = null) when 3+ workspaces share the same domain+content.
+      # This closes Loop 3: org knowledge → global wisdom.
+      - name: Federated Knowledge Promotion (weekly Sunday)
+        if: ${{ github.event.schedule == '0 3 * * 0' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          BASE_URL="${{ secrets.APP_URL || 'https://platform.usebrainos.com' }}"
+          echo "Calling ${BASE_URL}/api/cron/federate-knowledge ..."
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 60 \
+            "${BASE_URL}/api/cron/federate-knowledge" \
+            || echo "federate-knowledge failed (non-fatal — will retry next Sunday)"
 
       # ── Stale Job Watchdog (every 3-minute trigger) ───────────────────────────
       # Two responsibilities:

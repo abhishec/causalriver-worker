@@ -47,7 +47,7 @@ export async function extractAndStoreKnowledge(
   supabase: SupabaseClient,
   params: KnowledgeExtractionParams
 ): Promise<void> {
-  if (params.qualityScore < 0.65) return;
+  if (params.qualityScore < 0.5) return;  // Issue A: lowered from 0.65 to 0.5 to capture more executions
   if (!_ANTHROPIC_API_KEY) {
     logger.warn("[knowledge-extractor] ANTHROPIC_API_KEY not set — skipping extraction");
     return;
@@ -106,6 +106,8 @@ Max 2 insights.`;
         organization_id: params.orgId,
         domain: params.domain,
         content: insight.insight,
+        // Issue B fix: confidence as direct column (brain-context.ts filters .gte('confidence', 0.7))
+        confidence: insight.confidence ?? params.qualityScore,
         metadata: {
           applicability: insight.applicability ?? params.domain,
           confidence: insight.confidence ?? params.qualityScore,

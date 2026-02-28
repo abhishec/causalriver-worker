@@ -683,7 +683,7 @@ export async function getBrainContext(
       // federated_knowledge — universal insights promoted from all orgs (organization_id IS NULL)
       // These are workspace-agnostic learnings that apply to every AI worker.
       supabase.from("federated_knowledge")
-        .select("domain, insight, confidence, promoted_at")
+        .select("domain, content, confidence, promoted_at")
         .is("organization_id", null)
         .order("promoted_at", { ascending: false })
         .limit(10),
@@ -691,10 +691,10 @@ export async function getBrainContext(
       // federated_knowledge — org-specific insights with high confidence (>= 0.7)
       // These are learnings extracted from this org's executions that scored well.
       supabase.from("federated_knowledge")
-        .select("domain, insight, confidence, promoted_at")
+        .select("domain, content, confidence, created_at")
         .eq("organization_id", orgId)
         .gte("confidence", 0.7)
-        .order("promoted_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(10),
 
       // ── STRUCTURED OUTCOMES (Fix 3) ────────────────────────────────────────
@@ -1331,15 +1331,15 @@ export async function getBrainContext(
       const fedParts: string[] = [];
 
       if (fedUniversalRows.length > 0) {
-        const universalLines = (fedUniversalRows as Array<{ domain: string; insight: string; confidence: number; promoted_at: string }>)
-          .map(r => `[${r.domain}] ${r.insight} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
+        const universalLines = (fedUniversalRows as Array<{ domain: string; content: string; confidence: number; promoted_at: string }>)
+          .map(r => `[${r.domain}] ${r.content} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
           .join("\n");
         fedParts.push(`### Universal Knowledge (cross-workspace)\n${universalLines}`);
       }
 
       if (fedOrgRows.length > 0) {
-        const orgLines = (fedOrgRows as Array<{ domain: string; insight: string; confidence: number; promoted_at: string }>)
-          .map(r => `[${r.domain}] ${r.insight} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
+        const orgLines = (fedOrgRows as Array<{ domain: string; content: string; confidence: number; created_at: string }>)
+          .map(r => `[${r.domain}] ${r.content} (confidence: ${(r.confidence * 100).toFixed(0)}%)`)
           .join("\n");
         fedParts.push(`### Workspace Knowledge (org-specific, confidence >= 70%)\n${orgLines}`);
       }

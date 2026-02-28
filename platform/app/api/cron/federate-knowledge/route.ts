@@ -123,14 +123,18 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      const promotedAt = new Date().toISOString();
       const { error: insertErr } = await service.from("federated_knowledge").insert({
         organization_id: null,  // universal — applies to all workspaces
         domain: group.domain,
         content: group.bestContent,
+        // Direct columns required by brain-context.ts and brain_context org-confidence filter
+        confidence: 0.9,        // universal rows always high-confidence (promoted from 3+ orgs)
+        promoted_at: promotedAt,
         metadata: {
           source: "federate-knowledge-cron",
           source_workspace_count: group.orgIds.size,
-          promoted_at: new Date().toISOString(),
+          promoted_at: promotedAt,
         },
       });
 
