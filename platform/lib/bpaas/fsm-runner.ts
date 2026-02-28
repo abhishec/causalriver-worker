@@ -30,6 +30,7 @@ import {
 } from "@/lib/se-aas/agent-checkpoint";
 import { shouldChain } from "@/lib/brain/chain-invoker";
 import { recordStepOutcome } from "@/lib/brain/agent-rl";
+import { recordAndLearnStateOutcome } from "@/lib/brain/state-rl";
 import { logDecision } from "@/lib/brain/decision-log";
 import { logger } from "@/lib/logger";
 
@@ -383,6 +384,24 @@ export class BPaaSFSMRunner {
         durationMs,
         errorMessage: isTerminalFailure ? `Transition event: ${event}` : undefined,
       });
+
+      // State-level gradient descent RL — adapts per-state parameters online
+      // Quality: 1.0 for normal transitions, 0.2 for terminal failure (FAILED state)
+      // ESCALATE is intentional routing (not failure) → 0.6 partial quality
+      const stateQuality =
+        nextState === "FAILED"   ? 0.2 :
+        nextState === "ESCALATE" ? 0.6 :
+        1.0;
+      void recordAndLearnStateOutcome(
+        supabase,
+        this.context.organizationId,
+        this.context.processType,
+        prevState,  // the state that just completed
+        stateQuality,
+        durationMs
+      ).catch((e) =>
+        logger.warn("[FSM/StateRL] gradient descent failed (non-fatal)", { error: String(e) })
+      );
 
       // Decision log — EU AI Act Article 13 compliance
       void logDecision(supabase, {
