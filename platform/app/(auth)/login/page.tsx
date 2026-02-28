@@ -29,7 +29,7 @@ function LoginForm() {
   const redirectTo =
     nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//")
       ? nextUrl
-      : "/dashboard";
+      : "/workspace";
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();

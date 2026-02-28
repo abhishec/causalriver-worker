@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const next =
     rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
       ? rawNext
-      : "/overview";
+      : "/workspace";
   const type = searchParams.get("type") as
     | "recovery"
     | "signup"

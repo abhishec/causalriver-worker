@@ -348,10 +348,10 @@ export default function OnboardingPage() {
       // Refresh session so middleware sees updated user_metadata immediately
       // Without this, middleware still sees onboarding_complete=false and redirects back
       await supabase.auth.refreshSession();
-      router.push("/dashboard");
+      router.push("/workspace");
     } catch {
       // Even on failure, attempt to proceed — user can retry from dashboard
-      router.push("/dashboard");
+      router.push("/workspace");
     }
   }
 

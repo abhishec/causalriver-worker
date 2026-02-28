@@ -90,7 +90,7 @@ export default function InvitePage() {
       }
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/workspace");
       }, 1500);
     } catch {
       setError("Failed to accept invitation — please try again or request a new invite");
@@ -159,10 +159,10 @@ export default function InvitePage() {
           This invitation has already been accepted.
         </p>
         <Link
-          href="/dashboard"
+          href="/workspace"
           className="text-accent hover:text-accent-light text-sm"
         >
-          Go to copilot
+          Go to workspace
         </Link>
       </div>
     );

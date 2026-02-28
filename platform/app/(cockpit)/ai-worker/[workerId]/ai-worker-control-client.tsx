@@ -287,7 +287,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
       {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 flex items-center gap-3 px-5 h-12 border-b border-border/[0.06] bg-background/90 backdrop-blur-sm">
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/workspace")}
           className="flex items-center gap-1.5 text-muted hover:text-foreground transition-colors text-sm"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
