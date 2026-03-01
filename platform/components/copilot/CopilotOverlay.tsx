@@ -1,239 +1,32 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  FormEvent,
-} from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/workspace-context";
-import { consumeSSEStream } from "@/components/copilot/CopilotChat";
+import { CopilotChat } from "@/components/copilot/CopilotChat";
 
-/* ── Lightweight inline markdown for overlay responses ─────────────────────── */
-/* ── JSON Data Card: renders structured JSON as a readable table/card ────────── */
-function JsonDataCard({ data }: { data: Record<string, unknown> }): React.ReactElement {
-  const entries = Object.entries(data).filter(
-    ([, v]) => v !== null && v !== undefined && v !== ""
-  );
-
-  // If the value is an array of objects, render as a mini-table
-  const arrayEntry = entries.find(([, v]) => Array.isArray(v) && (v as unknown[]).length > 0 && typeof (v as unknown[])[0] === "object");
-  if (arrayEntry) {
-    const [arrayKey, arrayVal] = arrayEntry;
-    const rows = arrayVal as Record<string, unknown>[];
-    const keys = Object.keys(rows[0]);
-    return (
-      <div className="my-2 rounded-lg border border-border-subtle bg-card overflow-hidden text-xs">
-        <div className="px-3 py-1.5 border-b border-border text-muted-foreground font-medium capitalize">{arrayKey}</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px] text-muted-foreground">
-            <thead>
-              <tr className="border-b border-border">
-                {keys.map((k) => <th key={k} className="text-left px-3 py-1.5 text-gray-500 font-medium capitalize">{k.replace(/_/g, " ")}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.slice(0, 10).map((row, ri) => (
-                <tr key={ri} className="border-b border-border hover:bg-white/2">
-                  {keys.map((k) => <td key={k} className="px-3 py-1.5">{String(row[k] ?? "—")}</td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {/* Render remaining scalar entries */}
-        {entries.filter(([k]) => k !== arrayKey).length > 0 && (
-          <div className="px-3 py-2 border-t border-border flex flex-wrap gap-3">
-            {entries.filter(([k]) => k !== arrayKey).map(([k, v]) => (
-              <span key={k} className="text-[10px]">
-                <span className="text-gray-500 capitalize">{k.replace(/_/g, " ")}: </span>
-                <span className="text-muted-foreground">{String(v)}</span>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Simple key-value card
-  return (
-    <div className="my-2 rounded-lg border border-border-subtle bg-card p-3 text-[11px] grid grid-cols-2 gap-x-4 gap-y-1.5">
-      {entries.map(([k, v]) => (
-        <div key={k} className="flex gap-1.5 min-w-0">
-          <span className="text-gray-500 capitalize shrink-0">{k.replace(/_/g, " ")}:</span>
-          <span className="text-muted-foreground truncate">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function renderOverlayMarkdown(text: string): React.ReactNode[] {
-  const lines = text.split("\n");
-  const elements: React.ReactNode[] = [];
-  let codeBlock: string[] | null = null;
-  let codeLang = "";
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Fenced code blocks
-    if (line.startsWith("```")) {
-      if (codeBlock === null) {
-        codeBlock = [];
-        codeLang = line.slice(3).trim();
-      } else {
-        const rawCode = codeBlock.join("\n");
-        // Try to parse JSON data blocks and render as a readable card
-        if ((codeLang === "json" || codeLang === "") && rawCode.trim().startsWith("{")) {
-          let parsed: Record<string, unknown> | null = null;
-          try { parsed = JSON.parse(rawCode); } catch { /* not valid JSON */ }
-          if (parsed && typeof parsed === "object") {
-            elements.push(
-              <JsonDataCard key={`json-${i}`} data={parsed} />
-            );
-            codeBlock = null;
-            codeLang = "";
-            continue;
-          }
-        }
-        elements.push(
-          <pre key={`code-${i}`} className="my-2 rounded-lg bg-card border border-border p-3 overflow-x-auto">
-            <code className="text-xs font-mono text-muted-foreground leading-relaxed">{rawCode}</code>
-          </pre>
-        );
-        codeBlock = null;
-        codeLang = "";
-      }
-      continue;
-    }
-    if (codeBlock !== null) { codeBlock.push(line); continue; }
-
-    // Headers
-    if (line.startsWith("### ")) {
-      elements.push(<h4 key={i} className="text-xs font-semibold mt-3 mb-1">{inlineFormat(line.slice(4))}</h4>);
-    } else if (line.startsWith("## ")) {
-      elements.push(<h3 key={i} className="text-sm font-semibold mt-3 mb-1">{inlineFormat(line.slice(3))}</h3>);
-    } else if (line.startsWith("# ")) {
-      elements.push(<h2 key={i} className="text-sm font-bold mt-3 mb-1">{inlineFormat(line.slice(2))}</h2>);
-    }
-    // List items
-    else if (/^[-*]\s/.test(line)) {
-      elements.push(
-        <div key={i} className="flex items-start gap-1.5 text-sm leading-relaxed">
-          <span className="text-muted mt-0.5 shrink-0">•</span>
-          <span>{inlineFormat(line.replace(/^[-*]\s/, ""))}</span>
-        </div>
-      );
-    }
-    // Numbered items
-    else if (/^\d+[.)]\s/.test(line)) {
-      const match = line.match(/^(\d+)[.)]\s(.*)/);
-      if (match) {
-        elements.push(
-          <div key={i} className="flex items-start gap-1.5 text-sm leading-relaxed">
-            <span className="text-muted mt-0.5 shrink-0 text-xs tabular-nums font-mono">{match[1]}.</span>
-            <span>{inlineFormat(match[2])}</span>
-          </div>
-        );
-      }
-    }
-    // Empty line
-    else if (line.trim() === "") {
-      elements.push(<div key={i} className="h-2" />);
-    }
-    // Normal paragraph
-    else {
-      elements.push(<p key={i} className="text-sm leading-relaxed">{inlineFormat(line)}</p>);
-    }
-  }
-
-  // Unclosed code block
-  if (codeBlock !== null) {
-    const rawUnclosed = codeBlock.join("\n");
-    let parsedUnclosed: Record<string, unknown> | null = null;
-    try { parsedUnclosed = JSON.parse(rawUnclosed); } catch { /* not valid JSON */ }
-    if (parsedUnclosed && typeof parsedUnclosed === "object") {
-      elements.push(<JsonDataCard key="json-unclosed" data={parsedUnclosed} />);
-    } else {
-      elements.push(
-        <pre key="code-unclosed" className="my-2 rounded-lg bg-card border border-border p-3 overflow-x-auto">
-          <code className="text-xs font-mono text-muted-foreground leading-relaxed">{rawUnclosed}</code>
-        </pre>
-      );
-    }
-  }
-
-  return elements;
-}
-
-/** Inline formatting: bold, italic, code, links */
-function inlineFormat(text: string): React.ReactNode {
-  // Split by inline code first to avoid parsing inside backticks
-  const parts = text.split(/(`[^`]+`)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="px-1 py-0.5 rounded bg-surface text-xs font-mono text-accent">{part.slice(1, -1)}</code>;
-    }
-    // Bold
-    let processed: string | React.ReactNode = part;
-    if (typeof processed === "string" && /\*\*[^*]+\*\*/.test(processed)) {
-      const segments = processed.split(/(\*\*[^*]+\*\*)/g);
-      return segments.map((seg, j) => {
-        if (seg.startsWith("**") && seg.endsWith("**")) {
-          return <strong key={`${i}-${j}`} className="font-semibold">{seg.slice(2, -2)}</strong>;
-        }
-        return seg;
-      });
-    }
-    return part;
-  });
-}
-
-const QUICK_PROMPTS = [
-  "Why is churn increasing?",
-  "Strongest causal relationships",
-  "Anomalies detected today",
-  "Brain health status",
-];
-
+/**
+ * CopilotOverlay — full-screen Cmd+K chat panel, Claude Code style.
+ *
+ * Design decisions:
+ * - Full-screen (fixed inset-0), not a small modal — matches Claude Code UX
+ * - Always mounted (CSS opacity toggle) so conversation history survives close/reopen
+ * - No preset prompts — clean empty state like Claude Code
+ * - Multi-turn: CopilotChat handles full conversation history, streaming, code blocks
+ * - 150ms opacity fade on open/close
+ */
 export function CopilotOverlay() {
   const { currentWorkspace } = useWorkspace();
   const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState("");
-  const [response, setResponse] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  // Closing animation state — declared before keyboard useEffect so handleClose can be a dep
-  const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = useCallback(() => {
-    abortRef.current?.abort();
-    setIsClosing(true);
-    // Let the exit animation play (200ms) before unmounting
-    setTimeout(() => {
-      setIsOpen(false);
-      setIsClosing(false);
-      setInput("");
-      setResponse("");
-      setIsLoading(false);
-    }, 180);
-  }, []);
-
-  // Portal mount
+  // Mount gate — prevents SSR/hydration mismatch with createPortal
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Keyboard shortcut: Cmd+K / Ctrl+K
+  // Keyboard shortcut: Cmd+K / Ctrl+K to toggle, Esc to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -242,243 +35,78 @@ export function CopilotOverlay() {
       }
       if (e.key === "Escape" && isOpen) {
         e.preventDefault();
-        handleClose();
+        setIsOpen(false);
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose]);
-
-  // Focus input when overlay opens
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
-    }
   }, [isOpen]);
-
-  // Click outside to close
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.target === overlayRef.current) {
-        handleClose();
-      }
-    },
-    [handleClose]
-  );
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const trimmed = input.trim();
-    if (!trimmed || isLoading) return;
-
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setIsLoading(true);
-    setResponse("");
-
-    if (!currentWorkspace?.id) {
-      setResponse("AI Worker not loaded yet. Please try again.");
-      setIsLoading(false);
-      return;
-    }
-
-    // 30-second timeout to prevent spinning forever
-    let timedOut = false;
-    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 30000);
-
-    try {
-      const res = await fetch("/api/copilot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: trimmed,
-          workspaceId: currentWorkspace.id,
-        }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      await consumeSSEStream(
-        res,
-        {
-          onText: (_text, accumulated) => {
-            setResponse(accumulated);
-          },
-          onError: (error) => {
-            setResponse(error);
-          },
-          onBrainMeta: () => {
-            // Overlay doesn't display brain meta
-          },
-          onDomainResult: () => {
-            // Overlay doesn't display domain results
-          },
-          onDone: () => {},
-        },
-        controller.signal
-      );
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        if (timedOut) {
-          setResponse("Request timed out. Please try again or open the full Copilot for longer queries.");
-          setIsLoading(false);
-        }
-        return;
-      }
-      setResponse("Failed to get a response — check your connection and try again");
-    } finally {
-      clearTimeout(timeout);
-      setIsLoading(false);
-      abortRef.current = null;
-    }
-  };
-
-  const handlePromptClick = (prompt: string) => {
-    setInput(prompt);
-    inputRef.current?.focus();
-  };
-
-  // Memoize rendered markdown so it doesn't re-parse on every render tick
-  // (must be above early return to satisfy Rules of Hooks)
-  const renderedResponse = useMemo(() => {
-    if (!response) return null;
-    return renderOverlayMarkdown(response);
-  }, [response]);
 
   if (!mounted) return null;
 
-  const overlayContent = isOpen ? (
+  return createPortal(
     <div
-      ref={overlayRef}
-      onClick={handleBackdropClick}
       className={cn(
-        "fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh]",
-        "bg-background/70 backdrop-blur-sm",
-        isClosing ? "animate-overlay-backdrop-out" : "animate-overlay-backdrop"
+        "fixed inset-0 z-[9999] flex flex-col bg-background",
+        "transition-opacity duration-150",
+        isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}
     >
-      <div
-        className={cn(
-          "w-full max-w-xl rounded-2xl bg-card border border-border-subtle overflow-hidden",
-          "shadow-[var(--shadow-elevated)]",
-          isClosing ? "animate-overlay-panel-out" : "animate-overlay-panel"
-        )}
-      >
-        {/* Search input */}
-        <form onSubmit={handleSubmit} className="relative">
-          <div className="flex items-center border-b border-border-subtle">
+      {/* ── Minimal top bar — Copilot label + Esc hint + close ── */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle shrink-0">
+        <div className="flex items-center gap-2.5">
+          {/* Sparkle / brain icon */}
+          <svg
+            className="w-4 h-4 text-accent"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"
+            />
+          </svg>
+          <span className="text-sm font-medium text-foreground">Copilot</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <kbd className="px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted font-mono border border-border">
+            esc
+          </kbd>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+            aria-label="Close copilot"
+          >
             <svg
-              className="w-5 h-5 text-muted ml-4 shrink-0"
+              className="w-4 h-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={1.5}
+              strokeWidth={2}
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                d="M6 18L18 6M6 6l12 12"
               />
             </svg>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Brain OS anything..."
-              disabled={isLoading}
-              className="flex-1 bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted focus:outline-none disabled:opacity-50"
-            />
-            <div className="flex items-center gap-2 pr-3">
-              {input.trim() && (
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-3 py-1.5 rounded-xl bg-accent text-accent-foreground text-xs font-medium hover:bg-accent-dark transition-colors disabled:opacity-50"
-                >
-                  {isLoading ? "..." : "Ask"}
-                </button>
-              )}
-              <kbd className="px-1.5 py-0.5 rounded-md bg-surface text-[10px] text-muted font-mono border border-border">
-                esc
-              </kbd>
-            </div>
-          </div>
-        </form>
-
-        {/* Response area */}
-        {response ? (
-          <div className="max-h-72 overflow-y-auto p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-xl bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                <svg
-                  className="w-3.5 h-3.5 text-accent"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0 text-muted-foreground space-y-0.5">
-                {renderedResponse}
-                {isLoading && (
-                  <span className="inline-flex items-center gap-1 ml-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : !isLoading ? (
-          /* Quick prompts when no response */
-          <div className="p-3">
-            <div className="grid grid-cols-2 gap-2">
-              {QUICK_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handlePromptClick(prompt)}
-                  className="text-left px-3 py-2.5 rounded-xl bg-surface/50 border border-border-subtle hover:border-accent/20 hover:bg-surface-hover transition-all text-xs text-muted-foreground hover:text-foreground shadow-[var(--shadow-xs)]"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* Loading state */
-          <div className="flex items-center justify-center py-8">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse" />
-              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:150ms]" />
-              <span className="w-2 h-2 rounded-full bg-accent/60 animate-pulse [animation-delay:300ms]" />
-            </span>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center px-4 py-2.5 border-t border-border-subtle bg-surface/30">
-          <span className="text-[10px] text-muted/50">
-            Powered by Brain OS&apos;s causal intelligence
-          </span>
+          </button>
         </div>
       </div>
-    </div>
-  ) : null;
 
-  return createPortal(overlayContent, document.body);
+      {/* ── Full CopilotChat — always mounted so history persists across open/close ── */}
+      <div className="flex-1 overflow-hidden">
+        <CopilotChat
+          showHeader={false}
+          examplePrompts={[]}
+          extraParams={{ workspaceId: currentWorkspace?.id ?? "" }}
+        />
+      </div>
+    </div>,
+    document.body
+  );
 }

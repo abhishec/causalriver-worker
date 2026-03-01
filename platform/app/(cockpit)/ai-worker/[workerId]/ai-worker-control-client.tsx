@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
+
+const CopilotChat = dynamic(
+  () => import("@/components/copilot/CopilotChat").then((m) => m.CopilotChat),
+  { ssr: false }
+);
 
 // Module-level supabase client
 const supabase = createClient();
@@ -468,9 +474,10 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
       </nav>
 
       {/* ── Tab panels ────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Chat tab needs overflow-hidden + flex-col so CopilotChat (h-full) fills correctly */}
+      <div className={activeTab === "chat" ? "flex-1 overflow-hidden flex flex-col" : "flex-1 overflow-y-auto"}>
         {activeTab === "chat" && (
-          <ChatTab workerId={workerId} workerName={workerName} />
+          <ChatTab workerId={workerId} workerName={workerName} orgId={orgId} />
         )}
         {activeTab === "agents" && (
           <AgentsTab
@@ -516,45 +523,20 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
 
 function ChatTab({
   workerName,
+  orgId,
 }: {
   workerId: string;
   workerName: string;
+  orgId: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full py-24 px-6 text-center">
-      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 22 22"
-          fill="none"
-          className="text-primary"
-        >
-          <path
-            d="M4 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7l-4 3V6a2 2 0 0 1 2-2z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      <p className="text-sm font-medium text-foreground mb-1">
-        Chat with {workerName}
-      </p>
-      <p className="text-xs text-muted mb-4 max-w-sm">
-        Direct chat interface for this AI worker space is coming soon. Use the
-        Copilot for now.
-      </p>
-      <button
-        type="button"
-        onClick={() => {
-          document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
-        }}
-        className="text-xs px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
-      >
-        Open Copilot
-      </button>
-    </div>
+    <CopilotChat
+      endpoint="/api/copilot/chat"
+      extraParams={{ workspaceId: orgId }}
+      showHeader={false}
+      examplePrompts={[]}
+      persona={{ name: workerName, description: "AI Worker" }}
+    />
   );
 }
 
