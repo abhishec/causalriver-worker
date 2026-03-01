@@ -60,11 +60,9 @@ const MAX_CONTENT_WIDTH = 340;
 
 export function Sidebar() {
   const pathname = usePathname() ?? "";
-  // Mobile: collapse by default below 768px; desktop: restore from localStorage
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false; // SSR — default open
-    return window.innerWidth < 768 ? true : false;   // Mobile collapses immediately
-  });
+  // Always start open (matches SSR output — avoids hydration mismatch).
+  // useEffect below immediately collapses on mobile after mount.
+  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false); // Mobile overlay toggle
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const isDragging = useRef(false);
@@ -72,9 +70,13 @@ export function Sidebar() {
   const startW = useRef(0);
   const { currentWorkspace, isLoading: workspaceLoading, workspaces } = useWorkspace();
 
-  // Restore persisted state (desktop only — mobile always starts collapsed)
+  // Restore persisted state after mount (safe: runs client-only, no SSR mismatch)
   useEffect(() => {
-    if (window.innerWidth >= 768) {
+    if (window.innerWidth < 768) {
+      // Mobile: collapse immediately after hydration
+      setCollapsed(true);
+    } else {
+      // Desktop: restore from localStorage
       const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
       if (saved === "true") setCollapsed(true);
     }
@@ -187,9 +189,9 @@ export function Sidebar() {
         />
       )}
 
-    <div className="flex h-screen fixed left-0 top-0 z-40">
+    <div className={cn("h-screen fixed left-0 top-0 z-40", collapsed ? "hidden md:flex" : "flex")}>
       {/* ═══════════════════════════════════════════════════════════════════
-          PANE 1 — Icon Rail (always visible)
+          PANE 1 — Icon Rail (hidden on mobile when collapsed)
           ═══════════════════════════════════════════════════════════════════ */}
       <div
         className="flex flex-col items-center bg-background border-r border-border-subtle shrink-0 py-2"

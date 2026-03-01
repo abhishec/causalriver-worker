@@ -1,11 +1,14 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 /* ── Route labels for breadcrumb ──────────────────────────────────────────── */
 
 const ROUTE_LABELS: Record<string, string> = {
+  "/workspace": "Mission Control",
+  "/processes": "Processes",
   "/overview": "Command Center",
   "/copilot": "Intelligence",
   "/connectors": "Connectors",
@@ -34,11 +37,14 @@ function openCopilot() {
 
 export function TopBar() {
   const pathname = usePathname() ?? "";
+  // Compute label client-only to avoid SSR/client mismatch when module cache is stale
+  const [pageLabel, setPageLabel] = useState("");
+  useEffect(() => {
+    setPageLabel(ROUTE_LABELS[pathname] || pathname.split("/").pop() || "");
+  }, [pathname]);
 
   // Hide topbar on copilot page — it has its own header with service tabs
   if (pathname === "/copilot") return null;
-
-  const pageLabel = ROUTE_LABELS[pathname] || pathname.split("/").pop() || "";
 
   return (
     <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border-subtle bg-background px-6 pl-14 md:pl-6">

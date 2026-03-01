@@ -134,7 +134,9 @@ export default function WorkspaceMissionControl({ orgId }: { orgId: string }) {
       setWorkers(data.workers ?? []);
       setLastUpdated(new Date());
     } catch (err) {
-      logger.warn("[MissionControl] Workers fetch failed", { err });
+      logger.warn("[MissionControl] Workers fetch failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }, []);
 
