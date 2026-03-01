@@ -331,7 +331,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { context } = require('@actions/github');
+            // Note: `context` and `github` are globals provided by actions/github-script.
+            // Do NOT redeclare them via require('@actions/github') — that causes
+            // "Identifier 'context' already declared" SyntaxError.
             const failedJobs = ['test', 'platform-build', 'migration-check']
               .filter(j => context.payload.workflow_run?.conclusion === 'failure')
               .join(', ') || 'one or more jobs';
