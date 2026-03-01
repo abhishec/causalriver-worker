@@ -193,7 +193,7 @@ export function Sidebar() {
         />
       )}
 
-    <div className={cn("h-screen fixed left-0 top-0 z-40", collapsed ? "hidden md:flex" : "flex")}>
+    <div className={cn("flex h-screen fixed left-0 top-0 z-40", collapsed && "hidden md:flex")}>
       {/* ═══════════════════════════════════════════════════════════════════
           PANE 1 — Icon Rail (hidden on mobile when collapsed)
           ═══════════════════════════════════════════════════════════════════ */}
