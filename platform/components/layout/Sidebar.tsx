@@ -64,6 +64,9 @@ export function Sidebar() {
   // useEffect below immediately collapses on mobile after mount.
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false); // Mobile overlay toggle
+  // mounted: false during SSR and initial render — used to defer client-only UI
+  // (the mobile hamburger button) until after hydration to prevent SSR/client mismatch.
+  const [mounted, setMounted] = useState(false);
   const [contentWidth, setContentWidth] = useState(DEFAULT_CONTENT_WIDTH);
   const isDragging = useRef(false);
   const startX = useRef(0);
@@ -72,6 +75,7 @@ export function Sidebar() {
 
   // Restore persisted state after mount (safe: runs client-only, no SSR mismatch)
   useEffect(() => {
+    setMounted(true);
     if (window.innerWidth < 768) {
       // Mobile: collapse immediately after hydration
       setCollapsed(true);
@@ -162,12 +166,12 @@ export function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   return (
     <>
-      {/* Mobile hamburger button — only shown when sidebar is collapsed on mobile */}
-      {collapsed && (
+      {/* Mobile hamburger button — only shown when sidebar is collapsed on mobile.
+          Gated on `mounted` to match SSR output (collapsed=false → no button on SSR),
+          preventing React hydration mismatch. */}
+      {mounted && collapsed && (
         <button
           onClick={() => { setCollapsed(false); setMobileOpen(true); }}
           className="fixed top-3 left-3 z-50 md:hidden w-8 h-8 rounded-lg bg-background border border-border-subtle flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-hover transition-colors shadow-sm"

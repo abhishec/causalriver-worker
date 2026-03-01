@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -37,11 +36,8 @@ function openCopilot() {
 
 export function TopBar() {
   const pathname = usePathname() ?? "";
-  // Compute label client-only to avoid SSR/client mismatch when module cache is stale
-  const [pageLabel, setPageLabel] = useState("");
-  useEffect(() => {
-    setPageLabel(ROUTE_LABELS[pathname] || pathname.split("/").pop() || "");
-  }, [pathname]);
+  // Derive label directly from pathname — same value on SSR and client, no hydration mismatch.
+  const pageLabel = ROUTE_LABELS[pathname] || pathname.split("/").pop() || "";
 
   // Hide topbar on copilot page — it has its own header with service tabs
   if (pathname === "/copilot") return null;

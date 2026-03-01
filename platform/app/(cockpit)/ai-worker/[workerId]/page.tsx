@@ -31,19 +31,18 @@ export default async function AIWorkerControlPage({ params }: Props) {
     // fall through — client will handle missing orgId
   }
 
-  // Pre-fetch worker name server-side so the first render shows the real name
-  // instead of the "AI Worker" fallback during the async client fetch.
-  let initialWorkerName: string | undefined;
-  try {
-    const { data } = await supabase
-      .from("ai_workers")
-      .select("name")
-      .eq("id", workerId)
-      .single();
-    initialWorkerName = data?.name ?? undefined;
-  } catch {
-    // fall through — client fetch will populate name
-  }
+  // Validate that the worker exists and belongs to this session's org (enforced by RLS).
+  // .maybeSingle() returns data=null when no row found (no throw), so redirect() won't
+  // be accidentally swallowed by a catch block.
+  const { data: workerRow } = await supabase
+    .from("ai_workers")
+    .select("name")
+    .eq("id", workerId)
+    .maybeSingle();
+
+  if (!workerRow) redirect("/workspace");
+
+  const initialWorkerName: string | undefined = workerRow.name ?? undefined;
 
   return <AIWorkerControlClient orgId={orgId} workerId={workerId} initialWorkerName={initialWorkerName} />;
 }
