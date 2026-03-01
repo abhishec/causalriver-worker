@@ -13,6 +13,7 @@ const supabase = createClient();
 interface Props {
   orgId: string;
   workerId: string;
+  initialWorkerName?: string;
 }
 
 type Tab = "chat" | "agents" | "jobs" | "brain" | "keys";
@@ -126,7 +127,7 @@ function formatDate(date: string): string {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export default function AIWorkerControlClient({ orgId, workerId }: Props) {
+export default function AIWorkerControlClient({ orgId, workerId, initialWorkerName }: Props) {
   const router = useRouter();
 
   // All hooks before any early return
@@ -165,8 +166,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
       .then((d) => {
         if (d.worker) setWorker(d.worker);
       })
-      .catch(() => {
-        // non-fatal
+      .catch((err) => {
+        console.warn("[AIWorker] Failed to fetch worker:", err);
       });
   }, [workerId]);
 
@@ -175,8 +176,8 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
     fetch("/api/ai-workers")
       .then((r) => r.json())
       .then((d) => setAllWorkers(d.workers ?? []))
-      .catch(() => {
-        // non-fatal
+      .catch((err) => {
+        console.warn("[AIWorker] Failed to fetch worker list:", err);
       });
   }, []);
 
@@ -386,7 +387,7 @@ export default function AIWorkerControlClient({ orgId, workerId }: Props) {
 
   // Derived
   const isLearning = (rlStatus?.learningVelocity ?? 0) > 0;
-  const workerName = worker?.name ?? "AI Worker";
+  const workerName = worker?.name ?? initialWorkerName ?? "AI Worker";
   const serviceType = worker?.service_type ?? null;
 
   return (
@@ -814,17 +815,17 @@ function BrainTab({
           {isLoading ? (
             <div className="space-y-3">
               <div className="flex items-end gap-2">
-                <div className="h-10 w-16 rounded bg-white/[0.06] animate-pulse" />
-                <div className="h-4 w-5 rounded bg-white/[0.04] animate-pulse mb-1.5" />
+                <div className="h-10 w-16 rounded bg-foreground/[0.06] animate-pulse" />
+                <div className="h-4 w-5 rounded bg-foreground/[0.04] animate-pulse mb-1.5" />
               </div>
-              <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-white/[0.08] rounded-full animate-pulse" />
+              <div className="h-1 bg-foreground/5 rounded-full overflow-hidden">
+                <div className="h-full w-1/3 bg-foreground/[0.08] rounded-full animate-pulse" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <div className="h-3 w-16 rounded bg-white/[0.04] animate-pulse" />
-                    <div className="h-3 w-8 rounded bg-white/[0.06] animate-pulse" />
+                    <div className="h-3 w-16 rounded bg-foreground/[0.04] animate-pulse" />
+                    <div className="h-3 w-8 rounded bg-foreground/[0.06] animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -853,7 +854,7 @@ function BrainTab({
                 <MetricRow
                   label="Improvement"
                   value={`${Math.round(
-                    (rlStatus?.improvementThisSession ?? 0) * 100
+                    rlStatus?.improvementThisSession ?? 0
                   )}%`}
                 />
                 <MetricRow
@@ -878,8 +879,8 @@ function BrainTab({
             <div className="grid grid-cols-2 gap-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <div className="h-3 w-16 rounded bg-white/[0.04] animate-pulse" />
-                  <div className="h-3 w-8 rounded bg-white/[0.06] animate-pulse" />
+                  <div className="h-3 w-16 rounded bg-foreground/[0.04] animate-pulse" />
+                  <div className="h-3 w-8 rounded bg-foreground/[0.06] animate-pulse" />
                 </div>
               ))}
             </div>
@@ -948,7 +949,7 @@ function BrainTab({
 
           <div className="mt-4">
             {consolidationMsg ? (
-              <p className="text-xs text-success/80 text-center py-2">
+              <p className={`text-xs text-center py-2 ${consolidationMsg.includes("failed") ? "text-danger" : "text-success/80"}`}>
                 {consolidationMsg}
               </p>
             ) : (
@@ -1248,7 +1249,7 @@ function TableSkeleton({ rows, cols }: { rows: number; cols: number }) {
         {Array.from({ length: cols }).map((_, i) => (
           <div
             key={i}
-            className="h-2 w-16 rounded bg-white/[0.06] animate-pulse"
+            className="h-2 w-16 rounded bg-foreground/[0.06] animate-pulse"
           />
         ))}
       </div>
@@ -1260,7 +1261,7 @@ function TableSkeleton({ rows, cols }: { rows: number; cols: number }) {
           {Array.from({ length: cols }).map((_, j) => (
             <div
               key={j}
-              className={`h-3 rounded bg-white/[0.04] animate-pulse ${
+              className={`h-3 rounded bg-foreground/[0.04] animate-pulse ${
                 j === 0 ? "w-32" : "w-20"
               }`}
             />

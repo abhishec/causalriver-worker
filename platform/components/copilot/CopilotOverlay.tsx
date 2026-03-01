@@ -9,7 +9,6 @@ import {
   FormEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/lib/workspace-context";
 import { consumeSSEStream } from "@/components/copilot/CopilotChat";
@@ -213,8 +212,6 @@ export function CopilotOverlay() {
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const router = useRouter();
-
   // Closing animation state — declared before keyboard useEffect so handleClose can be a dep
   const [isClosing, setIsClosing] = useState(false);
 
@@ -340,16 +337,6 @@ export function CopilotOverlay() {
       clearTimeout(timeout);
       setIsLoading(false);
       abortRef.current = null;
-    }
-  };
-
-  const handleExpandToCopilot = () => {
-    const query = input.trim();
-    handleClose();
-    if (query) {
-      router.push(`/copilot?q=${encodeURIComponent(query)}`);
-    } else {
-      router.push("/copilot");
     }
   };
 
@@ -484,32 +471,10 @@ export function CopilotOverlay() {
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border-subtle bg-surface/30">
+        <div className="flex items-center px-4 py-2.5 border-t border-border-subtle bg-surface/30">
           <span className="text-[10px] text-muted/50">
             Powered by Brain OS&apos;s causal intelligence
           </span>
-          <button
-            onClick={handleExpandToCopilot}
-            className={cn(
-              "text-[10px] text-accent hover:text-accent-light transition-colors",
-              "flex items-center gap-1"
-            )}
-          >
-            Open full Copilot
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-              />
-            </svg>
-          </button>
         </div>
       </div>
     </div>
