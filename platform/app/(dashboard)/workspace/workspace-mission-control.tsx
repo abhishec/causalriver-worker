@@ -1,5 +1,5 @@
 "use client";
-
+// workspace mission control
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
@@ -168,7 +168,7 @@ export default function WorkspaceMissionControl({ orgId }: { orgId: string }) {
             </span>
           )}
           <Link
-            href="/ai-worker/new"
+            href="/ai-worker/create"
             className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             + New Worker
@@ -205,7 +205,7 @@ export default function WorkspaceMissionControl({ orgId }: { orgId: string }) {
             Create your first worker to get started
           </p>
           <Link
-            href="/ai-worker/new"
+            href="/ai-worker/create"
             className="mt-6 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Create AI Worker

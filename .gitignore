@@ -88,3 +88,8 @@ playwright-report/
 .idea/
 .vscode/settings.json
 *.sublime-workspace
+
+# Claude agent worktrees — NEVER commit these.
+# These are ephemeral git worktrees created by Claude Code agent sessions.
+# Committing them breaks GitHub Actions (fatal: No url found for submodule path).
+.claude/worktrees/
