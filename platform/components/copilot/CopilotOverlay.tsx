@@ -28,18 +28,18 @@ function JsonDataCard({ data }: { data: Record<string, unknown> }): React.ReactE
     const rows = arrayVal as Record<string, unknown>[];
     const keys = Object.keys(rows[0]);
     return (
-      <div className="my-2 rounded-lg border border-white/10 bg-[#0d1117] overflow-hidden text-xs">
-        <div className="px-3 py-1.5 border-b border-white/5 text-gray-400 font-medium capitalize">{arrayKey}</div>
+      <div className="my-2 rounded-lg border border-border-subtle bg-card overflow-hidden text-xs">
+        <div className="px-3 py-1.5 border-b border-border text-muted-foreground font-medium capitalize">{arrayKey}</div>
         <div className="overflow-x-auto">
-          <table className="w-full text-[11px] text-gray-300">
+          <table className="w-full text-[11px] text-muted-foreground">
             <thead>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-border">
                 {keys.map((k) => <th key={k} className="text-left px-3 py-1.5 text-gray-500 font-medium capitalize">{k.replace(/_/g, " ")}</th>)}
               </tr>
             </thead>
             <tbody>
               {rows.slice(0, 10).map((row, ri) => (
-                <tr key={ri} className="border-b border-white/5 hover:bg-white/2">
+                <tr key={ri} className="border-b border-border hover:bg-white/2">
                   {keys.map((k) => <td key={k} className="px-3 py-1.5">{String(row[k] ?? "—")}</td>)}
                 </tr>
               ))}
@@ -48,11 +48,11 @@ function JsonDataCard({ data }: { data: Record<string, unknown> }): React.ReactE
         </div>
         {/* Render remaining scalar entries */}
         {entries.filter(([k]) => k !== arrayKey).length > 0 && (
-          <div className="px-3 py-2 border-t border-white/5 flex flex-wrap gap-3">
+          <div className="px-3 py-2 border-t border-border flex flex-wrap gap-3">
             {entries.filter(([k]) => k !== arrayKey).map(([k, v]) => (
               <span key={k} className="text-[10px]">
                 <span className="text-gray-500 capitalize">{k.replace(/_/g, " ")}: </span>
-                <span className="text-gray-300">{String(v)}</span>
+                <span className="text-muted-foreground">{String(v)}</span>
               </span>
             ))}
           </div>
@@ -63,11 +63,11 @@ function JsonDataCard({ data }: { data: Record<string, unknown> }): React.ReactE
 
   // Simple key-value card
   return (
-    <div className="my-2 rounded-lg border border-white/10 bg-[#0d1117] p-3 text-[11px] grid grid-cols-2 gap-x-4 gap-y-1.5">
+    <div className="my-2 rounded-lg border border-border-subtle bg-card p-3 text-[11px] grid grid-cols-2 gap-x-4 gap-y-1.5">
       {entries.map(([k, v]) => (
         <div key={k} className="flex gap-1.5 min-w-0">
           <span className="text-gray-500 capitalize shrink-0">{k.replace(/_/g, " ")}:</span>
-          <span className="text-gray-300 truncate">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+          <span className="text-muted-foreground truncate">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
         </div>
       ))}
     </div>
@@ -104,8 +104,8 @@ function renderOverlayMarkdown(text: string): React.ReactNode[] {
           }
         }
         elements.push(
-          <pre key={`code-${i}`} className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
-            <code className="text-xs font-mono text-gray-300 leading-relaxed">{rawCode}</code>
+          <pre key={`code-${i}`} className="my-2 rounded-lg bg-card border border-border p-3 overflow-x-auto">
+            <code className="text-xs font-mono text-muted-foreground leading-relaxed">{rawCode}</code>
           </pre>
         );
         codeBlock = null;
@@ -163,8 +163,8 @@ function renderOverlayMarkdown(text: string): React.ReactNode[] {
       elements.push(<JsonDataCard key="json-unclosed" data={parsedUnclosed} />);
     } else {
       elements.push(
-        <pre key="code-unclosed" className="my-2 rounded-lg bg-[#0d1117] border border-white/5 p-3 overflow-x-auto">
-          <code className="text-xs font-mono text-gray-300 leading-relaxed">{rawUnclosed}</code>
+        <pre key="code-unclosed" className="my-2 rounded-lg bg-card border border-border p-3 overflow-x-auto">
+          <code className="text-xs font-mono text-muted-foreground leading-relaxed">{rawUnclosed}</code>
         </pre>
       );
     }

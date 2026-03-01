@@ -63,8 +63,8 @@ function MermaidDiagram({ code, title }: { code: string; title?: string }) {
   }
 
   return (
-    <div className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-[#0d1117]">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d]">
+    <div className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-card">
+      <div className="flex items-center justify-between px-4 py-2 bg-surface-hover border-b border-border-subtle">
         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">
           {title ?? "Diagram"}
         </span>
@@ -560,10 +560,10 @@ export function SEaaSResultPanel({ data }: SEaaSResultPanelProps) {
                   .filter(s => s.language?.toLowerCase() !== "mermaid")
                   .map((snippet, i) => (
                     <div key={i} className="my-2 rounded-xl overflow-hidden border border-border-subtle">
-                      <div className="px-4 py-2 bg-[#161b22] border-b border-[#21262d] flex items-center justify-between">
+                      <div className="px-4 py-2 bg-surface-hover border-b border-border-subtle flex items-center justify-between">
                         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{snippet.title ?? snippet.language}</span>
                       </div>
-                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-[#0d1117]"><code>{snippet.code ?? "// No code available"}</code></pre>
+                      <pre className="p-4 text-[11px] text-muted-foreground overflow-x-auto bg-card"><code>{snippet.code ?? "// No code available"}</code></pre>
                     </div>
                   ))}
               </div>

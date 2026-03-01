@@ -187,9 +187,9 @@ function CodeBlock({ code, language, blockKey }: { code: string; language: strin
   const shikiHtml = useShikiHighlight(code, language);
 
   return (
-    <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-[#0d1117]">
+    <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-card">
       {/* Header bar — language label + copy */}
-      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d]">
+      <div className="flex items-center justify-between px-4 py-2 bg-surface-hover border-b border-border-subtle">
         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">{langLabel}</span>
         <CopyButton text={code} label="Copy code" />
       </div>
@@ -282,8 +282,8 @@ function MermaidBlock({ code, blockKey }: { code: string; blockKey: string }) {
   }
 
   return (
-    <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-[#0d1117]">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#21262d]">
+    <div key={blockKey} className="my-3 rounded-xl overflow-hidden border border-border-subtle bg-card">
+      <div className="flex items-center justify-between px-4 py-2 bg-surface-hover border-b border-border-subtle">
         <span className="text-[10px] font-medium text-muted uppercase tracking-wider">Diagram</span>
         <CopyButton text={code} label="Copy source" />
       </div>

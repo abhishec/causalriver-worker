@@ -272,7 +272,7 @@ function ShikiCodeViewer({ code, language, wordWrap }: { code: string; language:
     return (
       <div
         className={cn(
-          "shiki-container px-4 py-3 text-[13px] leading-relaxed font-mono bg-[#0d1117] min-h-full",
+          "shiki-container px-4 py-3 text-[13px] leading-relaxed font-mono bg-card min-h-full",
           "[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent",
           "[&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-10 [&_.line::before]:text-right [&_.line::before]:pr-4 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-xs [&_.line::before]:tabular-nums [&_.line::before]:shrink-0",
           wordWrap ? "[&_pre]:whitespace-pre-wrap [&_pre]:break-words" : ""
@@ -284,7 +284,7 @@ function ShikiCodeViewer({ code, language, wordWrap }: { code: string; language:
 
   return (
     <pre className={cn(
-      "px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground bg-[#0d1117] min-h-full",
+      "px-4 py-3 text-[13px] leading-relaxed font-mono text-muted-foreground bg-card min-h-full",
       wordWrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"
     )}>
       {highlightCode(code, language)}

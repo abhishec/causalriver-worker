@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";
 
 
-export const metadata = { title: "Connectors" };
+export const metadata = { title: "Connectors — BrainOS" };
 
 const CONNECTORS = [
   { name: "AWS S3", type: "s3-storage", domain: "operations", icon: "📦", description: "File storage — CSV, JSON, reports, GL data", oauth: false },

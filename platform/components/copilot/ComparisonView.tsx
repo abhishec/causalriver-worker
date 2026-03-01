@@ -75,7 +75,7 @@ function ComparisonCodeViewer({
     return (
       <div
         className={cn(
-          "shiki-container px-3 py-2 text-[12px] leading-relaxed font-mono bg-[#0d1117] min-h-full",
+          "shiki-container px-3 py-2 text-[12px] leading-relaxed font-mono bg-card min-h-full",
           "[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent",
           "[&_.line]:flex [&_.line::before]:content-[attr(data-line)] [&_.line::before]:inline-block [&_.line::before]:w-8 [&_.line::before]:text-right [&_.line::before]:pr-3 [&_.line::before]:text-[var(--color-muted)]/30 [&_.line::before]:select-none [&_.line::before]:text-[10px] [&_.line::before]:tabular-nums [&_.line::before]:shrink-0"
         )}
@@ -85,7 +85,7 @@ function ComparisonCodeViewer({
   }
 
   return (
-    <pre className="px-3 py-2 text-[12px] leading-relaxed font-mono text-muted-foreground bg-[#0d1117] min-h-full whitespace-pre-wrap break-words">
+    <pre className="px-3 py-2 text-[12px] leading-relaxed font-mono text-muted-foreground bg-card min-h-full whitespace-pre-wrap break-words">
       {code}
     </pre>
   );

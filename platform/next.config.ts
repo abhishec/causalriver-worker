@@ -96,6 +96,18 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // ── Legacy route redirects ──────────────────────────────────────────────────
+  // /copilot and /dashboard were retired in favour of /workspace.
+  // Permanent=false so we can change the destination later without browser-cached redirects.
+  async redirects() {
+    return [
+      { source: "/copilot", destination: "/workspace", permanent: false },
+      { source: "/copilot/:path*", destination: "/workspace", permanent: false },
+      { source: "/dashboard", destination: "/workspace", permanent: false },
+      { source: "/dashboard/overview", destination: "/workspace", permanent: false },
+    ];
+  },
   typescript: {
     // Types are validated locally via `tsc --noEmit` (pre-commit hook) and in CI.
     // The build-time type check is redundant and can fail due to Turbopack

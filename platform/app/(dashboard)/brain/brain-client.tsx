@@ -257,7 +257,7 @@ export function BrainClient({ causalEdges, entities, snapshot, discoveryTimeline
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Brain Explorer</h1>
+            <h1 className="text-xl font-semibold tracking-tight">Brain</h1>
             <p className="text-xs text-muted mt-0.5">Knowledge atlas — causal graph, layers, and regions</p>
           </div>
           {snapshot && (

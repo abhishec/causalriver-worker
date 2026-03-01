@@ -7,7 +7,7 @@ import { SettingsClient } from "./settings-client";
 import { logger } from "@/lib/logger";
 
 
-export const metadata = { title: "Settings" };
+export const metadata = { title: "Settings — BrainOS" };
 
 export default async function SettingsPage() {
   // ── 500→401 Lambda pattern: each init wrapped separately ──

@@ -11,7 +11,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/connectors": "Connectors",
   "/settings": "Settings",
   "/artifacts": "Artifacts",
-  "/brain": "Brain Explorer",
+  "/brain": "Brain",
   "/predictions": "Predictions",
   "/agents": "Agents",
   "/early-warning": "Early Warning",

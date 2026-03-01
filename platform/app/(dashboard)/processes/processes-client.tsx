@@ -347,7 +347,7 @@ export default function ProcessesClient() {
 
       {/* Process instances table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <TableHeader />
+        {(loading || instances.length > 0) && <TableHeader />}
 
         {loading ? (
           <div className="space-y-0">
