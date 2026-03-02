@@ -456,6 +456,9 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
         <span className="text-xs text-muted">{worker?.status ?? "active"}</span>
       </header>
 
+      {/* ── Connector status strip ─────────────────────────────────────────── */}
+      <ConnectorStatusStrip orgId={orgId} />
+
       {/* ── Tab navigation ────────────────────────────────────────────────── */}
       <nav className="flex gap-0 border-b border-border px-4 bg-background">
         {(["chat", "agents", "jobs", "brain", "keys"] as Tab[]).map((tab) => (
@@ -515,6 +518,66 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
           />
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Connector Status Strip ────────────────────────────────────────────────────
+
+interface ConnectorRow {
+  type: string;
+  displayName: string;
+  status: string;
+}
+
+function ConnectorStatusStrip({ orgId }: { orgId: string }) {
+  const [connectors, setConnectors] = useState<ConnectorRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!orgId) return;
+    fetch(`/api/connectors/status?workspaceId=${encodeURIComponent(orgId)}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => {
+        setConnectors(d.connectors ?? []);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [orgId]);
+
+  if (!loaded) return null;
+
+  const dot = (status: string) =>
+    status === "active"  ? "bg-emerald-500" :
+    status === "error"   ? "bg-red-500" :
+    status === "pending" ? "bg-amber-400" : "bg-muted/40";
+
+  if (connectors.length === 0) {
+    return (
+      <div className="flex items-center gap-2 px-5 py-2 border-b border-border-subtle text-[11px] text-muted bg-background">
+        <span>No connectors</span>
+        <a href="/connectors" className="underline text-accent hover:opacity-80 transition-opacity">
+          Add one →
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1 px-5 py-1.5 border-b border-border-subtle bg-background overflow-x-auto shrink-0">
+      <span className="text-[9px] font-semibold text-muted uppercase tracking-widest mr-1 shrink-0">
+        Connected
+      </span>
+      {connectors.map(c => (
+        <a
+          key={c.type}
+          href="/connectors"
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full border border-border/50 hover:border-accent/40 hover:bg-surface transition-colors whitespace-nowrap text-[10px] text-muted hover:text-foreground shrink-0"
+        >
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dot(c.status)}`} />
+          {c.displayName}
+        </a>
+      ))}
     </div>
   );
 }

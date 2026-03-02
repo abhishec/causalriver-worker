@@ -26,6 +26,10 @@ import { MemoryUsageIndicator } from "./MemoryUsageIndicator";
 import type { CopilotChatHandle } from "@/lib/copilot-controller";
 import { AgentCreatedCard } from "./AgentCreatedCard";
 import type { AgentCreatedInfo } from "./AgentCreatedCard";
+import { ConnectorStatusCard } from "./ConnectorStatusCard";
+import type { ConnectorStatusInfo } from "./ConnectorStatusCard";
+import { ConnectorSetupCard } from "./ConnectorSetupCard";
+import type { ConnectorSetupInfo } from "./ConnectorSetupCard";
 import { AgentSpeechBubble } from "./AgentSpeechBubble";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -1133,6 +1137,14 @@ export async function consumeSSEStream(
             if (parsed.agentCreated) {
               callbacks.onAgentCreated?.(parsed.agentCreated);
             }
+            // Connector status — emitted when user asks "what am I connected to?"
+            if (parsed.connectorStatus) {
+              callbacks.onConnectorStatus?.(parsed.connectorStatus);
+            }
+            // Connector setup — emitted when user says "connect github / jira / etc."
+            if (parsed.connectorSetup) {
+              callbacks.onConnectorSetup?.(parsed.connectorSetup);
+            }
             // Orchestrator queued — brain-dependent job queued while brain populates
             if (parsed.orchestratorQueued) {
               callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
@@ -1188,6 +1200,8 @@ export async function consumeSSEStream(
             if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
             if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
+            if (parsed.connectorStatus) callbacks.onConnectorStatus?.(parsed.connectorStatus);
+            if (parsed.connectorSetup) callbacks.onConnectorSetup?.(parsed.connectorSetup);
             if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
             if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
             if (parsed.moaResult) callbacks.onMoaResult?.(parsed.moaResult);
@@ -1563,6 +1577,12 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   // ── Per-message agent created tracking (for AgentCreatedCard below each message) ──
   const [agentCreatedPerMessage, setAgentCreatedPerMessage] = useState<Map<number, AgentCreatedInfo>>(new Map());
+
+  // ── Per-message connector status tracking (for ConnectorStatusCard) ──
+  const [connectorStatusPerMessage, setConnectorStatusPerMessage] = useState<Map<number, ConnectorStatusInfo>>(new Map());
+
+  // ── Per-message connector setup tracking (for ConnectorSetupCard) ──
+  const [connectorSetupPerMessage, setConnectorSetupPerMessage] = useState<Map<number, ConnectorSetupInfo>>(new Map());
 
   // ── Per-message agent comms tracking (Heart/Mind/Speech for AgentSpeechBubble) ──
   // We use the agentId as the key within the message to support in-place updates
@@ -2187,6 +2207,22 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setAgentCreatedPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, agentInfo);
+              return pruneMap(next);
+            });
+          },
+          onConnectorStatus: (data) => {
+            if (controller.signal.aborted) return;
+            setConnectorStatusPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, data);
+              return pruneMap(next);
+            });
+          },
+          onConnectorSetup: (data) => {
+            if (controller.signal.aborted) return;
+            setConnectorSetupPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, data as ConnectorSetupInfo);
               return pruneMap(next);
             });
           },
@@ -2853,6 +2889,16 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                       {/* Agent Created Card — shown when user asked Copilot to create an agent */}
                       {agentCreatedPerMessage.get(i) && (
                         <AgentCreatedCard agent={agentCreatedPerMessage.get(i)!} />
+                      )}
+
+                      {/* Connector Status Card — shown when user asks "what am I connected to?" */}
+                      {connectorStatusPerMessage.get(i) && (
+                        <ConnectorStatusCard data={connectorStatusPerMessage.get(i)!} />
+                      )}
+
+                      {/* Connector Setup Card — shown when user says "connect github / jira / etc." */}
+                      {connectorSetupPerMessage.get(i) && (
+                        <ConnectorSetupCard data={connectorSetupPerMessage.get(i)!} />
                       )}
 
                       {/* Queued Job Badge — shown when brain-dependent job is queued */}

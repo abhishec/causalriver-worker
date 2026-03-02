@@ -358,6 +358,10 @@ export interface SSECallbacks {
     memoryTracking?: boolean;
     createdAt?: string;
   }) => void;
+  /** Connector status: emitted when user asks "what am I connected to?" */
+  onConnectorStatus?: (data: { connectors: Array<{ connector_type: string; status: string; signals_count?: number | null; last_sync_at?: string | null }> }) => void;
+  /** Connector setup: emitted when user says "connect github / jira / etc." */
+  onConnectorSetup?: (data: { connectorType: string; displayName: string; authMethod: string; oauthRoute?: string; domainParam?: string; domainPlaceholder?: string; fields?: Array<{ key: string; label: string; placeholder?: string; secret?: boolean }>; description?: string }) => void;
   /**
    * Orchestrator queued: emitted when a brain-dependent job is queued because
    * the brain isn't ready yet. The frontend should show a queued badge and poll

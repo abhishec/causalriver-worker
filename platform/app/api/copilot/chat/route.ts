@@ -860,6 +860,18 @@ export async function POST(request: NextRequest) {
       logger.warn("[BrainContext] Non-fatal: could not load brain intelligence:", { error: (brainErr as Error)?.message ?? String(brainErr), route: "/api/copilot/chat" });
     }
 
+    // ── Connector intent detection (fast regex, before LLM routing) ──────────
+    // These are handled by emitting SSE events + letting the LLM narrate.
+    const connectorStatusIntent = /\b(what(?:'s| is) (?:connected|my connectors?|connections?|integrations?)|show (?:connections?|connectors?|integrations?)|connector status|my integrations?|what(?:'s| is) (?:hooked up|linked)|which (?:tools?|services?) (?:are|is) (?:connected|active|linked))\b/i.test(message);
+    const connectMatch = message.match(
+      /\b(?:connect|setup|set up|add|link|integrate)\s+(?:to\s+)?(?:my\s+)?(github|jira|confluence|slack|freshdesk|freshchat|freshsales|hubspot|notion|linear|stripe|xero|quickbooks|datadog|cloudwatch|intercom|zendesk|mailchimp|elastic|elk|google[_\s]chat|google[_\s]calendar|s3|voice|generic[_\s]api)\b/i
+    );
+    const connectType = connectMatch?.[1]?.toLowerCase().replace(/\s+/g, "_");
+    // Normalize common aliases
+    const normalizedConnectType = connectType === "elastic" ? "elk" :
+      connectType === "s3" ? "s3-storage" :
+      connectType === "set_up" ? null : connectType;
+
     // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
     // Uses LLM interpretation for semantic service routing (replaces 350+ lines of regex).
     // Falls back to regex detectSEaaSRoute/detectAccountingRoute if interpretation unavailable.
@@ -3892,7 +3904,9 @@ ${inactiveC.length > 0 ? `Inactive/pending connectors: ${inactiveC.join(", ")}` 
 When the user asks about data from a specific source (e.g. Slack, GitHub, Jira, Xero):
 - If that source is in the ACTIVE list: the brain is ingesting data from it — answer from brain context or say data may still be processing.
 - If that source is NOT in ANY list: tell the user it is not connected yet and direct them to Settings > Connectors (path: /connectors) to add it.
-- If that source is inactive/pending: tell the user the connector exists but is not yet active — they should check the connector status in Settings > Connectors.`;
+- If that source is inactive/pending: tell the user the connector exists but is not yet active — they should check the connector status in Settings > Connectors.
+${connectorStatusIntent ? "- The user just asked about their connection status. A connector status card has been shown in the UI. Briefly confirm what's active and what isn't, without listing every connector by name." : ""}
+${normalizedConnectType ? `- The user wants to connect ${normalizedConnectType}. A setup card has been shown in the UI. Briefly acknowledge this and tell them to complete the form in the card above.` : ""}`;
       } else {
         // No connectors at all — LLM already has the zero-data guard, but clarify no connectors configured
         effectiveSystemPrompt += `\n\n## CONNECTED DATA SOURCES
@@ -4286,6 +4300,32 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send agent created event so the frontend can render AgentCreatedCard
         if (agentCreated) {
           send(JSON.stringify({ agentCreated }));
+        }
+
+        // ── Connector status card — emitted when user asks "what am I connected to?" ──
+        if (connectorStatusIntent) {
+          try {
+            const { data: connStatusRows } = await service
+              .from("org_connectors")
+              .select("connector_type, status, signals_count, last_sync_at")
+              .eq("organization_id", workspaceId);
+            send(JSON.stringify({ connectorStatus: { connectors: connStatusRows ?? [] } }));
+          } catch {
+            // Non-fatal — SSE event is enrichment only
+          }
+        }
+
+        // ── Connector setup card — emitted when user says "connect github / jira / etc." ──
+        if (normalizedConnectType) {
+          try {
+            const { CONNECTOR_AUTH_MAP } = await import("@/lib/connectors/connector-auth-map");
+            const authConfig = CONNECTOR_AUTH_MAP[normalizedConnectType];
+            if (authConfig) {
+              send(JSON.stringify({ connectorSetup: { connectorType: normalizedConnectType, ...authConfig } }));
+            }
+          } catch {
+            // Non-fatal
+          }
         }
 
         // ── Brain IQ warning — emitted when brain is not ready (IQ < 10) ──
