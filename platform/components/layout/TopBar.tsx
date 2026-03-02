@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -42,11 +43,27 @@ export function TopBar() {
   // Hide topbar on copilot page — it has its own header with service tabs
   if (pathname === "/copilot") return null;
 
+  // Show breadcrumb for non-root pages: "Mission Control > [page]"
+  const showBreadcrumb = pathname !== "/workspace" && pageLabel;
+
   return (
     <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-border-subtle bg-background px-6 pl-14 md:pl-6">
-      {/* ── Left: Page title ─────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-foreground">{pageLabel}</span>
+      {/* ── Left: Page title / breadcrumb ────────────────────────── */}
+      <div className="flex items-center gap-2">
+        {showBreadcrumb ? (
+          <>
+            <Link
+              href="/workspace"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Mission Control
+            </Link>
+            <span className="text-muted-foreground/40 text-sm">/</span>
+            <span className="text-sm font-medium text-foreground">{pageLabel}</span>
+          </>
+        ) : (
+          <span className="text-sm font-medium text-foreground">{pageLabel}</span>
+        )}
       </div>
 
       {/* ── Right: Ask AI + Theme toggle ────────────────────────── */}

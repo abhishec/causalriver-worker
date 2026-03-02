@@ -1,6 +1,6 @@
 "use client";
 // workspace mission control
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
 
@@ -40,9 +40,109 @@ const STATUS_DOT: Record<string, string> = {
   archived: "bg-muted-foreground/20",
 };
 
+/* ── Edit Worker Modal ───────────────────────────────────────────────── */
+
+function EditWorkerModal({
+  worker,
+  onClose,
+  onSaved,
+}: {
+  worker: WorkerData;
+  onClose: () => void;
+  onSaved: (updated: Partial<WorkerData>) => void;
+}) {
+  const [name, setName] = useState(worker.name);
+  const [serviceType, setServiceType] = useState(worker.service_type ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  async function handleSave() {
+    if (!name.trim()) { setError("Name is required"); return; }
+    setSaving(true);
+    setError(null);
+    try {
+      const body: Record<string, unknown> = { name: name.trim() };
+      if (serviceType) body.service_type = serviceType;
+      const res = await fetch(`/api/ai-workers/${worker.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Failed to save");
+      }
+      onSaved({ name: name.trim(), service_type: serviceType || null });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-sm mx-4 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Edit Worker</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors text-lg leading-none">×</button>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">Worker name</label>
+            <input
+              ref={inputRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") onClose(); }}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">Service type</label>
+            <select
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">None</option>
+              <option value="se-aas">SE-aaS — Delivery Intelligence</option>
+              <option value="aas">AaaS — Accounting & Finance</option>
+              <option value="pm-aas">PM-aaS — Project Management</option>
+            </select>
+          </div>
+
+          {error && <p className="text-xs text-red-500">{error}</p>}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >Cancel</button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >{saving ? "Saving…" : "Save"}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Worker card ─────────────────────────────────────────────────────── */
 
-function WorkerCard({ worker }: { worker: WorkerData }) {
+function WorkerCard({ worker, onEdit }: { worker: WorkerData; onEdit: (w: WorkerData) => void }) {
   const badge = worker.service_type ? SERVICE_BADGE[worker.service_type] : null;
   const dot = STATUS_DOT[worker.status] ?? "bg-muted-foreground/40";
   const quality =
@@ -60,49 +160,65 @@ function WorkerCard({ worker }: { worker: WorkerData }) {
       : "text-red-400";
 
   return (
-    <Link
-      href={`/ai-worker/${worker.id}`}
-      className="block rounded-xl border border-border bg-card p-5 hover:border-border/60 hover:bg-card/80 transition-all group"
-    >
-      {/* Header: name + status dot + service badge */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
-          <span className="text-sm font-medium text-foreground truncate group-hover:text-foreground/90">
-            {worker.name}
-          </span>
+    <div className="relative rounded-xl border border-border bg-card hover:border-border/60 hover:bg-card/80 transition-all group">
+      <Link
+        href={`/ai-worker/${worker.id}`}
+        className="block p-5"
+      >
+        {/* Header: name + status dot + service badge */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
+            <span className="text-sm font-medium text-foreground truncate group-hover:text-foreground/90">
+              {worker.name}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {badge && (
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded border font-medium ${badge.className}`}
+              >
+                {badge.label}
+              </span>
+            )}
+          </div>
         </div>
-        {badge && (
-          <span
-            className={`text-[10px] px-2 py-0.5 rounded border font-medium shrink-0 ${badge.className}`}
-          >
-            {badge.label}
-          </span>
+
+        {/* Running job indicator */}
+        {worker.runningJob ? (
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
+            <span className="text-xs text-foreground/60 truncate">
+              {worker.runningJob.task_type}
+            </span>
+          </div>
+        ) : (
+          <div className="mb-3">
+            <span className="text-xs text-muted-foreground">Idle</span>
+          </div>
         )}
-      </div>
 
-      {/* Running job indicator */}
-      {worker.runningJob ? (
-        <div className="flex items-center gap-1.5 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
-          <span className="text-xs text-foreground/60 truncate">
-            {worker.runningJob.task_type}
+        {/* 7d quality score */}
+        <div className="flex items-center justify-between pt-2 border-t border-border/40">
+          <span className="text-xs text-muted-foreground">7d quality</span>
+          <span className={`text-xs font-medium ${qualityColor}`}>
+            {quality !== null ? `${quality}%` : "—"}
           </span>
         </div>
-      ) : (
-        <div className="mb-3">
-          <span className="text-xs text-muted-foreground">Idle</span>
-        </div>
-      )}
+      </Link>
 
-      {/* 7d quality score */}
-      <div className="flex items-center justify-between pt-2 border-t border-border/40">
-        <span className="text-xs text-muted-foreground">7d quality</span>
-        <span className={`text-xs font-medium ${qualityColor}`}>
-          {quality !== null ? `${quality}%` : "—"}
-        </span>
-      </div>
-    </Link>
+      {/* Edit button — shown on hover, stops propagation so it doesn't navigate */}
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(worker); }}
+        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 w-6 h-6 rounded-md bg-surface border border-border flex items-center justify-center transition-opacity hover:bg-surface/80 hover:border-accent/40"
+        aria-label="Edit worker"
+        title="Edit worker"
+      >
+        <svg className="w-3 h-3 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
@@ -116,10 +232,11 @@ function SkeletonCard() {
 
 /* ── Main component ──────────────────────────────────────────────────── */
 
-export default function WorkspaceMissionControl({ orgId }: { orgId: string }) {
+export default function WorkspaceMissionControl({ orgId: _orgId }: { orgId: string }) {
   const [workers, setWorkers] = useState<WorkerData[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [editingWorker, setEditingWorker] = useState<WorkerData | null>(null);
 
   const fetchWorkers = useCallback(async () => {
     try {
@@ -214,9 +331,27 @@ export default function WorkspaceMissionControl({ orgId }: { orgId: string }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {workers.map((worker) => (
-            <WorkerCard key={worker.id} worker={worker} />
+            <WorkerCard
+              key={worker.id}
+              worker={worker}
+              onEdit={setEditingWorker}
+            />
           ))}
         </div>
+      )}
+
+      {/* Inline edit modal */}
+      {editingWorker && (
+        <EditWorkerModal
+          worker={editingWorker}
+          onClose={() => setEditingWorker(null)}
+          onSaved={(updated) => {
+            setWorkers((prev) =>
+              prev.map((w) => w.id === editingWorker.id ? { ...w, ...updated } : w)
+            );
+            setEditingWorker(null);
+          }}
+        />
       )}
     </div>
   );

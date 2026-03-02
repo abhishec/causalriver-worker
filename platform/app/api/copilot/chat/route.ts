@@ -194,6 +194,7 @@ export async function POST(request: NextRequest) {
       message,
       organizationId,
       workspaceId: bodyWorkspaceId,
+      workerId,
       entityState,
       conversationHistory: rawConversationHistory,
       useFramework,
@@ -210,6 +211,8 @@ export async function POST(request: NextRequest) {
       message: string;
       organizationId?: string;
       workspaceId?: string;
+      /** AI Worker UUID — when provided, gates SE-aaS/AaaS/PM-aaS routing to the worker's service_type */
+      workerId?: string;
       entityState?: Record<string, unknown>;
       conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>;
       useFramework?: boolean;
@@ -892,12 +895,35 @@ export async function POST(request: NextRequest) {
     // codebase-qa remains native to leverage full conversation context in Brain commander.
     const COPILOT_NATIVE_DOMAINS = new Set(['codebase-qa']);
 
+    // ── Service activation gate: look up the worker's service_type ─────────────
+    // When a workerId is present (AI Worker copilot), only route to domains that
+    // match the worker's activated service. Workers without SE-aaS should NOT see
+    // SE-aaS domain responses (BUG-006 fix).
+    let _workerServiceType: string | null = null;
+    if (workerId) {
+      try {
+        const { data: _workerRow } = await service
+          .from("ai_workers")
+          .select("service_type")
+          .eq("id", workerId)
+          .eq("organization_id", workspaceId)
+          .maybeSingle();
+        _workerServiceType = _workerRow?.service_type ?? null;
+      } catch {
+        // Non-fatal — fall through to ungated routing (backward compat)
+      }
+    }
+    // serviceAllowed: when workerId present, only route if service matches; when absent, allow all (backward compat)
+    const _seaasAllowed  = !workerId || _workerServiceType === "se-aas";
+    const _aaasAllowed   = !workerId || _workerServiceType === "aas";
+    const _pmaasAllowed  = !workerId || _workerServiceType === "pm-aas";
+
     // Determine service route from LLM interpretation or regex fallback.
     // resolveSeaasRoute/resolveAccountingRoute/resolvePmAasRoute handle domain gating + regex fallback.
     const serviceRoute = interpretation?.serviceRoute;
-    const seaasRoute = resolveSeaasRoute(message, interpretation as any);
-    const accountingRoute = resolveAccountingRoute(message, interpretation as any);
-    const pmAasRoute = resolvePmAasRoute(message, interpretation as any);
+    const seaasRoute = _seaasAllowed ? resolveSeaasRoute(message, interpretation as any) : null;
+    const accountingRoute = _aaasAllowed ? resolveAccountingRoute(message, interpretation as any) : null;
+    const pmAasRoute = _pmaasAllowed ? resolvePmAasRoute(message, interpretation as any) : null;
 
     // ── Agent Creation Routing ────────────────────────────────────────────────
     // When the LLM classifier detects "create-agent" intent, delegate to handleAgentCreation().
@@ -2655,6 +2681,19 @@ CRITICAL RULES:
 You currently have: ${causalEdges.length} causal edges, ${rules.length} business rules, ${patterns.length} patterns/insights, ${cascadeRules.length} cascade rules loaded.`;
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
+
+    // ── Service activation context (BUG-006 fix) ─────────────────────────────
+    // When a worker is present, inform the LLM which services are available so it
+    // can tell users "SE-aaS is not activated" instead of silently failing.
+    if (workerId && _workerServiceType) {
+      const serviceLabel = _workerServiceType === "se-aas" ? "SE-aaS (Delivery Intelligence)"
+        : _workerServiceType === "aas" ? "AaaS (Accounting & Finance)"
+        : _workerServiceType === "pm-aas" ? "PM-aaS (Project Management)"
+        : _workerServiceType;
+      effectiveSystemPrompt += `\n\n## ACTIVE SERVICE: ${serviceLabel}\nThis AI Worker has ${serviceLabel} activated. Respond with domain-specific analysis when asked about ${serviceLabel} topics.`;
+    } else if (workerId && !_workerServiceType) {
+      effectiveSystemPrompt += `\n\n## SERVICE STATUS: No service activated\nThis AI Worker has no service (SE-aaS/AaaS/PM-aaS) activated yet. If the user asks about delivery intelligence, engineering metrics, accounting analysis, or project management reports, politely explain that those capabilities require activating the relevant service from the workspace settings (/connectors or /capabilities). You can still answer general questions using the Brain's knowledge base.`;
+    }
 
     // ── Memory compression injection (via message-builder helper) ─────────────
     // When the user compressed earlier conversation turns, prepend the summary so

@@ -242,10 +242,14 @@ export function ConnectorsClient({
         jira_connected: "Jira site connected successfully",
         confluence_connected: "Confluence site connected successfully",
         github_connected: "GitHub account connected via OAuth",
-        github_app_installed: "GitHub App installed — org-level access enabled",
+        github_app_installed: "GitHub App installed — select repos to track",
         freshdesk_connected: "Freshdesk connected successfully",
       };
       setMessage({ type: "success", text: messages[success] || "Connector connected!" });
+      // After GitHub App install, open repo selection modal automatically
+      if (success === "github_app_installed") {
+        setShowSetupModal(true);
+      }
       window.history.replaceState({}, "", "/connectors");
     }
     if (error) {
@@ -689,6 +693,19 @@ export function ConnectorsClient({
                       >
                         {isSyncing ? "Syncing..." : "Sync Now"}
                       </button>
+                      {/* Multi-instance: add another Jira site */}
+                      {instance.connectorType === "jira" && (
+                        <button
+                          onClick={() => setShowJiraModal(true)}
+                          className="px-3 py-1.5 rounded-lg bg-surface border border-border-subtle text-xs font-medium hover:bg-surface-hover transition-colors flex items-center gap-1"
+                          title="Connect an additional Jira site"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          Add Instance
+                        </button>
+                      )}
                     </div>
                   </div>
                 </Card>

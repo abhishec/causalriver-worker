@@ -585,6 +585,7 @@ function ConnectorStatusStrip({ orgId }: { orgId: string }) {
 // ── Chat Tab ──────────────────────────────────────────────────────────────────
 
 function ChatTab({
+  workerId,
   workerName,
   orgId,
 }: {
@@ -595,7 +596,7 @@ function ChatTab({
   return (
     <CopilotChat
       endpoint="/api/copilot/chat"
-      extraParams={{ workspaceId: orgId }}
+      extraParams={{ workspaceId: orgId, workerId }}
       showHeader={false}
       examplePrompts={[]}
       persona={{ name: workerName, description: "AI Worker" }}
