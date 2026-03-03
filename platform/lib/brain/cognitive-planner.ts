@@ -911,6 +911,50 @@ async function _runCognitivePlannerInner(
     logger.warn("[CognitivePlanner] Phase 1f (recovery mode check) failed:", err);
   }
 
+  // 1g. Routing feedback awareness — read captureRoutingFeedback() patterns from ai_memory
+  // Written by post-flight.ts after every copilot response. Tells the planner which
+  // domains the orchestrator routed to poorly — feeds into domain deprioritization.
+  // ADR-027: closes the planner ↔ routing_feedback feedback loop.
+  let poorlyRoutedDomains: string[] = [];
+  try {
+    const { data: rfRows } = await supabase
+      .from("ai_memory")
+      .select("domain, metadata")
+      .eq("organization_id", orgId)
+      .eq("memory_type", "pattern")
+      .like("domain", "orchestration.routing_feedback.%")
+      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    for (const row of rfRows ?? []) {
+      const routedDomain = ((row as { domain: string }).domain)
+        .replace("orchestration.routing_feedback.", "");
+      const responseQuality = (row as { metadata?: { response_quality?: number } })
+        .metadata?.response_quality ?? 0.5;
+      // Quality < 0.4 = poor routing — planner should deprioritize until quality improves
+      if (responseQuality < 0.4 && !poorlyRoutedDomains.includes(routedDomain)) {
+        poorlyRoutedDomains.push(routedDomain);
+      }
+    }
+
+    // Merge into stuckDomains so planner avoids re-queueing them this cycle
+    for (const domain of poorlyRoutedDomains) {
+      if (!stuckDomains.includes(domain)) {
+        stuckDomains.push(domain);
+      }
+    }
+
+    if (poorlyRoutedDomains.length > 0) {
+      logger.warn(
+        `[CognitivePlanner] Phase 1g: ${poorlyRoutedDomains.length} poorly-routed domains added to stuckDomains`,
+        { poorlyRoutedDomains }
+      );
+    }
+  } catch (err) {
+    logger.warn("[CognitivePlanner] Phase 1g (routing feedback) failed (non-fatal):", err);
+  }
+
   // ── Phase 1h: Process bottleneck detection ────────────────────────────────
   // Reads state-level fail rates from service_health to surface process
   // templates that need policy knowledge enrichment.
@@ -1174,6 +1218,7 @@ ${pastReflectionsText}`;
 
       // Process Intelligence (internal FSM) is user-triggered only — never schedule autonomously.
       // Guard against bpaas.* and process.* domains appearing in suggestions.
+      // "bpaas.*" prefix is the RL domain for Process Engine jobs (legacy naming, kept for backward compat).
       if (decision.domain.startsWith("bpaas.") || decision.domain.startsWith("process.")) {
         logger.warn("[CognitivePlanner] Skipping internal process-intelligence domain", {
           domain: decision.domain,

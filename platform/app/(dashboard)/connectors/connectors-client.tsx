@@ -192,24 +192,26 @@ export function ConnectorsClient({
   const [showFreshworksInput, setShowFreshworksInput] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
 
-  // Health data: per-type polling every 60s to show live last-sync + auth method + status
+  // Health data: per-type polling every 60s to show live last-sync + auth method + status + token expiry
   const [healthMap, setHealthMap] = useState<Record<string, {
     status: string;
     lastSyncAt: string | null;
     signalsCount: number;
     errorMessage: string | null;
     authMethod: string | null;
+    expires_at?: string | null;
+    token_expires_at?: string | null;
   }>>({});
 
   useEffect(() => {
     const fetchHealth = () => {
       fetch("/api/connectors/health")
         .then((r) => r.ok ? r.json() : [])
-        .then((rows: Array<{ type: string; status: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null }>) => {
+        .then((rows: Array<{ type: string; status: string; lastSyncAt: string | null; signalsCount: number; errorMessage: string | null; authMethod: string | null; expires_at?: string | null; token_expires_at?: string | null }>) => {
           if (!Array.isArray(rows)) return; // guard: API returned non-array on cold start or auth error
           const m: typeof healthMap = {};
           for (const row of rows) {
-            m[row.type] = { status: row.status, lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod };
+            m[row.type] = { status: row.status, lastSyncAt: row.lastSyncAt, signalsCount: row.signalsCount, errorMessage: row.errorMessage, authMethod: row.authMethod, expires_at: row.expires_at, token_expires_at: row.token_expires_at };
           }
           setHealthMap(m);
         })
@@ -490,6 +492,11 @@ export function ConnectorsClient({
               const instanceLabel = instance.displayName || instance.instanceName;
               const health = healthMap[instance.connectorType];
 
+              const expiresAt = health?.expires_at ?? health?.token_expires_at ?? null;
+              const expiresIn = expiresAt ? new Date(expiresAt).getTime() - Date.now() : null;
+              const isExpired = expiresIn !== null && expiresIn <= 0;
+              const isExpiringSoon = expiresIn !== null && expiresIn > 0 && expiresIn < 3 * 24 * 60 * 60 * 1000;
+
               return (
                 <Card key={instance.id} variant="interactive">
                   <div className="flex items-start gap-4">
@@ -525,6 +532,16 @@ export function ConnectorsClient({
                         {health?.authMethod === "github_app" && (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-medium">
                             GitHub App
+                          </span>
+                        )}
+                        {isExpired && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/15 text-red-400 border border-red-500/20">
+                            Token expired
+                          </span>
+                        )}
+                        {isExpiringSoon && !isExpired && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">
+                            Expires {formatRelativeTime(new Date(expiresAt!))}
                           </span>
                         )}
                       </div>

@@ -21,7 +21,7 @@ import { startJobHeartbeat, stopJobHeartbeat } from "./job-heartbeat";
 import { recordAgentOutcome, computeAgentQuality, recordStepOutcome } from "@/lib/brain/agent-rl";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { recordRlvrPrediction } from "@/lib/brain/rlvr-verifier";
-import { depositDomainExecutionOutcome } from "@/lib/brain/engagement-flywheel";
+import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { selectModelForDomain, routeModelWithIq, routeCallType } from "./model-router";
 import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 import {
@@ -1487,20 +1487,19 @@ export async function executeDomain(
     },
   }).catch(() => {/* non-fatal */});
 
-  // ── Data Flywheel: Deposit structured milestone into engagement_outcomes ──
-  // Fire-and-forget — never block domain response.
-  // Only deposits for pod-match, early-warning, scope-creep (key delivery domains).
-  if (['pod-match', 'early-warning', 'scope-creep'].includes(params.domainType)) {
-    void depositDomainExecutionOutcome(supabase, {
-      organizationId: params.organizationId,
-      engagementId: (params.request as { engagementId?: string }).engagementId,
-      domainType: params.domainType,
-      qualityScore: rlQuality,
-      result,
-    }).catch((err: unknown) =>
-      logger.warn("[domain-executor] depositDomainExecutionOutcome fire-and-forget failed (non-fatal):", String(err))
-    );
-  }
+  // ADR-025: Record brain learning for ALL domains (no whitelist)
+  void recordBrainLearning(supabase, {
+    organizationId: params.organizationId,
+    aiWorkerId: params.aiWorkerId,
+    domain: params.domainType,
+    taskDescription: `SE-aaS domain execution: ${params.domainType}`,
+    qualityScore: rlQuality,
+    executionMs: Date.now() - executionStartMs,
+    result,
+    outcomeLabel: rlQuality >= 0.7 ? "success" : rlQuality >= 0.4 ? "partial" : "failed",
+  }).catch((err: unknown) =>
+    logger.warn("[domain-executor] recordBrainLearning failed (non-fatal)", { err: String(err) })
+  );
 
   // ── Step 9: RLVR Prediction Registration (fire-and-forget) ────────────
   // For early-warning results with high flight risk, record a prediction for

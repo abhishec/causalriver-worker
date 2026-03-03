@@ -19,6 +19,7 @@ import { logger } from "@/lib/logger";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface FederatedKnowledgeRow {
+  id?: string;  // Present when fetched for tracking
   domain: string;
   content: string;
   confidence: number;
@@ -151,7 +152,113 @@ export async function buildRLPrimer(
   }
 }
 
+// ── Primer With IDs ───────────────────────────────────────────────────────────
+
+export interface RLPrimerResult {
+  block: string;
+  patternIds: string[];  // IDs of federated_knowledge rows that were injected
+}
+
+/**
+ * Like buildRLPrimer(), but also returns the IDs of patterns that were injected.
+ * Use these IDs in feedback handlers to track which patterns led to good/bad outcomes.
+ * The caller should store patternIds in response metadata for later feedback linking.
+ */
+export async function buildRLPrimerWithIds(
+  userMessage: string,
+  workspaceId: string,
+  aiWorkerId?: string
+): Promise<RLPrimerResult> {
+  try {
+    return await withTimeout(fetchAndScoreWithIds(userMessage, workspaceId, aiWorkerId), 5_000);
+  } catch (err) {
+    logger.warn("[rl-primer] buildRLPrimerWithIds failed (non-fatal)", { workspaceId, error: String(err) });
+    return { block: "", patternIds: [] };
+  }
+}
+
+/**
+ * Update federated_knowledge.confidence based on user feedback for specific patterns.
+ * Call this from the feedback API when patternIds are available.
+ * Positive feedback nudges confidence UP (max 0.95), negative nudges DOWN (min 0.35).
+ */
+export async function updatePatternConfidence(
+  patternIds: string[],
+  rating: "helpful" | "not_helpful" | "incorrect"
+): Promise<void> {
+  if (!patternIds.length) return;
+  try {
+    const admin = getAdminClient();
+    const delta = rating === "helpful" ? 0.05 : rating === "incorrect" ? -0.10 : -0.05;
+    // Fetch current values, then update (no single-query increment in Supabase client)
+    const { data } = await admin
+      .from("federated_knowledge")
+      .select("id, confidence")
+      .in("id", patternIds);
+    if (!data?.length) return;
+    for (const row of data) {
+      const current = row.confidence as number;
+      const updated = Math.min(Math.max(current + delta, 0.35), 0.95);
+      await admin.from("federated_knowledge").update({ confidence: updated }).eq("id", row.id as string);
+    }
+  } catch (err) {
+    logger.warn("[rl-primer] updatePatternConfidence failed (non-fatal)", { error: String(err) });
+  }
+}
+
 // ── Internal ──────────────────────────────────────────────────────────────────
+
+async function fetchAndScoreWithIds(
+  userMessage: string,
+  workspaceId: string,
+  _aiWorkerId?: string
+): Promise<RLPrimerResult> {
+  const admin = getAdminClient();
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await admin
+    .from("federated_knowledge")
+    .select("id, domain, content, confidence, created_at")
+    .or(`organization_id.eq.${workspaceId},organization_id.is.null`)
+    .gte("confidence", 0.50)
+    .gte("created_at", thirtyDaysAgo)
+    .order("confidence", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    logger.warn("[rl-primer] fetchAndScoreWithIds query failed (non-fatal)", {
+      workspaceId,
+      error: error.message,
+    });
+    return { block: "", patternIds: [] };
+  }
+
+  const rows = (data ?? []) as FederatedKnowledgeRow[];
+  if (rows.length === 0) return { block: "", patternIds: [] };
+
+  const keywords = extractKeywords(userMessage);
+
+  const scored: ScoredEntry[] = rows
+    .map((row) => ({ row, score: scoreEntry(row, keywords) }))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.row.confidence - a.row.confidence;
+    });
+
+  const hasAnyMatch = scored.some((e) => e.score > 0);
+  const candidates = hasAnyMatch
+    ? scored.filter((e) => e.score > 0)
+    : scored;
+
+  const top3 = candidates.slice(0, 3).map((e) => e.row);
+  if (top3.length === 0) return { block: "", patternIds: [] };
+
+  return {
+    block: formatPrimerBlock(top3),
+    patternIds: top3.map((r) => r.id ?? "").filter(Boolean),
+  };
+}
 
 async function fetchAndScore(
   userMessage: string,
@@ -166,7 +273,7 @@ async function fetchAndScore(
     .from("federated_knowledge")
     .select("domain, content, confidence, created_at")
     .or(`organization_id.eq.${workspaceId},organization_id.is.null`)
-    .gte("confidence", 0.65)
+    .gte("confidence", 0.50)  // ADR-026: aligned with knowledge-extractor.ts write threshold
     .gte("created_at", thirtyDaysAgo)
     .order("confidence", { ascending: false })
     .limit(50); // fetch top 50 by confidence, then re-rank by keyword overlap

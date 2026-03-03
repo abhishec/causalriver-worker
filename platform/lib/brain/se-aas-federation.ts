@@ -1,3 +1,13 @@
+/**
+ * Brain Federation (ADR-025)
+ * ==========================
+ * Collects quality patterns from engagement_outcomes across all AI Worker
+ * executions (SE-aaS, AaaS, PM-aaS, Process Engine, overnight agents) and
+ * promotes high-quality patterns to the CORE brain for cross-org federation.
+ *
+ * Previously: SE-aaS-specific (only pod-match, early-warning, scope-creep).
+ * Now: Generic — any domain that calls recordBrainLearning() contributes.
+ */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { CORE_BRAIN_ORG_ID, ensureCoreBrain } from "@/lib/brain/core-brain";
@@ -22,7 +32,8 @@ async function collectOrgPatterns(
     .select('domain_sequence, confidence, outcome_label')
     .eq('organization_id', orgId)
     .gte('created_at', thirtyDaysAgo)
-    .not('domain_sequence', 'is', null);
+    .not('domain_sequence', 'is', null)
+    .neq('domain_sequence', '[]');  // ADR-025: skip legacy empty arrays
 
   if (!data?.length) return [];
 
@@ -34,7 +45,7 @@ async function collectOrgPatterns(
     // confidence is a scalar float (0-1) stored directly on the row
     const conf = typeof row.confidence === 'number' ? row.confidence : 0;
     entry.confidences.push(conf);
-    if (row.outcome_label === 'successful_delivery' || row.outcome_label === 'on_track') entry.successCount++;
+    if (row.outcome_label === 'success' || row.outcome_label === 'successful_delivery' || row.outcome_label === 'on_track') entry.successCount++;
     seqMap.set(key, entry);
   }
 
@@ -66,7 +77,7 @@ export async function promotePatternsToCore(
     if (!patterns.length) return;
 
     for (const pattern of patterns) {
-      if (pattern.successRate < 0.7 || pattern.occurrenceCount < 3) continue;
+      if (pattern.successRate < 0.5 || pattern.occurrenceCount < 2) continue;
 
       // Upsert to CORE brain's process_templates (anonymized — no org_id)
       const name = `[Cross-Org] ${pattern.domainSequence.join(' → ')}`;
@@ -85,12 +96,107 @@ export async function promotePatternsToCore(
       }, { onConflict: 'organization_id,name' });
     }
 
-    logger.warn('[FedLearning] SE-aaS patterns promoted to CORE', {
+    logger.warn('[FedLearning] Brain patterns promoted to CORE', {
       orgId,
-      patternsPromoted: patterns.filter(p => p.successRate >= 0.7).length
+      patternsPromoted: patterns.filter(p => p.successRate >= 0.5).length
     });
   } catch (err) {
     logger.warn('[FedLearning] Federation failed', { err });
+  }
+}
+
+/**
+ * Promotes repeated negative (gaba) signals into federated_knowledge as warning entries.
+ * These are written with confidence=0.75 so buildRLPrimer() picks them up and warns the LLM.
+ * Content is prefixed with "⚠️ AVOID PATTERN:" so the LLM understands these are anti-patterns.
+ *
+ * Criteria: domain has 2+ gaba/norepinephrine signals in last 14 days.
+ */
+export async function promoteGabaPatternsToKnowledge(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<number> {
+  try {
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data } = await supabase
+      .from('cross_domain_signals')
+      .select('target_domain, signal_value, signal_strength, payload')
+      .eq('organization_id', orgId)
+      .in('signal_value', ['gaba', 'norepinephrine'])
+      .gte('created_at', fourteenDaysAgo)
+      .limit(100);
+
+    if (!data?.length) return 0;
+
+    // Group by domain and count gaba occurrences
+    const domainGabaMap = new Map<string, { count: number; payloads: unknown[] }>();
+    for (const row of data) {
+      const domain = row.target_domain as string;
+      const entry = domainGabaMap.get(domain) ?? { count: 0, payloads: [] };
+      entry.count++;
+      if (row.payload) entry.payloads.push(row.payload);
+      domainGabaMap.set(domain, entry);
+    }
+
+    let promoted = 0;
+    for (const [domain, { count, payloads }] of domainGabaMap) {
+      if (count < 2) continue; // Need at least 2 negative signals before warning
+
+      // Extract common failure patterns from payloads
+      const failureHints = payloads
+        .slice(0, 3)
+        .map(p => {
+          if (!p || typeof p !== 'object') return null;
+          const payload = p as Record<string, unknown>;
+          return payload.errorMessage ?? payload.task_description ?? payload.resultSummary ?? null;
+        })
+        .filter(Boolean)
+        .join('; ')
+        .slice(0, 200);
+
+      const content = `⚠️ AVOID PATTERN: The domain "${domain}" has received ${count} negative feedback signal(s) recently. ${failureHints ? `Common issues: ${failureHints}` : 'Users found responses unhelpful or incorrect.'} Consider being more cautious, asking clarifying questions, or admitting uncertainty for this domain.`;
+
+      // SELECT-first approach — avoids dependency on a unique constraint
+      const { data: existing } = await supabase
+        .from('federated_knowledge')
+        .select('id, created_at')
+        .eq('organization_id', orgId)
+        .eq('domain', domain)
+        .eq('source', 'gaba_promotion')
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing warning entry
+        await supabase
+          .from('federated_knowledge')
+          .update({ content, confidence: 0.75, created_at: new Date().toISOString() })
+          .eq('id', existing.id);
+      } else {
+        // Insert new warning entry
+        await supabase.from('federated_knowledge').insert({
+          organization_id: orgId,
+          domain,
+          content,
+          confidence: 0.75,
+          source: 'gaba_promotion',
+        });
+      }
+
+      promoted++;
+    }
+
+    if (promoted > 0) {
+      logger.warn('[FedLearning] promoteGabaPatternsToKnowledge: promoted gaba patterns', {
+        orgId,
+        promoted,
+      });
+    }
+
+    return promoted;
+  } catch (err) {
+    logger.warn('[FedLearning] promoteGabaPatternsToKnowledge failed', { err, orgId });
+    return 0;
   }
 }
 

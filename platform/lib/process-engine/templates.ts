@@ -16,6 +16,7 @@ import {
   isValidProcessType,
   getProcessDefinition,
   bpaasDomain,
+  type ProcessType,
   type BPaaSProcessType,
   type ProcessDefinition,
   type PolicyRule,
@@ -28,15 +29,16 @@ export {
   getProcessDefinition,
   bpaasDomain,
 };
-export type { BPaaSProcessType, ProcessDefinition, PolicyRule, FSMTransition };
+export type { ProcessType as ProcessTemplateType, ProcessDefinition, PolicyRule, FSMTransition };
+
+/** @deprecated Use ProcessTemplateType instead */
+export type { BPaaSProcessType };
 
 // Aliases for backward compat where needed
 export { getProcessDefinition as getProcessTemplate };
 export { isValidProcessType as isProcessTemplate };
 
-/** Process Engine RL domain prefix: "bpaas.<templateType>" */
+/** Process Engine RL domain prefix: "bpaas.<templateType>" (prefix kept for backward compat) */
 export function processEngineDomain(templateType: string): string {
   return `bpaas.${templateType}`;
 }
-
-export type ProcessTemplateType = BPaaSProcessType;

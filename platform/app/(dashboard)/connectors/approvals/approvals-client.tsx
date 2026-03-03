@@ -194,9 +194,9 @@ function ApprovalRow({
   );
 }
 
-// ─── BPaaS HITL approvals ────────────────────────────────────────────────────
+// ─── Process Engine HITL approvals ───────────────────────────────────────────
 
-interface BPaaSJob {
+interface ProcessApprovalJob {
   id: string;
   process_type: string | null;
   escalation_question: string | null;
@@ -209,11 +209,11 @@ function formatProcessType(type: string): string {
   return type.replace(/_/g, " ").replace(/\w/g, (c) => c.toUpperCase());
 }
 
-function BPaaSApprovalRow({
+function ProcessApprovalRow({
   job,
   onResolved,
 }: {
-  job: BPaaSJob;
+  job: ProcessApprovalJob;
   onResolved: () => void;
 }) {
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
@@ -304,8 +304,8 @@ function BPaaSApprovalRow({
   );
 }
 
-function BPaaSHitlSection() {
-  const [jobs, setJobs] = useState<BPaaSJob[]>([]);
+function ProcessHitlSection() {
+  const [jobs, setJobs] = useState<ProcessApprovalJob[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchJobs = useCallback(async () => {
@@ -320,7 +320,7 @@ function BPaaSHitlSection() {
         created_at: string;
         payload?: Record<string, unknown> | null;
       }> };
-      // Filter to only suspended/awaiting_approval bpaas jobs
+      // Filter to only suspended/awaiting_approval Process Engine jobs
       const suspended = (data.instances ?? [])
         .filter((i) => i.job_status === "suspended" || i.job_status === "awaiting_approval")
         .map((i) => ({
@@ -333,7 +333,7 @@ function BPaaSHitlSection() {
         }));
       setJobs(suspended);
     } catch (err) {
-      logger.warn("[BPaaSHitlSection] fetch error:", err);
+      logger.warn("[ProcessHitlSection] fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -360,7 +360,7 @@ function BPaaSHitlSection() {
       </p>
       <div className="space-y-3">
         {jobs.map((job) => (
-          <BPaaSApprovalRow key={job.id} job={job} onResolved={fetchJobs} />
+          <ProcessApprovalRow key={job.id} job={job} onResolved={fetchJobs} />
         ))}
       </div>
       <div className="h-px bg-border-subtle" />
@@ -421,8 +421,8 @@ export function ApprovalsClient({ initialApprovals, canApprove }: ApprovalsClien
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* BPaaS Process Approvals — HITL gates */}
-      <BPaaSHitlSection />
+      {/* Process Engine Approvals — HITL gates */}
+      <ProcessHitlSection />
 
       {/* Header */}
       <div className="flex items-center justify-between">

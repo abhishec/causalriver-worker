@@ -160,6 +160,7 @@ async function loadStatePatterns(
  *   1. Load historical fail rates from service_health statePatterns (written by process-jobs cron)
  *   2. Look up the current processType.state key
  *   3. Load last 5 bpaas_process_instances for recent failure streak detection
+ *      (table: bpaas_process_instances, legacy name, kept for backward compat)
  *   4. Load process_templates for new-template risk (evolution_generation = 0, usage_count < 5)
  *   5. Compute composite risk score and return PredictionResult
  *
@@ -208,7 +209,7 @@ export async function predictStateRisk(
       // ── 2a. Recent failure streak ─────────────────────────────────────────
       try {
         const { data: recentInstances } = await supabase
-          .from("bpaas_process_instances")
+          .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
           .select("status, created_at")
           .eq("organization_id", orgId)
           .eq("process_type", processType)

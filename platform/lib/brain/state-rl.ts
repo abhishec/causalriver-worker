@@ -435,7 +435,7 @@ export async function updateStateParams(
  * It is safe to call with `void` and not await.
  *
  * @param supabase  - Supabase client (service or auth client)
- * @param orgId     - organization_id from BPaaSContext
+ * @param orgId     - organization_id from ProcessContext
  * @param processType - e.g. "hr_offboarding", "procurement"
  * @param stateName - the state that just completed (prevState before transition)
  * @param quality   - RL quality signal 0–1
@@ -461,9 +461,10 @@ export async function recordAndLearnStateOutcome(
   );
 
   const agentRlP = recordAgentOutcome(supabase, {
+    // agentId prefix 'bpaas-' kept for backward compat — historical RL records use this prefix
     agentId:         `bpaas-${processType}-${stateName}-${Date.now()}`,
     domain:          `process.${processType}.${stateName}`,
-    taskDescription: `BPaaS state execution: ${processType}/${stateName}`,
+    taskDescription: `Process Engine state execution: ${processType}/${stateName}`,
     resultSummary:   `quality=${quality.toFixed(3)} durationMs=${executionMs}`,
     quality,
     executionMs,

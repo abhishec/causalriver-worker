@@ -1,5 +1,5 @@
 /**
- * time-scheduler.ts — deterministic scheduling helpers for BPaaS FSM SCHEDULE_NOTIFY state.
+ * time-scheduler.ts — deterministic scheduling helpers for Process Engine FSM SCHEDULE_NOTIFY state.
  *
  * Rules:
  * - No LLM calls, no approximations, no randomness.

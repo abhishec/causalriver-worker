@@ -1,6 +1,6 @@
 /**
- * BPaaS FSM Runner — Business Process as a Service State Machine Executor
- * =========================================================================
+ * Process Engine FSM Runner — Process Engine State Machine Executor
+ * ==================================================================
  *
  * Executes a business process through an ordered state machine:
  *   DECOMPOSE → ASSESS → COMPUTE → POLICY_CHECK → APPROVAL_GATE
@@ -10,15 +10,16 @@
  *
  * Design:
  * - Composes ProcessFSM (coarse states) for agent_queue persistence
- * - Fine-grained BPaaS states stored in bpaas_process_instances.fsm_state
+ * - Fine-grained process states stored in bpaas_process_instances.fsm_state
+ *   (table: bpaas_process_instances, legacy name, kept for backward compat)
  * - Every state transition emits a step-level RL signal via recordStepOutcome()
  * - POLICY_CHECK gate delegates to runPolicyCheck() from policy-checker.ts (domain-executor.ts)
  * - APPROVAL_GATE calls checkHitlGate() and pauses via pauseJobAtDecisionGate()
  * - Lambda budget checked via shouldChain(); caller should checkpointAndChain() if true
  * - All gate decisions logged fire-and-forget via logDecision()
  *
- * Never use agent_type = 'se-aas' for BPaaS jobs — always 'bpaas'.
- * Domain prefix: "bpaas.<processType>"
+ * Never use agent_type = 'se-aas' for Process Engine jobs — always 'bpaas'.
+ * Domain prefix: "bpaas.<processType>" (kept for backward compat — RL historical data)
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -36,7 +37,7 @@ import { logger } from "@/lib/logger";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type BPaaSState =
+export type ProcessState =
   | "DECOMPOSE"
   | "ASSESS"
   | "COMPUTE"
@@ -54,7 +55,10 @@ export type BPaaSState =
   | "RECONCILE"
   | "RCA";
 
-export type BPaaSTransitionEvent =
+/** @deprecated Use ProcessState instead */
+export type BPaaSState = ProcessState;
+
+export type ProcessTransitionEvent =
   // Core events
   | "decomposed"
   | "assessed"
@@ -97,10 +101,13 @@ export type BPaaSTransitionEvent =
   | "security_conflict"
   | "cfo_review_required";
 
-export interface BPaaSContext {
+/** @deprecated Use ProcessTransitionEvent instead */
+export type BPaaSTransitionEvent = ProcessTransitionEvent;
+
+export interface ProcessContext {
   /** 'hr_offboarding' | 'procurement' | 'order_management' */
   processType: string;
-  /** FK to bpaas_process_instances */
+  /** FK to bpaas_process_instances (table: legacy name, kept for backward compat) */
   processInstanceId: string;
   /** agent_queue.id */
   jobId: string;
@@ -130,7 +137,7 @@ export interface BPaaSContext {
    */
   predictedHighRisk?: boolean;
   stateHistory: Array<{
-    state: BPaaSState;
+    state: ProcessState;
     enteredAt: number;
     exitedAt?: number;
     outcome?: string;
@@ -138,6 +145,9 @@ export interface BPaaSContext {
   /** Unix ms — for shouldChain() check */
   startedAt: number;
 }
+
+/** @deprecated Use ProcessContext instead */
+export type BPaaSContext = ProcessContext;
 
 // ── State Machine Transition Table ──────────────────────────────────────────
 
@@ -162,7 +172,7 @@ export const CUSTOM_INTERMEDIATE_STATES = new Set<string>([
  * Custom intermediate states use process definition transitions exclusively.
  */
 const CORE_TRANSITIONS: Readonly<
-  Record<string, Partial<Record<BPaaSTransitionEvent, BPaaSState | null>>>
+  Record<string, Partial<Record<ProcessTransitionEvent, ProcessState | null>>>
 > = {
   DECOMPOSE: {
     decomposed: "ASSESS",
@@ -212,7 +222,7 @@ const CORE_TRANSITIONS: Readonly<
   FAILED: {},
 };
 
-/** Map BPaaS fine-grained states to the coarse ProcessFSM states for agent_queue. */
+/** Map Process Engine fine-grained states to the coarse ProcessFSM states for agent_queue. */
 const BPAAS_TO_COARSE: Record<string, ProcessFSM["state"]> = {
   DECOMPOSE: "running",
   ASSESS: "running",
@@ -232,19 +242,19 @@ const BPAAS_TO_COARSE: Record<string, ProcessFSM["state"]> = {
   RCA: "running",
 };
 
-// ── BPaaSFSMRunner ─────────────────────────────────────────────────────────
+// ── ProcessFSMRunner ───────────────────────────────────────────────────────
 
-export class BPaaSFSMRunner {
-  private state: BPaaSState;
-  private context: BPaaSContext;
+export class ProcessFSMRunner {
+  private state: ProcessState;
+  private context: ProcessContext;
   /** Process definition transitions — resolves custom state and template overrides. */
   private processTransitions: Array<{ from: string; to: string; on: string }>;
   /** Coarse-grained FSM used for agent_queue persistence. */
   private processFSM: ProcessFSM;
 
   constructor(
-    context: BPaaSContext,
-    initialState: BPaaSState = "DECOMPOSE",
+    context: ProcessContext,
+    initialState: ProcessState = "DECOMPOSE",
     processTransitions: Array<{ from: string; to: string; on: string }> = []
   ) {
     this.context = { ...context };
@@ -263,11 +273,11 @@ export class BPaaSFSMRunner {
 
   // ── Accessors ───────────────────────────────────────────────────────────
 
-  getCurrentState(): BPaaSState {
+  getCurrentState(): ProcessState {
     return this.state;
   }
 
-  getContext(): BPaaSContext {
+  getContext(): ProcessContext {
     return { ...this.context };
   }
 
@@ -284,7 +294,7 @@ export class BPaaSFSMRunner {
   // ── State Transition ────────────────────────────────────────────────────
 
   /**
-   * Transition to the next BPaaS state based on the event.
+   * Transition to the next Process Engine state based on the event.
    *
    * Responsibilities:
    * 1. Validate the transition is legal
@@ -301,9 +311,9 @@ export class BPaaSFSMRunner {
    * @throws Error if called from a terminal state (COMPLETE or FAILED)
    */
   async transition(
-    event: BPaaSTransitionEvent,
+    event: ProcessTransitionEvent,
     supabase?: SupabaseClient
-  ): Promise<BPaaSState> {
+  ): Promise<ProcessState> {
     // ── Terminal-state guard ──────────────────────────────────────────────────
     // COMPLETE and FAILED are hard terminal states: no transition is ever valid.
     // ESCALATE is semi-terminal: it can advance to COMPLETE via "escalated" or
@@ -315,27 +325,27 @@ export class BPaaSFSMRunner {
     // This guard surfaces a clear diagnostic message so debugging is unambiguous.
     if (this.state === "COMPLETE") {
       throw new Error(
-        `[BPaaSFSMRunner] transition() called on terminal state COMPLETE ` +
+        `[ProcessFSMRunner] transition() called on terminal state COMPLETE ` +
         `(event=${event}, jobId=${this.context.jobId}). ` +
         `COMPLETE is a hard terminal state — no further transitions are valid.`
       );
     }
     if (this.state === "FAILED") {
       throw new Error(
-        `[BPaaSFSMRunner] transition() called on terminal state FAILED ` +
+        `[ProcessFSMRunner] transition() called on terminal state FAILED ` +
         `(event=${event}, jobId=${this.context.jobId}). ` +
         `FAILED is a hard terminal state — no further transitions are valid.`
       );
     }
 
-    let nextState: BPaaSState | null | undefined;
+    let nextState: ProcessState | null | undefined;
 
     // 1. Process definition transitions take priority (handles custom states + overrides)
     const defTransition = this.processTransitions.find(
       (t) => t.from === this.state && t.on === event
     );
     if (defTransition) {
-      nextState = defTransition.to as BPaaSState;
+      nextState = defTransition.to as ProcessState;
     } else if (CUSTOM_INTERMEDIATE_STATES.has(this.state)) {
       // Custom intermediate state with no matching definition transition
       if (event === "error") {
@@ -344,7 +354,7 @@ export class BPaaSFSMRunner {
         nextState = "ESCALATE";
       } else {
         throw new Error(
-          `[BPaaSFSMRunner] No transition for custom state ${this.state} --[${event}]-->` +
+          `[ProcessFSMRunner] No transition for custom state ${this.state} --[${event}]-->` +
           ` (add it to the process definition transitions)`
         );
       }
@@ -353,13 +363,13 @@ export class BPaaSFSMRunner {
       const stateTransitions = CORE_TRANSITIONS[this.state];
       if (!stateTransitions) {
         throw new Error(
-          `[BPaaSFSMRunner] Unknown current state: ${this.state}`
+          `[ProcessFSMRunner] Unknown current state: ${this.state}`
         );
       }
       nextState = stateTransitions[event];
       if (nextState === null || nextState === undefined) {
         throw new Error(
-          `[BPaaSFSMRunner] Illegal transition: ${this.state} --[${event}]--> (no target state)`
+          `[ProcessFSMRunner] Illegal transition: ${this.state} --[${event}]--> (no target state)`
         );
       }
     }
@@ -446,15 +456,15 @@ export class BPaaSFSMRunner {
           nextState,
           coarseState,
         },
-        rationale: `BPaaS state transition: ${prevState} --[${event}]--> ${nextState}`,
+        rationale: `Process Engine state transition: ${prevState} --[${event}]--> ${nextState}`,
         domain,
         jobId: this.context.jobId,
       }).catch((e: unknown) =>
-        logger.warn("[BPaaSFSMRunner] logDecision failed (non-fatal)", { error: String(e) })
+        logger.warn("[ProcessFSMRunner] logDecision failed (non-fatal)", { error: String(e) })
       );
     }
 
-    logger.warn(`[BPaaSFSMRunner] Transition: ${prevState} --[${event}]--> ${nextState}`, {
+    logger.warn(`[ProcessFSMRunner] Transition: ${prevState} --[${event}]--> ${nextState}`, {
       jobId: this.context.jobId,
       processType: this.context.processType,
       processInstanceId: this.context.processInstanceId,
@@ -488,7 +498,7 @@ export class BPaaSFSMRunner {
   ): Promise<{ blocked: boolean; approvalId?: string }> {
     if (this.state !== "APPROVAL_GATE") {
       throw new Error(
-        `[BPaaSFSMRunner] runApprovalGate() called in wrong state: ${this.state}`
+        `[ProcessFSMRunner] runApprovalGate() called in wrong state: ${this.state}`
       );
     }
 
@@ -522,7 +532,7 @@ export class BPaaSFSMRunner {
             policyOutcome: this.context.policyOutcome,
           },
           escalationQuestion: params.summary,
-          resumeInstruction: `Resume BPaaS process ${this.context.processType} (instance: ${this.context.processInstanceId}) from APPROVAL_GATE after human approval. approvalId=${approvalId}`,
+          resumeInstruction: `Resume Process Engine process ${this.context.processType} (instance: ${this.context.processInstanceId}) from APPROVAL_GATE after human approval. approvalId=${approvalId}`,
           escalationType: "admin-approval",
           metadata: {
             approvalId,
@@ -548,7 +558,8 @@ export class BPaaSFSMRunner {
   /**
    * Persist the current runner state to:
    * 1. agent_queue.metadata via processFSM.save() (coarse state — written first)
-   * 2. bpaas_process_instances.fsm_state (full BPaaSContext — written second)
+   * 2. bpaas_process_instances.fsm_state (full ProcessContext — written second)
+   *    (table: bpaas_process_instances, legacy name, kept for backward compat)
    *
    * Write order for crash-safety:
    *   The coarse queue state is written FIRST. bpaas_process_instances is the
@@ -585,13 +596,13 @@ export class BPaaSFSMRunner {
         .then(
           () => {},
           (e: unknown) =>
-            logger.warn("[BPaaSFSMRunner] save: heartbeat_at update failed (non-fatal)", {
+            logger.warn("[ProcessFSMRunner] save: heartbeat_at update failed (non-fatal)", {
               jobId: this.context.jobId,
               error: String(e),
             })
         );
     } catch (err) {
-      logger.warn("[BPaaSFSMRunner] save: processFSM.save (coarse) threw", {
+      logger.warn("[ProcessFSMRunner] save: processFSM.save (coarse) threw", {
         jobId: this.context.jobId,
         state: this.state,
         error: err instanceof Error ? err.message : String(err),
@@ -599,13 +610,14 @@ export class BPaaSFSMRunner {
     }
 
     // ── 2. Fine-grained state second — bpaas_process_instances ───────────────
+    // table: bpaas_process_instances (legacy name, kept for backward compat)
     // Column names per migration 20260228100001_bpaas_foundation.sql:
     //   current_state TEXT — the FSM state name (e.g. "ASSESS", "MUTATE")
-    //   fsm_state JSONB    — working memory / full BPaaSContext for restore
+    //   fsm_state JSONB    — working memory / full ProcessContext for restore
     //   (there is NO fsm_context column — fsm_state IS the context store)
     try {
       const { error } = await supabase
-        .from("bpaas_process_instances")
+        .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
         .update({
           current_state: this.state,
           fsm_state: this.context as unknown as Record<string, unknown>,
@@ -615,7 +627,7 @@ export class BPaaSFSMRunner {
         .eq("organization_id", this.context.organizationId);
 
       if (error) {
-        logger.warn("[BPaaSFSMRunner] save: bpaas_process_instances update failed", {
+        logger.warn("[ProcessFSMRunner] save: bpaas_process_instances update failed", {
           processInstanceId: this.context.processInstanceId,
           state: this.state,
           error: error.message,
@@ -624,7 +636,7 @@ export class BPaaSFSMRunner {
         fineOk = true;
       }
     } catch (err) {
-      logger.warn("[BPaaSFSMRunner] save: bpaas_process_instances threw", {
+      logger.warn("[ProcessFSMRunner] save: bpaas_process_instances threw", {
         processInstanceId: this.context.processInstanceId,
         state: this.state,
         error: err instanceof Error ? err.message : String(err),
@@ -632,7 +644,7 @@ export class BPaaSFSMRunner {
     }
 
     if (!coarseOk || !fineOk) {
-      logger.warn("[BPaaSFSMRunner] save: partial write — one of two DB writes failed", {
+      logger.warn("[ProcessFSMRunner] save: partial write — one of two DB writes failed", {
         jobId: this.context.jobId,
         processInstanceId: this.context.processInstanceId,
         state: this.state,
@@ -657,8 +669,8 @@ export class BPaaSFSMRunner {
     await saveDeepCheckpoint(supabase, this.context.jobId, {
       jobId: this.context.jobId,
       phase: this.state,
-      phaseLabel: `BPaaS ${this.context.processType} — ${this.state}`,
-      conversationHistory: [],  // BPaaS FSM runner is not LLM-conversation-based
+      phaseLabel: `Process Engine ${this.context.processType} — ${this.state}`,
+      conversationHistory: [],  // Process Engine FSM runner is not LLM-conversation-based
       completedTickets: this.context.stateHistory
         .filter((h) => h.exitedAt !== undefined)
         .map((h) => h.state),
@@ -674,11 +686,12 @@ export class BPaaSFSMRunner {
   // ── Static Restore ───────────────────────────────────────────────────────
 
   /**
-   * Restore a BPaaSFSMRunner from the database.
+   * Restore a ProcessFSMRunner from the database.
    *
    * Load order:
    * 1. bpaas_process_instances WHERE id = context.processInstanceId — preferred
-   *    (contains the full BPaaSContext with fine-grained state)
+   *    (table: bpaas_process_instances, legacy name, kept for backward compat)
+   *    (contains the full ProcessContext with fine-grained state)
    * 2. agent_queue.metadata WHERE id = jobId — fallback (coarse state only,
    *    reconstructed with empty stateHistory)
    *
@@ -687,7 +700,7 @@ export class BPaaSFSMRunner {
   static async restore(
     supabase: SupabaseClient,
     jobId: string
-  ): Promise<BPaaSFSMRunner | null> {
+  ): Promise<ProcessFSMRunner | null> {
     // 1. Try agent_queue to get the processInstanceId from payload
     try {
       const { data: jobRow, error: jobErr } = await supabase
@@ -697,7 +710,7 @@ export class BPaaSFSMRunner {
         .single();
 
       if (jobErr || !jobRow) {
-        logger.warn("[BPaaSFSMRunner] restore: agent_queue lookup failed", {
+        logger.warn("[ProcessFSMRunner] restore: agent_queue lookup failed", {
           jobId,
           error: jobErr?.message,
         });
@@ -710,38 +723,39 @@ export class BPaaSFSMRunner {
         (payload?.bpaas_instance_id as string);
 
       // 2. Try bpaas_process_instances for full context (preferred path)
+      // table: bpaas_process_instances (legacy name, kept for backward compat)
       // Column names per migration:
       //   current_state TEXT — the FSM state name
-      //   fsm_state JSONB    — working memory / full BPaaSContext
+      //   fsm_state JSONB    — working memory / full ProcessContext
       if (processInstanceId) {
         const { data: instanceRow } = await supabase
-          .from("bpaas_process_instances")
+          .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
           .select("current_state, fsm_state")
           .eq("id", processInstanceId)
           .single();
 
         if (instanceRow?.fsm_state) {
-          const savedContext = instanceRow.fsm_state as BPaaSContext;
-          const savedState = (instanceRow.current_state as BPaaSState) ?? "DECOMPOSE";
+          const savedContext = instanceRow.fsm_state as ProcessContext;
+          const savedState = (instanceRow.current_state as ProcessState) ?? "DECOMPOSE";
 
-          logger.warn("[BPaaSFSMRunner] restore: restored from bpaas_process_instances", {
+          logger.warn("[ProcessFSMRunner] restore: restored from bpaas_process_instances", {
             jobId,
             processInstanceId,
             state: savedState,
           });
 
-          return new BPaaSFSMRunner(savedContext, savedState);
+          return new ProcessFSMRunner(savedContext, savedState);
         }
       }
 
       // 3. Fallback: reconstruct from agent_queue.metadata (coarse state only)
       const metadata = jobRow.metadata as Record<string, unknown> | null;
-      const bpaasContext = metadata?.bpaas_fsm_context as BPaaSContext | undefined;
+      const bpaasContext = metadata?.bpaas_fsm_context as ProcessContext | undefined;
 
       if (bpaasContext) {
         const coarseFsmState = (metadata?.fsm_state as string) ?? "running";
-        // Map coarse → fine-grained: running → last known BPaaS state or DECOMPOSE
-        const fallbackState: BPaaSState =
+        // Map coarse → fine-grained: running → last known Process Engine state or DECOMPOSE
+        const fallbackState: ProcessState =
           coarseFsmState === "awaiting_hitl"
             ? "APPROVAL_GATE"
             : coarseFsmState === "paused"
@@ -752,19 +766,22 @@ export class BPaaSFSMRunner {
             ? "FAILED"
             : "DECOMPOSE";
 
-        logger.warn("[BPaaSFSMRunner] restore: fell back to agent_queue.metadata", {
+        logger.warn("[ProcessFSMRunner] restore: fell back to agent_queue.metadata", {
           jobId,
           fallbackState,
         });
 
-        return new BPaaSFSMRunner(bpaasContext, fallbackState);
+        return new ProcessFSMRunner(bpaasContext, fallbackState);
       }
 
-      logger.warn("[BPaaSFSMRunner] restore: no restorable context found", { jobId });
+      logger.warn("[ProcessFSMRunner] restore: no restorable context found", { jobId });
       return null;
     } catch (err) {
-      logger.warn("[BPaaSFSMRunner] restore: threw unexpectedly", { jobId, err });
+      logger.warn("[ProcessFSMRunner] restore: threw unexpectedly", { jobId, err });
       return null;
     }
   }
 }
+
+/** @deprecated Use ProcessFSMRunner instead */
+export const BPaaSFSMRunner = ProcessFSMRunner;

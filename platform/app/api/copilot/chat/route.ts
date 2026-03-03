@@ -76,7 +76,7 @@ import { selectModel as selectModelDAA, classifyQueryDifficulty } from "@/lib/br
 import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 import { classifyTaskIntent, buildPrivacyRefusal } from "@/lib/brain/task-intent-classifier";
 // ── Raw Capability Upgrade (ADR-022) ─────────────────────────────────────────
-import { buildRLPrimer } from "@/lib/brain/rl-primer";
+import { buildRLPrimerWithIds } from "@/lib/brain/rl-primer";
 import { recallCopilotMemory } from "@/lib/copilot/copilot-memory";
 import { detectOutputFormat, buildFormatDirective, hasFormatRequirement } from "@/lib/brain/format-detector";
 import { scoreResponseQuality } from "@/lib/brain/self-reflection";
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
     // ── Raw Capability Upgrade: kick off parallel async fetches early ─────────
     // These run concurrently with all setup below and are awaited just before
     // the system prompt is finalised — near-zero added latency on the hot path.
-    const _rcRLPrimerPromise = buildRLPrimer(message, workspaceId, workerId ?? undefined);
+    const _rcRLPrimerPromise = buildRLPrimerWithIds(message, workspaceId, workerId ?? undefined);
     const _rcEntityCtxPromise = getEntityContext(workspaceId, workerId ?? undefined);
     const _rcDriftStatusPromise = getDriftStatus(workspaceId, service as any);
     const _rcCapsPromise = getOrSynthesizeCapabilities(message, workspaceId, anthropicApiKey, service as any);
@@ -2868,8 +2868,11 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
       _rcCopilotMemPromise,
     ]);
     // 1. RL Primer — inject past success/failure patterns from federated_knowledge
-    if (_rcRLPrimer) {
-      effectiveSystemPrompt += `\n\n${_rcRLPrimer}`;
+    //    ADR-027: Using buildRLPrimerWithIds so we can track which patterns helped/hurt
+    const _rcRLPrimerBlock = typeof _rcRLPrimer === "string" ? _rcRLPrimer : _rcRLPrimer?.block ?? "";
+    const _rcRLPrimerPatternIds: string[] = typeof _rcRLPrimer === "string" ? [] : _rcRLPrimer?.patternIds ?? [];
+    if (_rcRLPrimerBlock) {
+      effectiveSystemPrompt += `\n\n${_rcRLPrimerBlock}`;
     }
     // 1b. ADR-027: Copilot Memory — inject routing patterns and user preferences
     if (_rcCopilotMem) {
@@ -4473,6 +4476,11 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send process triggered event so the frontend can render process status card
         if (processTriggeredResult) {
           send(JSON.stringify({ processTriggered: processTriggeredResult }));
+        }
+
+        // ADR-027: Send RL primer pattern IDs so feedback handler can track which patterns helped
+        if (_rcRLPrimerPatternIds.length > 0) {
+          send(JSON.stringify({ rlPrimerPatternIds: _rcRLPrimerPatternIds }));
         }
 
         // ── Connector status card — emitted when user asks "what am I connected to?" ──

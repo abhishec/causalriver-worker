@@ -172,6 +172,7 @@ function mutateTriggerConditions(
  *   1. Rate-limit guard: skip if evolved within the last hour
  *   2. Load org templates (own + is_public=false filter)
  *   3. For each template, load bpaas_process_instances last 30d by process_type
+ *      (table: bpaas_process_instances, legacy name, kept for backward compat)
  *   4. Load bpaas_policy_rules to compute policy compliance
  *   5. Compute fitness score and write to template row
  *   6. For fitness < FITNESS_THRESHOLD: mutate trigger_conditions + increment generation
@@ -238,7 +239,7 @@ export async function evolveProcessTemplates(
     let allInstancesByProcessType = new Map<string, ProcessInstanceRow[]>();
     try {
       const instancesQuery = supabase
-        .from("bpaas_process_instances")
+        .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
         .select("id, process_type, status, current_state, started_at, completed_at")
         .eq("organization_id", orgId)
         .gte("created_at", thirtyDaysAgo)

@@ -1,13 +1,13 @@
 /**
- * BPaaS Domain Executor — Brain-Integrated Business Process Orchestrator
- * ========================================================================
+ * Process Engine Domain Executor — Brain-Integrated Business Process Orchestrator
+ * =================================================================================
  *
- * Executes a BPaaS process end-to-end through the deterministic FSM:
+ * Executes a Process Engine job end-to-end through the deterministic FSM:
  *   DECOMPOSE → ASSESS → COMPUTE → POLICY_CHECK → APPROVAL_GATE
  *     → MUTATE → SCHEDULE_NOTIFY → COMPLETE
  *
  * Architecture:
- * - Step -1: Brain context prime (getBrainContext) — L7+ BPaaS history injected
+ * - Step -1: Brain context prime (getBrainContext) — L7+ Process Engine history injected
  * - Step 0:  Resume-or-create — restores runner from DB or creates fresh
  * - Step 1:  DECOMPOSE — Haiku LLM structured decomposition
  * - Step 2:  ASSESS — Haiku LLM entity/constraint/fact extraction
@@ -25,14 +25,15 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { BPaaSFSMRunner, CUSTOM_INTERMEDIATE_STATES } from "./fsm-runner";
-import type { BPaaSContext, BPaaSTransitionEvent } from "./fsm-runner";
+import { ProcessFSMRunner, CUSTOM_INTERMEDIATE_STATES } from "./fsm-runner";
+import type { ProcessContext, ProcessTransitionEvent } from "./fsm-runner";
 import { getProcessDefinition, bpaasDomain } from "./process-registry";
 import type { FSMTransition } from "./process-registry";
 import { runPolicyCheck } from "./policy-checker";
 import type { PolicyContext } from "./policy-checker";
 import { getBrainContext, invalidateBrainContextCache } from "@/lib/brain/brain-context";
 import { recordAgentOutcome, computeAgentQuality, computeProcessQuality, recordPredictionAccuracy } from "@/lib/brain/agent-rl";
+import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { extractAndStoreKnowledge } from "@/lib/brain/knowledge-extractor";
 import { predictStateRisk } from "@/lib/brain/process-predictor";
 import type { PredictionResult } from "@/lib/brain/process-predictor";
@@ -65,7 +66,7 @@ const CORE_PUSH_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 // ── Public API Types ─────────────────────────────────────────────────────────
 
-export interface BPaaSExecutionParams {
+export interface ProcessExecutionParams {
   jobId: string;
   organizationId: string;
   processType: string;
@@ -83,7 +84,10 @@ export interface BPaaSExecutionParams {
   aiWorkerId?: string;
 }
 
-export interface BPaaSExecutionResult {
+/** @deprecated Use ProcessExecutionParams instead */
+export type BPaaSExecutionParams = ProcessExecutionParams;
+
+export interface ProcessExecutionResult {
   status: "completed" | "awaiting_approval" | "escalated" | "failed" | "chained";
   processInstanceId: string;
   processType: string;
@@ -95,6 +99,9 @@ export interface BPaaSExecutionResult {
   chainDepth?: number;
   durationMs: number;
 }
+
+/** @deprecated Use ProcessExecutionResult instead */
+export type BPaaSExecutionResult = ProcessExecutionResult;
 
 // ── Custom intermediate states ────────────────────────────────────────────────
 // MINOR-3: CUSTOM_INTERMEDIATE_STATES imported from fsm-runner.ts (single source of truth).
@@ -120,9 +127,9 @@ function extractPolicyContext(obj: Record<string, unknown>): PolicyContext {
 function buildApprovalSummary(
   processType: string,
   computedValues: Record<string, unknown> | undefined,
-  policyOutcome: BPaaSContext["policyOutcome"] | undefined
+  policyOutcome: ProcessContext["policyOutcome"] | undefined
 ): string {
-  const parts: string[] = [`BPaaS process: ${processType}`];
+  const parts: string[] = [`Process Engine process: ${processType}`];
   if (computedValues && Object.keys(computedValues).length > 0) {
     const kv = Object.entries(computedValues)
       .slice(0, 5)
@@ -297,10 +304,10 @@ async function callHaiku(params: {
 
 // ── Main Executor ─────────────────────────────────────────────────────────────
 
-export async function executeBPaaSProcess(
-  params: BPaaSExecutionParams,
+export async function executeProcess(
+  params: ProcessExecutionParams,
   supabase: SupabaseClient
-): Promise<BPaaSExecutionResult> {
+): Promise<ProcessExecutionResult> {
   const startedAt = Date.now();
   const chainDepth = params.chainDepth ?? 0;
   const apiKey =
@@ -309,7 +316,7 @@ export async function executeBPaaSProcess(
     "";
 
   // ── Structured job-start log — machine-parseable for production incident debugging ──
-  logger.warn("[BPaaS/DomainExecutor] Job start", {
+  logger.warn("[ProcessEngine/DomainExecutor] Job start", {
     jobId: params.jobId,
     processType: params.processType,
     orgId: params.organizationId,
@@ -347,7 +354,7 @@ export async function executeBPaaSProcess(
         : brainCtx.qualityPatternsSummary;
     }
   } catch (err) {
-    logger.warn("[BPaaS/DomainExecutor] Brain context prime failed (non-fatal)", {
+    logger.warn("[ProcessEngine/DomainExecutor] Brain context prime failed (non-fatal)", {
       jobId: params.jobId,
       error: err instanceof Error ? err.message : String(err),
     });
@@ -365,14 +372,14 @@ export async function executeBPaaSProcess(
       currentState: "DECOMPOSE",
     });
     if (initialPrediction.riskLevel === "high") {
-      logger.warn("[BPaaS/Predictor] High risk process — pre-emptive escalation flag set", {
+      logger.warn("[ProcessEngine/Predictor] High risk process — pre-emptive escalation flag set", {
         processType: params.processType,
         riskScore: initialPrediction.riskScore,
         reasoning: initialPrediction.reasoning,
       });
     }
   } catch (predErr) {
-    logger.warn("[BPaaS/Predictor] Pre-execution prediction failed (non-fatal)", {
+    logger.warn("[ProcessEngine/Predictor] Pre-execution prediction failed (non-fatal)", {
       error: predErr instanceof Error ? predErr.message : String(predErr),
     });
   }
@@ -399,12 +406,12 @@ export async function executeBPaaSProcess(
   }
 
   // ── Step 0: Resume or create ──────────────────────────────────────────────
-  let runner: BPaaSFSMRunner;
+  let runner: ProcessFSMRunner;
   let processInstanceId: string;
 
   if (params.resumeFromJobId) {
     // Resuming after Lambda chain or HITL approval
-    const restored = await BPaaSFSMRunner.restore(supabase, params.resumeFromJobId);
+    const restored = await ProcessFSMRunner.restore(supabase, params.resumeFromJobId);
     if (!restored) {
       return {
         status: "failed",
@@ -436,14 +443,14 @@ export async function executeBPaaSProcess(
     if (preCreatedInstanceId) {
       // Instance row already exists (created by API route or A2A route) — skip INSERT.
       processInstanceId = preCreatedInstanceId;
-      logger.warn("[BPaaS/DomainExecutor] Reusing pre-created instance row (skip INSERT)", {
+      logger.warn("[ProcessEngine/DomainExecutor] Reusing pre-created instance row (skip INSERT)", {
         jobId: params.jobId,
         processInstanceId,
       });
       invalidateBrainContextCache(params.organizationId);
     } else {
       const { data: instanceRow, error: insertErr } = await supabase
-        .from("bpaas_process_instances")
+        .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
         .insert({
           organization_id: params.organizationId,
           agent_job_id: params.jobId,
@@ -481,7 +488,7 @@ export async function executeBPaaSProcess(
     // Update budget to use the real processInstanceId now that it's available
     tokenBudget = { ...tokenBudget, processInstanceId };
 
-    const context: BPaaSContext = {
+    const context: ProcessContext = {
       processType: params.processType,
       processInstanceId,
       jobId: params.jobId,
@@ -493,7 +500,7 @@ export async function executeBPaaSProcess(
       predictedHighRisk: initialPrediction?.riskLevel === "high",
     };
 
-    runner = new BPaaSFSMRunner(context, "DECOMPOSE", definition.transitions);
+    runner = new ProcessFSMRunner(context, "DECOMPOSE", definition.transitions);
   }
 
   // ── State machine loop ────────────────────────────────────────────────────
@@ -538,7 +545,7 @@ export async function executeBPaaSProcess(
     const currentState = runner.getCurrentState();
 
     // Structured job-start log on every state entry for production traceability
-    logger.warn("[BPaaS/DomainExecutor] State enter", {
+    logger.warn("[ProcessEngine/DomainExecutor] State enter", {
       state: currentState,
       jobId: params.jobId,
       processInstanceId,
@@ -610,7 +617,7 @@ export async function executeBPaaSProcess(
           // Not blocked — runner already transitioned inside runApprovalGate; continue loop
         } else {
           // Store findings in FSM context and fire the chosen event
-          const updatedCtx: BPaaSContext = {
+          const updatedCtx: ProcessContext = {
             ...ctx,
             [`${currentState.toLowerCase()}Result`]: agenticResult.findings,
             // Back-fill computed values from COMPUTE state so POLICY_CHECK can see them
@@ -622,7 +629,7 @@ export async function executeBPaaSProcess(
               ? { assessedFacts: agenticResult.findings as Record<string, unknown> }
               : {}),
           };
-          runner = new BPaaSFSMRunner(
+          runner = new ProcessFSMRunner(
             updatedCtx,
             runner.getCurrentState(),
             definition.transitions
@@ -638,7 +645,7 @@ export async function executeBPaaSProcess(
               ? agenticResult.nextEvent
               : (validEventsForState[0] ?? "completed");
 
-          await runner.transition(safeEvent as BPaaSTransitionEvent, supabase);
+          await runner.transition(safeEvent as ProcessTransitionEvent, supabase);
           await runner.save(supabase);
         }
       }
@@ -646,7 +653,7 @@ export async function executeBPaaSProcess(
       // ── POLICY_CHECK ──────────────────────────────────────────────────────
       else if (currentState === "POLICY_CHECK") {
         // Deterministic — delegates to policy-checker.ts, zero LLM
-        // `definition` is already loaded at the top of executeBPaaSProcess — reuse it.
+        // `definition` is already loaded at the top of executeProcess — reuse it.
         const ctx = runner.getContext();
 
         const policyCtx: PolicyContext = extractPolicyContext(
@@ -670,15 +677,15 @@ export async function executeBPaaSProcess(
           policyCtx
         );
 
-        const policyOutcome: BPaaSContext["policyOutcome"] = {
+        const policyOutcome: ProcessContext["policyOutcome"] = {
           passed: policyResult.passed,
           rules: policyResult.triggeredRules.map((r) => r.ruleId),
           escalationLevel: policyResult.escalationLevel,
         };
 
-        const updatedCtx: BPaaSContext = { ...ctx, policyOutcome };
+        const updatedCtx: ProcessContext = { ...ctx, policyOutcome };
         const currentFsmState = runner.getCurrentState();
-        runner = new BPaaSFSMRunner(updatedCtx, currentFsmState, definition.transitions);
+        runner = new ProcessFSMRunner(updatedCtx, currentFsmState, definition.transitions);
 
         // Use template-aware event selection — templates may have custom outbound events
         // from POLICY_CHECK (e.g. variance_detected, breach_confirmed) instead of
@@ -689,7 +696,7 @@ export async function executeBPaaSProcess(
           currentState
         );
 
-        await runner.transition(policyEvent as BPaaSTransitionEvent, supabase);
+        await runner.transition(policyEvent as ProcessTransitionEvent, supabase);
         await runner.save(supabase);
 
         // If policy resulted in escalation or failure, return early
@@ -743,7 +750,7 @@ export async function executeBPaaSProcess(
 
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
-      logger.warn("[BPaaS/DomainExecutor] State execution failed", {
+      logger.warn("[ProcessEngine/DomainExecutor] State execution failed", {
         state: currentState,
         processInstanceId,
         processType: params.processType,
@@ -756,7 +763,7 @@ export async function executeBPaaSProcess(
         await runner.transition("error", supabase);
         await runner.save(supabase);
       } catch (transErr) {
-        logger.warn("[BPaaS/DomainExecutor] error-transition failed", {
+        logger.warn("[ProcessEngine/DomainExecutor] error-transition failed", {
           processInstanceId,
           error: transErr instanceof Error ? transErr.message : String(transErr),
         });
@@ -810,7 +817,7 @@ export async function executeBPaaSProcess(
   };
 
   // Determine status from final FSM state
-  let status: BPaaSExecutionResult["status"];
+  let status: ProcessExecutionResult["status"];
   if (finalState === "COMPLETE") {
     status = "completed";
   } else if (finalState === "ESCALATE") {
@@ -834,7 +841,7 @@ export async function executeBPaaSProcess(
     void recordAgentOutcome(supabase, {
       agentId: processInstanceId,
       domain,
-      taskDescription: `BPaaS ${params.processType} process execution`,
+      taskDescription: `Process Engine ${params.processType} process execution`,
       resultSummary: resultJson.slice(0, 500),
       quality,
       executionMs: durationMs,
@@ -843,7 +850,7 @@ export async function executeBPaaSProcess(
       modelId: "claude-haiku-4-5-20251001",
       aiWorkerId: params.aiWorkerId ?? undefined,
     }).catch((e: unknown) =>
-      logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (task-level) failed (non-fatal)", {
+      logger.warn("[ProcessEngine/DomainExecutor] recordAgentOutcome (task-level) failed (non-fatal)", {
         processInstanceId,
         error: String(e),
       })
@@ -869,7 +876,7 @@ export async function executeBPaaSProcess(
     void recordAgentOutcome(supabase, {
       agentId: `process-quality-${processInstanceId}`,
       domain: `process.${params.processType}`,
-      taskDescription: `BPaaS ${params.processType} process-level quality`,
+      taskDescription: `Process Engine ${params.processType} process-level quality`,
       resultSummary: `finalState=${finalState} states=${ctx.stateHistory.length} duration=${durationMs}ms`,
       quality: bestQuality,
       executionMs: durationMs,
@@ -878,13 +885,27 @@ export async function executeBPaaSProcess(
       modelId: "process-engine",
       aiWorkerId: params.aiWorkerId ?? undefined,
     }).catch((e: unknown) =>
-      logger.warn("[BPaaS/DomainExecutor] recordAgentOutcome (process-level) failed (non-fatal)", {
+      logger.warn("[ProcessEngine/DomainExecutor] recordAgentOutcome (process-level) failed (non-fatal)", {
         processInstanceId,
         error: String(e),
       })
     );
+
+    // ADR-025: Record brain learning for federation pipeline
+    void recordBrainLearning(supabase, {
+      organizationId: params.organizationId,
+      aiWorkerId: params.aiWorkerId,
+      domain: `process.${params.processType}`,
+      taskDescription: `Process Engine ${params.processType} process execution`,
+      qualityScore: bestQuality,
+      executionMs: durationMs,
+      result: outputResult,
+      outcomeLabel: status === "completed" ? "success" : status === "escalated" ? "partial" : "failed",
+    }).catch((e: unknown) =>
+      logger.warn("[ProcessEngine/DomainExecutor] recordBrainLearning failed (non-fatal)", { err: String(e) })
+    );
   } catch (rlErr) {
-    logger.warn("[BPaaS/DomainExecutor] RL outcome recording failed (non-fatal)", {
+    logger.warn("[ProcessEngine/DomainExecutor] RL outcome recording failed (non-fatal)", {
       processInstanceId,
       error: rlErr instanceof Error ? rlErr.message : String(rlErr),
     });
@@ -900,7 +921,7 @@ export async function executeBPaaSProcess(
       actualOutcome: status === "completed" ? "success" : "failure",
       executionMs: durationMs,
     }).catch((e: unknown) =>
-      logger.warn("[BPaaS/DomainExecutor] recordPredictionAccuracy failed (non-fatal)", {
+      logger.warn("[ProcessEngine/DomainExecutor] recordPredictionAccuracy failed (non-fatal)", {
         processInstanceId,
         error: String(e),
       })
@@ -923,7 +944,7 @@ export async function executeBPaaSProcess(
         orgId: params.organizationId,
         aiWorkerId: params.aiWorkerId ?? undefined,
       }).catch((e: unknown) =>
-        logger.warn("[BPaaS/DomainExecutor] knowledge extraction failed (non-fatal)", {
+        logger.warn("[ProcessEngine/DomainExecutor] knowledge extraction failed (non-fatal)", {
           processInstanceId,
           error: String(e),
         })
@@ -940,7 +961,7 @@ export async function executeBPaaSProcess(
     _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
     // pushCoreInsightsToOrg accepts SupabaseClient<any>; service_health not yet in generated types
     void pushCoreInsightsToOrg(params.organizationId, supabase as any).catch((err: unknown) => {
-      logger.warn("[BPaaS/federation] CORE→ORG push failed (non-fatal):", err instanceof Error ? err.message : String(err));
+      logger.warn("[ProcessEngine/federation] CORE→ORG push failed (non-fatal):", err instanceof Error ? err.message : String(err));
     });
   }
 
@@ -963,7 +984,7 @@ export async function executeBPaaSProcess(
       // captures the current org state for the delta computation.
       const causalWeightsSnapshot = await snapshotCausalWeights(supabase, params.organizationId);
       if (causalWeightsSnapshot.size === 0) return; // No org causal data to federate
-      const federationCycleId = `bpaas_${params.processType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
+      const federationCycleId = `process_${params.processType}_${params.organizationId.slice(0, 8)}_${Date.now()}`;
       const federationResult = await computeAndPromoteCausalDeltas(
         supabase,
         params.organizationId,
@@ -978,23 +999,23 @@ export async function executeBPaaSProcess(
         },
       );
       logger.warn(
-        `[BPaaS/federation] org=${params.organizationId.slice(0, 8)} process=${params.processType} ` +
+        `[ProcessEngine/federation] org=${params.organizationId.slice(0, 8)} process=${params.processType} ` +
         `applied=${federationResult.deltasApplied} filtered=${federationResult.deltasFiltered} ` +
         `newPairs=${federationResult.newPairsAdded} updatedPairs=${federationResult.existingPairsUpdated} ` +
         `took=${federationResult.durationMs}ms`
       );
     } catch (err: unknown) {
       // Federation is best-effort — never block process response
-      logger.warn("[BPaaS/federation] Delta promotion failed (non-fatal):", err instanceof Error ? err.message : String(err));
+      logger.warn("[ProcessEngine/federation] Delta promotion failed (non-fatal):", err instanceof Error ? err.message : String(err));
     }
   })();
 
-  // Finalise bpaas_process_instances
+  // Finalise process instance
   // current_state = final FSM state name (TEXT column)
   // fsm_state = final working-memory JSONB (leave as the last saved context)
   try {
     await supabase
-      .from("bpaas_process_instances")
+      .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
       .update({
         status: status === "completed" ? "completed" : status === "escalated" ? "escalated" : "failed",
         output_result: outputResult,
@@ -1005,7 +1026,7 @@ export async function executeBPaaSProcess(
       .eq("id", processInstanceId)
       .eq("organization_id", params.organizationId);
   } catch (updateErr) {
-    logger.warn("[BPaaS/DomainExecutor] bpaas_process_instances finalisation failed (non-fatal)", {
+    logger.warn("[ProcessEngine/DomainExecutor] process instance finalisation failed (non-fatal)", {
       processInstanceId,
       error: updateErr instanceof Error ? updateErr.message : String(updateErr),
     });
@@ -1017,7 +1038,7 @@ export async function executeBPaaSProcess(
   invalidateBrainContextCache(params.organizationId);
 
   // ── Structured job-end log — machine-parseable for SLA/alerting ─────────
-  logger.warn("[BPaaS/DomainExecutor] Job end", {
+  logger.warn("[ProcessEngine/DomainExecutor] Job end", {
     jobId: params.jobId,
     processInstanceId,
     processType: params.processType,
@@ -1041,3 +1062,6 @@ export async function executeBPaaSProcess(
     durationMs,
   };
 }
+
+/** @deprecated Use executeProcess instead */
+export const executeBPaaSProcess = executeProcess;

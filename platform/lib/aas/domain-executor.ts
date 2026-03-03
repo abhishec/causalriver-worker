@@ -21,6 +21,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from "@/lib/logger";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { extractAndStoreKnowledge } from "@/lib/brain/knowledge-extractor";
 import { routeCallType } from "@/lib/se-aas/model-router";
@@ -532,6 +533,20 @@ export async function executeAccountingAgent(
     userId,
     aiWorkerId: params.aiWorkerId ?? undefined,
   }).catch(() => {/* non-fatal */});
+
+  // ADR-025: Record brain learning for federation pipeline
+  void recordBrainLearning(supabase, {
+    organizationId,
+    aiWorkerId: params.aiWorkerId,
+    domain: `aas.${action}`,
+    taskDescription: `AAS ${action} agent (${jurisdiction}, ${transactions.length} txns)`,
+    qualityScore: rlQuality,
+    executionMs: durationMs,
+    result: finalResult,
+    outcomeLabel: rlQuality >= 0.7 ? "success" : rlQuality >= 0.4 ? "partial" : "failed",
+  }).catch((err: unknown) =>
+    logger.warn("[aas/domain-executor] recordBrainLearning failed (non-fatal)", { err: String(err) })
+  );
 
   logAgentRetro({
     taskId: rlTaskId,

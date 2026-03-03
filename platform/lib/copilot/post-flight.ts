@@ -144,6 +144,18 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
         },
       }).catch(() => {}); // fire-and-forget
     }
+
+    // ADR-027: Capture routing feedback — links routing decision to response quality
+    void import("@/lib/brain/orchestration-capture").then(({ captureRoutingFeedback }) => {
+      captureRoutingFeedback(service, workspaceId, {
+        query: message.trim().slice(0, 200),
+        routedTo: _rlDomain,
+        serviceType: seaasResult ? 'se-aas' : accountingResult ? 'aas' : deliveryIntelligenceResult ? 'se-aas' : 'copilot',
+        responseQuality: _rlQuality,
+        durationMs: _rlExecutionMs,
+        // aiWorkerId omitted — ctx doesn't carry workerId; routing feedback is org-scoped
+      });
+    }).catch(() => {}); // fire-and-forget
   } catch { /* non-fatal */ }
 
   // ── 2.5. Federated Knowledge Capture ──────────────────────────────────────

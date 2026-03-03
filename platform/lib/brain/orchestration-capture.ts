@@ -11,7 +11,8 @@ export type OrchestrationDecisionType =
   | 'agent_spawn'            // Agent spawned with specific purpose
   | 'async_vs_sync'          // Async background vs blocking choice
   | 'abort_and_rethink'      // Detected wrong approach, pivoting
-  | 'escalation';            // Elevated to more capable model/approach
+  | 'escalation'             // Elevated to more capable model/approach
+  | 'routing_feedback';      // ADR-027: Post-execution routing quality signal
 
 export interface OrchestrationDecision {
   type: OrchestrationDecisionType;
@@ -178,5 +179,50 @@ export async function capturePriorityOverride(
     confidenceScore: 0.95,
     domain,
     metadata: { override_reason: why },
+  });
+}
+
+/**
+ * ADR-027: Capture routing feedback — records whether a routing decision was good.
+ *
+ * Called by post-flight.ts after every copilot response. Links the routing
+ * decision (intent → domain → service) with the response quality, creating a
+ * feedback loop: better routing → higher quality → brain learns → even better routing.
+ *
+ * The signal is written to both ai_memory (for copilot memory readback) and
+ * cross_domain_signals (for brain context / causal graph visibility).
+ */
+export async function captureRoutingFeedback(
+  supabase: SupabaseClient,
+  orgId: string,
+  params: {
+    query: string;
+    routedTo: string;       // the domain or service that was chosen
+    serviceType: string;    // 'se-aas' | 'aas' | 'pm-aas' | 'copilot' | 'general'
+    responseQuality: number; // 0.0-1.0 from RL quality computation
+    durationMs: number;
+    wasHelpful?: boolean;   // explicit user feedback (if available)
+    aiWorkerId?: string;
+  }
+): Promise<void> {
+  const qualityLabel = params.responseQuality >= 0.7 ? "good"
+    : params.responseQuality >= 0.4 ? "acceptable"
+    : "poor";
+
+  await captureOrchestrationDecision(supabase, orgId, {
+    type: 'routing_feedback',
+    trigger: params.query.slice(0, 200),
+    reasoning: `Routed to ${params.routedTo} via ${params.serviceType}. Quality: ${qualityLabel} (${(params.responseQuality * 100).toFixed(0)}%). Duration: ${params.durationMs}ms.`,
+    outcome: `${params.serviceType}/${params.routedTo} → quality=${qualityLabel}`,
+    confidenceScore: params.responseQuality,
+    domain: params.routedTo,
+    metadata: {
+      service_type: params.serviceType,
+      response_quality: params.responseQuality,
+      duration_ms: params.durationMs,
+      was_helpful: params.wasHelpful,
+      ai_worker_id: params.aiWorkerId,
+      quality_label: qualityLabel,
+    },
   });
 }

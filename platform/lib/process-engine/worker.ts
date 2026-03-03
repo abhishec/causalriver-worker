@@ -18,12 +18,12 @@
  *             requiring a database-level advisory lock.
  *
  * This is the same pattern used by the SE-aaS job-worker for 'se-aas' jobs.
- * processBPaaSJob() still writes started_at + status='running' in step 4,
+ * processProcessJob() still writes started_at + status='running' in step 4,
  * but that write is idempotent — the row is already 'running' from the claim.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { processBPaaSJob } from "@/lib/process-intelligence/job-worker";
+import { processProcessJob } from "@/lib/process-intelligence/job-worker";
 import type { AgentQueueJob } from "@/lib/process-intelligence/job-worker";
 import { logger } from "@/lib/logger";
 import type { ProcessEngineWorkerResult } from "./types";
@@ -108,10 +108,10 @@ export async function processProcessEngineJobs(
       });
 
       try {
-        // Pass a pre-claimed copy of the job so processBPaaSJob's step 4
+        // Pass a pre-claimed copy of the job so processProcessJob's step 4
         // (status → running) is idempotent and does not re-race.
         const claimedJob: AgentQueueJob = { ...(job as AgentQueueJob), status: "running" };
-        await processBPaaSJob(supabase, claimedJob);
+        await processProcessJob(supabase, claimedJob);
         result.succeeded++;
 
         logger.warn("[ProcessEngine/Worker] Job completed successfully", {

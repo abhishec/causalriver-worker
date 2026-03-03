@@ -1,15 +1,18 @@
 /**
- * Engagement Data Flywheel
- * ========================
- * Every engagement milestone deposits structured outcome data — the primary moat.
+ * Brain Training Flywheel (ADR-025)
+ * ==================================
+ * Every AI Worker execution deposits structured outcome data — the primary moat.
  *
  * Called from:
- * - domain-executor.ts (Step 8) after every delivery intelligence domain execution
- * - Future: engagement lifecycle hooks (start, sprint complete, close)
+ * - ALL domain executors (SE-aaS, AaaS, PM-aaS, Process Engine) via recordBrainLearning()
+ * - overnight-executor.ts (code-agent jobs) via recordBrainLearning()
+ * - Future: any new execution path that produces quality-scored output
  *
  * The flywheel compounds over time:
- * 500 engagements → benchmark data → "here's what healthy delivery looks like"
+ * 500 executions → benchmark data → "here's what good AI worker output looks like"
  * That dataset is impossible to replicate without running the product.
+ *
+ * Generic by design: NO service-specific whitelists. Any domain contributes.
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -21,7 +24,10 @@ export type MilestoneType =
   | "flight_risk_detected"
   | "scope_creep_alert"
   | "pod_matched"
-  | "engagement_complete";
+  | "engagement_complete"
+  // ADR-025: Dynamic domain-derived types (e.g., "code_agent_complete", "bookkeeper_complete")
+  // Any string is valid — new domains generate milestone types automatically.
+  | (string & {});
 
 export type EngagementMilestone = {
   organizationId: string;
@@ -39,7 +45,7 @@ export type EngagementMilestone = {
   podName?: string;
   domainSequence?: string[];
   confidence?: number;
-  outcomeLabel?: "successful_delivery" | "at_risk" | "churned" | "on_track";
+  outcomeLabel?: "successful_delivery" | "at_risk" | "churned" | "on_track" | "success" | "partial" | "failed";
 };
 
 /**
@@ -86,9 +92,83 @@ export async function depositEngagementMilestone(
   }
 }
 
+// ── Generic Brain Training (ADR-025) ──────────────────────────────────────────
+
 /**
- * Convenience helper: deposit after a delivery intelligence domain execution completes.
- * Maps domain type → milestone type. Non-delivery domains are silently skipped.
+ * Record a brain learning outcome for ANY domain execution.
+ *
+ * This is the generic replacement for depositDomainExecutionOutcome(). It works
+ * for ALL AI Worker execution types — SE-aaS, AaaS, PM-aaS, Process Engine,
+ * overnight agents, and any future execution path.
+ *
+ * NO whitelist. Every domain contributes to the brain's learning flywheel.
+ *
+ * Milestone type is derived dynamically from the domain name:
+ *   "pod-match" → "pod_match_complete"
+ *   "code-agent" → "code_agent_complete"
+ *   "brain-bookkeeper" → "brain_bookkeeper_complete"
+ *
+ * Fire-and-forget safe — callers should use `void` and never await in hot paths.
+ */
+export async function recordBrainLearning(
+  supabase: SupabaseClient,
+  params: {
+    organizationId: string;
+    aiWorkerId?: string;
+    domain: string;
+    taskDescription: string;
+    qualityScore: number;
+    executionMs: number;
+    result: unknown;
+    outcomeLabel?: "success" | "partial" | "failed";
+  }
+): Promise<void> {
+  try {
+    // Derive milestone type from domain: "pod-match" → "pod_match_complete"
+    const milestoneType = params.domain.replace(/-/g, "_").replace(/\./g, "_") + "_complete";
+
+    // Derive outcome label from quality if not provided
+    const outcomeLabel: EngagementMilestone["outcomeLabel"] = params.outcomeLabel
+      ?? (params.qualityScore >= 0.7 ? "success" : params.qualityScore >= 0.4 ? "partial" : "failed");
+
+    // Serialize result summary (max 500 chars for milestone_data)
+    let resultSummary: string;
+    try {
+      const full = JSON.stringify(params.result);
+      resultSummary = full.length > 500 ? full.slice(0, 497) + "..." : full;
+    } catch {
+      resultSummary = String(params.result);
+    }
+
+    await depositEngagementMilestone(supabase, {
+      organizationId: params.organizationId,
+      milestoneType,
+      milestoneData: {
+        domain: params.domain,
+        taskDescription: params.taskDescription.slice(0, 200),
+        qualityScore: params.qualityScore,
+        executionMs: params.executionMs,
+        aiWorkerId: params.aiWorkerId,
+        resultSummary,
+      },
+      domainSequence: [params.domain],
+      confidence: params.qualityScore,
+      outcomeLabel,
+    });
+  } catch (err) {
+    logger.warn("[BrainTraining] recordBrainLearning failed (non-fatal)", {
+      domain: params.domain,
+      orgId: params.organizationId,
+      err: String(err),
+    });
+  }
+}
+
+// ── Legacy SE-aaS Specific Deposit (deprecated) ──────────────────────────────
+
+/**
+ * @deprecated Use recordBrainLearning() instead. This function is SE-aaS specific
+ * and only deposits for 3 hardcoded domains. Kept for backward compatibility.
  */
 export async function depositDomainExecutionOutcome(
   supabase: SupabaseClient,

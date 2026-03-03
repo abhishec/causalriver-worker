@@ -406,7 +406,7 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
   const serviceType = worker?.service_type ?? null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur px-4 h-14 flex items-center gap-3">
         {/* BrainOS logo to /workspace */}
@@ -676,7 +676,7 @@ function ChatTab({
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
       />
-      <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex-1 min-w-0 overflow-hidden h-full">
         <CopilotChat
           key={chatKey}
           endpoint="/api/copilot/chat"

@@ -33,7 +33,7 @@ export interface PolicyCheckResult {
 }
 
 /**
- * Evaluate BPaaS policy rules against a context — fully deterministic, zero LLM.
+ * Evaluate Process Engine policy rules against a context — fully deterministic, zero LLM.
  * Evaluates each rule's condition string against the context object.
  * Returns a PolicyCheckResult indicating pass/fail and required actions.
  */
@@ -169,7 +169,7 @@ function evaluateCondition(condition: string, context: PolicyContext): boolean {
     // Base case: single atom
     return evaluateAtom(trimmed, context);
   } catch (err) {
-    logger.warn("[BPaaS/PolicyChecker] Condition evaluation error", {
+    logger.warn("[ProcessEngine/PolicyChecker] Condition evaluation error", {
       condition,
       error: String(err),
     });
@@ -178,8 +178,8 @@ function evaluateCondition(condition: string, context: PolicyContext): boolean {
 }
 
 /**
- * Run BPaaS policy check + existing org-level constraint check.
- * Combines BPaaS-specific rule evaluation with the platform's existing
+ * Run Process Engine policy check + existing org-level constraint check.
+ * Combines Process-specific rule evaluation with the platform's existing
  * evaluateConstraints() (rate limits, concurrent job limits, etc.)
  */
 export async function runPolicyCheck(
@@ -210,6 +210,6 @@ export async function runPolicyCheck(
     };
   }
 
-  // Then: BPaaS-specific deterministic policy rules
+  // Then: Process-Engine-specific deterministic policy rules
   return evaluatePolicyRules(rules, context);
 }

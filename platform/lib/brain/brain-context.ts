@@ -74,7 +74,7 @@ function _evictBrainContextCache(): void {
  * Why this matters:
  *   getBrainContext() has a 30s module-level cache. Without invalidation, the
  *   cognitive planner reads stale activeJobCount / pendingJobCount for up to 30s
- *   after a BPaaS process starts, and may queue duplicate jobs for the same domain.
+ *   after a Process Engine process starts, and may queue duplicate jobs for the same domain.
  *   The DB-level dedup marker in cognitive-planner.ts catches this for SE-aaS
  *   domains, but the brain context itself will silently misreport live operations.
  *
@@ -165,6 +165,9 @@ export interface BrainContext {
   seaasServiceLayer?: string;         // L27: SE-aaS holistic service activity (last 7d)
   aaasServiceLayer?: string;          // L28: AaaS artifact output and agent activity (24h)
   pmaasServiceLayer?: string;         // L29: PM-aaS agent activity (last 7d)
+
+  // ── ADR-027: Cognitive Planner Routing Hints ──
+  plannerRoutingHints?: string;       // Planner's stuckDomains + highDemandDomains for routing intelligence
 
   // ── 3-Tier Knowledge Architecture ──
   consolidatedPatterns?: string;      // Tier 3: stable behavioral rules + domain expertise
@@ -281,6 +284,9 @@ export async function getBrainContext(
 
       // ── STRUCTURED OUTCOMES (Fix 3) ──
       structuredOutcomesRow,          // ai_memory structured-outcome entries (all domains, not just session.%)
+
+      // ── ADR-027: COGNITIVE PLANNER STATE ──
+      plannerStateRow,               // Latest planner working memory (stuckDomains, highDemandDomains)
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -709,6 +715,15 @@ export async function getBrainContext(
         .not("domain", "like", "system.%")
         .order("created_at", { ascending: false })
         .limit(10),
+
+      // ADR-027: Read latest cognitive planner working memory for routing hints
+      supabase.from("ai_memory")
+        .select("content, metadata, created_at")
+        .eq("organization_id", orgId)
+        .eq("domain", "cognitive-planner")
+        .eq("memory_type", "working")
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
 
     // ── TIER 1: IDENTITY ─────────────────────────────────────────────────────
@@ -1375,6 +1390,30 @@ export async function getBrainContext(
       structuredOutcomeSummary = `## Structured Outcome Learnings (from domain executions)\n${outcomeLines}`.slice(0, 500);
     }
 
+    // ── ADR-027: COGNITIVE PLANNER ROUTING HINTS ──────────────────────────────
+    // Read the latest planner state and extract routing-relevant signals
+    let plannerRoutingHints: string | undefined;
+    try {
+      const plannerRows = plannerStateRow.status === "fulfilled"
+        ? (plannerStateRow.value.data ?? []) as Array<{ content: string; metadata: Record<string, unknown> | null }>
+        : [];
+      if (plannerRows.length > 0) {
+        const meta = plannerRows[0].metadata ?? {};
+        const stuckDomains = (meta.stuckDomains ?? meta.stuck_domains ?? []) as string[];
+        const highDemandDomains = (meta.highDemandDomains ?? meta.high_demand_domains ?? []) as string[];
+        const poorQualityDomains = (meta.poorQualityDomains ?? meta.poor_quality_domains ?? []) as string[];
+        const parts: string[] = [];
+        if (stuckDomains.length > 0) parts.push(`Stuck domains (avoid routing): ${stuckDomains.join(", ")}`);
+        if (highDemandDomains.length > 0) parts.push(`High-demand domains (prioritize): ${highDemandDomains.join(", ")}`);
+        if (poorQualityDomains.length > 0) parts.push(`Low-quality domains (caution): ${poorQualityDomains.join(", ")}`);
+        if (parts.length > 0) {
+          plannerRoutingHints = `## Cognitive Planner Routing Hints\n${parts.join("\n")}`;
+        }
+      }
+    } catch {
+      // non-fatal — planner hints are best-effort
+    }
+
     // ── RL QUALITY PATTERNS (post-allSettled, awaited separately) ────────────
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -1513,6 +1552,8 @@ export async function getBrainContext(
       // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
       federatedKnowledgeLayer,
       structuredOutcomeSummary,
+      // ADR-027: Cognitive Planner routing hints
+      plannerRoutingHints,
     });
 
     const result: BrainContext = {
@@ -1571,6 +1612,8 @@ export async function getBrainContext(
       // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
       federatedKnowledgeLayer,
       structuredOutcomeSummary,
+      // ADR-027: Cognitive Planner routing hints
+      plannerRoutingHints,
     };
 
     // Tier 1: Raw Knowledge — query-aware retrieval using the current query
@@ -1700,6 +1743,8 @@ function buildContextSummary(ctx: {
   // Federated Knowledge + Structured Outcomes (Fix 1 + Fix 3)
   federatedKnowledgeLayer?: string;
   structuredOutcomeSummary?: string;
+  // ADR-027: Cognitive Planner routing hints
+  plannerRoutingHints?: string;
 }): string {
   const parts: string[] = [];
 
@@ -1902,6 +1947,11 @@ function buildContextSummary(ctx: {
   // 33. Structured Outcome Learnings (Fix 3: memory_type=structured-outcome, all SE-aaS/AaaS domains)
   if (ctx.structuredOutcomeSummary) {
     parts.push(ctx.structuredOutcomeSummary);
+  }
+
+  // 34. ADR-027: Cognitive Planner Routing Hints (stuckDomains, highDemandDomains)
+  if (ctx.plannerRoutingHints) {
+    parts.push(ctx.plannerRoutingHints);
   }
 
   // Tier 1 LAST: Raw Knowledge — verbatim grounding data

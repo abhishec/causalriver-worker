@@ -25,6 +25,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "@/lib/logger";
 import { saveArtifact } from "@/lib/se-aas/job-queue";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
+import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { getCaseLogContext, logAgentRetro } from "@/lib/brain/rl-agent-loop";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
@@ -600,6 +601,20 @@ export async function executePmDomain(
     userId,
     aiWorkerId: params.aiWorkerId ?? undefined,
   }).catch(() => {/* non-fatal */});
+
+  // ADR-025: Record brain learning for federation pipeline
+  void recordBrainLearning(supabase, {
+    organizationId,
+    aiWorkerId: params.aiWorkerId,
+    domain: `pm-aas.${domainType}`,
+    taskDescription: `PM-aaS domain execution: ${domainType}`,
+    qualityScore: rlQuality,
+    executionMs: durationMs,
+    result,
+    outcomeLabel: rlQuality >= 0.7 ? "success" : rlQuality >= 0.4 ? "partial" : "failed",
+  }).catch((err: unknown) =>
+    logger.warn("[pm-aas/domain-executor] recordBrainLearning failed (non-fatal)", { err: String(err) })
+  );
 
   logAgentRetro({
     taskId: rlTaskId,

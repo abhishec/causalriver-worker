@@ -30,7 +30,7 @@ function hoursAgoISO(hours: number): string {
 }
 
 // ── Process Intelligence health writer (L26) ──────────────────────────────────
-// Queries bpaas_process_instances + FSM RL signals.
+// Queries bpaas_process_instances (legacy table name, kept for backward compat) + FSM RL signals.
 // Stamps service_type='process-intelligence' (NOT 'pm-aas').
 // Root bug fix: old writeProcessEngineHealth() stamped pm-aas, conflating
 // FSM process state (L26, always present) with PM-aaS service layer (L29, optional).
@@ -49,7 +49,7 @@ export async function writeProcessIntelligenceHealth(
 
     const [instancesRow, bpaasJobsRow, stateSignalsRow, topTemplatesRow] = await Promise.all([
       supabase
-        .from("bpaas_process_instances")
+        .from("bpaas_process_instances") // table: bpaas_process_instances (legacy name, kept for backward compat)
         .select("current_state, status, created_at")
         .eq("organization_id", orgId)
         .gte("created_at", sevenDaysAgo)

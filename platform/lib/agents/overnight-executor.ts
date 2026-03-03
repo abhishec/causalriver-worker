@@ -30,6 +30,7 @@ import {
 import type { GitHubFileToCommit } from "@/lib/connectors/writeback/github";
 import { postSlackMessage } from "@/lib/connectors/writeback/slack";
 import { recordAgentOutcome } from "@/lib/brain/agent-rl";
+import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { startJobHeartbeat, stopJobHeartbeat } from "@/lib/se-aas/job-heartbeat";
 import { routeCallType } from "@/lib/se-aas/model-router";
 import { captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
@@ -538,6 +539,17 @@ Rules:
     organizationId: orgId,
     userId: "agent",
   });
+
+  // ADR-025: Record brain learning for federation pipeline
+  void recordBrainLearning(supabase, {
+    organizationId: orgId,
+    domain: `code-agent.${ticket.domain || "general"}`,
+    taskDescription: `Implement ticket: ${ticket.title}`,
+    qualityScore: quality,
+    executionMs: Date.now() - startMs,
+    result: { prUrl: prResult?.url, filesCommitted: filesToCommit.length, branchName },
+    outcomeLabel: prResult ? "success" : "partial",
+  }).catch(err => logger.warn("[overnight-executor] recordBrainLearning failed (non-fatal)", { err: String(err) }));
 
   logger.warn("[overnight-executor] Code-agent job complete (all steps done)", {
     jobId,

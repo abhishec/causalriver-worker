@@ -30,6 +30,7 @@ export async function retrieveRelevantMemories(
   supabase: SupabaseClient,
   orgId: string,
   options: {
+    aiWorkerId?: string;       // ADR-027: scope to specific AI Worker (null = workspace-wide)
     currentDomains?: string[]; // domains active in current planning cycle
     currentFailures?: string[]; // domains that failed recently
     limit?: number;
@@ -42,44 +43,52 @@ export async function retrieveRelevantMemories(
     Date.now() - lookbackDays * 24 * 60 * 60 * 1000
   ).toISOString();
 
+  // ADR-027: Worker scope filter string — includes worker-specific AND workspace-wide memories
+  const _workerFilter = options.aiWorkerId
+    ? `ai_worker_id.eq.${options.aiWorkerId},ai_worker_id.is.null`
+    : null;
+
   // Build bucket queries as plain promises so we avoid complex generic inference
-  const bucket1 = supabase
+  const _b1Base = supabase
     .from("ai_memory")
     .select("content, metadata, created_at")
     .eq("organization_id", orgId)
     .eq("domain", "cognitive-planner")
-    .eq("memory_type", "episodic")
+    .eq("memory_type", "episodic");
+  const bucket1 = (_workerFilter ? _b1Base.or(_workerFilter) : _b1Base)
     .order("created_at", { ascending: false })
     .limit(5)
-    .then((r) => r);
+    .then((r: any) => r);
 
-  const bucket2 = supabase
+  const _b2Base = supabase
     .from("ai_memory")
     .select("content, metadata, created_at")
     .eq("organization_id", orgId)
     .eq("domain", "cognitive-planner")
     .eq("memory_type", "episodic")
     .gte("created_at", since)
-    .lt("metadata->>confidence", "0.4")
+    .lt("metadata->>confidence", "0.4");
+  const bucket2 = (_workerFilter ? _b2Base.or(_workerFilter) : _b2Base)
     .order("created_at", { ascending: false })
     .limit(5)
-    .then((r) => r);
+    .then((r: any) => r);
 
   const domainBuckets = (options.currentDomains ?? [])
     .slice(0, 3)
-    .map((domain) =>
-      supabase
+    .map((domain) => {
+      const _dbBase = supabase
         .from("ai_memory")
         .select("content, metadata, created_at")
         .eq("organization_id", orgId)
         .eq("domain", "cognitive-planner")
         .eq("memory_type", "episodic")
         .gte("created_at", since)
-        .ilike("content", `%${domain}%`)
+        .ilike("content", `%${domain}%`);
+      return (_workerFilter ? _dbBase.or(_workerFilter) : _dbBase)
         .order("created_at", { ascending: false })
         .limit(2)
-        .then((r) => r)
-    );
+        .then((r: any) => r);
+    });
 
   const results = await Promise.allSettled([
     bucket1,

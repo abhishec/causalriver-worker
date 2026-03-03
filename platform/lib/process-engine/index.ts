@@ -27,7 +27,7 @@ export {
   processEngineDomain,
   bpaasDomain,
   type ProcessTemplateType,
-  type BPaaSProcessType,
+  type BPaaSProcessType,  // deprecated alias — use ProcessType from process-intelligence/process-registry
 } from "./templates";
 
 // Types
@@ -42,5 +42,9 @@ export type {
 } from "./types";
 
 // Core execution (re-export for callers who need it directly)
-export { executeBPaaSProcess as executeProcess } from "@/lib/process-intelligence/domain-executor";
-export { BPaaSFSMRunner as ProcessEngineRunner } from "@/lib/process-intelligence/fsm-runner";
+export { executeProcess } from "@/lib/process-intelligence/domain-executor";
+// Deprecated alias kept for backward compat
+export { executeBPaaSProcess } from "@/lib/process-intelligence/domain-executor";
+export { ProcessFSMRunner as ProcessEngineRunner } from "@/lib/process-intelligence/fsm-runner";
+// Deprecated alias kept for backward compat
+export { BPaaSFSMRunner } from "@/lib/process-intelligence/fsm-runner";

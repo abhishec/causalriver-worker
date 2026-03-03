@@ -113,8 +113,8 @@ export async function POST(
 
     const serviceClient = getAdminClient();
 
-    // Validate templateType against DB — any type in bpaas_process_definitions is valid.
-    // This replaces the old sync isBPaaSProcessType() check against the hardcoded array.
+    // Validate templateType against DB — any type in bpaas_process_definitions (legacy table name) is valid.
+    // This replaces the old sync isValidProcessType() check against the hardcoded array.
     const isValid = await isValidProcessType(templateType, organizationId, serviceClient);
     if (!isValid) {
       return NextResponse.json(
@@ -233,6 +233,18 @@ export async function POST(
     logger.warn(
       `[process/[templateType] POST] Queued: job=${job.id} instance=${instance.id} template=${templateType} org=${organizationId}`
     );
+
+    // ADR-025: Immediately attempt execution (async, non-blocking).
+    // This eliminates the 0-2 minute wait for the process-jobs cron tick.
+    // Cron remains as fallback if this fails or times out.
+    void import("@/lib/process-engine/worker")
+      .then(({ processProcessEngineJobs }) => processProcessEngineJobs(serviceClient, 1))
+      .catch((err: unknown) => {
+        logger.warn("[process-api] Immediate execution failed — cron will pick up", {
+          jobId: job.id,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
 
     return NextResponse.json(
       {

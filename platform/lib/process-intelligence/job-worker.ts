@@ -1,14 +1,15 @@
 /**
- * BPaaS Job Worker
- * =================
+ * Process Engine Job Worker
+ * ==========================
  * Dispatch layer for agent_queue rows with agent_type = 'bpaas'.
+ * (agent_type value 'bpaas' is kept for backward compat — do not rename)
  *
  * Flow:
  * 1. Validate agent_type is 'bpaas'
  * 2. Extract processType, organizationId, inputPayload from payload
  * 3. Validate processType via isValidProcessType() — DB query, not hardcoded array
  * 4. Mark job running (status → 'running', started_at = now())
- * 5. Call executeBPaaSProcess()
+ * 5. Call executeProcess()
  * 6. Handle 5 result states:
  *    - completed      → status = 'completed', result written
  *    - awaiting_approval → status = 'awaiting_approval' (job is PAUSED, not done)
@@ -27,11 +28,11 @@
  *   DB constraint violations (non-retryable) are identified by error message
  *   prefix and bypass the retry path immediately.
  *
- * agent_type = 'bpaas' — NEVER 'se-aas'.
+ * agent_type = 'bpaas' — NEVER 'se-aas'. (value kept for backward compat)
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { executeBPaaSProcess } from "./domain-executor";
+import { executeProcess } from "./domain-executor";
 import { isValidProcessType } from "./process-registry";
 import { MAX_CHAIN_DEPTH } from "@/lib/brain/chain-invoker";
 import { logger } from "@/lib/logger";
@@ -64,14 +65,14 @@ export interface AgentQueueJob {
  */
 function isTransientError(errorMessage: string): boolean {
   const nonRetryablePatterns = [
-    "duplicate key",         // PG unique_violation
-    "violates row-level",    // RLS rejection
-    "violates foreign key",  // FK constraint
-    "invalid input syntax",  // Bad data type
-    "null value in column",  // NOT NULL violation
-    "permission denied",     // Auth failure
-    "Invalid BPaaS process", // Validation (processBPaaSJob step 3)
-    "Missing processType",   // Validation (processBPaaSJob step 2)
+    "duplicate key",                 // PG unique_violation
+    "violates row-level",            // RLS rejection
+    "violates foreign key",          // FK constraint
+    "invalid input syntax",          // Bad data type
+    "null value in column",          // NOT NULL violation
+    "permission denied",             // Auth failure
+    "Invalid BPaaS process",         // Validation (processProcessJob step 3) — legacy string kept
+    "Missing processType",           // Validation (processProcessJob step 2)
   ];
   const lower = errorMessage.toLowerCase();
   return !nonRetryablePatterns.some((p) => lower.includes(p.toLowerCase()));
@@ -80,7 +81,7 @@ function isTransientError(errorMessage: string): boolean {
 // ── Main Dispatch Function ────────────────────────────────────────────────────
 
 /**
- * Process a single BPaaS job from the agent_queue.
+ * Process a single Process Engine job from the agent_queue.
  *
  * Called by the process-jobs cron after it selects a pending bpaas row.
  * Handles all 5 result states and writes back to agent_queue on every path.
@@ -88,13 +89,14 @@ function isTransientError(errorMessage: string): boolean {
  * @param supabase  Service-role Supabase client
  * @param job       The agent_queue row to process
  */
-export async function processBPaaSJob(
+export async function processProcessJob(
   supabase: SupabaseClient,
   job: AgentQueueJob
 ): Promise<void> {
   // ── 1. Validate agent_type ─────────────────────────────────────────────────
+  // agent_type value 'bpaas' is kept for backward compat — do not rename
   if (job.agent_type !== "bpaas") {
-    logger.warn("[bpaas/job-worker] processBPaaSJob called with wrong agent_type", {
+    logger.warn("[process-engine/job-worker] processProcessJob called with wrong agent_type", {
       jobId: job.id,
       agentType: job.agent_type,
     });
@@ -102,7 +104,7 @@ export async function processBPaaSJob(
       .from("agent_queue")
       .update({
         status: "failed",
-        error_message: `processBPaaSJob: expected agent_type='bpaas', got '${job.agent_type}'`,
+        error_message: `processProcessJob: expected agent_type='bpaas', got '${job.agent_type}'`,
       })
       .eq("id", job.id);
     return;
@@ -118,7 +120,7 @@ export async function processBPaaSJob(
   const resumeFromJobId = payload.resumeFromJobId as string | undefined;
   const chainDepth = (payload.chainDepth as number | undefined) ?? 0;
   const userId = payload.userId as string | undefined;
-  // Fix 6: Propagate ai_worker_id from the job row to executeBPaaSProcess → RL tables.
+  // Fix 6: Propagate ai_worker_id from the job row to executeProcess → RL tables.
   // The worker SELECT now includes ai_worker_id so this is non-null when the job
   // was submitted with a worker context (API key auth or ADR-013 body param).
   const aiWorkerId = job.ai_worker_id ?? (payload.ai_worker_id as string | undefined) ?? undefined;
@@ -146,7 +148,7 @@ export async function processBPaaSJob(
 
   // ── 3. Validate processType ────────────────────────────────────────────────
   if (!processType) {
-    logger.warn("[bpaas/job-worker] Missing processType in payload", { jobId: job.id });
+    logger.warn("[process-engine/job-worker] Missing processType in payload", { jobId: job.id });
     await supabase
       .from("agent_queue")
       .update({
@@ -158,10 +160,11 @@ export async function processBPaaSJob(
   }
 
   // DB-driven validation — any type in bpaas_process_definitions is valid.
-  // Replaces the old sync isBPaaSProcessType() check against the hardcoded array.
+  // (table: bpaas_process_definitions, legacy name, kept for backward compat)
+  // Replaces the old sync check against the hardcoded process types array.
   const isValid = await isValidProcessType(processType, organizationId, supabase);
   if (!isValid) {
-    logger.warn("[bpaas/job-worker] Unknown process type — skipping", {
+    logger.warn("[process-engine/job-worker] Unknown process type — skipping", {
       jobId: job.id,
       processType,
     });
@@ -186,7 +189,7 @@ export async function processBPaaSJob(
 
   // ── 5. Execute + 6/7. Handle result ───────────────────────────────────────
   try {
-    const result = await executeBPaaSProcess(
+    const result = await executeProcess(
       {
         jobId: job.id,
         organizationId,
@@ -217,7 +220,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job completed", {
+      logger.warn("[process-engine/job-worker] Job completed", {
         jobId: job.id,
         processType,
         durationMs: result.durationMs,
@@ -251,7 +254,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job suspended at approval gate (awaiting human review)", {
+      logger.warn("[process-engine/job-worker] Job suspended at approval gate (awaiting human review)", {
         jobId: job.id,
         processType,
         approvalId: result.approvalId,
@@ -271,7 +274,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job escalated", {
+      logger.warn("[process-engine/job-worker] Job escalated", {
         jobId: job.id,
         processType,
         escalationLevel: result.escalationLevel,
@@ -306,7 +309,7 @@ export async function processBPaaSJob(
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job chained — new pending job queued", {
+      logger.warn("[process-engine/job-worker] Job chained — new pending job queued", {
         jobId: job.id,
         processType,
         chainDepth: result.chainDepth,
@@ -317,11 +320,11 @@ export async function processBPaaSJob(
         .from("agent_queue")
         .update({
           status: "failed",
-          error_message: result.errorMessage ?? "BPaaS execution failed",
+          error_message: result.errorMessage ?? "Process Engine execution failed",
         })
         .eq("id", job.id);
 
-      logger.warn("[bpaas/job-worker] Job failed", {
+      logger.warn("[process-engine/job-worker] Job failed", {
         jobId: job.id,
         processType,
         errorMessage: result.errorMessage,
@@ -342,7 +345,7 @@ export async function processBPaaSJob(
       // on next cron tick), 1→pending (same), etc.
       // The cron runs every 2 minutes, providing natural backoff between retries.
       const nextRetryCount = currentRetryCount + 1;
-      logger.warn("[bpaas/job-worker] Transient error — requeueing for retry", {
+      logger.warn("[process-engine/job-worker] Transient error — requeueing for retry", {
         jobId: job.id,
         processType,
         error: errorMessage,
@@ -365,7 +368,7 @@ export async function processBPaaSJob(
         ? `Exhausted ${maxRetries} retries — last error: ${errorMessage}`
         : `Non-retryable error: ${errorMessage}`;
 
-      logger.error("[bpaas/job-worker] Permanent failure", {
+      logger.error("[process-engine/job-worker] Permanent failure", {
         jobId: job.id,
         processType,
         error: errorMessage,
@@ -385,3 +388,6 @@ export async function processBPaaSJob(
     }
   }
 }
+
+/** @deprecated Use processProcessJob instead */
+export const processBPaaSJob = processProcessJob;

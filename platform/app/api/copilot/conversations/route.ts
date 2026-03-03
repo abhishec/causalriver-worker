@@ -39,6 +39,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "workspaceId required" }, { status: 400 });
     }
 
+    // AI Worker isolation (ADR-026): scope conversations to the requesting worker.
+    // Without this, both Fincense 5.11.5 and Fincense 6.3.4 (same user, same org)
+    // would see each other's conversation history — a data leakage risk.
+    const workerId = req.nextUrl.searchParams.get("workerId");
+
     // Verify workspace membership (uses admin client to bypass RLS recursion)
     const member = await verifyWorkspaceMembership(user.id, workspaceId);
     if (!member) {
@@ -46,11 +51,18 @@ export async function GET(req: NextRequest) {
     }
 
     const admin = getAdminClient();
-    const { data, error } = await admin
+    let query = admin
       .from("conversations")
       .select("id, title, service_mode, created_at, updated_at, metadata")
       .eq("org_id", workspaceId)
-      .eq("user_id", user.id)
+      .eq("user_id", user.id);
+
+    // Scope to specific worker when provided — prevents cross-worker history leakage
+    if (workerId) {
+      query = query.eq("ai_worker_id", workerId);
+    }
+
+    const { data, error } = await query
       .order("updated_at", { ascending: false })
       .limit(50);
 
@@ -99,11 +111,12 @@ export async function POST(req: NextRequest) {
     }
     // Accept both workspaceId (new) and orgId (legacy)
     const workspaceId = body.workspaceId || body.orgId;
-    const { title, serviceMode, messages, conversationId } = body as {
+    const { title, serviceMode, messages, conversationId, workerId } = body as {
       title?: string;
       serviceMode?: string;
       messages?: unknown[];
       conversationId?: string;
+      workerId?: string; // ADR-026: worker isolation — store ai_worker_id on new conversations
     };
 
     if (!workspaceId) {
@@ -140,12 +153,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ id: data?.id ?? conversationId });
     }
 
-    // Create new conversation
+    // Create new conversation — always store ai_worker_id for worker isolation (ADR-026)
     const { data, error } = await admin
       .from("conversations")
       .insert({
         org_id: workspaceId,
         user_id: user.id,
+        ...(workerId ? { ai_worker_id: workerId } : {}),
         title: title || "New conversation",
         service_mode: serviceMode || "general",
         messages: messages || [],

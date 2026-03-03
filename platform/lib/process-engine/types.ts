@@ -9,10 +9,11 @@
  */
 
 // Re-export the execution types from the FSM implementation (lib/process-intelligence/)
-export type { BPaaSExecutionParams as ProcessEngineParams } from "@/lib/process-intelligence/domain-executor";
-export type { BPaaSExecutionResult as ProcessEngineResult } from "@/lib/process-intelligence/domain-executor";
-export type { BPaaSContext as ProcessEngineContext } from "@/lib/process-intelligence/fsm-runner";
-export type { BPaaSState as ProcessEngineState } from "@/lib/process-intelligence/fsm-runner";
+// Use the new canonical names; deprecated aliases (BPaaSExecutionParams etc.) remain in source files.
+export type { ProcessExecutionParams as ProcessEngineParams } from "@/lib/process-intelligence/domain-executor";
+export type { ProcessExecutionResult as ProcessEngineResult } from "@/lib/process-intelligence/domain-executor";
+export type { ProcessContext as ProcessEngineContext } from "@/lib/process-intelligence/fsm-runner";
+export type { ProcessState as ProcessEngineState } from "@/lib/process-intelligence/fsm-runner";
 
 // ProcessTemplate — the canonical name for what bpaas called "ProcessDefinition"
 export type { ProcessDefinition as ProcessTemplate } from "@/lib/process-intelligence/process-registry";

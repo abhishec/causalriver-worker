@@ -1,9 +1,12 @@
 import { logger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// BPaaSProcessType is now an open string — any type in bpaas_process_definitions is valid.
+// ProcessType is now an open string — any type in bpaas_process_definitions is valid.
 // The hardcoded BPAAS_PROCESS_TYPES array has been removed. Validation is DB-driven.
-export type BPaaSProcessType = string;
+export type ProcessType = string;
+
+/** @deprecated Use ProcessType instead */
+export type BPaaSProcessType = ProcessType;
 
 export interface FSMTransition {
   from: string;
@@ -33,6 +36,7 @@ export interface PolicyRule {
 
 /**
  * Get process definition from bpaas_process_definitions table.
+ * (table: bpaas_process_definitions, legacy name, kept for backward compat)
  * Tries org-specific first (organization_id matches), then global (organization_id=NULL).
  * No hardcoded BUILTIN_DEFINITIONS fallback — FSM shapes live in the DB only.
  */
@@ -43,7 +47,7 @@ export async function getProcessDefinition(
 ): Promise<ProcessDefinition> {
   // Try org-specific first, then global (org_id=NULL)
   const { data, error } = await supabase
-    .from("bpaas_process_definitions")
+    .from("bpaas_process_definitions") // table: bpaas_process_definitions (legacy name, kept for backward compat)
     .select("*")
     .eq("process_type", processType)
     .eq("is_active", true)
@@ -53,7 +57,7 @@ export async function getProcessDefinition(
     .single();
 
   if (error || !data) {
-    logger.warn("[BPaaS/ProcessRegistry] Process definition not found in DB", {
+    logger.warn("[ProcessEngine/Registry] Process definition not found in DB", {
       processType,
       organizationId,
       error: error?.message,
@@ -92,6 +96,7 @@ export async function getProcessDefinition(
 
 /**
  * Check if a process type is valid by querying bpaas_process_definitions.
+ * (table: bpaas_process_definitions, legacy name, kept for backward compat)
  * Replaces the hardcoded BPAAS_PROCESS_TYPES array — any type in DB is valid.
  * Checks global templates (org_id=NULL) AND org-specific templates.
  */
@@ -103,7 +108,7 @@ export async function isValidProcessType(
   if (!processType || typeof processType !== "string") return false;
   try {
     const { data, error } = await supabase
-      .from("bpaas_process_definitions")
+      .from("bpaas_process_definitions") // table: bpaas_process_definitions (legacy name, kept for backward compat)
       .select("id")
       .eq("process_type", processType)
       .eq("is_active", true)
@@ -116,7 +121,11 @@ export async function isValidProcessType(
   }
 }
 
-/** RL domain prefix — always "bpaas.<processType>" */
+/**
+ * RL domain prefix — always "bpaas.<processType>"
+ * The "bpaas." prefix is kept for backward compat — historical data in prediction_records
+ * and cross_domain_signals uses this prefix. Do not rename.
+ */
 export function bpaasDomain(processType: string): string {
   return `bpaas.${processType}`;
 }

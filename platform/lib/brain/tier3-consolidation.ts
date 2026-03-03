@@ -18,6 +18,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { getDomainThreshold } from "@/lib/brain/agent-rl";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -56,19 +57,28 @@ export interface ConsolidatedPatternRow {
  * Returns true when a cross-domain signal is strong enough to contribute to
  * a consolidated pattern.
  *
- * Condition: signal_strength >= 0.72 OR signal_type === 'dopamine'
+ * Condition:
+ *   signal_strength >= 0.72  — any high-quality RL signal
+ *   OR signal_type === 'dopamine'                — positive RL reward
+ *   OR signal_type === 'cognitive_layer_execution' — brain activity signals
+ *
  * Note: signal_value is a numeric column in the DB (not the string type indicator).
- *       signal_type holds the string label ('dopamine', 'gaba', 'norepinephrine').
+ *       signal_type holds the string label ('dopamine', 'gaba', 'cognitive_layer_execution'…).
+ *
+ * ADR-026.2: The 0.72 threshold for signals has been superseded by getDomainThreshold()
+ * which is applied per-domain in the prediction clustering loop of runConsolidation().
+ * This function is retained for compatibility and for signal-type gating only.
  */
 export function shouldConsolidate(signal: {
   signal_strength?: number | null;
   signal_type?: string | null;
 }): boolean {
   const strength = signal.signal_strength ?? 0;
-  // TODO(Phase 3): make 0.72 adaptive via getDomainThreshold() from agent-rl.ts
-  // Currently a global threshold; can be per-domain in a future pass once
-  // tier3 consolidation is wired to receive orgId + domain context.
-  return strength >= 0.72 || signal.signal_type === "dopamine";
+  return (
+    strength >= 0.72 ||
+    signal.signal_type === "dopamine" ||
+    signal.signal_type === "cognitive_layer_execution"
+  );
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -243,10 +253,11 @@ export async function runConsolidation(
         "id, target_domain, signal_type, signal_strength, signal_value, payload"
       )
       .eq("organization_id", orgId)
-      // TODO(Phase 3): 0.72 is a global threshold — can become per-domain via
-      // getDomainThreshold() from agent-rl.ts once orgId+domain context is available here.
-      .gte("signal_strength", 0.72)
-      .in("signal_type", ["dopamine"])     // signal_type is the string label; signal_value is numeric
+      // Match shouldConsolidate() OR semantics:
+      //   signal_type='dopamine' (positive RL reward, any strength)
+      //   OR signal_type='cognitive_layer_execution' (dominant brain activity signal type)
+      //   OR signal_strength >= 0.72 (any high-quality signal regardless of type)
+      .or("signal_type.eq.dopamine,signal_type.eq.cognitive_layer_execution,signal_strength.gte.0.72")
       .gte("created_at", since)
       .order("signal_strength", { ascending: false })
       .limit(50);
@@ -260,12 +271,13 @@ export async function runConsolidation(
 
     const signals: CrossDomainSignal[] = (signalRows ?? []) as CrossDomainSignal[];
 
+
     // ── Step 2: High-quality prediction records ──────────────────────────────
     const { data: predRows, error: predError } = await admin
       .from("prediction_records")
       .select("id, domain, confidence")   // task_description column does not exist in prod schema
       .eq("organization_id", orgId)
-      .gte("confidence", 0.75)
+      .gte("confidence", 0.50)            // ADR-026.2: lowered from 0.75 — per-domain adaptive filter applied in Step 4
       .gte("created_at", since)
       .limit(50);
 
@@ -313,18 +325,23 @@ export async function runConsolidation(
     );
 
     for (const [domain, cluster] of predsByDomain) {
-      if (cluster.length < 3) continue;
-
-      const avgQuality = average(cluster.map((p) => p.confidence));
-      const predIds = cluster.map((p) => p.id);
+      // ADR-026.2: per-domain adaptive threshold (replaces hardcoded 0.75 DB filter)
+      let domainThreshold = 0.72; // default fallback
+      try {
+        domainThreshold = await getDomainThreshold(admin, orgId, domain);
+      } catch { /* non-fatal — use fallback */ }
+      const filteredCluster = cluster.filter(p => p.confidence >= domainThreshold);
+      if (filteredCluster.length < 3) continue;
+      const avgQuality = average(filteredCluster.map((p) => p.confidence));
+      const filteredIds = filteredCluster.map((p) => p.id);
 
       const created = await upsertPattern(admin, {
         orgId,
         patternType: "routing_pattern",
         domain,
-        clusterSize: cluster.length,
+        clusterSize: filteredCluster.length,
         avgStrength: avgQuality,
-        signalIds: predIds,
+        signalIds: filteredIds,
       });
 
       if (created) patternsPromoted += 1;
@@ -333,14 +350,25 @@ export async function runConsolidation(
     // ── Step 5: Log consolidation run ────────────────────────────────────────
     const durationMs = Date.now() - startMs;
 
+    // consolidation_runs: table exists but schema varies by deployment.
+    // The Feb-2025 schema has: id TEXT, organization_id, is_core_brain, started_at,
+    // completed_at, total_duration_ms, status, steps, report, errors, created_at.
+    // The Mar-2026 migration adds patterns_promoted/signals_scanned but uses
+    // CREATE TABLE IF NOT EXISTS — so on existing DBs those columns are absent.
+    // Write to the old schema columns + stuff new fields into the report JSONB.
     const { error: runLogError } = await admin
       .from("consolidation_runs")
       .insert({
+        id: crypto.randomUUID(),
         organization_id: orgId,
-        patterns_promoted: patternsPromoted,
-        signals_scanned: signalsScanned,
-        // duration_ms omitted — column does not exist in production schema
-        triggered_by: "library",
+        is_core_brain: false,
+        started_at: new Date(startMs).toISOString(),
+        completed_at: new Date().toISOString(),
+        total_duration_ms: durationMs,
+        status: "success",
+        steps: [],
+        errors: [],
+        report: { patternsPromoted, signalsScanned, triggeredBy: "library" },
       });
 
     if (runLogError) {

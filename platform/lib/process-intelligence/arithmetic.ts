@@ -1,5 +1,5 @@
 /**
- * arithmetic.ts — deterministic monetary arithmetic for BPaaS FSM COMPUTE state.
+ * arithmetic.ts — deterministic monetary arithmetic for Process Engine FSM COMPUTE state.
  *
  * Rules:
  * - All intermediate values computed in integer cents to avoid floating-point drift.

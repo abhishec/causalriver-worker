@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
     );
 
     // ── Phase 4: Process Engine Jobs (FSM/HITL — available to all workers regardless of service) ──
-    // Processes jobs that have a process_definition in their payload (BPaaS/FSM).
+    // Processes jobs that have a process_definition in their payload (Process Engine FSM).
     // These are submitted via any SE-aaS/AaaS/PM-aaS job payload with process_definition set.
     // Without this phase, FSM/HITL jobs sit pending forever.
     let processEngineResult = { processed: 0, succeeded: 0, failed: 0, jobIds: [] as string[] };

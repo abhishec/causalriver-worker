@@ -497,6 +497,7 @@ export async function extractStructuredMemory(
   supabase: SupabaseClient,
   params: {
     organizationId: string;
+    aiWorkerId?: string;       // ADR-027: per-worker memory isolation
     domain: string;
     inputQuery: string;
     resultSummary: string;
@@ -578,6 +579,7 @@ Respond with ONLY the JSON object. No explanation.`;
 
     await supabase.from("ai_memory").insert({
       organization_id: params.organizationId,
+      ...(params.aiWorkerId ? { ai_worker_id: params.aiWorkerId } : {}),
       domain: params.domain,
       memory_type: "structured-outcome",
       content,
@@ -586,18 +588,24 @@ Respond with ONLY the JSON object. No explanation.`;
         quality: params.quality,
         extractedAt: new Date().toISOString(),
         inputQueryPreview: params.inputQuery.slice(0, 100),
+        ...(params.aiWorkerId ? { ai_worker_id: params.aiWorkerId } : {}),
       },
     });
 
     // ── Bound: keep last MAX_STRUCTURED_OUTCOMES_PER_DOMAIN per domain ───
     try {
-      const { data: existing } = await supabase
+      let pruneQuery = supabase
         .from("ai_memory")
         .select("id, created_at")
         .eq("organization_id", params.organizationId)
         .eq("domain", params.domain)
         .eq("memory_type", "structured-outcome")
         .order("created_at", { ascending: false });
+      // ADR-027: scope pruning to same worker (don't prune other workers' memories)
+      if (params.aiWorkerId) {
+        pruneQuery = pruneQuery.eq("ai_worker_id", params.aiWorkerId);
+      }
+      const { data: existing } = await pruneQuery;
 
       if (existing && existing.length > MAX_STRUCTURED_OUTCOMES_PER_DOMAIN) {
         const toDelete = existing.slice(MAX_STRUCTURED_OUTCOMES_PER_DOMAIN).map(

@@ -46,8 +46,9 @@ import { runCognitivePlanner } from "@/lib/brain/cognitive-planner";
 import { runMonitoringReactions } from "@/lib/brain/monitoring-reactions";
 import { runCausalDiscovery } from "@/lib/brain/causal-discovery";
 import { extractProcessTemplates } from "@/lib/brain/process-templates";
-import { promotePatternsToCore } from "@/lib/brain/se-aas-federation";
+import { promotePatternsToCore, promoteGabaPatternsToKnowledge } from "@/lib/brain/se-aas-federation";
 import { ensureCoreBrain, checkCoreBrainHealth } from "@/lib/brain/core-brain";
+import { promoteMemoryToFederatedKnowledge } from "@/lib/brain/memory-federator";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -513,6 +514,14 @@ export async function GET(request: NextRequest) {
           // Fire-and-forget: promote SE-aaS patterns + extract FSM process templates
           void promotePatternsToCore(service, workerOrgId);
           void extractProcessTemplates(service, workerOrgId);
+          // Fix #1 (ADR-026): promote repeated gaba signals into federated_knowledge warnings
+          void promoteGabaPatternsToKnowledge(service, workerOrgId).catch((err: unknown) =>
+            logger.warn('[CognitiveCycle] promoteGabaPatternsToKnowledge failed', { err })
+          );
+          // Fix #4 (ADR-026): graduate high-quality structured-outcome ai_memory entries to federated_knowledge
+          void promoteMemoryToFederatedKnowledge(service, workerOrgId).catch((err: unknown) =>
+            logger.warn('[CognitiveCycle] promoteMemoryToFederatedKnowledge failed', { err })
+          );
         } catch (err) {
           const errMsg = (err as Error)?.message ?? String(err);
           logger.warn(`[CognitiveCycle] Planner failed/timed-out for worker=${workerId}:`, {

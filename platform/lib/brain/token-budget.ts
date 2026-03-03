@@ -49,7 +49,7 @@ export interface TokenBudget {
 /**
  * Create a fresh TokenBudget for a new process execution.
  *
- * @param processInstanceId - FK to bpaas_process_instances.id
+ * @param processInstanceId - FK to bpaas_process_instances.id (legacy table name, kept for backward compat)
  * @param processType       - e.g. "hr_offboarding", "procurement"
  * @param budgetTokens      - optional override; defaults to DEFAULT_PROCESS_TOKEN_BUDGET
  */
@@ -156,7 +156,7 @@ export function shouldSkipLLMCall(budget: TokenBudget): boolean {
  * Returns the recommended model based on current budget pressure.
  *
  * - > 80% used → "haiku" (cost reduction mode — warning threshold already crossed)
- * - Otherwise  → "sonnet" (standard quality, sufficient for most BPaaS states)
+ * - Otherwise  → "sonnet" (standard quality, sufficient for most Process Engine states)
  *
  * Note: Opus is never recommended from budget pressure alone — use the main
  * model-router.ts for Opus escalation decisions.

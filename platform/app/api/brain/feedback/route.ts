@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       commandId,
       domainId,
       organizationId: bodyOrgId,
+      patternIds: bodyPatternIds,  // ADR-027: RL primer pattern IDs for feedback tracking
     } = body as {
       messageId?: string;
       rating?: string;
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       commandId?: string;
       domainId?: string;
       organizationId?: string;
+      patternIds?: string[];
     };
 
     if (!messageId) {
@@ -230,6 +232,18 @@ export async function POST(request: NextRequest) {
         logger.warn("[Feedback] Failed to fuse feedback into prediction_records", { err });
       }
     })();
+
+    // ── ADR-027: RL Primer Feedback — adjust federated_knowledge confidence ──
+    // When the frontend sends patternIds (from the rlPrimerPatternIds SSE event),
+    // we can track which injected patterns led to good/bad outcomes and adjust their
+    // confidence accordingly. This closes the primer feedback loop.
+    if (bodyPatternIds?.length && VALID_RATINGS.includes(rating as Rating)) {
+      void import("@/lib/brain/rl-primer").then(({ updatePatternConfidence }) => {
+        updatePatternConfidence(bodyPatternIds, rating as Rating).catch((err: unknown) =>
+          logger.warn("[Feedback] updatePatternConfidence failed (non-fatal)", { err: String(err) })
+        );
+      }).catch(() => {}); // fire-and-forget
+    }
 
     if (insertError) {
       // If brain_feedback_queue doesn't exist yet, fall back to ai_memory

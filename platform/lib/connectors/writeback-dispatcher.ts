@@ -673,7 +673,7 @@ export type WritebackPayload =
  *   mutationPayload: mutationData,
  *   mutationReason: "FSM MUTATE state execution",
  *   executedBy: params.userId ?? "process-engine",
- * }).catch(e => logger.warn("[BPaaS/MUTATE] writeback dispatch failed", { error: String(e) }));
+ * }).catch(e => logger.warn("[ProcessEngine/MUTATE] writeback dispatch failed", { error: String(e) }));
  */
 export async function dispatchWriteback(
   supabase: SupabaseClient,
@@ -723,6 +723,24 @@ export async function dispatchWriteback(
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Returns true for write-back actions that should ALWAYS require human approval
+ * regardless of org-level require_writeback_approval setting.
+ * Conservative: err on side of requiring approval for irreversible or high-impact actions.
+ */
+function isHighImpactWriteback(rule: { action_type?: string | null; connector_type?: string | null }): boolean {
+  const actionType = (rule.action_type ?? "").toLowerCase();
+  const connectorType = (rule.connector_type ?? "").toLowerCase();
+  // Always require approval for: merging PRs, deleting anything, closing sprints, financial postings
+  const HIGH_IMPACT_ACTIONS = ["merge_pr", "delete", "close_sprint", "post_payment", "bulk_update", "force_push"];
+  if (HIGH_IMPACT_ACTIONS.some(a => actionType.includes(a))) return true;
+  // Jira: creating tickets is OK auto-approve; transitions (to Done, In Progress) need approval
+  if (connectorType === "jira" && actionType.includes("transition")) return true;
+  // GitHub: creating issues OK; merging PRs needs approval
+  if (connectorType === "github" && actionType.includes("merge")) return true;
+  return false;
+}
 
 /**
  * Called after every successful domain execution (fire-and-forget safe).
@@ -826,7 +844,7 @@ export async function checkAndQueueWriteback(
       );
 
       // ── Approval intercept ────────────────────────────────────────────────
-      if (requiresApproval) {
+      if (requiresApproval || isHighImpactWriteback(rule)) {
         const approval = await queueWritebackApproval(supabase, {
           organizationId: ctx.organizationId,
           jobId: ctx.jobId,
