@@ -865,7 +865,7 @@ export async function POST(request: NextRequest) {
 
     // ── Connector intent detection (fast regex, before LLM routing) ──────────
     // These are handled by emitting SSE events + letting the LLM narrate.
-    const connectorStatusIntent = /\b(what(?:'s| is) (?:connected|my connectors?|connections?|integrations?)|show (?:connections?|connectors?|integrations?)|connector status|my integrations?|what(?:'s| is) (?:hooked up|linked)|which (?:tools?|services?) (?:are|is) (?:connected|active|linked))\b/i.test(message);
+    const connectorStatusIntent = /\b(what(?:'s| is| am i| are my) (?:connected(?:\s+to)?|my connectors?|connections?|integrations?)|show (?:me )?(?:my )?(?:connections?|connectors?|integrations?)|connector status|my integrations?|what(?:'s| is) (?:hooked up|linked)|which (?:tools?|services?) (?:are|is) (?:connected|active|linked)|connected\s+to)\b/i.test(message);
     const connectMatch = message.match(
       /\b(?:connect|setup|set up|add|link|integrate)\s+(?:to\s+)?(?:my\s+)?(github|jira|confluence|slack|freshdesk|freshchat|freshsales|hubspot|notion|linear|stripe|xero|quickbooks|datadog|cloudwatch|intercom|zendesk|mailchimp|elastic|elk|google[_\s]chat|google[_\s]calendar|s3|voice|generic[_\s]api)\b/i
     );

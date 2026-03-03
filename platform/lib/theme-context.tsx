@@ -23,12 +23,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
 
-  // Load persisted theme on mount
+  // Always use light mode — ignore any stored dark preference
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored && ["light", "dark", "system"].includes(stored)) {
-      setThemeState(stored);
-    }
+    localStorage.setItem(STORAGE_KEY, "light");
     setMounted(true);
   }, []);
 

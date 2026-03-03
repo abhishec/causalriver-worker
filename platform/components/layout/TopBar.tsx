@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 /* ── Route labels for breadcrumb ──────────────────────────────────────────── */
 
@@ -66,7 +65,7 @@ export function TopBar() {
         )}
       </div>
 
-      {/* ── Right: Ask AI + Theme toggle ────────────────────────── */}
+      {/* ── Right: Ask AI ────────────────────────── */}
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -93,7 +92,6 @@ export function TopBar() {
             ⌘K
           </kbd>
         </button>
-        <ThemeToggle />
       </div>
     </header>
   );

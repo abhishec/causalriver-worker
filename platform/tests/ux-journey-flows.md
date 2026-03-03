@@ -896,3 +896,361 @@ Before executing these flows in production, verify:
 5. At least 2 AI Workers exist: `9f338d96-...` (Fincense 5.11.5) and `aa286f56-...` (Fincense 6.3.4)
 6. At least one connector (GitHub or Jira) is in "active" state for signal ingestion to work
 7. Brain has been trained at least once (some signals in `federated_knowledge` table)
+
+---
+
+## Flow 11 — Create AI Worker from Scratch + Copilot Heavy Task
+
+**Persona**: New user who has never created an AI Worker — starts completely fresh
+**Goal**: Create a new AI Worker, navigate to its Copilot chat, send a heavy analytical task, and verify sync + async agents start up
+**Session state**: Logged in, at `/workspace`. No prior AI Worker for this flow (use test workspace).
+
+### Pre-checks (run on every story)
+- [ ] Page loads in < 3s (no spinner > 3s = performance fail)
+- [ ] No dark mode toggle visible in header — color stays light
+- [ ] Navigation links work: logo → `/workspace`, breadcrumb links clickable
+- [ ] Settings gear icon visible in AI Worker header (links to `/settings`)
+
+### Steps
+
+**Step 11.1 — Navigate to Mission Control**
+- Navigate to `/workspace`
+- EXPECT: "Mission Control" page title
+- EXPECT: "+ New Worker" button visible in top-right
+
+**Step 11.2 — Open Create Worker flow**
+- CLICK "+ New Worker"
+- EXPECT: Redirect to `/ai-worker/create`
+- EXPECT: Form fields present: Worker Name, Description, Service Type (optional)
+- BUG: If page is blank or throws 404 → record as BUG-011-A
+
+**Step 11.3 — Fill out worker form**
+- TYPE `Heavy Task Worker` in Worker Name field
+- TYPE `End-to-end test worker for sync and async agent verification` in Description
+- Leave Service Type blank (no service — still has Brain + Copilot)
+- CLICK "Create Worker" (or equivalent submit button)
+- WAIT 5s
+- EXPECT: Redirect to `/ai-worker/<new-id>`
+- EXPECT: Worker name "Heavy Task Worker" visible in the header dropdown
+- BUG: If form submits but redirects to `/workspace` without creating → BUG-011-B
+
+**Step 11.4 — Verify Worker page loads**
+- EXPECT: 5 tabs visible — Chat | Agents | Jobs | Brain | Keys
+- EXPECT: Connector status strip shows "No connectors · Add one →"
+- EXPECT: Settings gear icon visible in header, links to `/settings`
+- EXPECT: BrainOS logo in header links to `/workspace`
+- EXPECT: "+ Create New Worker" option in the worker switcher dropdown
+
+**Step 11.5 — Navigate to Chat tab**
+- CLICK "Chat" tab (should be selected by default)
+- EXPECT: Copilot chat input visible
+- EXPECT: Placeholder text or welcome message present
+
+**Step 11.6 — Send a heavy synchronous analytical task**
+- TYPE in chat: `Analyze the top 3 risk patterns from the last 30 days across all connected data sources and give me a structured risk report with severity, likelihood, and recommended mitigation for each`
+- CLICK Send (or press Enter)
+- WAIT 20s
+- EXPECT: Response appears (streaming text visible)
+- EXPECT: Response is substantive (>100 words) — not "I don't have data" or an error
+- EXPECT: No SE-aaS gating message (worker has no service, so Brain-level response expected)
+- BUG: If response is blank or SSE stream disconnects → BUG-011-C
+
+**Step 11.7 — Send a task that triggers a background (async) agent**
+- TYPE in chat: `Create an agent to monitor GitHub for any new PRs tagged high-priority and alert me with a summary every hour`
+- CLICK Send
+- WAIT 10s
+- EXPECT: AgentCreatedCard appears in chat (blue card with agent name, Brain: Active, RL: Enabled)
+- EXPECT: Jobs tab badge shows a pending or running job count > 0
+- BUG: If no AgentCreatedCard appears and no job is queued → BUG-011-D
+
+**Step 11.8 — Verify Agents tab shows the created agent**
+- CLICK "Agents" tab
+- EXPECT: At least 1 agent row visible
+- EXPECT: Agent name matches or contains "GitHub" or "monitor"
+- EXPECT: Status = "active" or "pending"
+- BUG: Agents tab still shows "No agents yet" → BUG-011-E
+
+**Step 11.9 — Verify Jobs tab shows the queued job**
+- CLICK "Jobs" tab
+- EXPECT: At least 1 job row visible
+- EXPECT: Job status = "pending" or "running"
+- EXPECT: Each job row shows task type, status, and created timestamp
+
+**Step 11.10 — Navigate to Settings and back**
+- CLICK Settings gear icon in header
+- EXPECT: Redirect to `/settings`
+- EXPECT: TopBar breadcrumb shows "Mission Control / Settings" with clickable "Mission Control" link
+- CLICK "Mission Control" in breadcrumb
+- EXPECT: Back at `/workspace`
+
+---
+
+## Flow 12 — Connect GitHub + Jira via Copilot + Train Brain
+
+**Persona**: Engineer setting up connectors for the first time, entirely through the Copilot
+**Goal**: Connect GitHub and Jira via inline Copilot commands, trigger brain training, then ask a question that uses the ingested data
+**Session state**: Logged in, on AI Worker page (use Fincense 5.11.5 worker). GitHub and Jira are NOT currently active.
+
+### Pre-checks
+- [ ] UI stays light mode throughout
+- [ ] Page response < 3s per navigation
+- [ ] All navigation links functional
+
+### Steps
+
+**Step 12.1 — Navigate to AI Worker**
+- Navigate to `/ai-worker/9f338d96-...` (Fincense 5.11.5)
+- EXPECT: Worker page loads with 5 tabs
+
+**Step 12.2 — Ask Copilot connector status**
+- On Chat tab, TYPE: `what am I connected to?`
+- WAIT 8s
+- EXPECT: ConnectorStatusCard renders in chat (shows grouped list Active / Pending / Error)
+- EXPECT: GitHub and Jira show as "disconnected" or absent from active list
+- BUG: Plain text response instead of ConnectorStatusCard → BUG-012-A
+
+**Step 12.3 — Connect GitHub via Copilot**
+- TYPE: `connect github`
+- WAIT 5s
+- EXPECT: ConnectorSetupCard renders with "Connect GitHub" OAuth button
+- CLICK "Connect GitHub" button
+- EXPECT: Popup window opens (does NOT navigate away from main page)
+- EXPECT: Popup loads GitHub App install page or OAuth authorization page
+- WAIT 30s for user to authorize (test with pre-authorized account)
+- EXPECT: Popup closes automatically after authorization
+- EXPECT: ConnectorSetupCard updates to show green "Connected ✓"
+- BUG: Popup fails to open → BUG-012-B
+- BUG: Main page navigates away instead of popup → BUG-012-C
+- BUG: ConnectorSetupCard does not update after authorization → BUG-012-D
+
+**Step 12.4 — Connect Jira via Copilot**
+- TYPE: `connect jira`
+- WAIT 5s
+- EXPECT: ConnectorSetupCard renders with "Connect Jira" OAuth button
+- CLICK "Connect Jira" button
+- EXPECT: Popup opens (same popup pattern as GitHub)
+- WAIT 30s for authorization
+- EXPECT: ConnectorSetupCard shows green "Connected ✓"
+- BUG: Jira setup card shows API key form instead of OAuth → BUG-012-E
+
+**Step 12.5 — Verify connector strip updated**
+- EXPECT: Connector status strip at top of worker page now shows GitHub pill (green dot) + Jira pill (green or amber dot)
+- BUG: Strip still shows old state → BUG-012-F (requires page refresh to update — acceptable if documented)
+
+**Step 12.6 — Navigate to Brain tab and train**
+- CLICK "Brain" tab
+- EXPECT: Brain IQ score, RL metrics visible
+- CLICK "Run Consolidation" button
+- WAIT 15s
+- EXPECT: "Consolidation complete" toast or IQ score increments
+- EXPECT: Learning velocity > 0 in RL metrics
+
+**Step 12.7 — Ask a data-grounded question via Copilot**
+- Return to Chat tab
+- TYPE: `What are the most active GitHub repositories in the last 7 days and which Jira projects have the most open tickets?`
+- WAIT 20s
+- EXPECT: Response references actual GitHub repos or Jira project names (not generic placeholders)
+- EXPECT: Response is >150 words with structured data
+- BUG: Response says "I don't have access to GitHub data" after successful connection → BUG-012-G
+
+---
+
+## Flow 13 — Sync Agent: Copilot Delegates to SE-aaS + Evaluates Quality
+
+**Persona**: Engineering manager using SE-aaS delivery intelligence
+**Goal**: Use Copilot to send a complex SE-aaS task, watch a synchronous agent execute, evaluate response quality
+**Session state**: Logged in, on Fincense 5.11.5 worker (has SE-aaS service type). At least 1 engagement + GitHub connector active.
+
+### Pre-checks
+- [ ] SE-aaS service type shown in worker header badge
+- [ ] GitHub connector in "active" state (connector strip shows green dot)
+
+### Steps
+
+**Step 13.1 — Send a pod-matching SE-aaS query**
+- On Chat tab, TYPE: `Which engineers are best matched to the Fincense 6.3.4 delivery team based on current capacity and skill gaps?`
+- WAIT 20s
+- EXPECT: Response is structured table or list with engineer names and match confidence scores
+- EXPECT: Data comes from `pod_match_history` table (real names, not "Engineer A / Engineer B")
+- EXPECT: RL feedback buttons visible below the response (thumbs up / thumbs down)
+- BUG: Response says "no pod match data" when pod_match_history has rows → BUG-013-A
+
+**Step 13.2 — Send an early warning query**
+- TYPE: `Are there any flight risk engineers on the current engagements? Show me their velocity index and review burden.`
+- WAIT 20s
+- EXPECT: Response lists engineers by name with `flight_risk_score`, `velocity_index`, `review_burden`
+- EXPECT: Response is structured (table format or labeled sections)
+- BUG: Response is generic without real data → BUG-013-B
+
+**Step 13.3 — Evaluate quality with thumbs down**
+- On the early warning response, CLICK thumbs down feedback button
+- EXPECT: Feedback is recorded (UI confirms: "Feedback received")
+- EXPECT: RL status in Brain tab shows gaba signal count incremented (check after returning to Brain tab)
+
+**Step 13.4 — Create a synchronous delivery intelligence agent**
+- TYPE: `Create an agent that runs daily delivery health checks across all active engagements and flags any new flight risks`
+- WAIT 10s
+- EXPECT: AgentCreatedCard renders with agent name containing "delivery" or "health"
+- EXPECT: Jobs tab shows new job with `task_type = "se-aas"` or similar
+- EXPECT: Agent status transitions from "pending" → "running" within 60s (check Jobs tab)
+- WAIT 60s
+- CLICK Jobs tab
+- EXPECT: At least 1 job row with status "running" or "completed"
+- EXPECT: Completed jobs show result summary in expanded view
+
+**Step 13.5 — Check Brain RL metrics after agent run**
+- CLICK "Brain" tab
+- EXPECT: `totalSignals24h` incremented by at least 2 (one for agent run, one for feedback)
+- EXPECT: Learning velocity > 0 (active learning pill shows in sidebar)
+- EXPECT: Brain IQ stable or increased (should not decrease after a successful run)
+
+---
+
+## Flow 14 — Async Multi-Agent Orchestration + Quality Comparison
+
+**Persona**: CTO running a large-scale background analysis across 3 domains simultaneously
+**Goal**: Dispatch 3 async agents in parallel (SE-aaS + AaaS + Brain), monitor their execution, compare output quality
+**Session state**: Logged in, on Fincense 5.11.5 worker with SE-aaS active and GitHub + Jira connected.
+
+### Pre-checks
+- [ ] Worker has SE-aaS service type
+- [ ] Both GitHub and Jira connectors in "active" state
+- [ ] Brain IQ > 0
+
+### Steps
+
+**Step 14.1 — Dispatch SE-aaS async agent**
+- On Chat tab, TYPE: `Create an async agent to analyze delivery health across all engagements and produce a weekly digest report`
+- WAIT 8s
+- EXPECT: AgentCreatedCard #1 appears with delivery/health label
+- NOTE: Record agent ID from card (or from Agents tab)
+
+**Step 14.2 — Dispatch AaaS async agent**
+- TYPE: `Create an async agent to monitor GitHub PR merge rate and flag any PRs open > 72 hours as blockers`
+- WAIT 8s
+- EXPECT: AgentCreatedCard #2 appears with GitHub/PR label
+- EXPECT: Both agent cards visible in chat history
+- BUG: Second agent creation overwrites first job → BUG-014-A
+
+**Step 14.3 — Dispatch brain training agent**
+- TYPE: `Create an async agent to consolidate new learnings from all connector signals and update brain knowledge`
+- WAIT 8s
+- EXPECT: AgentCreatedCard #3 appears with brain/consolidation label
+
+**Step 14.4 — Monitor Jobs tab for parallel execution**
+- CLICK "Jobs" tab
+- EXPECT: 3 or more jobs visible with statuses "pending" or "running"
+- EXPECT: Jobs are assigned to correct agent_types (se-aas, aas, brain-related)
+- WAIT 90s (agents are async — long enough for at least 1 to complete)
+- REFRESH page (F5 or reload)
+- EXPECT: At least 1 job shows status "completed"
+- BUG: All jobs stuck at "pending" after 90s → BUG-014-B
+
+**Step 14.5 — Inspect completed job result**
+- CLICK any "completed" job row to expand
+- EXPECT: Result field shows structured output (not empty or `{}`)
+- EXPECT: Output contains domain-relevant content (delivery metrics, PR data, or brain signals)
+- BUG: Result is `null` or `{}` despite status "completed" → BUG-014-C
+
+**Step 14.6 — Compare agent output quality**
+- Return to Chat tab
+- TYPE: `Show me the results of the 3 agents I just ran — delivery health, PR monitor, and brain consolidation`
+- WAIT 15s
+- EXPECT: Response summarizes outputs from all 3 agents (or notes which are still running)
+- EXPECT: Response is structured with agent-by-agent breakdown
+- BUG: Copilot has no awareness of recently completed agents → BUG-014-D
+
+**Step 14.7 — Rate agent quality**
+- CLICK thumbs up on the highest-quality response
+- EXPECT: Dopamine signal recorded
+- Navigate to Brain tab
+- EXPECT: `totalSignals24h` > 5 (at least 3 agent runs + 2 feedback signals)
+- EXPECT: Brain IQ has not decreased
+
+---
+
+## Flow 15 — Full Platform Navigation Audit
+
+**Persona**: Power user testing all navigation pathways in a single session
+**Goal**: Verify every navigation link works, no dead-ends, no missing back-links, no dark mode leaks
+**Session state**: Logged in. Start at `/workspace`.
+
+### Pre-checks
+- [ ] Color mode is light — no dark class on `<html>` element
+- [ ] No ThemeToggle visible anywhere in the UI
+
+### Steps
+
+**Step 15.1 — Mission Control → AI Worker → Settings → Back**
+- At `/workspace`, CLICK on any WorkerCard
+- EXPECT: Navigate to `/ai-worker/<id>`
+- EXPECT: BrainOS logo visible in header (links to `/workspace`)
+- EXPECT: Settings gear icon visible in header (links to `/settings`)
+- CLICK Settings gear icon
+- EXPECT: Navigate to `/settings`
+- EXPECT: TopBar shows breadcrumb "Mission Control / Settings"
+- CLICK "Mission Control" in breadcrumb
+- EXPECT: Back at `/workspace`
+
+**Step 15.2 — Mission Control → Brain → Back**
+- At `/workspace`, CLICK "Brain" in sidebar
+- EXPECT: Navigate to `/brain`
+- EXPECT: TopBar shows "Mission Control / Brain"
+- CLICK "Mission Control" in breadcrumb
+- EXPECT: Back at `/workspace`
+
+**Step 15.3 — Mission Control → Connectors → Back**
+- CLICK "Connectors" in sidebar
+- EXPECT: Navigate to `/connectors`
+- EXPECT: TopBar shows "Mission Control / Connectors"
+- CLICK "Mission Control" breadcrumb
+- EXPECT: Back at `/workspace`
+
+**Step 15.4 — Mission Control → Settings → Back**
+- CLICK "Settings" in sidebar
+- EXPECT: Navigate to `/settings`
+- EXPECT: TopBar shows "Mission Control / Settings"
+- CLICK "Mission Control" breadcrumb
+- EXPECT: Back at `/workspace`
+
+**Step 15.5 — AI Worker → Worker switcher navigation**
+- Navigate to `/ai-worker/<id1>`
+- CLICK worker switcher dropdown
+- EXPECT: All workspace AI Workers listed by name
+- EXPECT: "+ Create New Worker" option at bottom
+- SELECT a different worker
+- EXPECT: Navigate to `/ai-worker/<id2>` (URL changes, worker name updates)
+
+**Step 15.6 — AI Worker → Create new worker**
+- CLICK worker switcher dropdown
+- SELECT "+ Create New Worker"
+- EXPECT: Navigate to `/ai-worker/create`
+- EXPECT: Form fields present (name, description)
+- CLICK "Back" or BrainOS logo
+- EXPECT: Return to `/workspace` (not a dead-end)
+
+**Step 15.7 — Redirect chain verification**
+- Navigate to `/copilot`
+- EXPECT: Redirect to `/workspace` (not a 404 or blank page)
+- Navigate to `/dashboard`
+- EXPECT: Redirect to `/workspace`
+- Navigate to `/overview`
+- EXPECT: Redirect or shows "Mission Control" — not a 404
+
+**Step 15.8 — Color consistency check**
+- At any page, open browser DevTools → Console
+- EXECUTE: `document.documentElement.classList.contains('dark')`
+- EXPECT: `false` — no dark class on HTML element
+- CHECK: `localStorage.getItem('nexus_theme')`
+- EXPECT: `"light"` (not `"dark"` or `"system"`)
+
+**Step 15.9 — Performance check (all pages)**
+- For each of: `/workspace`, `/ai-worker/<id>`, `/settings`, `/connectors`, `/brain`
+- RECORD: Time from navigation to interactive (first meaningful content visible)
+- EXPECT: All pages interactive within 3 seconds on a standard connection
+- FLAG: Any page > 5s = performance issue requiring investigation
+
+**Step 15.10 — No broken links or 404s**
+- Navigate through all sidebar links while logged in
+- EXPECT: No page shows "404 Not Found" or "500 Internal Server Error"
+- EXPECT: Every page has at least one navigation element to return to Mission Control
