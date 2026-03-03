@@ -36,6 +36,7 @@ import {
   getGoogleDriveFileContent,
 } from "@/lib/connectors/google-drive-client";
 import { crawlWebsites } from "@/lib/connectors/web-crawler";
+import { parseDocumentBuffer } from "@/lib/connectors/document-parser";
 import { logger } from "@/lib/logger";
 
 // Static capture for Lambda SSR
@@ -256,24 +257,51 @@ async function processGoogleDriveBatch(
           file.name,
         );
 
-        // For binary files (PDF, DOCX), store base64 content with a note.
-        // Full binary parsing would require a PDF library not available in Lambda.
-        // The content is stored as base64 in the metadata for future offline parsing.
+        // For binary files (PDF, DOCX), decode and parse text content.
+        // Uses pdf-parse (for PDFs) and mammoth (for DOCX) via document-parser.ts.
         if (fileContent.needsBinaryParsing) {
+          let parsedContent = "";
+          let parsedSourceType: "pdf" | "text" = "text";
+          let parseMetadata: Record<string, unknown> = {};
+
+          try {
+            const buffer = Buffer.from(fileContent.content, "base64");
+            const parsed = await parseDocumentBuffer(buffer, file.mimeType, file.name);
+            parsedContent = parsed.text;
+            parsedSourceType = file.mimeType === "application/pdf" || file.name.endsWith(".pdf") ? "pdf" : "text";
+            parseMetadata = {
+              pageCount: parsed.pageCount,
+              wordCount: parsed.wordCount,
+              parsedFromBinary: true,
+            };
+            logger.warn("[cron/process-ingestion] Binary file parsed", {
+              fileName: file.name,
+              mimeType: file.mimeType,
+              wordCount: parsed.wordCount,
+              pageCount: parsed.pageCount,
+            });
+          } catch (parseErr) {
+            // Parsing failed — store metadata placeholder so we don't lose the file entirely
+            parsedContent = `[Binary file — ${file.mimeType}. Size: ${fileContent.sizeBytes} bytes. ` +
+              `Parsing failed: ${parseErr instanceof Error ? parseErr.message : String(parseErr)}. ` +
+              `Source: Google Drive file ID ${file.id}.]`;
+            parseMetadata = { parseFailed: true, parseError: parseErr instanceof Error ? parseErr.message : String(parseErr) };
+            logger.warn("[cron/process-ingestion] Binary file parse failed", {
+              fileName: file.name,
+              error: parseErr instanceof Error ? parseErr.message : String(parseErr),
+            });
+          }
+
           documents.push({
             title: file.name,
-            content: `[Binary file — ${file.mimeType}. Size: ${fileContent.sizeBytes} bytes. ` +
-              `Source: Google Drive file ID ${file.id}. ` +
-              `Base64 content stored in metadata for offline processing.]`,
+            content: parsedContent,
             sourceUrl: `https://drive.google.com/file/d/${file.id}/view`,
-            sourceType: "text",
+            sourceType: parsedSourceType,
             metadata: {
               driveFileId: file.id,
               driveMimeType: file.mimeType,
-              base64Content: fileContent.content.slice(0, 1024), // Store first 1KB for identification
-              needsFullParsing: true,
               sizeBytes: fileContent.sizeBytes,
-              encoding: "base64",
+              ...parseMetadata,
             },
           });
         } else {

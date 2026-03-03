@@ -84,6 +84,9 @@ import { recordContextUsage } from "@/lib/brain/context-drift-detector";
 import { observeCapabilityRegret } from "@/lib/brain/capability-synthesizer";
 // ── ADR-023 additions ─────────────────────────────────────────────────────────
 import { validateProcessOutput, buildValidationHint } from "@/lib/brain/output-validator";
+// ── ADR-030: Reflex Engine (L31 Brain Layer — System 1 deterministic routing) ─
+import { buildReflexContext, runReflexEngine, loadCustomReflexes } from "@/lib/brain/reflex-engine";
+import type { ReflexResult } from "@/lib/brain/reflex-engine";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -897,6 +900,86 @@ export async function POST(request: NextRequest) {
     const normalizedConnectType = connectType === "elastic" ? "elk" :
       connectType === "s3" ? "s3-storage" :
       connectType === "set_up" ? null : connectType;
+
+    // ══════════════════════════════════════════════════════════════════════
+    // ADR-030: REFLEX ENGINE (L31 — System 1 deterministic routing)
+    // Runs BEFORE LLM routing. If a reflex matches, it either:
+    //   - bypass: returns a complete response (skips LLM entirely)
+    //   - inject: adds messages to conversation stream (augments LLM context)
+    //   - delegate: routes to a specialized handler function
+    // Guards always apply (even when no reflex matches).
+    // ══════════════════════════════════════════════════════════════════════
+    let reflexResult: ReflexResult = { matched: false, guards: [] };
+    let reflexDelegateResult: Record<string, unknown> | null = null;
+
+    try {
+      const reflexCtx = buildReflexContext(
+        message,
+        workspaceId,
+        user.id,
+        (conversationHistory || []).map((m) => ({ role: m.role, content: m.content })),
+        workerId ?? undefined,
+      );
+
+      // Load custom reflexes (self-synthesized from capability_library)
+      const customReflexes = await loadCustomReflexes(service, workspaceId);
+
+      reflexResult = runReflexEngine(reflexCtx, customReflexes.length > 0 ? customReflexes : undefined);
+
+      if (reflexResult.matched && reflexResult.action) {
+        // ── Handle "bypass" — return response immediately, skip LLM ──
+        if (reflexResult.action.type === "bypass") {
+          const { stream: bypassStream, sendText: bypassSendText, close: bypassClose } = createSSEStream();
+          bypassSendText(reflexResult.action.response);
+          bypassClose();
+          return new Response(bypassStream, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache, no-transform",
+              Connection: "keep-alive",
+              "X-Accel-Buffering": "no",
+            },
+          });
+        }
+
+        // ── Handle "delegate" — dispatch to handler, stream result ──
+        if (reflexResult.action.type === "delegate") {
+          const { dispatchReflexDelegate } = await import("@/lib/brain/reflex-dispatcher");
+          const delegateOut = await dispatchReflexDelegate({
+            handler: reflexResult.action.handler,
+            params: reflexResult.action.params,
+            supabase: service,
+          });
+
+          if (delegateOut.success && delegateOut.narrative) {
+            // Delegate succeeded — stream the narrative as a response
+            // The LLM still runs below to provide a polished answer,
+            // but we inject the delegate result into the system prompt.
+            reflexDelegateResult = {
+              reflexName: reflexResult.reflexName,
+              handler: reflexResult.action.handler,
+              ...delegateOut.result,
+              narrative: delegateOut.narrative,
+            };
+          } else if (!delegateOut.success) {
+            // Delegate failed — log and fall through to LLM
+            logger.warn("[reflex-engine] Delegate failed, falling through to LLM", {
+              handler: reflexResult.action.handler,
+              error: delegateOut.error,
+            });
+          }
+        }
+
+        // ── Handle "inject" — messages are injected below in system prompt ──
+        // (inject action is handled during system prompt building)
+      }
+    } catch (reflexErr) {
+      // Non-fatal — reflex engine must NEVER break copilot flow
+      logger.warn("[reflex-engine] Non-fatal: reflex check failed", {
+        error: reflexErr instanceof Error ? reflexErr.message : String(reflexErr),
+      });
+    }
 
     // ── SE-aaS + AAS SERVICE ROUTING (Phase 3: LLM-Powered) ──────────
     // Uses LLM interpretation for semantic service routing (replaces 350+ lines of regex).
@@ -2772,6 +2855,35 @@ You currently have: ${causalEdges.length} causal edges, ${rules.length} business
       effectiveSystemPrompt = injectZeroDataGuard(effectiveSystemPrompt);
     }
 
+    // ── ADR-030: Inject reflex guards into system prompt (always applies) ──────
+    // Guards constrain LLM behavior for known-dangerous contexts (e.g., financial
+    // precision, no hallucination). They apply even when no reflex matched.
+    if (reflexResult.guards.length > 0) {
+      for (const guard of reflexResult.guards) {
+        effectiveSystemPrompt += `\n\n${guard.systemPromptAddition}`;
+      }
+    }
+
+    // ── ADR-030: Inject reflex "inject"-type messages into system prompt ──────
+    if (reflexResult.matched && reflexResult.action?.type === "inject") {
+      const injectedMsgs = reflexResult.action.injectedMessages;
+      for (const msg of injectedMsgs) {
+        if (msg.role === "system") {
+          effectiveSystemPrompt += `\n\n${msg.content}`;
+        }
+      }
+    }
+
+    // ── ADR-030: Inject reflex delegate result into system prompt ─────────────
+    // When a reflex delegate succeeded, inject its output so the LLM can narrate it.
+    if (reflexDelegateResult) {
+      const delegateNarrative = reflexDelegateResult.narrative as string || "";
+      const delegateType = reflexDelegateResult.type as string || "reflex-result";
+      effectiveSystemPrompt += `\n\n## REFLEX AGENT RESULT: ${delegateType.toUpperCase()}\n` +
+        `The Brain's reflex engine (System 1) has already executed a specialized handler for this request.\n` +
+        `Present the following result to the user in a clear, structured format:\n\n${delegateNarrative}`;
+    }
+
     // ── Delivery Intelligence exemption — overrides zero-data restriction ──
     // Pod-match, early-warning, scope-creep, delivery-intelligence are AI-reasoned
     // domains. They do NOT require pre-loaded causal graph data to be useful.
@@ -4105,7 +4217,7 @@ No connectors are configured yet. When the user asks for data from any source (S
     // ── DAAO: Difficulty-Aware Adaptive Orchestration — 3-tier model routing ──
     // Routes to Haiku (simple, ~80%) / Sonnet (standard, ~18%) / Opus (expert, ~2%).
     // Target: 84% cost reduction by keeping simple queries on Haiku.
-    const hasDomainResults = !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult;
+    const hasDomainResults = !!seaasResult || !!accountingResult || !!deliveryIntelligenceResult || !!pmAasResult || !!agentCreated || !!orchestratorResult || !!reflexDelegateResult;
     const _domainCount = [seaasResult, accountingResult, deliveryIntelligenceResult, pmAasResult].filter(Boolean).length;
     const _isFollowUp = !!(conversationHistory && conversationHistory.length > 0);
 
@@ -4386,6 +4498,11 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send SE-aaS Delivery Intelligence result (pod-match + health scores) for SEaaSDeliveryPanel
         if (deliveryIntelligenceResult) {
           send(JSON.stringify({ deliveryIntelligenceResult }));
+        }
+
+        // ADR-030: Send reflex delegate result to frontend
+        if (reflexDelegateResult) {
+          send(JSON.stringify({ reflexResult: reflexDelegateResult }));
         }
 
         // ── Self-MOA (3-lens): Fire-and-forget multi-agent synthesis ──────

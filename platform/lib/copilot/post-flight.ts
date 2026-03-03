@@ -116,6 +116,26 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
       .catch(() => {}); // fire-and-forget
   }
 
+  // ── 1.5b. ADR-030: Self-Evolving Reflex Gap Recording ──────────────────────
+  // When LLM response quality is consistently low for a domain (< 0.4), record
+  // a reflex gap so the tool-maker can synthesize a deterministic reflex that
+  // intercepts before the LLM next time. This is the self-evolving loop:
+  //   Post-flight detects failure → records gap → tool-maker synthesizes reflex
+  //   → promoted reflex starts bypassing the LLM for that pattern.
+  if (_rlQuality < 0.4 && detectedIntent && message.trim().length > 10) {
+    void import("@/lib/brain/reflex-engine")
+      .then(({ recordReflexGap }) =>
+        recordReflexGap(service, workspaceId, {
+          triggerMessage: message.trim(),
+          failureReason: `Low RL quality (${_rlQuality.toFixed(2)}) for domain ${detectedIntent}`,
+          suggestedAction: `Create deterministic reflex for "${detectedIntent}" domain pattern`,
+          domain: detectedIntent,
+          occurrences: 1,
+        })
+      )
+      .catch(() => {}); // fire-and-forget
+  }
+
   // ── 1.6. ADR-027 PART 7E: Tool Invocation RL Tracking ───────────────────
   // If synthesized tools were injected in this request (working memory has
   // capabilitiesBlock), record the response quality as a tool invocation
