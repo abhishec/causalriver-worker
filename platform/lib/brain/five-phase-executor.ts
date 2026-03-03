@@ -2,6 +2,8 @@ import { logger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Anthropic from "@anthropic-ai/sdk";
 import { captureStreamedResponse as _captureFivePhase } from "@/lib/brain/claude-learning-capture";
+import { getOrSynthesizeCapabilities, formatCapabilitiesForPrompt } from "@/lib/brain/capability-synthesizer";
+import type { SynthesizedCapability } from "@/lib/brain/capability-synthesizer";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -99,6 +101,17 @@ Respond in JSON: { "subtasks": ["...", "..."], "dataNeeded": ["...", "..."] }`,
     }
   }
 
+  // ── CAPABILITY SYNTHESIS (between Plan and Gather) ─────────────
+  // Detect and synthesize any computation capabilities needed for this task.
+  // Fire-and-forget safe: .catch(() => []) ensures this never throws.
+  const _synthesizedCaps = await getOrSynthesizeCapabilities(
+    params.taskDescription,
+    params.orgId,
+    process.env.ANTHROPIC_API_KEY ?? '',
+    supabase,
+  ).catch(() => [] as SynthesizedCapability[]);
+  const _capsPrompt = formatCapabilitiesForPrompt(_synthesizedCaps);
+
   // ── PHASE 2: GATHER ────────────────────────────────────────────
   let gatherOutput = "";
   if (activePhaseset.has("gather")) {
@@ -147,7 +160,7 @@ Gathered data: ${gatherOutput.slice(0, 600)}
 
 Brain context: ${(params.brainContext ?? "").slice(0, 400)}
 
-Synthesize a comprehensive analysis. Be specific and actionable.`,
+Synthesize a comprehensive analysis. Be specific and actionable.${_capsPrompt ? `\n\n${_capsPrompt}` : ""}`,
           },
         ],
       });
