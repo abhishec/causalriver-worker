@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       conversationId,
       commandId,
       domainId,
+      organizationId: bodyOrgId,
     } = body as {
       messageId?: string;
       rating?: string;
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       conversationId?: string;
       commandId?: string;
       domainId?: string;
+      organizationId?: string;
     };
 
     if (!messageId) {
@@ -100,7 +102,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const workspaceId = await getCurrentWorkspaceId();
+    // Use server-resolved workspace first; fall back to org passed in the request body
+    // (MessageFeedback sends organizationId for cases where session cookie resolution
+    // returns an empty string — e.g., when the AI Worker belongs to a different org than
+    // the user's primary workspace).
+    const workspaceId = (await getCurrentWorkspaceId()) || bodyOrgId || "";
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace context" }, { status: 400 });
     }

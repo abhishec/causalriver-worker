@@ -37,9 +37,10 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messageId,
+          organizationId,        // fallback for server-side workspace resolution
           conversationId: conversationId || undefined,
           rating: r,
-          context: correctionText || undefined,
+          correction: correctionText || undefined,
         }),
       });
 
