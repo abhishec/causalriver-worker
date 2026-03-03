@@ -344,8 +344,9 @@ async function executeWorkflow(
       stepOutputs,
     ) as Record<string, unknown>;
 
-    // Inject action sub-type into session params
-    if (step.primitive === "session" && step.action) {
+    // Resolve step-level action field (used by session primitive and others)
+    // This is generic: any step can declare an "action" field.
+    if (step.action && !resolvedParams["action"]) {
       resolvedParams["action"] = step.action;
     }
 
@@ -648,26 +649,42 @@ function extractParams(
     }
   }
 
-  // Post-process: extract space keys from Confluence URLs
-  if (result["confluenceUrls"]) {
-    const confluenceUrls = result["confluenceUrls"] as string[];
-    result["confluenceSpaceKeys"] = confluenceUrls
-      .map((url) => {
-        const m = url.match(/\/wiki\/spaces\/([^/]+)/);
-        return m?.[1];
-      })
-      .filter(Boolean);
-  }
+  // Second pass: resolve "derivedFrom" parameters (extract from previously extracted params)
+  // This is generic — any connector can define extraction patterns in parameter_extraction.
+  // Replaces hardcoded Confluence space key / Google Drive folder ID extractors.
+  for (const [paramName, config] of Object.entries(paramExtraction)) {
+    if (!config || typeof config !== "object") continue;
+    const cfg = config as Record<string, unknown>;
 
-  // Post-process: extract folder ID from Google Drive URLs
-  if (result["driveUrls"]) {
-    const driveUrls = result["driveUrls"] as string[];
-    result["driveFolderId"] = driveUrls
-      .map((url) => {
-        const m = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
-        return m?.[1];
-      })
-      .find(Boolean) ?? null;
+    if (cfg["source"] === "derivedFrom") {
+      const sourceParam = cfg["param"] as string;
+      const extractPattern = cfg["extractPattern"] as string;
+      const extractMode = (cfg["extractMode"] as string) || "all"; // "all" | "first"
+
+      if (!sourceParam || !extractPattern || !result[sourceParam]) continue;
+
+      const sourceValues = result[sourceParam];
+      if (!Array.isArray(sourceValues)) continue;
+
+      try {
+        const re = new RegExp(extractPattern);
+        const extracted = sourceValues
+          .map((v: unknown) => {
+            if (typeof v !== "string") return null;
+            const m = v.match(re);
+            return m?.[1] ?? null;
+          })
+          .filter(Boolean);
+
+        if (extractMode === "first") {
+          result[paramName] = extracted[0] ?? null;
+        } else {
+          result[paramName] = extracted;
+        }
+      } catch {
+        // Invalid regex — skip silently
+      }
+    }
   }
 
   return result;
@@ -752,60 +769,7 @@ export async function executeCapability(params: UCEParams): Promise<UCEResult> {
   return result;
 }
 
-/**
- * Match a user message to a capability via trigger_patterns and execute it.
- *
- * Used by reflex-engine when doing DB-backed pattern matching.
- */
-export async function matchAndExecuteCapability(
-  supabase: SupabaseClient,
-  organizationId: string,
-  userId: string,
-  aiWorkerId: string | undefined,
-  userMessage: string,
-  detectedUrls: string[],
-  conversationHistory: Array<{ role: string; content: string }>,
-): Promise<UCEResult | null> {
-  // Check if session-continue should take priority
-  const recentMessages = conversationHistory.slice(-6).map((m) => m.content).join(" ");
-  const hasActiveSession = recentMessages.includes("sessionId:") ||
-    recentMessages.includes("Session ID:") ||
-    recentMessages.includes("session is ready") ||
-    recentMessages.includes("Product Analyst");
-
-  const sessionContinueTriggers = [
-    "write user story", "write story", "next story", "another story",
-    "revise", "approved", "looks good", "lgtm", "try again", "redo",
-    "write prd", "write requirement", "acceptance criteria",
-  ];
-  const lowerMsg = userMessage.toLowerCase();
-  const wantsSessionContinue = sessionContinueTriggers.some((t) => lowerMsg.includes(t));
-
-  if (hasActiveSession && wantsSessionContinue) {
-    return executeCapability({
-      supabase,
-      organizationId,
-      userId,
-      aiWorkerId,
-      capabilityName: "session-continue",
-      params: { userInput: userMessage },
-      userMessage,
-      detectedUrls,
-    });
-  }
-
-  // General trigger pattern matching
-  const capability = await findCapabilityByTrigger(supabase, organizationId, userMessage);
-  if (!capability) return null;
-
-  return executeCapability({
-    supabase,
-    organizationId,
-    userId,
-    aiWorkerId,
-    capabilityName: capability.name,
-    params: {},
-    userMessage,
-    detectedUrls,
-  });
-}
+// matchAndExecuteCapability removed in ADR-031.
+// Session detection and trigger matching are now fully handled by
+// reflex-engine.ts (System 1) + workflow-synthesizer.ts (System 2).
+// The reflex engine calls executeCapability() directly via the dispatcher.

@@ -1,12 +1,12 @@
 /**
- * Reflex Dispatcher — ADR-030 L31 Delegation Router
- * ==================================================
+ * Reflex Dispatcher — ADR-031 Zero-Hardcoded Delegation Router
+ * ==============================================================
  *
  * Thin adapter: takes a delegate action from the reflex engine and
  * executes it via the Universal Capability Executor.
  *
- * The hardcoded switch statement that used to live here has been replaced
- * by capability_library — all capability logic lives in the DB, not code.
+ * ADR-031: No HANDLER_TO_CAPABILITY map. The handler IS the capability name.
+ * The reflex engine emits capability names directly from DB trigger matching.
  *
  * Called from chat/route.ts when the reflex engine returns a "delegate" action.
  */
@@ -32,38 +32,22 @@ export interface ReflexDelegateResult {
 }
 
 /**
- * Map legacy handler names (from hardcoded reflexes) to capability_library names.
- */
-const HANDLER_TO_CAPABILITY: Record<string, string> = {
-  runCompetitorIntelligence: "competitive-intelligence",
-  initializeProductAnalyst: "product-analyst",
-  continueAgentSession: "session-continue",
-  // Accounting uses inject action — capability name matches directly
-  "accounting-gl": "accounting-gl",
-};
-
-/**
- * Dispatch a reflex delegate action to the appropriate capability.
+ * Dispatch a reflex delegate action to the Universal Capability Executor.
  *
- * The handler name comes from the reflex engine (which still uses legacy
- * handler names from BUILT_IN_REFLEXES). We map to capability_library names here.
- *
- * In future: reflex engine will emit capability names directly.
+ * The handler name is the capability name (from capability_library.name).
+ * No translation map needed — reflex engine emits DB names directly.
  */
 export async function dispatchReflexDelegate(
   params: ReflexDelegateParams,
 ): Promise<ReflexDelegateResult> {
   const { handler, params: handlerParams, supabase, userMessage = "", detectedUrls = [] } = params;
 
-  // Resolve the capability name
-  const capabilityName = HANDLER_TO_CAPABILITY[handler] ?? handler;
-
   const result = await executeCapability({
     supabase,
     organizationId: handlerParams.organizationId as string,
     userId: handlerParams.userId as string,
     aiWorkerId: handlerParams.aiWorkerId as string | undefined,
-    capabilityName,
+    capabilityName: handler, // Direct — no mapping needed
     params: handlerParams,
     userMessage,
     detectedUrls,

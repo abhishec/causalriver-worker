@@ -118,9 +118,19 @@ export async function GET(req: NextRequest) {
 
             if (existingTool?.length) continue; // Already have a tool
 
-            // Synthesize!
-            const { synthesizeToolFromGap } = await import("@/lib/brain/tool-maker");
-            const result = await synthesizeToolFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
+            // ADR-031: Route to appropriate synthesizer based on gap domain.
+            // reflex: domain gaps → workflow synthesis (generates step graphs)
+            // other domain gaps → compute synthesis (generates JS functions)
+            const isReflexGap = gap.domain.startsWith("reflex:");
+            let result;
+
+            if (isReflexGap) {
+              const { synthesizeWorkflowFromGap } = await import("@/lib/brain/tool-maker");
+              result = await synthesizeWorkflowFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
+            } else {
+              const { synthesizeToolFromGap } = await import("@/lib/brain/tool-maker");
+              result = await synthesizeToolFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
+            }
 
             if (result) {
               synthesized++;

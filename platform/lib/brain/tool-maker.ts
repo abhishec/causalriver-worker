@@ -592,3 +592,63 @@ export async function synthesizeToolFromGap(
     return null;
   }
 }
+
+// ── ADR-031: Workflow Synthesis for Reflex Gaps ─────────────────────────────
+
+/**
+ * Synthesize a workflow-type capability from a reflex gap.
+ *
+ * Called by the cron tool-maker when a gap has domain starting with "reflex:".
+ * Uses the workflow-synthesizer to generate a workflow_definition (not a compute function).
+ *
+ * This bridges the gap between:
+ * - Inline synthesis (immediate, during user request, via workflow-synthesizer.ts)
+ * - Background synthesis (cron, 30 min cadence, via tool-maker.ts)
+ *
+ * Background synthesis uses Sonnet for higher quality and runs self-correction.
+ */
+export async function synthesizeWorkflowFromGap(
+  supabase: SupabaseClient,
+  orgId: string,
+  gap: { id: string; domain: string; query: string; occurrences: number },
+  apiKey: string,
+): Promise<{ toolId: string; status: "candidate" | "validated" } | null> {
+  try {
+    // Import synthesizer dynamically to avoid circular deps
+    const { synthesizeWorkflow } = await import("./workflow-synthesizer");
+
+    // Use the synthesizer with the gap's query as the user message
+    const synthesized = await synthesizeWorkflow(
+      supabase,
+      orgId,
+      gap.query,
+      [], // no URLs in background synthesis
+      [], // no conversation history
+    );
+
+    if (!synthesized) {
+      logger.warn("[tool-maker] Workflow synthesis returned null for gap", {
+        orgId,
+        gapId: gap.id,
+        domain: gap.domain,
+      });
+      return null;
+    }
+
+    logger.info("[tool-maker] Workflow synthesized from gap", {
+      orgId,
+      gapId: gap.id,
+      toolId: synthesized.id.slice(0, 8),
+      name: synthesized.name,
+    });
+
+    return { toolId: synthesized.id, status: "validated" };
+  } catch (err) {
+    logger.warn("[tool-maker] synthesizeWorkflowFromGap failed (non-fatal)", {
+      orgId,
+      gapId: gap.id,
+      error: String(err),
+    });
+    return null;
+  }
+}

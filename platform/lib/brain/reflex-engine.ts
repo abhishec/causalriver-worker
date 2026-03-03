@@ -1,11 +1,11 @@
 /**
- * Reflexive Agent Architecture — L31 Brain Layer (ADR-030)
- * =========================================================
+ * Reflexive Agent Architecture — L31 Brain Layer (ADR-030 / ADR-031)
+ * ===================================================================
  *
  * Dual-process cognitive architecture (Kahneman System 1 / System 2):
  *
- *   System 1 (Reflex Layer) — deterministic FSMs for known patterns, 100% reliable
- *   System 2 (LLM Cortex)   — deliberative reasoning for novel situations
+ *   System 1 (Reflex Layer) — DB-driven pattern matching against capability_library
+ *   System 2 (Workflow Synthesizer) — LLM generates a new capability on-the-fly
  *
  * The reflex engine runs BEFORE the LLM in the copilot chat route. If a reflex
  * matches, it either:
@@ -13,15 +13,16 @@
  *   - Injects messages into conversation stream (augmenting LLM context)
  *   - Delegates to the Universal Capability Executor
  *
- * Anti-Pattern Guards constrain LLM behavior for known-dangerous contexts.
+ * ADR-031 ZERO-HARDCODED DESIGN:
+ *   - NO hardcoded capability names (no "competitive-intelligence", "session-continue")
+ *   - NO hardcoded URL patterns (no "atlassian.net", "drive.google.com")
+ *   - NO hardcoded session detection (generic agent_sessions DB query)
+ *   - Guards stored per-capability in capability_library.guards column
+ *   - All matching is database-driven via trigger_patterns
  *
- * Self-Evolving Loop: Post-flight detects repeated LLM failures → records reflex
- * gap in capability_library → tool-maker synthesizes a deterministic reflex →
- * promoted reflex starts intercepting before the LLM.
- *
- * Capability-Driven Design: All capabilities (competitive intelligence,
- * product analyst, accounting, etc.) are rows in capability_library.
- * The engine matches trigger_patterns from DB — no hardcoded reflexes.
+ * Self-Evolving Loop:
+ *   System 1 miss → System 2 synthesizes workflow → stored in capability_library
+ *   → next time System 1 matches → fast path. RL feedback promotes/demotes.
  *
  * Research: Kahneman (2011) dual-process theory, spinal reflex arc analogy.
  */
@@ -65,12 +66,7 @@ export function extractUrls(text: string): string[] {
   return [...text.matchAll(re)].map(m => m[0]);
 }
 
-function has(text: string, patterns: string[]): boolean {
-  const lower = text.toLowerCase();
-  return patterns.some(p => lower.includes(p.toLowerCase()));
-}
-
-// ── Built-in Guards (these are always present — not capability-dependent) ────
+// ── Built-in Guards (universal — not domain-specific) ────────────────────────
 
 const ALWAYS_ON_GUARDS: Guard[] = [
   {
@@ -82,30 +78,7 @@ const ALWAYS_ON_GUARDS: Guard[] = [
   },
 ];
 
-const CONTEXTUAL_GUARDS: Array<{ test: (ctx: ReflexContext) => boolean; guard: Guard }> = [
-  {
-    test: (ctx) => has(ctx.message, ["journal", "ledger", "reconcil", "financial", "accounting"]),
-    guard: {
-      name: "accounting-precision",
-      systemPromptAddition:
-        `## BEHAVIOR CONSTRAINT: Financial Precision\n` +
-        `All monetary amounts to 2 decimal places. Debits MUST equal credits.\n` +
-        `Never approximate financial figures. Always specify currency (default SGD).`,
-    },
-  },
-  {
-    test: (ctx) => has(ctx.message, ["competitor", "scan", "crawl"]),
-    guard: {
-      name: "force-web-crawler",
-      systemPromptAddition:
-        `## BEHAVIOR CONSTRAINT: Web Crawling Required\n` +
-        `For competitor analysis, ALWAYS use the web crawler tool. Do NOT hallucinate\n` +
-        `product features or website content. Only report data actually retrieved.`,
-    },
-  },
-];
-
-// ── DB-backed capability row ──────────────────────────────────────────────────
+// ── DB-backed capability row ─────────────────────────────────────────────────
 
 interface CapabilityRow {
   id: string;
@@ -115,6 +88,7 @@ interface CapabilityRow {
   trigger_patterns: string[];
   quality_score: number;
   organization_id: string;
+  guards: Array<{ name: string; systemPromptAddition: string }> | null;
 }
 
 // System org sentinel for template rows
@@ -142,28 +116,70 @@ export function buildReflexContext(
 }
 
 /**
- * Run the reflex engine against a message.
- *
- * Pattern matching is done against capability_library.trigger_patterns via
- * loadCapabilityReflexes(). No hardcoded patterns.
- *
- * Returns guards (always) + matched action (if any).
- *
- * NOTE: This function is synchronous so it can be called without await.
- * DB-backed capability matching uses the async version below.
+ * Run the reflex engine (sync — guards only, no DB matching).
  */
 export function runReflexEngine(
   ctx: ReflexContext,
 ): ReflexResult {
-  // Collect active guards
-  const guards: Guard[] = [...ALWAYS_ON_GUARDS];
-  for (const { test, guard } of CONTEXTUAL_GUARDS) {
-    if (test(ctx)) guards.push(guard);
-  }
+  void ctx;
+  return { matched: false, guards: [...ALWAYS_ON_GUARDS] };
+}
 
-  // Return guards only — actual capability matching is done asynchronously
-  // by runReflexEngineAsync() which queries capability_library
-  return { matched: false, guards };
+// ── Generic session detection ────────────────────────────────────────────────
+
+/**
+ * Check if there's an active agent session for this org/worker.
+ * Returns the session's agent_type if found, null otherwise.
+ *
+ * This replaces the hardcoded "Product Analyst" / "sessionId:" checks.
+ */
+async function findActiveSession(
+  supabase: SupabaseClient,
+  organizationId: string,
+  aiWorkerId?: string,
+): Promise<{ id: string; agentType: string } | null> {
+  try {
+    let query = supabase
+      .from("agent_sessions")
+      .select("id, agent_type")
+      .eq("organization_id", organizationId)
+      .eq("status", "active")
+      .order("updated_at", { ascending: false })
+      .limit(1);
+
+    if (aiWorkerId) {
+      query = query.eq("ai_worker_id", aiWorkerId);
+    }
+
+    const { data } = await query;
+    if (data?.length) {
+      return { id: data[0].id as string, agentType: data[0].agent_type as string };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if this message looks like a session continuation vs a new capability request.
+ *
+ * Session-continue triggers: conversational follow-ups that imply continuing
+ * an existing interaction rather than starting something new.
+ *
+ * These are stored per-capability in trigger_patterns — but we need a quick
+ * heuristic to decide if we should PRIORITIZE session-continue over other matches.
+ */
+function looksLikeContinuation(message: string): boolean {
+  const lower = message.toLowerCase().trim();
+
+  // Very short messages are usually continuations (e.g., "yes", "approved", "next")
+  if (lower.length < 30) return true;
+
+  // Messages without URLs are more likely continuations
+  if (!extractUrls(message).length) return true;
+
+  return false;
 }
 
 /**
@@ -171,26 +187,25 @@ export function runReflexEngine(
  *
  * This is the primary entry point used by chat/route.ts.
  * Matches trigger_patterns from capability_library rows.
+ *
+ * ADR-031: Zero hardcoded patterns. All matching is database-driven.
+ * If no match: engages System 2 (workflow synthesizer) to generate
+ * a capability on-the-fly.
  */
 export async function runReflexEngineAsync(
   ctx: ReflexContext,
   supabase: SupabaseClient,
 ): Promise<ReflexResult> {
-  // Collect active guards
+  // Collect universal guards
   const guards: Guard[] = [...ALWAYS_ON_GUARDS];
-  for (const { test, guard } of CONTEXTUAL_GUARDS) {
-    if (test(ctx)) guards.push(guard);
-  }
 
   // Load capabilities from DB
   const capabilities = await loadCapabilityReflexes(supabase, ctx.organizationId);
 
-  if (capabilities.length === 0) {
-    return { matched: false, guards };
-  }
+  // Check for active session (generic — no hardcoded agent types)
+  const activeSession = await findActiveSession(supabase, ctx.organizationId, ctx.aiWorkerId);
 
   const lowerMessage = ctx.message.toLowerCase();
-  const recentHistory = ctx.conversationHistory.slice(-6).map((m) => m.content).join(" ");
 
   // Score each capability by trigger pattern matches
   type ScoredCap = { cap: CapabilityRow; score: number };
@@ -200,65 +215,121 @@ export async function runReflexEngineAsync(
     const patterns = cap.trigger_patterns ?? [];
     let matchCount = patterns.filter((p) => lowerMessage.includes(p.toLowerCase())).length;
 
-    // session-continue: check for active session in history AND continuation intent
-    if (cap.name === "session-continue") {
-      const hasSession = recentHistory.includes("sessionId:") ||
-        recentHistory.includes("Session ID:") ||
-        recentHistory.includes("session is ready") ||
-        recentHistory.includes("Product Analyst");
-      if (!hasSession) continue; // session-continue requires an active session
-      matchCount += hasSession ? 5 : 0; // boost priority when session is active
+    // Generic session-continue boosting:
+    // If there's an active session AND message looks like a continuation AND
+    // this capability's tool_type is 'workflow' with trigger_patterns matching
+    // continuation keywords → boost it.
+    if (cap.tool_type === "workflow" && activeSession && looksLikeContinuation(ctx.message)) {
+      // Check if this capability handles session continuation
+      // (its trigger_patterns will include things like "write", "revise", "approve" etc.)
+      if (matchCount > 0) {
+        matchCount += 5; // Significant boost when session is active + has pattern match
+      }
     }
 
     if (matchCount > 0) {
       // Org-specific rows beat system templates
       const orgBonus = cap.organization_id === ctx.organizationId ? 2 : 0;
       scored.push({ cap, score: matchCount + orgBonus + cap.quality_score });
+
+      // Merge capability-specific guards
+      if (cap.guards && Array.isArray(cap.guards)) {
+        for (const g of cap.guards) {
+          if (g.name && g.systemPromptAddition) {
+            guards.push(g);
+          }
+        }
+      }
     }
   }
 
-  if (scored.length === 0) {
-    return { matched: false, guards };
+  if (scored.length > 0) {
+    // Sort by score descending, first match wins
+    scored.sort((a, b) => b.score - a.score);
+    const winner = scored[0].cap;
+
+    logger.warn("[reflex-engine] Capability matched (System 1)", {
+      capability: winner.name,
+      score: scored[0].score,
+      orgId: ctx.organizationId,
+      hasActiveSession: !!activeSession,
+    });
+
+    // Build delegate action — pass ALL URLs through, let UCE extractParams handle filtering
+    const action: ReflexAction = {
+      type: "delegate",
+      handler: winner.name,
+      params: {
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        aiWorkerId: ctx.aiWorkerId,
+        urls: ctx.detectedUrls, // ALL URLs — no pre-filtering
+        userInput: ctx.message,
+        // Pass active session info if available (UCE/primitives may need it)
+        ...(activeSession ? { activeSessionId: activeSession.id, activeSessionAgentType: activeSession.agentType } : {}),
+      },
+    };
+
+    return { matched: true, reflexName: winner.name, action, guards };
   }
 
-  // Sort by score descending, first match wins
-  scored.sort((a, b) => b.score - a.score);
-  const winner = scored[0].cap;
+  // ── System 2: Workflow Synthesis ──────────────────────────────────────────
+  // No match in capability_library — engage the synthesizer to create
+  // a new capability on-the-fly.
 
-  logger.warn("[reflex-engine] Capability matched", {
-    capability: winner.name,
-    score: scored[0].score,
-    orgId: ctx.organizationId,
-  });
+  try {
+    const { synthesizeWorkflow } = await import("./workflow-synthesizer");
+    const synthesized = await synthesizeWorkflow(
+      supabase,
+      ctx.organizationId,
+      ctx.message,
+      ctx.detectedUrls,
+      ctx.conversationHistory,
+    );
 
-  const action: ReflexAction = {
-    type: "delegate",
-    handler: winner.name, // UCE uses this as capabilityName
-    params: {
-      organizationId: ctx.organizationId,
-      userId: ctx.userId,
-      aiWorkerId: ctx.aiWorkerId,
-      competitorUrls: ctx.detectedUrls.filter(u =>
-        !u.includes("atlassian.net") && !u.includes("confluence") && !u.includes("drive.google.com")
-      ),
-      confluenceUrls: ctx.detectedUrls.filter(u =>
-        u.includes("atlassian.net") || u.includes("confluence")
-      ),
-      driveUrls: ctx.detectedUrls.filter(u => u.includes("drive.google.com")),
-      docUrls: ctx.detectedUrls.filter(u =>
-        !u.includes("atlassian.net") && !u.includes("confluence") && !u.includes("drive.google.com")
-      ),
-      userInput: ctx.message,
-    },
-  };
+    if (synthesized) {
+      logger.warn("[reflex-engine] Capability synthesized (System 2)", {
+        capability: synthesized.name,
+        orgId: ctx.organizationId,
+      });
 
-  return { matched: true, reflexName: winner.name, action, guards };
+      // Merge synthesized capability's guards
+      if (synthesized.guards?.length) {
+        for (const g of synthesized.guards) {
+          guards.push(g);
+        }
+      }
+
+      return {
+        matched: true,
+        reflexName: synthesized.name,
+        action: {
+          type: "delegate",
+          handler: synthesized.name,
+          params: {
+            organizationId: ctx.organizationId,
+            userId: ctx.userId,
+            aiWorkerId: ctx.aiWorkerId,
+            urls: ctx.detectedUrls,
+            userInput: ctx.message,
+            ...(activeSession ? { activeSessionId: activeSession.id, activeSessionAgentType: activeSession.agentType } : {}),
+          },
+        },
+        guards,
+      };
+    }
+  } catch (err) {
+    logger.warn("[reflex-engine] System 2 synthesis failed (non-fatal)", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  return { matched: false, guards };
 }
 
 /**
  * Load capabilities from capability_library that have trigger_patterns.
- * Fetches org-specific promoted rows + system template rows.
- * Cached implicitly by Supabase client's connection pooling.
+ * Fetches org-specific + system template rows with validated/promoted status.
  */
 export async function loadCapabilityReflexes(
   supabase: SupabaseClient,
@@ -267,7 +338,7 @@ export async function loadCapabilityReflexes(
   try {
     const { data, error } = await supabase
       .from("capability_library")
-      .select("id, name, description, tool_type, trigger_patterns, quality_score, organization_id")
+      .select("id, name, description, tool_type, trigger_patterns, quality_score, organization_id, guards")
       .in("organization_id", [organizationId, SYSTEM_ORG_ID])
       .in("status", ["validated", "promoted"])
       .not("trigger_patterns", "eq", "{}")
@@ -301,7 +372,6 @@ export async function loadCustomReflexes(
   supabase: SupabaseClient,
   organizationId: string,
 ): Promise<[]> {
-  // No-op: capabilities are now loaded directly in runReflexEngineAsync
   void supabase;
   void organizationId;
   return [];
