@@ -239,6 +239,14 @@ export const CONNECTOR_AUTH_MAP: Record<string, ConnectorAuthConfig> = {
     description: "Campaign performance metrics",
   },
 
+  // ── Document Sources ─────────────────────────────────────────────────────
+  google_drive: {
+    displayName: "Google Drive",
+    authMethod: "oauth",
+    oauthRoute: "/api/connectors/google-drive/auth",
+    description: "PDF, DOCX, and text files from Google Drive folders",
+  },
+
   // ── Generic ──────────────────────────────────────────────────────────────
   generic_api: {
     displayName: "Custom API",

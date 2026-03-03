@@ -410,3 +410,137 @@ export async function searchDocumentChunks(
 
   return data ?? [];
 }
+
+/**
+ * Scoped document search — filters to only the agent's corpus.
+ *
+ * Used by interactive agents to search within their own knowledge scope
+ * (a curated set of documents or ingestion jobs) rather than the entire
+ * organization corpus. Falls back to global search when no scope provided.
+ *
+ * Scope filters (applied as AND conditions):
+ *   ingestionJobIds — match chunks whose metadata->>'ingestionJobId' is in list
+ *   documentIds     — match chunks by document_id column
+ *   sourceTypes     — match chunks by source_type column
+ *
+ * Search is a tsvector full-text search — appropriate for scoped sets because
+ * the corpus is small enough that precision matters more than recall ranking.
+ */
+export async function searchDocumentChunksScoped(
+  supabase: SupabaseClient,
+  organizationId: string,
+  query: string,
+  scope?: {
+    documentIds?: string[];
+    ingestionJobIds?: string[];
+    sourceTypes?: string[];
+  },
+  limit = 5
+): Promise<
+  Array<{
+    chunk_text: string;
+    document_title: string | null;
+    chunk_index: number;
+    source_type: string;
+  }>
+> {
+  // No scope or empty scope: delegate to the full global search
+  const hasDocumentIds = (scope?.documentIds?.length ?? 0) > 0;
+  const hasIngestionJobIds = (scope?.ingestionJobIds?.length ?? 0) > 0;
+  const hasSourceTypes = (scope?.sourceTypes?.length ?? 0) > 0;
+
+  if (!scope || (!hasDocumentIds && !hasIngestionJobIds && !hasSourceTypes)) {
+    return searchDocumentChunks(supabase, organizationId, query, limit);
+  }
+
+  // Empty query: return most recently ingested chunks within scope
+  if (!query.trim()) {
+    let recentQuery = supabase
+      .from("document_chunks")
+      .select("chunk_text, document_title, chunk_index, source_type")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (hasDocumentIds) {
+      recentQuery = recentQuery.in("document_id", scope!.documentIds!);
+    }
+    if (hasSourceTypes) {
+      recentQuery = recentQuery.in("source_type", scope!.sourceTypes!);
+    }
+
+    const { data, error } = await recentQuery;
+
+    if (error) {
+      logger.warn("[document-ingester] searchDocumentChunksScoped (recent) failed", {
+        error: error.message,
+        organizationId,
+      });
+      return [];
+    }
+
+    // Filter by ingestionJobId post-fetch (metadata JSONB filter not supported via typed client)
+    if (hasIngestionJobIds && data) {
+      const jobIds = new Set(scope!.ingestionJobIds!);
+      return data.filter((row: { chunk_text: string; document_title: string | null; chunk_index: number; source_type: string; metadata?: Record<string, unknown> }) => {
+        const meta = (row as { metadata?: Record<string, unknown> }).metadata ?? {};
+        return jobIds.has(meta["ingestionJobId"] as string);
+      });
+    }
+
+    return data ?? [];
+  }
+
+  // Non-empty query: tsvector full-text search with scope filters
+  let scopedQuery = supabase
+    .from("document_chunks")
+    .select("chunk_text, document_title, chunk_index, source_type, metadata")
+    .eq("organization_id", organizationId)
+    .textSearch("search_vector", query.split(" ").join(" | "), { type: "websearch" })
+    .order("created_at", { ascending: false })
+    .limit(hasIngestionJobIds ? limit * 4 : limit); // over-fetch when we need to post-filter by metadata
+
+  if (hasDocumentIds) {
+    scopedQuery = scopedQuery.in("document_id", scope!.documentIds!);
+  }
+  if (hasSourceTypes) {
+    scopedQuery = scopedQuery.in("source_type", scope!.sourceTypes!);
+  }
+
+  const { data, error } = await scopedQuery;
+
+  if (error) {
+    logger.warn("[document-ingester] searchDocumentChunksScoped tsvector failed", {
+      error: error.message,
+      organizationId,
+      scope,
+    });
+    // Graceful degradation: fall back to global search
+    return searchDocumentChunks(supabase, organizationId, query, limit);
+  }
+
+  let results = (data ?? []) as Array<{
+    chunk_text: string;
+    document_title: string | null;
+    chunk_index: number;
+    source_type: string;
+    metadata?: Record<string, unknown>;
+  }>;
+
+  // Post-filter by ingestionJobId (stored in JSONB metadata)
+  if (hasIngestionJobIds) {
+    const jobIds = new Set(scope!.ingestionJobIds!);
+    results = results.filter((row) => {
+      const meta = row.metadata ?? {};
+      return jobIds.has(meta["ingestionJobId"] as string);
+    });
+  }
+
+  // Strip metadata from return shape to match the expected interface
+  return results.slice(0, limit).map((row) => ({
+    chunk_text: row.chunk_text,
+    document_title: row.document_title,
+    chunk_index: row.chunk_index,
+    source_type: row.source_type,
+  }));
+}

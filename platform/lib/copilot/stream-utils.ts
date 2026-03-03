@@ -99,10 +99,44 @@ export function createSSEStream() {
     send(JSON.stringify({ workflowProgress: progress }));
   };
 
+  /**
+   * Stream bulk ingestion progress to the UI.
+   * Emitted during batch document ingestion jobs to show per-document status.
+   */
+  const sendIngestionProgress = (progress: {
+    jobId: string;
+    totalDocuments: number;
+    processedDocuments: number;
+    currentDocument?: string;
+    chunksCreated?: number;
+    status: "running" | "completed" | "failed" | "partial";
+    errorMessage?: string;
+  }) => {
+    send(JSON.stringify({ ingestionProgress: progress }));
+  };
+
+  /**
+   * Stream an interactive agent turn result to the UI.
+   * Emitted after each user input → agent output exchange in a session.
+   */
+  const sendSessionTurn = (turn: {
+    sessionId: string;
+    turnId: string;
+    turnNumber: number;
+    agentType: string;
+    output: string;
+    tokensUsed?: number;
+    ragResultsUsed?: number;
+    status: "completed" | "failed";
+    errorMessage?: string;
+  }) => {
+    send(JSON.stringify({ sessionTurn: turn }));
+  };
+
   return {
     stream, send, sendText, sendError, close,
     sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
-    sendWorkflowProgress,
+    sendWorkflowProgress, sendIngestionProgress, sendSessionTurn,
   };
 }
 

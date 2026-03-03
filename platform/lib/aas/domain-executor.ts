@@ -20,6 +20,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { logger } from "@/lib/logger";
+import { createJournalEntry, createReconciliation, upsertEntityFinancials } from "@/lib/aas/accounting-dal";
 import { recordAgentOutcome, computeAgentQuality } from "@/lib/brain/agent-rl";
 import { recordBrainLearning } from "@/lib/brain/engagement-flywheel";
 import { logAgentRetro } from "@/lib/brain/rl-agent-loop";
@@ -509,6 +510,78 @@ export async function executeAccountingAgent(
       // Non-fatal — CAS injection is best-effort
     }
   }
+
+  // ── Step 7b: ADR-029 Phase 4 — Persist structured accounting records ─────
+  // Fire-and-forget: DAL writes never block the agent response. Any failure
+  // is logged at warn level but does NOT surface to the caller. This keeps
+  // the hot path latency unchanged while durably recording agent output.
+  (async () => {
+    try {
+      if (action === 'bookkeep') {
+        // brain-bookkeeper returns journal entries in result.journalEntries[]
+        const entries = (finalResult['journalEntries'] as Array<Record<string, unknown>>) ?? [];
+        for (const entry of entries.slice(0, 20)) {
+          const lineItems = Array.isArray(entry['lineItems']) ? entry['lineItems'] : [];
+          if (lineItems.length === 0) continue;
+          await createJournalEntry(supabase, {
+            organizationId,
+            entryDate: (entry['entryDate'] as string) || new Date().toISOString().slice(0, 10),
+            referenceNumber: entry['referenceNumber'] as string | undefined,
+            description: (entry['description'] as string) || `Bookkeeping entry — ${action}`,
+            currency: (entry['currency'] as string) || jurisdiction || 'SGD',
+            lineItems: lineItems as import("@/lib/aas/accounting-dal").JournalEntryLineItem[],
+            source: 'agent',
+            agentJobId: undefined,
+            metadata: { agentName: info.name, action, jurisdiction },
+            createdBy: userId,
+          });
+        }
+      } else if (action === 'reconcile') {
+        // brain-reconciler returns reconciliation summary in result.reconciliation
+        const reco = finalResult['reconciliation'] as Record<string, unknown> | undefined;
+        if (reco) {
+          const periodRange = period ?? { from: undefined, to: undefined };
+          await createReconciliation(supabase, {
+            organizationId,
+            bankAccountName: (reco['bankAccountName'] as string) || (reco['account'] as string) || 'Bank Account',
+            periodStart: (reco['periodStart'] as string) || (periodRange.from as string) || new Date().toISOString().slice(0, 10),
+            periodEnd: (reco['periodEnd'] as string) || (periodRange.to as string) || new Date().toISOString().slice(0, 10),
+            bankStatementBalance: (reco['bankStatementBalance'] as number) ?? 0,
+            bookBalance: (reco['bookBalance'] as number) ?? 0,
+            agentJobId: undefined,
+            reconciledBy: userId,
+          });
+        }
+      } else if (action === 'statements' || action === 'causal-pl' || action === 'causal-analysis' || action === 'full') {
+        // brain-statement-generator / causal-pl-narrator return entity-level financials
+        const entityData = (finalResult['entityFinancials'] as Record<string, unknown>) ||
+                           (finalResult['financials'] as Record<string, unknown>) || {};
+        if (Object.keys(entityData).length > 0) {
+          await upsertEntityFinancials(supabase, {
+            organizationId,
+            entityName: (entityData['entityName'] as string) || organizationId,
+            entityCode: (entityData['entityCode'] as string) || organizationId.slice(0, 8),
+            period: period?.from?.slice(0, 7)
+              ? `${period.from.slice(0, 7)}-01`
+              : new Date().toISOString().slice(0, 10),
+            currency: (entityData['currency'] as string) || jurisdiction || 'SGD',
+            exchangeRate: entityData['exchangeRate'] as number | undefined,
+            financialData: (entityData['data'] as Record<string, unknown>) || entityData,
+            intercompanyEliminations: entityData['intercompanyEliminations'] as Record<string, unknown> | undefined,
+            consolidationAdjustments: entityData['consolidationAdjustments'] as Record<string, unknown> | undefined,
+            status: 'draft',
+            agentJobId: undefined,
+            createdBy: userId,
+          });
+        }
+      }
+    } catch (err: unknown) {
+      logger.warn('[aas/domain-executor] ADR-029 persistence fire-and-forget failed (non-fatal)', {
+        action,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  })();
 
   // ── Step 8: RL Outcome Recording ─────────────────────────────────────────
   // Mirror SE-aaS pattern: record quality signal to prediction_records +
