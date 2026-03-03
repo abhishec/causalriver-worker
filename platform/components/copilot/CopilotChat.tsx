@@ -108,6 +108,11 @@ export interface CopilotChatProps {
   customGatheringMap?: Record<string, import("./command-gathering").CommandGathering>;
   /** Called when user clicks "Create new agent..." in SlashCommandPicker */
   onCreateAgent?: () => void;
+  /**
+   * If set, load THIS conversation on mount instead of auto-loading the most recent.
+   * Used by the ConversationSidebar to jump to a specific past chat.
+   */
+  initialConversationId?: string;
 }
 
 // ─── Default values ─────────────────────────────────────────────────────────
@@ -1557,6 +1562,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   customCommands,
   customGatheringMap,
   onCreateAgent,
+  initialConversationId,
 }, ref) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1755,6 +1761,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
 
   // Load most-recent conversation on mount so history survives page refresh.
+  // If initialConversationId is set, load that specific conversation instead.
   // Falls back across all workspace memberships when the worker's org has no conversations
   // (server always saves to the user's primary workspace, not necessarily the worker's org).
   useEffect(() => {
@@ -1768,6 +1775,26 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       // In production there is no Fast Refresh, so this delay is harmless.
       await new Promise(r => setTimeout(r, 800));
       if (cancelled) return;
+
+      // If a specific conversation was requested (sidebar click), load it directly
+      if (initialConversationId) {
+        try {
+          const detailRes = await fetch(`/api/copilot/conversations/${initialConversationId}`);
+          if (detailRes.ok) {
+            const detailData = await detailRes.json() as { conversation?: { id: string; messages: Array<{ role: string; content: string }> } };
+            if (detailData?.conversation?.messages?.length) {
+              const loaded = detailData.conversation.messages
+                .filter(m => m.role === 'user' || m.role === 'assistant')
+                .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+              if (loaded.length > 0 && !cancelled) {
+                setMessages(loaded);
+                setConversationId(detailData.conversation.id);
+              }
+            }
+          }
+        } catch { /* non-critical */ }
+        return;
+      }
 
       // Build ordered list of org IDs to try: worker's org first, then all memberships
       const orgIdsToTry: string[] = primaryWorkspaceId ? [primaryWorkspaceId] : [];

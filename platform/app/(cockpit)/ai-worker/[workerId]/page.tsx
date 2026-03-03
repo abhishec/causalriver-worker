@@ -32,17 +32,21 @@ export default async function AIWorkerControlPage({ params }: Props) {
   }
 
   // Validate that the worker exists and belongs to this session's org (enforced by RLS).
+  // Also fetch organization_id so the Brain tab's consolidation runs against the correct
+  // workspace (not the platform-admin fallback CORE workspace from getCurrentWorkspaceId).
   // .maybeSingle() returns data=null when no row found (no throw), so redirect() won't
   // be accidentally swallowed by a catch block.
   const { data: workerRow } = await supabase
     .from("ai_workers")
-    .select("name")
+    .select("name, organization_id")
     .eq("id", workerId)
     .maybeSingle();
 
   if (!workerRow) redirect("/workspace");
 
   const initialWorkerName: string | undefined = workerRow.name ?? undefined;
+  // Use the worker's own org — always correct; avoids CORE workspace fallback for admins
+  const workerOrgId: string = (workerRow as any).organization_id ?? orgId;
 
-  return <AIWorkerControlClient orgId={orgId} workerId={workerId} initialWorkerName={initialWorkerName} />;
+  return <AIWorkerControlClient orgId={workerOrgId} workerId={workerId} initialWorkerName={initialWorkerName} />;
 }

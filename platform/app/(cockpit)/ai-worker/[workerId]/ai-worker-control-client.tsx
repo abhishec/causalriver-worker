@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
+import { ConversationSidebar } from "@/components/copilot/ConversationSidebar";
+import { useConversations } from "@/lib/use-conversations";
 
 const CopilotChat = dynamic(
   () => import("@/components/copilot/CopilotChat").then((m) => m.CopilotChat),
@@ -233,7 +235,10 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
 
   const fetchTierStats = useCallback(async () => {
     try {
-      const res = await fetch("/api/brain/tier-stats");
+      // Pass orgId so the server queries the worker's workspace, not the
+      // platform-admin CORE workspace fallback from getCurrentWorkspaceId().
+      const qs = orgId ? `?workspaceId=${encodeURIComponent(orgId)}` : "";
+      const res = await fetch(`/api/brain/tier-stats${qs}`);
       if (res.ok) {
         const d = await res.json();
         setTierStats({
@@ -245,7 +250,7 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
     } catch {
       // non-fatal
     }
-  }, []);
+  }, [orgId]);
 
   const fetchAgents = useCallback(async () => {
     setAgentsLoading(true);
@@ -617,14 +622,73 @@ function ChatTab({
   workerName: string;
   orgId: string;
 }) {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // activeConvId=null means fresh/new conversation; a UUID means load that specific chat
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  // chatKey changes force-remounts CopilotChat to load a different conversation
+  const [chatKey, setChatKey] = useState(() => crypto.randomUUID());
+
+  const {
+    conversations,
+    loading: convsLoading,
+    loadList,
+    deleteConversation,
+    renameConversation,
+    saveConversation,
+  } = useConversations(orgId || undefined);
+
+  const handleSelectConv = useCallback((id: string) => {
+    setActiveConvId(id);
+    setChatKey(id); // remount CopilotChat to load the selected conversation
+  }, []);
+
+  const handleNewConv = useCallback(() => {
+    setActiveConvId(null);
+    setChatKey(crypto.randomUUID()); // remount CopilotChat with empty messages
+  }, []);
+
+  const handleDeleteConv = useCallback(async (id: string) => {
+    await deleteConversation(id);
+    // If the deleted conv was active, start fresh
+    if (id === activeConvId) handleNewConv();
+  }, [deleteConversation, activeConvId, handleNewConv]);
+
+  const handleSave = useCallback(async (opts: { messages: { role: string; content: string }[]; title: string; serviceMode: string }) => {
+    await saveConversation({
+      conversationId: activeConvId ?? undefined,
+      title: opts.title,
+      serviceMode: (opts.serviceMode as "general" | "aas" | "seaas") || "general",
+      messages: opts.messages as { role: "user" | "assistant"; content: string }[],
+    });
+    loadList(); // refresh sidebar after save
+  }, [saveConversation, activeConvId, loadList]);
+
   return (
-    <CopilotChat
-      endpoint="/api/copilot/chat"
-      extraParams={{ workspaceId: orgId, workerId }}
-      showHeader={false}
-      examplePrompts={[]}
-      persona={{ name: workerName, description: "AI Worker" }}
-    />
+    <div className="flex h-full overflow-hidden">
+      <ConversationSidebar
+        conversations={conversations}
+        activeId={activeConvId}
+        onSelect={handleSelectConv}
+        onNew={handleNewConv}
+        onDelete={handleDeleteConv}
+        onRename={renameConversation}
+        loading={convsLoading}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+      />
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <CopilotChat
+          key={chatKey}
+          endpoint="/api/copilot/chat"
+          extraParams={{ workspaceId: orgId, workerId }}
+          showHeader={false}
+          examplePrompts={[]}
+          persona={{ name: workerName, description: "AI Worker" }}
+          initialConversationId={activeConvId ?? undefined}
+          onSave={handleSave}
+        />
+      </div>
+    </div>
   );
 }
 

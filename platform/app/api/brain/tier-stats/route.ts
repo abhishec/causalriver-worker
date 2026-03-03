@@ -19,7 +19,7 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   // ── Auth ─────────────────────────────────────────────────────────────
   let supabase;
   let user = null;
@@ -37,7 +37,11 @@ export async function GET(): Promise<NextResponse> {
   }
 
   try {
-    const orgId = await getCurrentWorkspaceId();
+    // Accept workspaceId from query param (sent by AI Worker Brain tab so we
+    // query the worker's actual org, not the admin CORE workspace fallback).
+    const url = new URL(request.url);
+    const queryWorkspaceId = url.searchParams.get("workspaceId") || undefined;
+    const orgId = queryWorkspaceId || (await getCurrentWorkspaceId());
 
     if (!orgId) {
       return NextResponse.json({
