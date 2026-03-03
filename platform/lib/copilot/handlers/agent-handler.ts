@@ -206,7 +206,10 @@ export function detectAgentIntent(
   if (
     /(?:train|retrain|start\s+training|run\s+(?:brain\s+)?training)\s+(?:the\s+)?brain\b/i.test(message) ||
     /brain\s+training/i.test(message) ||
-    /(?:train|retrain)\s+(?:the\s+)?(?:ai|brain|model)\b/i.test(message)
+    /(?:train|retrain)\s+(?:the\s+)?(?:ai|brain|model)\b/i.test(message) ||
+    /\b(?:begin|start|kick\s+off|run|trigger)\s+training\b/i.test(message) ||
+    /\bbegin\s+(?:the\s+)?(?:learning|training|consolidation)\b/i.test(message) ||
+    /\brun\s+(?:consolidation|brain\s+cycle)\b/i.test(message)
   ) {
     agentType = "train-brain";
   } else if (/review\s+(?:pr|pull|code|diff)|pr\s+review|code\s+review/i.test(lower)) {

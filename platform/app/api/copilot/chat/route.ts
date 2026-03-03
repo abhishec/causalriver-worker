@@ -880,6 +880,11 @@ export async function POST(request: NextRequest) {
     // ── Connector intent detection (fast regex, before LLM routing) ──────────
     // These are handled by emitting SSE events + letting the LLM narrate.
     const connectorStatusIntent = /\b(what(?:'s| is| am i| are my) (?:connected(?:\s+to)?|my connectors?|connections?|integrations?)|show (?:me )?(?:my )?(?:connections?|connectors?|integrations?)|connector status|my integrations?|what(?:'s| is) (?:hooked up|linked)|which (?:tools?|services?) (?:are|is) (?:connected|active|linked)|connected\s+to)\b/i.test(message);
+    // "check all connections" / "sync all" → triggers sync-all agent
+    const syncAllIntent =
+      /\b(?:check|verify|refresh|sync|resync|update)\s+(?:all\s+)?(?:my\s+)?(?:connections?|connectors?|integrations?|sources?)\b/i.test(message) ||
+      /\bsync[\s-]all\b/i.test(message) ||
+      /\b(?:pull|fetch)\s+(?:all\s+)?(?:latest\s+)?(?:data\s+from\s+)?(?:all\s+)?(?:connections?|connectors?)\b/i.test(message);
     const connectMatch = message.match(
       /\b(?:connect|setup|set up|add|link|integrate)\s+(?:to\s+)?(?:my\s+)?(github|jira|confluence|slack|freshdesk|freshchat|freshsales|hubspot|notion|linear|stripe|xero|quickbooks|datadog|cloudwatch|intercom|zendesk|mailchimp|elastic|elk|google[_\s]chat|google[_\s]calendar|s3|voice|generic[_\s]api)\b/i
     );
@@ -3993,7 +3998,8 @@ When the user asks about data from a specific source (e.g. Slack, GitHub, Jira, 
 - If that source is NOT in ANY list: tell the user it is not connected yet and direct them to Settings > Connectors (path: /connectors) to add it.
 - If that source is inactive/pending: tell the user the connector exists but is not yet active — they should check the connector status in Settings > Connectors.
 ${connectorStatusIntent ? "- The user just asked about their connection status. A connector status card has been shown in the UI. Briefly confirm what's active and what isn't, without listing every connector by name." : ""}
-${normalizedConnectType ? `- The user wants to connect ${normalizedConnectType}. A setup card has been shown in the UI. Briefly acknowledge this and tell them to complete the form in the card above.` : ""}`;
+${normalizedConnectType ? `- The user wants to connect ${normalizedConnectType}. A setup card has been shown in the UI. Briefly acknowledge this and tell them to complete the form in the card above.` : ""}
+${syncAllIntent && !connectorStatusIntent && !normalizedConnectType ? "- The user asked to check or sync all connections. A background sync has been triggered for all active connectors. Confirm that the sync has started and will pull fresh data from all connected sources (GitHub, Jira, Slack, etc.). Tell them the brain will automatically learn from the new signals once sync completes. ETA is typically 30-120 seconds per connector." : ""}`;
       } else {
         // No connectors at all — LLM already has the zero-data guard, but clarify no connectors configured
         effectiveSystemPrompt += `\n\n## CONNECTED DATA SOURCES
@@ -4399,6 +4405,22 @@ No connectors are configured yet. When the user asks for data from any source (S
             send(JSON.stringify({ connectorStatus: { connectors: connStatusRows ?? [] } }));
           } catch {
             // Non-fatal — SSE event is enrichment only
+          }
+        }
+
+        // ── Sync-all agent — triggered when user says "check all connections" / "sync all" ──
+        if (syncAllIntent && !connectorStatusIntent && !normalizedConnectType) {
+          try {
+            // Fire sync-all in background — don't await, just kick it off
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/connectors/sync-all`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-internal-call": "copilot" },
+              body: JSON.stringify({ organizationId: workspaceId, skipBrainCycle: false }),
+            }).catch(() => { /* Non-fatal — fire and forget */ });
+            // Emit a sync-started SSE event so frontend can show feedback
+            send(JSON.stringify({ syncAll: { status: "started", message: "Syncing all connectors…" } }));
+          } catch {
+            // Non-fatal
           }
         }
 

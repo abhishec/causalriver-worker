@@ -386,6 +386,8 @@ export interface SSECallbacks {
    * expand it in the chat bubble below the primary response.
    */
   onMoaResult?: (result: { consensusLevel: string; overallConfidence: number; synthesis: string; executionMs: number; [k: string]: unknown }) => void;
+  /** Sync-all: emitted when user says "check all connections" — connector sync started */
+  onSyncAll?: (data: { status: string; message: string }) => void;
   onDone: () => void;
 }
 

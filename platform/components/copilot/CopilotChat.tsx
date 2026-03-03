@@ -1145,6 +1145,10 @@ export async function consumeSSEStream(
             if (parsed.connectorSetup) {
               callbacks.onConnectorSetup?.(parsed.connectorSetup);
             }
+            // Sync-all — emitted when user says "check all connections"
+            if (parsed.syncAll) {
+              callbacks.onSyncAll?.(parsed.syncAll);
+            }
             // Orchestrator queued — brain-dependent job queued while brain populates
             if (parsed.orchestratorQueued) {
               callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
@@ -1202,6 +1206,7 @@ export async function consumeSSEStream(
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
             if (parsed.connectorStatus) callbacks.onConnectorStatus?.(parsed.connectorStatus);
             if (parsed.connectorSetup) callbacks.onConnectorSetup?.(parsed.connectorSetup);
+            if (parsed.syncAll) callbacks.onSyncAll?.(parsed.syncAll);
             if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
             if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
             if (parsed.moaResult) callbacks.onMoaResult?.(parsed.moaResult);
@@ -2225,6 +2230,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               next.set(messageIdx, data as ConnectorSetupInfo);
               return pruneMap(next);
             });
+          },
+          onSyncAll: (_data) => {
+            // Sync-all fired — LLM narrates the sync; no extra UI needed beyond the text response.
+            // The sync-all API runs in background; LLM response confirms it started.
           },
           onAgentComms: (comms) => {
             if (controller.signal.aborted) return;
