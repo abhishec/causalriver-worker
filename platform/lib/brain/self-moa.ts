@@ -47,6 +47,43 @@ const HIGH_STAKES_PHRASES = [
   "trade-off",
 ];
 
+// ── Jaccard Overlap ────────────────────────────────────────────────────────────
+
+/**
+ * Compute Jaccard similarity between two text strings using word-level sets.
+ * Returns 0.0 (no overlap) to 1.0 (identical token sets).
+ *
+ * Used as an overlap gate before synthesis: if two MoA responses are too similar
+ * (Jaccard >= 0.70), synthesis adds no value and is skipped — saving cost.
+ */
+export function computeJaccard(a: string, b: string): number {
+  if (!a && !b) return 1.0;
+  if (!a || !b) return 0.0;
+
+  const tokenize = (text: string): Set<string> =>
+    new Set(
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length >= 3)
+    );
+
+  const setA = tokenize(a);
+  const setB = tokenize(b);
+
+  if (setA.size === 0 && setB.size === 0) return 1.0;
+  if (setA.size === 0 || setB.size === 0) return 0.0;
+
+  let intersectionSize = 0;
+  for (const token of setA) {
+    if (setB.has(token)) intersectionSize++;
+  }
+
+  const unionSize = setA.size + setB.size - intersectionSize;
+  return unionSize === 0 ? 0.0 : intersectionSize / unionSize;
+}
+
 /**
  * Determine whether Self-MoA should be activated for this query.
  *
@@ -112,6 +149,24 @@ export async function runSelfMoA(
     if (!conservative && !creative) {
       logger.warn("[Self-MoA] Both variants returned empty content");
       return { synthesizedResponse: "", usedMoA: false, qualityBoost: 0 };
+    }
+
+    // ── Jaccard overlap gate ────────────────────────────────────────────────
+    // If the two responses are highly similar (>= 0.70 Jaccard), synthesis
+    // adds no value — skip it and return the conservative response directly.
+    const overlap = computeJaccard(conservative, creative);
+    if (overlap >= 0.70) {
+      logger.warn(
+        `[Self-MoA] Responses too similar (Jaccard=${overlap.toFixed(2)}) — skipping synthesis`,
+        { overlap }
+      );
+      return {
+        synthesizedResponse: conservative,
+        usedMoA: false,
+        conservativeResponse: conservative,
+        creativeResponse: creative,
+        qualityBoost: 0,
+      };
     }
 
     // Synthesize with Haiku — cheap, fast, purpose-built for merging
@@ -218,6 +273,13 @@ export async function selfMoaSynthesize(
 
     if (!conservative && !creative) return '';
     if (!creative || conservative === creative) return conservative;
+
+    // Skip synthesis when responses are too similar — same logic as runSelfMoA
+    const overlap = computeJaccard(conservative, creative);
+    if (overlap >= 0.70) {
+      logger.warn('[selfMoaSynthesize] Jaccard overlap >= 0.70 — skipping synthesis', { overlap });
+      return conservative;
+    }
 
     // Synthesize with Haiku: pick the better response or combine best of both
     const synthesisResp = await anthropic.messages.create({

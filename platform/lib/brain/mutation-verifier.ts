@@ -186,6 +186,94 @@ export function inferWritebackAction(
   };
 }
 
+// ── Inverted Write Detection ───────────────────────────────────────────────────
+
+/**
+ * Extract a read action from a write action name using noun extraction.
+ *
+ * Maps action verbs to their read equivalents:
+ *   approve_invoice  → get_invoice
+ *   create_ticket    → get_ticket
+ *   send_message     → get_message
+ *   update_record    → get_record
+ *   post_comment     → get_comment
+ *   delete_item      → get_item (to verify deletion)
+ *
+ * This enables the verifier to check: "after we approved invoice X, can we
+ * read it back to confirm the approval field is set?"
+ *
+ * @param toolName - The write tool name (e.g. "approve_invoice", "create_jira_ticket")
+ * @returns        - The inferred read tool name (e.g. "get_invoice", "get_jira_ticket")
+ *                   Returns null if no read equivalent can be inferred.
+ */
+export function extractReadActionFromWrite(toolName: string): string | null {
+  const lower = toolName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+
+  // Direct verb substitution map
+  const WRITE_TO_READ_VERBS: Record<string, string> = {
+    approve: "get",
+    create: "get",
+    send: "get",
+    post: "get",
+    update: "get",
+    patch: "get",
+    put: "get",
+    submit: "get",
+    publish: "get",
+    delete: "get",       // verify by trying to read (should 404)
+    remove: "get",
+    archive: "get",
+    close: "get",
+    resolve: "get",
+    assign: "get",
+    schedule: "get",
+    trigger: "get",
+    invoke: "get",
+    execute: "get",
+    add: "get",
+    insert: "get",
+  };
+
+  // Split on underscores, find the verb (usually first token)
+  const parts = lower.split("_").filter(Boolean);
+  if (parts.length === 0) return null;
+
+  const firstPart = parts[0];
+  const readVerb = WRITE_TO_READ_VERBS[firstPart];
+
+  if (!readVerb) return null;
+
+  // Replace first token with read verb, keep noun parts
+  const nounParts = parts.slice(1);
+  if (nounParts.length === 0) return null;
+
+  return `${readVerb}_${nounParts.join("_")}`;
+}
+
+/**
+ * Extracts the noun entity from a tool name (e.g. "approve_invoice" → "invoice").
+ * Used to build descriptive verification logs.
+ *
+ * @param toolName - Tool name (e.g. "create_jira_ticket")
+ * @returns        - Primary noun entity (e.g. "jira_ticket") or null
+ */
+export function extractEntityNoun(toolName: string): string | null {
+  const parts = toolName.toLowerCase().replace(/[^a-z0-9_]/g, "_").split("_").filter(Boolean);
+  if (parts.length <= 1) return null;
+
+  const WRITE_VERBS = new Set([
+    "approve", "create", "send", "post", "update", "patch", "put",
+    "submit", "publish", "delete", "remove", "archive", "close",
+    "resolve", "assign", "schedule", "trigger", "invoke", "execute",
+    "add", "insert", "get", "fetch", "read", "list",
+  ]);
+
+  // Return everything after the first verb token
+  const firstIsVerb = WRITE_VERBS.has(parts[0]);
+  const nounParts = firstIsVerb ? parts.slice(1) : parts;
+  return nounParts.length > 0 ? nounParts.join("_") : null;
+}
+
 /**
  * Builds a human-readable summary of one or more VerificationResults.
  *

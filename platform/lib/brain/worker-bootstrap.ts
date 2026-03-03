@@ -13,6 +13,7 @@
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { seedWorkerKnowledge } from "@/lib/brain/training-seeder";
 
 export async function triggerWorkerBootstrap(
   workerId: string,
@@ -116,6 +117,16 @@ export async function triggerWorkerBootstrap(
     logger.warn("[worker-bootstrap] Step 3 (initial memory) failed — non-fatal", err);
   }
 
-  // ── Step 4: Log completion ─────────────────────────────────────────────────
+  // ── Step 4: Training seeder ───────────────────────────────────────────────
+  // Seeds the new worker with high-quality federated knowledge.
+  // Idempotent (24h guard via ai_memory marker) — safe to call on every bootstrap.
+  try {
+    await seedWorkerKnowledge(workerId, orgId, supabase);
+    logger.info("[worker-bootstrap] Training seeder complete", { workerId, orgId });
+  } catch (err) {
+    logger.warn("[worker-bootstrap] Step 4 (training seeder) failed — non-fatal", err);
+  }
+
+  // ── Step 5: Log completion ─────────────────────────────────────────────────
   logger.info("[worker-bootstrap] Bootstrap complete", { workerId, orgId });
 }

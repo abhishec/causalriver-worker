@@ -30,6 +30,7 @@ import { logAuditEvent, AuditAction } from "@/lib/audit";
 import { routeCallType } from "@/lib/brain/call-type-router";
 import { captureStreamedResponse as _captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
 import { selectStrategy, recordOutcome as recordBanditOutcome } from "@/lib/brain/strategy-bandit";
+import { pruneKnowledgeBase, shouldPrune } from "@/lib/brain/knowledge-pruner";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -959,6 +960,30 @@ async function _runCognitivePlannerInner(
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 1h (process bottlenecks) failed:", err);
   }
+
+  // ── Phase 1i: Knowledge quality pruning (fire-and-forget) ─────────────────
+  // Prune low-quality/stale federated_knowledge and prediction_records.
+  // Conservative: capped at 30% of candidates per run. Non-blocking.
+  void (async () => {
+    try {
+      const needsPrune = await shouldPrune(orgId, supabase);
+      if (needsPrune) {
+        const pruneResult = await pruneKnowledgeBase(orgId, supabase);
+        if (pruneResult.totalDeleted > 0) {
+          logger.warn(
+            `[CognitivePlanner] Phase 1i: knowledge pruning — ${pruneResult.totalDeleted} entries removed`,
+            {
+              lowQuality: pruneResult.lowQualityDeleted,
+              stale: pruneResult.staleDeleted,
+              repeatFailure: pruneResult.repeatFailureDeleted,
+            }
+          );
+        }
+      }
+    } catch (err) {
+      logger.warn("[CognitivePlanner] Phase 1i (knowledge pruning) failed — non-fatal:", err);
+    }
+  })();
 
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 2 — PLAN (one Claude Haiku call)

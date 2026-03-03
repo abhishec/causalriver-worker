@@ -467,3 +467,114 @@ export function filterContextRot(
 
   return withoutEmptySections.join("\n");
 }
+
+// ── Empty-Result Drift Detection ───────────────────────────────────────────────
+
+/**
+ * Detects silent empty-result drift: when a query returns HTTP 200 + empty array
+ * but the table is known to have rows.
+ *
+ * This is different from column-error drift: the query SUCCEEDS but returns nothing,
+ * suggesting the WHERE clause references a stale/renamed column with no rows matching.
+ *
+ * Pattern: 200 OK + data.length === 0 + estimated total count > 0
+ *
+ * @param data       - The query result array (may be empty)
+ * @param totalCount - Known row count for this table (from a separate COUNT query or estimate)
+ * @param table      - Table name (for logging)
+ * @returns          - true if empty-result drift is suspected
+ */
+export function detectEmptyResultDrift(
+  data: unknown[],
+  totalCount: number,
+  table: string
+): boolean {
+  if (!Array.isArray(data)) return false;
+  if (data.length > 0) return false;      // got results — no drift
+  if (totalCount <= 0) return false;       // table is genuinely empty
+
+  // Empty result but table has rows — likely column drift in WHERE clause
+  logger.warn("[SchemaDrift] Empty-result drift suspected", {
+    table,
+    resultCount: 0,
+    estimatedTotal: totalCount,
+  });
+  return true;
+}
+
+/**
+ * Executes a query WITH empty-result drift detection.
+ *
+ * If the primary query returns empty AND a count query confirms the table has rows,
+ * this function attempts ONE retry with a broadened select (remove filters one-by-one).
+ *
+ * Returns the original empty array if the broadened query also fails.
+ * NEVER throws.
+ *
+ * Usage: When you need to detect "we got nothing but table is not empty" patterns.
+ */
+export async function executeQueryWithEmptyResultDetection<T = Record<string, unknown>>(
+  supabase: SupabaseClient,
+  params: DriftResistantQueryParams
+): Promise<{ data: T[]; wasDrifted: boolean }> {
+  try {
+    // First: run the standard drift-resistant query
+    const data = await executeQueryWithDriftResistance<T>(supabase, params);
+
+    if (data.length > 0) {
+      return { data, wasDrifted: false };
+    }
+
+    // Got empty — check if table actually has rows
+    const { count, error: countError } = await (supabase
+      .from(params.table)
+      .select("*", { count: "exact", head: true }) as unknown as Promise<{
+        count: number | null;
+        error: { message: string } | null;
+      }>);
+
+    if (countError || count === null || count === 0) {
+      // Genuine empty table or count query failed — not drift
+      return { data: [], wasDrifted: false };
+    }
+
+    const isDrifted = detectEmptyResultDrift([], count, params.table);
+    if (!isDrifted) return { data: [], wasDrifted: false };
+
+    // Drift detected — retry with NO filters (broadened query)
+    logger.warn("[SchemaDrift] Empty-result drift: retrying with no filters", {
+      table: params.table,
+      originalFilters: params.filters?.length ?? 0,
+    });
+
+    const broadenedParams: DriftResistantQueryParams = {
+      ...params,
+      filters: [], // strip all filters — get any rows to verify schema
+      limit: 5,    // limit to small sample for validation only
+    };
+
+    const broadenedData = await executeQueryWithDriftResistance<T>(supabase, broadenedParams);
+
+    if (broadenedData.length === 0) {
+      logger.warn("[SchemaDrift] Broadened query also returned empty — not drift", {
+        table: params.table,
+      });
+      return { data: [], wasDrifted: false };
+    }
+
+    // Broadened query got results — the original filters were the problem.
+    // Return empty (we can't safely return unfiltered data) but flag as drifted.
+    logger.warn("[SchemaDrift] Empty-result drift confirmed — filter columns may be renamed", {
+      table: params.table,
+      sampleColumnNames: Object.keys(broadenedData[0] as Record<string, unknown>).slice(0, 5),
+    });
+
+    return { data: [], wasDrifted: true };
+  } catch (err) {
+    logger.warn("[SchemaDrift] executeQueryWithEmptyResultDetection error", {
+      table: params.table,
+      error: String(err),
+    });
+    return { data: [], wasDrifted: false };
+  }
+}

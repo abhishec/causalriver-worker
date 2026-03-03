@@ -166,6 +166,59 @@ export function getRecommendedModel(budget: TokenBudget): "haiku" | "sonnet" | "
   return "sonnet";
 }
 
+// ── Progressive Efficiency Hints ───────────────────────────────────────────────
+
+/**
+ * Returns a system prompt suffix with budget guidance at key thresholds.
+ * Returns empty string when budget is healthy (< 30% used).
+ *
+ * Thresholds:
+ *   >= 30% — Awareness hint: be concise
+ *   >= 60% — Caution hint: prioritize key points, reduce examples
+ *   >= 80% — Warning hint: switch to compressed mode
+ *   >= 100% — Hard stop: no LLM calls (shouldSkipLLMCall === true)
+ *
+ * Designed to be injected into the system prompt dynamically.
+ * Never throws — returns "" on any unexpected input.
+ */
+export function getEfficiencyHint(budget: TokenBudget): string {
+  try {
+    if (!budget || budget.budgetTokens <= 0) return "";
+
+    const ratio = budget.usedTokens / budget.budgetTokens;
+
+    if (ratio >= 1.0) {
+      return "\n\n## TOKEN BUDGET: EXHAUSTED\nToken budget fully consumed. Return a brief summary only — no elaboration.";
+    }
+
+    if (ratio >= 0.80) {
+      return "\n\n## TOKEN BUDGET: CRITICAL (80%+ used)\nCompress all responses: use bullet points, skip preambles, omit examples. Prioritize final answer only.";
+    }
+
+    if (ratio >= 0.60) {
+      return "\n\n## TOKEN BUDGET: CAUTION (60%+ used)\nBe concise. Lead with conclusions. Skip lengthy explanations unless critical to the answer.";
+    }
+
+    if (ratio >= 0.30) {
+      return "\n\n## TOKEN BUDGET: AWARENESS (30%+ used)\nPrefer direct, structured answers. Avoid unnecessary elaboration.";
+    }
+
+    return "";
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Returns the current budget usage as a percentage string (e.g. "45%").
+ * Useful for logging and monitoring.
+ */
+export function getBudgetUsagePercent(budget: TokenBudget): string {
+  if (!budget || budget.budgetTokens <= 0) return "0%";
+  const pct = Math.round((budget.usedTokens / budget.budgetTokens) * 100);
+  return `${pct}%`;
+}
+
 // ── Answer Format ──────────────────────────────────────────────────────────────
 
 /**
