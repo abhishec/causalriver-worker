@@ -345,7 +345,11 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
     setIsConsolidating(true);
     setConsolidationMsg(null);
     try {
-      const res = await fetch("/api/brain/consolidation", { method: "POST" });
+      const res = await fetch("/api/brain/consolidation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organizationId: orgId }),
+      });
       if (res.ok) {
         const d = await res.json();
         const promoted = d.patternsPromoted ?? d.promoted ?? 0;

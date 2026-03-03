@@ -6,7 +6,7 @@
  * prompts to give the Brain long-term, org-specific intelligence.
  *
  * Consolidation criteria:
- *   - Signals: `signal_strength >= 0.72` AND `signal_value = 'dopamine'` (7-day window)
+ *   - Signals: `signal_strength >= 0.72` AND `signal_type = 'dopamine'` (7-day window)
  *   - Predictions: `confidence >= 0.75` (7-day window)
  *   - Cluster threshold: 3+ events on the same domain → pattern candidate
  *
@@ -26,7 +26,7 @@ interface CrossDomainSignal {
   target_domain: string;
   signal_type: string;
   signal_strength: number | null;
-  signal_value: string | null;
+  signal_value: number | null;   // numeric in DB (e.g. 0.3, -0.5)
   payload: Record<string, unknown> | null;
 }
 
@@ -34,7 +34,7 @@ interface PredictionRecord {
   id: string;
   domain: string;
   confidence: number;
-  task_description: string | null;
+  // task_description omitted — column does not exist in production schema
 }
 
 export interface ConsolidationResult {
@@ -56,17 +56,19 @@ export interface ConsolidatedPatternRow {
  * Returns true when a cross-domain signal is strong enough to contribute to
  * a consolidated pattern.
  *
- * Condition: signal_strength >= 0.72 OR signal_value === 'dopamine'
+ * Condition: signal_strength >= 0.72 OR signal_type === 'dopamine'
+ * Note: signal_value is a numeric column in the DB (not the string type indicator).
+ *       signal_type holds the string label ('dopamine', 'gaba', 'norepinephrine').
  */
 export function shouldConsolidate(signal: {
   signal_strength?: number | null;
-  signal_value?: string | null;
+  signal_type?: string | null;
 }): boolean {
   const strength = signal.signal_strength ?? 0;
   // TODO(Phase 3): make 0.72 adaptive via getDomainThreshold() from agent-rl.ts
   // Currently a global threshold; can be per-domain in a future pass once
   // tier3 consolidation is wired to receive orgId + domain context.
-  return strength >= 0.72 || signal.signal_value === "dopamine";
+  return strength >= 0.72 || signal.signal_type === "dopamine";
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
@@ -192,6 +194,7 @@ async function upsertPattern(
       confidence: newConfidence,
       evidence_count: clusterSize,
       source_signal_ids: signalIds,
+      is_active: true,             // required — tier-stats filters by is_active=true
     });
 
   if (insertError) {
@@ -243,7 +246,7 @@ export async function runConsolidation(
       // TODO(Phase 3): 0.72 is a global threshold — can become per-domain via
       // getDomainThreshold() from agent-rl.ts once orgId+domain context is available here.
       .gte("signal_strength", 0.72)
-      .in("signal_value", ["dopamine"])
+      .in("signal_type", ["dopamine"])     // signal_type is the string label; signal_value is numeric
       .gte("created_at", since)
       .order("signal_strength", { ascending: false })
       .limit(50);
@@ -260,7 +263,7 @@ export async function runConsolidation(
     // ── Step 2: High-quality prediction records ──────────────────────────────
     const { data: predRows, error: predError } = await admin
       .from("prediction_records")
-      .select("id, domain, confidence, task_description")
+      .select("id, domain, confidence")   // task_description column does not exist in prod schema
       .eq("organization_id", orgId)
       .gte("confidence", 0.75)
       .gte("created_at", since)
@@ -336,7 +339,7 @@ export async function runConsolidation(
         organization_id: orgId,
         patterns_promoted: patternsPromoted,
         signals_scanned: signalsScanned,
-        duration_ms: durationMs,
+        // duration_ms omitted — column does not exist in production schema
         triggered_by: "library",
       });
 
