@@ -558,6 +558,63 @@ export function executeCapabilityTests(
 // ── Capability Observer ───────────────────────────────────────────────────────
 
 /**
+ * ADR-027 PART 7A: Records a capability gap based on low response quality.
+ *
+ * Called from post-flight when responseQuality < 0.5. Unlike observeCapabilityRegret
+ * (which scans LLM response text for regret phrases), this function records gaps
+ * triggered by quality-score signals — indicating the AI produced a weak answer
+ * for this domain/query combination and should synthesize better tooling.
+ *
+ * Fire-and-forget safe: never throws.
+ *
+ * @param params.domain       - Domain that produced the low-quality response
+ * @param params.query        - Original user query (truncated to 300 chars)
+ * @param params.qualityScore - RL quality score (0–1) that triggered the gap
+ * @param params.supabase     - Supabase service-role client
+ * @param params.orgId        - Organization/workspace ID
+ */
+export async function recordCapabilityGap(params: {
+  domain: string;
+  query: string;
+  qualityScore: number;
+  supabase: SupabaseClient;
+  orgId: string;
+}): Promise<void> {
+  const { domain, query, qualityScore, supabase, orgId } = params;
+
+  logger.warn("[capability-synthesizer] recordCapabilityGap: low-quality response gap", {
+    domain,
+    orgId,
+    qualityScore,
+    queryPreview: query.slice(0, 80),
+  });
+
+  try {
+    await supabase.from("ai_memory").insert({
+      organization_id: orgId,
+      domain: `capability-gap:${domain}`,
+      memory_type: "capability-regret",
+      content: JSON.stringify({
+        domain,
+        query: query.slice(0, 300),
+        qualityScore,
+        source: "quality-signal",
+        detectedAt: new Date().toISOString(),
+      }),
+      importance: 0.7,
+      metadata: {
+        gapSource: "quality-signal",
+        qualityScore,
+        domain,
+        recordedAt: new Date().toISOString(),
+      },
+    });
+  } catch {
+    // fire-and-forget — never throw
+  }
+}
+
+/**
  * CapabilityObserver: detects computation gaps in LLM responses at inference time.
  *
  * After an LLM response is generated, scan it for phrases indicating the LLM

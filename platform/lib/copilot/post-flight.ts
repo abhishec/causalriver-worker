@@ -96,6 +96,23 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
     logger.warn('[PostFlight] RL import failed:', rlErr instanceof Error ? rlErr.message : String(rlErr));
   }
 
+  // ── 1.5. ADR-027 PART 7: Capability Gap Recording ─────────────────────────
+  // When response quality is low, record the domain+query as a capability gap
+  // so the tool synthesis pipeline can generate better tooling for future use.
+  if (_rlQuality < 0.5 && detectedIntent) {
+    void import("@/lib/brain/capability-synthesizer")
+      .then(({ recordCapabilityGap }) =>
+        recordCapabilityGap({
+          domain: detectedIntent,
+          query: message,
+          qualityScore: _rlQuality,
+          supabase: service,
+          orgId: workspaceId,
+        })
+      )
+      .catch(() => {}); // fire-and-forget
+  }
+
   // ── 2. Decision Pattern Training ──────────────────────────────────────────
   // Write high-quality decisions to ai_memory as pattern training data.
   // Uses upsert on (organization_id, memory_type, domain) unique index.
