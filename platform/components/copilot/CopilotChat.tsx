@@ -1755,31 +1755,74 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
 
   // Load most-recent conversation on mount so history survives page refresh.
+  // Falls back across all workspace memberships when the worker's org has no conversations
+  // (server always saves to the user's primary workspace, not necessarily the worker's org).
   useEffect(() => {
-    const workspaceId = (extraParams as Record<string, unknown>)?.workspaceId as string | undefined;
-    if (!workspaceId) return;
+    const primaryWorkspaceId = (extraParams as Record<string, unknown>)?.workspaceId as string | undefined;
     let cancelled = false;
-    // Step 1: list conversations for this workspace (returns id + metadata, no messages)
-    fetch(`/api/copilot/conversations?workspaceId=${workspaceId}`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (cancelled || !Array.isArray(data?.conversations) || data.conversations.length === 0) return null;
-        const recent = data.conversations[0];
-        if (!recent?.id) return null;
-        // Step 2: load full messages for that conversation
-        return fetch(`/api/copilot/conversations/${recent.id}`).then(r => r.ok ? r.json() : null);
-      })
-      .then(data => {
-        if (cancelled || !data?.conversation?.messages?.length) return;
-        const loaded = (data.conversation.messages as Array<{ role: string; content: string }>)
-          .filter(m => m.role === 'user' || m.role === 'assistant')
-          .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
-        if (loaded.length > 0) {
-          setMessages(loaded);
-          setConversationId(data.conversation.id); // reuse the existing UUID so updates go to same row
+
+    async function loadHistory() {
+      // Small delay: let Next.js Fast Refresh finish its current rebuild before
+      // issuing API calls. Without this, the dev-server is briefly unavailable
+      // during the rebuild window and all fetches throw "Failed to fetch".
+      // In production there is no Fast Refresh, so this delay is harmless.
+      await new Promise(r => setTimeout(r, 800));
+      if (cancelled) return;
+
+      // Build ordered list of org IDs to try: worker's org first, then all memberships
+      const orgIdsToTry: string[] = primaryWorkspaceId ? [primaryWorkspaceId] : [];
+
+      // Fetch all workspace memberships for fallback
+      // API returns { memberships: [{ organization_id, id, ... }] }
+      try {
+        const memRes = await fetch('/api/workspace/memberships');
+        if (memRes.ok) {
+          const memData = await memRes.json() as { memberships?: Array<{ organization_id?: string; id?: string }> };
+          if (Array.isArray(memData?.memberships)) {
+            for (const ws of memData.memberships) {
+              const orgId = ws.organization_id || ws.id;
+              if (orgId && !orgIdsToTry.includes(orgId)) orgIdsToTry.push(orgId);
+            }
+          }
         }
-      })
-      .catch(() => { /* Non-critical — history load is best-effort */ });
+      } catch { /* non-critical */ }
+
+      if (orgIdsToTry.length === 0 || cancelled) return;
+
+      // Try each org until we find one with conversations
+      for (const orgId of orgIdsToTry) {
+        if (cancelled) return;
+        try {
+          const listRes = await fetch(`/api/copilot/conversations?workspaceId=${orgId}`);
+          if (!listRes.ok) continue;
+          const listData = await listRes.json() as { conversations?: Array<{ id: string }> };
+          if (!Array.isArray(listData?.conversations) || listData.conversations.length === 0) continue;
+
+          const recent = listData.conversations[0];
+          if (!recent?.id) continue;
+
+          const detailRes = await fetch(`/api/copilot/conversations/${recent.id}`);
+          if (!detailRes.ok) continue;
+          const detailData = await detailRes.json() as { conversation?: { id: string; messages: Array<{ role: string; content: string }> } };
+          if (!detailData?.conversation?.messages?.length) continue;
+
+          const loaded = detailData.conversation.messages
+            .filter(m => m.role === 'user' || m.role === 'assistant')
+            .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+
+          if (loaded.length > 0) {
+            // Note: intentionally NOT guarding on `cancelled` here.
+            // Fast Refresh in dev sets cancelled=true mid-flight, but we still want
+            // the messages to appear. React 18 no longer warns on post-unmount setState.
+            setMessages(loaded);
+            setConversationId(detailData.conversation.id);
+          }
+          return; // found — stop trying other orgs
+        } catch { /* try next org */ }
+      }
+    }
+
+    void loadHistory();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount only
