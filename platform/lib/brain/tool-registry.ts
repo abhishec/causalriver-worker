@@ -14,6 +14,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 
+// ── Module-level dedup guard ────────────────────────────────────────────────
+const _synthLastRunMs = new Map<string, number>();
+const SYNTH_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes between synthesis runs per org
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface SynthesizedTool {
@@ -250,5 +254,232 @@ export async function getCapabilityGaps(
       error: String(err),
     });
     return [];
+  }
+}
+
+// ── 7D: Tool Synthesis Scheduler ────────────────────────────────────────────
+
+/**
+ * Synthesize tools from recurring capability gaps (ADR-027 PART 7D).
+ *
+ * Reads capability-regret records with 3+ occurrences, checks if a tool
+ * already exists for that domain, and if not, creates a synthesized tool
+ * entry in ai_memory. Uses Haiku for cheap function generation.
+ *
+ * Called from cognitive-cycle cron. TTL-guarded to max once per 30 min per org.
+ * Fire-and-forget safe: never throws.
+ *
+ * @returns Number of tools synthesized (0 if none needed or on error)
+ */
+export async function synthesizeToolsFromGaps(
+  supabase: SupabaseClient,
+  orgId: string,
+  anthropicApiKey?: string,
+): Promise<number> {
+  // TTL guard — max once per 30 min per org
+  const lastRun = _synthLastRunMs.get(orgId) ?? 0;
+  if (Date.now() - lastRun < SYNTH_COOLDOWN_MS) return 0;
+  _synthLastRunMs.set(orgId, Date.now());
+
+  try {
+    // 1. Find recurring gaps (3+ occurrences = strong synthesis signal)
+    const gaps = await getCapabilityGaps(supabase, orgId, {
+      limit: 5,
+      minOccurrences: 3,
+    });
+
+    if (!gaps.length) return 0;
+
+    let synthesized = 0;
+
+    for (const gap of gaps) {
+      // 2. Check if tool already exists for this domain
+      const existing = await getToolsForDomain(supabase, orgId, gap.domain);
+      const alreadyExists = existing.some(
+        (t) => t.domain === gap.domain && t.qualityScore > 0.3
+      );
+      if (alreadyExists) continue;
+
+      // 3. Synthesize a tool spec (cheap Haiku call if API key available,
+      //    otherwise create a descriptive stub)
+      let toolSpec: Partial<SynthesizedTool>;
+
+      if (anthropicApiKey) {
+        try {
+          const Anthropic = (await import("@anthropic-ai/sdk")).default;
+          const client = new Anthropic({ apiKey: anthropicApiKey });
+          const resp = await client.messages.create({
+            model: "claude-3-5-haiku-latest",
+            max_tokens: 800,
+            messages: [
+              {
+                role: "user",
+                content: `Generate a JavaScript helper function for this capability gap:
+Domain: ${gap.domain}
+Recurring query pattern: ${gap.query.slice(0, 200)}
+Quality score when this gap was hit: ${gap.qualityScore}
+
+Return ONLY valid JSON with these fields:
+{
+  "name": "function_name",
+  "description": "what it does in 1 sentence",
+  "implementation": "function body as a single string"
+}`,
+              },
+            ],
+          });
+
+          const text =
+            resp.content[0]?.type === "text" ? resp.content[0].text : "";
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            toolSpec = {
+              name: parsed.name ?? `tool_${gap.domain.replace(/[^a-z0-9]/gi, "_")}`,
+              description: parsed.description ?? `Synthesized tool for ${gap.domain}`,
+              implementation: parsed.implementation ?? "",
+              domain: gap.domain,
+              qualityScore: 0.5,
+              invocationCount: 0,
+              successRate: 0,
+              sourceGapId: gap.id,
+            };
+          } else {
+            toolSpec = _createStubTool(gap);
+          }
+        } catch {
+          toolSpec = _createStubTool(gap);
+        }
+      } else {
+        toolSpec = _createStubTool(gap);
+      }
+
+      // 4. Store synthesized tool in ai_memory
+      try {
+        await supabase.from("ai_memory").insert({
+          organization_id: orgId,
+          domain: `tool:${gap.domain}`,
+          memory_type: "synthesized_tool",
+          content: JSON.stringify(toolSpec),
+          importance: 0.6,
+          metadata: {
+            synthesizedAt: new Date().toISOString(),
+            sourceGapId: gap.id,
+            gapOccurrences: gap.occurrences,
+            domain: gap.domain,
+          },
+        });
+        synthesized++;
+      } catch {
+        // Non-fatal: single tool write failure doesn't block others
+      }
+    }
+
+    if (synthesized > 0) {
+      logger.info("[tool-registry] Synthesized tools from capability gaps", {
+        orgId,
+        synthesized,
+        gapsEvaluated: gaps.length,
+      });
+    }
+
+    return synthesized;
+  } catch (err) {
+    logger.warn("[tool-registry] synthesizeToolsFromGaps failed (non-fatal)", {
+      orgId,
+      error: String(err),
+    });
+    return 0;
+  }
+}
+
+/** Create a descriptive stub tool when Haiku synthesis is unavailable */
+function _createStubTool(gap: CapabilityGapRecord): Partial<SynthesizedTool> {
+  return {
+    name: `tool_${gap.domain.replace(/[^a-z0-9]/gi, "_")}`,
+    description: `Capability gap detected: ${gap.query.slice(0, 120)}. Needs human-guided synthesis.`,
+    implementation: `// Stub: synthesized from ${gap.occurrences} occurrences of capability gap in domain "${gap.domain}"`,
+    domain: gap.domain,
+    qualityScore: 0.3,
+    invocationCount: 0,
+    successRate: 0,
+    sourceGapId: gap.id,
+  };
+}
+
+// ── 7E: Tool RL Feedback Aggregation ────────────────────────────────────────
+
+/**
+ * Update a synthesized tool's quality metrics from recorded invocations.
+ *
+ * Reads recent tool_invocation records for a specific tool, computes
+ * success rate and updates the tool's quality score in ai_memory.
+ *
+ * Fire-and-forget safe: never throws.
+ */
+export async function updateToolQualityFromInvocations(
+  supabase: SupabaseClient,
+  orgId: string,
+  toolId: string,
+  domain: string,
+): Promise<void> {
+  try {
+    // Read recent invocations for this tool
+    const { data: invocations } = await supabase
+      .from("ai_memory")
+      .select("content")
+      .eq("organization_id", orgId)
+      .eq("memory_type", "tool_invocation")
+      .eq("domain", `tool-invocation:${domain}`)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (!invocations?.length) return;
+
+    // Compute success rate
+    let successes = 0;
+    let total = 0;
+    for (const row of invocations) {
+      try {
+        const parsed = JSON.parse(row.content as string);
+        if (parsed.toolId === toolId) {
+          total++;
+          if (parsed.success) successes++;
+        }
+      } catch { /* skip malformed */ }
+    }
+
+    if (total === 0) return;
+
+    const successRate = successes / total;
+    const newQuality = Math.min(0.95, 0.3 + successRate * 0.6); // 0.3–0.9 range
+
+    // Update the tool's quality score
+    await supabase
+      .from("ai_memory")
+      .update({
+        importance: newQuality,
+        metadata: {
+          lastRLUpdate: new Date().toISOString(),
+          invocationCount: total,
+          successRate,
+          computedQuality: newQuality,
+        },
+      })
+      .eq("id", toolId)
+      .eq("memory_type", "synthesized_tool");
+
+    logger.info("[tool-registry] Updated tool quality from invocations", {
+      toolId: toolId.slice(0, 8),
+      domain,
+      successRate: Math.round(successRate * 100),
+      newQuality: Math.round(newQuality * 100),
+      invocations: total,
+    });
+  } catch (err) {
+    logger.warn("[tool-registry] updateToolQualityFromInvocations failed", {
+      toolId,
+      error: String(err),
+    });
   }
 }

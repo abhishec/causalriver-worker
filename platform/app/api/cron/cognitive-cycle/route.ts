@@ -539,12 +539,29 @@ export async function GET(request: NextRequest) {
             return 0;
           });
 
-          // Log federation results for diagnostics
-          if (gabaPromotionCount > 0 || memoryPromotionCount > 0) {
+          // ADR-027 PART 7D: Synthesize tools from recurring capability gaps
+          const toolsSynthesized = await import("@/lib/brain/tool-registry")
+            .then(async ({ synthesizeToolsFromGaps, getToolsForDomain, updateToolQualityFromInvocations }) => {
+              const count = await synthesizeToolsFromGaps(service, workerOrgId, process.env.ANTHROPIC_API_KEY);
+              // 7E: Update quality scores for existing tools from RL invocations
+              const existingTools = await getToolsForDomain(service, workerOrgId, "*").catch(() => [] as Array<{ id: string; domain: string }>);
+              for (const tool of existingTools.slice(0, 10)) {
+                await updateToolQualityFromInvocations(service, workerOrgId, tool.id, tool.domain).catch(() => {});
+              }
+              return count;
+            })
+            .catch((err: unknown) => {
+              logger.warn('[CognitiveCycle] synthesizeToolsFromGaps failed (non-fatal)', { err: String(err), workerId });
+              return 0;
+            });
+
+          // Log federation + synthesis results for diagnostics
+          if (gabaPromotionCount > 0 || memoryPromotionCount > 0 || toolsSynthesized > 0) {
             logger.info('[CognitiveCycle] Federation metrics', {
               workerId,
               gabaPromotionCount,
               memoryPromotionCount,
+              toolsSynthesized,
             });
           }
         } catch (err) {

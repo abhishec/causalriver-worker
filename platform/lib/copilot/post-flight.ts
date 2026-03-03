@@ -113,6 +113,27 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
       .catch(() => {}); // fire-and-forget
   }
 
+  // ── 1.6. ADR-027 PART 7E: Tool Invocation RL Tracking ───────────────────
+  // If synthesized tools were injected in this request (working memory has
+  // capabilitiesBlock), record the response quality as a tool invocation
+  // outcome so the RL loop can update tool quality scores over time.
+  if (detectedIntent && _rlQuality > 0) {
+    void import("@/lib/brain/tool-registry")
+      .then(async ({ getToolsForDomain, recordToolInvocation }) => {
+        const tools = await getToolsForDomain(service, workspaceId, detectedIntent);
+        for (const tool of tools.slice(0, 3)) { // max 3 tools per domain
+          await recordToolInvocation(service, workspaceId, {
+            toolId: tool.id,
+            domain: detectedIntent,
+            success: _rlQuality >= 0.6,
+            executionMs: 0, // copilot doesn't track per-tool execution time
+            timestamp: new Date().toISOString(),
+          });
+        }
+      })
+      .catch(() => {}); // fire-and-forget
+  }
+
   // ── 2. Decision Pattern Training ──────────────────────────────────────────
   // Write high-quality decisions to ai_memory as pattern training data.
   // Uses upsert on (organization_id, memory_type, domain) unique index.
