@@ -40,13 +40,15 @@ export interface AgentCreatedResult {
  * @param workspaceId - organization_id to scope the agent to
  * @param userId - user who triggered the creation
  * @param originalMessage - raw user message (used as description fallback)
+ * @param workerId - optional AI Worker ID; when present, inserts into agent_queue so the Jobs tab shows it
  * @returns AgentCreatedResult on success, or null on failure (non-fatal)
  */
 export async function handleAgentCreation(
   spec: AgentSpec,
   workspaceId: string,
   userId: string,
-  originalMessage: string
+  originalMessage: string,
+  workerId?: string
 ): Promise<AgentCreatedResult | null> {
   try {
     // Admin client bypasses RLS — se_aas_artifacts and agent_queue have no user-scoped RLS.
@@ -81,6 +83,55 @@ export async function handleAgentCreation(
 
     if (agentInsertError) {
       logger.warn("[agent-handler] Agent insert error (non-fatal):", agentInsertError);
+    }
+
+    // ── Also insert into agents so the Agents tab can surface this agent definition ───────────
+    // The Agents tab queries the `agents` table filtered by ai_worker_id. Without this insert,
+    // agents created from Copilot are invisible there.
+    if (workerId) {
+      const { error: agentsTableError } = await admin.from("agents").insert({
+        id: agentId,
+        ai_worker_id: workerId,
+        organization_id: workspaceId,
+        name: spec.name,
+        purpose: spec.description || originalMessage.slice(0, 500),
+        status: "active",
+        created_by: "user",
+        created_at: now,
+      });
+      if (agentsTableError) {
+        logger.warn("[agent-handler] agents table insert error (non-fatal):", agentsTableError);
+      }
+    }
+
+    // ── Also insert into agent_queue so the Jobs tab can surface this agent ──────────────────
+    // The Jobs tab queries agent_queue filtered by ai_worker_id. Without this insert, agents
+    // created from Copilot are invisible in the Jobs tab because they only exist in se_aas_artifacts.
+    if (workerId) {
+      const { error: queueInsertError } = await admin.from("agent_queue").insert({
+        organization_id: workspaceId,
+        agent_type: spec.domain || "custom",
+        task_type: spec.trigger || "manual",
+        priority: 5, // 5 = normal priority in agent_queue
+        status: "pending",
+        ai_worker_id: workerId,
+        payload: {
+          agentId,
+          name: spec.name,
+          description: spec.description || originalMessage,
+          domain: spec.domain || "custom",
+          schedule: spec.schedule ?? null,
+          requiredInputs: spec.requiredInputs ?? [],
+          brainEnabled: true,
+          rlEnabled: true,
+          memoryTracking: true,
+          source: "copilot",
+        },
+        created_at: now,
+      });
+      if (queueInsertError) {
+        logger.warn("[agent-handler] agent_queue insert error (non-fatal):", queueInsertError);
+      }
     }
 
     logger.warn(`[agent-handler] Agent created inline: ${spec.name} (${agentId})`);

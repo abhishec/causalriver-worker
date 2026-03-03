@@ -77,6 +77,7 @@ import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 import { classifyTaskIntent, buildPrivacyRefusal } from "@/lib/brain/task-intent-classifier";
 // ── Raw Capability Upgrade (ADR-022) ─────────────────────────────────────────
 import { buildRLPrimer } from "@/lib/brain/rl-primer";
+import { recallCopilotMemory } from "@/lib/copilot/copilot-memory";
 import { detectOutputFormat, buildFormatDirective, hasFormatRequirement } from "@/lib/brain/format-detector";
 import { scoreResponseQuality } from "@/lib/brain/self-reflection";
 import { extractEntities, persistEntities, getEntityContext } from "@/lib/brain/entity-memory";
@@ -296,6 +297,11 @@ export async function POST(request: NextRequest) {
     const _rcEntityCtxPromise = getEntityContext(workspaceId, workerId ?? undefined);
     const _rcDriftStatusPromise = getDriftStatus(workspaceId, service as any);
     const _rcCapsPromise = getOrSynthesizeCapabilities(message, workspaceId, anthropicApiKey, service as any);
+    // ADR-027: Recall user routing patterns + preferences from session memory
+    const _rcCopilotMemPromise = recallCopilotMemory(service as any, workspaceId, {
+      aiWorkerId: workerId ?? undefined,
+      userMessage: message,
+    });
     const commandResult: any = (ctx as any)._commandResult;
     const interpretation: QueryInterpretation | undefined = (ctx as any)._interpretation;
     (ctx as any)._conversationHistory = conversationHistory;
@@ -909,6 +915,8 @@ export async function POST(request: NextRequest) {
     let deliveryIntelligenceResult: Record<string, unknown> | null = null;
     let pmAasResult: Record<string, unknown> | null = null;
     let agentCreated: Record<string, unknown> | null = null;
+    /** Set when process engine intent is detected — emitted as processTriggered SSE event */
+    let processTriggeredResult: Record<string, unknown> | null = null;
     /** Set when orchestrator queues a job as waiting — injected into system prompt */
     let orchestratorResult: Record<string, unknown> | null = null;
     /** Collected Agent Communication Protocol payloads — emitted to frontend via SSE */
@@ -956,7 +964,8 @@ export async function POST(request: NextRequest) {
         serviceRoute.agentSpec as any,
         workspaceId,
         user.id,
-        message
+        message,
+        workerId ?? undefined   // pass AI Worker context so agent_queue row gets ai_worker_id set
       );
     }
 
@@ -1597,6 +1606,40 @@ export async function POST(request: NextRequest) {
         domain: 'agent_management',
         metadata: { agent_type: agentIntent.agentType },
       }).catch(() => {});
+    }
+
+    // ── Process Engine Intent Detection ──────────────────────────────────────
+    // Detect "trigger process" intent BEFORE agent execution mode.
+    // Examples: "start the hr offboarding process", "run quarterly delivery review"
+    // Uses agent_queue insert (agent_type='bpaas') + immediate fire-and-forget worker trigger.
+    // Non-fatal: if process handling fails, log a warning and continue to normal copilot flow.
+    {
+      const { detectProcessIntent, handleProcessTrigger } = await import("@/lib/copilot/handlers/process-handler");
+      const processIntent = detectProcessIntent(message);
+      if (processIntent && !agentCreated) {
+        try {
+          const { getAdminClient: _getAdmin } = await import("@/lib/supabase/admin");
+          const _admin = _getAdmin();
+          const processResult = await handleProcessTrigger(processIntent, workspaceId, user.id, _admin);
+          processTriggeredResult = processResult as unknown as Record<string, unknown>;
+          // Capture process trigger as an orchestration decision for brain learning
+          captureOrchestrationDecision(service, workspaceId, {
+            type: 'agent_spawn',
+            trigger: message.slice(0, 200),
+            reasoning: `User triggered business process: ${processIntent.rawProcessName}`,
+            outcome: `Process queued: ${processIntent.processType} (job ${processResult.jobId})`,
+            confidenceScore: 0.7,
+            domain: `process.${processIntent.processType}`,
+            metadata: {
+              processType: processIntent.processType,
+              jobId: processResult.jobId,
+              rawProcessName: processIntent.rawProcessName,
+            },
+          }).catch(() => {});
+        } catch (processErr) {
+          logger.warn("[chat/route] Process trigger failed (non-fatal)", { err: String(processErr) });
+        }
+      }
     }
 
     // Skip regex agent path when LLM already handled create-agent via handleAgentCreation().
@@ -2817,15 +2860,20 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
     // ── Raw Capability Upgrade: await learning context (ADR-022) ─────────────
     // Promises were fired immediately after workspaceId was known — they've been
     // running concurrently with all brain context building above.
-    const [_rcRLPrimer, _rcEntityCtx, _rcDriftStatus, _rcSynthCaps] = await Promise.all([
+    const [_rcRLPrimer, _rcEntityCtx, _rcDriftStatus, _rcSynthCaps, _rcCopilotMem] = await Promise.all([
       _rcRLPrimerPromise,
       _rcEntityCtxPromise,
       _rcDriftStatusPromise,
       _rcCapsPromise,
+      _rcCopilotMemPromise,
     ]);
     // 1. RL Primer — inject past success/failure patterns from federated_knowledge
     if (_rcRLPrimer) {
       effectiveSystemPrompt += `\n\n${_rcRLPrimer}`;
+    }
+    // 1b. ADR-027: Copilot Memory — inject routing patterns and user preferences
+    if (_rcCopilotMem) {
+      effectiveSystemPrompt += `\n\n${_rcCopilotMem}`;
     }
     // 2. Entity Memory — inject known entities from recent conversations
     if (_rcEntityCtx) {
@@ -4420,6 +4468,11 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send agent created event so the frontend can render AgentCreatedCard
         if (agentCreated) {
           send(JSON.stringify({ agentCreated }));
+        }
+
+        // Send process triggered event so the frontend can render process status card
+        if (processTriggeredResult) {
+          send(JSON.stringify({ processTriggered: processTriggeredResult }));
         }
 
         // ── Connector status card — emitted when user asks "what am I connected to?" ──
