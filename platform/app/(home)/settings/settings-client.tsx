@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusDot } from "@/components/ui/StatusDot";
@@ -389,6 +390,16 @@ export function SettingsClient({
     <div className="flex gap-8 min-h-[calc(100vh-7rem)]">
       {/* ── Sidebar Navigation (Claude-style vertical tabs) ──────────── */}
       <nav className="w-52 shrink-0 py-1 flex flex-col">
+        {/* Back to Mission Control */}
+        <Link
+          href="/workspace"
+          className="flex items-center gap-1.5 px-3 mb-4 text-[11px] text-muted hover:text-foreground transition-colors"
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Mission Control
+        </Link>
         <h1 className="text-xl font-semibold tracking-tight px-3 mb-1">Settings</h1>
         <p className="text-[11px] text-muted px-3 mb-5">{aiWorkerName ? `Configure ${aiWorkerName}` : "Manage your AI Worker"}</p>
         <div className="space-y-0.5 flex-1">
