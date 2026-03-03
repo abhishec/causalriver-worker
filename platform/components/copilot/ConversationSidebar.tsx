@@ -204,7 +204,7 @@ export function ConversationSidebar({
       </div>
 
       {/* ── Conversation list ───────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 min-h-0 overflow-y-auto py-2">
         {loading ? (
           <div className="px-3 py-8 text-center text-xs text-muted">
             Loading...

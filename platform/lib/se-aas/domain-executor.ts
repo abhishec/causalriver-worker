@@ -1526,11 +1526,24 @@ export async function executeDomain(
     }
   }
 
-  // ── Step 10: Knowledge Extraction (ADR-019, fire-and-forget) ─────────────
-  // After every domain execution with quality >= 0.65, extract 1-2 reusable
-  // insights and store in federated_knowledge as workspace-specific rows.
+  // ── Step 10: Knowledge Extraction (ADR-019, ADR-026.2, fire-and-forget) ────────
+  // After every domain execution with quality >= adaptive threshold, extract 1-2
+  // reusable insights and store in federated_knowledge as workspace-specific rows.
+  // Uses getDomainThreshold() for per-domain adaptive gating (replaces hardcoded 0.65).
   // Non-blocking — never delays or blocks the caller.
-  if (rlQuality >= 0.65) {
+  let _kxThreshold = 0.65; // fallback default
+  try {
+    const { getDomainThreshold } = await import("@/lib/brain/agent-rl");
+    _kxThreshold = await getDomainThreshold(
+      params.domainType as any,
+      params.organizationId,
+      params.domainType
+    );
+  } catch {
+    // Fallback to 0.65 if threshold lookup fails (non-fatal)
+  }
+
+  if (rlQuality >= _kxThreshold) {
     extractAndStoreKnowledge(supabase, {
       domain: params.domainType,
       taskType: params.domainType,

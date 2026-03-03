@@ -512,16 +512,41 @@ export async function GET(request: NextRequest) {
           plannerResults.push({ workerId, orgId: workerOrgId, result });
 
           // Fire-and-forget: promote SE-aaS patterns + extract FSM process templates
-          void promotePatternsToCore(service, workerOrgId);
-          void extractProcessTemplates(service, workerOrgId);
+          // Await these calls and log their results for diagnostics
+          const corePromotionResult = await promotePatternsToCore(service, workerOrgId).catch(
+            (err: unknown) => {
+              logger.warn('[CognitiveCycle] promotePatternsToCore failed (non-fatal)', { err, workerId });
+              return null;
+            }
+          );
+
+          const templateExtractionResult = await extractProcessTemplates(service, workerOrgId).catch(
+            (err: unknown) => {
+              logger.warn('[CognitiveCycle] extractProcessTemplates failed (non-fatal)', { err, workerId });
+              return null;
+            }
+          );
+
           // Fix #1 (ADR-026): promote repeated gaba signals into federated_knowledge warnings
-          void promoteGabaPatternsToKnowledge(service, workerOrgId).catch((err: unknown) =>
-            logger.warn('[CognitiveCycle] promoteGabaPatternsToKnowledge failed', { err })
-          );
+          const gabaPromotionCount = await promoteGabaPatternsToKnowledge(service, workerOrgId).catch((err: unknown) => {
+            logger.warn('[CognitiveCycle] promoteGabaPatternsToKnowledge failed (non-fatal)', { err, workerId });
+            return 0;
+          });
+
           // Fix #4 (ADR-026): graduate high-quality structured-outcome ai_memory entries to federated_knowledge
-          void promoteMemoryToFederatedKnowledge(service, workerOrgId).catch((err: unknown) =>
-            logger.warn('[CognitiveCycle] promoteMemoryToFederatedKnowledge failed', { err })
-          );
+          const memoryPromotionCount = await promoteMemoryToFederatedKnowledge(service, workerOrgId).catch((err: unknown) => {
+            logger.warn('[CognitiveCycle] promoteMemoryToFederatedKnowledge failed (non-fatal)', { err, workerId });
+            return 0;
+          });
+
+          // Log federation results for diagnostics
+          if (gabaPromotionCount > 0 || memoryPromotionCount > 0) {
+            logger.info('[CognitiveCycle] Federation metrics', {
+              workerId,
+              gabaPromotionCount,
+              memoryPromotionCount,
+            });
+          }
         } catch (err) {
           const errMsg = (err as Error)?.message ?? String(err);
           logger.warn(`[CognitiveCycle] Planner failed/timed-out for worker=${workerId}:`, {

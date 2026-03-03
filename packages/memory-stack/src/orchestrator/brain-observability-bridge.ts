@@ -412,9 +412,13 @@ export function createBrainObservabilityBridge(config: BrainObservabilityBridgeC
 
       // Emit cross_domain_signal for EVERY layer execution
       // → Brain Evolution Engine tracks layer activity
+      // target_domain = layer-specific domain so tier3 consolidation can cluster
+      // cognitive_layer_execution signals by brain layer (not all null-domain).
+      const layerDomain = `brain.layer.${layer.layerNumber}`;
       await supabase.from('cross_domain_signals').insert({
         organization_id: organizationId,
-        source_domain: `brain.layer.${layer.layerNumber}`,
+        source_domain: layerDomain,
+        target_domain: layerDomain,    // ← was missing; caused all signals to cluster under null
         signal_type: 'cognitive_layer_execution',
         signal_value: layer.didProduce ? 1 : 0,
         signal_timestamp: new Date().toISOString(),

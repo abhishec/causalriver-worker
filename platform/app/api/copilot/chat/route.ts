@@ -75,14 +75,13 @@ import { routeCallType } from "@/lib/se-aas/model-router";
 import { selectModel as selectModelDAA, classifyQueryDifficulty } from "@/lib/brain/model-router";
 import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 import { classifyTaskIntent, buildPrivacyRefusal } from "@/lib/brain/task-intent-classifier";
-// ── Raw Capability Upgrade (ADR-022) ─────────────────────────────────────────
-import { buildRLPrimerWithIds } from "@/lib/brain/rl-primer";
-import { recallCopilotMemory } from "@/lib/copilot/copilot-memory";
-import { detectOutputFormat, buildFormatDirective, hasFormatRequirement } from "@/lib/brain/format-detector";
+// ── ADR-027: Tier 1 Working Memory (replaces scattered _rc* variables) ───────
+import { gatherWorkingMemory, resolveWorkingMemory, injectWorkingMemory } from "@/lib/copilot/working-memory";
+// ── Post-flight + enrichment imports (still needed outside of working memory) ─
 import { scoreResponseQuality } from "@/lib/brain/self-reflection";
-import { extractEntities, persistEntities, getEntityContext } from "@/lib/brain/entity-memory";
-import { getDriftStatus, recordContextUsage, buildDriftAwareContextSuffix } from "@/lib/brain/context-drift-detector";
-import { getOrSynthesizeCapabilities, formatCapabilitiesForPrompt, observeCapabilityRegret } from "@/lib/brain/capability-synthesizer";
+import { extractEntities, persistEntities } from "@/lib/brain/entity-memory";
+import { recordContextUsage } from "@/lib/brain/context-drift-detector";
+import { observeCapabilityRegret } from "@/lib/brain/capability-synthesizer";
 // ── ADR-023 additions ─────────────────────────────────────────────────────────
 import { validateProcessOutput, buildValidationHint } from "@/lib/brain/output-validator";
 
@@ -290,18 +289,12 @@ export async function POST(request: NextRequest) {
     const user = { id: _userId } as { id: string };
     const memStack: Record<string, any> = ctx.memStack!;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY!;
-    // ── Raw Capability Upgrade: kick off parallel async fetches early ─────────
-    // These run concurrently with all setup below and are awaited just before
-    // the system prompt is finalised — near-zero added latency on the hot path.
-    const _rcRLPrimerPromise = buildRLPrimerWithIds(message, workspaceId, workerId ?? undefined);
-    const _rcEntityCtxPromise = getEntityContext(workspaceId, workerId ?? undefined);
-    const _rcDriftStatusPromise = getDriftStatus(workspaceId, service as any);
-    const _rcCapsPromise = getOrSynthesizeCapabilities(message, workspaceId, anthropicApiKey, service as any);
-    // ADR-027: Recall user routing patterns + preferences from session memory
-    const _rcCopilotMemPromise = recallCopilotMemory(service as any, workspaceId, {
-      aiWorkerId: workerId ?? undefined,
-      userMessage: message,
-    });
+    // ── ADR-027: Tier 1 Working Memory — kick off all parallel fetches early ──
+    // gatherWorkingMemory() fires 7 concurrent fetches (RL primer, entity ctx,
+    // drift status, capabilities, copilot memory, planner strategy, brain context
+    // cache warmer). All run in parallel with setup below and are resolved just
+    // before system prompt finalization via resolveWorkingMemory().
+    const _wmHandles = gatherWorkingMemory(message, workspaceId, workerId ?? undefined, service as any, anthropicApiKey);
     const commandResult: any = (ctx as any)._commandResult;
     const interpretation: QueryInterpretation | undefined = (ctx as any)._interpretation;
     (ctx as any)._conversationHistory = conversationHistory;
@@ -2857,48 +2850,16 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
 - **Section headers**: Use ## and ### to create scannable structure
 - **Emoji indicators**: ✅ Done, 🔄 In Progress, 📋 To Do, 🔴 Blocker, ⚠️ At Risk, 🟢 On Track`;
 
-    // ── Raw Capability Upgrade: await learning context (ADR-022) ─────────────
-    // Promises were fired immediately after workspaceId was known — they've been
-    // running concurrently with all brain context building above.
-    const [_rcRLPrimer, _rcEntityCtx, _rcDriftStatus, _rcSynthCaps, _rcCopilotMem] = await Promise.all([
-      _rcRLPrimerPromise,
-      _rcEntityCtxPromise,
-      _rcDriftStatusPromise,
-      _rcCapsPromise,
-      _rcCopilotMemPromise,
-    ]);
-    // 1. RL Primer — inject past success/failure patterns from federated_knowledge
-    //    ADR-027: Using buildRLPrimerWithIds so we can track which patterns helped/hurt
-    const _rcRLPrimerBlock = typeof _rcRLPrimer === "string" ? _rcRLPrimer : _rcRLPrimer?.block ?? "";
-    const _rcRLPrimerPatternIds: string[] = typeof _rcRLPrimer === "string" ? [] : _rcRLPrimer?.patternIds ?? [];
-    if (_rcRLPrimerBlock) {
-      effectiveSystemPrompt += `\n\n${_rcRLPrimerBlock}`;
-    }
-    // 1b. ADR-027: Copilot Memory — inject routing patterns and user preferences
-    if (_rcCopilotMem) {
-      effectiveSystemPrompt += `\n\n${_rcCopilotMem}`;
-    }
-    // 2. Entity Memory — inject known entities from recent conversations
-    if (_rcEntityCtx) {
-      effectiveSystemPrompt += `\n\n${_rcEntityCtx}`;
-    }
-    // 3. Context Drift Warning — tell LLM not to trust stale brain context
-    const _rcDriftSuffix = buildDriftAwareContextSuffix(_rcDriftStatus);
-    if (_rcDriftSuffix) {
-      effectiveSystemPrompt += `\n\n${_rcDriftSuffix}`;
-    }
-    // 4. Format Directive — pre-detect required output shape, inject before LLM call
-    if (hasFormatRequirement(message)) {
-      const _rcFmtDirective = buildFormatDirective(detectOutputFormat(message));
-      if (_rcFmtDirective) {
-        effectiveSystemPrompt += `\n\n## FORMAT REQUIREMENT\n${_rcFmtDirective}`;
-      }
-    }
-    // 5. Synthesised Capabilities — inject computed JS tools for any detected gaps
-    const _rcCapsPrompt = formatCapabilitiesForPrompt(_rcSynthCaps);
-    if (_rcCapsPrompt) {
-      effectiveSystemPrompt += `\n\n${_rcCapsPrompt}`;
-    }
+    // ── ADR-027: Tier 1 Working Memory — resolve all 7 parallel fetches ──────
+    // gatherWorkingMemory() handles: RL primer, entity ctx, drift warning,
+    // capabilities, copilot memory, planner strategy, brain context cache.
+    // injectWorkingMemory() appends all non-empty blocks to the system prompt
+    // in the correct order (RL primer → copilot mem → planner → entity →
+    // drift → format → capabilities). See lib/copilot/working-memory.ts.
+    const _wm = await resolveWorkingMemory(_wmHandles, message);
+    effectiveSystemPrompt = injectWorkingMemory(effectiveSystemPrompt, _wm);
+    // Extract pattern IDs for SSE emission (ADR-027 RL feedback loop)
+    const _rcRLPrimerPatternIds = _wm.rlPrimerPatternIds;
 
     // ── ADR-023: Four-phase tool execution ordering (from purple agent pattern) ──
     // Guides the LLM to follow an optimal execution order when tools are available.

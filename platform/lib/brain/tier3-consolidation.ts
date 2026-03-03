@@ -87,6 +87,10 @@ function sevenDaysAgo(): string {
   return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 }
 
+function thirtyDaysAgo(): string {
+  return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+}
+
 function average(values: number[]): number {
   if (values.length === 0) return 0;
   return values.reduce((sum, v) => sum + v, 0) / values.length;
@@ -259,8 +263,11 @@ export async function runConsolidation(
       //   OR signal_strength >= 0.72 (any high-quality signal regardless of type)
       .or("signal_type.eq.dopamine,signal_type.eq.cognitive_layer_execution,signal_strength.gte.0.72")
       .gte("created_at", since)
-      .order("signal_strength", { ascending: false })
-      .limit(50);
+      // nullsFirst: false → non-null strength values sort first (DESC), nulls go to end.
+      // Without this, Postgres puts NULLs first in DESC order, filling the limit with
+      // null-strength cognitive_layer_execution signals and pushing dopamine signals out.
+      .order("signal_strength", { ascending: false, nullsFirst: false })
+      .limit(200);
 
     if (signalError) {
       logger.warn("[tier3-consolidation] cross_domain_signals fetch failed", {
@@ -378,9 +385,16 @@ export async function runConsolidation(
       });
     }
 
+    // ── Step 6: Promote high-quality RL patterns into federated_knowledge ────
+    // Fire-and-forget: result is logged inside promoteHighQualityPredictions.
+    // We await it so the count appears in the run-complete log below, but
+    // any error inside is caught by the function itself — never throws here.
+    const rlPatternsPromoted = await promoteHighQualityPredictions(orgId);
+
     logger.warn("[tier3-consolidation] run complete", {
       orgId,
       patternsPromoted,
+      rlPatternsPromoted,
       signalsScanned,
       durationMs,
     });
@@ -394,6 +408,128 @@ export async function runConsolidation(
       durationMs,
     });
     return { patternsPromoted, signalsScanned: 0, durationMs };
+  }
+}
+
+// ── RL quality promotion: prediction_records → federated_knowledge ────────────
+
+/**
+ * Promote high-quality RL patterns from `prediction_records` into
+ * `federated_knowledge` so the knowledge base benefits from domain-level
+ * RL learning over time.
+ *
+ * Eligibility criteria (30-day window):
+ *   - Domain has >= 5 prediction records
+ *   - Average quality (confidence) >= 0.70
+ *
+ * For each qualifying domain an `rl_quality_pattern` row is upserted into
+ * `federated_knowledge`. The upsert key is (source_org_id, pattern_key) so
+ * repeated consolidation runs refresh the content rather than accumulate rows.
+ *
+ * Never throws — returns 0 on any error.
+ */
+export async function promoteHighQualityPredictions(
+  orgId: string
+): Promise<number> {
+  try {
+    const admin = getAdminClient();
+    const since = thirtyDaysAgo();
+
+    // Fetch all prediction records for this org in the 30-day window.
+    // We pull id + domain + confidence only — that is all we need for grouping.
+    const { data: rows, error: fetchError } = await admin
+      .from("prediction_records")
+      .select("domain, confidence")
+      .eq("organization_id", orgId)
+      .gte("created_at", since)
+      .limit(500);
+
+    if (fetchError) {
+      logger.warn("[Tier3] promoteHighQualityPredictions fetch failed", {
+        orgId,
+        error: fetchError.message,
+      });
+      return 0;
+    }
+
+    const records = (rows ?? []) as { domain: string; confidence: number }[];
+
+    if (records.length === 0) return 0;
+
+    // Group by domain, then apply eligibility criteria.
+    const byDomain = groupBy(records, (r) => r.domain);
+
+    let promoted = 0;
+
+    for (const [domain, cluster] of byDomain) {
+      if (cluster.length < 5) continue;
+
+      const avgQuality = average(cluster.map((r) => r.confidence));
+      if (avgQuality < 0.70) continue;
+
+      // Compute a simple trend: compare first-half avg vs second-half avg.
+      // Positive = improving, negative = declining.
+      const midpoint = Math.floor(cluster.length / 2);
+      const firstHalfAvg = average(cluster.slice(0, midpoint).map((r) => r.confidence));
+      const secondHalfAvg = average(cluster.slice(midpoint).map((r) => r.confidence));
+      const trend = secondHalfAvg - firstHalfAvg;
+
+      const patternKey = `prediction.${domain}.quality`;
+      const content = JSON.stringify({
+        domain,
+        avg_quality: Math.round(avgQuality * 1000) / 1000,
+        record_count: cluster.length,
+        trend: Math.round(trend * 1000) / 1000,
+        window_days: 30,
+        promoted_at: new Date().toISOString(),
+      });
+
+      // Upsert on (source_org_id, pattern_key) — the pair uniquely identifies
+      // this domain quality pattern per org. On conflict we overwrite content
+      // and confidence with the latest 30-day view.
+      const { error: upsertError } = await admin
+        .from("federated_knowledge")
+        .upsert(
+          {
+            source_org_id: orgId,
+            pattern_key: patternKey,
+            knowledge_type: "rl_quality_pattern",
+            content,
+            confidence: Math.round(avgQuality * 1000) / 1000,
+            source_type: "prediction_records",
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "source_org_id,pattern_key" }
+        );
+
+      if (upsertError) {
+        logger.warn("[Tier3] federated_knowledge upsert failed", {
+          orgId,
+          domain,
+          patternKey,
+          error: upsertError.message,
+        });
+        continue;
+      }
+
+      promoted += 1;
+    }
+
+    if (promoted > 0) {
+      logger.warn("[Tier3] promoteHighQualityPredictions complete", {
+        orgId,
+        domainsEvaluated: byDomain.size,
+        patternsPromoted: promoted,
+      });
+    }
+
+    return promoted;
+  } catch (err) {
+    logger.warn("[Tier3] promoteHighQualityPredictions threw", {
+      orgId,
+      error: String(err),
+    });
+    return 0;
   }
 }
 

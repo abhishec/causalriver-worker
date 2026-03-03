@@ -494,6 +494,14 @@ export async function executePmDomain(
     // non-fatal — domain proceeds without brain context
   }
 
+  // ── Step 0.5: Pull CORE insights into this org (fire-and-forget, TTL-guarded) — ADR-027
+  try {
+    const { pushCoreInsightsToOrg } = await import("@nexus-ai/memory-stack");
+    void pushCoreInsightsToOrg(organizationId, supabase as any).catch((e: unknown) =>
+      logger.warn("[pm-aas/domain-executor] Core insight pull failed (non-fatal):", e instanceof Error ? e.message : String(e))
+    );
+  } catch { /* non-fatal — federation never blocks execution */ }
+
   // ── Step 1: Build prompt and call Claude ────────────────────────────────
   const model = selectPmModel(domainType);
   const anthropicKey = params.anthropicApiKey || process.env.ANTHROPIC_API_KEY;

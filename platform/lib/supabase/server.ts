@@ -59,30 +59,29 @@ export const getAuthUser = cache(async () => {
   return user;
 });
 
-/** Service-role client for admin operations (bypasses RLS) */
+/**
+ * Service-role client for admin operations (bypasses RLS).
+ *
+ * CRITICAL: Must NOT pass user cookies. @supabase/ssr createServerClient forwards
+ * the user's session JWT in `Authorization: Bearer`, which sets auth.role()='authenticated'
+ * in Postgres and makes RLS fire — even though the service role key is provided.
+ * With empty cookies, Supabase uses only the service role JWT embedded in the key,
+ * so auth.role()='service_role' and all RLS policies are bypassed correctly.
+ */
 export async function createServiceClient() {
   if (!_SUPABASE_URL || !_SERVICE_ROLE_KEY) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Check your .env.local");
   }
-  const cookieStore = await cookies();
 
   return createServerClient(
     _SUPABASE_URL,
     _SERVICE_ROLE_KEY,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Ignored in Server Components
-          }
-        },
+        // Service role doesn't need user session cookies — empty handlers ensure
+        // the user JWT never leaks into service-role requests.
+        getAll() { return []; },
+        setAll() { /* no-op */ },
       },
     }
   );

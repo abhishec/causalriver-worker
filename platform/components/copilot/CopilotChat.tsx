@@ -2653,7 +2653,8 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       )}
 
       {/* Messages area — matches HTML prototype: .chat-area centered, max-width 680px */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
+      {/* min-h-0 is critical: without it, flex-1 expands to content height and overflow-y-auto never triggers */}
+      <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto py-6" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.length === 0 && !gathering.isActive ? (
           /* Empty state — domain commands in sidebar */
           <div data-testid="empty-state-v2" className="flex flex-col items-center justify-center h-full text-center px-6 pt-24 pb-16">

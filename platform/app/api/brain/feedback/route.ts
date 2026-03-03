@@ -104,11 +104,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use server-resolved workspace first; fall back to org passed in the request body
-    // (MessageFeedback sends organizationId for cases where session cookie resolution
-    // returns an empty string — e.g., when the AI Worker belongs to a different org than
-    // the user's primary workspace).
-    const workspaceId = (await getCurrentWorkspaceId()) || bodyOrgId || "";
+    // Prefer body-supplied organizationId (from AI Worker page context) over session-resolved
+    // workspace. getCurrentWorkspaceId() returns CORE_WORKSPACE_ID for platform admins who
+    // are members of the CORE org — this is the wrong org for per-worker operations.
+    // bodyOrgId is explicitly sent by the UI with the correct worker org every time.
+    const workspaceId = bodyOrgId || (await getCurrentWorkspaceId()) || "";
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace context" }, { status: 400 });
     }
@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
 
       const signalStrength = rating === "helpful" ? 0.3 : rating === "incorrect" ? -0.5 : -0.2;
 
-      await service.from("cross_domain_signals").insert({
+      const { error: signalInsertErr } = await service.from("cross_domain_signals").insert({
         organization_id: workspaceId,
         source_domain: "user_feedback",
         target_domain: domainId || "general",
@@ -313,6 +313,12 @@ export async function POST(request: NextRequest) {
         },
         created_at: new Date().toISOString(),
       });
+      if (signalInsertErr) {
+        logger.warn("[BrainFeedback] RL signal emission failed", {
+          code: signalInsertErr.code,
+          message: signalInsertErr.message,
+        });
+      }
     } catch (signalErr) {
       // Non-fatal: feedback is saved, RL signal is bonus
       logger.warn("[BrainFeedback] RL signal emission failed:", signalErr);

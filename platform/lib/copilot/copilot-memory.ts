@@ -8,7 +8,7 @@
  * with the copilot inference path (which needs to READ them back).
  *
  * Pattern:
- *   post-flight.ts writes: routing.{domain} patterns with quality scores
+ *   post-flight.ts writes: routing.{domain} AND orchestration.routing_feedback.{domain} patterns with quality scores
  *   copilot-memory.ts reads: top N routing patterns + user preferences
  *   chat/route.ts injects: "## USER CONTEXT MEMORY" block into system prompt
  *
@@ -50,7 +50,7 @@ export async function recallCopilotMemory(
       .select("domain, content, importance, metadata, created_at")
       .eq("organization_id", orgId)
       .eq("memory_type", "pattern")
-      .like("domain", "routing.%")
+      .or("domain.like.routing.%,domain.like.orchestration.routing_feedback.%")
       .gte("importance", 0.6)
       .order("importance", { ascending: false })
       .limit(limit);
@@ -69,7 +69,7 @@ export async function recallCopilotMemory(
     // Score patterns by relevance to current message
     const userWords = (options.userMessage ?? "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
     const scored = rows.map(row => {
-      const domainName = row.domain.replace("routing.", "");
+      const domainName = row.domain.replace(/^(routing\.|orchestration\.routing_feedback\.)/, "");
       const contentLower = row.content.toLowerCase();
       const relevance = userWords.filter(w => contentLower.includes(w) || domainName.includes(w)).length;
       return { ...row, relevance };
@@ -86,7 +86,7 @@ export async function recallCopilotMemory(
     if (!top.length) return "";
 
     const lines = top.map(p => {
-      const domain = p.domain.replace("routing.", "");
+      const domain = p.domain.replace(/^(routing\.|orchestration\.routing_feedback\.)/, "");
       const quality = Math.round(p.importance * 100);
       return `- ${domain}: ${p.content.slice(0, 120)} (quality: ${quality}%)`;
     });

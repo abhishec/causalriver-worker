@@ -47,7 +47,9 @@ export async function extractAndStoreKnowledge(
   supabase: SupabaseClient,
   params: KnowledgeExtractionParams
 ): Promise<void> {
-  if (params.qualityScore < 0.5) return;  // Issue A: lowered from 0.65 to 0.5 to capture more executions
+  // ADR-026.2: Caller (domain-executor) gates via getDomainThreshold() — this is a safety floor
+  // only. Lowered from 0.5 to 0.3 to catch edge cases where adaptive threshold is used.
+  if (params.qualityScore < 0.3) return;
   if (!_ANTHROPIC_API_KEY) {
     logger.warn("[knowledge-extractor] ANTHROPIC_API_KEY not set — skipping extraction");
     return;
