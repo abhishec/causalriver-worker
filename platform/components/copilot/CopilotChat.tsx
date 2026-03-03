@@ -1749,8 +1749,40 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     return () => { cancelled = true; clearInterval(interval); };
   }, [organizationId]);
 
-  // Stable conversation ID for feedback tracking (one per chat session)
-  const [conversationId] = useState(() => `conv_${Date.now()}_${crypto.randomUUID().replace(/-/g, '').slice(0, 6)}`);
+  // Stable conversation UUID — used to upsert the conversations table row.
+  // A proper UUID is required because the DB id column is type UUID.
+  // setConversationId lets the load-on-mount effect reuse an existing conversation.
+  const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
+
+  // Load most-recent conversation on mount so history survives page refresh.
+  useEffect(() => {
+    const workspaceId = (extraParams as Record<string, unknown>)?.workspaceId as string | undefined;
+    if (!workspaceId) return;
+    let cancelled = false;
+    // Step 1: list conversations for this workspace (returns id + metadata, no messages)
+    fetch(`/api/copilot/conversations?workspaceId=${workspaceId}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (cancelled || !Array.isArray(data?.conversations) || data.conversations.length === 0) return null;
+        const recent = data.conversations[0];
+        if (!recent?.id) return null;
+        // Step 2: load full messages for that conversation
+        return fetch(`/api/copilot/conversations/${recent.id}`).then(r => r.ok ? r.json() : null);
+      })
+      .then(data => {
+        if (cancelled || !data?.conversation?.messages?.length) return;
+        const loaded = (data.conversation.messages as Array<{ role: string; content: string }>)
+          .filter(m => m.role === 'user' || m.role === 'assistant')
+          .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+        if (loaded.length > 0) {
+          setMessages(loaded);
+          setConversationId(data.conversation.id); // reuse the existing UUID so updates go to same row
+        }
+      })
+      .catch(() => { /* Non-critical — history load is best-effort */ });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount only
 
   // Bug fix #2: Use refs for values that sendMessage closes over to avoid stale closures
   const messagesRef = useRef(messages);
@@ -2143,6 +2175,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             ? { commandId: pendingCommandIdRef.current }
             : {}),
           ...(Object.keys(gatheringRef.current.state.collectedParams).length > 0 ? { commandParams: gatheringRef.current.state.collectedParams } : {}),
+          conversationId, // stable UUID → server uses it to upsert the conversations row
           ...extraParams,
         }),
         signal: controller.signal,

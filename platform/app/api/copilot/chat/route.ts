@@ -216,6 +216,8 @@ export async function POST(request: NextRequest) {
       commandParams,
       // Memory compression: narrative summary of earlier turns for unlimited memory
       compressedSummary,
+      // Stable UUID from the frontend CopilotChat session — used to upsert the conversation row
+      conversationId: bodyConversationId,
     } = body as {
       message: string;
       organizationId?: string;
@@ -230,6 +232,7 @@ export async function POST(request: NextRequest) {
       commandId?: string;
       commandParams?: Record<string, unknown>;
       compressedSummary?: string;
+      conversationId?: string;
     };
 
     // When a compressed summary exists, cap history to the 10 most recent turns.
@@ -4682,6 +4685,7 @@ No connectors are configured yet. When the user asks for data from any source (S
         // but never propagate. ctx._conversationHistory is set from conversationHistory above.
         void runPostFlight({
           ctx,
+          conversationId: bodyConversationId,
           streamedAssistantText,
           detectedIntent: detectedIntent ?? null,
           v4SmartModel,
