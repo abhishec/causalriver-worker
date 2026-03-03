@@ -207,3 +207,95 @@ async function fetchAndScore(
 
   return formatPrimerBlock(top3);
 }
+
+// ── Structured Memory Extraction ──────────────────────────────────────────────
+
+/**
+ * Extracts structured entity:value pairs from raw federated_knowledge content.
+ * Zero-cost: pure regex, synchronous, never calls Anthropic.
+ *
+ * Extracts patterns like:
+ *   - "key: value" pairs
+ *   - "entity → outcome" arrows
+ *   - "domain: X" domain tags
+ *   - Numeric thresholds: "score: 0.85", "confidence: 0.9"
+ *   - Action patterns: "when X → do Y"
+ *   - Named entities: capitalized terms (3+ chars)
+ *
+ * Used to build a quick-lookup index from the RL primer entries
+ * without requiring an additional LLM call.
+ *
+ * @param content - Raw content string from a federated_knowledge row
+ * @returns       - Map of extracted key→value pairs
+ */
+export function extractStructuredMemory(content: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!content || content.length === 0) return result;
+
+  // 1. Key: Value pairs (e.g. "domain: se-aas", "confidence: 0.85")
+  const kvRegex = /\b([a-z][a-z0-9_]{2,30})\s*:\s*([^\n,;]{1,80})/gi;
+  let match: RegExpExecArray | null;
+  while ((match = kvRegex.exec(content)) !== null) {
+    const key = match[1].toLowerCase().trim();
+    const value = match[2].trim();
+    if (key.length >= 3 && value.length >= 1 && !result[key]) {
+      result[key] = value;
+    }
+  }
+
+  // 2. Arrow patterns: "X → Y" or "X -> Y" (causal relationships)
+  const arrowRegex = /([^.\n]{3,40})\s*[→\->]+\s*([^.\n]{3,60})/g;
+  let arrowIdx = 0;
+  while ((match = arrowRegex.exec(content)) !== null) {
+    const cause = match[1].trim();
+    const effect = match[2].trim();
+    if (cause.length > 3 && effect.length > 3) {
+      result[`pattern_${arrowIdx++}`] = `${cause} → ${effect}`;
+    }
+    if (arrowIdx >= 5) break; // limit to 5 arrow patterns
+  }
+
+  // 3. Numeric thresholds: extract numbers that appear near quality keywords
+  const thresholdRegex = /\b(score|confidence|quality|threshold|accuracy|rate)\s*[=:≥>=]+\s*([\d.]+)/gi;
+  while ((match = thresholdRegex.exec(content)) !== null) {
+    const metric = match[1].toLowerCase();
+    const value = parseFloat(match[2]);
+    if (!isNaN(value) && value >= 0 && value <= 1) {
+      result[`${metric}_threshold`] = value.toFixed(2);
+    }
+  }
+
+  // 4. Domain tags: "domain: X" or "[domain: X]"
+  const domainRegex = /\[?domain\s*:\s*([a-z][a-z0-9\-._]{1,40})\]?/gi;
+  if ((match = domainRegex.exec(content)) !== null) {
+    result["extracted_domain"] = match[1].toLowerCase().trim();
+  }
+
+  return result;
+}
+
+/**
+ * Augments the primer block with structured memory extracts.
+ * Adds a condensed key-insight summary below each pattern.
+ *
+ * @param entries - federated_knowledge rows from buildRLPrimer
+ * @returns       - Map of domain → extracted key:value pairs per entry
+ */
+export function buildStructuredMemoryIndex(
+  entries: Array<{ domain: string; content: string; confidence: number }>
+): Record<string, Record<string, string>> {
+  const index: Record<string, Record<string, string>> = {};
+
+  for (const entry of entries) {
+    try {
+      const structured = extractStructuredMemory(entry.content);
+      if (Object.keys(structured).length > 0) {
+        index[entry.domain] = structured;
+      }
+    } catch {
+      // skip failed extractions
+    }
+  }
+
+  return index;
+}

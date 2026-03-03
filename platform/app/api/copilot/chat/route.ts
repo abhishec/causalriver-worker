@@ -81,7 +81,9 @@ import { detectOutputFormat, buildFormatDirective, hasFormatRequirement } from "
 import { scoreResponseQuality } from "@/lib/brain/self-reflection";
 import { extractEntities, persistEntities, getEntityContext } from "@/lib/brain/entity-memory";
 import { getDriftStatus, recordContextUsage, buildDriftAwareContextSuffix } from "@/lib/brain/context-drift-detector";
-import { getOrSynthesizeCapabilities, formatCapabilitiesForPrompt } from "@/lib/brain/capability-synthesizer";
+import { getOrSynthesizeCapabilities, formatCapabilitiesForPrompt, observeCapabilityRegret } from "@/lib/brain/capability-synthesizer";
+// ── ADR-023 additions ─────────────────────────────────────────────────────────
+import { validateProcessOutput, buildValidationHint } from "@/lib/brain/output-validator";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -2844,6 +2846,28 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
       effectiveSystemPrompt += `\n\n${_rcCapsPrompt}`;
     }
 
+    // ── ADR-023: Four-phase tool execution ordering (from purple agent pattern) ──
+    // Guides the LLM to follow an optimal execution order when tools are available.
+    effectiveSystemPrompt += `\n\n## EXECUTION PROTOCOL (Four-Phase Tool Ordering)
+When tools or connectors are available, follow this execution order:
+**Phase 1 — CLARIFY**: If the request is ambiguous, ask ONE clarifying question before acting.
+**Phase 2 — GATHER**: Retrieve all relevant data first. Run data-fetch tools before analysis tools.
+**Phase 3 — COMPUTE**: Run calculations, comparisons, or transformations on gathered data.
+**Phase 4 — RESPOND**: Synthesize a direct, structured answer. Lead with the conclusion.
+Avoid skipping phases. Avoid re-fetching data you already retrieved in Phase 2.`;
+
+    // ── ADR-023: L2/L3 Completion Contract hint for domain-structured outputs ──
+    const _contractDomain = (interpretation as any)?.primaryDomain ?? (interpretation as any)?.serviceRoute?.seaasDomain ?? null;
+    if (_contractDomain && typeof _contractDomain === 'string') {
+      const _contractHint = buildValidationHint(
+        validateProcessOutput(null, _contractDomain),
+        _contractDomain
+      );
+      if (_contractHint) {
+        effectiveSystemPrompt += `\n\n${_contractHint}`;
+      }
+    }
+
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
       effectiveSystemPrompt +=
@@ -4601,6 +4625,16 @@ No connectors are configured yet. When the user asks for data from any source (S
           workspaceId,
           workerId ?? undefined,
         );
+        // ADR-023: CapabilityObserver — detect regret signals in LLM response
+        // Fire-and-forget: seeds capability-gap entries for future synthesis
+        if (streamedAssistantText && streamedAssistantText.length > 50) {
+          void observeCapabilityRegret(
+            streamedAssistantText,
+            (interpretation as any)?.primaryDomain ?? "copilot",
+            workspaceId,
+            service as any,
+          ).catch(() => { /* never throw */ });
+        }
 
         // ── Brain Feedback: teach the Brain from Copilot interaction (Phase 4: 5s timeout) ──
         const { createBrainFeedbackBus } = memStack;

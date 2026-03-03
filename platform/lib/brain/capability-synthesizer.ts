@@ -429,3 +429,196 @@ function inferSignatureFromName(gapType: string): string {
     .map((part, i) => (i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)))
     .join("");
 }
+
+// ── Test Case Executor ────────────────────────────────────────────────────────
+
+interface CapabilityTestCase {
+  inputs: Record<string, unknown>;
+  expectedOutputType: "number" | "string" | "array" | "object" | "boolean";
+  description: string;
+}
+
+// Default test cases per gap type
+const DEFAULT_TEST_CASES: Record<string, CapabilityTestCase[]> = {
+  npv: [
+    {
+      inputs: { cashflows: [-1000, 300, 400, 500], discountRate: 0.1 },
+      expectedOutputType: "number",
+      description: "NPV of standard investment",
+    },
+  ],
+  irr: [
+    {
+      inputs: { cashflows: [-1000, 300, 400, 500] },
+      expectedOutputType: "number",
+      description: "IRR of standard investment",
+    },
+  ],
+  velocity_trend: [
+    {
+      inputs: { sprintVelocities: [30, 35, 32, 38, 40] },
+      expectedOutputType: "object",
+      description: "Velocity trend for 5 sprints",
+    },
+  ],
+  burndown: [
+    {
+      inputs: { totalPoints: 100, completedPoints: [0, 20, 40, 65, 80], sprintDays: 10 },
+      expectedOutputType: "object",
+      description: "Burndown chart data",
+    },
+  ],
+  sharpe_ratio: [
+    {
+      inputs: { returns: [0.05, 0.03, 0.08, -0.02, 0.06], riskFreeRate: 0.02 },
+      expectedOutputType: "number",
+      description: "Sharpe ratio calculation",
+    },
+  ],
+  cagr: [
+    {
+      inputs: { startValue: 1000, endValue: 2000, years: 5 },
+      expectedOutputType: "number",
+      description: "CAGR 5-year",
+    },
+  ],
+  amortization: [
+    {
+      inputs: { principal: 100000, rate: 0.05, periods: 12 },
+      expectedOutputType: "object",
+      description: "Monthly amortization schedule",
+    },
+  ],
+  engagement_health: [
+    {
+      inputs: { metrics: [{ score: 0.8 }, { score: 0.6 }, { score: 0.7 }] },
+      expectedOutputType: "object",
+      description: "Engagement health aggregation",
+    },
+  ],
+};
+
+/**
+ * Execute a synthesized capability function against test cases.
+ * Uses Function() constructor in a try-catch for safe execution.
+ *
+ * @param capability - The synthesized capability to test
+ * @returns          - "passed" | "failed" | "skipped" with optional error message
+ */
+export function executeCapabilityTests(
+  capability: SynthesizedCapability
+): { result: "passed" | "failed" | "skipped"; error?: string } {
+  const testCases = DEFAULT_TEST_CASES[capability.gapType];
+
+  if (!testCases || testCases.length === 0) {
+    return { result: "skipped" };
+  }
+
+  const { implementation } = capability;
+
+  for (const testCase of testCases) {
+    try {
+      // Wrap the implementation in a function factory and execute
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+      const fn = new Function(`
+        ${implementation}
+        // Auto-call: find the first function definition and call it
+        const fnMatch = \`${implementation.replace(/`/g, "\\`")}\`.match(/function\\s+(\\w+)/);
+        const fnName = fnMatch ? fnMatch[1] : null;
+        if (fnName && typeof eval(fnName) === 'function') {
+          return eval(fnName)(${JSON.stringify(Object.values(testCase.inputs)[0])});
+        }
+        return null;
+      `);
+
+      const output = fn();
+
+      // Type check the output
+      const outputType = Array.isArray(output) ? "array" : typeof output;
+      if (output === null || output === undefined) {
+        return { result: "failed", error: "Function returned null/undefined" };
+      }
+      if (outputType !== testCase.expectedOutputType && testCase.expectedOutputType !== "object") {
+        return {
+          result: "failed",
+          error: `Expected ${testCase.expectedOutputType}, got ${outputType}`,
+        };
+      }
+    } catch (err) {
+      return {
+        result: "failed",
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  return { result: "passed" };
+}
+
+// ── Capability Observer ───────────────────────────────────────────────────────
+
+/**
+ * CapabilityObserver: detects computation gaps in LLM responses at inference time.
+ *
+ * After an LLM response is generated, scan it for phrases indicating the LLM
+ * lacked a computation capability (e.g., "I cannot calculate", "would require
+ * running code", "I don't have the ability to compute").
+ *
+ * These are "capability regret" signals — the LLM wanted to compute but couldn't.
+ * The observer records these as gaps for next-time synthesis.
+ *
+ * @param response  - The LLM response text to scan
+ * @param domain    - Current domain (for categorization)
+ * @param orgId     - Organization ID (for storage)
+ * @param supabase  - Supabase client
+ */
+export async function observeCapabilityRegret(
+  response: string,
+  domain: string,
+  orgId: string,
+  supabase: SupabaseClient
+): Promise<void> {
+  // "Regret patterns": phrases indicating the LLM wanted to compute but couldn't
+  const REGRET_PATTERNS = [
+    /i (?:cannot|can't|couldn't|am unable to) (?:calculate|compute|run|execute|perform the calculation)/i,
+    /(?:would require|requires) (?:running code|actual computation|a calculator|numeric|programming)/i,
+    /i don't have the (?:ability|capability|tools) to (?:calculate|compute|run)/i,
+    /(?:you'd need|you would need|one would need) (?:to run|actual|a tool) (?:to compute|to calculate)/i,
+    /(?:cannot|can't) (?:actually run|execute) this (?:calculation|formula|function)/i,
+  ];
+
+  const detectedRegrets: string[] = [];
+  for (const pattern of REGRET_PATTERNS) {
+    const match = response.match(pattern);
+    if (match) {
+      detectedRegrets.push(match[0]);
+    }
+  }
+
+  if (detectedRegrets.length === 0) return;
+
+  logger.warn("[capability-synthesizer] CapabilityObserver: regret signals detected", {
+    domain,
+    orgId,
+    count: detectedRegrets.length,
+    sample: detectedRegrets[0],
+  });
+
+  // Fire-and-forget: record the gap signals for future capability synthesis
+  try {
+    await supabase.from("ai_memory").insert({
+      organization_id: orgId,
+      domain: `capability-gap:${domain}`,
+      memory_type: "capability-regret",
+      content: JSON.stringify({
+        domain,
+        regrets: detectedRegrets,
+        responseFragment: response.slice(0, 200),
+        detectedAt: new Date().toISOString(),
+      }),
+      importance: 0.6,
+    });
+  } catch {
+    // fire-and-forget — never throw
+  }
+}

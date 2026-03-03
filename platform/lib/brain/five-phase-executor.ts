@@ -24,7 +24,7 @@ export interface FivePhaseParams {
   orgId: string;
   aiWorkerId?: string;
   brainContext?: string; // from getBrainContext() — passed in, not re-fetched
-  gatherFn?: () => Promise<string>; // optional custom data gather function
+  gatherFn?: (() => Promise<string>) | Array<(prevContext: string) => Promise<string>>; // single fn or sequential chain
   maxPhases?: Phase[]; // if set, only run these phases (default: all 5)
 }
 
@@ -118,7 +118,27 @@ Respond in JSON: { "subtasks": ["...", "..."], "dataNeeded": ["...", "..."] }`,
     const phaseStart = Date.now();
     try {
       if (params.gatherFn) {
-        gatherOutput = await params.gatherFn();
+        if (Array.isArray(params.gatherFn)) {
+          // Sequential chaining: each gather function receives prior context
+          // This enables "gather market data → gather risk signals → gather sentiment"
+          // where each step sees what the prior step found
+          let chainedContext = params.brainContext ?? "";
+          const gatherSteps: string[] = [];
+          for (const gatherStep of params.gatherFn) {
+            try {
+              const stepOutput = await gatherStep(chainedContext);
+              gatherSteps.push(stepOutput);
+              // Chain context: accumulate all gathered data so far
+              chainedContext = gatherSteps.join("\n\n---\n\n");
+            } catch (stepErr) {
+              logger.warn("[five-phase-executor] GATHER chain step failed (continuing)", { stepErr });
+              gatherSteps.push(""); // continue with empty — don't abort chain
+            }
+          }
+          gatherOutput = gatherSteps.filter(Boolean).join("\n\n---\n\n");
+        } else {
+          gatherOutput = await params.gatherFn();
+        }
       } else {
         // Default: use brain context as gathered data
         gatherOutput = params.brainContext ?? "No additional context available.";
