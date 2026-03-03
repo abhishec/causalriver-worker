@@ -68,6 +68,9 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
   } = opts;
 
   const { workspaceId, userId, service, message, memStack } = ctx;
+  // workerId scopes all ai_memory writes to a specific AI Worker.
+  // Without it, memories are workspace-level and leak across all workers' "While you were away".
+  const _workerId: string | undefined = (ctx as any).workerId ?? undefined;
   const _sessionId = ctx.requestId;
   const _rlExecutionMs = Date.now() - streamStartMs;
 
@@ -178,6 +181,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
         timestamp: new Date().toISOString(),
       }),
       importance: _rlQuality >= 0.6 ? 0.7 : 0.5,
+      metadata: { source: "capability_library", ...(_workerId ? { worker_id: _workerId } : {}) },
     })).catch(() => {});
   }
 
@@ -196,6 +200,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
           importance: _rlQuality,
           metadata: {
             type: 'claude_decision_pattern',
+            ...(_workerId ? { worker_id: _workerId } : {}),
             record: {
               sessionId: _sessionId,
               query: message.trim().slice(0, 200),
@@ -238,7 +243,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
         serviceType: seaasResult ? 'se-aas' : accountingResult ? 'aas' : deliveryIntelligenceResult ? 'se-aas' : 'copilot',
         responseQuality: _rlQuality,
         durationMs: _rlExecutionMs,
-        // aiWorkerId omitted — ctx doesn't carry workerId; routing feedback is org-scoped
+        aiWorkerId: _workerId, // scope routing feedback to the specific worker
       });
     }).catch(() => {}); // fire-and-forget
   } catch { /* non-fatal */ }
@@ -301,6 +306,7 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`,
                     intent: detectedIntent,
                     model: v4SmartModel,
                     quality: _rlQuality,
+                    ...(_workerId ? { worker_id: _workerId } : {}),
                   },
                 }, {
                   onConflict: 'organization_id,memory_type,domain',
@@ -338,6 +344,7 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`,
                 qualityBoost: _moaResult.qualityBoost,
                 model: v4SmartModel,
                 originalQuery: message.slice(0, 200),
+                ...(_workerId ? { worker_id: _workerId } : {}),
               },
             }, {
               onConflict: "organization_id,memory_type,domain",

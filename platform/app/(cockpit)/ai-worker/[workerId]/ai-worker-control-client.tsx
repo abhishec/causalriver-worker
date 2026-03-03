@@ -635,7 +635,7 @@ function ChatTab({
     deleteConversation,
     renameConversation,
     saveConversation,
-  } = useConversations(orgId || undefined);
+  } = useConversations(orgId || undefined, workerId);
 
   const handleSelectConv = useCallback((id: string) => {
     setActiveConvId(id);

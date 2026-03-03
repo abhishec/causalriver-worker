@@ -35,7 +35,7 @@ function dispatchSaveError(message: string) {
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
-export function useConversations(workspaceId: string | undefined) {
+export function useConversations(workspaceId: string | undefined, workerId?: string) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(false);
   // Track pending saves that arrived before workspace was ready
@@ -53,7 +53,9 @@ export function useConversations(workspaceId: string | undefined) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
     try {
-      const res = await fetch(`/api/copilot/conversations?workspaceId=${workspaceId}`, {
+      const qs = new URLSearchParams({ workspaceId });
+      if (workerId) qs.set("workerId", workerId);
+      const res = await fetch(`/api/copilot/conversations?${qs}`, {
         signal: controller.signal,
       });
       if (res.ok) {
@@ -66,7 +68,7 @@ export function useConversations(workspaceId: string | undefined) {
       clearTimeout(timeout);
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, workerId]);
 
   useEffect(() => {
     loadList();
@@ -91,7 +93,8 @@ export function useConversations(workspaceId: string | undefined) {
         return fetch("/api/copilot/conversations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId, ...opts }),
+          // workerId stamps ai_worker_id on new conversations for per-worker isolation (ADR-026)
+          body: JSON.stringify({ workspaceId, workerId, ...opts }),
         });
       };
 

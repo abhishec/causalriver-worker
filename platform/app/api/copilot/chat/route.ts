@@ -85,7 +85,7 @@ import { observeCapabilityRegret } from "@/lib/brain/capability-synthesizer";
 // ── ADR-023 additions ─────────────────────────────────────────────────────────
 import { validateProcessOutput, buildValidationHint } from "@/lib/brain/output-validator";
 // ── ADR-030: Reflex Engine (L31 Brain Layer — System 1 deterministic routing) ─
-import { buildReflexContext, runReflexEngine, loadCustomReflexes } from "@/lib/brain/reflex-engine";
+import { buildReflexContext, runReflexEngineAsync } from "@/lib/brain/reflex-engine";
 import type { ReflexResult } from "@/lib/brain/reflex-engine";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
@@ -921,10 +921,8 @@ export async function POST(request: NextRequest) {
         workerId ?? undefined,
       );
 
-      // Load custom reflexes (self-synthesized from capability_library)
-      const customReflexes = await loadCustomReflexes(service, workspaceId);
-
-      reflexResult = runReflexEngine(reflexCtx, customReflexes.length > 0 ? customReflexes : undefined);
+      // DB-backed capability matching — all capabilities come from capability_library
+      reflexResult = await runReflexEngineAsync(reflexCtx, service);
 
       if (reflexResult.matched && reflexResult.action) {
         // ── Handle "bypass" — return response immediately, skip LLM ──
@@ -943,26 +941,41 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // ── Handle "delegate" — dispatch to handler, stream result ──
+        // ── Handle "delegate" — dispatch to UCE via capability name ──
         if (reflexResult.action.type === "delegate") {
           const { dispatchReflexDelegate } = await import("@/lib/brain/reflex-dispatcher");
           const delegateOut = await dispatchReflexDelegate({
             handler: reflexResult.action.handler,
             params: reflexResult.action.params,
             supabase: service,
+            userMessage: message,
+            detectedUrls: reflexCtx.detectedUrls,
           });
 
-          if (delegateOut.success && delegateOut.narrative) {
-            // Delegate succeeded — stream the narrative as a response
-            // The LLM still runs below to provide a polished answer,
-            // but we inject the delegate result into the system prompt.
-            reflexDelegateResult = {
-              reflexName: reflexResult.reflexName,
-              handler: reflexResult.action.handler,
-              ...delegateOut.result,
-              narrative: delegateOut.narrative,
-            };
-          } else if (!delegateOut.success) {
+          if (delegateOut.success) {
+            if (delegateOut.narrative) {
+              // Delegate returned a narrative — inject for LLM to narrate
+              reflexDelegateResult = {
+                reflexName: reflexResult.reflexName,
+                handler: reflexResult.action.handler,
+                ...delegateOut.result,
+                narrative: delegateOut.narrative,
+              };
+            }
+            // Handle inject-type capabilities (e.g. accounting-gl)
+            // delegateOut.injectedMessages are merged with inject action below
+            if (delegateOut.injectedMessages?.length) {
+              // Treat as inject action — merge messages into reflexResult
+              reflexResult = {
+                ...reflexResult,
+                action: {
+                  type: "inject",
+                  injectedMessages: delegateOut.injectedMessages,
+                  metadata: delegateOut.injectMetadata,
+                },
+              };
+            }
+          } else {
             // Delegate failed — log and fall through to LLM
             logger.warn("[reflex-engine] Delegate failed, falling through to LLM", {
               handler: reflexResult.action.handler,
@@ -1056,7 +1069,7 @@ export async function POST(request: NextRequest) {
         confidenceScore: 0.85,
         domain: seaasRoute.domainType,
         metadata: { domain_type: seaasRoute.domainType, intent: interpretation?.intent },
-      }).catch(() => {});
+      }, workerId ?? undefined).catch(() => {});
     }
 
     // ── EU AI Act Article 13: log domain routing decision ───────────────────
@@ -1681,7 +1694,7 @@ export async function POST(request: NextRequest) {
         confidenceScore: 0.9,
         domain: 'agent_management',
         metadata: { agent_type: agentIntent.agentType },
-      }).catch(() => {});
+      }, workerId ?? undefined).catch(() => {});
     }
 
     // ── Process Engine Intent Detection ──────────────────────────────────────
@@ -1711,7 +1724,7 @@ export async function POST(request: NextRequest) {
               jobId: processResult.jobId,
               rawProcessName: processIntent.rawProcessName,
             },
-          }).catch(() => {});
+          }, workerId ?? undefined).catch(() => {});
         } catch (processErr) {
           logger.warn("[chat/route] Process trigger failed (non-fatal)", { err: String(processErr) });
         }
@@ -4286,7 +4299,8 @@ No connectors are configured yet. When the user asks for data from any source (S
         ? `Brain IQ ${brainIqForRouting} below threshold — downgraded to cost-efficient model`
         : `Brain IQ ${brainIqForRouting} sufficient — using ${v4SmartModel} for quality`,
       'claude-sonnet-4-6',
-      detectedIntent ?? 'general'
+      detectedIntent ?? 'general',
+      workerId ?? undefined
     ).catch(() => {});
 
     // ── Decision Record: capture routing intelligence for brain training ──
@@ -4401,14 +4415,44 @@ No connectors are configured yet. When the user asks for data from any source (S
         const isFirstMessage = !conversationHistory || conversationHistory.length === 0;
         if (isFirstMessage) {
           try {
-            const { data: recentInsights } = await service
+            // Build query — MUST scope to this specific worker to prevent cross-worker contamination.
+            // ai_memory entries are now tagged with metadata->>'worker_id' at write time (post-flight.ts +
+            // orchestration-capture.ts). The strict filter (worker_id = this worker only, NO null fallback)
+            // is intentional: old untagged entries (null worker_id) were workspace-scoped by mistake and
+            // should NOT leak into other workers' "While you were away" panels.
+            // Use ->>' (text extraction) for string comparison in PostgREST, not '->' (JSONB object).
+            // Two time bounds:
+            //   - max age: 24h (stale insights aren't useful)
+            //   - min age: 2 min (exclude current-session entries — model selection captures
+            //     run fire-and-forget and may land before this query, leaking routing metadata
+            //     into "While you were away" that was generated by THIS message, not a past session)
+            const _now = Date.now();
+            const _windowStart = new Date(_now - 24 * 60 * 60 * 1000).toISOString();
+            const _windowEnd   = new Date(_now - 2 * 60 * 1000).toISOString(); // 2 min ago
+            let insightsQuery = service
               .from("ai_memory")
               .select("content, domain, importance")
               .eq("organization_id", workspaceId)
-              .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+              .gte("created_at", _windowStart)
+              .lte("created_at", _windowEnd)
+              // Business insights only — exclude internal routing/orchestration metadata.
+              // Users see "While you were away" for flight risk, scope creep, engagement alerts —
+              // NOT for model selection decisions or routing feedback (those are system telemetry).
+              .not("domain", "like", "orchestration.%")
+              .not("domain", "like", "routing.%")
+              .not("domain", "like", "moa.%")
+              .not("domain", "like", "tool-invocation:%")
               .in("memory_type", ["insight", "alert", "pattern"])
               .order("importance", { ascending: false })
               .limit(5);
+            if (workerId) {
+              // Strict: only show THIS worker's tagged memories. No null fallback to prevent
+              // contamination from legacy untagged entries (which were erroneously workspace-scoped).
+              insightsQuery = insightsQuery.filter(
+                `metadata->>worker_id`, "eq", workerId
+              );
+            }
+            const { data: recentInsights } = await insightsQuery;
 
             if (recentInsights && recentInsights.length > 0) {
               sendProactiveInsights(

@@ -44,6 +44,9 @@ export default function CreateWorkerPage() {
       }
 
       const { worker } = await res.json();
+      // Brief pause so the DB write propagates before the RSC renders
+      // (avoids the read-after-write race that causes redirect → /workspace)
+      await new Promise(resolve => setTimeout(resolve, 400));
       router.push(`/ai-worker/${worker.id}`);
     } catch {
       setError("Network error — please try again");

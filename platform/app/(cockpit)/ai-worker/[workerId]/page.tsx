@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import AIWorkerControlClient from "./ai-worker-control-client";
 
@@ -31,12 +31,18 @@ export default async function AIWorkerControlPage({ params }: Props) {
     // fall through — client will handle missing orgId
   }
 
-  // Validate that the worker exists and belongs to this session's org (enforced by RLS).
-  // Also fetch organization_id so the Brain tab's consolidation runs against the correct
-  // workspace (not the platform-admin fallback CORE workspace from getCurrentWorkspaceId).
-  // .maybeSingle() returns data=null when no row found (no throw), so redirect() won't
-  // be accidentally swallowed by a catch block.
-  const { data: workerRow } = await supabase
+  // Validate that the worker exists.
+  // Uses service client to bypass RLS on ai_workers — the ai_workers RLS policy
+  // references org_members which has its own RLS, causing infinite recursion when
+  // queried via user client (same pattern as /api/workspace/memberships admin bypass).
+  // Auth is already validated above (user must be authenticated).
+  let service;
+  try {
+    service = await createServiceClient();
+  } catch {
+    service = supabase; // fallback to user client
+  }
+  const { data: workerRow } = await service
     .from("ai_workers")
     .select("name, organization_id")
     .eq("id", workerId)

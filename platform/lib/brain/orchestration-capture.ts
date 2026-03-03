@@ -32,7 +32,11 @@ export interface OrchestrationDecision {
 export async function captureOrchestrationDecision(
   supabase: SupabaseClient,
   orgId: string,
-  decision: OrchestrationDecision
+  decision: OrchestrationDecision,
+  /** Optional AI Worker ID — when set, scopes this memory to a specific worker.
+   *  Without it, the memory is workspace-level and shows up in ALL workers' "While you were away".
+   *  Pass this whenever called from a worker-context request (e.g. /api/copilot/chat with workerId). */
+  workerId?: string
 ): Promise<void> {
   const importance = decision.confidenceScore;
 
@@ -59,6 +63,9 @@ export async function captureOrchestrationDecision(
         source: 'orchestration_capture',
         decision_type: decision.type,
         confidence: decision.confidenceScore,
+        // Tag with worker_id so "While you were away" query can scope to correct worker.
+        // null/undefined = workspace-level (shown to all workers — legacy + shared brain events).
+        ...(workerId ? { worker_id: workerId } : {}),
         ...decision.metadata,
       },
     }, { onConflict: 'organization_id,memory_type,domain', ignoreDuplicates: false })
@@ -146,7 +153,8 @@ export async function captureModelSelection(
   modelChosen: string,
   reason: string,
   alternativeConsidered?: string,
-  domain?: string
+  domain?: string,
+  workerId?: string
 ): Promise<void> {
   await captureOrchestrationDecision(supabase, orgId, {
     type: 'model_selection',
@@ -157,7 +165,7 @@ export async function captureModelSelection(
     confidenceScore: 0.9,
     domain: domain ?? 'model_routing',
     metadata: { model_chosen: modelChosen, alternative: alternativeConsidered },
-  });
+  }, workerId);
 }
 
 /**
@@ -224,5 +232,5 @@ export async function captureRoutingFeedback(
       ai_worker_id: params.aiWorkerId,
       quality_label: qualityLabel,
     },
-  });
+  }, params.aiWorkerId /* propagate worker scope */);
 }

@@ -11,13 +11,17 @@
  * matches, it either:
  *   - Returns a complete response (bypassing LLM entirely)
  *   - Injects messages into conversation stream (augmenting LLM context)
- *   - Delegates to a specific handler function
+ *   - Delegates to the Universal Capability Executor
  *
  * Anti-Pattern Guards constrain LLM behavior for known-dangerous contexts.
  *
  * Self-Evolving Loop: Post-flight detects repeated LLM failures → records reflex
  * gap in capability_library → tool-maker synthesizes a deterministic reflex →
  * promoted reflex starts intercepting before the LLM.
+ *
+ * Capability-Driven Design: All capabilities (competitive intelligence,
+ * product analyst, accounting, etc.) are rows in capability_library.
+ * The engine matches trigger_patterns from DB — no hardcoded reflexes.
  *
  * Research: Kahneman (2011) dual-process theory, spinal reflex arc analogy.
  */
@@ -54,165 +58,19 @@ export interface Guard {
   systemPromptAddition: string;
 }
 
-export interface Reflex {
-  name: string;
-  priority: number; // higher = checked first (0-100)
-  phases: ReflexPhase[];
-}
-
-export interface ReflexPhase {
-  gate: (ctx: ReflexContext) => boolean;
-  action: (ctx: ReflexContext) => ReflexAction;
-}
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function extractUrls(text: string): string[] {
+export function extractUrls(text: string): string[] {
   const re = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
   return [...text.matchAll(re)].map(m => m[0]);
 }
 
 function has(text: string, patterns: string[]): boolean {
   const lower = text.toLowerCase();
-  return patterns.some(p => lower.includes(p));
+  return patterns.some(p => lower.includes(p.toLowerCase()));
 }
 
-// ── Built-in Reflexes ────────────────────────────────────────────────────────
-
-/** REFLEX: Continue an active interactive session (highest priority) */
-const sessionContinueReflex: Reflex = {
-  name: "session-continue",
-  priority: 95,
-  phases: [{
-    gate: (ctx) => {
-      const recent = ctx.conversationHistory.slice(-6);
-      return recent.some(m =>
-        m.content.includes("sessionId:") ||
-        m.content.includes("Session ID:") ||
-        m.content.includes("session is ready") ||
-        m.content.includes("Product Analyst")
-      ) && has(ctx.message, [
-        "write user story", "write story", "next story", "another story",
-        "revise", "approved", "looks good", "lgtm", "try again", "redo",
-        "change this", "update this", "write prd", "write requirement",
-        "feature", "acceptance criteria",
-      ]);
-    },
-    action: (ctx) => ({
-      type: "delegate" as const,
-      handler: "continueAgentSession",
-      params: {
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        userInput: ctx.message,
-        aiWorkerId: ctx.aiWorkerId,
-      },
-    }),
-  }],
-};
-
-/** REFLEX: Competitor Intelligence (scan competitor websites) */
-const competitorIntelReflex: Reflex = {
-  name: "competitor-intelligence",
-  priority: 90,
-  phases: [{
-    gate: (ctx) => {
-      const hasIntent = has(ctx.message, [
-        "competitor", "compete", "competing", "rival",
-        "scan competitor", "analyze competitor", "compare product",
-        "product feature", "feature comparison", "competitive analysis",
-        "benchmark", "market analysis",
-      ]);
-      const hasWebIntent = has(ctx.message, [
-        "scan", "crawl", "scrape", "check their website",
-        "browse", "extract from", "visit their",
-      ]);
-      const hasUrls = ctx.detectedUrls.length > 0;
-      return hasIntent || (hasUrls && hasWebIntent);
-    },
-    action: (ctx) => ({
-      type: "delegate" as const,
-      handler: "runCompetitorIntelligence",
-      params: {
-        competitorUrls: ctx.detectedUrls,
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        aiWorkerId: ctx.aiWorkerId,
-      },
-    }),
-  }],
-};
-
-/** REFLEX: Product Analyst (create agent with document corpus) */
-const productAnalystReflex: Reflex = {
-  name: "product-analyst",
-  priority: 85,
-  phases: [{
-    gate: (ctx) => {
-      const hasAnalystIntent = has(ctx.message, [
-        "product analyst", "user story", "user stories", "write story",
-        "prd", "product requirement", "requirement doc",
-        "acceptance criteria", "story writing", "train on",
-        "learn from", "consume doc", "learn style", "writing style",
-      ]);
-      const hasCorpusSource = has(ctx.message, [
-        "google drive", "gdrive", "confluence", "from folder",
-        "from docs", "existing stories", "past stories",
-        "documentation", "user guide", "atlassian",
-      ]);
-      return hasAnalystIntent && hasCorpusSource;
-    },
-    action: (ctx) => ({
-      type: "delegate" as const,
-      handler: "initializeProductAnalyst",
-      params: {
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        aiWorkerId: ctx.aiWorkerId,
-        confluenceUrls: ctx.detectedUrls.filter(u =>
-          u.includes("atlassian.net") || u.includes("confluence")
-        ),
-        driveUrls: ctx.detectedUrls.filter(u =>
-          u.includes("drive.google.com")
-        ),
-        docUrls: ctx.detectedUrls.filter(u =>
-          !u.includes("atlassian.net") && !u.includes("confluence") && !u.includes("drive.google.com")
-        ),
-      },
-    }),
-  }],
-};
-
-/** REFLEX: Accounting / GL processing (inject context, don't bypass) */
-const accountingReflex: Reflex = {
-  name: "accounting-gl",
-  priority: 80,
-  phases: [{
-    gate: (ctx) => has(ctx.message, [
-      "journal entry", "journal entries", "general ledger", "gl code",
-      "double entry", "chart of account", "post entries", "post journal",
-      "bank reconcil", "reconcile bank", "reconciliation",
-      "p&l", "profit and loss", "balance sheet", "cash flow",
-      "trial balance", "financial statement", "consolidat",
-    ]),
-    action: () => ({
-      type: "inject" as const,
-      injectedMessages: [{
-        role: "system",
-        content:
-          `## ACCOUNTING CONTEXT ACTIVE\n` +
-          `The user is requesting accounting operations. Available tables:\n` +
-          `- journal_entries: Create, post, void double-entry journal entries\n` +
-          `- bank_reconciliations: Match bank transactions to book entries\n` +
-          `- entity_financials: Multi-entity consolidation\n` +
-          `Route to AAS domain. ALWAYS persist results to the appropriate table.`,
-      }],
-      metadata: { forceAasDomain: true },
-    }),
-  }],
-};
-
-// ── Built-in Guards ──────────────────────────────────────────────────────────
+// ── Built-in Guards (these are always present — not capability-dependent) ────
 
 const ALWAYS_ON_GUARDS: Guard[] = [
   {
@@ -247,14 +105,20 @@ const CONTEXTUAL_GUARDS: Array<{ test: (ctx: ReflexContext) => boolean; guard: G
   },
 ];
 
-// ── Engine (sorted by priority, first match wins) ────────────────────────────
+// ── DB-backed capability row ──────────────────────────────────────────────────
 
-const BUILT_IN_REFLEXES: Reflex[] = [
-  sessionContinueReflex,
-  competitorIntelReflex,
-  productAnalystReflex,
-  accountingReflex,
-];
+interface CapabilityRow {
+  id: string;
+  name: string;
+  description: string;
+  tool_type: string;
+  trigger_patterns: string[];
+  quality_score: number;
+  organization_id: string;
+}
+
+// System org sentinel for template rows
+const SYSTEM_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
 /**
  * Build reflex context from raw inputs.
@@ -280,12 +144,16 @@ export function buildReflexContext(
 /**
  * Run the reflex engine against a message.
  *
- * Returns the first matching reflex result, or { matched: false } with guards.
- * Called from copilot/chat/route.ts BEFORE the LLM.
+ * Pattern matching is done against capability_library.trigger_patterns via
+ * loadCapabilityReflexes(). No hardcoded patterns.
+ *
+ * Returns guards (always) + matched action (if any).
+ *
+ * NOTE: This function is synchronous so it can be called without await.
+ * DB-backed capability matching uses the async version below.
  */
 export function runReflexEngine(
   ctx: ReflexContext,
-  extraReflexes?: Reflex[],
 ): ReflexResult {
   // Collect active guards
   const guards: Guard[] = [...ALWAYS_ON_GUARDS];
@@ -293,78 +161,150 @@ export function runReflexEngine(
     if (test(ctx)) guards.push(guard);
   }
 
-  // Merge built-in + custom reflexes, sort by priority descending
-  const allReflexes = [...BUILT_IN_REFLEXES, ...(extraReflexes ?? [])];
-  allReflexes.sort((a, b) => b.priority - a.priority);
-
-  // First match wins
-  for (const reflex of allReflexes) {
-    const phase = reflex.phases[0];
-    if (phase && phase.gate(ctx)) {
-      const action = phase.action(ctx);
-
-      logger.warn("[reflex-engine] Reflex matched", {
-        reflex: reflex.name,
-        actionType: action.type,
-        orgId: ctx.organizationId,
-      });
-
-      return { matched: true, reflexName: reflex.name, action, guards };
-    }
-  }
-
+  // Return guards only — actual capability matching is done asynchronously
+  // by runReflexEngineAsync() which queries capability_library
   return { matched: false, guards };
 }
 
 /**
- * Load custom reflexes from capability_library (self-synthesized).
+ * Run the reflex engine with async DB-backed capability matching.
+ *
+ * This is the primary entry point used by chat/route.ts.
+ * Matches trigger_patterns from capability_library rows.
+ */
+export async function runReflexEngineAsync(
+  ctx: ReflexContext,
+  supabase: SupabaseClient,
+): Promise<ReflexResult> {
+  // Collect active guards
+  const guards: Guard[] = [...ALWAYS_ON_GUARDS];
+  for (const { test, guard } of CONTEXTUAL_GUARDS) {
+    if (test(ctx)) guards.push(guard);
+  }
+
+  // Load capabilities from DB
+  const capabilities = await loadCapabilityReflexes(supabase, ctx.organizationId);
+
+  if (capabilities.length === 0) {
+    return { matched: false, guards };
+  }
+
+  const lowerMessage = ctx.message.toLowerCase();
+  const recentHistory = ctx.conversationHistory.slice(-6).map((m) => m.content).join(" ");
+
+  // Score each capability by trigger pattern matches
+  type ScoredCap = { cap: CapabilityRow; score: number };
+  const scored: ScoredCap[] = [];
+
+  for (const cap of capabilities) {
+    const patterns = cap.trigger_patterns ?? [];
+    let matchCount = patterns.filter((p) => lowerMessage.includes(p.toLowerCase())).length;
+
+    // session-continue: check for active session in history AND continuation intent
+    if (cap.name === "session-continue") {
+      const hasSession = recentHistory.includes("sessionId:") ||
+        recentHistory.includes("Session ID:") ||
+        recentHistory.includes("session is ready") ||
+        recentHistory.includes("Product Analyst");
+      if (!hasSession) continue; // session-continue requires an active session
+      matchCount += hasSession ? 5 : 0; // boost priority when session is active
+    }
+
+    if (matchCount > 0) {
+      // Org-specific rows beat system templates
+      const orgBonus = cap.organization_id === ctx.organizationId ? 2 : 0;
+      scored.push({ cap, score: matchCount + orgBonus + cap.quality_score });
+    }
+  }
+
+  if (scored.length === 0) {
+    return { matched: false, guards };
+  }
+
+  // Sort by score descending, first match wins
+  scored.sort((a, b) => b.score - a.score);
+  const winner = scored[0].cap;
+
+  logger.warn("[reflex-engine] Capability matched", {
+    capability: winner.name,
+    score: scored[0].score,
+    orgId: ctx.organizationId,
+  });
+
+  const action: ReflexAction = {
+    type: "delegate",
+    handler: winner.name, // UCE uses this as capabilityName
+    params: {
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      aiWorkerId: ctx.aiWorkerId,
+      competitorUrls: ctx.detectedUrls.filter(u =>
+        !u.includes("atlassian.net") && !u.includes("confluence") && !u.includes("drive.google.com")
+      ),
+      confluenceUrls: ctx.detectedUrls.filter(u =>
+        u.includes("atlassian.net") || u.includes("confluence")
+      ),
+      driveUrls: ctx.detectedUrls.filter(u => u.includes("drive.google.com")),
+      docUrls: ctx.detectedUrls.filter(u =>
+        !u.includes("atlassian.net") && !u.includes("confluence") && !u.includes("drive.google.com")
+      ),
+      userInput: ctx.message,
+    },
+  };
+
+  return { matched: true, reflexName: winner.name, action, guards };
+}
+
+/**
+ * Load capabilities from capability_library that have trigger_patterns.
+ * Fetches org-specific promoted rows + system template rows.
+ * Cached implicitly by Supabase client's connection pooling.
+ */
+export async function loadCapabilityReflexes(
+  supabase: SupabaseClient,
+  organizationId: string,
+): Promise<CapabilityRow[]> {
+  try {
+    const { data, error } = await supabase
+      .from("capability_library")
+      .select("id, name, description, tool_type, trigger_patterns, quality_score, organization_id")
+      .in("organization_id", [organizationId, SYSTEM_ORG_ID])
+      .in("status", ["validated", "promoted"])
+      .not("trigger_patterns", "eq", "{}")
+      .order("quality_score", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      logger.warn("[reflex-engine] Failed to load capabilities from DB", {
+        error: error.message,
+        orgId: organizationId,
+      });
+      return [];
+    }
+
+    return (data ?? []).filter((r) =>
+      Array.isArray(r.trigger_patterns) && r.trigger_patterns.length > 0
+    ) as CapabilityRow[];
+  } catch (err) {
+    logger.warn("[reflex-engine] loadCapabilityReflexes threw", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return [];
+  }
+}
+
+/**
+ * @deprecated Use loadCapabilityReflexes + runReflexEngineAsync instead.
+ * Kept for backward compatibility with post-flight.ts.
  */
 export async function loadCustomReflexes(
   supabase: SupabaseClient,
   organizationId: string,
-): Promise<Reflex[]> {
-  try {
-    const { data, error } = await supabase
-      .from("capability_library")
-      .select("name, description, implementation, quality_score")
-      .eq("organization_id", organizationId)
-      .in("status", ["validated", "promoted"])
-      .contains("tags", ["reflex"])
-      .order("quality_score", { ascending: false })
-      .limit(20);
-
-    if (error || !data?.length) return [];
-
-    const customs: Reflex[] = [];
-    for (const row of data) {
-      try {
-        const def = JSON.parse(row.implementation) as {
-          triggerPatterns: string[];
-          actionType: "bypass" | "inject" | "delegate";
-          actionConfig: Record<string, unknown>;
-          priority?: number;
-        };
-        customs.push({
-          name: row.name,
-          priority: def.priority ?? 50,
-          phases: [{
-            gate: (ctx) => has(ctx.message, def.triggerPatterns),
-            action: () => ({ type: def.actionType, ...def.actionConfig } as ReflexAction),
-          }],
-        });
-      } catch { /* skip malformed */ }
-    }
-
-    if (customs.length > 0) {
-      logger.warn("[reflex-engine] Loaded custom reflexes", {
-        organizationId,
-        count: customs.length,
-      });
-    }
-    return customs;
-  } catch {
-    return [];
-  }
+): Promise<[]> {
+  // No-op: capabilities are now loaded directly in runReflexEngineAsync
+  void supabase;
+  void organizationId;
+  return [];
 }
 
 /**
@@ -388,13 +328,11 @@ export async function recordReflexGap(
       name: `reflex_gap_${pattern.domain}_${Date.now()}`,
       description: `Repeated LLM failure: ${pattern.failureReason}. Suggested: ${pattern.suggestedAction}`,
       domain: `reflex:${pattern.domain}`,
-      implementation: JSON.stringify({
-        triggerPatterns: [pattern.triggerMessage.toLowerCase().slice(0, 200)],
-        failureReason: pattern.failureReason,
-        suggestedAction: pattern.suggestedAction,
-        occurrences: pattern.occurrences,
-      }),
-      tags: ["reflex", "gap", pattern.domain],
+      tool_type: "workflow",
+      trigger_patterns: [pattern.triggerMessage.toLowerCase().slice(0, 200)],
+      implementation: "",
+      workflow_definition: null,
+      tags: ["gap", pattern.domain],
       status: "gap",
       quality_score: 0.3,
     });

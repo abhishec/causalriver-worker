@@ -18,8 +18,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
-import { updateSessionFeedback } from "@/lib/agents/session-manager";
-import { executeInteractiveAgent } from "@/lib/agents/interactive-executor";
+import { updateSessionFeedback, recordSessionTurn, getSessionContext } from "@/lib/agents/session-manager";
+import { executePrimitive } from "@/lib/brain/primitive-registry";
 
 export const dynamic = "force-dynamic";
 
@@ -162,28 +162,66 @@ export async function POST(
           }
         : undefined;
 
-    const result = await executeInteractiveAgent(supabase, {
-      sessionId,
-      userInput: body.userInput,
+    // Record any feedback on previous turn before running new turn
+    if (feedbackWithTurnId) {
+      await updateSessionFeedback(supabase, feedbackWithTurnId.turnId, {
+        type: feedbackWithTurnId.type,
+        notes: feedbackWithTurnId.notes,
+      });
+    }
+
+    // Execute the session turn via the Primitive Registry
+    const ctx = {
+      supabase,
       organizationId,
       userId: user.id,
-      agentType,
-      feedback: feedbackWithTurnId,
+      aiWorkerId: undefined as string | undefined,
+    };
+
+    const result = await executePrimitive(ctx, "session", {
+      action: "continue",
+      userInput: body.userInput,
     });
 
+    if (result["error"]) {
+      return NextResponse.json({ error: result["error"] }, { status: 400 });
+    }
+
+    // If no active session was found, fall back to creating a new turn manually
+    if (!result["sessionId"]) {
+      logger.warn("[/api/agents/sessions/[id]/turn POST] No active session from primitive, using direct session", {
+        sessionId,
+      });
+      // Direct fallback: record the session context manually
+      const sessionCtx = await getSessionContext(supabase, sessionId);
+      if (!sessionCtx) {
+        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+      }
+      const turn = await recordSessionTurn(supabase, sessionId, {
+        userInput: body.userInput,
+        agentOutput: "Unable to process turn at this time.",
+      });
+      return NextResponse.json({
+        output: "Unable to process turn at this time.",
+        turnId: turn?.turnId ?? null,
+        turnNumber: turn?.turnNumber ?? 0,
+        sessionId,
+        tokensUsed: 0,
+      });
+    }
+
     logger.warn("[/api/agents/sessions/[id]/turn POST] Turn executed", {
-      sessionId,
-      turnId: result.turnId,
-      turnNumber: result.turnNumber,
-      tokensUsed: result.tokensUsed,
+      sessionId: result["sessionId"],
+      turnId: result["turnId"],
+      turnNumber: result["turnNumber"],
     });
 
     return NextResponse.json({
-      output: result.output,
-      turnId: result.turnId,
-      turnNumber: result.turnNumber,
-      sessionId: result.sessionId,
-      tokensUsed: result.tokensUsed,
+      output: result["output"],
+      turnId: result["turnId"],
+      turnNumber: result["turnNumber"],
+      sessionId: result["sessionId"],
+      tokensUsed: 0,
     });
   } catch (err) {
     logger.error("[/api/agents/sessions/[id]/turn POST] Unexpected error", {
