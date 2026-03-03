@@ -238,6 +238,24 @@ export async function POST(request: NextRequest) {
           confidence: rating === "helpful" ? 1.0 : rating === "not_helpful" ? 0.3 : 0.1,
           created_at: new Date().toISOString(),
         });
+      } else if (insertError.code === "PGRST204") {
+        // Schema mismatch — table exists but is on old schema (missing message_id, user_id, etc.)
+        // Retry with only columns guaranteed by the original migration (20260220000005)
+        logger.warn("[BrainFeedback] Schema mismatch (PGRST204), retrying with legacy columns");
+        const { error: retryError } = await service.from("brain_feedback_queue").insert({
+          organization_id: workspaceId,
+          conversation_id: conversationId || "unknown",
+          message_index: 0,
+          rating: rating as Rating,
+          correction: correction || null,
+          domain: domainId || null,
+          processed: false,
+          created_at: new Date().toISOString(),
+        });
+        if (retryError && retryError.code !== "42P01") {
+          logger.error("[BrainFeedback] Legacy schema insert also failed:", retryError);
+          return NextResponse.json({ error: "Internal error" }, { status: 500 });
+        }
       } else {
         logger.error("[BrainFeedback] Insert error:", insertError);
         return NextResponse.json({ error: "Internal error" }, { status: 500 });

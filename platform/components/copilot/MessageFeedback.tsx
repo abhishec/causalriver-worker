@@ -38,7 +38,7 @@ export function MessageFeedback({ messageIndex, organizationId, conversationId, 
         body: JSON.stringify({
           messageId,
           conversationId: conversationId || undefined,
-          rating: r === "helpful" ? 1 : r === "not_helpful" ? 0 : -1,
+          rating: r,
           context: correctionText || undefined,
         }),
       });
