@@ -419,7 +419,7 @@ function renderMarkdown(text: string) {
                   key={i}
                   className="text-left px-3 py-2 text-[10px] uppercase tracking-wider text-muted/60 font-medium"
                 >
-                  {h.trim()}
+                  {renderInline(h.trim())}
                 </th>
               ))}
             </tr>
@@ -1574,6 +1574,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [scrollToBottomTrigger, setScrollToBottomTrigger] = useState(0); // incremented by loadHistory to force-scroll
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -1776,6 +1777,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       await new Promise(r => setTimeout(r, 800));
       if (cancelled) return;
 
+      // Extract workerId for per-worker conversation isolation (ADR-026)
+      const primaryWorkerId = (extraParams as Record<string, unknown>)?.workerId as string | undefined;
+
       // If a specific conversation was requested (sidebar click), load it directly
       if (initialConversationId) {
         try {
@@ -1789,6 +1793,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               if (loaded.length > 0 && !cancelled) {
                 setMessages(loaded);
                 setConversationId(detailData.conversation.id);
+                setScrollToBottomTrigger(t => t + 1); // signal useEffect to scroll (multiple attempts)
               }
             }
           }
@@ -1820,7 +1825,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       for (const orgId of orgIdsToTry) {
         if (cancelled) return;
         try {
-          const listRes = await fetch(`/api/copilot/conversations?workspaceId=${orgId}`);
+          // Scope to current worker when available — prevents loading other workers' conversations (ADR-026)
+          const qs = new URLSearchParams({ workspaceId: orgId });
+          if (primaryWorkerId) qs.set("workerId", primaryWorkerId);
+          const listRes = await fetch(`/api/copilot/conversations?${qs}`);
           if (!listRes.ok) continue;
           const listData = await listRes.json() as { conversations?: Array<{ id: string }> };
           if (!Array.isArray(listData?.conversations) || listData.conversations.length === 0) continue;
@@ -1843,6 +1851,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             // the messages to appear. React 18 no longer warns on post-unmount setState.
             setMessages(loaded);
             setConversationId(detailData.conversation.id);
+            setScrollToBottomTrigger(t => t + 1); // signal useEffect to scroll (multiple attempts)
           }
           return; // found — stop trying other orgs
         } catch { /* try next org */ }
@@ -1951,17 +1960,45 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const color = persona.color || "accent";
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Instant scroll (not smooth) so the scroll event fires with distance≈0,
+    // preventing the handleScroll listener from immediately re-showing the button.
+    const c = messagesContainerRef.current;
+    if (c) c.scrollTop = c.scrollHeight;
     setShowScrollToBottom(false);
   }, []);
 
-  // Auto-scroll only when user is near the bottom (within 150px)
+  // Force-scroll to bottom when loadHistory completes.
+  // Uses multiple setTimeout attempts because Shiki + markdown components render
+  // asynchronously after setMessages, growing scrollHeight from ~1700 to ~5700 over ~1s.
+  // A single rAF/useLayoutEffect fires before async sub-components finish rendering.
+  // Three attempts (100ms / 500ms / 1200ms) reliably land at the final rendered bottom.
+  useEffect(() => {
+    if (scrollToBottomTrigger === 0) return;
+    const scrollToEnd = () => {
+      const c = messagesContainerRef.current;
+      if (c) c.scrollTop = c.scrollHeight;
+    };
+    const timers = [
+      setTimeout(scrollToEnd, 100),   // catches most cases (simple messages)
+      setTimeout(scrollToEnd, 500),   // catches partial Shiki rendering
+      setTimeout(scrollToEnd, 1200),  // catches full Shiki + table rendering
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [scrollToBottomTrigger]);
+
+  // Auto-scroll to bottom on every message change.
+  // When streaming: keeps bottom in view. When user loads history: shows latest message.
+  // The scrollToBottomTrigger useEffect handles the initial history load case.
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-    if (distanceFromBottom < 150) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only auto-scroll if user is already near the bottom (≤500px) — preserves scroll
+    // position when user has intentionally scrolled up to read history.
+    // Use instant scrollTop (not smooth scrollIntoView) so we keep up with rapid content
+    // growth during streaming — smooth scroll lags behind and next chunk sees distance>300px.
+    if (distanceFromBottom <= 500) {
+      container.scrollTop = container.scrollHeight;
     }
   }, [messages]);
 
@@ -2199,6 +2236,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
     const userMessage: Message = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMessage]);
+    setScrollToBottomTrigger(t => t + 1); // force-scroll to show user's new message immediately
     setInput("");
     setAttachments([]);
     setIsLoading(true);

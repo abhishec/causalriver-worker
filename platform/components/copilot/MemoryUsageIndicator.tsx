@@ -17,11 +17,15 @@ import { cn } from "@/lib/utils";
  */
 
 // Thresholds for visual feedback
-const HAIKU_MAX_TOKENS = 200_000;    // claude-haiku context window
-const SONNET_MAX_TOKENS = 200_000;   // claude-sonnet context window
-const AVG_TOKENS_PER_MSG = 300;      // rough estimate
-const WARN_THRESHOLD = 0.6;          // 60% → amber
-const CRITICAL_THRESHOLD = 0.8;      // 80% → red + cleanup prompt
+// Use the app-level rolling window (not the model's full context limit).
+// chat/route.ts slices history to the last N turns before sending to Claude, so
+// once the session grows past this window the model loses the oldest turns.
+// Surfacing compression at 60% / 80% of this window keeps responses accurate.
+const HAIKU_MAX_TOKENS = 8_000;      // app rolling-window token budget
+const SONNET_MAX_TOKENS = 8_000;     // same budget for sonnet
+const AVG_TOKENS_PER_MSG = 300;      // rough estimate (~1200 chars / 4)
+const WARN_THRESHOLD = 0.6;          // 60% (≈16 msgs) → amber + Compress button
+const CRITICAL_THRESHOLD = 0.8;      // 80% (≈21 msgs) → red
 
 interface MemoryUsageIndicatorProps {
   messageCount: number;
@@ -69,8 +73,8 @@ export function MemoryUsageIndicator({
     }
   }, [conversationId, cleaning, onCleanup]);
 
-  // Only show the indicator when conversation is substantial (>10 messages)
-  if (messageCount < 10) return null;
+  // Only show the indicator when conversation is substantial (>4 messages)
+  if (messageCount < 4) return null;
 
   const barColor = isCritical
     ? "bg-red-500"

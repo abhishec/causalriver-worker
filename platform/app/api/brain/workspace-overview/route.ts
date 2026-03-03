@@ -79,9 +79,10 @@ export async function GET() {
       .or(`organization_id.is.null,organization_id.eq.${orgId}`),
 
     // RL stats: prediction_records last 7d for overall quality score
+    // Note: select only columns that exist in all environments (no `success` — may not exist)
     supabase
       .from("prediction_records")
-      .select("domain, confidence, success")
+      .select("domain, confidence")
       .eq("organization_id", orgId)
       .gte("created_at", sevenDaysAgo)
       .limit(500),
