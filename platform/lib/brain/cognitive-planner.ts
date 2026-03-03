@@ -29,6 +29,7 @@ import { retrieveRelevantMemories } from "@/lib/brain/memory-retrieval";
 import { logAuditEvent, AuditAction } from "@/lib/audit";
 import { routeCallType } from "@/lib/brain/call-type-router";
 import { captureStreamedResponse as _captureStreamedResponse } from "@/lib/brain/claude-learning-capture";
+import { selectStrategy, recordOutcome as recordBanditOutcome } from "@/lib/brain/strategy-bandit";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -437,6 +438,9 @@ async function _runCognitivePlannerInner(
   // B5: Load configurable thresholds — falls back to defaults silently
   const plannerConfig = await loadPlannerConfig(supabase, orgId);
 
+  // Bandit selection for this cycle — assigned in Phase 2, recorded in Phase 5 of the NEXT cycle
+  let _banditSelection: { strategy: "five_phase" | "direct" | "moa"; confidence: number; explorationBonus: number; isExploring: boolean } = { strategy: "five_phase", confidence: 0.5, explorationBonus: 0, isExploring: true };
+
   // Determine allowed domains based on the worker's service_type (ADR-012)
   const allowedDomains = getAllowedDomainsForWorker(workerConfig?.service_type);
 
@@ -613,6 +617,19 @@ async function _runCognitivePlannerInner(
           logger.warn(
             `[CognitivePlanner] Reflected on prior cycle: ${successCount} successes, ${failCount} failures`
           );
+
+          // Record bandit outcome for the prior cycle using the prior domain as task category
+          const _priorTaskCategory = priorDomains[0] ?? 'general';
+          const _priorOutcomeQuality = (successCount + failCount) > 0
+            ? successCount / (successCount + failCount)
+            : 0.5;
+          void recordBanditOutcome(
+            _priorTaskCategory,
+            aiWorkerId ?? 'default',
+            _banditSelection.strategy,
+            _priorOutcomeQuality,
+            supabase
+          ).catch(() => {});
         }
       }
     }
@@ -969,6 +986,11 @@ ${pastReflectionsText}`;
 
   let decisions: PlannerDecision[] = [];
 
+  // ── Bandit selection (UCB1 strategy) ───────────────────────────────────────
+  const _taskCategory = coverageGaps[0] ?? workerConfig?.service_type ?? 'general';
+  _banditSelection = await selectStrategy(_taskCategory, aiWorkerId ?? 'default', supabase).catch(() => ({ strategy: 'five_phase' as const, confidence: 0.5, explorationBonus: 0, isExploring: true }));
+  logger.warn(`[CognitivePlanner] Bandit selected: ${_banditSelection.strategy} (exploring: ${_banditSelection.isExploring})`);
+
   try {
     const response = await anthropic.messages.create({
       model: PLANNER_MODEL,
@@ -983,7 +1005,8 @@ ${pastReflectionsText}`;
             `\n\nGiven this state, output a JSON array of at most ${maxDecisions} decisions:\n[{"domain": "domain-name", "priority": "high|normal|low", "rationale": "one sentence"}]\n\nRules:\n- Skip any domain in stuck list\n- PRIORITIZE domains with high user demand (users need these results now)\n- Then prefer domains in coverage gaps\n- Skip domains with avg quality < ${plannerConfig.qualityFloor} unless >12h since last run\n- If recovery mode is active, output at most 1 decision\n- Max ${maxDecisions} decisions total` +
             (processBottlenecks.length > 0
               ? `\n\nProcess Intelligence: The following process FSM states are experiencing high failure rates and may need policy knowledge enrichment: ${processBottleneckSummary}. Consider scheduling policy enrichment for these templates.`
-              : ""),
+              : "") +
+            `\n\nRecommended execution strategy for this task type: ${_banditSelection.strategy}`,
         },
       ],
     });

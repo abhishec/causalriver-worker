@@ -16,6 +16,7 @@ import { getConnectorCredentials } from "@/lib/connectors/get-credentials";
 import { getConnectorToken, markConnectorError } from "@/lib/connectors/get-connector-token";
 import { executeWritebackAction } from "@/lib/connectors/writeback/index";
 import { getBrainContext } from "@/lib/brain/brain-context";
+import { verifyWriteback, inferWritebackAction, buildVerificationSummary } from "@/lib/brain/mutation-verifier";
 
 /** Connector types that support token-aware refresh (Jira, Confluence) */
 const REFRESHABLE_WRITE_BACK_TYPES = new Set(["jira", "confluence"]);
@@ -521,6 +522,17 @@ export async function executeApprovedWriteback(
       config
     );
 
+    // Verify the write committed (fire-and-forget — never blocks)
+    void (async () => {
+      try {
+        const _writeAction = inferWritebackAction(approval.connector_type, approval.action_type, approval.action_payload);
+        const _verifyResult = await verifyWriteback(_writeAction, result, supabase);
+        if (!_verifyResult.confirmed) {
+          logger.warn(`[WritebackDispatcher] Write unconfirmed: ${buildVerificationSummary([_verifyResult])}`);
+        }
+      } catch { /* never throw */ }
+    })();
+
     // Detect 401/403 auth failures and mark connector errored
     if (
       !result.success &&
@@ -1020,6 +1032,17 @@ export async function processWritebackQueue(
             credentials,
             config
           );
+
+          // Verify the write committed (fire-and-forget — never blocks)
+          void (async () => {
+            try {
+              const _writeAction = inferWritebackAction(item.connector_type, item.action_type, item.action_payload);
+              const _verifyResult = await verifyWriteback(_writeAction, result, supabase);
+              if (!_verifyResult.confirmed) {
+                logger.warn(`[WritebackDispatcher] Write unconfirmed: ${buildVerificationSummary([_verifyResult])}`);
+              }
+            } catch { /* never throw */ }
+          })();
 
           // Detect 401/403 auth failures in the result error message.
           // When detected, mark the connector as errored so the UI shows a reconnect button.

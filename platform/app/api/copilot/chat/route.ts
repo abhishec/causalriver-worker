@@ -75,6 +75,13 @@ import { routeCallType } from "@/lib/se-aas/model-router";
 import { selectModel as selectModelDAA, classifyQueryDifficulty } from "@/lib/brain/model-router";
 import { logAuditEvent, AuditAction, extractRequestContext } from "@/lib/audit";
 import { classifyTaskIntent, buildPrivacyRefusal } from "@/lib/brain/task-intent-classifier";
+// ── Raw Capability Upgrade (ADR-022) ─────────────────────────────────────────
+import { buildRLPrimer } from "@/lib/brain/rl-primer";
+import { detectOutputFormat, buildFormatDirective, hasFormatRequirement } from "@/lib/brain/format-detector";
+import { scoreResponseQuality } from "@/lib/brain/self-reflection";
+import { extractEntities, persistEntities, getEntityContext } from "@/lib/brain/entity-memory";
+import { getDriftStatus, recordContextUsage, buildDriftAwareContextSuffix } from "@/lib/brain/context-drift-detector";
+import { getOrSynthesizeCapabilities, formatCapabilitiesForPrompt } from "@/lib/brain/capability-synthesizer";
 
 // ── Token Budget Constants (Phase 4: prevent context overflow) ──────────
 const MAX_CONTEXT_TOKENS = 180_000; // Claude 3.5 Sonnet context window
@@ -277,6 +284,13 @@ export async function POST(request: NextRequest) {
     const user = { id: _userId } as { id: string };
     const memStack: Record<string, any> = ctx.memStack!;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY!;
+    // ── Raw Capability Upgrade: kick off parallel async fetches early ─────────
+    // These run concurrently with all setup below and are awaited just before
+    // the system prompt is finalised — near-zero added latency on the hot path.
+    const _rcRLPrimerPromise = buildRLPrimer(message, workspaceId, workerId ?? undefined);
+    const _rcEntityCtxPromise = getEntityContext(workspaceId, workerId ?? undefined);
+    const _rcDriftStatusPromise = getDriftStatus(workspaceId, service as any);
+    const _rcCapsPromise = getOrSynthesizeCapabilities(message, workspaceId, anthropicApiKey, service as any);
     const commandResult: any = (ctx as any)._commandResult;
     const interpretation: QueryInterpretation | undefined = (ctx as any)._interpretation;
     (ctx as any)._conversationHistory = conversationHistory;
@@ -2790,6 +2804,40 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
 - **Section headers**: Use ## and ### to create scannable structure
 - **Emoji indicators**: ✅ Done, 🔄 In Progress, 📋 To Do, 🔴 Blocker, ⚠️ At Risk, 🟢 On Track`;
 
+    // ── Raw Capability Upgrade: await learning context (ADR-022) ─────────────
+    // Promises were fired immediately after workspaceId was known — they've been
+    // running concurrently with all brain context building above.
+    const [_rcRLPrimer, _rcEntityCtx, _rcDriftStatus, _rcSynthCaps] = await Promise.all([
+      _rcRLPrimerPromise,
+      _rcEntityCtxPromise,
+      _rcDriftStatusPromise,
+      _rcCapsPromise,
+    ]);
+    // 1. RL Primer — inject past success/failure patterns from federated_knowledge
+    if (_rcRLPrimer) {
+      effectiveSystemPrompt += `\n\n${_rcRLPrimer}`;
+    }
+    // 2. Entity Memory — inject known entities from recent conversations
+    if (_rcEntityCtx) {
+      effectiveSystemPrompt += `\n\n${_rcEntityCtx}`;
+    }
+    // 3. Context Drift Warning — tell LLM not to trust stale brain context
+    const _rcDriftSuffix = buildDriftAwareContextSuffix(_rcDriftStatus);
+    if (_rcDriftSuffix) {
+      effectiveSystemPrompt += `\n\n${_rcDriftSuffix}`;
+    }
+    // 4. Format Directive — pre-detect required output shape, inject before LLM call
+    if (hasFormatRequirement(message)) {
+      const _rcFmtDirective = buildFormatDirective(detectOutputFormat(message));
+      if (_rcFmtDirective) {
+        effectiveSystemPrompt += `\n\n## FORMAT REQUIREMENT\n${_rcFmtDirective}`;
+      }
+    }
+    // 5. Synthesised Capabilities — inject computed JS tools for any detected gaps
+    const _rcCapsPrompt = formatCapabilitiesForPrompt(_rcSynthCaps);
+    if (_rcCapsPrompt) {
+      effectiveSystemPrompt += `\n\n${_rcCapsPrompt}`;
+    }
 
     // Augment with action engine computed data if available
     if (actionArtifact?.__promptText) {
@@ -4505,6 +4553,32 @@ No connectors are configured yet. When the user asks for data from any source (S
           // Without finally, a throw here leaks the 120s timer.
           clearTimeout(streamTimeout);
         }
+
+        // ── Raw Capability Upgrade: post-stream quality scoring + entity persistence ──
+        // All fire-and-forget — never blocks or delays the response to the user.
+        void scoreResponseQuality(message, streamedAssistantText, { timeoutMs: 5_000 })
+          .then((reflection) => {
+            if (reflection.score < 0.5) {
+              logger.warn(
+                `[Copilot/Reflection] Low quality response (${reflection.score.toFixed(2)}): ${reflection.reasoning}`
+              );
+            }
+            // Feed quality score back into context drift detector
+            void recordContextUsage(
+              `copilot_${Date.now()}`,
+              workspaceId,
+              !!brainContext,
+              reflection.score,
+              service as any,
+            );
+          })
+          .catch(() => { /* never throw — quality gate is advisory only */ });
+        // Extract entities from the response and persist for cross-query memory
+        void persistEntities(
+          extractEntities(`${message} ${streamedAssistantText}`),
+          workspaceId,
+          workerId ?? undefined,
+        );
 
         // ── Brain Feedback: teach the Brain from Copilot interaction (Phase 4: 5s timeout) ──
         const { createBrainFeedbackBus } = memStack;
