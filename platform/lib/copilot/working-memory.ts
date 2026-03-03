@@ -51,6 +51,12 @@ export interface CopilotWorkingMemory {
   /** Synthesised capability descriptions for detected tool gaps */
   capabilitiesBlock: string;
 
+  // ── Tool Library (ADR-028) ──
+  /** Synthesized tools from capability_library, retrieved by vector similarity */
+  toolLibraryBlock: string;
+  /** Tool IDs injected — tracked for RL feedback (ADR-028) */
+  toolLibraryIds: string[];
+
   // ── Planner Strategy ──
   /** Cognitive planner's latest scheduled domains (so orchestrator sees what was planned) */
   plannerStrategyBlock: string;
@@ -78,6 +84,7 @@ export interface WorkingMemoryPromises {
   entityCtxPromise: Promise<string>;
   driftStatusPromise: Promise<unknown>;
   capsPromise: Promise<unknown>;
+  toolLibraryPromise: Promise<{ block: string; ids: string[] }>;
   copilotMemPromise: Promise<string>;
   plannerStrategyPromise: Promise<string>;
   brainContextPromise: Promise<Record<string, unknown> | null>;
@@ -135,6 +142,29 @@ export function gatherWorkingMemory(
       return null;
     });
 
+  // 8. Tool Library retrieval (ADR-028: CRAFT multi-view)
+  const toolLibraryPromise = import("@/lib/brain/tool-retrieval")
+    .then(({ retrieveRelevantTools }) =>
+      retrieveRelevantTools(service, workspaceId, message, undefined, { limit: 5 })
+    )
+    .then(tools => {
+      if (!tools.length) return { block: "", ids: [] };
+      const sections = tools.map(t =>
+        `**${t.name}** (${t.domain}, quality: ${Math.round(t.quality_score * 100)}%)\n` +
+        `${t.description}\n` +
+        "```javascript\n" + t.implementation + "\n```"
+      );
+      return {
+        block:
+          "## DYNAMIC TOOL LIBRARY\n" +
+          "The following synthesized tools are available for this request:\n\n" +
+          sections.join("\n\n") +
+          "\n\nUse these functions when they match the user's needs.",
+        ids: tools.map(t => t.id),
+      };
+    })
+    .catch(() => ({ block: "", ids: [] }));
+
   const copilotMemPromise = import("@/lib/copilot/copilot-memory")
     .then(({ recallCopilotMemory }) =>
       recallCopilotMemory(service, workspaceId, {
@@ -189,6 +219,7 @@ export function gatherWorkingMemory(
     entityCtxPromise,
     driftStatusPromise,
     capsPromise,
+    toolLibraryPromise,
     copilotMemPromise,
     plannerStrategyPromise,
     brainContextPromise,
@@ -241,6 +272,11 @@ export async function resolveWorkingMemory(
     capabilitiesBlock = formatCapabilitiesForPrompt(rawCaps as any) ?? "";
   } catch { /* non-fatal */ }
 
+  // ── Resolve tool library (ADR-028) ──
+  const toolLib = await handles.toolLibraryPromise;
+  const toolLibraryBlock = toolLib.block;
+  const toolLibraryIds = toolLib.ids;
+
   // ── Build format directive ──
   let formatDirectiveBlock = "";
   try {
@@ -266,6 +302,7 @@ export async function resolveWorkingMemory(
   if (capabilitiesBlock) injectedPieces.push("capabilities");
   if (formatDirectiveBlock) injectedPieces.push("format_directive");
   if (plannerStrategyBlock) injectedPieces.push("planner_strategy");
+  if (toolLibraryBlock) injectedPieces.push("toolLibrary");
 
   return {
     rlPrimerBlock,
@@ -274,6 +311,8 @@ export async function resolveWorkingMemory(
     entityContextBlock: entityCtx ?? "",
     driftSuffixBlock,
     capabilitiesBlock,
+    toolLibraryBlock,
+    toolLibraryIds,
     plannerStrategyBlock,
     brainContextData,
     formatDirectiveBlock,
@@ -332,6 +371,11 @@ export function injectWorkingMemory(
   // 6. Capabilities — synthesised tool descriptions
   if (wm.capabilitiesBlock) {
     prompt += `\n\n${wm.capabilitiesBlock}`;
+  }
+
+  // 7. Tool Library — CRAFT multi-view retrieved tools (ADR-028)
+  if (wm.toolLibraryBlock) {
+    prompt += "\n\n" + wm.toolLibraryBlock;
   }
 
   return prompt;

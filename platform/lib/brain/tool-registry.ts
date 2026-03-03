@@ -1,6 +1,11 @@
 /**
  * Tool Registry — ADR-027 Dynamic Tool Synthesis (PART 7)
  *
+ * @deprecated ADR-028: This module is a backward-compat wrapper. New code should use:
+ *   - tool-maker.ts for synthesis
+ *   - tool-retrieval.ts for retrieval
+ *   - tool-lifecycle.ts for quality updates
+ *
  * Registry for dynamically synthesized tools. Each tool is:
  * - Generated from capability-regret analysis
  * - Stored with metadata for RL tracking
@@ -106,6 +111,40 @@ export async function getToolsForDomain(
       } catch {
         // Skip malformed rows — never throw
       }
+    }
+
+    // ADR-028: Also query capability_library for newer tools
+    try {
+      const { data: clTools } = await supabase
+        .from("capability_library")
+        .select("id, name, description, domain, implementation, quality_score, invocation_count, success_rate, created_at, source_gap_id")
+        .eq("organization_id", orgId)
+        .in("status", ["validated", "promoted"])
+        .or(`domain.eq.${domain},domain.like.${domain}.%`)
+        .order("quality_score", { ascending: false })
+        .limit(10);
+
+      if (clTools?.length) {
+        for (const row of clTools) {
+          // Avoid duplicates by name
+          if (!tools.some(t => t.name === (row.name as string))) {
+            tools.push({
+              id: row.id as string,
+              name: row.name as string,
+              description: (row.description as string) || "",
+              implementation: (row.implementation as string) || "",
+              domain: (row.domain as string) || domain,
+              qualityScore: (row.quality_score as number) ?? 0.5,
+              invocationCount: (row.invocation_count as number) ?? 0,
+              successRate: (row.success_rate as number) ?? 0,
+              createdAt: (row.created_at as string) ?? new Date().toISOString(),
+              sourceGapId: (row.source_gap_id as string) ?? null,
+            });
+          }
+        }
+      }
+    } catch {
+      // capability_library may not exist yet — non-fatal
     }
 
     return tools;
@@ -260,6 +299,10 @@ export async function getCapabilityGaps(
 // ── 7D: Tool Synthesis Scheduler ────────────────────────────────────────────
 
 /**
+ * @deprecated ADR-028: Use tool-maker.ts synthesizeToolFromGap() instead.
+ * This function is kept for backward compat — it still works but uses
+ * Haiku-only synthesis without self-correction loops.
+ *
  * Synthesize tools from recurring capability gaps (ADR-027 PART 7D).
  *
  * Reads capability-regret records with 3+ occurrences, checks if a tool
@@ -410,6 +453,8 @@ function _createStubTool(gap: CapabilityGapRecord): Partial<SynthesizedTool> {
 // ── 7E: Tool RL Feedback Aggregation ────────────────────────────────────────
 
 /**
+ * @deprecated ADR-028: Use tool-lifecycle.ts updateToolQualities() instead.
+ *
  * Update a synthesized tool's quality metrics from recorded invocations.
  *
  * Reads recent tool_invocation records for a specific tool, computes

@@ -555,6 +555,43 @@ export async function GET(request: NextRequest) {
               return 0;
             });
 
+          // ── ADR-028: Tool Lifecycle Management ─────────────────────────────
+          try {
+            const { updateToolQualities, runLifecycleTransitions, tuneGapDetectionPolicy } =
+              await import("@/lib/brain/tool-lifecycle");
+            const { migrateToolsFromAiMemory } = await import("@/lib/brain/tool-migration");
+
+            // One-time migration: ai_memory → capability_library (idempotent)
+            const migrated = await migrateToolsFromAiMemory(service, workerOrgId);
+            if (migrated > 0) {
+              logger.info("[cognitive-cycle] Migrated tools to capability_library", { orgId: workerOrgId.slice(0, 8), migrated });
+            }
+
+            // Update quality scores from invocation data
+            const qualityResult = await updateToolQualities(service, workerOrgId);
+
+            // Run lifecycle transitions (promote/deprecate/revision)
+            const lifecycleResult = await runLifecycleTransitions(service, workerOrgId);
+
+            // SAGE: Tune gap detection policy
+            await tuneGapDetectionPolicy(service, workerOrgId);
+
+            if (qualityResult.updated > 0 || lifecycleResult.promoted > 0 || lifecycleResult.deprecated > 0) {
+              logger.info("[cognitive-cycle] ADR-028 lifecycle complete", {
+                orgId: workerOrgId.slice(0, 8),
+                qualityUpdated: qualityResult.updated,
+                promoted: lifecycleResult.promoted,
+                deprecated: lifecycleResult.deprecated,
+                revisionsTriggered: lifecycleResult.revisionsTriggered,
+              });
+            }
+          } catch (err) {
+            logger.warn("[cognitive-cycle] ADR-028 lifecycle failed (non-fatal)", {
+              orgId: workerOrgId.slice(0, 8),
+              error: String(err),
+            });
+          }
+
           // Log federation + synthesis results for diagnostics
           if (gabaPromotionCount > 0 || memoryPromotionCount > 0 || toolsSynthesized > 0) {
             logger.info('[CognitiveCycle] Federation metrics', {

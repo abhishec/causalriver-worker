@@ -178,6 +178,9 @@ export interface BrainContext {
 
   // ── Structured Outcome Learnings (Fix 3) ──
   structuredOutcomeSummary?: string;  // Mem0-style structured-outcome memories (all domain executions)
+
+  // ── Tier 9: Dynamic Tool Synthesis (ADR-028) ──
+  dynamicToolLibrary?: string;  // L30: capability_library stats + recently promoted tools
 }
 
 export async function getBrainContext(
@@ -287,6 +290,9 @@ export async function getBrainContext(
 
       // ── ADR-027: COGNITIVE PLANNER STATE ──
       plannerStateRow,               // Latest planner working memory (stuckDomains, highDemandDomains)
+
+      // ── TIER 9: DYNAMIC TOOL SYNTHESIS (ADR-028) ──
+      toolLibraryRows,               // L30: capability_library validated/promoted tools
     ] = await Promise.allSettled([
       // ── TIER 1: IDENTITY ──
 
@@ -724,6 +730,17 @@ export async function getBrainContext(
         .eq("memory_type", "working")
         .order("created_at", { ascending: false })
         .limit(1),
+
+      // L30: Dynamic Tool Library (ADR-028) — validated + promoted tools from capability_library
+      Promise.resolve(
+        supabase
+          .from("capability_library")
+          .select("name, domain, quality_score, status, invocation_count")
+          .eq("organization_id", orgId)
+          .in("status", ["validated", "promoted"])
+          .order("quality_score", { ascending: false })
+          .limit(10)
+      ).then(r => (r as { data: unknown[] | null }).data ?? []).catch(() => []),
     ]);
 
     // ── TIER 1: IDENTITY ─────────────────────────────────────────────────────
@@ -1414,6 +1431,24 @@ export async function getBrainContext(
       // non-fatal — planner hints are best-effort
     }
 
+    // ── L30: Dynamic Tool Library (ADR-028) ───────────────────────────────────
+    let dynamicToolLibrary: string | undefined;
+    try {
+      const toolLibRows = toolLibraryRows.status === "fulfilled"
+        ? toolLibraryRows.value as Array<{ name: string; domain: string; quality_score: number; status: string; invocation_count: number }>
+        : [];
+      if (toolLibRows?.length) {
+        const promoted = toolLibRows.filter((t: { status: string }) => t.status === 'promoted').length;
+        const validated = toolLibRows.filter((t: { status: string }) => t.status === 'validated').length;
+        const topTools = toolLibRows.slice(0, 5).map((t: { name: string; domain: string; quality_score: number; invocation_count: number }) =>
+          `${t.name} (${t.domain}, quality: ${Math.round(t.quality_score * 100)}%, used ${t.invocation_count}x)`
+        ).join('; ');
+        dynamicToolLibrary = `L30 Tool Library: ${promoted} promoted, ${validated} validated. Top: ${topTools}`;
+      }
+    } catch {
+      // Non-fatal — dynamic tool library is best-effort
+    }
+
     // ── RL QUALITY PATTERNS (post-allSettled, awaited separately) ────────────
     // getRecentQualityPatterns is fire-and-forget safe — never throws, returns [] on failure
     const qualityPatterns = await getRecentQualityPatterns(supabase, orgId, 24).catch(() => []);
@@ -1554,6 +1589,8 @@ export async function getBrainContext(
       structuredOutcomeSummary,
       // ADR-027: Cognitive Planner routing hints
       plannerRoutingHints,
+      // Tier 9: Dynamic Tool Library (ADR-028)
+      dynamicToolLibrary,
     });
 
     const result: BrainContext = {
@@ -1614,6 +1651,8 @@ export async function getBrainContext(
       structuredOutcomeSummary,
       // ADR-027: Cognitive Planner routing hints
       plannerRoutingHints,
+      // Tier 9: Dynamic Tool Library (ADR-028)
+      dynamicToolLibrary,
     };
 
     // Tier 1: Raw Knowledge — query-aware retrieval using the current query
@@ -1745,6 +1784,8 @@ function buildContextSummary(ctx: {
   structuredOutcomeSummary?: string;
   // ADR-027: Cognitive Planner routing hints
   plannerRoutingHints?: string;
+  // Tier 9: Dynamic Tool Synthesis (ADR-028)
+  dynamicToolLibrary?: string;
 }): string {
   const parts: string[] = [];
 
@@ -1952,6 +1993,11 @@ function buildContextSummary(ctx: {
   // 34. ADR-027: Cognitive Planner Routing Hints (stuckDomains, highDemandDomains)
   if (ctx.plannerRoutingHints) {
     parts.push(ctx.plannerRoutingHints);
+  }
+
+  // 35. L30: Dynamic Tool Library (ADR-028)
+  if (ctx.dynamicToolLibrary) {
+    parts.push(ctx.dynamicToolLibrary);
   }
 
   // Tier 1 LAST: Raw Knowledge — verbatim grounding data

@@ -519,7 +519,7 @@ export function executeCapabilityTests(
   for (const testCase of testCases) {
     try {
       // Wrap the implementation in a function factory and execute
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+      // eslint-disable-next-line no-new-func
       const fn = new Function(`
         ${implementation}
         // Auto-call: find the first function definition and call it
@@ -609,6 +609,20 @@ export async function recordCapabilityGap(params: {
         recordedAt: new Date().toISOString(),
       },
     });
+
+    // ADR-028: Also record gap in capability_library for tool-maker synthesis
+    void Promise.resolve(supabase.from("capability_library").insert({
+      organization_id: orgId,
+      name: `gap_${domain.replace(/[^a-z0-9]/gi, "_")}_${Date.now()}`,
+      description: query.slice(0, 300),
+      domain,
+      implementation: "",  // empty — gap only
+      status: "gap",
+      quality_score: qualityScore,
+      synthesized_by: "system",
+    })).catch(() => {
+      // fire-and-forget — capability_library may not exist yet
+    });
   } catch {
     // fire-and-forget — never throw
   }
@@ -674,6 +688,20 @@ export async function observeCapabilityRegret(
         detectedAt: new Date().toISOString(),
       }),
       importance: 0.6,
+    });
+
+    // ADR-028: Also record regret gap in capability_library
+    void Promise.resolve(supabase.from("capability_library").insert({
+      organization_id: orgId,
+      name: `regret_${domain.replace(/[^a-z0-9]/gi, "_")}_${Date.now()}`,
+      description: `LLM regret: ${detectedRegrets[0]?.slice(0, 200) ?? "unknown"}`,
+      domain: `capability-gap:${domain}`,
+      implementation: "",
+      status: "gap",
+      quality_score: 0.3,
+      synthesized_by: "system",
+    })).catch(() => {
+      // fire-and-forget — capability_library may not exist yet
     });
   } catch {
     // fire-and-forget — never throw

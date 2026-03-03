@@ -4729,6 +4729,8 @@ No connectors are configured yet. When the user asks for data from any source (S
             }
             return false;
           })(),
+          // ADR-028: pass capability_library tool IDs for invocation tracking
+          toolLibraryIds: _wm?.toolLibraryIds,
         });
         close();
       } catch (err) {
