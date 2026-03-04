@@ -48,6 +48,31 @@ let failures = 0;
 let restarting = false;
 let shuttingDown = false;
 let restartCount = 0;
+let warmedUp = false; // tracks if warmup has fired for this server instance
+
+// ── Warmup: pre-compile Turbopack manifest to avoid _buildManifest.js.tmp ISE ──
+// The race condition: Turbopack writes _buildManifest.js.tmp then renames it.
+// If the FIRST request hits between write and rename → 500.
+// Fix: send a warmup request immediately after "Ready" so the rename completes
+// before any real user traffic arrives.
+async function warmupPages() {
+  const pages = ["/workspace"];
+  for (const page of pages) {
+    try {
+      await new Promise((resolve) => {
+        const req = http.get(`http://localhost:${PORT}${page}`, { timeout: 30_000 }, (res) => {
+          res.resume(); // drain body (we don't care about content)
+          logSuccess(`Warmup complete: ${page} → HTTP ${res.statusCode}`);
+          resolve(null);
+        });
+        req.on("error", () => resolve(null));
+        req.on("timeout", () => { req.destroy(); resolve(null); });
+      });
+    } catch {
+      // Non-fatal — if warmup fails user may still hit ISE but it self-heals
+    }
+  }
+}
 
 function log(msg) {
   const ts = new Date().toLocaleTimeString();
@@ -155,14 +180,32 @@ function startServer() {
     log(`Restarting server (restart #${restartCount})...`);
   }
 
+  warmedUp = false; // reset warmup flag on each (re)start
   log(`Starting: ${NEXT_BIN} dev --port ${PORT} --turbopack`);
 
   // Spawn the next binary directly — NOT through npx which creates a wrapper
   // process that exits (code 0) while leaving the actual server orphaned.
+  // stdout is piped so we can detect the "Ready" signal and trigger warmup.
+  // stderr + stdin remain inherited (user sees compiler output, errors, etc.)
   child = spawn(NEXT_BIN, ["dev", "--port", String(PORT), "--turbopack"], {
     cwd: PLATFORM_DIR,
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "inherit"],
     env: { ...process.env },
+  });
+
+  // Forward stdout to terminal AND detect Turbopack "Ready" signal
+  child.stdout?.on("data", (chunk) => {
+    process.stdout.write(chunk); // pass through to terminal unchanged
+    const text = chunk.toString();
+    // Turbopack prints "✓ Ready in Xs" or "Ready on http://localhost:PORT"
+    if (!warmedUp && /ready/i.test(text)) {
+      warmedUp = true;
+      // Short delay so the port is fully accepting connections before warmup
+      setTimeout(() => {
+        log("Turbopack ready — pre-compiling routes to prevent manifest race...");
+        warmupPages().catch(() => {});
+      }, 800);
+    }
   });
 
   child.on("error", (err) => {
