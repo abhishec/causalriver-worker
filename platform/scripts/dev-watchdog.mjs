@@ -56,7 +56,13 @@ let warmedUp = false; // tracks if warmup has fired for this server instance
 // Fix: send a warmup request immediately after "Ready" so the rename completes
 // before any real user traffic arrives.
 async function warmupPages() {
-  const pages = ["/workspace"];
+  const pages = [
+    "/workspace",
+    // Fake worker ID — triggers [workerId] segment compilation so _buildManifest
+    // race is resolved before any real /ai-worker/[id] request arrives.
+    // The 404 response is expected and harmless.
+    "/ai-worker/__warmup__",
+  ];
   for (const page of pages) {
     try {
       await new Promise((resolve) => {

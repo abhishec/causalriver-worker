@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function AIWorkerError({
   error,
@@ -9,9 +9,19 @@ export default function AIWorkerError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const hasAutoRetried = useRef(false);
+
   useEffect(() => {
     console.error("AI Worker error:", error);
-  }, [error]);
+    // Dev-only: auto-retry once to recover from Turbopack _buildManifest race on
+    // first SSR request after startup. The warmup in dev-watchdog.mjs is the
+    // primary fix; this is belt-and-suspenders for any requests that race through.
+    if (process.env.NODE_ENV !== "production" && !hasAutoRetried.current) {
+      hasAutoRetried.current = true;
+      const t = setTimeout(reset, 600);
+      return () => clearTimeout(t);
+    }
+  }, [error, reset]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
