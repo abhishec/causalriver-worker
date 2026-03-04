@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       input?: { signals?: any[]; query?: string };
     };
 
-    const workspaceId = organizationId || await getCurrentWorkspaceId();
+    const workspaceId = organizationId ?? await getCurrentWorkspaceId();
 
     // ── Verify membership (skip for internal cron) ────────────────
     if (!isInternalCron) {
@@ -460,7 +460,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const workspaceId = request.nextUrl.searchParams.get("organizationId") || await getCurrentWorkspaceId();
+    const workspaceId = request.nextUrl.searchParams.get("organizationId") ?? await getCurrentWorkspaceId();
 
     // Check if controller exists in cache
     const cached = controllerCache.get(workspaceId);

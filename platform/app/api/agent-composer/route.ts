@@ -109,7 +109,8 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Org check ───────────────────────────────────────────────────────
-    const orgId = organizationId || process.env.CORE_ORG_ID;
+    // SECURITY: Do NOT fall back to CORE_ORG_ID — callers must supply an explicit org.
+    const orgId = organizationId ?? null;
     if (!orgId) {
       return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
     }

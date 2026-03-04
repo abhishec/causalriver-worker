@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const skipBrainCycle: boolean = body.skipBrainCycle === true;
 
-    const workspaceId = body.organizationId || await getCurrentWorkspaceId();
+    const workspaceId = body.organizationId ?? await getCurrentWorkspaceId();
     if (!workspaceId) {
       return NextResponse.json({ error: "No workspace context" }, { status: 400 });
     }

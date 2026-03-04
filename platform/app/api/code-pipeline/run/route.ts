@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       organizationId?: string;
     };
 
-    const workspaceId = organizationId || await getCurrentWorkspaceId();
+    const workspaceId = organizationId ?? await getCurrentWorkspaceId();
 
     // Validate issue
     if (!issue || !issue.type || !issue.description) {
