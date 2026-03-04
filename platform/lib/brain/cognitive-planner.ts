@@ -460,12 +460,16 @@ async function _runCognitivePlannerInner(
   let reflected = false;
 
   try {
+    // Only reflect on working memory < 4 hours old — stale prior cycles can
+    // corrupt current planning with outdated decisions (ADR-027 Bug 3 fix).
+    const workingMemoryTTL = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
     const { data: priorCycle } = await supabase
       .from("ai_memory")
       .select("id, content, metadata")
       .eq("organization_id", orgId)
       .eq("domain", "cognitive-planner")
       .eq("memory_type", "working")
+      .gte("created_at", workingMemoryTTL)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();

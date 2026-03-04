@@ -4136,7 +4136,14 @@ Additional context:
   2. Jira — go to /connectors → click "Connect Jira"
 - Once connected, Brain IQ will begin rising automatically.
 - Brain IQ >= 10 means the brain is learning. Brain IQ >= 20 means it is ready for full SE-aaS analysis.
-Be encouraging and specific. Do NOT say "I don't know" — give them the exact next steps above.`;
+Be encouraging and specific. Do NOT say "I don't know" — give them the exact next steps above.
+
+## ZERO-DATA CONSTRAINT (CRITICAL — always enforced when brain is empty)
+This workspace has NO connected data (0 signals ingested). You MUST follow these rules for ALL responses:
+- Do NOT generate specific numbers, percentages, metrics, or data insights (e.g. "your team velocity is X", "3 engineers are at risk")
+- Do NOT fabricate trends, comparisons, or analyses based on non-existent data
+- If asked for data insights: acknowledge the data gap and redirect to connector setup
+- General product questions, explanations of capabilities, and setup guidance are fine`;
       } else if (brainCtx.brainIq < 10) {
         effectiveSystemPrompt += `\n\n## BRAIN STATUS GUIDANCE (CRITICAL)
 Brain IQ: ${brainCtx.brainIq}/100 | Signals: ${brainCtx.signalCount}
