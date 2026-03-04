@@ -126,7 +126,7 @@ const CHUNK_OVERLAP_CHARS = 200;   // ~50 tokens overlap
 export interface IngestDocumentParams {
   organizationId: string;
   sourceUrl?: string;
-  sourceType: "pdf" | "confluence" | "github" | "markdown" | "text";
+  sourceType: "pdf" | "confluence" | "github" | "markdown" | "text" | "local-files";
   documentTitle?: string;
   documentId?: string;
   content: string;  // raw text content

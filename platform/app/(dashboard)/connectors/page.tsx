@@ -32,6 +32,8 @@ const CONNECTORS = [
   { name: "ELK / OpenSearch", type: "elk", domain: "engineering", icon: "🔍", description: "Elasticsearch or OpenSearch log indexes — any structured log data", oauth: false },
   { name: "Generic Log Endpoint", type: "logs", domain: "engineering", icon: "📄", description: "Any HTTP endpoint returning JSON-lines or JSON array of log events", oauth: false },
   { name: "Generic API", type: "generic_api", domain: "any", icon: "🔌", description: "Custom webhook endpoints for any data source", oauth: false },
+  // Local file access
+  { name: "Local Files", type: "local-files", domain: "knowledge", icon: "💻", description: "PDFs, Word docs, text, and markdown from your laptop", oauth: false },
   // AAAS — Accounting connectors
   { name: "Xero", type: "xero", domain: "accounting", icon: "📘", description: "General ledger, invoices, bank feeds, GST — full accounting data sync", oauth: true },
   { name: "QuickBooks", type: "quickbooks", domain: "accounting", icon: "📗", description: "Chart of accounts, transactions, reports, payroll data", oauth: true },

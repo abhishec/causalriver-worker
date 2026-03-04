@@ -24,7 +24,7 @@ export interface ConnectorAuthConfig {
    *  oauth_domain = OAuth but requires a domain field first
    *  apikey = inline API key / credentials form
    */
-  authMethod: "oauth" | "oauth_domain" | "apikey";
+  authMethod: "oauth" | "oauth_domain" | "apikey" | "browser_fsa";
   /** Server route that starts OAuth flow (GET, returns redirect) */
   oauthRoute?: string;
   /** For oauth_domain — the query param name for the domain */
@@ -245,6 +245,13 @@ export const CONNECTOR_AUTH_MAP: Record<string, ConnectorAuthConfig> = {
     authMethod: "oauth",
     oauthRoute: "/api/connectors/google-drive/auth",
     description: "PDF, DOCX, and text files from Google Drive folders",
+  },
+
+  // ── Local ────────────────────────────────────────────────────────────────
+  "local-files": {
+    displayName: "Local Files",
+    authMethod: "browser_fsa",
+    description: "PDFs, Word docs, text files, and markdown from your laptop",
   },
 
   // ── Generic ──────────────────────────────────────────────────────────────

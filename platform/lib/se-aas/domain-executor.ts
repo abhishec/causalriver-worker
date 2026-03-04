@@ -259,13 +259,21 @@ const earlyWarningDomain = {
     thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay() + 1);
     const weekStart = thisWeek.toISOString().split("T")[0];
 
-    const { data: snapshots, error } = await supabase
+    let { data: snapshots, error } = await supabase
       .from("engineer_health_snapshots")
       .select("github_login, review_burden, velocity_index, flight_risk_score, overallocation_flag, week_start")
       .eq("organization_id", orgId)
       .gte("week_start", weekStart)
       .order("flight_risk_score", { ascending: false })
       .limit(50);
+
+    // Schema drift recovery: retry with select("*") if column doesn't exist
+    if (error?.message?.includes("does not exist")) {
+      logger.warn(`[early-warning] Schema drift detected: ${error.message}. Retrying with select("*")`);
+      const fallback = await supabase.from("engineer_health_snapshots").select("*")
+        .eq("organization_id", orgId).gte("week_start", weekStart).limit(50);
+      snapshots = fallback.data; error = fallback.error;
+    }
 
     if (error) {
       logger.warn("[early-warning domain] engineer_health_snapshots query failed:", error.message);
@@ -313,12 +321,20 @@ const scopeCreepDomain = {
       return { domain: "scope-creep", alerts: [], summary: null, error: "No org context available" };
     }
 
-    const { data: alerts, error } = await supabase
+    let { data: alerts, error } = await supabase
       .from("scope_creep_alerts")
       .select("id, engagement_id, severity, drift_percent, description, created_at, acknowledged, engagements(engagement_name, client_name)")
       .eq("organization_id", orgId)
       .order("created_at", { ascending: false })
       .limit(20);
+
+    // Schema drift recovery: retry with select("*") if column doesn't exist
+    if (error?.message?.includes("does not exist")) {
+      logger.warn(`[scope-creep] Schema drift detected: ${error.message}. Retrying with select("*")`);
+      const fallback = await supabase.from("scope_creep_alerts").select("*")
+        .eq("organization_id", orgId).order("created_at", { ascending: false }).limit(20);
+      alerts = fallback.data; error = fallback.error;
+    }
 
     if (error) {
       logger.warn("[scope-creep domain] scope_creep_alerts query failed:", error.message);
@@ -379,12 +395,20 @@ const deliveryIntelligenceDomain = {
     }
 
     // ── 1. engagement_health_latest — bottom 5 by health_score ─────────────
-    const { data: engagementsRaw, error: engErr } = await supabase
+    let { data: engagementsRaw, error: engErr } = await supabase
       .from("engagement_health_latest")
       .select("engagement_id, health_score, computed_at, client_name, engagement_name, status, forecast_at_risk, forecast_days_remaining, delivery_velocity, jira_resolution_rate, scope_drift")
       .eq("organization_id", orgId)
       .order("health_score", { ascending: true })
       .limit(5);
+
+    // Schema drift recovery: retry with select("*") if column doesn't exist
+    if (engErr?.message?.includes("does not exist")) {
+      logger.warn(`[delivery-intelligence] Schema drift on engagement_health_latest: ${engErr.message}. Retrying with select("*")`);
+      const fallback = await supabase.from("engagement_health_latest").select("*")
+        .eq("organization_id", orgId).limit(5);
+      engagementsRaw = fallback.data; engErr = fallback.error;
+    }
 
     if (engErr) {
       logger.warn("[delivery-intelligence domain] engagement_health_latest query failed:", engErr.message);
@@ -1402,6 +1426,17 @@ export async function executeDomain(
   _runDomainSideEffects(supabase, params.organizationId, params.domainType, result, confidence, durationMs).catch(() => {
     // Non-blocking: side-effect failure should NEVER break domain execution
   });
+
+  // ── Step 6c: Mutation Verifier — fire-and-forget write verification ────
+  // Verifies that domain side-effect writes actually landed in the DB.
+  // Catches silent write failures (RLS denials, schema drift, constraint violations).
+  void import("@/lib/brain/mutation-verifier").then(({ verifyWriteback }) =>
+    verifyWriteback(
+      { type: 'database_record', entityType: params.domainType, metadata: { operation: 'domain_side_effect' } },
+      { organizationId: params.organizationId, domainType: params.domainType, confidence },
+      supabase,
+    )
+  ).catch(() => {});
 
   // ── Step 6b: Boilerplate-scaffold → GitHub PR write-back (non-blocking) ──
   // If the caller provided repoOwner + repoName in the request and the

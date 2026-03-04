@@ -13,6 +13,8 @@ import { JiraSetupModal, type JiraConfig } from "@/components/connectors/JiraSet
 import { IngestionProgress } from "@/components/connectors/IngestionProgress";
 import { S3UploadModal } from "@/components/connectors/S3UploadModal";
 import { WritebackRulesPanel } from "@/components/connectors/WritebackRulesPanel";
+import { ConnectorHealthBadge } from "@/components/connectors/ConnectorHealthBadge";
+import { ConnectorOnboardingWizard } from "@/components/connectors/ConnectorOnboardingWizard";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 /* ── Types ─────────────────────────────────────────────────────── */
@@ -458,6 +460,13 @@ export function ConnectorsClient({
         />
       )}
 
+      {/* ── Onboarding Wizard (zero-state) ──────────────────────── */}
+      {activeInstances.length === 0 && (
+        <div className="max-w-md mx-auto py-6">
+          <ConnectorOnboardingWizard onComplete={() => router.refresh()} />
+        </div>
+      )}
+
       {/* ── Connected Connectors ──────────────────────────────── */}
       {activeInstances.length > 0 && (
         <div>
@@ -633,11 +642,21 @@ export function ConnectorsClient({
                         </div>
                       )}
 
-                      {/* Error message */}
+                      {/* Error / Health badge */}
                       {instance.errorMessage && (
-                        <div className="mt-2 flex items-center gap-1.5 text-[11px] text-danger">
-                          <StatusDot type="error" size="sm" />
-                          {instance.errorMessage}
+                        <div className="mt-2">
+                          <ConnectorHealthBadge
+                            status={instance.status}
+                            errorMessage={instance.errorMessage}
+                            lastSyncAt={instance.lastSyncAt}
+                            onReconnect={() => {
+                              window.dispatchEvent(
+                                new CustomEvent("copilot-inject-and-submit", {
+                                  detail: `connect ${instance.connectorType}`,
+                                }),
+                              );
+                            }}
+                          />
                         </div>
                       )}
 

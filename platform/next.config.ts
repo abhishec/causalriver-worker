@@ -76,6 +76,9 @@ const nextConfig: NextConfig = {
     // Feature flags — controls optional platform features
     ENABLE_OVERNIGHT_AGENT: process.env.ENABLE_OVERNIGHT_AGENT,
     ENABLE_WEBHOOKS: process.env.ENABLE_WEBHOOKS,
+    // Enterprise primitives — web search + browser automation
+    BRAVE_SEARCH_API_KEY: process.env.BRAVE_SEARCH_API_KEY,
+    BROWSERLESS_API_KEY: process.env.BROWSERLESS_API_KEY,
   },
 
   // In dev: enable gzip (no CDN). In prod: disable (CloudFront handles it at edge).

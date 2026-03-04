@@ -277,6 +277,25 @@ export async function runPreFlight(
     }
   } catch { /* non-fatal — classifier prefix is best-effort */ }
 
+  // ── 6b. Freshness-triggered web search injection ────────────────────────
+  // When the user's message contains freshness indicators, fire a web search
+  // and inject top results into the classifier context for current-awareness.
+  const FRESHNESS_KEYWORDS = /\b(latest|today|current|recent|now|this week|news|update|trending|breaking)\b/i;
+  if (FRESHNESS_KEYWORDS.test(message)) {
+    try {
+      const { executePrimitive } = await import("@/lib/brain/primitive-registry");
+      const searchResult = await executePrimitive(
+        { supabase: service, organizationId: workspaceId, userId: user.id },
+        "web_search",
+        { query: message.slice(0, 200), limit: 3 },
+      );
+      const results = searchResult.results as Array<{ title: string }> | undefined;
+      if (results?.length) {
+        _classifierBrainPrefix += `[WebSearch: ${results.map((r) => r.title).join("; ")}] `;
+      }
+    } catch { /* non-fatal — web search is enrichment only */ }
+  }
+
   // ── 7. LLM Query Interpretation ────────────────────────────────────────────
   const { createLLMQueryInterpreter } = memStack;
   const interpreter = createLLMQueryInterpreter({

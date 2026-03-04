@@ -142,6 +142,7 @@ export async function recordJobOutcome(
   // MUST NOT block the job result — wrap in void + catch.
   void extractStructuredMemory(supabase, {
     organizationId: params.organizationId,
+    aiWorkerId: params.aiWorkerId,
     domain: params.domain,
     inputQuery: params.taskDescription,
     resultSummary: params.resultSummary,

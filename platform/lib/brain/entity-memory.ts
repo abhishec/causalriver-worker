@@ -27,7 +27,8 @@ import { logger } from "@/lib/logger";
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface ExtractedEntity {
-  type: "person" | "project" | "team" | "amount" | "date" | "id" | "email" | "status";
+  /** Entity type — regex types are fixed, LLM-extracted types are open-ended (person, company, regulation, etc.) */
+  type: string;
   value: string;
   normalized: string;
   /** Up to 60 characters of surrounding text for context */
@@ -51,7 +52,7 @@ export interface EntityMemoryEntry {
  * so that more specific patterns (email, id) are matched before generic ones (person).
  */
 const PATTERNS: Array<{
-  type: ExtractedEntity["type"];
+  type: string;
   regex: RegExp;
 }> = [
   // Email — must come before person to prevent "john@example.com" matching as a name
@@ -325,7 +326,8 @@ export async function getEntityContext(
       grouped[type].push(String(row.content));
     }
 
-    // Build label map for display
+    // Dynamic label map — known regex types get readable labels,
+    // LLM-extracted types display as-is (capitalized)
     const LABEL_MAP: Record<string, string> = {
       person: "People",
       project: "Projects",
@@ -338,23 +340,18 @@ export async function getEntityContext(
     };
 
     const parts: string[] = [];
-    // Output in a stable order
-    const ORDER: ExtractedEntity["type"][] = [
-      "person", "project", "team", "amount", "date", "status", "id", "email",
-    ];
+    // Stable order for known types, then LLM-extracted types alphabetically
+    const KNOWN_ORDER = ["person", "project", "team", "amount", "date", "status", "id", "email"];
+    const knownTypes = KNOWN_ORDER.filter((t) => grouped[t]?.length);
+    const dynamicTypes = Object.keys(grouped)
+      .filter((t) => !KNOWN_ORDER.includes(t) && grouped[t]?.length)
+      .sort();
 
-    for (const type of ORDER) {
+    for (const type of [...knownTypes, ...dynamicTypes]) {
       const values = grouped[type];
       if (values && values.length > 0) {
-        const label = LABEL_MAP[type] ?? type;
+        const label = LABEL_MAP[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
         parts.push(`${label}: ${values.join(", ")}`);
-      }
-    }
-
-    // Any types not in ORDER (future-proofing)
-    for (const [type, values] of Object.entries(grouped)) {
-      if (!ORDER.includes(type as ExtractedEntity["type"]) && values.length > 0) {
-        parts.push(`${type}: ${values.join(", ")}`);
       }
     }
 
@@ -370,6 +367,75 @@ export async function getEntityContext(
   }
 }
 
+/**
+ * LLM-based entity extraction — runs fire-and-forget post-stream.
+ * Uses Haiku to extract domain-specific entities that regex can't catch
+ * (companies, regulations, typologies, metrics, etc.).
+ *
+ * Hybrid approach: regex handles universals (email, UUID, amounts, dates),
+ * LLM handles domain-specific entities that vary by workspace.
+ *
+ * Never throws — fire-and-forget safe.
+ */
+export async function extractEntitiesLLM(
+  text: string,
+  orgId: string,
+  workerId: string | undefined,
+): Promise<void> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || text.length < 50) return; // Skip trivially short text
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        messages: [{
+          role: "user",
+          content: `Extract named entities from this conversation. Return ONLY a JSON array of {type, value, context}. Types can be anything: person, company, product, regulation, alert, typology, engagement, ticket, metric, technology, etc. Only extract entities that are specifically mentioned, not generic terms. Max 10 entities.\n\nText: ${text.slice(0, 2000)}`,
+        }],
+      }),
+    });
+
+    if (!resp.ok) return;
+
+    const data = (await resp.json()) as {
+      content: Array<{ type: string; text: string }>;
+    };
+    const responseText = data.content?.filter((b) => b.type === "text").map((b) => b.text).join("") ?? "";
+
+    // Parse JSON array from response
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return;
+
+    const entities = JSON.parse(jsonMatch[0]) as Array<{ type: string; value: string; context?: string }>;
+    if (!Array.isArray(entities) || entities.length === 0) return;
+
+    // Convert to ExtractedEntity format and persist
+    const extracted: ExtractedEntity[] = entities
+      .filter((e) => e.type && e.value && e.value.length >= 2)
+      .slice(0, 10)
+      .map((e) => ({
+        type: e.type.toLowerCase().replace(/\s+/g, "_"),
+        value: e.value,
+        normalized: e.value.trim().replace(/\s+/g, " "),
+        context: (e.context ?? "").slice(0, 60),
+      }));
+
+    if (extracted.length > 0) {
+      await persistEntities(extracted, orgId, workerId);
+    }
+  } catch {
+    // Fire-and-forget: never throws
+  }
+}
+
 // ── Internal Helpers ──────────────────────────────────────────────────────────
 
 /**
@@ -378,7 +444,7 @@ export async function getEntityContext(
  * - Lowercases amounts, dates, statuses, and IDs (case-insensitive domains)
  * - Preserves casing for people, projects, and teams (proper nouns)
  */
-function normalizeEntity(type: ExtractedEntity["type"], value: string): string {
+function normalizeEntity(type: string, value: string): string {
   const trimmed = value.trim();
   switch (type) {
     case "amount":

@@ -65,6 +65,10 @@ export interface CopilotWorkingMemory {
   /** Pre-fetched brain context (warms 30s cache so domain executors hit cache, not DB) */
   brainContextData: Record<string, unknown> | null;
 
+  // ── Document RAG ──
+  /** Relevant document chunks from semantic search (uploaded files, local docs) */
+  docRagBlock: string;
+
   // ── Format ──
   /** Format directive if user's message implies structured output */
   formatDirectiveBlock: string;
@@ -88,6 +92,7 @@ export interface WorkingMemoryPromises {
   copilotMemPromise: Promise<string>;
   plannerStrategyPromise: Promise<string>;
   brainContextPromise: Promise<Record<string, unknown> | null>;
+  docRagPromise: Promise<string>;
   gatherStartMs: number;
 }
 
@@ -126,8 +131,12 @@ export function gatherWorkingMemory(
       return "";
     });
 
+  // Bug fix: use three-state drift detector (trust/caution/warning-instead-of-value)
+  // instead of binary getDriftStatus (isDrifted: boolean)
   const driftStatusPromise = import("@/lib/brain/context-drift-detector")
-    .then(({ getDriftStatus }) => getDriftStatus(workspaceId, service as any))
+    .then(({ getSignalTypeDriftStatus }) =>
+      getSignalTypeDriftStatus(workspaceId, "general", service as any)
+    )
     .catch((err) => {
       logger.warn("[working-memory] Drift status fetch failed", { error: String(err) });
       return null;
@@ -214,6 +223,72 @@ export function gatherWorkingMemory(
       return null;
     });
 
+  // 9. Document RAG — semantic search over uploaded documents + absorbed structured knowledge
+  const docRagPromise = Promise.all([
+    // 9a. Vector/hybrid chunk search — 15 chunks for richer context
+    import("@/lib/connectors/document-ingester")
+      .then(({ searchDocumentChunks }) => searchDocumentChunks(service, workspaceId, message, 15))
+      .catch(() => [] as Array<{ document_title?: string; chunk_index: number; chunk_text: string }>),
+    // 9b. Absorbed structured knowledge (product features, pricing, capabilities) from ai_memory
+    Promise.resolve(
+      service
+        .from("ai_memory")
+        .select("content, metadata, domain")
+        .eq("organization_id", workspaceId)
+        .like("domain", "document.%")
+        .eq("memory_type", "knowledge")
+        .order("importance", { ascending: false })
+        .limit(8)
+    ).then(({ data }) => (data ?? []) as Array<{ content: string; metadata: unknown; domain: string }>)
+     .catch(() => [] as Array<{ content: string; metadata: unknown; domain: string }>),
+  ]).then(([rawChunks, absorbed]) => {
+    const chunks = rawChunks as Array<{ document_title?: string | null; chunk_index: number; chunk_text: string }>;
+    const absorbedRows = absorbed as Array<{ content: string; metadata: unknown; domain: string }>;
+    const parts: string[] = [];
+
+    if (chunks?.length) {
+      const formatted = chunks
+        .map(
+          (c, i) =>
+            `[Doc ${i + 1}: ${c.document_title ?? "Document"}, chunk ${c.chunk_index}]\n${c.chunk_text}`,
+        )
+        .join("\n\n");
+      parts.push(`## DOCUMENT KNOWLEDGE (from uploaded files)\n${formatted}`);
+    }
+
+    if (absorbedRows?.length) {
+      const structuredParts = absorbedRows
+        .map((row: { content: string; metadata: unknown; domain: string }) => {
+          const meta = row.metadata as Record<string, unknown> | null ?? {};
+          const lines: string[] = [row.content];
+          const features = meta.productFeatures as Array<{ name: string; category: string; description: string }> | undefined;
+          if (features?.length) {
+            lines.push(`  → Features: ${features.map((f) => `${f.name} [${f.category}]`).join(", ")}`);
+          }
+          const pricing = meta.pricingTiers as Array<{ name: string; price?: string }> | undefined;
+          if (pricing?.length) {
+            lines.push(`  → Pricing: ${pricing.map((t) => `${t.name}${t.price ? ` (${t.price})` : ""}`).join(", ")}`);
+          }
+          const caps = meta.capabilities as Array<{ name: string }> | undefined;
+          if (caps?.length) {
+            lines.push(`  → Capabilities: ${caps.map((c) => c.name).join(", ")}`);
+          }
+          const integrations = meta.integrations as string[] | undefined;
+          if (integrations?.length) {
+            lines.push(`  → Integrations: ${integrations.join(", ")}`);
+          }
+          return lines.join("\n");
+        })
+        .join("\n\n");
+      parts.push(`## STRUCTURED PRODUCT KNOWLEDGE (extracted from docs)\n${structuredParts}`);
+    }
+
+    return parts.join("\n\n");
+  }).catch((err) => {
+    logger.warn("[working-memory] Document RAG fetch failed", { error: String(err) });
+    return "";
+  });
+
   return {
     rlPrimerPromise,
     entityCtxPromise,
@@ -223,6 +298,7 @@ export function gatherWorkingMemory(
     copilotMemPromise,
     plannerStrategyPromise,
     brainContextPromise,
+    docRagPromise,
     gatherStartMs,
   };
 }
@@ -240,7 +316,7 @@ export async function resolveWorkingMemory(
   handles: WorkingMemoryPromises,
   message: string,
 ): Promise<CopilotWorkingMemory> {
-  const [rawRLPrimer, entityCtx, rawDriftStatus, rawCaps, copilotMem, plannerStrategy, rawBrainContext] = await Promise.all([
+  const [rawRLPrimer, entityCtx, rawDriftStatus, rawCaps, copilotMem, plannerStrategy, rawBrainContext, docRagBlock] = await Promise.all([
     handles.rlPrimerPromise,
     handles.entityCtxPromise,
     handles.driftStatusPromise,
@@ -248,6 +324,7 @@ export async function resolveWorkingMemory(
     handles.copilotMemPromise,
     handles.plannerStrategyPromise,
     handles.brainContextPromise,
+    handles.docRagPromise,
   ]);
 
   // ── Extract RL primer block + pattern IDs ──
@@ -303,6 +380,7 @@ export async function resolveWorkingMemory(
   if (formatDirectiveBlock) injectedPieces.push("format_directive");
   if (plannerStrategyBlock) injectedPieces.push("planner_strategy");
   if (toolLibraryBlock) injectedPieces.push("toolLibrary");
+  if (docRagBlock) injectedPieces.push("docRag");
 
   return {
     rlPrimerBlock,
@@ -313,6 +391,7 @@ export async function resolveWorkingMemory(
     capabilitiesBlock,
     toolLibraryBlock,
     toolLibraryIds,
+    docRagBlock: docRagBlock ?? "",
     plannerStrategyBlock,
     brainContextData,
     formatDirectiveBlock,
@@ -376,6 +455,11 @@ export function injectWorkingMemory(
   // 7. Tool Library — CRAFT multi-view retrieved tools (ADR-028)
   if (wm.toolLibraryBlock) {
     prompt += "\n\n" + wm.toolLibraryBlock;
+  }
+
+  // 8. Document RAG — relevant chunks from uploaded files (local, S3, etc.)
+  if (wm.docRagBlock) {
+    prompt += "\n\n" + wm.docRagBlock;
   }
 
   return prompt;

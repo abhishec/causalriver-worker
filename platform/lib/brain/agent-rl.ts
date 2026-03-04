@@ -584,6 +584,7 @@ Respond with ONLY the JSON object. No explanation.`;
       memory_type: "structured-outcome",
       content,
       importance: params.quality,
+      memory_tier: 1,
       metadata: {
         quality: params.quality,
         extractedAt: new Date().toISOString(),

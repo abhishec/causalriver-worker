@@ -133,10 +133,20 @@ export function createSSEStream() {
     send(JSON.stringify({ sessionTurn: turn }));
   };
 
+  /** Stream a typed widget to the UI (Dynamic Widget System) */
+  const sendWidget = (widget: {
+    kind: string;
+    title?: string;
+    subtitle?: string;
+    data: Record<string, unknown>;
+  }) => {
+    send(JSON.stringify({ widget }));
+  };
+
   return {
     stream, send, sendText, sendError, close,
     sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
-    sendWorkflowProgress, sendIngestionProgress, sendSessionTurn,
+    sendWorkflowProgress, sendIngestionProgress, sendSessionTurn, sendWidget,
   };
 }
 

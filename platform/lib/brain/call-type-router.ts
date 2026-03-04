@@ -60,12 +60,19 @@ export function resolveModel(claudeModel: ClaudeModel, provider?: LLMProvider): 
   return claudeModel;
 }
 
-// Light domains: structured data lookup, pattern matching
+// Light domains: structured data lookup, pattern matching, analysis-only
 const HAIKU_DOMAINS = new Set([
   'pod-match',
   'scope-creep',
   'early-warning',
   'delivery-intelligence',
+  // Analysis-only domains — read/query, no generation needed
+  'sql-analyzer',
+  'impact-analysis',
+  'data-lineage',
+  'log-query',
+  'dead-code-detector',
+  'performance-profiler',
   // Brain agents / connectors — structured, low-complexity
   'context-agent',
   'context-compress',
@@ -78,24 +85,18 @@ const HAIKU_DOMAINS = new Set([
   'aas-artifact-simple',
 ]);
 
-// Heavy domains: code understanding, generation, synthesis
+// Heavy domains: code generation, synthesis, complex reasoning
 const SONNET_DOMAINS = new Set([
   'pr-review',
   'codebase-qa',
-  'sql-analyzer',
   'test-data-generator',
   'incident-diagnosis',
   'tdd-code-generator',
   'tdd',
   'design-doc-generator',
   'architecture-extractor',
-  'impact-analysis',
   'test-case-generator',
-  'data-lineage',
-  'log-query',
   'dependency-upgrade',
-  'performance-profiler',
-  'dead-code-detector',
   'boilerplate-scaffold',
   // Brain agents / orchestration — reasoning, synthesis, generation
   'copilot-complex',
@@ -110,8 +111,8 @@ const SONNET_DOMAINS = new Set([
 export function selectModelForDomain(domainType: string): ClaudeModel {
   if (HAIKU_DOMAINS.has(domainType)) return 'claude-haiku-4-5-20251001';
   if (SONNET_DOMAINS.has(domainType)) return 'claude-sonnet-4-6';
-  // Default: Sonnet for unknown domains (safe)
-  return 'claude-sonnet-4-6';
+  // Default: Haiku for unknown domains (cost-efficient, escalate per-domain)
+  return 'claude-haiku-4-5-20251001';
 }
 
 export function getModelDisplayName(model: ClaudeModel): string {

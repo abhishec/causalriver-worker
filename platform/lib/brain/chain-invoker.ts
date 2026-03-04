@@ -27,10 +27,11 @@ export const LAMBDA_BUDGET_MS = 75_000;
 
 /**
  * Maximum chain depth before we give up and fail the job.
- * 20 hops × 75s = 25 minutes of wall-clock agent work.
- * Prevents infinite loops if a bug causes a job to never complete.
+ * 600 hops × 75s = 12.5 hours of wall-clock agent work.
+ * Supports long-running enterprise sessions (12h+).
+ * Per-job cost control (maxCostUsd in payload) provides budget guardrails.
  */
-export const MAX_CHAIN_DEPTH = 20;
+export const MAX_CHAIN_DEPTH = 600;
 
 /**
  * Returns true when the Lambda should stop and hand off to a continuation.
@@ -52,6 +53,23 @@ export const MAX_CHAIN_DEPTH = 20;
  */
 export function shouldChain(startedAt: number, budgetMs: number = LAMBDA_BUDGET_MS): boolean {
   return Date.now() - startedAt > budgetMs;
+}
+
+/**
+ * Check if a job has exceeded its cost budget.
+ * Call this alongside shouldChain() to enforce per-job spending limits.
+ *
+ * @param accumulatedCostUsd  Total cost accumulated so far for this job chain
+ * @param maxCostUsd          Budget cap from agent_queue.payload.maxCostUsd (optional)
+ * @returns true if the budget is exceeded and the job should stop chaining
+ */
+export function isCostBudgetExceeded(accumulatedCostUsd: number, maxCostUsd?: number): boolean {
+  if (!maxCostUsd || maxCostUsd <= 0) return false;
+  if (accumulatedCostUsd > maxCostUsd) {
+    logger.warn(`[chain-invoker] Cost budget exceeded: $${accumulatedCostUsd.toFixed(4)} > $${maxCostUsd}`);
+    return true;
+  }
+  return false;
 }
 
 /**

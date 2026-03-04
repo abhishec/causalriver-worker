@@ -24,7 +24,13 @@ interface ChunkAbsorption {
   keyFacts: string[];
   relationships: Array<{ from: string; to: string; relationship: string }>;
   insights: string[];
-  domain: string; // detected domain: 'github', 'jira', 'delivery', 'general', etc.
+  domain: string; // detected domain: 'github', 'jira', 'delivery', 'finance', 'product', 'general', etc.
+  // Product-specific structured fields
+  productFeatures?: Array<{ name: string; category: string; description: string; tiers?: string[] }>;
+  pricingTiers?: Array<{ name: string; price?: string; features: string[] }>;
+  capabilities?: Array<{ name: string; description: string }>;
+  integrations?: string[];
+  userStories?: Array<{ asA: string; iWant: string; soThat: string; acceptanceCriteria?: string[] }>;
 }
 
 /**
@@ -46,11 +52,11 @@ export async function absorbDocumentChunks(
 ): Promise<void> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  // Process chunks in batches of 5 to avoid overwhelming the LLM
+  // Process chunks in batches of 5. Up to 40 chunks covers large PDFs and multi-doc sets.
   const batchSize = 5;
 
-  for (let i = 0; i < Math.min(chunks.length, 20); i += batchSize) {
-    // Limit to first 20 chunks (most important content is usually early)
+  for (let i = 0; i < Math.min(chunks.length, 40); i += batchSize) {
+    // Up to 40 chunks — product features / pricing often appear in later sections
     const batch = chunks.slice(i, i + batchSize);
     const batchText = batch
       .map((c) => `[Chunk ${c.chunk_index}]:\n${c.chunk_text}`)
@@ -67,16 +73,21 @@ export async function absorbDocumentChunks(
 
 ${batchText}
 
-Return JSON with:
+Return JSON only — no prose. Extract ALL of the following fields that apply:
 {
-  "entities": [{"name": "...", "type": "person|project|metric|technology|process|risk", "description": "..."}],
-  "keyFacts": ["fact 1", "fact 2", ...],
+  "entities": [{"name": "...", "type": "person|project|metric|technology|process|risk|feature|pricing|capability|integration", "description": "..."}],
+  "keyFacts": ["fact 1", "fact 2"],
   "relationships": [{"from": "...", "to": "...", "relationship": "..."}],
-  "insights": ["insight 1", "insight 2", ...],
-  "domain": "github|jira|delivery|finance|hr|general"
+  "insights": ["insight 1", "insight 2"],
+  "domain": "github|jira|delivery|finance|hr|product|general",
+  "productFeatures": [{"name": "...", "category": "...", "description": "...", "tiers": ["Free","Pro"]}],
+  "pricingTiers": [{"name": "Free", "price": "$0/mo", "features": ["feature1","feature2"]}],
+  "capabilities": [{"name": "...", "description": "..."}],
+  "integrations": ["Slack", "Jira"],
+  "userStories": [{"asA": "...", "iWant": "...", "soThat": "...", "acceptanceCriteria": ["..."]}]
 }
 
-Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 relationships, 3 insights.`,
+Rules: Max 5 entities, 5 facts, 3 relationships, 3 insights, 10 productFeatures, 5 pricingTiers, 10 capabilities, 15 integrations, 5 userStories. Only include fields present in the text. Be specific and accurate.`,
           },
         ],
       });
@@ -94,6 +105,20 @@ Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 rel
       }
 
       // Store to ai_memory as 'knowledge' type
+      const productParts: string[] = [];
+      if (absorption.productFeatures?.length) {
+        productParts.push(`Features: ${absorption.productFeatures.map((f) => `${f.name} (${f.category})`).join(", ")}`);
+      }
+      if (absorption.pricingTiers?.length) {
+        productParts.push(`Pricing: ${absorption.pricingTiers.map((t) => `${t.name}${t.price ? ` ${t.price}` : ""}`).join(", ")}`);
+      }
+      if (absorption.capabilities?.length) {
+        productParts.push(`Capabilities: ${absorption.capabilities.map((c) => c.name).join(", ")}`);
+      }
+      if (absorption.integrations?.length) {
+        productParts.push(`Integrations: ${absorption.integrations.join(", ")}`);
+      }
+
       const memoryContent = [
         absorption.keyFacts.length > 0
           ? `Facts: ${absorption.keyFacts.join(" | ")}`
@@ -104,6 +129,7 @@ Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 rel
         absorption.entities.length > 0
           ? `Entities: ${absorption.entities.map((e) => `${e.name} (${e.type})`).join(", ")}`
           : "",
+        ...productParts,
       ]
         .filter(Boolean)
         .join("\n");
@@ -118,13 +144,18 @@ Be specific. Extract only meaningful information. Max 5 entities, 5 facts, 3 rel
                 domain: `document.${absorption.domain}`,
                 memory_type: "knowledge",
                 content: `[${documentTitle}] ${memoryContent}`,
-                importance: 0.7,
+                importance: absorption.productFeatures?.length ? 0.85 : 0.7,
                 metadata: {
                   source: "document_absorber",
                   document_title: documentTitle,
                   entities: absorption.entities,
                   relationships: absorption.relationships,
                   chunk_range: `${batch[0].chunk_index}-${batch[batch.length - 1].chunk_index}`,
+                  productFeatures: absorption.productFeatures ?? [],
+                  pricingTiers: absorption.pricingTiers ?? [],
+                  capabilities: absorption.capabilities ?? [],
+                  integrations: absorption.integrations ?? [],
+                  userStories: absorption.userStories ?? [],
                 },
               },
               {

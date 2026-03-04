@@ -55,10 +55,12 @@ export async function captureOrchestrationDecision(
   void Promise.resolve(
     supabase.from('ai_memory').upsert({
       organization_id: orgId,
+      ai_worker_id: workerId || null,
       domain: `orchestration.${decision.type}.${decision.domain}`,
       memory_type: 'pattern',
       content: content.slice(0, 1000),
       importance,
+      memory_tier: 2,
       metadata: {
         source: 'orchestration_capture',
         decision_type: decision.type,

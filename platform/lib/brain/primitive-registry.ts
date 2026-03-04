@@ -36,6 +36,8 @@ import { extractStyleProfile } from "@/lib/agents/style-extractor";
 // ── Static env capture (Amplify Lambda) ─────────────────────────────────────
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const BRAVE_SEARCH_API_KEY = process.env.BRAVE_SEARCH_API_KEY;
+const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY;
 
 // ── Type: execution context passed to every primitive ────────────────────────
 
@@ -96,6 +98,18 @@ export interface SessionPrimitiveParams {
 export interface InjectPrimitiveParams {
   messages: Array<{ role: string; content: string }>;
   metadata?: Record<string, unknown>;
+}
+
+export interface WebSearchPrimitiveParams {
+  query: string;
+  limit?: number;
+}
+
+export interface BrowserPrimitiveParams {
+  action: "navigate" | "extract" | "screenshot";
+  url: string;
+  waitFor?: number;
+  fullPage?: boolean;
 }
 
 // ── Primitive implementations ────────────────────────────────────────────────
@@ -529,6 +543,111 @@ function executeInject(
   };
 }
 
+/**
+ * web_search — Enterprise real-time web search via Brave Search API.
+ * Returns structured search results (title, url, description).
+ */
+async function executeWebSearch(
+  params: WebSearchPrimitiveParams,
+): Promise<PrimitiveResult> {
+  if (!BRAVE_SEARCH_API_KEY) {
+    return { results: [], error: "BRAVE_SEARCH_API_KEY not configured" };
+  }
+
+  try {
+    const count = Math.min(params.limit ?? 5, 20);
+    const resp = await fetch(
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(params.query)}&count=${count}`,
+      {
+        headers: {
+          "X-Subscription-Token": BRAVE_SEARCH_API_KEY,
+          Accept: "application/json",
+        },
+      },
+    );
+
+    if (!resp.ok) {
+      logger.warn("[primitive:web_search] Brave API error", { status: resp.status });
+      return { results: [], error: `Brave Search API error ${resp.status}` };
+    }
+
+    const data = (await resp.json()) as {
+      web?: { results?: Array<{ title: string; url: string; description: string }> };
+    };
+
+    const results = (data.web?.results ?? []).map((r) => ({
+      title: r.title,
+      url: r.url,
+      description: r.description,
+    }));
+
+    return { results, count: results.length };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.warn("[primitive:web_search] Fetch threw", { error: msg });
+    return { results: [], error: msg };
+  }
+}
+
+/**
+ * browser — Cloud browser automation via Browserless.io.
+ * Lambda-compatible (no local Chromium needed).
+ * Supports: navigate/extract (HTML content), screenshot (base64 image).
+ */
+async function executeBrowser(
+  params: BrowserPrimitiveParams,
+): Promise<PrimitiveResult> {
+  if (!BROWSERLESS_API_KEY) {
+    return { error: "BROWSERLESS_API_KEY not configured" };
+  }
+
+  const { action, url, waitFor = 3000, fullPage = false } = params;
+
+  try {
+    if (action === "navigate" || action === "extract") {
+      const resp = await fetch(
+        `https://chrome.browserless.io/content?token=${BROWSERLESS_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, waitFor }),
+        },
+      );
+
+      if (!resp.ok) {
+        return { error: `Browserless content API error ${resp.status}` };
+      }
+
+      const html = await resp.text();
+      return { html: html.slice(0, 50_000), truncated: html.length > 50_000 };
+    }
+
+    if (action === "screenshot") {
+      const resp = await fetch(
+        `https://chrome.browserless.io/screenshot?token=${BROWSERLESS_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, options: { fullPage } }),
+        },
+      );
+
+      if (!resp.ok) {
+        return { error: `Browserless screenshot API error ${resp.status}` };
+      }
+
+      const buffer = await resp.arrayBuffer();
+      return { screenshot: Buffer.from(buffer).toString("base64"), format: "png" };
+    }
+
+    return { error: `Unknown browser action: ${action}` };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.warn("[primitive:browser] Fetch threw", { error: msg });
+    return { error: msg };
+  }
+}
+
 // ── Registry dispatch table ──────────────────────────────────────────────────
 
 type PrimitiveHandler = (
@@ -544,6 +663,8 @@ const PRIMITIVES: Record<string, PrimitiveHandler> = {
   search: (ctx, params) => executeSearch(ctx, params as unknown as SearchPrimitiveParams),
   session: (ctx, params) => executeSession(ctx, params as unknown as SessionPrimitiveParams),
   inject: (ctx, params) => executeInject(ctx, params as unknown as InjectPrimitiveParams),
+  web_search: (_ctx, params) => executeWebSearch(params as unknown as WebSearchPrimitiveParams),
+  browser: (_ctx, params) => executeBrowser(params as unknown as BrowserPrimitiveParams),
 };
 
 /**

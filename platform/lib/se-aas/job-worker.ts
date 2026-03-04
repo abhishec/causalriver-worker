@@ -76,7 +76,7 @@ export async function processSeAaSJobs(
   // Fetch pending SE-aaS jobs ordered by priority DESC, created_at ASC
   let query = supabase
     .from("agent_queue")
-    .select("id, organization_id, task_type, payload")
+    .select("id, organization_id, task_type, payload, ai_worker_id, agent_id")
     .eq("agent_type", "se-aas")
     .eq("status", "pending")
     .order("priority", { ascending: false })
@@ -358,7 +358,26 @@ export async function processSeAaSJobs(
           executionMs,
           artifactGenerated: !!artifactId,
           artifactId: artifactId ?? null,
+          aiWorkerId: job.ai_worker_id ?? undefined,
         }).catch(() => { /* non-fatal */ });
+
+        // ── Agent Lifecycle: transition status + populate result ──────────
+        // Fire-and-forget: if this job is linked to an agent, update its status.
+        if (job.agent_id) {
+          const _agentQuality = JSON.stringify(domainResult).length > 30 ? 0.7 : 0.3;
+          void supabase.from("agents").update({
+            status: _agentQuality >= 0.7 ? "completed" : "paused",
+            result: {
+              domain: job.task_type,
+              quality: _agentQuality,
+              executionMs,
+              artifactId: artifactId ?? null,
+              summary: JSON.stringify(domainResult).slice(0, 500),
+            },
+            completed_at: _agentQuality >= 0.7 ? new Date().toISOString() : null,
+          }).eq("id", job.agent_id)
+            .then(() => {}, () => {}); // fire-and-forget
+        }
 
         // ── Write-back Dispatch ──────────────────────────────────────────
         // Fire-and-forget: queue write-back actions for any matching rules.

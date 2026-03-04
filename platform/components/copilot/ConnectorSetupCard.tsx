@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { ConnectorAuthConfig } from "@/lib/connectors/connector-auth-map";
+import { LocalFilePicker } from "@/components/connectors/LocalFilePicker";
 
 export interface ConnectorSetupInfo extends ConnectorAuthConfig {
   connectorType: string;
@@ -210,6 +211,19 @@ function ApiKeySetup({ data, onDone }: { data: ConnectorSetupInfo; onDone: () =>
   );
 }
 
+// ── First-query suggestions — shown after connector is connected ──────────────
+const FIRST_QUERY_SUGGESTIONS: Record<string, string[]> = {
+  github: ["Show me PR velocity for the last 30 days", "Who are the top contributors this sprint?", "Which PRs have been open for more than 5 days?"],
+  jira: ["How healthy is our current sprint?", "Show me tickets blocked for more than 3 days", "What's the scope creep risk this sprint?"],
+  slack: ["What's the team sentiment this week?", "Show me critical alerts from the last 24 hours", "Summarize what happened while I was away"],
+  hubspot: ["Which deals are at risk this quarter?", "Show me the pipeline health summary", "What's our win rate trend over 90 days?"],
+  stripe: ["Show me MRR trend for the last 6 months", "What's our churn rate this quarter?", "Which customers are at churn risk?"],
+  xero: ["Generate this month's P&L statement", "What's our current burn rate?", "Show me cash flow forecast for 90 days"],
+  freshdesk: ["Top support ticket categories?", "What's our CSAT trend this month?", "Show me open tickets by priority"],
+  "local-files": ["Analyze the data I just uploaded", "Show me trends in this file", "Summarize the key findings"],
+};
+const DEFAULT_FIRST_QUERIES = ["What can I ask now that this is connected?", "Give me an overview of the data available"];
+
 /** Main ConnectorSetupCard — shown inline in Copilot chat after "connect [service]" command. */
 export function ConnectorSetupCard({ data }: { data: ConnectorSetupInfo }) {
   const [connected, setConnected] = useState(false);
@@ -238,12 +252,34 @@ export function ConnectorSetupCard({ data }: { data: ConnectorSetupInfo }) {
       {/* Body */}
       <div className="px-4 py-3">
         {connected ? (
-          <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-            {data.displayName} is now connected. Data ingestion will begin shortly.
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              {data.displayName} is now connected. Data ingestion will begin shortly.
+            </div>
+            {/* First-query suggestions */}
+            <div>
+              <p className="text-[11px] text-muted mb-2 font-medium">Try asking:</p>
+              <div className="flex flex-col gap-1.5">
+                {(FIRST_QUERY_SUGGESTIONS[data.connectorType] ?? DEFAULT_FIRST_QUERIES).map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("copilot-inject-and-submit", { detail: q }));
+                    }}
+                    className="text-left text-[12px] text-accent hover:text-accent/80 px-2.5 py-1.5 rounded-lg bg-accent/5 hover:bg-accent/10 border border-accent/10 transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+        ) : data.authMethod === "browser_fsa" ? (
+          <LocalFilePicker connectorType={data.connectorType} onDone={() => setConnected(true)} />
         ) : data.authMethod === "apikey" ? (
           <ApiKeySetup data={data} onDone={() => setConnected(true)} />
         ) : (

@@ -95,6 +95,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
       executionMs: _rlExecutionMs,
       organizationId: workspaceId,
       userId,
+      aiWorkerId: _workerId,
     }).catch((rlErr: unknown) =>
       logger.warn('[PostFlight] RL outcome recording failed:', rlErr instanceof Error ? rlErr.message : String(rlErr))
     );
@@ -179,6 +180,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
     // Record per-invocation outcome for RL aggregation
     void Promise.resolve(service.from("ai_memory").insert({
       organization_id: workspaceId,
+      ai_worker_id: _workerId || null,
       memory_type: "tool_invocation",
       domain: `tool-invocation:${detectedIntent ?? "general"}`,
       content: JSON.stringify({
@@ -189,6 +191,7 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
         timestamp: new Date().toISOString(),
       }),
       importance: _rlQuality >= 0.6 ? 0.7 : 0.5,
+      memory_tier: 1,
       metadata: { source: "capability_library", ...(_workerId ? { worker_id: _workerId } : {}) },
     })).catch(() => {});
   }
@@ -202,10 +205,12 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
       void Promise.resolve(
         service.from('ai_memory').upsert({
           organization_id: workspaceId,
+          ai_worker_id: _workerId || null,
           domain: `routing.${_rlDomain}`,
           memory_type: 'pattern',
           content: `Query: "${message.trim().slice(0, 200)}" → Intent: ${_rlDomain}, Quality: ${(_rlQuality * 100).toFixed(0)}%`,
           importance: _rlQuality,
+          memory_tier: 2,
           metadata: {
             type: 'claude_decision_pattern',
             ...(_workerId ? { worker_id: _workerId } : {}),
@@ -305,10 +310,12 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`,
               await Promise.resolve(
                 service.from('ai_memory').upsert({
                   organization_id: workspaceId,
+                  ai_worker_id: _workerId || null,
                   domain: `response.${detectedIntent ?? 'general'}`,
                   memory_type: 'pattern',
                   content: content.slice(0, 1000),
                   importance: _rlQuality ?? 0.5,
+                  memory_tier: 2,
                   metadata: {
                     source: 'response_harvester',
                     intent: detectedIntent,
@@ -328,41 +335,11 @@ Return JSON: {"keyFacts": ["..."], "patterns": ["..."], "decisions": ["..."]}`,
     })();
   }
 
-  // ── 4. Self-MoA Post-Stream Synthesis ─────────────────────────────────────
-  if (useMoA && streamedAssistantText.length > 0) {
-    void (async () => {
-      try {
-        const { runSelfMoA } = await import("@/lib/brain/self-moa");
-        const _moaResult = await runSelfMoA(
-          [{ role: "user", content: message }],
-          effectiveSystemPrompt,
-          v4SmartModel,
-          512
-        );
-        if (_moaResult.usedMoA && _moaResult.synthesizedResponse) {
-          await Promise.resolve(
-            service.from("ai_memory").upsert({
-              organization_id: workspaceId,
-              memory_type: "pattern",
-              domain: `moa.${detectedIntent ?? "general"}`,
-              content: `Q: ${message.slice(0, 200)}\nA: ${_moaResult.synthesizedResponse.slice(0, 800)}`,
-              importance: 0.85,
-              metadata: {
-                source: "self_moa",
-                qualityBoost: _moaResult.qualityBoost,
-                model: v4SmartModel,
-                originalQuery: message.slice(0, 200),
-                ...(_workerId ? { worker_id: _workerId } : {}),
-              },
-            }, {
-              onConflict: "organization_id,memory_type,domain",
-              ignoreDuplicates: false,
-            })
-          ).catch(() => {});
-        }
-      } catch { /* non-blocking — MoA failure must never affect response */ }
-    })();
-  }
+  // ── 4. Self-MoA — NOW PRE-STREAM (moved to chat/route.ts) ────────────────
+  // MoA synthesis now runs pre-stream and is injected into the system prompt
+  // so the main LLM call produces a higher-quality, MoA-informed response.
+  // The post-stream path is removed to avoid redundant 2x Sonnet calls.
+  // See: chat/route.ts "Pre-stream MoA synthesis (Bug 6 fix)" block.
 
   // ── 5. Chat Auto-Save ─────────────────────────────────────────────────────
   try {

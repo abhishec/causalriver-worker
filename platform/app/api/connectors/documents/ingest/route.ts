@@ -52,7 +52,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60; // seconds (Vercel/Amplify max for large file processing)
 
 // Supported source types for the ingest pipeline
-const validSourceTypes = ["pdf", "confluence", "github", "markdown", "text"] as const;
+const validSourceTypes = ["pdf", "confluence", "github", "markdown", "text", "local-files"] as const;
 type ValidSourceType = typeof validSourceTypes[number];
 
 function resolveSourceType(raw: string | undefined): ValidSourceType {
