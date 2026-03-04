@@ -105,18 +105,26 @@ export async function runPostFlight(opts: PostFlightOptions): Promise<void> {
   // ── 1.5. ADR-027 PART 7: Capability Gap Recording ─────────────────────────
   // When response quality is low, record the domain+query as a capability gap
   // so the tool synthesis pipeline can generate better tooling for future use.
-  if (_rlQuality < 0.5 && detectedIntent) {
-    void import("@/lib/brain/capability-synthesizer")
-      .then(({ recordCapabilityGap }) =>
-        recordCapabilityGap({
-          domain: detectedIntent,
-          query: message,
-          qualityScore: _rlQuality,
-          supabase: service,
-          orgId: workspaceId,
-        })
-      )
-      .catch(() => {}); // fire-and-forget
+  // ADR-031 Phase 4: Use SAGE-tuned threshold instead of hard-coded 0.5.
+  if (detectedIntent) {
+    void (async () => {
+      try {
+        const { getGapDetectionThreshold } = await import("@/lib/brain/tool-lifecycle");
+        const gapThreshold = await getGapDetectionThreshold(service, workspaceId);
+        if (_rlQuality < gapThreshold) {
+          const { recordCapabilityGap } = await import("@/lib/brain/capability-synthesizer");
+          await recordCapabilityGap({
+            domain: detectedIntent,
+            query: message,
+            qualityScore: _rlQuality,
+            supabase: service,
+            orgId: workspaceId,
+          });
+        }
+      } catch {
+        // fire-and-forget — never propagate
+      }
+    })();
   }
 
   // ── 1.5b. ADR-030: Self-Evolving Reflex Gap Recording ──────────────────────

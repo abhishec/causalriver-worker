@@ -273,6 +273,64 @@ export async function runReflexEngineAsync(
     return { matched: true, reflexName: winner.name, action, guards };
   }
 
+  // ── System 1.5: Embedding Fallback ──────────────────────────────────────────
+  // Substring matching found nothing. Before engaging System 2 (expensive LLM
+  // synthesis), try semantic search over capability_library embeddings.
+  // Uses the same search_capability_library RPC as ATLASS dedup.
+  // ADR-031 Phase 4: Closes the "no embedding at inference" gap.
+  try {
+    const { embedText } = await import("@/lib/brain/tier2-signals");
+    const queryEmbedding = await embedText(ctx.message);
+
+    if (queryEmbedding) {
+      const { data: semanticMatches } = await supabase.rpc("search_capability_library", {
+        p_embedding: queryEmbedding,
+        p_org_id: ctx.organizationId,
+        p_match_threshold: 0.65, // Lower than ATLASS (0.85) — inference is more speculative
+        p_match_count: 3,
+        p_status_filter: ["validated", "promoted"],
+      });
+
+      if (semanticMatches?.length) {
+        // Take highest similarity match that also meets quality bar
+        const best = (semanticMatches as Array<{ name: string; quality_score: number; similarity: number }>).find(
+          (m) => m.quality_score >= 0.5 && m.similarity >= 0.65,
+        );
+
+        if (best) {
+          logger.warn("[reflex-engine] Capability matched (System 1.5 — embedding)", {
+            capability: best.name,
+            similarity: best.similarity,
+            quality: best.quality_score,
+            orgId: ctx.organizationId,
+          });
+
+          const action: ReflexAction = {
+            type: "delegate",
+            handler: best.name,
+            params: {
+              organizationId: ctx.organizationId,
+              userId: ctx.userId,
+              aiWorkerId: ctx.aiWorkerId,
+              urls: ctx.detectedUrls,
+              userInput: ctx.message,
+              ...(activeSession
+                ? { activeSessionId: activeSession.id, activeSessionAgentType: activeSession.agentType }
+                : {}),
+            },
+          };
+
+          return { matched: true, reflexName: best.name, action, guards };
+        }
+      }
+    }
+  } catch (err) {
+    // Non-fatal — fall through to System 2
+    logger.warn("[reflex-engine] System 1.5 embedding search failed (non-fatal)", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
   // ── System 2: Workflow Synthesis ──────────────────────────────────────────
   // No match in capability_library — engage the synthesizer to create
   // a new capability on-the-fly.

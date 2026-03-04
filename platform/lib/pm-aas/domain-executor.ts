@@ -45,6 +45,12 @@ export interface ExecutePmDomainParams {
    * When provided, written to RL tables to enable per-worker threshold adaptation.
    */
   aiWorkerId?: string;
+  /**
+   * ADR-031 Phase 5: Pre-resolved working memory context (RL primer, worker memory,
+   * tool library, entity context, etc.). Resolved before service routing so domain
+   * executors get the same GATHER context as the copilot LLM.
+   */
+  workingMemoryContext?: string;
 }
 
 export interface ExecutePmDomainResult {
@@ -80,6 +86,10 @@ function buildDomainPrompt(domainType: string, request: Record<string, unknown>)
   const caseLog = request["_caseLogContext"]
     ? `\n\nPAST PATTERNS (case-log priming):\n${request["_caseLogContext"]}`
     : "";
+  // ADR-031 Phase 5: Working memory context (RL primer, worker memory, tool library, etc.)
+  const wmCtx = request["_workingMemoryContext"]
+    ? `\n\nWORKING MEMORY (session context — RL patterns, worker memory, tools):\n${request["_workingMemoryContext"]}`
+    : "";
 
   switch (domainType) {
     case "roadmap-planner": {
@@ -92,7 +102,7 @@ INPUT:
 Goals/Objectives: ${goals}
 Timeframe: ${timeframe}
 Additional Context: ${context}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -136,7 +146,7 @@ OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 INPUT:
 Sprint Data / Context: ${sprintData}
 Team: ${team}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -184,7 +194,7 @@ OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 INPUT:
 Backlog Items: ${JSON.stringify(items).slice(0, 3000)}
 Prioritization Criteria: ${criteria}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -226,7 +236,7 @@ INPUT:
 Audience: ${audience}
 Context / Recent Progress: ${context}
 Format: ${format}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -277,7 +287,7 @@ INPUT:
 Release Context: ${releaseContext}
 Target Release Date: ${releaseDate}
 Features in Scope: ${JSON.stringify(features).slice(0, 2000)}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -322,7 +332,7 @@ OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 INPUT:
 Feature: ${feature}
 Scope: ${scope}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -386,7 +396,7 @@ INPUT:
 Team / Capacity Data: ${JSON.stringify(team).slice(0, 2000)}
 Planned Work: ${JSON.stringify(plannedWork).slice(0, 2000)}
 Sprint Length (weeks): ${sprintLength}
-${brainCtx}${caseLog}
+${brainCtx}${caseLog}${wmCtx}
 
 OUTPUT: Return ONLY valid JSON (no markdown, no explanation):
 {
@@ -492,6 +502,11 @@ export async function executePmDomain(
     }
   } catch {
     // non-fatal — domain proceeds without brain context
+  }
+
+  // ADR-031 Phase 5: Inject pre-resolved working memory context
+  if (params.workingMemoryContext) {
+    enrichedRequest["_workingMemoryContext"] = params.workingMemoryContext;
   }
 
   // ── Step 0.5: Pull CORE insights into this org (fire-and-forget, TTL-guarded) — ADR-027

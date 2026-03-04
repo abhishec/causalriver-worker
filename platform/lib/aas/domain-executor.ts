@@ -101,6 +101,12 @@ export interface ExecuteAccountingParams {
    * When provided, written to RL tables to enable per-worker threshold adaptation.
    */
   aiWorkerId?: string;
+  /**
+   * ADR-031 Phase 5: Pre-resolved working memory context (RL primer, worker memory,
+   * tool library, entity context, etc.). Resolved before service routing so domain
+   * executors get the same GATHER context as the copilot LLM.
+   */
+  workingMemoryContext?: string;
 }
 
 export interface ExecuteAccountingResult {
@@ -211,6 +217,14 @@ export async function executeAccountingAgent(
     }
   } catch {
     // non-fatal — proceed without brain context enrichment
+  }
+
+  // ADR-031 Phase 5: Append working memory to brain context string
+  // so it flows through the mesh assembly query AND into all AaaS agents.
+  if (params.workingMemoryContext) {
+    brainContextStr = (brainContextStr || "")
+      + "\n\n## WORKING MEMORY (session context — RL patterns, worker memory, tools)\n"
+      + params.workingMemoryContext;
   }
 
   // ── Step 0: Snapshot causal weights BEFORE execution for federation delta ─

@@ -612,3 +612,34 @@ Failing any one = domain silently dead.
 
 ### Cost Assessment
 - Could parallel tasks be cheaper? Yes — some feature agents could have been Haiku for pure code-gen from clear specs. But under time pressure, Sonnet correct choice.
+
+---
+
+## Retro 023: Security Hardening + Turbopack Fix + UI Bug Sweep (2026-03-04)
+
+### Tasks Completed
+1. **Security: Supabase RLS** — Fixed 18 obs_* tables with unscoped `FOR ALL USING (true)` + dropped 8 stale `{public}` policy variants. Applied via Management API (CLI broken for this state).
+2. **Security: npm vulns** — All 21 Dependabot vulnerabilities resolved: minimatch override, xlsx→exceljs, website/demo/cdk audit fixes.
+3. **Turbopack ISE race** — Added `/ai-worker/__warmup__` to dev-watchdog warmup list + auto-retry in error boundary.
+4. **UI/UX bug sweep** — Full audit: 7 capability checks (all pass except HITL TTL minor), 8 UI rendering checks (all pass), 6 perf checks. Fixed: ChatTab `extraParams`/`persona` inline object literals → `useMemo`.
+
+### What Went Well
+- Parallel Haiku Explore agents for audit = fast, cheap, thorough (3 agents, ~3 min total)
+- Management API bypass for Supabase CLI deadlock — discovered `POST /v1/projects/{ref}/database/query` works when CLI loops
+- Warmup fake-ID trick (`/ai-worker/__warmup__`) is clean: 404 response is harmless, manifest race resolves
+
+### What Went Wrong / Lessons Learned
+- **Supabase CLI deadlock**: `migration repair` inserts row → `db push --include-all` tries to INSERT again → duplicate key. CLI has no ON CONFLICT DO NOTHING. Workaround: use Management API directly.
+- **Supabase CLI output appears twice**: Not a bug — CLI connects to two poolers (transaction + session mode). Normal but confusing.
+- **8 stale public policies** not caught by migration SQL: they had non-standard names (`service_role_all_obs_causal_imagination` etc). Post-apply verification query found them. Always verify RLS with a SELECT after applying.
+
+### HITL TTL Gap (open issue)
+`hitl_approvals` with `status='pending'` past `expires_at` are never cleaned up. No cron exists. Approvals accumulate as stale rows. Low urgency — no correctness issue, just table bloat. Queue a cleanup migration if table grows large.
+
+### Model Used
+- Main: Sonnet ✅ (multi-system work — correct)
+- Audit agents: Haiku ✅ (read-only search — correct, saved cost)
+- No Opus needed
+
+### Cost Assessment
+- Parallel Haiku agents for audit was the right call — same result at ~4x lower cost than Sonnet

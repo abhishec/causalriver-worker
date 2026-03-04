@@ -452,26 +452,6 @@ async function _runCognitivePlannerInner(
       `maxDomainsPerCycle=${plannerConfig.maxDomainsPerCycle} stuckThreshold=${plannerConfig.stuckDomainThreshold}`
   );
 
-  // If this worker has no allowed domains (e.g. no service_type), skip domain scheduling.
-  // Brain-only workers still run the full reflection/assessment loop for Brain context,
-  // but exit early before queuing any domain jobs.
-  if (allowedDomains.length === 0) {
-    logger.warn(
-      `[CognitivePlanner] Worker ${aiWorkerId ?? "unscoped"} has no service_type — skipping domain job scheduling`
-    );
-    return {
-      cycleId,
-      decisionsQueued: 0,
-      decisions: [],
-      coverageGaps: [],
-      poorQualityDomains: [],
-      stuckDomains: [],
-      highDemandDomains: [],
-      recoveryMode: false,
-      reflected: false,
-    };
-  }
-
   // ══════════════════════════════════════════════════════════════════════════
   // PHASE 5 — REFLECT (runs at start, reflects on PRIOR cycle outcomes)
   // Reflexion episodic buffer: bounded verbal reflection on past decisions
@@ -619,15 +599,22 @@ async function _runCognitivePlannerInner(
             `[CognitivePlanner] Reflected on prior cycle: ${successCount} successes, ${failCount} failures`
           );
 
-          // Record bandit outcome for the prior cycle using the prior domain as task category
+          // Record bandit outcome for the prior cycle using the prior domain as task category.
+          // Read the PRIOR cycle's bandit strategy from its metadata — NOT from _banditSelection
+          // which is the current cycle's default (Phase 2 hasn't run yet when Phase 5 executes).
           const _priorTaskCategory = priorDomains[0] ?? 'general';
           const _priorOutcomeQuality = (successCount + failCount) > 0
             ? successCount / (successCount + failCount)
             : 0.5;
+          const _priorBanditRaw = ((priorCycle.metadata as Record<string, unknown> | null)?.banditStrategy as string) ?? 'five_phase';
+          const _validStrategies = new Set(['five_phase', 'direct', 'moa']);
+          const _priorBanditStrategy = _validStrategies.has(_priorBanditRaw)
+            ? (_priorBanditRaw as "five_phase" | "direct" | "moa")
+            : ("five_phase" as const);
           void recordBanditOutcome(
             _priorTaskCategory,
             aiWorkerId ?? 'default',
-            _banditSelection.strategy,
+            _priorBanditStrategy,
             _priorOutcomeQuality,
             supabase
           ).catch(() => {});
@@ -723,6 +710,27 @@ async function _runCognitivePlannerInner(
     } catch { /* non-fatal */ }
   } catch (err) {
     logger.warn("[CognitivePlanner] Phase 0 (prime) failed:", err);
+  }
+
+  // ── Brain-only workers: exit after Phase 5 (reflect) and Phase 0 (prime) ──
+  // Workers without a service_type have no allowed domains for job scheduling,
+  // but they still benefit from reflection and episodic memory accumulation.
+  if (allowedDomains.length === 0) {
+    logger.warn(
+      `[CognitivePlanner] Worker ${aiWorkerId ?? "unscoped"} has no service_type — ` +
+        `completed Phase 5+0 (reflection/prime), skipping domain scheduling`
+    );
+    return {
+      cycleId,
+      decisionsQueued: 0,
+      decisions: [],
+      coverageGaps: [],
+      poorQualityDomains: [],
+      stuckDomains: [],
+      highDemandDomains: [],
+      recoveryMode: false,
+      reflected,
+    };
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -1359,6 +1367,10 @@ ${pastReflectionsText}`;
         cycleId,
         decisionCount: decisions.length,
         reflected: false,
+        stuckDomains,
+        highDemandDomains,
+        poorQualityDomains,
+        banditStrategy: _banditSelection.strategy,
       },
     });
   } catch (err) {

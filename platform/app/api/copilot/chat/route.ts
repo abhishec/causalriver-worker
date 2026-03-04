@@ -1042,6 +1042,17 @@ export async function POST(request: NextRequest) {
     /** Collected Agent Communication Protocol payloads — emitted to frontend via SSE */
     const agentCommsBuffer: import("@/lib/agents/agent-comms").AgentCommsPayload[] = [];
 
+    // ── ADR-031 Phase 5: Resolve working memory BEFORE service routing ──────
+    // Domain executors need RL primer, worker memory, tool library, entity context.
+    // gatherWorkingMemory() kicked off at line 300; we await here so domain
+    // executors get the full context. The copilot LLM path still uses _wm later.
+    const _wm = await resolveWorkingMemory(_wmHandles, message);
+
+    // Build a standalone context string for domain executors (all non-empty blocks).
+    // This is the same content that injectWorkingMemory() appends to the copilot prompt,
+    // but packaged as a standalone string for domain executor injection.
+    const _wmContextForExecutors = injectWorkingMemory("", _wm);
+
     // Copilot-native capabilities handled by Brain commander (not SE-aaS domain executors).
     // All SE-aaS domains now route through executeDomain() for full WOW artifact generation.
     // codebase-qa remains native to leverage full conversation context in Brain commander.
@@ -1222,6 +1233,7 @@ export async function POST(request: NextRequest) {
           interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
           // Agent Communication Protocol: collect payloads for SSE emission
           onComms: (payload) => { agentCommsBuffer.push(payload); },
+          workingMemoryContext: _wmContextForExecutors, // ADR-031 Phase 5: GATHER universality
         });
 
         const isDeliveryDomain = DELIVERY_DOMAINS.has(seaasRoute.domainType);
@@ -1304,6 +1316,7 @@ export async function POST(request: NextRequest) {
             interpretation: interpretation as any, // Phase 3: pass interpretation for targeted context
             // Agent Communication Protocol: collect payloads for SSE emission
             onComms: (payload) => { agentCommsBuffer.push(payload); },
+            workingMemoryContext: _wmContextForExecutors, // ADR-031 Phase 5: GATHER universality
           });
 
           accountingResult = {
@@ -1345,6 +1358,7 @@ export async function POST(request: NextRequest) {
           organizationId: workspaceId,
           userId: user.id,
           anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+          workingMemoryContext: _wmContextForExecutors, // ADR-031 Phase 5: GATHER universality
         });
 
         pmAasResult = {
@@ -3006,13 +3020,9 @@ Supported: graph (flowchart), gantt, stateDiagram, sequenceDiagram, pie, classDi
 - **Section headers**: Use ## and ### to create scannable structure
 - **Emoji indicators**: ✅ Done, 🔄 In Progress, 📋 To Do, 🔴 Blocker, ⚠️ At Risk, 🟢 On Track`;
 
-    // ── ADR-027: Tier 1 Working Memory — resolve all 7 parallel fetches ──────
-    // gatherWorkingMemory() handles: RL primer, entity ctx, drift warning,
-    // capabilities, copilot memory, planner strategy, brain context cache.
-    // injectWorkingMemory() appends all non-empty blocks to the system prompt
-    // in the correct order (RL primer → copilot mem → planner → entity →
-    // drift → format → capabilities). See lib/copilot/working-memory.ts.
-    const _wm = await resolveWorkingMemory(_wmHandles, message);
+    // ── ADR-027: Tier 1 Working Memory — inject into copilot system prompt ────
+    // _wm was resolved before service routing (ADR-031 Phase 5) so domain
+    // executors also get the context. Here we inject into the copilot LLM prompt.
     effectiveSystemPrompt = injectWorkingMemory(effectiveSystemPrompt, _wm);
     // Extract pattern IDs for SSE emission (ADR-027 RL feedback loop)
     const _rcRLPrimerPatternIds = _wm.rlPrimerPatternIds;
@@ -4857,6 +4867,27 @@ No connectors are configured yet. When the user asks for data from any source (S
               reflection.score,
               service as any,
             );
+            // ADR-027: Persist reflection score to ai_memory so the pre-flight
+            // classifier and cognitive planner can read per-domain quality history.
+            void service.from("ai_memory").upsert({
+              organization_id: workspaceId,
+              domain: `reflection.${detectedIntent ?? "general"}`,
+              memory_type: "reflection_score",
+              content: JSON.stringify({
+                score: reflection.score,
+                isRefusal: reflection.isRefusal,
+                reasoning: reflection.reasoning,
+                method: reflection.method,
+                scoredAt: new Date().toISOString(),
+              }),
+              importance: reflection.score,
+              metadata: {
+                domain: detectedIntent ?? "general",
+                method: reflection.method,
+                is_refusal: reflection.isRefusal,
+              },
+            }, { onConflict: "organization_id,memory_type,domain", ignoreDuplicates: false })
+            .then(() => {}, () => {}); // fire-and-forget
           })
           .catch(() => { /* never throw — quality gate is advisory only */ });
         // Extract entities from the response and persist for cross-query memory

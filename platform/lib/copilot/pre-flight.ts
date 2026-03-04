@@ -172,16 +172,110 @@ export async function runPreFlight(
   });
 
   // ── 6. Brain state prefix for classifier routing ───────────────────────────
+  // ADR-027: Enrich the Haiku classifier with routing feedback, planner state,
+  // and domain quality signals so it can make context-aware routing decisions.
+  // Three parallel queries (Promise.allSettled) — each .limit(10), indexed columns.
   let _classifierBrainPrefix = '';
   try {
-    const { count } = await supabase
-      .from('cross_domain_signals')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', workspaceId);
-    const _sigCount = count ?? 0;
+    const _24hAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const [signalsResult, routingFbResult, plannerResult] = await Promise.allSettled([
+      // (a) Signal count — brain data readiness (existing)
+      supabase
+        .from('cross_domain_signals')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', workspaceId),
+
+      // (b) Routing feedback — per-domain quality from last 24h
+      // Written by captureRoutingFeedback() in post-flight after every response.
+      supabase
+        .from('ai_memory')
+        .select('domain, metadata')
+        .eq('organization_id', workspaceId)
+        .eq('memory_type', 'pattern')
+        .like('domain', 'orchestration.routing_feedback.%')
+        .gte('created_at', _24hAgo)
+        .order('created_at', { ascending: false })
+        .limit(10),
+
+      // (c) Planner state — stuck/poor-quality domains from latest cognitive cycle
+      // Written by Phase 4 of cognitive-planner.ts (metadata now includes these fields)
+      supabase
+        .from('ai_memory')
+        .select('metadata')
+        .eq('organization_id', workspaceId)
+        .eq('domain', 'cognitive-planner')
+        .eq('memory_type', 'working')
+        .order('created_at', { ascending: false })
+        .limit(1),
+    ]);
+
+    // (a) Signal count
+    const _sigCount = signalsResult.status === 'fulfilled'
+      ? (signalsResult.value.count ?? 0)
+      : 0;
     const _brainReady = _sigCount > 10;
     _classifierBrainPrefix = `[Brain: ${_sigCount} signals, ${_brainReady ? 'data available' : 'limited data'}] `;
-  } catch { /* non-fatal */ }
+
+    // (b) Routing feedback → domain success rates + adaptive thresholds
+    if (routingFbResult.status === 'fulfilled') {
+      const rfRows = (routingFbResult.value.data ?? []) as Array<{
+        domain: string;
+        metadata: { response_quality?: number; service_type?: string } | null;
+      }>;
+      if (rfRows.length > 0) {
+        const domainQuality: Record<string, { sum: number; count: number; serviceType: string }> = {};
+        for (const row of rfRows) {
+          const domainName = row.domain.replace('orchestration.routing_feedback.', '');
+          const quality = row.metadata?.response_quality ?? 0.5;
+          const svcType = row.metadata?.service_type ?? 'copilot';
+          if (!domainQuality[domainName]) {
+            domainQuality[domainName] = { sum: 0, count: 0, serviceType: svcType };
+          }
+          domainQuality[domainName].sum += quality;
+          domainQuality[domainName].count += 1;
+        }
+        // Domain success rates — compact prefix for classifier
+        const routingParts = Object.entries(domainQuality)
+          .map(([domain, { sum, count, serviceType }]) => {
+            const avg = sum / count;
+            const pct = Math.round(avg * 100);
+            const trend = avg < 0.4 ? '\u2193' : '';
+            return `${domain}\u2192${serviceType}(${pct}%${trend})`;
+          })
+          .slice(0, 5);
+        if (routingParts.length > 0) {
+          _classifierBrainPrefix += `[Routing: ${routingParts.join(', ')}] `;
+        }
+
+        // Adaptive threshold — warn classifier about low-quality domains
+        const lowQualityDomains = Object.entries(domainQuality)
+          .filter(([, { sum, count }]) => (sum / count) < 0.4)
+          .map(([domain]) => domain);
+        if (lowQualityDomains.length > 0) {
+          _classifierBrainPrefix += `[LOW-QUALITY (prefer copilot): ${lowQualityDomains.join(', ')}] `;
+        }
+      }
+    }
+
+    // (c) Planner state — stuck and poor-quality domains from cognitive planner
+    if (plannerResult.status === 'fulfilled') {
+      const plannerRows = (plannerResult.value.data ?? []) as Array<{
+        metadata: Record<string, unknown> | null;
+      }>;
+      if (plannerRows.length > 0) {
+        const meta = plannerRows[0].metadata ?? {};
+        const stuck = (meta.stuckDomains ?? meta.stuck_domains ?? []) as string[];
+        const poor = (meta.poorQualityDomains ?? meta.poor_quality_domains ?? []) as string[];
+        const plannerParts: string[] = [];
+        if (stuck.length > 0) plannerParts.push(`stuck=${stuck.slice(0, 3).join(',')}`);
+        if (poor.length > 0) plannerParts.push(`low-quality=${poor.slice(0, 3).join(',')}`);
+        if (plannerParts.length > 0) {
+          _classifierBrainPrefix += `[Planner: ${plannerParts.join(', ')}] `;
+        }
+      }
+    }
+  } catch { /* non-fatal — classifier prefix is best-effort */ }
 
   // ── 7. LLM Query Interpretation ────────────────────────────────────────────
   const { createLLMQueryInterpreter } = memStack;

@@ -746,6 +746,12 @@ export interface ExecuteDomainParams {
    * When provided, written to RL tables to enable per-worker threshold adaptation.
    */
   aiWorkerId?: string;
+  /**
+   * ADR-031 Phase 5: Pre-resolved working memory context (RL primer, worker memory,
+   * tool library, entity context, etc.). Resolved before service routing so domain
+   * executors get the same GATHER context as the copilot LLM.
+   */
+  workingMemoryContext?: string;
 }
 
 export interface ExecuteDomainResult {
@@ -875,6 +881,14 @@ export async function executeDomain(
       const { getBrainContext } = await import("@/lib/brain/brain-context");
       const brainCtx = await getBrainContext(supabase, params.organizationId);
       brainContextStr = brainCtx.contextSummary;
+      // ADR-031 Phase 5: Append working memory to brain context string
+      // so it flows through the mesh assembly query AND into ctx.input._brainContextStr
+      // for all 17 domain execute() functions without modifying each one.
+      if (params.workingMemoryContext) {
+        brainContextStr = (brainContextStr || "")
+          + "\n\n## WORKING MEMORY (session context — RL patterns, worker memory, tools)\n"
+          + params.workingMemoryContext;
+      }
       if (brainContextStr) {
         (params.request as Record<string, unknown>)["_brainContextStr"] = brainContextStr;
       }
