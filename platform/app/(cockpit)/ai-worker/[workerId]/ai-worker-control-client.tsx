@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -647,6 +647,17 @@ function ChatTab({
   orgId: string;
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Stable object refs — inline literals create new objects every render and
+  // defeat CopilotChat's prop memoization, causing unnecessary re-mounts.
+  const extraParams = useMemo(
+    () => ({ workspaceId: orgId, workerId }),
+    [orgId, workerId]
+  );
+  const persona = useMemo(
+    () => ({ name: workerName, description: "AI Worker" }),
+    [workerName]
+  );
   // activeConvId=null means fresh/new conversation; a UUID means load that specific chat
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   // chatKey changes force-remounts CopilotChat to load a different conversation
@@ -704,10 +715,10 @@ function ChatTab({
         <CopilotChat
           key={chatKey}
           endpoint="/api/copilot/chat"
-          extraParams={{ workspaceId: orgId, workerId }}
+          extraParams={extraParams}
           showHeader={false}
           examplePrompts={[]}
-          persona={{ name: workerName, description: "AI Worker" }}
+          persona={persona}
           initialConversationId={activeConvId ?? undefined}
           onSave={handleSave}
         />
