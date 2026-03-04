@@ -19,10 +19,13 @@
  *
  * Usage:
  *   import { parseGLFile } from "@/lib/parsers/gl-file-parser";
- *   const { transactions, metadata } = parseGLFile(buffer, "gl-export.xlsx");
+ *   const { transactions, metadata } = await parseGLFile(buffer, "gl-export.xlsx");
+ *
+ * Security note: Uses exceljs instead of xlsx (SheetJS) — xlsx has unpatched CVEs
+ * (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9) with no fix available on npm.
  */
 
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -69,16 +72,42 @@ const MONTH_MAP: Record<string, string> = {
 };
 
 /**
+ * Convert an Excel serial date number to a calendar date.
+ * Excel epoch: January 0, 1900 (with the infamous 1900 leap-year bug).
+ * Serial 1 = 1900-01-01, serial 60 = 1900-02-28 (59 is the phantom Feb 29).
+ */
+function excelSerialToDate(serial: number): { y: number; m: number; d: number } | null {
+  if (!serial || serial < 1) return null;
+  // Skip the phantom Feb 29 1900 (serial 60) — treat > 60 as needing an offset
+  const adjusted = serial > 60 ? serial - 1 : serial;
+  // Excel serial 1 = 1900-01-01 = JS timestamp for 1899-12-31 + 1 day
+  const MS_PER_DAY = 86400000;
+  const EXCEL_EPOCH = Date.UTC(1899, 11, 31); // Dec 31, 1899
+  const date = new Date(EXCEL_EPOCH + adjusted * MS_PER_DAY);
+  return { y: date.getUTCFullYear(), m: date.getUTCMonth() + 1, d: date.getUTCDate() };
+}
+
+/**
  * Parse various date formats to YYYY-MM-DD:
  *   "01 Jan 2020"     → "2020-01-01" (Xero)
  *   "2020-01-01"      → "2020-01-01" (ISO)
  *   "01/01/2020"      → "2020-01-01" (DD/MM/YYYY)
  *   "1/1/2020"        → "2020-01-01"
  *   "1/15/24"         → "2024-01-15" (XLSX CSV output)
- *   Excel serial      → via XLSX date utils
+ *   Excel serial      → via excelSerialToDate()
+ *   JS Date object    → UTC string extraction
  */
 function parseDate(raw: unknown): string | null {
   if (!raw) return null;
+
+  // ExcelJS sometimes returns Date objects for date cells
+  if (raw instanceof Date) {
+    if (isNaN(raw.getTime())) return null;
+    const y = raw.getFullYear();
+    const m = String(raw.getMonth() + 1).padStart(2, "0");
+    const d = String(raw.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
 
   const str = String(raw).trim();
 
@@ -130,13 +159,10 @@ function parseDate(raw: unknown): string | null {
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
 
-  // MM/DD/YYYY (US format — only if month <= 12 and day > 12)
-  // Skip — ambiguous, default to DD/MM/YYYY above
-
-  // Excel serial number
+  // Excel serial number (5-digit integer like 44927)
   if (/^\d{5}$/.test(str)) {
     try {
-      const d = XLSX.SSF.parse_date_code(parseInt(str));
+      const d = excelSerialToDate(parseInt(str));
       if (d) {
         return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
       }
@@ -172,7 +198,7 @@ function parsePct(raw: unknown): number {
  * Auto-detect file format and parse to canonical GLTransaction[].
  * Throws if the file cannot be parsed at all.
  */
-export function parseGLFile(buffer: Buffer, fileName: string): ParseResult {
+export async function parseGLFile(buffer: Buffer, fileName: string): Promise<ParseResult> {
   const ext = fileName.toLowerCase().split(".").pop() || "";
 
   if (ext === "xlsx" || ext === "xls") {
@@ -214,7 +240,7 @@ function isSkipRow(firstCell: string): boolean {
  * Account headers are rows with exactly ONE non-empty cell that is NOT a date
  * and NOT a skip/total prefix.
  */
-function isAccountHeader(row: unknown[], dateColIdx?: number): boolean {
+function isAccountHeader(row: unknown[], _dateColIdx?: number): boolean {
   const nonEmpty = row.filter((c) => c !== null && c !== undefined && String(c).trim() !== "");
   if (nonEmpty.length !== 1) return false;
   const val = String(nonEmpty[0]).trim();
@@ -304,19 +330,33 @@ function buildColumnMap(headers: string[]): Record<string, number> {
   return map;
 }
 
-// ── Unified Excel/spreadsheet parser ──────────────────────────────────────────
-//
-// Single parser for ALL Excel files — Xero, QuickBooks, MYOB, custom.
-// No hardcoded column positions. Everything auto-detected.
+// ── Excel parser (exceljs) ────────────────────────────────────────────────────
 
-function parseExcel(buffer: Buffer): ParseResult {
-  const wb = XLSX.read(buffer, { type: "buffer", raw: false });
-  const sheetName = wb.SheetNames[0];
-  const ws = wb.Sheets[sheetName];
-  const rows: unknown[][] = XLSX.utils.sheet_to_json(ws, {
-    header: 1,
-    raw: false,
-    defval: "",
+async function parseExcel(buffer: Buffer): Promise<ParseResult> {
+  const workbook = new ExcelJS.Workbook();
+  // @ts-expect-error exceljs types use pre-generic @types/node Buffer; runtime is fine
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) {
+    throw new Error("Excel file has no worksheets.");
+  }
+
+  // Convert exceljs worksheet to rows array (unknown[][])
+  // exceljs row.values is 1-indexed (index 0 is null); slice from 1
+  const rows: unknown[][] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    // row.values is 1-indexed — slice(1) to make it 0-indexed
+    const cells = (row.values as unknown[]).slice(1);
+    // Resolve rich text objects to plain strings
+    const resolved = cells.map((cell) => {
+      if (cell && typeof cell === "object" && "richText" in (cell as Record<string, unknown>)) {
+        return (cell as { richText: { text: string }[] }).richText.map((r) => r.text).join("");
+      }
+      // ExcelJS date cells come as Date objects — leave as-is for parseDate()
+      return cell;
+    });
+    rows.push(resolved);
   });
 
   if (rows.length < 2) {
@@ -326,16 +366,71 @@ function parseExcel(buffer: Buffer): ParseResult {
   return parseRows(rows);
 }
 
-/**
- * Core row parser — used by both Excel and CSV paths.
- *
- * Strategy:
- *   1. Scan first 30 rows to find the HEADER ROW (auto-detected by column name matching)
- *   2. Extract metadata (company name, period) from rows ABOVE the header
- *   3. Detect if this is a "section header" layout (no Account column → Xero-style)
- *   4. Parse all data rows below the header using the dynamic column map
- *   5. Handle single "Amount" column by splitting into debit/credit
- */
+// ── CSV parser (native) ───────────────────────────────────────────────────────
+
+function parseCSVText(text: string): unknown[][] {
+  const rows: unknown[][] = [];
+  const lines = text.split(/\r?\n/);
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+
+    // RFC 4180 CSV parsing — handles quoted fields with embedded commas/newlines
+    const cells: string[] = [];
+    let pos = 0;
+    while (pos <= line.length) {
+      if (line[pos] === '"') {
+        // Quoted field
+        let cell = "";
+        pos++; // skip opening quote
+        while (pos < line.length) {
+          if (line[pos] === '"' && line[pos + 1] === '"') {
+            cell += '"';
+            pos += 2;
+          } else if (line[pos] === '"') {
+            pos++; // skip closing quote
+            break;
+          } else {
+            cell += line[pos++];
+          }
+        }
+        cells.push(cell);
+        if (line[pos] === ",") pos++;
+      } else {
+        // Unquoted field
+        const end = line.indexOf(",", pos);
+        if (end === -1) {
+          cells.push(line.slice(pos));
+          break;
+        } else {
+          cells.push(line.slice(pos, end));
+          pos = end + 1;
+        }
+      }
+    }
+    rows.push(cells);
+  }
+
+  return rows;
+}
+
+function parseCSV(buffer: Buffer): ParseResult {
+  const text = buffer.toString("utf-8");
+  const rows = parseCSVText(text);
+
+  if (rows.length < 2) {
+    throw new Error("CSV file has too few rows. Expected at least a header and one data row.");
+  }
+
+  // Reuse the same row-parsing logic as Excel
+  return parseRows(rows);
+}
+
+// ── Unified row parser (shared by Excel + CSV) ─────────────────────────────────
+//
+// Single parser for ALL spreadsheet sources — Xero, QuickBooks, MYOB, custom.
+// No hardcoded column positions. Everything auto-detected.
+
 function parseRows(rows: unknown[][]): ParseResult {
   // ── Step 1: Find the header row ──────────────────────────────────────────
   let headerRowIdx = -1;
@@ -480,29 +575,6 @@ function parseRows(rows: unknown[][]): ParseResult {
   return buildResult(transactions, format, parseErrors, skippedRows, companyName, period);
 }
 
-// ── CSV parser ────────────────────────────────────────────────────────────────
-
-function parseCSV(buffer: Buffer): ParseResult {
-  const text = buffer.toString("utf-8");
-
-  // Use XLSX to parse CSV (handles quoting, encoding edge cases)
-  const wb = XLSX.read(text, { type: "string", raw: false });
-  const sheetName = wb.SheetNames[0];
-  const ws = wb.Sheets[sheetName];
-  const rows: unknown[][] = XLSX.utils.sheet_to_json(ws, {
-    header: 1,
-    raw: false,
-    defval: "",
-  });
-
-  if (rows.length < 2) {
-    throw new Error("CSV file has too few rows. Expected at least a header and one data row.");
-  }
-
-  // Reuse the same row-parsing logic as Excel
-  return parseRows(rows);
-}
-
 // ── JSON parser (backward compatible) ─────────────────────────────────────────
 
 function parseJSON(buffer: Buffer): ParseResult {
@@ -519,6 +591,7 @@ function parseJSON(buffer: Buffer): ParseResult {
   }
 
   // Validate and normalize
+  // eslint-disable-next-line
   const transactions: GLTransaction[] = data.map((row: any) => ({
     date: String(row.date || "").slice(0, 10),
     source: String(row.source || ""),

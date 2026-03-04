@@ -133,7 +133,7 @@ const nextConfig: NextConfig = {
       'framer-motion',
       'shiki',
       '@supabase/supabase-js',
-      'xlsx',
+      'exceljs',
     ],
     // globalNotFound causes flaky build-trace failures in Next.js 15.5
     // (_not-found/page.js.nft.json missing). app/not-found.tsx works without it.

@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     if (fileType === "gl-data") {
       try {
         // Dynamic file parsing — supports Excel (.xlsx), CSV, and JSON
-        const { transactions, metadata: parseMeta } = parseGLFile(buffer, file.name);
+        const { transactions, metadata: parseMeta } = await parseGLFile(buffer, file.name);
         logger.debug(`[S3Upload] Parsed ${file.name}: format=${parseMeta.format}, ${transactions.length} transactions, ${parseMeta.accountCount} accounts, balanced=${parseMeta.balanced}`);
 
         if (transactions.length === 0) {

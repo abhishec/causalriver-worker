@@ -9,6 +9,10 @@
  *      - RE1: Transaction Interpretation Engine (needs account, debit, credit, description)
  *      - RE2: Causal Financial Risk Scoring (needs account classification for signal generation)
  *   5. generateGLSignals-compatible output (monthly revenue/expense aggregation)
+ *
+ * Note: xlsx (SheetJS) is used ONLY in this test file to create synthetic Excel
+ * buffers. It is a devDependency — the production parser uses exceljs instead,
+ * which does not have the unpatched CVEs (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9).
  */
 
 import { describe, it, expect } from "vitest";
@@ -97,9 +101,9 @@ function createJSONBuffer(): Buffer {
 
 describe("GL File Parser", () => {
   describe("Xero Excel (.xlsx)", () => {
-    it("should parse Xero GL Detail export correctly", () => {
+    it("should parse Xero GL Detail export correctly", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "General Ledger Detail.xlsx");
+      const result = await parseGLFile(buffer, "General Ledger Detail.xlsx");
 
       expect(result.metadata.format).toBe("xero-xlsx");
       expect(result.metadata.companyName).toBe("Tookitaki Holding Pte. Ltd.");
@@ -107,9 +111,9 @@ describe("GL File Parser", () => {
       expect(result.transactions.length).toBeGreaterThanOrEqual(10);
     });
 
-    it("should extract correct accounts from section headers", () => {
+    it("should extract correct accounts from section headers", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const accounts = new Set(result.transactions.map((t) => t.account));
       expect(accounts.has("License Fee Income")).toBe(true);
@@ -119,18 +123,18 @@ describe("GL File Parser", () => {
       expect(accounts.has("Insurance Expense")).toBe(true);
     });
 
-    it("should parse Xero date format (DD Mon YYYY) to ISO", () => {
+    it("should parse Xero date format (DD Mon YYYY) to ISO", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const firstTxn = result.transactions.find((t) => t.account === "License Fee Income");
       expect(firstTxn).toBeDefined();
       expect(firstTxn!.date).toBe("2024-01-15");
     });
 
-    it("should parse debit/credit amounts correctly", () => {
+    it("should parse debit/credit amounts correctly", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const revenue = result.transactions.filter((t) => t.account === "License Fee Income");
       expect(revenue.length).toBe(4);
@@ -143,9 +147,9 @@ describe("GL File Parser", () => {
       expect(payroll[0].credit).toBe(0);
     });
 
-    it("should parse GST tax rate correctly", () => {
+    it("should parse GST tax rate correctly", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const gstTxn = result.transactions.find((t) => t.taxRate > 0);
       expect(gstTxn).toBeDefined();
@@ -153,9 +157,9 @@ describe("GL File Parser", () => {
       expect(gstTxn!.taxRateName).toBe("GST 9%");
     });
 
-    it("should skip Total and Net movement rows", () => {
+    it("should skip Total and Net movement rows", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const totalRows = result.transactions.filter(
         (t) => t.description.startsWith("Total") || t.description.startsWith("Net movement")
@@ -165,17 +169,17 @@ describe("GL File Parser", () => {
   });
 
   describe("CSV format", () => {
-    it("should parse CSV with auto-detected columns", () => {
+    it("should parse CSV with auto-detected columns", async () => {
       const buffer = createCSVBuffer();
-      const result = parseGLFile(buffer, "transactions.csv");
+      const result = await parseGLFile(buffer, "transactions.csv");
 
-      expect(result.metadata.format).toBe("generic-xlsx"); // CSV parsed via XLSX internally
+      expect(result.metadata.format).toBe("generic-xlsx"); // CSV falls through to generic-xlsx format label
       expect(result.transactions.length).toBe(6);
     });
 
-    it("should map account column correctly", () => {
+    it("should map account column correctly", async () => {
       const buffer = createCSVBuffer();
-      const result = parseGLFile(buffer, "gl.csv");
+      const result = await parseGLFile(buffer, "gl.csv");
 
       const accounts = new Set(result.transactions.map((t) => t.account));
       expect(accounts.has("License Fee Income")).toBe(true);
@@ -184,17 +188,17 @@ describe("GL File Parser", () => {
   });
 
   describe("JSON format (backward compatible)", () => {
-    it("should parse JSON array of transactions", () => {
+    it("should parse JSON array of transactions", async () => {
       const buffer = createJSONBuffer();
-      const result = parseGLFile(buffer, "gl-data.json");
+      const result = await parseGLFile(buffer, "gl-data.json");
 
       expect(result.metadata.format).toBe("json");
       expect(result.transactions.length).toBe(4);
     });
 
-    it("should preserve all fields from JSON", () => {
+    it("should preserve all fields from JSON", async () => {
       const buffer = createJSONBuffer();
-      const result = parseGLFile(buffer, "gl-data.json");
+      const result = await parseGLFile(buffer, "gl-data.json");
 
       const first = result.transactions[0];
       expect(first.date).toBe("2024-01-15");
@@ -206,9 +210,9 @@ describe("GL File Parser", () => {
   });
 
   describe("RE1 readiness: Transaction Interpretation Engine", () => {
-    it("should produce transactions with all fields needed for RE1 narratives", () => {
+    it("should produce transactions with all fields needed for RE1 narratives", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       // RE1 needs: account, debit, credit, description, reference, date
       for (const txn of result.transactions) {
@@ -220,9 +224,9 @@ describe("GL File Parser", () => {
       }
     });
 
-    it("should have revenue accounts detectable by classification rules", () => {
+    it("should have revenue accounts detectable by classification rules", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       // RE1 classifies accounts by pattern matching
       // "License Fee Income" should match "license fee" → revenue/license
@@ -232,9 +236,9 @@ describe("GL File Parser", () => {
       expect(revenueAccounts.length).toBeGreaterThan(0);
     });
 
-    it("should have expense accounts detectable by classification rules", () => {
+    it("should have expense accounts detectable by classification rules", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       const expenseAccounts = result.transactions.filter((t) =>
         /salary|salaries|expense|cost|depreciation|insurance/i.test(t.account)
@@ -244,18 +248,18 @@ describe("GL File Parser", () => {
   });
 
   describe("RE2 readiness: Causal Financial Risk Scoring", () => {
-    it("should produce data suitable for generateGLSignals (monthly aggregation)", () => {
+    it("should produce data suitable for generateGLSignals (monthly aggregation)", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       // generateGLSignals groups by month from txn.date
       const months = new Set(result.transactions.map((t) => t.date.slice(0, 7)));
       expect(months.size).toBeGreaterThan(1);
     });
 
-    it("should have data for bootstrapAccountingCausalGraph conditions", () => {
+    it("should have data for bootstrapAccountingCausalGraph conditions", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       // bootstrapAccountingCausalGraph checks:
       // hasRevenue: "fee|income|grant|revenue|subscription"
@@ -283,9 +287,9 @@ describe("GL File Parser", () => {
       expect(hasGST).toBe(true);
     });
 
-    it("should produce balanced debits and credits", () => {
+    it("should produce balanced debits and credits", async () => {
       const buffer = createXeroExcelBuffer();
-      const result = parseGLFile(buffer, "gl.xlsx");
+      const result = await parseGLFile(buffer, "gl.xlsx");
 
       // Not always balanced in a partial export, but metadata should report it
       expect(typeof result.metadata.balanced).toBe("boolean");
@@ -295,7 +299,7 @@ describe("GL File Parser", () => {
   });
 
   describe("Flexible column handling", () => {
-    it("should parse Xero Excel with shuffled column order", () => {
+    it("should parse Xero Excel with shuffled column order", async () => {
       // Same data as Xero but columns are in a completely different order:
       // Credit, Date, Tax Rate Name, Debit, Source, Reference, Description, Tax, Running Balance, Tax Rate
       const rows: (string | number | null)[][] = [
@@ -322,7 +326,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "GL Detail");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "gl-shuffled.xlsx");
+      const result = await parseGLFile(buffer, "gl-shuffled.xlsx");
 
       expect(result.metadata.format).toBe("xero-xlsx");
       expect(result.metadata.companyName).toBe("Acme Corp Pte. Ltd.");
@@ -343,7 +347,7 @@ describe("GL File Parser", () => {
       expect(salary.credit).toBe(0);
     });
 
-    it("should parse Excel with non-standard column names (fuzzy match)", () => {
+    it("should parse Excel with non-standard column names (fuzzy match)", async () => {
       // Column names that don't exactly match our aliases but should fuzzy-match
       const rows: (string | number | null)[][] = [
         ["Transaction Date", "GL Account Name", "Memo/Description", "Ref No.", "Debit (SGD)", "Credit (SGD)", "Closing Balance"],
@@ -357,7 +361,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "custom-gl.xlsx");
+      const result = await parseGLFile(buffer, "custom-gl.xlsx");
 
       expect(result.metadata.format).toBe("generic-xlsx");
       expect(result.transactions.length).toBe(3);
@@ -371,7 +375,7 @@ describe("GL File Parser", () => {
       expect(result.transactions[0].runningBalance).toBe(50000);
     });
 
-    it("should parse with minimal columns (Date + Debit + Credit only)", () => {
+    it("should parse with minimal columns (Date + Debit + Credit only)", async () => {
       const rows: (string | number | null)[][] = [
         ["Date", "Debit", "Credit"],
         ["2024-01-15", "0", "50000"],
@@ -383,7 +387,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "minimal.xlsx");
+      const result = await parseGLFile(buffer, "minimal.xlsx");
 
       expect(result.transactions.length).toBe(2);
       expect(result.transactions[0].credit).toBe(50000);
@@ -394,7 +398,7 @@ describe("GL File Parser", () => {
       expect(result.transactions[0].taxRate).toBe(0);
     });
 
-    it("should parse with extra/unknown columns (ignored gracefully)", () => {
+    it("should parse with extra/unknown columns (ignored gracefully)", async () => {
       const rows: (string | number | null)[][] = [
         ["Date", "Account", "Debit", "Credit", "Department", "Cost Center", "Project Code", "Approved By"],
         ["2024-01-15", "Revenue", "0", "50000", "Sales", "SG-001", "PRJ-42", "John"],
@@ -406,7 +410,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "extra-cols.xlsx");
+      const result = await parseGLFile(buffer, "extra-cols.xlsx");
 
       expect(result.transactions.length).toBe(2);
       expect(result.transactions[0].account).toBe("Revenue");
@@ -415,7 +419,7 @@ describe("GL File Parser", () => {
       expect(result.transactions[1].debit).toBe(35000);
     });
 
-    it("should parse single Amount column (positive=debit, negative=credit)", () => {
+    it("should parse single Amount column (positive=debit, negative=credit)", async () => {
       const rows: (string | number | null)[][] = [
         ["Date", "Account", "Description", "Amount"],
         ["2024-01-15", "Revenue", "Q1 License", "-50000"],
@@ -428,7 +432,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "single-amount.xlsx");
+      const result = await parseGLFile(buffer, "single-amount.xlsx");
 
       expect(result.transactions.length).toBe(3);
       // Negative amount → credit
@@ -439,7 +443,7 @@ describe("GL File Parser", () => {
       expect(result.transactions[1].credit).toBe(0);
     });
 
-    it("should handle header row not on row 0 (metadata rows above)", () => {
+    it("should handle header row not on row 0 (metadata rows above)", async () => {
       // Some exports have title, company, date, blank, then header
       const rows: (string | number | null)[][] = [
         ["ACME Corp Financial Report", null, null, null],
@@ -458,7 +462,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "offset-header.xlsx");
+      const result = await parseGLFile(buffer, "offset-header.xlsx");
 
       expect(result.transactions.length).toBe(2);
       // "ACME Corp Financial Report" is the first non-title text, treated as company name
@@ -466,13 +470,13 @@ describe("GL File Parser", () => {
       expect(result.metadata.period).toBe("As at 31 December 2024");
     });
 
-    it("should parse CSV with non-standard column names", () => {
+    it("should parse CSV with non-standard column names", async () => {
       const csv = `Transaction Date,GL Account,Memo,Ref No.,Dr,Cr
 2024-01-15,License Fee Income,Q1 SaaS License,INV-10001,0,50000
 2024-01-31,Salaries,Jan Payroll,#8001,35000,0
 `;
       const buffer = Buffer.from(csv, "utf-8");
-      const result = parseGLFile(buffer, "custom.csv");
+      const result = await parseGLFile(buffer, "custom.csv");
 
       expect(result.transactions.length).toBe(2);
       expect(result.transactions[0].account).toBe("License Fee Income");
@@ -483,28 +487,28 @@ describe("GL File Parser", () => {
   });
 
   describe("Error handling", () => {
-    it("should throw on empty file", () => {
+    it("should throw on empty file", async () => {
       const buffer = Buffer.from("", "utf-8");
-      expect(() => parseGLFile(buffer, "empty.json")).toThrow();
+      await expect(parseGLFile(buffer, "empty.json")).rejects.toThrow();
     });
 
-    it("should throw on non-array JSON", () => {
+    it("should throw on non-array JSON", async () => {
       const buffer = Buffer.from('{"key": "value"}', "utf-8");
-      expect(() => parseGLFile(buffer, "bad.json")).toThrow("array");
+      await expect(parseGLFile(buffer, "bad.json")).rejects.toThrow("array");
     });
 
-    it("should throw on CSV with only a header row (no data)", () => {
-      // This covers the rows.length < 2 branch in parseCSV (line 499)
+    it("should throw on CSV with only a header row (no data)", async () => {
+      // This covers the rows.length < 2 branch in parseCSV
       const csv = `Date,Account,Debit,Credit\n`;
       const buffer = Buffer.from(csv, "utf-8");
-      expect(() => parseGLFile(buffer, "header-only.csv")).toThrow(/too few rows/i);
+      await expect(parseGLFile(buffer, "header-only.csv")).rejects.toThrow(/too few rows/i);
     });
   });
 
   describe("Row parse error counting", () => {
-    it("should count parse errors for rows with data but unparseable date", () => {
+    it("should count parse errors for rows with data but unparseable date", async () => {
       // A row that has non-empty cells, non-skip first cell, but no valid date.
-      // This exercises the parseErrors++ branch (lines 437-438).
+      // This exercises the parseErrors++ branch.
       const rows: (string | number | null)[][] = [
         ["Date", "Account", "Description", "Debit", "Credit"],
         ["2024-01-15", "Revenue", "Valid transaction", 0, 50000],
@@ -516,7 +520,7 @@ describe("GL File Parser", () => {
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       const buffer = Buffer.from(XLSX.write(wb, { type: "buffer", bookType: "xlsx" }));
 
-      const result = parseGLFile(buffer, "error-rows.xlsx");
+      const result = await parseGLFile(buffer, "error-rows.xlsx");
 
       // The valid row should be parsed, the invalid one counted as a parse error
       expect(result.transactions.length).toBeGreaterThanOrEqual(1);
