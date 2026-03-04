@@ -2,6 +2,20 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { ThemeProvider, useTheme } from "../lib/theme-context";
 
+/**
+ * Theme System tests
+ *
+ * NOTE: BrainOS is locked to light mode only (B9 security/UX fix).
+ * setTheme() ignores its argument and always coerces to "light".
+ * Dark mode UI is intentionally disabled — dark-mode token leakage
+ * via localStorage was causing session-confusion bugs.
+ *
+ * These tests verify the LOCKED behaviour:
+ *   - Theme is always "light" regardless of what setTheme() is called with
+ *   - localStorage always stores "light"
+ *   - .dark class is never applied to documentElement
+ */
+
 function ThemeConsumer() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   return (
@@ -25,7 +39,7 @@ describe("Theme System", () => {
     expect(screen.getByTestId("resolved").textContent).toBe("light");
   });
 
-  it("toggles to dark mode", () => {
+  it("setTheme('dark') is a no-op — stays light (light-only lock)", () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
@@ -34,11 +48,12 @@ describe("Theme System", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-dark"));
     });
-    expect(screen.getByTestId("theme").textContent).toBe("dark");
-    expect(screen.getByTestId("resolved").textContent).toBe("dark");
+    // Locked: always light regardless of argument
+    expect(screen.getByTestId("theme").textContent).toBe("light");
+    expect(screen.getByTestId("resolved").textContent).toBe("light");
   });
 
-  it("toggles back to light mode", () => {
+  it("setTheme('light') keeps light theme", () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
@@ -47,14 +62,15 @@ describe("Theme System", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-dark"));
     });
-    expect(screen.getByTestId("resolved").textContent).toBe("dark");
+    // Still light — lock holds
+    expect(screen.getByTestId("resolved").textContent).toBe("light");
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-light"));
     });
     expect(screen.getByTestId("resolved").textContent).toBe("light");
   });
 
-  it("persists theme to localStorage", () => {
+  it("persists 'light' to localStorage even when dark is requested", () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
@@ -63,10 +79,11 @@ describe("Theme System", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-dark"));
     });
-    expect(localStorage.getItem("nexus_theme")).toBe("dark");
+    // Lock: localStorage always writes "light", never "dark"
+    expect(localStorage.getItem("nexus_theme")).toBe("light");
   });
 
-  it("applies .dark class to document element", () => {
+  it("never applies .dark class to document element", () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
@@ -75,7 +92,8 @@ describe("Theme System", () => {
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-dark"));
     });
-    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    // .dark class must never be present — light-only lock
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
     act(() => {
       fireEvent.click(screen.getByTestId("toggle-light"));
     });
