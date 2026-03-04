@@ -146,6 +146,40 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // ── Phase 4b: Process general-purpose agent jobs ──────────────
+    // General agents handle arbitrary tasks via Claude tool_use loops.
+    // Separate from SE-aaS (domain-specific) and code-agents (GitHub PRs).
+    let generalResult = { processed: 0, succeeded: 0, failed: 0, jobIds: [] as string[] };
+    const remainingForGeneral = Math.max(0, 28_000 - (Date.now() - startMs));
+    if (remainingForGeneral > 2_000) {
+      try {
+        const { processGeneralJobs } = await import("@/lib/agents/general-worker");
+        generalResult = await withTimeout(
+          processGeneralJobs(service, 2),
+          remainingForGeneral,
+          "processGeneralJobs"
+        );
+      } catch (err) {
+        logger.error("[process-jobs] general-worker phase error", { error: err });
+      }
+    }
+
+    // ── Phase 4c: APEX agent jobs (FSM-gated, Perplexity-style quality gates) ──
+    let apexResult = { processed: 0, succeeded: 0, failed: 0, jobIds: [] as string[] };
+    const remainingForApex = Math.max(0, 28_000 - (Date.now() - startMs));
+    if (remainingForApex > 2_000) {
+      try {
+        const { processApexJobs } = await import("@/lib/agents/apex-worker");
+        apexResult = await withTimeout(
+          processApexJobs(service, 1),
+          remainingForApex,
+          "processApexJobs"
+        );
+      } catch (err) {
+        logger.error("[process-jobs] apex-worker phase error", { error: err });
+      }
+    }
+
     // ── Phase 5: Service Health snapshot ─────────────────────────
     // Fire-and-forget health writes for active orgs. Non-blocking.
     // Provides service_health table data for brain-context.ts L26/L27/L28.
@@ -178,6 +212,8 @@ export async function GET(request: NextRequest) {
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
+      `general=${generalResult.processed}(ok=${generalResult.succeeded}) ` +
+      `apex=${apexResult.processed}(ok=${apexResult.succeeded}) ` +
       `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) ` +
       `capabilityWf=${capabilityResult.processed}(resumed=${capabilityResult.resumed}) took=${durationMs}ms`
     );
@@ -188,6 +224,8 @@ export async function GET(request: NextRequest) {
       staleJobsRecovered,
       ...result,
       codeAgent: codeAgentResult,
+      general: generalResult,
+      apex: apexResult,
       processEngine: processEngineResult,
       capabilityWorkflow: capabilityResult,
       durationMs,

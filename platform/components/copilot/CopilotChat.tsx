@@ -30,6 +30,7 @@ import { ConnectorStatusCard } from "./ConnectorStatusCard";
 import type { ConnectorStatusInfo } from "./ConnectorStatusCard";
 import { ConnectorSetupCard } from "./ConnectorSetupCard";
 import type { ConnectorSetupInfo } from "./ConnectorSetupCard";
+import { WidgetRenderer } from "./widgets/WidgetRenderer";
 import { AgentSpeechBubble } from "./AgentSpeechBubble";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
@@ -479,6 +480,20 @@ function renderMarkdown(text: string) {
               />
             );
           }
+        } else if (codeLanguage.toLowerCase() === "widget") {
+          try {
+            const payload = JSON.parse(code) as import("./types").WidgetPayload;
+            elements.push(<WidgetRenderer key={`widget-${codeBlockIdx}`} widget={payload} />);
+          } catch {
+            elements.push(
+              <CodeBlock
+                key={`code-${codeBlockIdx}`}
+                code={code}
+                language="json"
+                blockKey={`code-${codeBlockIdx}`}
+              />
+            );
+          }
         } else {
           elements.push(
             <CodeBlock
@@ -632,6 +647,21 @@ function renderMarkdown(text: string) {
             <div className="flex items-center gap-2 text-xs text-muted">
               <div className="w-3 h-3 rounded-full border-2 border-accent border-t-transparent animate-spin" />
               Generating chart...
+            </div>
+          </div>
+        );
+      }
+    } else if (codeLanguage.toLowerCase() === "widget") {
+      // Try to parse partial widget JSON during streaming
+      try {
+        const payload = JSON.parse(code) as import("./types").WidgetPayload;
+        elements.push(<WidgetRenderer key={`widget-streaming-${codeBlockIdx}`} widget={payload} />);
+      } catch {
+        elements.push(
+          <div key={`widget-loading-${codeBlockIdx}`} className="rounded-xl bg-card border border-border-subtle p-4 my-3">
+            <div className="flex items-center gap-2 text-xs text-muted">
+              <div className="w-3 h-3 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+              Generating widget...
             </div>
           </div>
         );
@@ -1145,6 +1175,10 @@ export async function consumeSSEStream(
             if (parsed.agentCreated) {
               callbacks.onAgentCreated?.(parsed.agentCreated);
             }
+            // General/APEX job queued — emitted when detectGeneralTask() dispatches a job (Gap D)
+            if (parsed.generalJobQueued) {
+              callbacks.onGeneralJobQueued?.(parsed.generalJobQueued);
+            }
             // Connector status — emitted when user asks "what am I connected to?"
             if (parsed.connectorStatus) {
               callbacks.onConnectorStatus?.(parsed.connectorStatus);
@@ -1164,6 +1198,10 @@ export async function consumeSSEStream(
             // Brain IQ warning — brain not ready (IQ < 10)
             if (parsed.brainWarning) {
               callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
+            }
+            // Dynamic Widget — typed widget from domain executors
+            if (parsed.widget) {
+              callbacks.onWidget?.(parsed.widget);
             }
             // Self-MoA result — 3-angle synthesis for delivery-intelligence / early-warning
             if (parsed.moaResult) {
@@ -1213,11 +1251,13 @@ export async function consumeSSEStream(
             if (parsed.learningPulse) callbacks.onLearningPulse?.(parsed.learningPulse);
             if (parsed.agentName) callbacks.onAgentName?.(parsed.agentName);
             if (parsed.agentCreated) callbacks.onAgentCreated?.(parsed.agentCreated);
+            if (parsed.generalJobQueued) callbacks.onGeneralJobQueued?.(parsed.generalJobQueued);
             if (parsed.connectorStatus) callbacks.onConnectorStatus?.(parsed.connectorStatus);
             if (parsed.connectorSetup) callbacks.onConnectorSetup?.(parsed.connectorSetup);
             if (parsed.syncAll) callbacks.onSyncAll?.(parsed.syncAll);
             if (parsed.orchestratorQueued) callbacks.onOrchestratorQueued?.(parsed.orchestratorQueued);
             if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
+            if (parsed.widget) callbacks.onWidget?.(parsed.widget);
             if (parsed.moaResult) callbacks.onMoaResult?.(parsed.moaResult);
           } catch { /* skip */ }
         }
@@ -1486,14 +1526,31 @@ function QueuedJobBadge({
     : 2;
 
   if (isCompleted) {
+    const domainLabel = info.domain
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const handleShowResults = () => {
+      window.dispatchEvent(
+        new CustomEvent("copilot-inject-and-submit", {
+          detail: `My ${domainLabel} analysis just completed. Please retrieve and show me the results with visualizations and widgets.`,
+        }),
+      );
+    };
     return (
-      <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-success/10 border border-success/20 text-xs text-success">
-        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
-        <span className="font-medium">
-          Analysis ready — open Agent Monitor to view results
-        </span>
+      <div className="mt-3 flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          <span className="font-medium">{domainLabel} analysis ready</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleShowResults}
+          className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition-colors font-medium"
+        >
+          Show results →
+        </button>
       </div>
     );
   }
@@ -1519,7 +1576,7 @@ function QueuedJobBadge({
         </span>
         <span className="text-muted-foreground leading-snug">
           {info.domain} analysis will auto-start once the brain is ready.
-          Track progress in the Agent Monitor.
+          This button will update when results are ready.
         </span>
       </div>
     </div>
@@ -1594,6 +1651,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   // ── Per-message agent created tracking (for AgentCreatedCard below each message) ──
   const [agentCreatedPerMessage, setAgentCreatedPerMessage] = useState<Map<number, AgentCreatedInfo>>(new Map());
 
+  // ── Per-message general/apex job tracking (for AgentJobWidget — Gap D fix) ──
+  const [generalJobPerMessage, setGeneralJobPerMessage] = useState<Map<number, Record<string, unknown>>>(new Map());
+
   // ── Per-message connector status tracking (for ConnectorStatusCard) ──
   const [connectorStatusPerMessage, setConnectorStatusPerMessage] = useState<Map<number, ConnectorStatusInfo>>(new Map());
 
@@ -1615,6 +1675,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   // ── Per-message Brain IQ warning tracking (amber banner when IQ < 10) ──
   const [brainWarningPerMessage, setBrainWarningPerMessage] = useState<Map<number, string>>(new Map());
+
+  // ── Per-message widget data (Dynamic Widget System) ─────────────────────
+  const [widgetPerMessage, setWidgetPerMessage] = useState<Map<number, import("./types").WidgetPayload>>(new Map());
 
   // ── Agent execution state (Week 3: OpenClaw agent mode) ─────────────────
   const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
@@ -1913,11 +1976,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setGeneralJobPerMessage(new Map());
       setAgentCommsPerMessage(new Map());
       setAgentInputRequestPerMessage(new Map());
       setQueuedJobPerMessage(new Map());
       setCompletedQueuedJobs(new Set());
       setBrainWarningPerMessage(new Map());
+      setWidgetPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
@@ -2138,11 +2203,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setGeneralJobPerMessage(new Map());
       setAgentCommsPerMessage(new Map());
       setAgentInputRequestPerMessage(new Map());
       setQueuedJobPerMessage(new Map());
       setCompletedQueuedJobs(new Set());
       setBrainWarningPerMessage(new Map());
+      setWidgetPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
@@ -2175,11 +2242,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
       setBrainMetaPerMessage(new Map());
       setAgentNamePerMessage(new Map());
       setAgentCreatedPerMessage(new Map());
+      setGeneralJobPerMessage(new Map());
       setAgentCommsPerMessage(new Map());
       setAgentInputRequestPerMessage(new Map());
       setQueuedJobPerMessage(new Map());
       setCompletedQueuedJobs(new Set());
       setBrainWarningPerMessage(new Map());
+      setWidgetPerMessage(new Map());
       setShowSlashPicker(false);
       setSlashQuery("");
       setAgentSteps([]);
@@ -2360,6 +2429,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               return pruneMap(next);
             });
           },
+          onGeneralJobQueued: (jobInfo) => {
+            if (controller.signal.aborted) return;
+            setGeneralJobPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, jobInfo as Record<string, unknown>);
+              return pruneMap(next);
+            });
+          },
           onConnectorStatus: (data) => {
             if (controller.signal.aborted) return;
             setConnectorStatusPerMessage((prev) => {
@@ -2416,6 +2493,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             setBrainWarningPerMessage((prev) => {
               const next = new Map(prev);
               next.set(messageIdx, warning);
+              return pruneMap(next);
+            });
+          },
+          onWidget: (widget) => {
+            if (controller.signal.aborted) return;
+            setWidgetPerMessage((prev) => {
+              const next = new Map(prev);
+              next.set(messageIdx, widget);
               return pruneMap(next);
             });
           },
@@ -3058,6 +3143,16 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                         <AgentCreatedCard agent={agentCreatedPerMessage.get(i)!} />
                       )}
 
+                      {/* Agent Job Widget — shown when a general/APEX job is queued (Gap D fix) */}
+                      {generalJobPerMessage.get(i) && (
+                        <WidgetRenderer
+                          widget={{
+                            kind: "agent_job",
+                            data: generalJobPerMessage.get(i)!,
+                          }}
+                        />
+                      )}
+
                       {/* Connector Status Card — shown when user asks "what am I connected to?" */}
                       {connectorStatusPerMessage.get(i) && (
                         <ConnectorStatusCard data={connectorStatusPerMessage.get(i)!} />
@@ -3066,6 +3161,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                       {/* Connector Setup Card — shown when user says "connect github / jira / etc." */}
                       {connectorSetupPerMessage.get(i) && (
                         <ConnectorSetupCard data={connectorSetupPerMessage.get(i)!} />
+                      )}
+
+                      {/* Dynamic Widget — emitted by domain executors via sendWidget() */}
+                      {widgetPerMessage.get(i) && (
+                        <WidgetRenderer widget={widgetPerMessage.get(i)!} />
                       )}
 
                       {/* Queued Job Badge — shown when brain-dependent job is queued */}

@@ -215,6 +215,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // ── Async ingestion trigger (Gap B fix) ──────────────────────────────────
+    // Fire-and-forget: queue a general agent job to discover + ingest Confluence pages.
+    void (async () => {
+      try {
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const adminClient = getAdminClient();
+        await adminClient.from("agent_queue").insert({
+          organization_id: orgId,
+          agent_type: "general",
+          task_type: "confluence-ingest",
+          priority: 8,
+          status: "pending",
+          payload: {
+            task: `Discover and ingest pages from the Confluence site "${primarySite?.name ?? "connected workspace"}" (${primarySite?.url ?? ""}). List all accessible spaces and pages. For each page, extract the text content and ingest it into the knowledge base. Focus on product documentation, release notes, specifications, and architecture docs.`,
+            source: "confluence-oauth-callback",
+            connectorType: "confluence",
+            siteUrl: primarySite?.url,
+            siteName: primarySite?.name,
+            cloudId: primarySite?.id,
+            maxTurns: 30,
+          },
+        });
+        logger.warn("[confluence/callback] Async ingestion job queued", { orgId, site: primarySite?.name });
+      } catch (triggerErr) {
+        logger.warn("[confluence/callback] Failed to queue ingestion job (non-fatal)", { error: String(triggerErr) });
+      }
+    })();
+
     return NextResponse.redirect(
       new URL('/connectors?success=confluence_connected', request.url)
     );

@@ -28,7 +28,7 @@ import { createSSEStream, SSE_HEADERS } from "@/lib/copilot/stream-utils";
 import { runPreFlight } from "@/lib/copilot/pre-flight";
 import { runPostFlight } from "@/lib/copilot/post-flight";
 import { resolveSeaasRoute, resolveAccountingRoute, resolvePmAasRoute } from "@/lib/copilot/domain-router";
-import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES } from "@/lib/copilot/handlers/agent-handler";
+import { handleAgentCreation, detectAgentIntent, DOMAIN_AGENT_NAMES, detectGeneralTask, handleGeneralJobCreation } from "@/lib/copilot/handlers/agent-handler";
 import { buildDeliveryIntelligenceResult, DELIVERY_DOMAINS } from "@/lib/copilot/handlers/delivery-handler";
 import {
   buildActionKnowledge as _buildActionKnowledge,
@@ -39,6 +39,7 @@ import {
   type TrainedCausalEdge as _TrainedCausalEdge,
   type TrainedRule as _TrainedRule,
 } from "@/lib/copilot/message-builder";
+import { getWidgetSystemPrompt } from "@/components/copilot/widgets/widget-schemas";
 // Keep admin client import for the orchestration dynamic import path
 import { getAdminClient } from "@/lib/supabase/admin";
 // ── @nexus-ai/memory-stack: bypasses Turbopack bundling ──────────────────────
@@ -892,14 +893,26 @@ export async function POST(request: NextRequest) {
       /\b(?:check|verify|refresh|sync|resync|update)\s+(?:all\s+)?(?:my\s+)?(?:connections?|connectors?|integrations?|sources?)\b/i.test(message) ||
       /\bsync[\s-]all\b/i.test(message) ||
       /\b(?:pull|fetch)\s+(?:all\s+)?(?:latest\s+)?(?:data\s+from\s+)?(?:all\s+)?(?:connections?|connectors?)\b/i.test(message);
+    // "sync github", "refresh jira" → targeted connector sync (not sync-all)
+    const targetedSyncMatch = message.match(
+      /\b(?:sync|refresh|update|resync|pull(?:\s+latest)?)\s+(?:my\s+)?(github|jira|confluence|slack|freshdesk|hubspot|notion|linear|datadog|cloudwatch|intercom|zendesk)\b/i
+    );
+    const targetedSyncType = targetedSyncMatch?.[1]?.toLowerCase() ?? null;
+    // "upload files", "read my local files", "add documents from laptop"
+    const localFileIntent =
+      /\b(?:upload|read|add|import|attach|bring in|load)\s+(?:my\s+)?(?:local\s+)?(?:files?|documents?|docs?|spreadsheets?|csvs?|pdfs?)\b/i.test(message) ||
+      /\b(?:my\s+)?(?:local\s+files?|files?\s+from\s+(?:my\s+)?(?:laptop|computer|desktop|machine)|documents?\s+from\s+(?:my\s+)?(?:laptop|computer))\b/i.test(message) ||
+      /\b(?:read|access)\s+(?:files?\s+on\s+)?(?:my\s+)?(?:laptop|computer|desktop|drive)\b/i.test(message);
     const connectMatch = message.match(
-      /\b(?:connect|setup|set up|add|link|integrate)\s+(?:to\s+)?(?:my\s+)?(github|jira|confluence|slack|freshdesk|freshchat|freshsales|hubspot|notion|linear|stripe|xero|quickbooks|datadog|cloudwatch|intercom|zendesk|mailchimp|elastic|elk|google[_\s]chat|google[_\s]calendar|s3|voice|generic[_\s]api)\b/i
+      /\b(?:connect|setup|set up|add|link|integrate)\s+(?:to\s+)?(?:my\s+)?(github|jira|confluence|slack|freshdesk|freshchat|freshsales|hubspot|notion|linear|stripe|xero|quickbooks|datadog|cloudwatch|intercom|zendesk|mailchimp|elastic|elk|google[_\s]chat|google[_\s]calendar|s3|voice|generic[_\s]api|local[_\s]files?|my[_\s]files?|laptop[_\s]files?)\b/i
     );
     const connectType = connectMatch?.[1]?.toLowerCase().replace(/\s+/g, "_");
     // Normalize common aliases
     const normalizedConnectType = connectType === "elastic" ? "elk" :
       connectType === "s3" ? "s3-storage" :
-      connectType === "set_up" ? null : connectType;
+      connectType === "set_up" ? null :
+      (connectType?.startsWith("local") || connectType?.startsWith("my_file") || connectType?.startsWith("laptop")) ? "local-files" :
+      connectType;
 
     // ══════════════════════════════════════════════════════════════════════
     // ADR-030: REFLEX ENGINE (L31 — System 1 deterministic routing)
@@ -1037,6 +1050,8 @@ export async function POST(request: NextRequest) {
     let agentCreated: Record<string, unknown> | null = null;
     /** Set when process engine intent is detected — emitted as processTriggered SSE event */
     let processTriggeredResult: Record<string, unknown> | null = null;
+    /** Set when a general/apex agent job is queued — emitted as generalJobQueued SSE event */
+    let generalJobQueued: Record<string, unknown> | null = null;
     /** Set when orchestrator queues a job as waiting — injected into system prompt */
     let orchestratorResult: Record<string, unknown> | null = null;
     /** Collected Agent Communication Protocol payloads — emitted to frontend via SSE */
@@ -1098,6 +1113,23 @@ export async function POST(request: NextRequest) {
         message,
         workerId ?? undefined   // pass AI Worker context so agent_queue row gets ai_worker_id set
       );
+    }
+
+    // ── General Task Detection (Gap A fix) ───────────────────────────────────
+    // Detect URL scans, research tasks, competitor analysis → dispatch to general/apex worker.
+    // Only fires if no domain-specific route (SE-aaS/AaaS/PM-aaS/create-agent) already owns it.
+    const _alreadyHandled = !!(agentCreated || seaasRoute || accountingRoute || pmAasRoute);
+    const _generalTaskDetection = detectGeneralTask(message, _alreadyHandled);
+    if (_generalTaskDetection) {
+      const _generalJob = await handleGeneralJobCreation(
+        _generalTaskDetection,
+        workspaceId,
+        user.id,
+        workerId ?? undefined,
+      );
+      if (_generalJob) {
+        generalJobQueued = _generalJob as unknown as Record<string, unknown>;
+      }
     }
 
     // ── Orchestration Capture: SE-aaS routing decision → brain training ──
@@ -2883,6 +2915,11 @@ You currently have: ${causalEdges.length} causal edges, ${rules.length} business
 
     let effectiveSystemPrompt = brainContext?.fullPrompt || NO_HALLUCINATION_FALLBACK;
 
+    // ── Widget system — general AI worker capability ───────────────────────────
+    // Dynamically generated from WIDGET_SCHEMAS in widget-schemas.ts.
+    // Adding a new widget type automatically updates Claude's instructions.
+    effectiveSystemPrompt += getWidgetSystemPrompt();
+
     // ── Service activation context (BUG-006 fix) ─────────────────────────────
     // When a worker is present, inform the LLM which services are available so it
     // can tell users "SE-aaS is not activated" instead of silently failing.
@@ -3866,6 +3903,27 @@ Be enthusiastic but concise. Do NOT list the agent ID unless the user asks.`;
 The user requested to create an AI agent but there was a technical error. Tell the user we encountered a temporary issue creating their agent and they should try again in a moment. Apologize briefly.`;
     }
 
+    // ── General/APEX job queued — inject context so Claude tells user (Gap A+D) ──
+    if (generalJobQueued) {
+      const _gjTask = String(generalJobQueued.task ?? "").slice(0, 120);
+      const _gjType = String(generalJobQueued.agentType ?? "general");
+      const _gjId = String(generalJobQueued.jobId ?? "");
+      effectiveSystemPrompt += `\n\n## Background Agent Job Queued
+
+I have just dispatched a background ${_gjType === "apex" ? "APEX research" : "general"} agent job to handle this request:
+- Task: ${_gjTask}
+- Job ID: ${_gjId}
+- Status: pending (will start within the next cron tick, ~2 minutes)
+- Type: ${_gjType === "apex" ? "Multi-phase FSM with quality gates (Perplexity-style)" : "Tool-use agent loop with KB + web search"}
+
+Tell the user:
+1. Their request has been queued as a background agent job
+2. The agent will use web search, knowledge base, and browser tools to complete it
+3. They can track progress in the AI Worker Dashboard (Jobs tab)
+4. Results will appear here when the agent completes
+Be concise and enthusiastic. Mention the job is running in the background.`;
+    }
+
     // ── ORCHESTRATOR: Inject queued job notification into system prompt ────
     // When brain isn't ready, the orchestrator queues the job and sets
     // orchestratorResult so Claude tells the user about the orchestration AND gives immediate value.
@@ -4310,15 +4368,24 @@ No connectors are configured yet. When the user asks for data from any source (S
     });
     void v4SmartModelBase; // retained for captureModelSelection rationale parity
 
-    // ── Self-MoA: Dual top_p synthesis flag ─────────────────────────────
-    // For high-stakes queries (complexity >= 0.65 + strategic phrases):
-    // run at top_p=0.85 (focused) + top_p=0.99 (exploratory) post-stream,
-    // synthesize with Haiku, store as high-quality reference in ai_memory.
-    // Fire-and-forget — never blocks the SSE stream.
+    // ── UCB1 Strategy Bandit: routing-time exploration/exploitation ──────
+    // Runs the multi-armed bandit to select strategy (five_phase/direct/moa).
+    // If bandit recommends MoA, activates pre-stream synthesis below.
+    const _banditSelection = workerId
+      ? await import("@/lib/brain/strategy-bandit")
+          .then(({ selectStrategy }) => selectStrategy(detectedIntent ?? 'general', workerId, service))
+          .catch(() => null)
+      : null;
+
+    // ── Self-MoA: Pre-stream multi-perspective synthesis ────────────────
+    // For high-stakes queries (complexity >= 0.65 + strategic phrases) OR
+    // when UCB1 bandit recommends MoA strategy: run 3-lens Haiku synthesis
+    // pre-stream so the result enriches the main LLM call.
     const { shouldUseMoA: _shouldUseMoA } = await import("@/lib/brain/self-moa");
-    const _useMoA = _shouldUseMoA(message, commandResult?.dispatch?.complexityScore ?? 0);
+    let _useMoA = _shouldUseMoA(message, commandResult?.dispatch?.complexityScore ?? 0);
+    if (_banditSelection?.strategy === 'moa') _useMoA = true;
     if (_useMoA) {
-      logger.debug(`[Self-MoA] Activated for high-stakes query: complexity=${commandResult?.dispatch?.complexityScore?.toFixed(2)} query="${message.slice(0, 80)}"`);
+      logger.debug(`[Self-MoA] Activated for high-stakes query: complexity=${commandResult?.dispatch?.complexityScore?.toFixed(2)} bandit=${_banditSelection?.strategy ?? 'none'} query="${message.slice(0, 80)}"`);
     }
 
     // ── Self-MOA (3-lens): Domain multi-agent synthesis flag ─────────────
@@ -4382,7 +4449,7 @@ No connectors are configured yet. When the user asks for data from any source (S
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
+    const { stream, send, sendText, sendError, close, sendProactiveInsights, sendWidget } = createSSEStream();
     const streamStartMs = Date.now();
 
     // ADR-031 Phase 3b: Replay UCE progress events buffered before stream was created
@@ -4594,6 +4661,26 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send SE-aaS Delivery Intelligence result (pod-match + health scores) for SEaaSDeliveryPanel
         if (deliveryIntelligenceResult) {
           send(JSON.stringify({ deliveryIntelligenceResult }));
+
+          // Dynamic Widget: emit a metric_grid summary alongside delivery intelligence
+          try {
+            const diHealthScores = (deliveryIntelligenceResult.health_scores as Array<Record<string, unknown>>) ?? [];
+            if (diHealthScores.length > 0) {
+              const topHealth = diHealthScores[0];
+              sendWidget({
+                kind: "metric_grid",
+                title: "Delivery Health Summary",
+                data: {
+                  cols: 3,
+                  metrics: [
+                    { label: "Health Score", value: String(topHealth.health_score ?? "\u2014"), color: (Number(topHealth.health_score) || 0) >= 75 ? "green" : "red" },
+                    { label: "Velocity", value: String(topHealth.delivery_velocity ?? "\u2014") },
+                    { label: "Scope Drift", value: `${String(topHealth.scope_drift ?? 0)}%`, color: (Number(topHealth.scope_drift) || 0) > 20 ? "red" : "green" },
+                  ],
+                },
+              });
+            }
+          } catch { /* Widget emission must never break the response */ }
         }
 
         // ADR-030: Send reflex delegate result to frontend
@@ -4650,6 +4737,11 @@ No connectors are configured yet. When the user asks for data from any source (S
         // Send process triggered event so the frontend can render process status card
         if (processTriggeredResult) {
           send(JSON.stringify({ processTriggered: processTriggeredResult }));
+        }
+
+        // Send general/apex job queued event so frontend can show progress widget (Gap A+D fix)
+        if (generalJobQueued) {
+          send(JSON.stringify({ generalJobQueued }));
         }
 
         // ADR-027: Send RL primer pattern IDs so feedback handler can track which patterns helped
@@ -4713,6 +4805,33 @@ No connectors are configured yet. When the user asks for data from any source (S
             if (authConfig) {
               send(JSON.stringify({ connectorSetup: { connectorType: normalizedConnectType, ...authConfig } }));
             }
+          } catch {
+            // Non-fatal
+          }
+        }
+
+        // ── Local file intent — emit browser FSA connector setup card ──────
+        if (localFileIntent && !normalizedConnectType) {
+          try {
+            const { CONNECTOR_AUTH_MAP } = await import("@/lib/connectors/connector-auth-map");
+            const authConfig = CONNECTOR_AUTH_MAP["local-files"];
+            if (authConfig) {
+              send(JSON.stringify({ connectorSetup: { connectorType: "local-files", ...authConfig } }));
+            }
+          } catch {
+            // Non-fatal
+          }
+        }
+
+        // ── Targeted connector sync — "sync github", "refresh jira" ────────
+        if (targetedSyncType && !syncAllIntent) {
+          try {
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/connectors/sync-all`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-internal-call": "copilot" },
+              body: JSON.stringify({ organizationId: workspaceId, connectorTypes: [targetedSyncType] }),
+            }).catch(() => { /* Non-fatal — fire and forget */ });
+            send(JSON.stringify({ syncAll: { status: "started", message: `Syncing ${targetedSyncType} connector\u2026` } }));
           } catch {
             // Non-fatal
           }
@@ -4820,6 +4939,40 @@ No connectors are configured yet. When the user asks for data from any source (S
           effectiveSystemPrompt = effectiveSystemPrompt.slice(0, (MAX_SYSTEM_PROMPT_TOKENS - 10_000) * 4);
         }
 
+        // ── Token budget efficiency hints ─────────────────────────────────
+        // Inject progressive hints (30%/60%/80%) so the LLM self-regulates output length.
+        try {
+          const { createTokenBudget, recordTokenUsage, getEfficiencyHint } = await import("@/lib/brain/token-budget");
+          const _budget = recordTokenUsage(
+            createTokenBudget(`copilot_${_sessionId}`, 'copilot', MAX_SYSTEM_PROMPT_TOKENS),
+            'system_prompt', systemTokens
+          );
+          const _hint = getEfficiencyHint(_budget);
+          if (_hint) effectiveSystemPrompt += '\n' + _hint;
+        } catch { /* non-fatal — token budget hints are best-effort */ }
+
+        // ── Pre-stream MoA synthesis (Bug 6 fix) ─────────────────────────
+        // When MoA is triggered, run 3-lens Haiku synthesis (~1s) and inject
+        // the multi-perspective analysis into the system prompt. The main LLM
+        // sees the synthesis and produces a higher-quality, MoA-informed response.
+        if (_useMoA && detectedIntent) {
+          try {
+            const { runSelfMoa } = await import("@/lib/brain/self-moa");
+            const _moaSynthesis = await runSelfMoa({
+              query: message,
+              domain: detectedIntent,
+              organizationId: workspaceId,
+              userId: user.id,
+              brainContext: String(brainContext?.contextSummary ?? ""),
+              apiKey: anthropicApiKey,
+            });
+            if (_moaSynthesis?.synthesis) {
+              effectiveSystemPrompt += `\n\n## MULTI-PERSPECTIVE SYNTHESIS\nThe following synthesis from multiple analytical perspectives may be useful:\n${_moaSynthesis.synthesis}`;
+              logger.warn(`[Self-MoA] Pre-stream synthesis injected (${_moaSynthesis.synthesis.length} chars) for domain=${detectedIntent}`);
+            }
+          } catch { /* non-fatal — MoA failure falls back to normal response */ }
+        }
+
         const anthropicStream = anthropic.messages.stream({
           model: v4SmartModel,
           max_tokens: 8192,
@@ -4898,11 +5051,16 @@ No connectors are configured yet. When the user asks for data from any source (S
           })
           .catch(() => { /* never throw — quality gate is advisory only */ });
         // Extract entities from the response and persist for cross-query memory
+        // Regex (instant, zero-cost) + LLM (fire-and-forget Haiku, domain-specific)
+        const _entityText = `${message} ${streamedAssistantText}`;
         void persistEntities(
-          extractEntities(`${message} ${streamedAssistantText}`),
+          extractEntities(_entityText),
           workspaceId,
           workerId ?? undefined,
         );
+        void import("@/lib/brain/entity-memory")
+          .then(({ extractEntitiesLLM }) => extractEntitiesLLM(_entityText, workspaceId, workerId ?? undefined))
+          .catch(() => {});
         // ADR-023: CapabilityObserver — detect regret signals in LLM response
         // Fire-and-forget: seeds capability-gap entries for future synthesis
         if (streamedAssistantText && streamedAssistantText.length > 50) {

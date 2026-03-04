@@ -256,6 +256,35 @@ export async function GET(request: NextRequest) {
       email: profile.email,
     });
 
+    // ── Async ingestion trigger (Gap B fix) ──────────────────────────────────
+    // Fire-and-forget: queue a general agent job to discover + ingest Google Drive files.
+    // This runs asynchronously via the cron worker — never blocks the OAuth redirect.
+    void (async () => {
+      try {
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const adminClient = getAdminClient();
+        await adminClient.from("agent_queue").insert({
+          organization_id: orgId,
+          agent_type: "general",
+          task_type: "google-drive-ingest",
+          priority: 8,
+          status: "pending",
+          payload: {
+            task: `Discover and ingest documents from the Google Drive account connected to ${profile.email ?? "the workspace"}. List all accessible Google Docs, Sheets, and PDF files. For each document, extract the text content and ingest it into the knowledge base using the document ingestion API. Focus on recently modified files first.`,
+            source: "google-drive-oauth-callback",
+            connectorType: "google_drive",
+            googleEmail: profile.email,
+            maxTurns: 20,
+          },
+        });
+        logger.warn("[google-drive/callback] Async ingestion job queued", { orgId });
+      } catch (triggerErr) {
+        logger.warn("[google-drive/callback] Failed to queue ingestion job (non-fatal)", {
+          error: String(triggerErr),
+        });
+      }
+    })();
+
     if (isPopup) {
       return new NextResponse(
         popupHtml("google_drive-connected", undefined, {

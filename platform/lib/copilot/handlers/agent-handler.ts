@@ -297,3 +297,169 @@ export function detectAgentIntent(
     },
   };
 }
+
+// ── General Task Detection + Job Creation (Gap A fix) ────────────────────────
+
+export interface GeneralTaskDetection {
+  /** The resolved task description to pass to the general worker */
+  task: string;
+  /** Agent type: 'general' for quick tasks, 'apex' for complex research */
+  agentType: "general" | "apex";
+  /** URLs extracted from the message (for scan/analyze tasks) */
+  urls: string[];
+}
+
+/**
+ * Detect if the user's message is a general research/scan/analysis task
+ * that should be dispatched to the general worker (not SE-aaS/AaaS/PM-aaS).
+ *
+ * Triggers on: URL scans, competitor research, web lookups, doc analysis,
+ * knowledge base queries, report generation, and similar open-ended tasks.
+ *
+ * Returns null if the message is NOT a general task (i.e., a domain-specific
+ * SE-aaS / AaaS / PM-aaS query should handle it instead).
+ */
+export function detectGeneralTask(
+  message: string,
+  alreadyHandled: boolean,
+): GeneralTaskDetection | null {
+  // Don't double-handle if an agent or SE-aaS domain already owns this message
+  if (alreadyHandled) return null;
+
+  // Extract URLs from the message
+  const urlPattern = /https?:\/\/[^\s,)'"]+|(?:www\.)[^\s,)'"]+\.[a-z]{2,}/gi;
+  const urls = (message.match(urlPattern) ?? []).map((u) =>
+    u.startsWith("http") ? u : `https://${u}`
+  );
+
+  const lower = message.toLowerCase();
+
+  // === Trigger patterns for general worker dispatch ===
+
+  // 1. URL scan / scrape / extract (always general)
+  const hasUrl = urls.length > 0;
+  const urlAction = /\b(scan|scrape|extract|visit|browse|fetch|read|check|look at|analyse|analyze|summarize|compare)\b/i.test(lower);
+  if (hasUrl && urlAction) {
+    return {
+      task: message,
+      agentType: "general",
+      urls,
+    };
+  }
+
+  // 2. Competitor / market research
+  if (
+    /\b(competitor|competition|rival|vs\.?|versus|benchmark|market\s+(research|analysis|landscape|intel|intelligence))\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "apex", // Complex research → APEX FSM
+      urls,
+    };
+  }
+
+  // 3. Product / feature research from KB
+  if (
+    /\b(product\s+(feature|roadmap|pricing|tier|plan|capability)|what\s+does\s+(our|the)\s+product|how\s+does\s+(our|the)\s+product|knowledge\s+base|search\s+(our\s+)?docs?|find\s+in\s+(our\s+)?docs?)\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "general",
+      urls,
+    };
+  }
+
+  // 4. Explicit research / report generation
+  if (
+    /\b(research|investigate|deep\s+dive|write\s+(a\s+)?(report|summary|analysis)|generate\s+(a\s+)?(report|summary)|compile|gather\s+info(rmation)?)\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: urls.length > 2 ? "apex" : "general",
+      urls,
+    };
+  }
+
+  // 5. Explicit "run agent for X" / "use agent to X" (general purpose)
+  if (
+    /\b(run\s+(?:an?\s+)?agent\s+(for|to|on)|use\s+(?:an?\s+)?agent\s+(for|to)|dispatch\s+(?:an?\s+)?agent)\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "general",
+      urls,
+    };
+  }
+
+  // 6. Explicit web search requests
+  if (
+    /\b(search\s+(?:the\s+)?web|look\s+up\s+online|find\s+online|google\s+(for|this)|web\s+search)\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "general",
+      urls,
+    };
+  }
+
+  return null;
+}
+
+export interface GeneralJobCreatedResult {
+  jobId: string;
+  agentType: "general" | "apex";
+  task: string;
+  status: "pending";
+  createdAt: string;
+}
+
+/**
+ * Create a general-purpose agent job in agent_queue.
+ * Called when detectGeneralTask() returns a non-null result.
+ */
+export async function handleGeneralJobCreation(
+  detection: GeneralTaskDetection,
+  workspaceId: string,
+  userId: string,
+  workerId?: string,
+): Promise<GeneralJobCreatedResult | null> {
+  try {
+    const admin = getAdminClient();
+    const now = new Date().toISOString();
+
+    const { data: job, error } = await admin.from("agent_queue").insert({
+      organization_id: workspaceId,
+      agent_type: detection.agentType,       // 'general' or 'apex'
+      task_type: "user-request",
+      priority: 7,                           // above normal, below chain-continuations
+      status: "pending",
+      ai_worker_id: workerId ?? null,
+      payload: {
+        task: detection.task,
+        urls: detection.urls,
+        source: "copilot",
+        createdBy: userId,
+        maxTurns: detection.agentType === "apex" ? 50 : 20,
+      },
+      created_at: now,
+    }).select("id").single();
+
+    if (error || !job?.id) {
+      logger.warn("[agent-handler] General job insert failed:", error);
+      return null;
+    }
+
+    logger.warn(`[agent-handler] General ${detection.agentType} job created: ${job.id} for "${detection.task.slice(0, 60)}"`);
+
+    return {
+      jobId: job.id,
+      agentType: detection.agentType,
+      task: detection.task,
+      status: "pending",
+      createdAt: now,
+    };
+  } catch (err) {
+    logger.error("[agent-handler] General job creation failed:", err);
+    return null;
+  }
+}

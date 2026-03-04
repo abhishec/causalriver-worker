@@ -309,6 +309,28 @@ export interface AgentCommsPayload {
   timestamp: string;
 }
 
+// ─── Dynamic Widget System ──────────────────────────────────────────────────
+// Emitted by domain executors as typed SSE events { widget: WidgetPayload }.
+// Frontend dispatches via WIDGET_MAP to the correct renderer component.
+
+/**
+ * Open widget kind discriminator — any registered string is valid.
+ * Add new kinds by calling registerWidget() in WidgetRenderer.tsx
+ * and adding a schema entry to widget-schemas.ts.
+ */
+export type WidgetKind = string;
+
+export interface WidgetPayload {
+  /** Discriminator — maps to a renderer in WIDGET_MAP */
+  kind: WidgetKind;
+  /** Human-readable title shown above the widget */
+  title?: string;
+  /** Optional subtitle / context */
+  subtitle?: string;
+  /** Widget-specific data — shape depends on kind */
+  data: Record<string, unknown>;
+}
+
 // ─── Agent Input Request ──────────────────────────────────────────────────────
 // Emitted when the agent needs more information before it can execute.
 
@@ -359,6 +381,14 @@ export interface SSECallbacks {
     memoryTracking?: boolean;
     createdAt?: string;
   }) => void;
+  /** General/APEX job queued: emitted when detectGeneralTask() dispatches a background agent job */
+  onGeneralJobQueued?: (job: {
+    jobId: string;
+    agentType: "general" | "apex";
+    task: string;
+    status: "pending";
+    createdAt: string;
+  }) => void;
   /** Connector status: emitted when user asks "what am I connected to?" */
   onConnectorStatus?: (data: { connectors: Array<{ connector_type: string; status: string; signals_count?: number | null; last_sync_at?: string | null }> }) => void;
   /** Connector setup: emitted when user says "connect github / jira / etc." */
@@ -389,6 +419,8 @@ export interface SSECallbacks {
   onMoaResult?: (result: { consensusLevel: string; overallConfidence: number; synthesis: string; executionMs: number; [k: string]: unknown }) => void;
   /** Sync-all: emitted when user says "check all connections" — connector sync started */
   onSyncAll?: (data: { status: string; message: string }) => void;
+  /** Widget: typed widget payload from domain executors (Dynamic Widget System) */
+  onWidget?: (widget: WidgetPayload) => void;
   onDone: () => void;
 }
 

@@ -130,6 +130,39 @@ export async function POST(
         );
       }
 
+      // ── Feedback → Few-shot bridge ─────────────────────────────────────────
+      // When a turn is APPROVED, auto-add to the agent's few-shot corpus so
+      // future turns improve from this example. Fire-and-forget (non-blocking).
+      if (type === "approved") {
+        void (async () => {
+          try {
+            // Fetch the approved turn to get input/output, and session to get corpusId
+            const [turnResult, corpusResult] = await Promise.all([
+              admin.from("agent_session_turns").select("user_input, agent_output").eq("id", turnId).single(),
+              admin.from("agent_corpus").select("id").eq("session_id", sessionId).maybeSingle(),
+            ]);
+
+            const turnRow = turnResult.data;
+            const corpusRow = corpusResult.data;
+
+            if (turnRow?.agent_output && corpusRow?.id) {
+              const { recordApprovedExample } = await import("@/lib/agents/few-shot-accumulator");
+              await recordApprovedExample(admin, {
+                corpusId: corpusRow.id,
+                sessionId,
+                turnId,
+                input: String(turnRow.user_input ?? ""),
+                output: String(turnRow.agent_output),
+                quality: 0.9,
+              });
+              logger.warn("[turn] Approved output added to few-shot corpus", { sessionId, turnId, corpusId: corpusRow.id });
+            }
+          } catch (fsErr) {
+            logger.warn("[turn] Few-shot accumulation failed (non-fatal)", { error: String(fsErr) });
+          }
+        })();
+      }
+
       logger.warn("[/api/agents/sessions/[id]/turn POST] Feedback recorded", {
         sessionId,
         turnId,
