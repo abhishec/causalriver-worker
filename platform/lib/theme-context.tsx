@@ -66,9 +66,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
-  const setTheme = (t: Theme) => {
-    setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
+  // LOCKED TO LIGHT ONLY — dark mode is not supported in this product.
+  // Any call to setTheme("dark") or setTheme("system") is silently coerced to "light".
+  const setTheme = (_t: Theme) => {
+    setThemeState("light");
+    localStorage.setItem(STORAGE_KEY, "light");
   };
 
   return (

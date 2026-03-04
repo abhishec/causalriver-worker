@@ -25,13 +25,23 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
-import { executePrimitive, type PrimitiveContext } from "./primitive-registry";
+import { executePrimitive, listPrimitives, type PrimitiveContext } from "./primitive-registry";
 
 // ── System org sentinel (seeds use this as their organization_id) ─────────────
 
 const SYSTEM_ORG_ID = "00000000-0000-0000-0000-000000000001";
 
 // ── Types ────────────────────────────────────────────────────────────────────
+
+/** Progress callback shape for streaming step-by-step progress to frontend */
+export interface UCEProgressEvent {
+  runId: string;
+  capabilityName: string;
+  status: "running" | "paused" | "completed" | "failed";
+  currentStep: number;
+  totalSteps: number;
+  stepLabel: string;
+}
 
 export interface UCEParams {
   supabase: SupabaseClient;
@@ -46,6 +56,8 @@ export interface UCEParams {
   userMessage?: string;
   /** Detected URLs from the user message */
   detectedUrls?: string[];
+  /** Optional progress callback — called before/after each step for SSE streaming */
+  onProgress?: (event: UCEProgressEvent) => void;
 }
 
 export interface UCEResult {
@@ -87,9 +99,23 @@ interface FSMState {
   steps: WorkflowStep[];
   next?: string;
   terminal?: boolean;
+  /** ADR-031 Phase 2: Async wait condition — pause FSM until condition is met */
+  waitCondition?: {
+    type: string;                // "ingestion_complete" | "time_delay" | etc.
+    jobIdRefs?: string[];        // $steps.X.jobId references to resolve
+    description?: string;
+  };
 }
 
-interface FSMWorkflowDefinition {
+/** Checkpoint data for resuming an FSM from a paused state */
+export interface FSMCheckpoint {
+  currentState: string;
+  allStepOutputs: Record<string, PrimitiveResult>;
+  stateOutputs: Record<string, PrimitiveResult>;
+  params: Record<string, unknown>;
+}
+
+export interface FSMWorkflowDefinition {
   states: Record<string, FSMState>;
   initialState: string;
   outputMapping?: Record<string, string>;
@@ -312,6 +338,67 @@ function applyOutputMapping(
   return result;
 }
 
+// ── Pre-validation ("Green Light" system) ────────────────────────────────────
+
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const VALID_PRIMITIVE_NAMES = new Set(listPrimitives());
+
+/**
+ * ADR-031 Phase 2: Pre-validate a workflow BEFORE execution.
+ * Catches broken references, missing config, and invalid primitives
+ * so the user gets a clear error instead of silent undefined cascading.
+ */
+function preValidateWorkflow(
+  def: WorkflowDefinition | FSMWorkflowDefinition,
+  params: Record<string, unknown>,
+): { ready: boolean; issues: string[] } {
+  const issues: string[] = [];
+
+  // Collect all steps across workflow types
+  const allSteps: WorkflowStep[] = [];
+  if ("steps" in def) {
+    allSteps.push(...(def as WorkflowDefinition).steps);
+  } else if ("states" in def) {
+    const fsm = def as FSMWorkflowDefinition;
+    for (const state of Object.values(fsm.states)) {
+      allSteps.push(...state.steps);
+    }
+  }
+
+  // 1. Check all primitives exist
+  for (const step of allSteps) {
+    if (!VALID_PRIMITIVE_NAMES.has(step.primitive)) {
+      issues.push(`Step '${step.id}': unknown primitive '${step.primitive}'. Valid: ${[...VALID_PRIMITIVE_NAMES].join(", ")}`);
+    }
+  }
+
+  // 2. Check API key if any step uses call_llm
+  const usesLlm = allSteps.some((s) => s.primitive === "call_llm");
+  if (usesLlm && !ANTHROPIC_API_KEY) {
+    issues.push("Workflow uses call_llm but ANTHROPIC_API_KEY is not configured");
+  }
+
+  // 3. Check $params references resolve to non-null
+  const paramRefs = new Set<string>();
+  const stepsJson = JSON.stringify(allSteps);
+  const paramMatches = stepsJson.match(/\$params\.(\w+)/g) ?? [];
+  for (const ref of paramMatches) {
+    paramRefs.add(ref.replace("$params.", ""));
+  }
+
+  for (const paramName of paramRefs) {
+    const val = params[paramName];
+    if (val === undefined || val === null) {
+      issues.push(`Parameter '${paramName}' is required but resolved to ${String(val)}`);
+    } else if (Array.isArray(val) && val.length === 0) {
+      // Empty arrays for URL params are common — warn but don't block
+      // The step's condition guard ($params.X.length > 0) will skip it
+    }
+  }
+
+  return { ready: issues.length === 0, issues };
+}
+
 // ── Workflow execution ────────────────────────────────────────────────────────
 
 /**
@@ -370,11 +457,21 @@ async function executeWorkflow(
       } else {
         const results: PrimitiveResult[] = [];
         for (const item of items) {
-          const itemParams = {
-            ...resolvedParams,
-            ...(step.forEachKey ? { [step.forEachKey]: item } : {}),
-          };
-          const itemResult = await executePrimitive(ctx, step.primitive, itemParams);
+          // Re-resolve params per item so $forEach.X references work in templates.
+          // The forEach item is injected into params under the forEachKey for $params.X resolution,
+          // and also into stepOutputs under "__forEach" for $steps.__forEach.X resolution.
+          const perItemParams = step.forEachKey
+            ? { ...params, [step.forEachKey]: item }
+            : params;
+          const perItemResolved = resolveAllRefs(
+            step.params,
+            perItemParams,
+            stepOutputs,
+          ) as Record<string, unknown>;
+          if (step.action && !perItemResolved["action"]) {
+            perItemResolved["action"] = step.action;
+          }
+          const itemResult = await executePrimitive(ctx, step.primitive, perItemResolved);
           results.push(itemResult);
         }
         output = { results };
@@ -384,6 +481,20 @@ async function executeWorkflow(
     }
 
     stepOutputs[step.id] = output;
+
+    // ADR-031 Phase 2: Error short-circuit — abort workflow on step failure
+    if (output.error && !output.skipped) {
+      logger.warn("[uce] Step failed — aborting workflow", {
+        stepId: step.id,
+        primitive: step.primitive,
+        error: output.error,
+      });
+      return {
+        success: false,
+        capabilityName: "",
+        error: `Step '${step.id}' (${step.primitive}) failed: ${output.error}`,
+      };
+    }
 
     // Collect injected messages from inject steps
     if (step.primitive === "inject") {
@@ -477,6 +588,21 @@ async function executeFSMWorkflow(
       stateStepOutputs[step.id] = output;
       allStepOutputs[step.id] = output; // accumulate globally
 
+      // ADR-031 Phase 2: Error short-circuit — abort FSM on step failure
+      if (output.error && !output.skipped) {
+        logger.warn("[uce:fsm] Step failed — aborting FSM workflow", {
+          state: currentStateName,
+          stepId: step.id,
+          primitive: step.primitive,
+          error: output.error,
+        });
+        return {
+          success: false,
+          capabilityName: "",
+          error: `State '${currentStateName}' step '${step.id}' (${step.primitive}) failed: ${output.error}`,
+        };
+      }
+
       if (step.primitive === "inject") {
         const msgs = output["injectedMessages"];
         if (Array.isArray(msgs)) {
@@ -488,12 +614,183 @@ async function executeFSMWorkflow(
     // Merge this state's step outputs into state outputs (for $states.X.Y references)
     stateOutputs[currentStateName] = { ...stateStepOutputs };
 
+    // ADR-031 Phase 2: Check for async waitCondition before transitioning
+    // If state has a waitCondition, pause FSM and return checkpoint for durable execution
+    if (state.waitCondition && state.next) {
+      const resolvedJobIds = (state.waitCondition.jobIdRefs ?? [])
+        .map((ref) => resolveRef(ref, params, allStepOutputs, stateOutputs))
+        .filter((id): id is string => typeof id === "string" && id.length > 0);
+
+      logger.warn("[uce:fsm] waitCondition detected — pausing FSM for async resumption", {
+        state: currentStateName,
+        nextState: state.next,
+        conditionType: state.waitCondition.type,
+        resolvedJobIds,
+      });
+
+      return {
+        success: true,
+        capabilityName: "",
+        result: {
+          asyncWait: true,
+          waitCondition: {
+            ...state.waitCondition,
+            resolvedJobIds,
+          },
+          checkpoint: {
+            currentState: state.next, // resume FROM the NEXT state
+            allStepOutputs: { ...allStepOutputs },
+            stateOutputs: { ...stateOutputs },
+            params,
+          } satisfies FSMCheckpoint,
+        },
+        narrative: state.waitCondition.description
+          ?? "Processing started. I'll continue when the required data is ready.",
+      };
+    }
+
     if (state.terminal) break;
     currentStateName = state.next ?? "";
     if (!currentStateName) break;
   }
 
   // Apply outputMapping — allStepOutputs for $steps.X, stateOutputs for $states.X.Y
+  const mappedResult = applyOutputMapping(def.outputMapping, allStepOutputs, params, stateOutputs);
+
+  return {
+    success: true,
+    capabilityName: "",
+    result: mappedResult,
+    injectedMessages: allInjectedMessages.length > 0 ? allInjectedMessages : undefined,
+    narrative: (mappedResult["message"] ?? mappedResult["summary"] ?? mappedResult["narrative"]) as string | undefined,
+  };
+}
+
+// ── Checkpoint resume (ADR-031 Phase 2) ─────────────────────────────────────
+
+/**
+ * Resume an FSM workflow from a checkpoint saved during a previous async wait.
+ *
+ * Used by the capability-workflow-worker cron phase when a waitCondition
+ * (e.g. ingestion_complete) is satisfied. Starts from checkpoint.currentState
+ * with pre-populated step/state outputs, continuing the FSM until the next
+ * waitCondition or terminal state.
+ */
+export async function executeFSMWorkflowFromCheckpoint(
+  ctx: PrimitiveContext,
+  def: FSMWorkflowDefinition,
+  checkpoint: FSMCheckpoint,
+): Promise<UCEResult> {
+  let currentStateName = checkpoint.currentState;
+  const allStepOutputs: Record<string, PrimitiveResult> = { ...checkpoint.allStepOutputs };
+  const stateOutputs: Record<string, PrimitiveResult> = { ...checkpoint.stateOutputs };
+  const params = checkpoint.params;
+  const allInjectedMessages: Array<{ role: string; content: string }> = [];
+  const MAX_STATES = 20;
+  let iterations = 0;
+
+  logger.warn("[uce:fsm:resume] Resuming FSM from checkpoint", {
+    currentState: currentStateName,
+    priorStates: Object.keys(stateOutputs),
+    priorSteps: Object.keys(allStepOutputs),
+  });
+
+  while (currentStateName && iterations < MAX_STATES) {
+    iterations++;
+    const state = def.states[currentStateName];
+    if (!state) {
+      logger.warn("[uce:fsm:resume] Unknown state after checkpoint", { currentStateName });
+      break;
+    }
+
+    logger.warn("[uce:fsm:resume] Entering state", {
+      state: currentStateName,
+      stepCount: state.steps.length,
+    });
+
+    const stateStepOutputs: Record<string, PrimitiveResult> = {};
+
+    for (const step of state.steps) {
+      if (step.condition && !evaluateCondition(step.condition, params, allStepOutputs)) {
+        stateStepOutputs[step.id] = { skipped: true };
+        allStepOutputs[step.id] = { skipped: true };
+        continue;
+      }
+
+      const resolvedParams = resolveAllRefs(
+        step.params,
+        params,
+        allStepOutputs,
+        stateOutputs,
+      ) as Record<string, unknown>;
+
+      if (step.primitive === "session" && step.action) {
+        resolvedParams["action"] = step.action;
+      }
+
+      const output = await executePrimitive(ctx, step.primitive, resolvedParams);
+      stateStepOutputs[step.id] = output;
+      allStepOutputs[step.id] = output;
+
+      // Error short-circuit
+      if (output.error && !output.skipped) {
+        logger.warn("[uce:fsm:resume] Step failed — aborting resumed FSM", {
+          state: currentStateName,
+          stepId: step.id,
+          error: output.error,
+        });
+        return {
+          success: false,
+          capabilityName: "",
+          error: `State '${currentStateName}' step '${step.id}' (${step.primitive}) failed: ${output.error}`,
+        };
+      }
+
+      if (step.primitive === "inject") {
+        const msgs = output["injectedMessages"];
+        if (Array.isArray(msgs)) {
+          allInjectedMessages.push(...(msgs as Array<{ role: string; content: string }>));
+        }
+      }
+    }
+
+    stateOutputs[currentStateName] = { ...stateStepOutputs };
+
+    // Check for another waitCondition (chained async waits)
+    if (state.waitCondition && state.next) {
+      const resolvedJobIds = (state.waitCondition.jobIdRefs ?? [])
+        .map((ref) => resolveRef(ref, params, allStepOutputs, stateOutputs))
+        .filter((id): id is string => typeof id === "string" && id.length > 0);
+
+      logger.warn("[uce:fsm:resume] Another waitCondition — re-pausing FSM", {
+        state: currentStateName,
+        nextState: state.next,
+        resolvedJobIds,
+      });
+
+      return {
+        success: true,
+        capabilityName: "",
+        result: {
+          asyncWait: true,
+          waitCondition: { ...state.waitCondition, resolvedJobIds },
+          checkpoint: {
+            currentState: state.next,
+            allStepOutputs: { ...allStepOutputs },
+            stateOutputs: { ...stateOutputs },
+            params,
+          } satisfies FSMCheckpoint,
+        },
+        narrative: state.waitCondition.description
+          ?? "Still waiting on additional async dependencies…",
+      };
+    }
+
+    if (state.terminal) break;
+    currentStateName = state.next ?? "";
+    if (!currentStateName) break;
+  }
+
   const mappedResult = applyOutputMapping(def.outputMapping, allStepOutputs, params, stateOutputs);
 
   return {
@@ -731,21 +1028,49 @@ export async function executeCapability(params: UCEParams): Promise<UCEResult> {
     paramKeys: Object.keys(mergedParams),
   });
 
-  // 3. Track invocation
+  // 3. Pre-validate workflow before execution (ADR-031 Phase 2 — "green light" system)
+  if (capability.workflow_definition && (capability.tool_type === "workflow" || capability.tool_type === "fsm_workflow")) {
+    const validation = preValidateWorkflow(
+      capability.workflow_definition as WorkflowDefinition | FSMWorkflowDefinition,
+      mergedParams,
+    );
+    if (!validation.ready) {
+      logger.warn("[uce] Pre-validation failed — aborting before execution", {
+        capabilityName,
+        issues: validation.issues,
+      });
+      return {
+        success: false,
+        capabilityName,
+        error: `Cannot run '${capabilityName}': ${validation.issues.join("; ")}`,
+      };
+    }
+  }
+
+  // 4. Track invocation
   void supabase.rpc("increment_tool_invocation", { p_tool_id: capability.id });
 
   const ctx: PrimitiveContext = { supabase, organizationId, userId, aiWorkerId };
+  const runId = `uce-${Date.now()}`;
+  const onProgress = params.onProgress;
 
-  // 4. Dispatch to correct execution strategy
+  // 5. Dispatch to correct execution strategy
   let result: UCEResult;
 
   try {
     if (capability.tool_type === "workflow") {
       const workflowDef = capability.workflow_definition as WorkflowDefinition;
+      const totalSteps = workflowDef.steps?.length ?? 0;
+      onProgress?.({ runId, capabilityName, status: "running", currentStep: 0, totalSteps, stepLabel: "Starting workflow…" });
       result = await executeWorkflow(ctx, workflowDef, mergedParams);
+      onProgress?.({ runId, capabilityName, status: result.success ? "completed" : "failed", currentStep: totalSteps, totalSteps, stepLabel: result.success ? "Workflow complete" : `Failed: ${result.error ?? "unknown"}` });
     } else if (capability.tool_type === "fsm_workflow") {
       const fsmDef = capability.workflow_definition as FSMWorkflowDefinition;
+      const totalStates = fsmDef.states ? Object.keys(fsmDef.states).length : 0;
+      onProgress?.({ runId, capabilityName, status: "running", currentStep: 0, totalSteps: totalStates, stepLabel: `Starting FSM (${totalStates} states)…` });
       result = await executeFSMWorkflow(ctx, fsmDef, mergedParams);
+      const finalStatus = result.result?.asyncWait ? "paused" : (result.success ? "completed" : "failed");
+      onProgress?.({ runId, capabilityName, status: finalStatus, currentStep: totalStates, totalSteps: totalStates, stepLabel: finalStatus === "paused" ? "Workflow paused — awaiting async dependency" : (result.success ? "FSM complete" : `Failed: ${result.error ?? "unknown"}`) });
     } else {
       // compute: run implementation as JS function
       // For safety, only allow pre-validated implementations
@@ -764,7 +1089,7 @@ export async function executeCapability(params: UCEParams): Promise<UCEResult> {
     return { success: false, capabilityName, error: msg };
   }
 
-  // 5. Attach capability name to result
+  // 6. Attach capability name to result
   result.capabilityName = capabilityName;
   return result;
 }

@@ -49,6 +49,7 @@ import { extractProcessTemplates } from "@/lib/brain/process-templates";
 import { promotePatternsToCore, promoteGabaPatternsToKnowledge } from "@/lib/brain/se-aas-federation";
 import { ensureCoreBrain, checkCoreBrainHealth } from "@/lib/brain/core-brain";
 import { promoteMemoryToFederatedKnowledge } from "@/lib/brain/memory-federator";
+import { writeAllServiceHealth } from "@/lib/brain/service-health-writer";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes max — 5 orgs × ~30s each
@@ -763,6 +764,15 @@ export async function GET(request: NextRequest) {
         error: (err as Error)?.message ?? String(err),
       });
     }
+
+    // ── Service Health Cache Refresh ──────────────────────────────────
+    // Refreshes L26-L29 service_health rows so brain context injection
+    // always has fresh data without blocking the cron response.
+    void writeAllServiceHealth(service).catch((err: unknown) => {
+      logger.warn("[CronCognitiveCycle] writeAllServiceHealth failed (non-fatal)", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
 
     // ── Log run to scheduled_job_runs ─────────────────────────────────
     try {

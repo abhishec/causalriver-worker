@@ -13,6 +13,11 @@ const CopilotChat = dynamic(
   { ssr: false }
 );
 
+const BrainTabContent = dynamic(
+  () => import("./BrainTabContent").then((m) => m.BrainTabContent),
+  { ssr: false }
+);
+
 // Module-level supabase client
 const supabase = createClient();
 
@@ -166,6 +171,7 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
   const [creatingKey, setCreatingKey] = useState(false);
   const [newKeyRaw, setNewKeyRaw] = useState<string | null>(null);
   const [newKeyError, setNewKeyError] = useState<string | null>(null);
+  const [revokingKeyId, setRevokingKeyId] = useState<string | null>(null);
 
   // Fetch worker from DB
   useEffect(() => {
@@ -400,6 +406,21 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
     }
   }, [workerId, newKeyName, creatingKey, fetchKeys]);
 
+  const revokeKey = useCallback(async (keyId: string) => {
+    if (revokingKeyId) return;
+    setRevokingKeyId(keyId);
+    try {
+      const res = await fetch(`/api/ai-workers/${workerId}/keys/${keyId}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchKeys();
+      }
+    } catch {
+      // non-fatal — key list will still show
+    } finally {
+      setRevokingKeyId(null);
+    }
+  }, [workerId, revokingKeyId, fetchKeys]);
+
   // Derived
   const isLearning = (rlStatus?.learningVelocity ?? 0) > 0;
   const workerName = worker?.name ?? initialWorkerName ?? "AI Worker";
@@ -522,7 +543,8 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
           <JobsTab jobs={jobs} loading={jobsLoading} onRefresh={fetchJobs} />
         )}
         {activeTab === "brain" && (
-          <BrainTab
+          <BrainTabContent
+            orgId={orgId}
             rlStatus={rlStatus}
             workerHealth={workerHealth}
             tierStats={tierStats}
@@ -544,6 +566,8 @@ export default function AIWorkerControlClient({ orgId, workerId, initialWorkerNa
             newKeyRaw={newKeyRaw}
             onDismissKey={() => setNewKeyRaw(null)}
             newKeyError={newKeyError}
+            onRevokeKey={revokeKey}
+            revokingKeyId={revokingKeyId}
           />
         )}
       </div>
@@ -910,205 +934,6 @@ function JobsTab({
   );
 }
 
-// ── Brain Tab ─────────────────────────────────────────────────────────────────
-
-function BrainTab({
-  rlStatus,
-  workerHealth,
-  tierStats,
-  isLoading,
-  isLearning,
-  isConsolidating,
-  consolidationMsg,
-  onConsolidate,
-}: {
-  rlStatus: RLStatus | null;
-  workerHealth: WorkerHealth | null;
-  tierStats: TierStats | null;
-  isLoading: boolean;
-  isLearning: boolean;
-  isConsolidating: boolean;
-  consolidationMsg: string | null;
-  onConsolidate: () => void;
-}) {
-  return (
-    <div className="p-6 max-w-4xl">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Brain IQ card */}
-        <div className="rounded-xl border border-border bg-white/[0.03] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>Brain Intelligence</SectionLabel>
-            {isLearning && (
-              <span className="text-[10px] font-medium text-orange-400 uppercase tracking-wide flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-orange-400 animate-pulse" />
-                Learning
-              </span>
-            )}
-          </div>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              <div className="flex items-end gap-2">
-                <div className="h-10 w-16 rounded bg-foreground/[0.06] animate-pulse" />
-                <div className="h-4 w-5 rounded bg-foreground/[0.04] animate-pulse mb-1.5" />
-              </div>
-              <div className="h-1 bg-foreground/5 rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-foreground/[0.08] rounded-full animate-pulse" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="h-3 w-16 rounded bg-foreground/[0.04] animate-pulse" />
-                    <div className="h-3 w-8 rounded bg-foreground/[0.06] animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-end gap-2 mb-1">
-                <span className="text-4xl font-bold text-accent">
-                  {rlStatus?.brainIq ?? 0}
-                </span>
-                <span className="text-sm text-muted mb-1.5">IQ</span>
-              </div>
-              <div className="h-1 bg-white/5 rounded-full overflow-hidden mb-4">
-                <div
-                  className="h-full bg-accent/60 rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${Math.min(100, rlStatus?.brainIq ?? 0)}%`,
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <MetricRow
-                  label="Signals (24h)"
-                  value={String(rlStatus?.totalSignals24h ?? 0)}
-                />
-                <MetricRow
-                  label="Improvement"
-                  value={`${Math.round(
-                    rlStatus?.improvementThisSession ?? 0
-                  )}%`}
-                />
-                <MetricRow
-                  label="Velocity"
-                  value={String(rlStatus?.learningVelocity ?? 0)}
-                />
-                <MetricRow
-                  label="This Hour"
-                  value={String(rlStatus?.signalsThisHour ?? 0)}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Worker health card */}
-        <div className="rounded-xl border border-border bg-white/[0.03] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>Worker Health</SectionLabel>
-          </div>
-          {isLoading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="h-3 w-16 rounded bg-foreground/[0.04] animate-pulse" />
-                  <div className="h-3 w-8 rounded bg-foreground/[0.06] animate-pulse" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <MetricRow
-                label="Running"
-                value={String(workerHealth?.runningJobs ?? 0)}
-                valueClass={
-                  workerHealth?.runningJobs ? "text-accent" : "text-foreground/70"
-                }
-              />
-              <MetricRow
-                label="Pending"
-                value={String(workerHealth?.pendingJobs ?? 0)}
-                valueClass="text-warning"
-              />
-              <MetricRow
-                label="Done (1h)"
-                value={String(workerHealth?.succeededLast1h ?? 0)}
-                valueClass="text-success"
-              />
-              <MetricRow
-                label="Failed (1h)"
-                value={String(workerHealth?.failedLast1h ?? 0)}
-                valueClass={
-                  workerHealth?.failedLast1h ? "text-danger" : "text-foreground/70"
-                }
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Knowledge Tiers */}
-        <div className="rounded-xl border border-border bg-white/[0.03] p-5 md:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>Knowledge Tiers</SectionLabel>
-          </div>
-
-          <div className="space-y-2.5">
-            <TierRow
-              label="T1"
-              name="Raw Knowledge"
-              table="knowledge_chunks"
-              count={tierStats?.tier1Count ?? null}
-              colorClass="text-accent"
-              bgClass="bg-accent/15"
-            />
-            <TierRow
-              label="T2"
-              name="Signals (24h)"
-              table="cross_domain_signals"
-              count={tierStats?.tier2Count ?? null}
-              colorClass="text-purple-400"
-              bgClass="bg-purple-500/15"
-            />
-            <TierRow
-              label="T3"
-              name="Consolidated"
-              table="consolidated_patterns"
-              count={tierStats?.tier3Count ?? null}
-              colorClass="text-success"
-              bgClass="bg-success/15"
-            />
-          </div>
-
-          <div className="mt-4">
-            {consolidationMsg ? (
-              <p className={`text-xs text-center py-2 ${consolidationMsg.includes("failed") ? "text-danger" : "text-success/80"}`}>
-                {consolidationMsg}
-              </p>
-            ) : (
-              <button
-                onClick={onConsolidate}
-                disabled={isConsolidating}
-                className="w-full py-2 rounded-lg border border-border text-xs text-muted hover:border-success/30 hover:text-success/70 hover:bg-success/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-              >
-                {isConsolidating ? (
-                  <>
-                    <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                    Consolidating...
-                  </>
-                ) : (
-                  "Run Consolidation"
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Keys Tab ──────────────────────────────────────────────────────────────────
 
 function KeysTab({
@@ -1121,6 +946,8 @@ function KeysTab({
   newKeyRaw,
   onDismissKey,
   newKeyError,
+  onRevokeKey,
+  revokingKeyId,
 }: {
   apiKeys: ApiKey[];
   loading: boolean;
@@ -1131,6 +958,8 @@ function KeysTab({
   newKeyRaw: string | null;
   onDismissKey: () => void;
   newKeyError: string | null;
+  onRevokeKey: (keyId: string) => void;
+  revokingKeyId: string | null;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -1246,6 +1075,7 @@ function KeysTab({
                 <th className="text-left px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
                   Created
                 </th>
+                <th className="px-4 py-2.5" />
               </tr>
             </thead>
             <tbody>
@@ -1270,6 +1100,17 @@ function KeysTab({
                   </td>
                   <td className="px-4 py-3 text-muted text-xs">
                     {formatDate(key.created_at)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {key.is_active && (
+                      <button
+                        onClick={() => onRevokeKey(key.id)}
+                        disabled={revokingKeyId === key.id}
+                        className="text-[11px] text-danger/60 hover:text-danger transition-colors disabled:opacity-40"
+                      >
+                        {revokingKeyId === key.id ? "Revoking…" : "Revoke"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -1320,39 +1161,6 @@ function StatusBadge({ status }: { status: string }) {
       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`} />
       {status}
     </span>
-  );
-}
-
-function TierRow({
-  label,
-  name,
-  table,
-  count,
-  colorClass,
-  bgClass,
-}: {
-  label: string;
-  name: string;
-  table: string;
-  count: number | null;
-  colorClass: string;
-  bgClass: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03]">
-      <div
-        className={`w-5 h-5 rounded flex items-center justify-center ${bgClass} flex-shrink-0`}
-      >
-        <span className={`text-[9px] font-bold ${colorClass}`}>{label}</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-foreground/60">{name}</p>
-        <p className="text-[10px] text-muted">{table}</p>
-      </div>
-      <span className={`text-sm font-bold ${colorClass}`}>
-        {count !== null ? count.toLocaleString() : "—"}
-      </span>
-    </div>
   );
 }
 

@@ -82,13 +82,17 @@ const nextConfig: NextConfig = {
   compress: isDev,
 
   // ── Cache headers for static assets ────────────────────────────────────────
-  // _next/static/ files use content-hashed filenames → safe to cache forever.
-  // CloudFront caches these at edge; browsers cache locally for 1 year.
+  // Production: content-hashed filenames → safe to cache forever via CloudFront.
+  // Development: no-cache so edited chunks are always refetched (Turbopack reuses
+  // the same URL hash even when content changes, so immutable breaks hot reload).
   async headers() {
+    const staticCache = isDev
+      ? "no-cache, no-store, must-revalidate"
+      : "public, max-age=31536000, immutable";
     return [
       {
         source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+        headers: [{ key: "Cache-Control", value: staticCache }],
       },
       {
         source: "/fonts/:path*",

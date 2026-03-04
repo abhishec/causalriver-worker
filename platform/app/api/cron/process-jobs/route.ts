@@ -155,12 +155,31 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    // ── Phase 6: Capability Workflow resumption (ADR-031) ──────
+    // Resumes FSM workflows paused by waitCondition (e.g., ingestion_complete).
+    // Uses existing agent_queue rows with agent_type='capability-workflow'.
+    let capabilityResult = { processed: 0, resumed: 0, completed: 0, failed: 0 };
+    const remainingForCapabilities = Math.max(0, 28_000 - (Date.now() - startMs));
+    if (remainingForCapabilities > 2_000) {
+      try {
+        const { processCapabilityWorkflows } = await import("@/lib/brain/capability-workflow-worker");
+        capabilityResult = await withTimeout(
+          processCapabilityWorkflows(service, 3),
+          remainingForCapabilities,
+          "processCapabilityWorkflows"
+        );
+      } catch (err) {
+        logger.error("[process-jobs] capability-workflow phase error", { error: err });
+      }
+    }
+
     const durationMs = Date.now() - startMs;
     logger.warn(
       `[cron/process-jobs] type=${workerType} staleRecovered=${staleJobsRecovered} ` +
       `processed=${result.processed} ok=${result.succeeded} failed=${result.failed} ` +
       `codeAgents=${codeAgentResult.processed}(ok=${codeAgentResult.succeeded}) ` +
-      `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) took=${durationMs}ms`
+      `processEngine=${processEngineResult.processed}(ok=${processEngineResult.succeeded}) ` +
+      `capabilityWf=${capabilityResult.processed}(resumed=${capabilityResult.resumed}) took=${durationMs}ms`
     );
 
     return NextResponse.json({
@@ -170,6 +189,7 @@ export async function GET(request: NextRequest) {
       ...result,
       codeAgent: codeAgentResult,
       processEngine: processEngineResult,
+      capabilityWorkflow: capabilityResult,
       durationMs,
     });
   } catch (err: unknown) {

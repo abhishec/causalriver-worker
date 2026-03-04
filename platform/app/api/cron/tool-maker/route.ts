@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
         // Group by domain, count occurrences
         const domainCounts = new Map<string, { count: number; gap: { id: string; domain: string; query: string } }>();
         for (const row of gapRows) {
-          const domain = (row.domain as string).replace(/^capability-gap:/, "");
+          const domain = (row.domain as string).replace(/^capability-gap:/, "").replace(/^reflex:/, "");
           const existing = domainCounts.get(domain);
           if (existing) {
             existing.count++;
@@ -118,23 +118,25 @@ export async function GET(req: NextRequest) {
 
             if (existingTool?.length) continue; // Already have a tool
 
-            // ADR-031: Route to appropriate synthesizer based on gap domain.
-            // reflex: domain gaps → workflow synthesis (generates step graphs)
-            // other domain gaps → compute synthesis (generates JS functions)
-            const isReflexGap = gap.domain.startsWith("reflex:");
-            let result;
-
-            if (isReflexGap) {
-              const { synthesizeWorkflowFromGap } = await import("@/lib/brain/tool-maker");
-              result = await synthesizeWorkflowFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
-            } else {
-              const { synthesizeToolFromGap } = await import("@/lib/brain/tool-maker");
-              result = await synthesizeToolFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
-            }
+            // ADR-031 Phase 5: ALL gaps → workflow synthesis.
+            // compute tool_type is blocked in UCE runtime (no sandbox).
+            // Workflow synthesis generates executable step graphs using primitives.
+            // This covers both reflex: domain gaps AND general domain gaps.
+            const { synthesizeWorkflowFromGap } = await import("@/lib/brain/tool-maker");
+            const result = await synthesizeWorkflowFromGap(service, orgId, { ...gap, occurrences: count }, apiKey);
 
             if (result) {
               synthesized++;
               totalSynthesized++;
+
+              // Fix 5: Clean up gap rows after successful synthesis
+              // Prevents re-synthesis on next cron run
+              await service
+                .from("capability_library")
+                .update({ status: "deprecated", updated_at: new Date().toISOString() })
+                .eq("organization_id", orgId)
+                .eq("domain", gap.domain)
+                .eq("status", "gap");
             }
           } catch (err) {
             errors++;

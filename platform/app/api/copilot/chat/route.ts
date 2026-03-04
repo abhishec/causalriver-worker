@@ -911,6 +911,9 @@ export async function POST(request: NextRequest) {
     // ══════════════════════════════════════════════════════════════════════
     let reflexResult: ReflexResult = { matched: false, guards: [] };
     let reflexDelegateResult: Record<string, unknown> | null = null;
+    // ADR-031 Phase 3b: Pre-stream buffer — UCE progress events fired before the SSE
+    // stream is open are collected here and replayed when the main stream starts.
+    const _uceProgressBuffer: string[] = [];
 
     try {
       const reflexCtx = buildReflexContext(
@@ -950,10 +953,38 @@ export async function POST(request: NextRequest) {
             supabase: service,
             userMessage: message,
             detectedUrls: reflexCtx.detectedUrls,
+            // ADR-031 Phase 3b: Collect progress into pre-stream buffer; replayed when stream opens
+            onProgress: (evt) => {
+              _uceProgressBuffer.push(JSON.stringify({
+                workflowProgress: {
+                  runId: evt.runId,
+                  workflowId: evt.capabilityName,
+                  workflowName: evt.capabilityName.replace(/-/g, " "),
+                  status: evt.status,
+                  currentStep: evt.currentStep,
+                  totalSteps: evt.totalSteps,
+                  steps: [{
+                    order: evt.currentStep,
+                    label: evt.stepLabel,
+                    status: evt.status === "completed" ? "completed"
+                          : evt.status === "failed"    ? "failed"
+                          : "running",
+                  }],
+                },
+              }));
+            },
           });
 
           if (delegateOut.success) {
-            if (delegateOut.narrative) {
+            if (delegateOut.asyncWait) {
+              // ADR-031: Workflow paused for async dependency (e.g. ingestion)
+              reflexDelegateResult = {
+                reflexName: reflexResult.reflexName,
+                handler: reflexResult.action.handler,
+                type: "async-wait",
+                narrative: delegateOut.narrative ?? "Workflow paused — will resume automatically when dependencies complete.",
+              };
+            } else if (delegateOut.narrative) {
               // Delegate returned a narrative — inject for LLM to narrate
               reflexDelegateResult = {
                 reflexName: reflexResult.reflexName,
@@ -4337,6 +4368,10 @@ No connectors are configured yet. When the user asks for data from any source (S
     const { stream, send, sendText, sendError, close, sendProactiveInsights } = createSSEStream();
     const streamStartMs = Date.now();
 
+    // ADR-031 Phase 3b: Replay UCE progress events buffered before stream was created
+    for (const p of _uceProgressBuffer) { send(p); }
+    _uceProgressBuffer.length = 0;
+
     // ── NB-063: Snapshot causal weights BEFORE stream for federation delta ───
     // Mirror of domain-executor Step 0: capture the org's causal graph state
     // right now so that after the stream we can diff what changed and promote
@@ -4629,6 +4664,25 @@ No connectors are configured yet. When the user asks for data from any source (S
             }).catch(() => { /* Non-fatal — fire and forget */ });
             // Emit a sync-started SSE event so frontend can show feedback
             send(JSON.stringify({ syncAll: { status: "started", message: "Syncing all connectors…" } }));
+          } catch {
+            // Non-fatal
+          }
+        }
+
+        // ── Brain training intent — triggered when user says "begin training" / "start training" ──
+        const beginTrainingIntent =
+          /\b(?:begin|start|kick off|run|trigger|initiate|launch)\s+(?:brain\s+)?training\b/i.test(message) ||
+          /\btrain(?:ing)?\s+(?:my\s+)?(?:brain|AI|model)\b/i.test(message) ||
+          /\brun\s+(?:brain\s+)?consolidation\b/i.test(message);
+        if (beginTrainingIntent && !syncAllIntent) {
+          try {
+            // Fire consolidation in background — don't await
+            fetch(`${process.env.NEXT_PUBLIC_APP_URL || ""}/api/brain/consolidation`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-internal-call": "copilot" },
+              body: JSON.stringify({ organizationId: workspaceId, mode: "full" }),
+            }).catch(() => { /* Non-fatal — fire and forget */ });
+            send(JSON.stringify({ brainTraining: { status: "started", message: "Brain training started — consolidating knowledge…" } }));
           } catch {
             // Non-fatal
           }

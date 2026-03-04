@@ -1091,6 +1091,9 @@ export async function consumeSSEStream(
             if (parsed.pmAasResult) {
               callbacks.onDomainResult({ service: "pm-aas", data: parsed.pmAasResult });
             }
+            if (parsed.reflexResult) {
+              callbacks.onDomainResult({ service: "reflex", data: parsed.reflexResult });
+            }
             // Agent Communications Protocol (Heart/Mind/Speech)
             if (parsed.agentComms) {
               callbacks.onAgentComms?.(parsed.agentComms);
@@ -1196,6 +1199,7 @@ export async function consumeSSEStream(
             if (parsed.seaasResult) callbacks.onDomainResult({ service: "seaas", data: parsed.seaasResult });
             if (parsed.deliveryIntelligenceResult) callbacks.onDomainResult({ service: "delivery-intelligence", data: parsed.deliveryIntelligenceResult });
             if (parsed.pmAasResult) callbacks.onDomainResult({ service: "pm-aas", data: parsed.pmAasResult });
+            if (parsed.reflexResult) callbacks.onDomainResult({ service: "reflex", data: parsed.reflexResult });
             if (parsed.agentComms) callbacks.onAgentComms?.(parsed.agentComms);
             if (parsed.agentInputRequest) callbacks.onAgentInputRequest?.(parsed.agentInputRequest);
             if (parsed.agentStep) callbacks.onAgentStep?.(parsed.agentStep);
@@ -2417,6 +2421,18 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
           },
           onDomainResult: (result) => {
             if (controller.signal.aborted) return;
+            // ADR-031 Phase 3b: async-wait → amber pulsing dot (reuses agentRunningDomain state)
+            if (result.service === "reflex") {
+              const d = result.data as Record<string, unknown>;
+              if (d?.type === "async-wait") {
+                setAgentRunningDomain(
+                  String(d.handler ?? d.reflexName ?? "workflow").replace(/-/g, " ")
+                );
+                setAgentRunningMessage(
+                  String(d.narrative ?? "Processing in background…")
+                );
+              }
+            }
             // Attach the message index so the parent can link this artifact to the chat message
             onDomainResultRef.current?.({ ...result, messageIndex: messageIdx });
           },

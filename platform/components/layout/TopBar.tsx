@@ -37,7 +37,11 @@ function openCopilot() {
 export function TopBar() {
   const pathname = usePathname() ?? "";
   // Derive label directly from pathname — same value on SSR and client, no hydration mismatch.
-  const pageLabel = ROUTE_LABELS[pathname] || pathname.split("/").pop() || "";
+  // Fallback: auto-title-case the last URL segment (e.g. "approvals" → "Approvals",
+  // "early-warning" → "Early Warning") so unknown sub-routes never produce a raw lowercase segment.
+  const rawSegment = pathname.split("/").pop() ?? "";
+  const autoLabel = rawSegment.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  const pageLabel = ROUTE_LABELS[pathname] || autoLabel;
 
   // Hide topbar on copilot page — it has its own header with service tabs
   if (pathname === "/copilot") return null;

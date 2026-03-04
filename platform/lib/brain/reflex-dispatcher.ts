@@ -12,7 +12,8 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { executeCapability } from "./universal-capability-executor";
+import { executeCapability, type UCEProgressEvent } from "./universal-capability-executor";
+import { logger } from "@/lib/logger";
 
 export interface ReflexDelegateParams {
   handler: string;
@@ -20,6 +21,8 @@ export interface ReflexDelegateParams {
   supabase: SupabaseClient;
   userMessage?: string;
   detectedUrls?: string[];
+  /** Optional progress callback — forwarded to UCE for SSE streaming */
+  onProgress?: (event: UCEProgressEvent) => void;
 }
 
 export interface ReflexDelegateResult {
@@ -29,6 +32,8 @@ export interface ReflexDelegateResult {
   injectedMessages?: Array<{ role: string; content: string }>;
   injectMetadata?: Record<string, unknown>;
   error?: string;
+  /** ADR-031: True when workflow is paused for async dependencies (e.g. ingestion) */
+  asyncWait?: boolean;
 }
 
 /**
@@ -40,7 +45,7 @@ export interface ReflexDelegateResult {
 export async function dispatchReflexDelegate(
   params: ReflexDelegateParams,
 ): Promise<ReflexDelegateResult> {
-  const { handler, params: handlerParams, supabase, userMessage = "", detectedUrls = [] } = params;
+  const { handler, params: handlerParams, supabase, userMessage = "", detectedUrls = [], onProgress } = params;
 
   const result = await executeCapability({
     supabase,
@@ -51,7 +56,58 @@ export async function dispatchReflexDelegate(
     params: handlerParams,
     userMessage,
     detectedUrls,
+    onProgress,
   });
+
+  // ADR-031 Phase 3: Handle async wait — checkpoint to agent_queue for cron resumption
+  if (result.success && result.result?.asyncWait) {
+    const orgId = handlerParams.organizationId as string;
+    const workerId = handlerParams.aiWorkerId as string | undefined;
+
+    try {
+      const { error: queueError } = await supabase.from("agent_queue").insert({
+        organization_id: orgId,
+        ai_worker_id: workerId ?? null,
+        agent_type: "capability-workflow",
+        task_type: handler, // capability name for lookup on resume
+        priority: 3,
+        status: "paused",
+        payload: {
+          capabilityName: handler,
+          checkpoint: result.result.checkpoint,
+          waitCondition: result.result.waitCondition,
+          userId: handlerParams.userId,
+        },
+        metadata: {
+          waitCondition: result.result.waitCondition,
+          pausedAt: new Date().toISOString(),
+        },
+      });
+
+      if (queueError) {
+        logger.warn("[reflex-dispatcher] Failed to queue async workflow", {
+          handler,
+          error: queueError.message,
+        });
+      } else {
+        logger.warn("[reflex-dispatcher] Async workflow checkpointed to agent_queue", {
+          handler,
+          waitType: (result.result.waitCondition as Record<string, unknown>)?.type,
+        });
+      }
+    } catch (err) {
+      logger.warn("[reflex-dispatcher] Error creating agent_queue row for async workflow", {
+        handler,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+
+    return {
+      success: true,
+      narrative: result.narrative,
+      asyncWait: true,
+    };
+  }
 
   return {
     success: result.success,

@@ -378,6 +378,36 @@ export async function loadCustomReflexes(
 }
 
 /**
+ * Extract keywords from a user message for substring-matchable trigger_patterns.
+ * Filters stopwords, keeps 4-20 char words, returns ≤8 keywords.
+ */
+function extractKeywords(message: string): string[] {
+  const STOPWORDS = new Set([
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "do", "does", "did", "will", "would", "could",
+    "should", "may", "might", "shall", "can", "need", "dare", "ought",
+    "used", "to", "of", "in", "for", "on", "with", "at", "by", "from",
+    "as", "into", "through", "during", "before", "after", "above", "below",
+    "between", "out", "off", "over", "under", "again", "further", "then",
+    "once", "here", "there", "when", "where", "why", "how", "all", "each",
+    "every", "both", "few", "more", "most", "other", "some", "such", "no",
+    "not", "only", "own", "same", "so", "than", "too", "very", "just",
+    "because", "but", "and", "or", "if", "while", "about", "up", "that",
+    "this", "these", "those", "what", "which", "who", "whom", "my", "your",
+    "his", "her", "its", "our", "their", "me", "him", "them", "i", "you",
+    "he", "she", "it", "we", "they", "please", "help", "want", "like",
+    "get", "make", "know", "think", "take", "see", "come", "look", "give",
+  ]);
+
+  return message
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 4 && w.length <= 20 && !STOPWORDS.has(w))
+    .slice(0, 8);
+}
+
+/**
  * Record a reflex gap — post-flight detected repeated LLM failures.
  * Creates a gap in capability_library for the tool-maker to synthesize.
  */
@@ -393,13 +423,14 @@ export async function recordReflexGap(
   },
 ): Promise<void> {
   try {
+    const keywords = extractKeywords(pattern.triggerMessage);
     await supabase.from("capability_library").insert({
       organization_id: organizationId,
       name: `reflex_gap_${pattern.domain}_${Date.now()}`,
       description: `Repeated LLM failure: ${pattern.failureReason}. Suggested: ${pattern.suggestedAction}`,
       domain: `reflex:${pattern.domain}`,
       tool_type: "workflow",
-      trigger_patterns: [pattern.triggerMessage.toLowerCase().slice(0, 200)],
+      trigger_patterns: keywords.length > 0 ? keywords : [pattern.domain],
       implementation: "",
       workflow_definition: null,
       tags: ["gap", pattern.domain],

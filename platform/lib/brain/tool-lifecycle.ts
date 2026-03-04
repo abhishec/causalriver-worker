@@ -183,6 +183,35 @@ export async function runLifecycleTransitions(
   const result = { promoted: 0, deprecated: 0, revisionsTriggered: 0 };
 
   try {
+    // 0. Validate: candidate → validated (synthesized tools with implementation)
+    const { data: candidateTools } = await supabase
+      .from("capability_library")
+      .select("id, name, domain, workflow_definition, implementation")
+      .eq("organization_id", orgId)
+      .eq("status", "candidate");
+
+    if (candidateTools?.length) {
+      for (const tool of candidateTools) {
+        // A candidate is validated if it has a non-empty workflow_definition OR implementation
+        const hasWorkflow = tool.workflow_definition != null;
+        const hasImpl = typeof tool.implementation === "string" && (tool.implementation as string).length > 0;
+        if (!hasWorkflow && !hasImpl) continue;
+
+        const { error } = await supabase
+          .from("capability_library")
+          .update({ status: "validated", updated_at: new Date().toISOString() })
+          .eq("id", tool.id);
+
+        if (!error) {
+          logger.info("[tool-lifecycle] Tool validated (candidate → validated)", {
+            orgId: orgId.slice(0, 8),
+            toolName: tool.name,
+            domain: tool.domain,
+          });
+        }
+      }
+    }
+
     // 1. Promote: validated → promoted
     const { data: promotionCandidates } = await supabase
       .from("capability_library")

@@ -167,6 +167,7 @@ export type DomainResult =
   | { service: "seaas"; data: SEaaSDomainData; messageIndex?: number }
   | { service: "pm-aas"; data: Record<string, unknown>; messageIndex?: number }
   | { service: "delivery-intelligence"; data: DeliveryIntelligenceData; messageIndex?: number }
+  | { service: "reflex"; data: Record<string, unknown>; messageIndex?: number }
   | { service: "custom"; data: Record<string, unknown>; messageIndex?: number }
   | { service: "general"; data: Record<string, unknown>; messageIndex?: number };
 

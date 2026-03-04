@@ -286,3 +286,15 @@
 - **Pattern**: For public endpoints (no cookies), NEVER use `createServiceClient()` or `createClient()` from `@/lib/supabase/server` — they call `requireEnv()` in the module body. Use `getAdminClient()` OR inline `@supabase/supabase-js` direct.
 - **Pattern**: Health check `envVars: "ok"` can be a false positive if you only check one of two required vars. Check ALL required vars including service key.
 - **Debugging workflow**: Health endpoint `supabaseError` field now shows the actual error message — use it as first diagnostic step.
+
+## Case 020: Supabase Security Audit — API Route Org Scoping (2026-03-04)
+- **Context**: Full security sweep of migrations + API routes for cross-tenant exposure
+- **Migration findings**: All critical `WITH CHECK (true)` vulnerabilities already fixed by prior sessions (20260227120000, 20260304000001, 20260328000001, 20260329000004, 20260330000001, 20260330000060). Zero new migration issues.
+- **API route findings**:
+  - CRITICAL: `agent-composer/route.ts` used `organizationId || process.env.CORE_ORG_ID` fallback — empty-string organizationId silently resolved to Core org
+  - HIGH (4 routes): Used `||` instead of `??` with `getCurrentWorkspaceId()` — empty-string organizationId bypassed 400 guard and triggered workspace auto-resolution
+- **Fix pattern**: `organizationId ?? null` (CORE_ORG_ID fallback removed) + `||` → `??` in 4 routes
+- **NOT a vulnerability**: `ingest-cc-learnings/route.ts` CORE_ORG_ID usage is intentional (CRON bearer-token auth, writes to Core Brain specifically)
+- **DEPENDABOT NOTE**: GitHub reported 21 npm dependency vulnerabilities (18 high, 3 moderate) — separate from RLS/auth issues; review Dependabot alerts for package updates
+- **Lesson**: `||` vs `??` matters for org resolution — empty string `organizationId=""` is falsy with `||` but preserved with `??`. Always use `??` when falling back to workspace resolution.
+- **Rule**: Any `organizationId || CORE_WORKSPACE_ID` pattern = CRITICAL. Any `organizationId || getCurrentWorkspaceId()` = HIGH (change to `??`).

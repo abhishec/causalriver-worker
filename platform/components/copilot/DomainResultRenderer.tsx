@@ -80,6 +80,7 @@ const GenericIntelRenderer      = dynamic(() => import("@/components/copilot/art
 const CashFlowForecastRenderer = dynamic(() => import("@/components/copilot/artifact-renderers/CashFlowForecastRenderer").then(m => ({ default: m.CashFlowForecastRenderer })), { ssr: false });
 const RevenueLeakageRenderer   = dynamic(() => import("@/components/copilot/artifact-renderers/RevenueLeakageRenderer").then(m => ({ default: m.RevenueLeakageRenderer })),     { ssr: false });
 const CausalPLRenderer         = dynamic(() => import("@/components/copilot/artifact-renderers/CausalPLRenderer").then(m => ({ default: m.CausalPLRenderer })),                 { ssr: false });
+const ReflexCapabilityRenderer = dynamic(() => import("@/components/copilot/artifact-renderers/ReflexCapabilityRenderer").then(m => ({ default: m.ReflexCapabilityRenderer })), { ssr: false });
 
 // ── Domain ID → Renderer mapping ─────────────────────────────────────────────
 // Covers ALL 34 commands from DOMAIN_CATALOGUE (20) + AAS_COMMANDS (10) + GENERAL (4)
@@ -225,6 +226,15 @@ export function DomainResultRenderer({ result, domainId }: DomainResultRendererP
     // Use rawData (already null-safe) instead of result.data directly to prevent crashes
     // when the streaming response is truncated or result.data is null/non-object
     return withDeliveryFeedback(<SEaaSDeliveryPanel data={rawData as unknown as DeliveryIntelligenceData} />);
+  }
+
+  // ── 5a. Reflex service → ReflexCapabilityRenderer (UCE capability results + async-wait)
+  if (result.service === "reflex") {
+    return withFeedback(
+      <Suspense fallback={<div className="animate-pulse h-32 rounded bg-zinc-800/50" />}>
+        <ReflexCapabilityRenderer data={rawData} />
+      </Suspense>
+    );
   }
 
   // ── 5. PM-aaS service → GenericIntelRenderer (PM domain results: roadmap, sprint-health, etc.)

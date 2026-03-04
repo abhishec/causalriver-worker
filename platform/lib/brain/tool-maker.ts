@@ -112,10 +112,10 @@ async function findAtlassMatch(
 ): Promise<AtlassMatch | null> {
   try {
     const { data, error } = await supabase.rpc("search_capability_library", {
-      query_embedding: embedding,
-      org_id: orgId,
-      similarity_threshold: ATLASS_SIMILARITY_THRESHOLD,
-      match_count: 1,
+      p_embedding: embedding,
+      p_org_id: orgId,
+      p_match_threshold: ATLASS_SIMILARITY_THRESHOLD,
+      p_match_count: 1,
     });
 
     if (error || !data || !Array.isArray(data) || data.length === 0) return null;

@@ -46,14 +46,18 @@ function EditWorkerModal({
   worker,
   onClose,
   onSaved,
+  onArchived,
 }: {
   worker: WorkerData;
   onClose: () => void;
   onSaved: (updated: Partial<WorkerData>) => void;
+  onArchived: () => void;
 }) {
   const [name, setName] = useState(worker.name);
   const [serviceType, setServiceType] = useState(worker.service_type ?? "");
   const [saving, setSaving] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +85,28 @@ function EditWorkerModal({
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleArchive() {
+    setArchiving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/ai-workers/${worker.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "archived" }),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Failed to archive");
+      }
+      onArchived();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Archive failed");
+    } finally {
+      setArchiving(false);
     }
   }
 
@@ -130,9 +156,36 @@ function EditWorkerModal({
             >Cancel</button>
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || archiving}
               className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
             >{saving ? "Saving…" : "Save"}</button>
+          </div>
+
+          {/* Archive — danger zone */}
+          <div className="pt-3 mt-1 border-t border-border/40">
+            {confirmArchive ? (
+              <div className="space-y-1.5">
+                <p className="text-[11px] text-muted-foreground text-center">Remove this worker from Mission Control?</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setConfirmArchive(false)}
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >Keep</button>
+                  <button
+                    onClick={handleArchive}
+                    disabled={archiving}
+                    className="flex-1 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                  >{archiving ? "Archiving…" : "Yes, archive"}</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmArchive(true)}
+                className="w-full text-xs text-muted-foreground/60 hover:text-red-400 transition-colors py-0.5"
+              >
+                Archive worker
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -349,6 +402,10 @@ export default function WorkspaceMissionControl({ orgId: _orgId }: { orgId: stri
             setWorkers((prev) =>
               prev.map((w) => w.id === editingWorker.id ? { ...w, ...updated } : w)
             );
+            setEditingWorker(null);
+          }}
+          onArchived={() => {
+            setWorkers((prev) => prev.filter((w) => w.id !== editingWorker.id));
             setEditingWorker(null);
           }}
         />
