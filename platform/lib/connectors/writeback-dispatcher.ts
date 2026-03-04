@@ -418,6 +418,30 @@ export async function queueWritebackApproval(
   }
 ): Promise<{ approvalId: string } | null> {
   try {
+    // ── Idempotency: prevent double-click duplicate approvals ────────────────
+    // Check for an existing pending approval with same org + job + action before inserting.
+    // If found, return the existing ID — the user already submitted this approval.
+    if (params.jobId) {
+      const { data: existing } = await supabase
+        .from("writeback_approvals")
+        .select("id")
+        .eq("organization_id", params.organizationId)
+        .eq("job_id", params.jobId)
+        .eq("action_type", params.actionType)
+        .eq("connector_type", params.connectorType)
+        .eq("status", "pending")
+        .limit(1)
+        .maybeSingle();
+      if (existing) {
+        logger.warn("[writeback-dispatcher] Duplicate approval suppressed (idempotency):", {
+          approvalId: existing.id,
+          jobId: params.jobId,
+          actionType: params.actionType,
+        });
+        return { approvalId: existing.id };
+      }
+    }
+
     const { data, error } = await supabase
       .from("writeback_approvals")
       .insert({
@@ -864,6 +888,28 @@ export async function checkAndQueueWriteback(
           });
         }
         continue;
+      }
+
+      // ── Idempotency: prevent double-dispatch of same job+rule ────────────
+      // Check for an existing pending/processing row before inserting.
+      if (ctx.jobId && rule.id) {
+        const { data: existingQueueItem } = await supabase
+          .from("writeback_queue")
+          .select("id")
+          .eq("organization_id", ctx.organizationId)
+          .eq("rule_id", rule.id)
+          .eq("job_id", ctx.jobId)
+          .in("status", ["pending", "processing"])
+          .limit(1)
+          .maybeSingle();
+        if (existingQueueItem) {
+          logger.warn("[writeback-dispatcher] Duplicate writeback_queue entry suppressed:", {
+            ruleId: rule.id,
+            jobId: ctx.jobId,
+          });
+          queued++; // count as queued (already in queue)
+          continue;
+        }
       }
 
       // Insert into writeback_queue (immediate execution path)

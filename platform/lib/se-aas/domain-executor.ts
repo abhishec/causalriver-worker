@@ -1081,10 +1081,10 @@ export async function executeDomain(
     result = await info.domain.execute(ctx);
 
     // ── Domain MoA: 3-angle Haiku synthesis + Sonnet for high-stakes domains ──
-    // Runs for early-warning and delivery-intelligence only.
-    // Non-blocking: runs in parallel with downstream steps, result is merged
-    // into the return value before returning to caller.
-    if (DOMAIN_MOA_ENABLED.has(params.domainType)) {
+    // Runs for early-warning and delivery-intelligence only, AND only when
+    // Brain IQ >= 50. Below IQ 50 the brain hasn't accumulated enough signal
+    // for multi-angle synthesis to be meaningful — skip to save 4 LLM calls.
+    if (DOMAIN_MOA_ENABLED.has(params.domainType) && brainIqForRouting >= 50) {
       const moaSynthesis = await runDomainMoA(params.domainType, result, params.request, supabase, params.organizationId);
       if (moaSynthesis) {
         result = { ...result, moaSynthesis, moaEnabled: true };
