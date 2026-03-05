@@ -145,13 +145,26 @@ const COPILOT_DELTA_INTERVAL_MS = 5 * 60 * 1000;      // 5 minutes — max once 
 const CACHE_MAX_ENTRIES = 200; // ~200 active orgs per Lambda instance is very safe
 function _evictExpiredCacheEntries(): void {
   const now = Date.now();
+
+  // TTL eviction for value caches — evict expired first, then cap size if still oversized
   for (const [k, v] of _correctionsCache) {
     if (v.expiry <= now) _correctionsCache.delete(k);
   }
+  if (_correctionsCache.size > CACHE_MAX_ENTRIES) {
+    // Size cap: evict entries with soonest expiry (least remaining lifetime)
+    const sorted = [..._correctionsCache.entries()].sort((a, b) => a[1].expiry - b[1].expiry);
+    sorted.slice(0, sorted.length - CACHE_MAX_ENTRIES).forEach(([k]) => _correctionsCache.delete(k));
+  }
+
   for (const [k, v] of _learningPulseCache) {
     if (v.expiry <= now) _learningPulseCache.delete(k);
   }
-  // Evict oldest TTL-guard entries if Maps grow too large
+  if (_learningPulseCache.size > CACHE_MAX_ENTRIES) {
+    const sorted = [..._learningPulseCache.entries()].sort((a, b) => a[1].expiry - b[1].expiry);
+    sorted.slice(0, sorted.length - CACHE_MAX_ENTRIES).forEach(([k]) => _learningPulseCache.delete(k));
+  }
+
+  // Evict least-recently-used entries from timestamp guard maps
   if (_copilotCorePushLastMs.size > CACHE_MAX_ENTRIES) {
     const sorted = [..._copilotCorePushLastMs.entries()].sort((a, b) => a[1] - b[1]);
     sorted.slice(0, sorted.length - CACHE_MAX_ENTRIES).forEach(([k]) => _copilotCorePushLastMs.delete(k));
@@ -4972,6 +4985,12 @@ No connectors are configured yet. When the user asks for data from any source (S
               logger.warn(`[Self-MoA] Pre-stream synthesis injected (${_moaSynthesis.synthesis.length} chars) for domain=${detectedIntent}`);
             }
           } catch { /* non-fatal — MoA failure falls back to normal response */ }
+        }
+
+        // Memory telemetry — warn if heap is high before spawning the Anthropic stream
+        const _heapMb = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+        if (_heapMb > 400) {
+          logger.warn(`[chat] High heap before Anthropic stream: ${_heapMb}MB — possible OOM risk`);
         }
 
         const anthropicStream = anthropic.messages.stream({
