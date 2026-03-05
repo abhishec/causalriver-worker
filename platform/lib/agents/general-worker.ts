@@ -486,7 +486,13 @@ async function runAgenticLoop(
           logger.warn(`[general-worker] Job ${job.id} cancelled externally at turn ${turn}, exiting`);
           return { output: output || "[Cancelled by user]", toolCallCount, toolsUsed };
         }
-      } catch { /* non-fatal — continue if poll fails */ }
+      } catch (pollErr: unknown) {
+        // Non-fatal — continue if poll fails, but log so ops can detect repeated DB issues
+        logger.warn(`[general-worker] Cancellation poll failed (turn ${turn})`, {
+          jobId: job.id,
+          error: pollErr instanceof Error ? pollErr.message : String(pollErr),
+        });
+      }
     }
 
     // Also check cost budget if specified in payload
@@ -610,7 +616,14 @@ async function runAgenticLoop(
           },
         })
         .eq("id", job.id);
-    } catch { /* non-fatal */ }
+    } catch (hbErr: unknown) {
+      // Non-fatal — but log so ops can see if heartbeat is repeatedly failing
+      // (stale-job recovery kills after 60s with no heartbeat, so silent failure = ghost jobs)
+      logger.warn(`[general-worker] Heartbeat write failed (turn ${turn})`, {
+        jobId: job.id,
+        error: hbErr instanceof Error ? hbErr.message : String(hbErr),
+      });
+    }
   }
 
   return { output, toolCallCount, toolsUsed };

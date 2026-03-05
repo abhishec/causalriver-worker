@@ -275,7 +275,12 @@ export async function runPreFlight(
         }
       }
     }
-  } catch { /* non-fatal — classifier prefix is best-effort */ }
+  } catch (prefixErr: unknown) {
+    // Non-fatal — classifier prefix is best-effort, but log so ops can detect repeated DB issues
+    logger.warn('[Copilot/PreFlight] Brain classifier prefix assembly failed (non-fatal)', {
+      error: prefixErr instanceof Error ? prefixErr.message : String(prefixErr),
+    });
+  }
 
   // ── 6b. Freshness-triggered web search injection ────────────────────────
   // When the user's message contains freshness indicators, fire a web search
@@ -284,12 +289,16 @@ export async function runPreFlight(
   if (FRESHNESS_KEYWORDS.test(message)) {
     try {
       const { executePrimitive } = await import("@/lib/brain/primitive-registry");
-      const searchResult = await executePrimitive(
-        { supabase: service, organizationId: workspaceId, userId: user.id },
-        "web_search",
-        { query: message.slice(0, 200), limit: 3 },
-      );
-      const results = searchResult.results as Array<{ title: string }> | undefined;
+      // 3s timeout — web search is enrichment only; never block the critical path
+      const searchResult = await Promise.race([
+        executePrimitive(
+          { supabase: service, organizationId: workspaceId, userId: user.id },
+          "web_search",
+          { query: message.slice(0, 200), limit: 3 },
+        ),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("web_search timeout")), 3000)),
+      ]);
+      const results = (searchResult as { results?: Array<{ title: string }> }).results;
       if (results?.length) {
         _classifierBrainPrefix += `[WebSearch: ${results.map((r) => r.title).join("; ")}] `;
       }

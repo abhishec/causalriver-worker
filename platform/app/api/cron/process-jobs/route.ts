@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
   }
 
   const workerType = (request.nextUrl.searchParams.get("type") ?? "mixed") as WorkerType;
-  const limit = Math.min(parseInt(request.nextUrl.searchParams.get("limit") ?? "5", 10), 20);
+  const limit = Math.min(parseInt(request.nextUrl.searchParams.get("limit") ?? "5", 10) || 5, 20);
 
   const startMs = Date.now();
   let staleJobsRecovered = 0;

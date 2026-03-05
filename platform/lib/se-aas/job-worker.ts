@@ -425,7 +425,7 @@ export async function processSeAaSJobs(
       Promise.resolve()
         .then(() => checkAndStartWaitingJobs(_orgId, _jobId))
         .then(() => _isBrainPopulation ? checkAndStartBrainDependentJobs(_orgId) : Promise.resolve([]))
-        .catch(() => { /* non-fatal — orchestration must never break the job worker */ });
+        .catch((orchErr: unknown) => { logger.warn("[job-worker] checkAndStartWaitingJobs failed (non-fatal)", { error: orchErr instanceof Error ? orchErr.message : String(orchErr) }); });
     } catch {
       result.failed++;
 

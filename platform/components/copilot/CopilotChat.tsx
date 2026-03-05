@@ -1280,6 +1280,11 @@ export async function consumeSSEStream(
     reader.releaseLock();
   }
 
+  // Flush any remaining UTF-8 continuation bytes from the streaming TextDecoder.
+  // Without this, multi-byte characters split across the last chunk are lost silently.
+  const decoderFlush = decoder.decode();
+  if (decoderFlush) buffer += decoderFlush;
+
   // Bug fix #4: Only fire onDone if not already fired AND not aborted
   if (!doneFired && !signal?.aborted) {
     // Also process any remaining buffer content before signaling done
