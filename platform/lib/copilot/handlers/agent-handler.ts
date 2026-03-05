@@ -347,6 +347,21 @@ export function detectGeneralTask(
     };
   }
 
+  // 1b. URL-only message — user just pasted a URL (with optional brief context)
+  // If 50%+ of the message is URLs, treat as an implicit "analyze this" request
+  if (hasUrl) {
+    const nonUrlText = message.replace(urlPattern, "").trim();
+    if (nonUrlText.length < 60) {
+      return {
+        task: nonUrlText
+          ? `Analyze the following and provide a summary with key insights: ${message}`
+          : `Analyze the content at the following URL(s) and provide a comprehensive summary with key insights: ${urls.join(" ")}`,
+        agentType: urls.length > 2 ? "apex" : "general",
+        urls,
+      };
+    }
+  }
+
   // 2. Competitor / market research
   if (
     /\b(competitor|competition|rival|vs\.?|versus|benchmark|market\s+(research|analysis|landscape|intel|intelligence))\b/i.test(lower)

@@ -263,7 +263,7 @@ export async function processApexJobs(
             status: "completed",
             completed_at: new Date().toISOString(),
             result: {
-              output: apexResult.synthesis?.slice(0, 5000),
+              output: apexResult.synthesis?.slice(0, 15000),
               subtasksCompleted: apexResult.subtasksCompleted,
               toolCalls: apexResult.toolCallCount,
               durationMs,
@@ -535,7 +535,7 @@ async function decomposeTask(task: string, job: ApexJob): Promise<Subtask[]> {
     return [{ index: 0, goal: task, acceptanceCriteria: ["Complete the task"], attempts: 0 }];
   }
 
-  const prompt = `Decompose this complex task into 3-7 concrete subtasks. Each subtask must be independently executable and have measurable acceptance criteria.
+  const prompt = `You are a research project manager. Break this task into 3-7 research phases that will produce a comprehensive, executive-ready deliverable.
 
 TASK: ${task}
 
@@ -543,17 +543,20 @@ Respond ONLY with valid JSON (no markdown):
 {
   "subtasks": [
     {
-      "goal": "specific thing to do",
+      "goal": "specific research objective",
       "acceptanceCriteria": ["criterion 1", "criterion 2"]
     }
   ]
 }
 
 Guidelines:
-- Keep subtasks focused and achievable in 2-5 tool calls each
-- Acceptance criteria should be specific and verifiable
-- Order subtasks by dependency (research before synthesis)
-- Maximum 7 subtasks`;
+- Each phase should answer a distinct question or cover a distinct angle
+- Phase 1 should always be foundational research (gather baseline facts)
+- Later phases should build on earlier findings (competitive analysis, gap analysis, etc.)
+- Include a phase for "cross-referencing and validation" if the task involves claims or comparisons
+- Acceptance criteria should be evidence-based: "Found at least 3 data points about X", "Identified pricing for Y"
+- Order phases so earlier ones provide context for later ones
+- Maximum 7 phases`;
 
   try {
     const data = await callApexWithRetry({
@@ -614,22 +617,28 @@ async function executeSubtask(
     const data = await callApexWithRetry({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
-      system: `You are a focused AI agent completing a specific subtask. Be thorough and meet the acceptance criteria. Organization: ${job.organization_id}
+      system: `You are a research analyst completing one phase of a multi-phase investigation. Be thorough, precise, and evidence-based.
 
 ## Available Tools
-- **search_corpus**: Semantic search in the workspace knowledge base (PDFs, Confluence, Google Drive). Use FIRST for internal knowledge.
-- **search_knowledge**: Search structured knowledge (product features, pricing, capabilities, integrations).
-- **keyword_search**: Fast exact/phrase search for known terms, product names, dates.
-- **web_search**: Search the web for current information, news, pricing, or anything not in the knowledge base.
-- **browser_extract**: Navigate to a URL and extract full page text.
-- **write_memory**: Persist important findings for future use.
-- **compress_context**: Summarize accumulated findings when context is growing long.
+- **search_corpus**: Semantic search in the workspace knowledge base (PDFs, Confluence, Google Drive) — use FIRST
+- **search_knowledge**: Search structured knowledge (product features, pricing, capabilities)
+- **keyword_search**: Fast exact/phrase search for specific terms, names, dates, numbers
+- **web_search**: Search the web for current information, news, pricing, competitors
+- **browser_extract**: Navigate to a URL and extract page content
+- **write_memory**: Save important findings to the knowledge base for future use
+- **compress_context**: Summarize accumulated findings when context is growing long
 
-## Strategy
-1. Start with **search_corpus**, **search_knowledge**, **keyword_search** for internal knowledge
-2. Use **web_search** + **browser_extract** for external or current information
-3. Use **write_memory** to save key discoveries; **compress_context** if context is large
-4. Cite sources (document names, URLs) when making factual claims`,
+## Research Strategy
+1. Search internal knowledge first, then external sources
+2. Cross-reference claims across multiple sources
+3. Save key findings with **write_memory**
+4. Always cite sources: (Source: document name) or (Source: URL)
+
+## Output Standards
+- Lead with facts and evidence, not descriptions of your search process
+- Include specific numbers, dates, percentages, names — not vague statements
+- If you cannot find information, say so explicitly rather than guessing
+- Structure findings with bullet points and bold key phrases`,
       messages,
       tools,
     });
@@ -701,33 +710,64 @@ async function compressSubtaskResults(completedSubtasks: Subtask[], originalTask
 // ── Synthesizer ───────────────────────────────────────────────────────────────
 
 async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob): Promise<string> {
-  // Separate passed from escalated subtasks — synthesis prompt handles them differently
+  const completed = subtasks.filter((s) => s.verdict === "PASS");
   const escalated = subtasks.filter((s) => s.verdict === "ESCALATE");
+
   const completedWork = subtasks
     .map((s) => {
       const statusLabel = s.verdict === "ESCALATE"
-        ? `⚠ ESCALATED (quality gate failed after ${s.attempts} attempts, score: ${s.score?.toFixed(2) ?? "N/A"})`
-        : `✓ PASS (score: ${s.score?.toFixed(2) ?? "N/A"})`;
-      return `## Subtask ${s.index + 1}: ${s.goal}\nStatus: ${statusLabel}\n${s.result ?? "No result"}`;
+        ? `⚠ Partial coverage (${s.attempts} attempts)`
+        : `✓ Complete`;
+      return `## Research Phase ${s.index + 1}: ${s.goal}\nStatus: ${statusLabel}\n${s.result ?? "No result"}`;
     })
     .join("\n\n---\n\n");
 
-  const escalationNote = escalated.length > 0
-    ? `\n\nNOTE: ${escalated.length} subtask(s) were ESCALATED (quality gate failures). Address gaps in these areas explicitly and note uncertainty where coverage is incomplete.`
+  const coverageNote = escalated.length > 0
+    ? `\n\nIMPORTANT: ${escalated.length} of ${subtasks.length} research phases had incomplete coverage. For those areas, provide the best available analysis and clearly note what remains uncertain.`
     : "";
 
   if (!ANTHROPIC_API_KEY) return completedWork;
 
   try {
-    // Allow synthesis model override from job payload — default Haiku, Sonnet for enterprise quality
     const synthesisModel = String(job.payload.synthesisModel ?? "claude-haiku-4-5-20251001");
     const data = await callApexWithRetry({
       model: synthesisModel,
       max_tokens: 4096,
-      system: `You are a senior analyst synthesizing research into a final, comprehensive report. Be structured, insightful, and actionable. Organization: ${job.organization_id}`,
+      system: `You are a senior strategy analyst producing an executive-ready research report. Your output will be displayed directly to enterprise customers. It must be polished, insightful, and actionable.
+
+## Report Template (follow this structure exactly)
+
+# [Report Title — derived from the task]
+
+## Executive Summary
+2-3 sentences answering the core question with the most important conclusion.
+
+## Key Findings
+- Bullet points with the most significant discoveries
+- Each finding should include a specific fact, number, or insight
+- Bold the most important phrases
+
+## Detailed Analysis
+Organized by topic with headers (### Topic Name). Include:
+- Evidence and data points from research
+- Comparisons where relevant (use markdown tables for side-by-side comparisons)
+- Citations: (Source: document/URL name)
+
+## Recommendations
+Numbered, actionable next steps. Each should be specific enough to act on.
+
+## Sources
+Bullet list of all documents, URLs, and knowledge base items referenced.
+
+## Quality Rules
+- Lead with insights, not process descriptions
+- Use markdown formatting extensively: **bold**, tables, bullet lists
+- Be specific — include numbers, percentages, dates, names
+- If any area has gaps, say "Further investigation needed for..." rather than guessing
+- Write for C-suite audience — clear, concise, high-impact`,
       messages: [{
         role: "user",
-        content: `Synthesize these subtask results into a comprehensive final answer for the original task.${escalationNote}\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProvide a well-structured, comprehensive synthesis that directly answers the original task. For any ESCALATED subtasks, acknowledge the gap and provide the best available partial answer.`,
+        content: `Synthesize these research results into a polished executive report.${coverageNote}\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProduce the final report following the template in your instructions. Make it comprehensive and actionable.`,
       }],
     });
     return data.content.find((b) => b.type === "text")?.text ?? completedWork;
