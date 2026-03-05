@@ -111,12 +111,12 @@ export async function runPreFlight(
 
   const { user, workspaceId, supabase, service } = sessionResult;
 
-  // ── 2. Rate limiting: 30 req/min per user ──────────────────────────────────
-  const rateLimit = await checkSessionRateLimit(user.id, "/api/copilot/chat");
+  // ── 2. Rate limiting: 30 req/min per user, 300 req/min per org ────────────
+  const rateLimit = await checkSessionRateLimit(user.id, "/api/copilot/chat", workspaceId);
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment before sending another message." },
-      { status: 429 }
+      { status: 429, headers: { "Retry-After": "60" } }
     );
   }
 
