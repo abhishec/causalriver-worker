@@ -295,6 +295,18 @@ function buildGeneralTools(): ToolDef[] {
       },
     },
     {
+      name: "keyword_search",
+      description: "Fast exact/keyword search in the knowledge base. Use when you need to find specific terms, product names, dates, or exact phrases — faster and more precise than search_corpus for known terms.",
+      input_schema: {
+        type: "object",
+        properties: {
+          keyword: { type: "string", description: "Exact term or phrase to find (case-insensitive)" },
+          limit: { type: "number", description: "Max results (1-15)", default: 10 },
+        },
+        required: ["keyword"],
+      },
+    },
+    {
       name: "write_memory",
       description: "Persist an important finding, fact, or insight to the workspace knowledge base so it is available in future queries. Use when you discover key facts, competitive insights, pricing data, or product information worth preserving.",
       input_schema: {
@@ -534,6 +546,22 @@ async function executeGeneralTool(
           }),
           count: data.length,
         };
+      }
+      case "keyword_search": {
+        // Fast text search — A-RAG hierarchical retrieval (for known terms)
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const supabase = getAdminClient();
+        const keyword = String(input.keyword ?? "");
+        const limit = Math.min(Number(input.limit ?? 10), 15);
+        if (!keyword) return { error: "keyword is required" };
+        const { data } = await supabase
+          .from("document_chunks")
+          .select("chunk_text, chunk_index, document_id")
+          .eq("organization_id", job.organization_id)
+          .ilike("chunk_text", `%${keyword}%`)
+          .limit(limit);
+        if (!data?.length) return { results: [], message: `No chunks containing "${keyword}" found.` };
+        return { results: data.map((c) => ({ text: c.chunk_text, chunk: c.chunk_index })), count: data.length };
       }
       case "write_memory": {
         // Persist agent-discovered facts to ai_memory so they survive session boundaries

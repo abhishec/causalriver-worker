@@ -73,6 +73,9 @@ export async function GET(
             type: "progress",
             status: current.status,
             step: checkpoint?.currentStep ?? checkpoint?.phase ?? null,
+            lastTool: checkpoint?.lastTool ?? null,
+            totalToolCalls: checkpoint?.totalToolCalls ?? null,
+            toolsUsed: checkpoint?.toolsUsed ?? null,
             progress: checkpoint?.progress ?? null,
             elapsedMs,
             heartbeatAge: current.heartbeat_at

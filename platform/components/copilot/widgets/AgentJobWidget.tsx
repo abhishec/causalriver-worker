@@ -25,7 +25,9 @@ type JobStatus = "pending" | "running" | "completed" | "failed" | "paused";
 
 interface JobProgress {
   status: JobStatus;
-  step?: string | null;
+  step?: string | number | null;
+  lastTool?: string | null;
+  totalToolCalls?: number | null;
   progress?: number | null;
   elapsedMs?: number;
   result?: Record<string, unknown> | null;
@@ -62,6 +64,8 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
           setProgress({
             status: (msg.status as JobStatus) ?? "running",
             step: msg.step ?? null,
+            lastTool: (msg as Record<string, unknown>).lastTool as string | null ?? null,
+            totalToolCalls: (msg as Record<string, unknown>).totalToolCalls as number | null ?? null,
             progress: msg.progress ?? null,
             elapsedMs: msg.elapsedMs,
           });
@@ -111,8 +115,20 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
   };
 
   const output = progress.result?.output as string | undefined;
-  const toolCalls = progress.result?.toolCalls as number | undefined;
+  const toolCalls = (progress.result?.toolCalls ?? progress.totalToolCalls) as number | undefined;
   const subtasksCompleted = progress.result?.subtasksCompleted as number | undefined;
+
+  const TOOL_LABELS: Record<string, string> = {
+    web_search: "Searching web",
+    browser_extract: "Reading page",
+    browser_screenshot: "Capturing screenshot",
+    search_corpus: "Searching knowledge base",
+    search_knowledge: "Retrieving structured knowledge",
+    keyword_search: "Keyword lookup",
+    write_memory: "Saving to memory",
+    compress_context: "Compressing context",
+  };
+  const lastToolLabel = progress.lastTool ? (TOOL_LABELS[progress.lastTool] ?? progress.lastTool) : null;
 
   return (
     <div className="my-3 rounded-xl border border-border-subtle overflow-hidden">
@@ -143,11 +159,18 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
         <div className="text-sm text-foreground line-clamp-2">{task}</div>
       </div>
 
-      {/* Progress step (running) */}
-      {progress.status === "running" && progress.step && (
-        <div className="px-4 py-2 border-b border-border-subtle/40">
-          <div className="text-[10px] text-muted uppercase tracking-wider font-medium mb-0.5">Current step</div>
-          <div className="text-sm text-blue-400">{progress.step}</div>
+      {/* Live activity (running) */}
+      {progress.status === "running" && (progress.step !== null || lastToolLabel) && (
+        <div className="px-4 py-2 border-b border-border-subtle/40 flex items-center gap-3">
+          {progress.step !== null && progress.step !== undefined && (
+            <span className="text-[10px] text-muted font-mono">Turn {progress.step}</span>
+          )}
+          {lastToolLabel && (
+            <span className="text-xs text-blue-400 flex items-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              {lastToolLabel}…
+            </span>
+          )}
         </div>
       )}
 

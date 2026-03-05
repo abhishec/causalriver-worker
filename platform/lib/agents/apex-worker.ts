@@ -29,6 +29,38 @@ const APEX_BUDGET_MS = 20_000;
 const MAX_RETRY_ATTEMPTS = 3;
 const COMPRESSION_TURN_INTERVAL = 10;
 
+// ── Exponential backoff (same pattern as general-worker) ─────────────────────
+
+type AnthropicMessage = {
+  content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>;
+  stop_reason: string;
+};
+
+async function callApexWithRetry(payload: unknown, maxRetries = 3): Promise<AnthropicMessage> {
+  const delays = [1000, 2000, 4000];
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY!,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (resp.ok) return resp.json() as Promise<AnthropicMessage>;
+    if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
+      const jitter = Math.random() * 300;
+      await new Promise((r) => setTimeout(r, delays[attempt] + jitter));
+      lastErr = new Error(`Anthropic API ${resp.status} (attempt ${attempt + 1})`);
+      continue;
+    }
+    throw new Error(`Anthropic API error: ${resp.status}`);
+  }
+  throw lastErr ?? new Error("callApexWithRetry: max retries exceeded");
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface ApexWorkerResult {
@@ -124,6 +156,32 @@ function buildApexTools() {
           domain_filter: { type: "string", description: "Optional domain filter", default: "" },
         },
         required: ["query"],
+      },
+    },
+    {
+      name: "keyword_search",
+      description: "Fast exact/keyword search in the knowledge base. Use when you need to find specific terms, product names, dates, or exact phrases. Faster and more precise than search_corpus for known terms.",
+      input_schema: {
+        type: "object",
+        properties: {
+          keyword: { type: "string", description: "Exact term or phrase to find (case-insensitive)" },
+          limit: { type: "number", description: "Max results (1-15)", default: 10 },
+        },
+        required: ["keyword"],
+      },
+    },
+    {
+      name: "write_memory",
+      description: "Persist an important finding, fact, or insight to the workspace knowledge base so it is available in future queries and sessions.",
+      input_schema: {
+        type: "object",
+        properties: {
+          content: { type: "string", description: "The fact or insight to store (max 1000 chars)" },
+          domain: { type: "string", description: "Domain: product, competitive, finance, delivery, general, research", default: "research" },
+          importance: { type: "number", description: "Importance 0.0–1.0", default: 0.8 },
+          title: { type: "string", description: "Short title (max 100 chars)" },
+        },
+        required: ["content", "title"],
       },
     },
     {
@@ -401,23 +459,11 @@ Guidelines:
 - Maximum 7 subtasks`;
 
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1024,
-        messages: [{ role: "user", content: prompt }],
-      }),
+    const data = await callApexWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
     });
-
-    if (!resp.ok) throw new Error(`API error ${resp.status}`);
-
-    const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
     const text = data.content.find((b) => b.type === "text")?.text ?? "{}";
     const cleaned = text.replace(/```json\n?|```\n?/g, "").trim();
     const parsed = JSON.parse(cleaned) as { subtasks?: Array<{ goal: string; acceptanceCriteria: string[] }> };
@@ -465,28 +511,13 @@ async function executeSubtask(
   for (let turn = 0; turn < MAX_SUBTASK_TURNS; turn++) {
     turnCount++;
 
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY!,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
-        system: `You are a focused AI agent completing a specific subtask. Be thorough and meet the acceptance criteria. Organization: ${job.organization_id}`,
-        messages,
-        tools,
-      }),
+    const data = await callApexWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4096,
+      system: `You are a focused AI agent completing a specific subtask. Be thorough and meet the acceptance criteria. Organization: ${job.organization_id}`,
+      messages,
+      tools,
     });
-
-    if (!resp.ok) throw new Error(`Anthropic API error: ${resp.status}`);
-
-    const data = await resp.json() as {
-      content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>;
-      stop_reason: string;
-    };
 
     const textBlocks = data.content.filter((b) => b.type === "text");
     if (textBlocks.length > 0) {
@@ -525,26 +556,14 @@ async function compressSubtaskResults(completedSubtasks: Subtask[], originalTask
   if (!ANTHROPIC_API_KEY) return resultsText.slice(0, 2000);
 
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 512,
-        messages: [{
-          role: "user",
-          content: `Compress these completed subtask results into a concise context summary (max 400 words). Preserve all key facts and findings.\n\nOriginal task: ${originalTask}\n\nCompleted work:\n${resultsText}`,
-        }],
-      }),
+    const data = await callApexWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
+      messages: [{
+        role: "user",
+        content: `Compress these completed subtask results into a concise context summary (max 400 words). Preserve all key facts and findings.\n\nOriginal task: ${originalTask}\n\nCompleted work:\n${resultsText}`,
+      }],
     });
-
-    if (!resp.ok) return resultsText.slice(0, 2000);
-
-    const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
     return data.content.find((b) => b.type === "text")?.text ?? resultsText.slice(0, 2000);
   } catch {
     return resultsText.slice(0, 2000);
@@ -561,27 +580,15 @@ async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob
   if (!ANTHROPIC_API_KEY) return completedWork;
 
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
-        system: `You are a senior analyst synthesizing research into a final, comprehensive report. Be structured, insightful, and actionable. Organization: ${job.organization_id}`,
-        messages: [{
-          role: "user",
-          content: `Synthesize these subtask results into a comprehensive final answer for the original task.\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProvide a well-structured, comprehensive synthesis that directly answers the original task.`,
-        }],
-      }),
+    const data = await callApexWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4096,
+      system: `You are a senior analyst synthesizing research into a final, comprehensive report. Be structured, insightful, and actionable. Organization: ${job.organization_id}`,
+      messages: [{
+        role: "user",
+        content: `Synthesize these subtask results into a comprehensive final answer for the original task.\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProvide a well-structured, comprehensive synthesis that directly answers the original task.`,
+      }],
     });
-
-    if (!resp.ok) return completedWork;
-
-    const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
     return data.content.find((b) => b.type === "text")?.text ?? completedWork;
   } catch {
     return completedWork;
@@ -653,6 +660,41 @@ async function executeApexTool(
           }),
           count: data.length,
         };
+      }
+      case "keyword_search": {
+        // Fast text search — hierarchical retrieval (A-RAG pattern)
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const supabase = getAdminClient();
+        const keyword = String(input.keyword ?? "");
+        const limit = Math.min(Number(input.limit ?? 10), 15);
+        if (!keyword) return { error: "keyword is required" };
+        const { data } = await supabase
+          .from("document_chunks")
+          .select("chunk_text, chunk_index, document_id")
+          .eq("organization_id", job.organization_id)
+          .ilike("chunk_text", `%${keyword}%`)
+          .limit(limit);
+        if (!data?.length) return { results: [], message: `No chunks containing "${keyword}" found.` };
+        return { results: data.map((c) => ({ text: c.chunk_text, chunk: c.chunk_index })), count: data.length };
+      }
+      case "write_memory": {
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const supabase = getAdminClient();
+        const content = String(input.content ?? "").slice(0, 1000);
+        const title = String(input.title ?? "APEX finding").slice(0, 100);
+        const domain = String(input.domain ?? "research");
+        const importance = Math.min(1.0, Math.max(0.0, Number(input.importance ?? 0.8)));
+        if (!content) return { error: "content is required" };
+        const { data, error } = await supabase.from("ai_memory").insert({
+          organization_id: job.organization_id,
+          content,
+          memory_type: "knowledge",
+          domain: `apex.${domain}`,
+          importance,
+          metadata: { title, source: "apex-agent", jobId: job.id, discoveredAt: new Date().toISOString() },
+        }).select("id").single();
+        if (error) return { error: error.message };
+        return { success: true, memoryId: data?.id, message: `Finding "${title}" saved.` };
       }
       case "compress_context":
         // This tool is handled externally in the FSM; return ack
