@@ -1947,11 +1947,13 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     let cancelled = false;
 
     async function loadHistory() {
-      // Small delay: let Next.js Fast Refresh finish its current rebuild before
+      // Dev-only delay: let Next.js Fast Refresh finish its current rebuild before
       // issuing API calls. Without this, the dev-server is briefly unavailable
       // during the rebuild window and all fetches throw "Failed to fetch".
-      // In production there is no Fast Refresh, so this delay is harmless.
-      await new Promise(r => setTimeout(r, 800));
+      // Skipped in production — no Fast Refresh, no delay needed (audit M5).
+      if (process.env.NODE_ENV === "development") {
+        await new Promise(r => setTimeout(r, 800));
+      }
       if (cancelled) return;
 
       // Extract workerId for per-worker conversation isolation (ADR-026)

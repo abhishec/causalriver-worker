@@ -98,7 +98,8 @@ export async function processSeAaSJobs(
 
   // Week 7: Per-org backpressure — skip jobs from orgs that already have
   // too many running jobs (prevents one org from monopolizing workers)
-  const MAX_RUNNING_PER_ORG = 3;
+  // Configurable via env: SE_AAS_MAX_RUNNING_PER_ORG (default 3, audit M3)
+  const MAX_RUNNING_PER_ORG = parseInt(process.env.SE_AAS_MAX_RUNNING_PER_ORG ?? "3", 10);
   let filteredJobs = pendingJobs;
 
   if (pendingJobs.length > 1) {

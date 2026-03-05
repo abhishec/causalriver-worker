@@ -77,12 +77,13 @@ export async function GET(request: NextRequest) {
 
     // ── Phase 1: Stale job recovery ──────────────────────────────
     // Recover jobs stuck in 'running' because Lambda killed them at 90s.
-    // Any job with no heartbeat update for > 120s is moved to 'failed'.
+    // Any job with no heartbeat update for > 60s is moved to 'failed'.
+    // 60s (was 120s) — Lambda max is 30s, so 60s = 2 full Lambda cycles, safe margin.
     // This runs BEFORE processing new jobs so the worker slot count is
     // accurate when the per-org backpressure check runs.
     try {
       const { data: recovered, error: recoverError } = await service
-        .rpc("recover_stale_jobs", { stale_threshold_seconds: 120 });
+        .rpc("recover_stale_jobs", { stale_threshold_seconds: 60 });
 
       if (recoverError) {
         logger.warn("[cron/process-jobs] recover_stale_jobs RPC error (non-fatal)", {

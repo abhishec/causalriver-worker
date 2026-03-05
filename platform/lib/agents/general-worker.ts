@@ -523,6 +523,17 @@ async function runAgenticLoop(
       break;
     }
 
+    // Hard OOM cap: if messages array is approaching Lambda memory limits, force-prune
+    // BEFORE appending to prevent runaway growth (audit H2). 50 messages × ~10KB = ~500KB.
+    const HARD_CAP_MESSAGES = 50;
+    if (messages.length >= HARD_CAP_MESSAGES) {
+      const anchor = messages[0];
+      const recent = messages.slice(-20);
+      messages.length = 0;
+      messages.push(anchor, ...recent);
+      logger.warn(`[general-worker] Hard OOM cap hit: trimmed to ${messages.length} messages`);
+    }
+
     // Add assistant message to history
     messages.push({ role: "assistant", content: data.content });
 

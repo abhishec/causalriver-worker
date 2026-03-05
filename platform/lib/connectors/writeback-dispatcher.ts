@@ -1325,6 +1325,37 @@ async function moveToDeadLetterQueue(
 
     // Send Slack notification to admin if they have a webhook configured
     await notifyAdminSlackDeadLetter(supabase, item, attemptCount, failureReason);
+
+    // In-app notification: alert org admins even if Slack is not configured (audit C5)
+    // Inserts into notifications table (same schema used by domain-executor high-risk alerts)
+    const { data: admins } = await supabase
+      .from("org_members")
+      .select("user_id")
+      .eq("organization_id", item.organization_id)
+      .in("role", ["admin", "owner"]);
+
+    if (admins && admins.length > 0) {
+      void supabase.from("notifications").insert(
+        admins.map((m: { user_id: string }) => ({
+          user_id: m.user_id,
+          organization_id: item.organization_id,
+          notification_type: "writeback_dead_letter",
+          title: "Write-back action permanently failed",
+          message: `The ${item.connector_type} ${item.action_type} action failed after ${attemptCount} attempts and has been dead-lettered. Review in Settings → Connectors.`,
+          metadata: {
+            writeback_queue_id: item.id,
+            connector_type: item.connector_type,
+            action_type: item.action_type,
+            rule_id: item.rule_id,
+            failure_reason: failureReason,
+            attempt_count: attemptCount,
+          },
+          read: false,
+        }))
+      ).then(null, (err: unknown) =>
+        logger.warn("[writeback-dispatcher] In-app notification insert failed (non-fatal):", err)
+      );
+    }
   } catch (err) {
     logger.warn("[writeback-dispatcher] moveToDeadLetterQueue error (non-fatal):", err);
   }

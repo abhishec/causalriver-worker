@@ -426,9 +426,9 @@ async function runApexFsm(
         .eq("id", job.id);
     } catch { /* non-fatal */ }
 
-    // Execute the subtask in a fresh mini agentic loop
+    // Execute the subtask in a fresh mini agentic loop (adminSupabase for H10 heartbeats)
     const subtaskResult = await executeSubtask(
-      subtask, job, tools, compressedContext,
+      subtask, job, tools, compressedContext, adminSupabase,
     );
     toolCallCount += subtaskResult.toolCallCount;
     turnsSinceCompression += subtaskResult.turnCount;
@@ -615,6 +615,7 @@ async function executeSubtask(
   job: ApexJob,
   tools: ReturnType<typeof buildApexTools>,
   compressedContext?: string,
+  adminSupabase?: SupabaseClient,
 ): Promise<SubtaskExecutionResult> {
   const messages: Array<{ role: string; content: unknown }> = [
     {
@@ -695,6 +696,23 @@ async function executeSubtask(
         tool_use_id: toolCall.id ?? "",
         content: JSON.stringify(toolResult).slice(0, 8000),
       });
+      // Mid-subtask heartbeat: write after every tool so AgentJobWidget shows live tool progress
+      // without waiting for the full subtask to complete (audit H10)
+      if (adminSupabase) {
+        void adminSupabase
+          .from("agent_queue")
+          .update({
+            heartbeat_at: new Date().toISOString(),
+            checkpoint_data: {
+              phase: `TOOL_${toolCall.name ?? "unknown"}`,
+              totalToolCalls: toolCallCount,
+              lastTool: toolCall.name ?? null,
+              subtaskGoal: subtask.goal.slice(0, 80),
+            },
+          })
+          .eq("id", job.id)
+          .then(null, () => {/* non-fatal */});
+      }
     }
     // Anthropic API requires tool_result for every tool_use — stub skipped calls
     for (const skipped of skippedToolCalls) {
