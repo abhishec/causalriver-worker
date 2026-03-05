@@ -5047,6 +5047,21 @@ No connectors are configured yet. When the user asks for data from any source (S
               reflection.score,
               service as any,
             );
+            // Close the UCB1 bandit feedback loop (audit H1)
+            // selectStrategy() was called pre-stream; now record the outcome so bandit learns
+            if (_banditSelection && workerId && detectedIntent) {
+              void import("@/lib/brain/strategy-bandit")
+                .then(({ recordOutcome }) =>
+                  recordOutcome(
+                    detectedIntent,
+                    workerId,
+                    _banditSelection.strategy,
+                    reflection.score,
+                    service,
+                  )
+                )
+                .catch((e: unknown) => logger.warn("[chat] bandit recordOutcome failed (non-fatal):", e));
+            }
             // ADR-027: Persist reflection score to ai_memory so the pre-flight
             // classifier and cognitive planner can read per-domain quality history.
             void service.from("ai_memory").upsert({

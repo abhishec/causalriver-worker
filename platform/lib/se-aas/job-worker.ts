@@ -308,7 +308,9 @@ export async function processSeAaSJobs(
             } else {
               // Use the graceful degradation object as the result so the user
               // gets a helpful message instead of an empty response.
-              domainResult = { ...(recovery.result as Record<string, unknown> ?? { _recovery: recovery }) };
+              // C7: always stamp _recovery so the quality scorer in job-worker can detect
+              // this as a fallback and assign quality 0.25 → "paused" status.
+              domainResult = { ...(recovery.result as Record<string, unknown> ?? {}), _recovery: recovery };
             }
           }
         } catch (domainErr: any) {
@@ -364,7 +366,11 @@ export async function processSeAaSJobs(
         // ── Agent Lifecycle: transition status + populate result ──────────
         // Fire-and-forget: if this job is linked to an agent, update its status.
         if (job.agent_id) {
-          const _agentQuality = JSON.stringify(domainResult).length > 30 ? 0.7 : 0.3;
+          // Content-aware quality scoring (audit M9): check for recovery fallback + data substance
+          const _domainJson = JSON.stringify(domainResult);
+          const _hasRecovery = typeof domainResult === 'object' && domainResult !== null && '_recovery' in (domainResult as object);
+          const _hasSubstantiveData = _domainJson.length > 150 && !_hasRecovery;
+          const _agentQuality = _hasSubstantiveData ? 0.75 : _hasRecovery ? 0.25 : 0.45;
           void supabase.from("agents").update({
             status: _agentQuality >= 0.7 ? "completed" : "paused",
             result: {

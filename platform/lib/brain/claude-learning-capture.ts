@@ -160,30 +160,49 @@ function extractTextFromResponse<T>(response: T): string {
 /**
  * Lightweight quality heuristic that does NOT call Claude.
  *
- * Scoring rationale:
- * - Base: 0.4 (pass the minimum threshold for any response)
- * - Length bonus: up to +0.35 for longer, more detailed responses (caps at 2000 chars)
- * - Structure bonus: +0.10 if the response contains JSON or numbered content
- * - Speed bonus: +0.05 if latency < 5000ms (fast confident responses)
- * - Penalty: -0.15 for very short responses that look like refusals or errors
+ * Improved scoring (audit C6):
+ * - Refusal/error detection: hard cap 0.30 for error responses
+ * - Data density: numbers, measurements, proper nouns = substantive
+ * - Length bonus: moderate reward (responses can be short but good)
+ * - Structure bonus: JSON, lists, tables indicate structured thinking
+ * - Short-but-valid: don't penalize terse but complete answers
  *
- * Range: 0.25–0.90 (never hits 1.0 — that's reserved for user-validated signals)
+ * Range: 0.25–0.90 (never hits 1.0 — reserved for user-validated signals)
  */
 function computeQualityHeuristic(outputText: string, durationMs: number): number {
-  let quality = 0.4;
+  const text = outputText.trim();
 
-  // Length bonus: longer responses tend to be more substantive
-  quality += Math.min(0.35, (outputText.length / 2000) * 0.35);
+  // ── Refusal / error detection (hard cap 0.30) ──────────────────────────
+  // These patterns indicate the model couldn't answer or produced an error
+  const REFUSAL_PATTERNS = /\b(i cannot|i can't|i don't have access|unable to|no data available|no results found|error occurred|failed to|i'm unable|i am unable|cannot access|don't have information about)\b/i;
+  const ERROR_PATTERNS = /^(error|failed|exception|timeout|undefined|null|nan)\b/i;
+  if (REFUSAL_PATTERNS.test(text) || ERROR_PATTERNS.test(text.slice(0, 50))) {
+    // Could be partial refusal (some data + some caveat) — softer cap
+    return text.length > 200 ? 0.40 : 0.25;
+  }
 
-  // Structure bonus: JSON or numbered lists indicate structured thinking
-  if (/\{[\s\S]*\}|\[[\s\S]*\]/.test(outputText)) quality += 0.08;
-  if (/^\d+\.\s/m.test(outputText)) quality += 0.04;
+  let quality = 0.45; // slightly higher base than before
 
-  // Speed bonus: fast responses suggest confident, low-entropy answers
-  if (durationMs < 5000) quality += 0.05;
+  // ── Length bonus (capped at 0.25) ──────────────────────────────────────
+  // Moderate reward: long doesn't always mean good, but ≥500 chars is substantive
+  quality += Math.min(0.25, (text.length / 1500) * 0.25);
 
-  // Penalty: very short responses (< 50 chars) are likely refusals or errors
-  if (outputText.length < 50) quality -= 0.15;
+  // ── Data density bonus ────────────────────────────────────────────────
+  // Numeric data (metrics, counts, percentages) = substantive content
+  const numberMatches = text.match(/\b\d+([.,]\d+)?(%|ms|s|k|M|B|GB|KB|px|h|min|days?)?\b/g);
+  if (numberMatches && numberMatches.length >= 3) quality += 0.08;
+
+  // ── Structure bonus ────────────────────────────────────────────────────
+  if (/\{[\s\S]*\}|\[[\s\S]*\]/.test(text)) quality += 0.07; // JSON
+  if (/^\d+\.\s/m.test(text) || /^\s*[-*]\s/m.test(text)) quality += 0.04; // lists
+  if (/\|.+\|.+\|/.test(text)) quality += 0.03; // markdown tables
+
+  // ── Speed bonus ────────────────────────────────────────────────────────
+  if (durationMs < 5000) quality += 0.03;
+
+  // ── Very short response penalty (< 30 chars) ──────────────────────────
+  // Only penalize truly empty/useless responses
+  if (text.length < 30) quality -= 0.20;
 
   return Math.min(0.90, Math.max(0.0, quality));
 }
