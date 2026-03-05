@@ -26,6 +26,74 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 // Cron gives ~25s; we stop at 20s and chain to next Lambda invocation.
 const GENERAL_WORKER_BUDGET_MS = 20_000;
 
+// ── Exponential backoff for Anthropic API (pattern from SOTA research) ────────
+// 429/500 → retry with 1s/2s/4s + jitter. Prevents silent cascade failures.
+
+async function callAnthropicWithRetry(
+  payload: unknown,
+  maxRetries = 3,
+): Promise<{ content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>; stop_reason: string }> {
+  const delays = [1000, 2000, 4000];
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY!,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (resp.ok) return resp.json() as Promise<{ content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>; stop_reason: string }>;
+    if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
+      const jitter = Math.random() * 300;
+      await new Promise((r) => setTimeout(r, delays[attempt] + jitter));
+      lastErr = new Error(`Anthropic API ${resp.status} (attempt ${attempt + 1})`);
+      continue;
+    }
+    throw new Error(`Anthropic API error: ${resp.status}`);
+  }
+  throw lastErr ?? new Error("callAnthropicWithRetry: max retries exceeded");
+}
+
+// ── Goal-check quality evaluator (Haiku) ─────────────────────────────────────
+// Replaces naive output.length heuristic with a fast semantic evaluation.
+// Returns 0.0–1.0 quality score. Graceful degradation on API failure.
+
+async function evaluateOutputQuality(task: string, output: string, toolCallCount: number): Promise<number> {
+  if (!ANTHROPIC_API_KEY || !output.trim()) return 0.2;
+  // Quick heuristic pre-check: if agent made tool calls AND has substantive output, already promising
+  if (toolCallCount >= 2 && output.length >= 200) {
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 128,
+          system: "You are a task completion evaluator. Respond ONLY with a JSON object: {\"score\": 0.0-1.0, \"reason\": \"brief\"}. Score 0.9+ if task fully completed with sources/evidence. Score 0.6-0.8 if partially done. Score <0.5 if task not addressed.",
+          messages: [{
+            role: "user",
+            content: `TASK: ${task.slice(0, 300)}\n\nAGENT OUTPUT (first 1000 chars):\n${output.slice(0, 1000)}\n\nScore the completion quality.`,
+          }],
+        }),
+      });
+      if (resp.ok) {
+        const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
+        const text = data.content?.find((b) => b.type === "text")?.text ?? "";
+        const match = text.match(/"score"\s*:\s*([0-9.]+)/);
+        if (match) return Math.min(1.0, Math.max(0.0, parseFloat(match[1])));
+      }
+    } catch { /* fallback to heuristic */ }
+  }
+  // Heuristic fallback: tool calls + output length
+  if (toolCallCount >= 3 && output.length >= 500) return 0.75;
+  if (toolCallCount >= 1 && output.length >= 100) return 0.60;
+  if (output.length >= 50) return 0.40;
+  return 0.20;
+}
+
 export interface GeneralWorkerResult {
   processed: number;
   succeeded: number;
@@ -120,20 +188,22 @@ export async function processGeneralJobs(
           })
           .eq("id", job.id);
 
-        // Record RL outcome
-        void import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
-          recordAgentOutcome(supabase, {
-            agentId: job.id,
-            organizationId: job.organization_id,
-            userId: job.organization_id,
-            aiWorkerId: job.ai_worker_id ?? undefined,
-            domain: "general",
-            taskDescription,
-            resultSummary: agentResult.output.slice(0, 500),
-            quality: agentResult.output.length > 50 ? 0.7 : 0.3,
-            executionMs: durationMs,
-            modelId: "claude-haiku-4-5-20251001",
-          })
+        // Record RL outcome with actual quality evaluation (not length heuristic)
+        void evaluateOutputQuality(taskDescription, agentResult.output, agentResult.toolCallCount).then((quality) =>
+          import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
+            recordAgentOutcome(supabase, {
+              agentId: job.id,
+              organizationId: job.organization_id,
+              userId: job.organization_id,
+              aiWorkerId: job.ai_worker_id ?? undefined,
+              domain: "general",
+              taskDescription,
+              resultSummary: agentResult.output.slice(0, 500),
+              quality,
+              executionMs: durationMs,
+              modelId: "claude-haiku-4-5-20251001",
+            })
+          )
         ).catch(() => {});
       }
 
@@ -222,6 +292,20 @@ function buildGeneralTools(): ToolDef[] {
           domain_filter: { type: "string", description: "Optional domain filter: product, finance, hr, delivery, general", default: "" },
         },
         required: ["query"],
+      },
+    },
+    {
+      name: "write_memory",
+      description: "Persist an important finding, fact, or insight to the workspace knowledge base so it is available in future queries. Use when you discover key facts, competitive insights, pricing data, or product information worth preserving.",
+      input_schema: {
+        type: "object",
+        properties: {
+          content: { type: "string", description: "The fact, finding, or insight to store (max 1000 chars)" },
+          domain: { type: "string", description: "Domain category: product, competitive, finance, delivery, general, research", default: "general" },
+          importance: { type: "number", description: "Importance score 0.0–1.0 (0.8 for key facts, 0.5 for general info)", default: 0.7 },
+          title: { type: "string", description: "Short title for this memory (max 100 chars)" },
+        },
+        required: ["content", "title"],
       },
     },
   ];
@@ -313,30 +397,33 @@ async function runAgenticLoop(
       break;
     }
 
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY!,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
-        system: buildGeneralSystemPrompt(job, task, chainDepth),
-        messages,
-        tools,
-      }),
-    });
-
-    if (!resp.ok) {
-      throw new Error(`Anthropic API error: ${resp.status}`);
+    // Progress heartbeat every 3 turns — makes AgentJobWidget show live progress
+    if (turn % 3 === 0 && turn > 0) {
+      try {
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        await getAdminClient()
+          .from("agent_queue")
+          .update({
+            heartbeat_at: new Date().toISOString(),
+            checkpoint_data: {
+              currentTurn: turn,
+              totalToolCalls: toolCallCount,
+              toolsUsed,
+              lastTool: toolsUsed[toolsUsed.length - 1] ?? null,
+              partialOutput: output.slice(0, 500),
+            },
+          })
+          .eq("id", job.id);
+      } catch { /* non-fatal — heartbeat failure should not crash the loop */ }
     }
 
-    const data = (await resp.json()) as {
-      content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>;
-      stop_reason: string;
-    };
+    const data = await callAnthropicWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4096,
+      system: buildGeneralSystemPrompt(job, task, chainDepth),
+      messages,
+      tools,
+    });
 
     // Collect text output
     const textBlocks = data.content.filter((b) => b.type === "text");
@@ -447,6 +534,26 @@ async function executeGeneralTool(
           }),
           count: data.length,
         };
+      }
+      case "write_memory": {
+        // Persist agent-discovered facts to ai_memory so they survive session boundaries
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const supabase = getAdminClient();
+        const domain = String(input.domain ?? "general");
+        const importance = Math.min(1.0, Math.max(0.0, Number(input.importance ?? 0.7)));
+        const content = String(input.content ?? "").slice(0, 1000);
+        const title = String(input.title ?? "Agent finding").slice(0, 100);
+        if (!content) return { error: "content is required" };
+        const { data, error } = await supabase.from("ai_memory").insert({
+          organization_id: job.organization_id,
+          content,
+          memory_type: "knowledge",
+          domain: `agent.${domain}`,
+          importance,
+          metadata: { title, source: "general-agent", jobId: job.id, discoveredAt: new Date().toISOString() },
+        }).select("id").single();
+        if (error) return { error: error.message };
+        return { success: true, memoryId: data?.id, message: `Fact "${title}" saved to knowledge base.` };
       }
       default:
         return { error: `Unknown tool: ${toolName}` };
