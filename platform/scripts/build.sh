@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# build.sh — Safe Next.js 15.5 build wrapper for App Router projects
+# build.sh — Next.js App Router build wrapper for BrainOS
 #
-# Next.js 15.5 App Router has a known bug with route groups (auth), (dashboard)
-# during the "Collecting page data" phase. The compilation succeeds, but page
-# data collection can fail with "Failed to collect page data for /login" etc.
+# Pinned to Next.js 15.3.3 — DO NOT upgrade without testing route groups.
+# Next.js 15.5.x had a bug where route groups (auth), (dashboard) failed
+# during "Collecting page data". Downgraded in this commit; re-upgrading
+# re-introduced the bug (see git log for d19deedc0 and 7d297dd83).
 #
-# Since ALL our pages use force-dynamic or "use client", the page data
-# collection phase is irrelevant — everything renders at runtime.
+# The suppress-document-error.cjs safety net handles any pre-existing
+# pdf-parse/pdfjs-dist Html-outside-document prerender errors.
 #
 # Strategy:
 # 1. Run next build with error suppression
@@ -32,7 +33,7 @@ mkdir -p "$PLATFORM_DIR/.next/server"
 SUPPRESS_SCRIPT="$SCRIPT_DIR/suppress-document-error.cjs"
 export NODE_OPTIONS="--max-old-space-size=3584 --require $SUPPRESS_SCRIPT"
 
-echo "🔨 Building Next.js 15.5 (App Router, webpack)..."
+echo "🔨 Building Next.js 15.3.3 (App Router, webpack)..."
 
 # Capture build output to check for compilation success
 BUILD_LOG=$(mktemp)
@@ -59,8 +60,8 @@ fi
 # unnecessary — runtime rendering works fine without it.
 if [ "$COMPILED" -gt 0 ] && [ "$HAS_MANIFEST" = true ] && [ "$HAS_APP_DIR" = true ]; then
   echo "⚠️  Build exited $EXIT_CODE but compilation succeeded and artifacts exist."
-  echo "   Known Next.js 15.5 route group page data collection bug — non-fatal."
-  echo "   All pages use force-dynamic — runtime rendering is unaffected."
+  echo "   Non-fatal prerender error (pdf-parse Html import on /404) — suppressed."
+  echo "   All app pages use force-dynamic — runtime rendering is unaffected."
   # Generate BUILD_ID if missing (page data phase crashed before creating it)
   if [ ! -f "$PLATFORM_DIR/.next/BUILD_ID" ]; then
     echo "$(date +%s)" > "$PLATFORM_DIR/.next/BUILD_ID"
