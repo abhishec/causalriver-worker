@@ -94,6 +94,7 @@ export async function GET(
             lastTool: checkpoint?.lastTool ?? null,
             totalToolCalls: checkpoint?.totalToolCalls ?? null,
             toolsUsed: checkpoint?.toolsUsed ?? null,
+            partialOutput: checkpoint?.partialOutput ?? null,
             progress: checkpoint?.progress ?? null,
             elapsedMs,
             heartbeatAge: current.heartbeat_at

@@ -446,6 +446,17 @@ export async function handleGeneralJobCreation(
   userId: string,
   workerId?: string,
 ): Promise<GeneralJobCreatedResult | null> {
+  // Validate task before queuing — prevent empty or oversized tasks from wasting worker cycles
+  const trimmedTask = detection.task?.trim() ?? "";
+  if (!trimmedTask) {
+    logger.warn("[agent-handler] Rejected empty task");
+    return null;
+  }
+  if (trimmedTask.length > 5000) {
+    logger.warn("[agent-handler] Task exceeds 5000 char limit, truncating");
+    detection = { ...detection, task: trimmedTask.slice(0, 5000) };
+  }
+
   try {
     const admin = getAdminClient();
     const now = new Date().toISOString();

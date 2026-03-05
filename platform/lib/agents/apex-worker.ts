@@ -550,7 +550,8 @@ Guidelines:
 
     if (!parsed.subtasks?.length) throw new Error("No subtasks");
 
-    return parsed.subtasks.map((s, i) => ({
+    // Cap at 7 subtasks — prompt says max 7 but Claude can ignore; enforce here
+    return parsed.subtasks.slice(0, 7).map((s, i) => ({
       index: i,
       goal: s.goal,
       acceptanceCriteria: s.acceptanceCriteria ?? ["Complete the subtask"],
@@ -692,8 +693,10 @@ async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob
   if (!ANTHROPIC_API_KEY) return completedWork;
 
   try {
+    // Allow synthesis model override from job payload — default Haiku, Sonnet for enterprise quality
+    const synthesisModel = String(job.payload.synthesisModel ?? "claude-haiku-4-5-20251001");
     const data = await callApexWithRetry({
-      model: "claude-haiku-4-5-20251001",
+      model: synthesisModel,
       max_tokens: 4096,
       system: `You are a senior analyst synthesizing research into a final, comprehensive report. Be structured, insightful, and actionable. Organization: ${job.organization_id}`,
       messages: [{

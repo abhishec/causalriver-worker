@@ -31,6 +31,8 @@ interface JobProgress {
   currentSubtaskGoal?: string | null;
   lastTool?: string | null;
   totalToolCalls?: number | null;
+  partialOutput?: string | null;
+  heartbeatAge?: number | null;
   progress?: number | null;
   elapsedMs?: number;
   result?: Record<string, unknown> | null;
@@ -74,6 +76,8 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
             currentSubtaskGoal: m.currentSubtaskGoal as string | null ?? null,
             lastTool: m.lastTool as string | null ?? null,
             totalToolCalls: m.totalToolCalls as number | null ?? null,
+            partialOutput: m.partialOutput as string | null ?? null,
+            heartbeatAge: m.heartbeatAge as number | null ?? null,
             progress: msg.progress ?? null,
             elapsedMs: msg.elapsedMs,
           });
@@ -130,6 +134,11 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
 
   const isActive = progress.status === "pending" || progress.status === "running";
   const elapsedSec = progress.elapsedMs ? Math.round(progress.elapsedMs / 1000) : 0;
+  const elapsedLabel = elapsedSec >= 60
+    ? `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`
+    : elapsedSec > 0 ? `${elapsedSec}s` : null;
+  // Heartbeat staleness: warn if worker hasn't reported in > 60s
+  const isStale = isActive && progress.heartbeatAge != null && progress.heartbeatAge > 60_000;
 
   const agentLabel = agentType === "apex" ? "APEX Research Agent" : "General Agent";
   const statusColors: Record<JobStatus, string> = {
@@ -173,7 +182,8 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted">
-          {elapsedSec > 0 && <span>{elapsedSec}s</span>}
+          {elapsedLabel && <span>{elapsedLabel}</span>}
+          {isStale && <span className="text-amber-400 font-medium">⚠ stale</span>}
           {toolCalls !== undefined && <span>{toolCalls} tool calls</span>}
           {subtasksCompleted !== undefined && <span>{subtasksCompleted} subtasks</span>}
           {isActive && (
@@ -218,6 +228,11 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               {lastToolLabel}…
             </span>
+          )}
+          {progress.partialOutput && (
+            <div className="mt-1 text-[10px] text-muted/80 font-mono leading-relaxed line-clamp-3 border-l-2 border-border-subtle/60 pl-2">
+              {progress.partialOutput}
+            </div>
           )}
         </div>
       )}
