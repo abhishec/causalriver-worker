@@ -251,6 +251,8 @@ async function executeCallLlm(
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
       }),
+      // Timeout: prevents Lambda from hanging if Anthropic is slow/overloaded
+      signal: AbortSignal.timeout(20_000),
     });
 
     if (!response.ok) {
@@ -262,9 +264,13 @@ async function executeCallLlm(
       return { text: "", error: `API error ${response.status}` };
     }
 
-    const data = (await response.json()) as {
-      content: Array<{ type: string; text: string }>;
-    };
+    let data: { content: Array<{ type: string; text: string }> };
+    try {
+      data = await response.json() as typeof data;
+    } catch {
+      logger.warn("[primitive:call_llm] JSON parse failed on Anthropic response");
+      return { text: "", error: "Invalid API response (JSON parse failed)" };
+    }
 
     const text = data.content
       .filter((b) => b.type === "text")
@@ -452,15 +458,21 @@ async function executeSession(
           system: systemPrompt,
           messages,
         }),
+        // Timeout: prevents Lambda from hanging if Anthropic is slow/overloaded
+        signal: AbortSignal.timeout(20_000),
       });
 
       if (!response.ok) {
         return { error: `LLM error ${response.status}`, output: null };
       }
 
-      const data = (await response.json()) as {
-        content: Array<{ type: string; text: string }>;
-      };
+      let data: { content: Array<{ type: string; text: string }> };
+      try {
+        data = await response.json() as typeof data;
+      } catch {
+        logger.warn("[primitive:session:continue] JSON parse failed on Anthropic response");
+        return { error: "Invalid API response (JSON parse failed)", output: null };
+      }
       const output = data.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
@@ -546,6 +558,9 @@ function executeInject(
 // ── Exponential backoff helper for external API calls ────────────────────────
 // Retries on 429 (rate limit) and 5xx (transient server errors).
 // Brave and Browserless both return 429 during high-traffic periods.
+// Per-attempt 15s timeout prevents Lambda from hanging on slow upstream APIs.
+
+const EXTERNAL_FETCH_TIMEOUT_MS = 15_000;
 
 async function fetchWithRetry(
   url: string,
@@ -555,14 +570,29 @@ async function fetchWithRetry(
   const delays = [1000, 2000];
   let lastResp: Response | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const resp = await fetch(url, init);
-    if (resp.ok) return resp;
-    if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
-      lastResp = resp;
-      await new Promise((r) => setTimeout(r, delays[attempt] + Math.random() * 200));
-      continue;
+    // Each attempt gets its own AbortController — timeout resets on retry
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), EXTERNAL_FETCH_TIMEOUT_MS);
+    try {
+      const resp = await fetch(url, { ...init, signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (resp.ok) return resp;
+      if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
+        lastResp = resp;
+        await new Promise((r) => setTimeout(r, delays[attempt] + Math.random() * 200));
+        continue;
+      }
+      return resp; // non-retryable error — return as-is so caller handles it
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const isAbort = (err as Error)?.name === "AbortError";
+      if (isAbort && attempt < maxRetries) {
+        logger.warn("[fetchWithRetry] Timeout — retrying", { attempt, url: url.slice(0, 80) });
+        await new Promise((r) => setTimeout(r, delays[attempt] + Math.random() * 200));
+        continue;
+      }
+      throw isAbort ? new Error(`External API timeout after ${EXTERNAL_FETCH_TIMEOUT_MS / 1000}s`) : err;
     }
-    return resp; // non-retryable error — return as-is so caller handles it
   }
   return lastResp!;
 }
@@ -580,9 +610,13 @@ async function executeWebSearch(
   }
 
   try {
+    // Validate query — empty/null query causes 400 from Brave or meaningless results
+    const query = String(params.query ?? "").trim();
+    if (!query) return { results: [], error: "query is required" };
+
     const count = Math.min(params.limit ?? 5, 20);
     const resp = await fetchWithRetry(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(params.query)}&count=${count}`,
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${count}`,
       {
         headers: {
           "X-Subscription-Token": BRAVE_SEARCH_API_KEY,
@@ -596,9 +630,13 @@ async function executeWebSearch(
       return { results: [], error: `Brave Search API error ${resp.status}` };
     }
 
-    const data = (await resp.json()) as {
-      web?: { results?: Array<{ title: string; url: string; description: string }> };
-    };
+    let data: { web?: { results?: Array<{ title: string; url: string; description: string }> } };
+    try {
+      data = await resp.json() as typeof data;
+    } catch {
+      logger.warn("[primitive:web_search] JSON parse failed on Brave response");
+      return { results: [], error: "Invalid API response (JSON parse failed)" };
+    }
 
     const results = (data.web?.results ?? []).map((r) => ({
       title: r.title,

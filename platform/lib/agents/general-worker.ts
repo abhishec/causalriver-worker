@@ -217,22 +217,41 @@ export async function processGeneralJobs(
           );
           // 2. Federated knowledge write-back — Brain L25-L29 learns from agent work
           if (quality >= 0.5 && agentResult.output.length > 100) {
-            supabase.from("federated_knowledge").insert({
-              organization_id: job.organization_id,
-              domain: `general-agent.${String(job.task_type ?? "general")}`,
-              content: agentResult.output.slice(0, 4000),
-              confidence: quality,
-              metadata: {
+            try {
+              const { error: insertErr } = await supabase.from("federated_knowledge").insert({
+                organization_id: job.organization_id,
+                domain: `general-agent.${String(job.task_type ?? "general")}`,
+                content: agentResult.output.slice(0, 4000),
+                confidence: quality,
+                metadata: {
+                  jobId: job.id,
+                  task: taskDescription.slice(0, 300),
+                  toolsUsed: agentResult.toolsUsed,
+                  toolCallCount: agentResult.toolCallCount,
+                  source: "general-worker",
+                  aiWorkerId: job.ai_worker_id ?? null,
+                },
+              });
+              // Non-fatal: log but don't fail the job — Brain learning should not block results
+              if (insertErr) {
+                logger.warn("[general-worker] federated_knowledge insert failed (non-fatal)", {
+                  error: insertErr.message,
+                  jobId: job.id,
+                });
+              }
+            } catch (insertException) {
+              logger.warn("[general-worker] federated_knowledge insert threw (non-fatal)", {
+                error: insertException instanceof Error ? insertException.message : String(insertException),
                 jobId: job.id,
-                task: taskDescription.slice(0, 300),
-                toolsUsed: agentResult.toolsUsed,
-                toolCallCount: agentResult.toolCallCount,
-                source: "general-worker",
-                aiWorkerId: job.ai_worker_id ?? null,
-              },
-            }).then(() => {}, () => {}); // fire-and-forget, non-fatal
+              });
+            }
           }
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.warn("[general-worker] Post-job RL/knowledge write-back failed (non-fatal)", {
+            error: err instanceof Error ? err.message : String(err),
+            jobId: job.id,
+          });
+        });
       }
 
       result.succeeded++;
@@ -431,6 +450,11 @@ async function runAgenticLoop(
   chainDepth: number = 0,
   resumeMessages?: Array<{ role: string; content: unknown }>,
 ): Promise<AgentLoopResult> {
+  // Create admin client ONCE before the loop — prevents N+1 client instantiation (audit C5).
+  // Importing inside each loop iteration creates a new client per turn (50 iterations = 50 clients).
+  const { getAdminClient } = await import("@/lib/supabase/admin");
+  const adminSupabase = getAdminClient();
+
   // Restore conversation history from checkpoint, or start fresh
   const messages: Array<{ role: string; content: unknown }> = resumeMessages?.length
     ? [...resumeMessages]
@@ -444,10 +468,8 @@ async function runAgenticLoop(
     // Chain-invoker: if Lambda budget is nearly exhausted, checkpoint and spawn continuation
     if (shouldChain(startMs, GENERAL_WORKER_BUDGET_MS)) {
       try {
-        const { getAdminClient } = await import("@/lib/supabase/admin");
-        const supabase = getAdminClient();
         const checkpoint = { task, messages, chainDepth, toolCallCount, toolsUsed, partialOutput: output };
-        const childJobId = await checkpointAndChain(supabase, job.id, checkpoint, chainDepth);
+        const childJobId = await checkpointAndChain(adminSupabase, job.id, checkpoint, chainDepth);
         return { output, toolCallCount, toolsUsed, chained: true, childJobId };
       } catch (chainErr) {
         logger.error("[general-worker] Chain failed, continuing in current Lambda", { error: chainErr });
@@ -458,8 +480,7 @@ async function runAgenticLoop(
     // Cancellation check — poll DB every 3 turns to detect external cancel requests
     if (turn > 0 && turn % 3 === 0) {
       try {
-        const { getAdminClient } = await import("@/lib/supabase/admin");
-        const { data: currentStatus } = await getAdminClient()
+        const { data: currentStatus } = await adminSupabase
           .from("agent_queue").select("status").eq("id", job.id).single();
         if (currentStatus?.status === "cancelled") {
           logger.warn(`[general-worker] Job ${job.id} cancelled externally at turn ${turn}, exiting`);
@@ -565,8 +586,7 @@ async function runAgenticLoop(
 
     // Heartbeat after every tool execution batch — lastTool is always current
     try {
-      const { getAdminClient } = await import("@/lib/supabase/admin");
-      await getAdminClient()
+      await adminSupabase
         .from("agent_queue")
         .update({
           heartbeat_at: new Date().toISOString(),

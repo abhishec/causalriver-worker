@@ -32,6 +32,7 @@ import { ConnectorSetupCard } from "./ConnectorSetupCard";
 import type { ConnectorSetupInfo } from "./ConnectorSetupCard";
 import { WidgetRenderer } from "./widgets/WidgetRenderer";
 import { AgentSpeechBubble } from "./AgentSpeechBubble";
+import { useBackgroundTasks } from "@/lib/use-background-tasks";
 
 // ─── Types (re-exported from types.ts to avoid circular deps) ───────────────
 // All shared types live in ./types.ts. Re-export them here for backward compat.
@@ -566,6 +567,46 @@ function renderMarkdown(text: string) {
       continue;
     }
 
+    // Blockquote
+    if (line.startsWith("> ")) {
+      elements.push(
+        <blockquote
+          key={i}
+          className="border-l-2 border-primary/40 pl-3 py-0.5 my-1 text-muted-foreground italic text-sm"
+        >
+          {renderInline(line.slice(2))}
+        </blockquote>
+      );
+      continue;
+    }
+
+    // Image markdown: ![alt](url)
+    {
+      const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (imgMatch) {
+        const imgUrl = imgMatch[2];
+        // Only render http/https URLs for security
+        if (imgUrl.startsWith("http://") || imgUrl.startsWith("https://")) {
+          elements.push(
+            <div key={i} className="my-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imgUrl}
+                alt={imgMatch[1] || ""}
+                className="max-w-full max-h-96 rounded-lg border border-border object-contain"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+              {imgMatch[1] && (
+                <p className="text-[10px] text-muted mt-1">{imgMatch[1]}</p>
+              )}
+            </div>
+          );
+          continue;
+        }
+      }
+    }
+
     // Numbered list item
     if (line.match(/^\d+\.\s/)) {
       const content = line.replace(/^\d+\.\s/, "");
@@ -681,10 +722,12 @@ function renderMarkdown(text: string) {
   return elements;
 }
 
-/** Inline renderer: bold, code */
+/** Inline renderer: bold, code, markdown links */
 function renderInline(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
-  const regex = /(\*\*(.+?)\*\*)|(`(.+?)`)/g;
+  // Matches: **bold** | ~~strikethrough~~ | `code` | [text](url)
+  // Groups:   1(2)       3(4)                5(6)     7(8)
+  const regex = /(\*\*(.+?)\*\*)|(~~(.+?)~~)|(`(.+?)`)|\[([^\]]+)\]\(([^)]+)\)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -700,14 +743,34 @@ function renderInline(text: string): React.ReactNode {
         </strong>
       );
     } else if (match[4]) {
-      // Code
+      // Strikethrough
+      parts.push(
+        <del key={match.index} className="opacity-60">
+          {match[4]}
+        </del>
+      );
+    } else if (match[6]) {
+      // Inline code
       parts.push(
         <code
           key={match.index}
           className="px-1.5 py-0.5 rounded bg-surface text-accent text-[12px] font-mono"
         >
-          {match[4]}
+          {match[6]}
         </code>
+      );
+    } else if (match[7] && match[8]) {
+      // Markdown link [text](url)
+      parts.push(
+        <a
+          key={match.index}
+          href={match[8]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
+        >
+          {match[7]}
+        </a>
       );
     }
     lastIndex = match.index + match[0].length;
@@ -1668,6 +1731,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   // ── Per-message agent input request (when agent needs more info to proceed) ──
   const [agentInputRequestPerMessage, setAgentInputRequestPerMessage] = useState<Map<number, AgentInputRequest>>(new Map());
 
+  // ── Per-message timestamps (for display in footer) ────────────────────────
+  const messageTimestampsRef = useRef<Map<number, Date>>(new Map());
+
   // ── Per-message orchestrator queued tracking (for QueuedJobBadge + polling) ──
   const [queuedJobPerMessage, setQueuedJobPerMessage] = useState<Map<number, OrchestratorQueuedInfo>>(new Map());
   // Track completed queued jobs so we can swap the badge for a "ready" indicator
@@ -1704,6 +1770,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   // ── Pending verification prompts (reinforcement learning ground truth) ──
   const [pendingVerifications, setPendingVerifications] = useState<Array<{
@@ -1764,6 +1831,9 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   const handleDismissVerification = useCallback((predictionId: string) => {
     setPendingVerifications((prev) => prev.filter((v) => v.predictionId !== predictionId));
   }, []);
+
+  // ── Global background task store (persists across navigation) ─────────────
+  const { addTask: addBackgroundTask } = useBackgroundTasks(organizationId);
 
   // ── Poll queued job status every 5s until success ─────────────────────────
   // When orchestratorQueued SSE arrives, we show a pulsing badge and poll
@@ -1827,6 +1897,21 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
   // A proper UUID is required because the DB id column is type UUID.
   // setConversationId lets the load-on-mount effect reuse an existing conversation.
   const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
+
+  // Clear per-message Maps when conversation resets — prevents unbounded memory growth (audit C6).
+  // Maps are keyed by message index and accumulate without eviction in long sessions.
+  // Cleanup runs on unmount and whenever conversationId changes (new conversation started).
+  useEffect(() => {
+    return () => {
+      messageTimestampsRef.current.clear();
+      setAgentCommsPerMessage(new Map());
+      setAgentInputRequestPerMessage(new Map());
+      setQueuedJobPerMessage(new Map());
+      setCompletedQueuedJobs(new Set());
+      setBrainWarningPerMessage(new Map());
+      setWidgetPerMessage(new Map());
+    };
+  }, [conversationId]);
 
   // Load most-recent conversation on mount so history survives page refresh.
   // If initialConversationId is set, load that specific conversation instead.
@@ -2300,15 +2385,59 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
 
   const sendMessage = useCallback(async (messageText: string) => {
     const trimmed = messageText.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoadingRef.current) return; // Use ref for reliable race guard
 
     // Cancel any in-flight request
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const userMessage: Message = { role: "user", content: trimmed };
-    setMessages((prev) => [...prev, userMessage]);
+    // ── Upload attachments before sending message ──────────────────────
+    let uploadedFiles: Array<{ name: string; chunksCreated: number; wordCount: number }> = [];
+    if (attachments.length > 0) {
+      setUploadingFiles(true);
+      try {
+        const currentAttachments = [...attachments]; // snapshot before clearing
+        for (const file of currentAttachments) {
+          try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("sourceType", file.name.endsWith(".pdf") ? "pdf" : file.name.endsWith(".md") ? "markdown" : "text");
+            formData.append("documentTitle", file.name);
+            const res = await fetch("/api/connectors/documents/ingest", {
+              method: "POST",
+              body: formData,
+            });
+            if (res.ok) {
+              const result = await res.json();
+              uploadedFiles.push({
+                name: file.name,
+                chunksCreated: result.chunksCreated ?? 0,
+                wordCount: result.wordCount ?? 0,
+              });
+            } else {
+              console.warn(`File upload failed for "${file.name}": HTTP ${res.status}`);
+            }
+          } catch (err) {
+            console.warn(`File upload error for "${file.name}":`, err);
+          }
+        }
+      } finally {
+        setUploadingFiles(false); // Always reset — never leave UI stuck
+      }
+    }
+
+    // Build user message with file context
+    const fileLabel = uploadedFiles.length > 0
+      ? `\n\n📎 Attached: ${uploadedFiles.map(f => f.name).join(", ")}`
+      : "";
+    const userMessage: Message = { role: "user", content: trimmed + fileLabel };
+    const now = new Date();
+    setMessages((prev) => {
+      // Stamp user message timestamp at its index (prev.length before push)
+      messageTimestampsRef.current.set(prev.length, now);
+      return [...prev, userMessage];
+    });
     setScrollToBottomTrigger(t => t + 1); // force-scroll to show user's new message immediately
     setInput("");
     setAttachments([]);
@@ -2318,7 +2447,11 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
     setLastFailedPrompt(null);
     hasStreamErrorRef.current = false;
 
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    setMessages((prev) => {
+      // Stamp assistant message timestamp at its index
+      messageTimestampsRef.current.set(prev.length, new Date());
+      return [...prev, { role: "assistant", content: "" }];
+    });
 
     // Reset agent state for new message
     setAgentSteps([]);
@@ -2357,6 +2490,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             : {}),
           ...(Object.keys(gatheringRef.current.state.collectedParams).length > 0 ? { commandParams: gatheringRef.current.state.collectedParams } : {}),
           conversationId, // stable UUID → server uses it to upsert the conversations row
+          ...(uploadedFiles.length > 0 ? { uploadedFiles } : {}),
           ...extraParams,
         }),
         signal: controller.signal,
@@ -2435,6 +2569,14 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               const next = new Map(prev);
               next.set(messageIdx, jobInfo as Record<string, unknown>);
               return pruneMap(next);
+            });
+            // Register in global background task store (persists across navigation)
+            addBackgroundTask({
+              jobId: jobInfo.jobId,
+              agentType: jobInfo.agentType,
+              task: jobInfo.task,
+              status: "pending",
+              createdAt: jobInfo.createdAt,
             });
           },
           onConnectorStatus: (data) => {
@@ -3057,10 +3199,19 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                           /* When agent is running, don't show loading dots (timeline is visible) */
                           null
                         ) : (
-                          /* Shimmer streaming indicator — Claude-style */
+                          /* Animated thinking indicator */
                           <div className="py-3">
-                            <div className="streaming-shimmer text-[15px] font-medium">
-                              Thinking...
+                            <div className="flex items-center gap-2 text-[15px] text-muted-foreground">
+                              <span>Thinking</span>
+                              <span className="flex items-center gap-0.5">
+                                {[0, 1, 2].map((di) => (
+                                  <span
+                                    key={di}
+                                    className="w-1 h-1 rounded-full bg-muted-foreground animate-bounce"
+                                    style={{ animationDelay: `${di * 0.15}s`, animationDuration: "0.9s" }}
+                                  />
+                                ))}
+                              </span>
                             </div>
                           </div>
                         )}
@@ -3179,19 +3330,24 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                       {/* RL Feedback + agent badge — inline row, shown after stream completes */}
                       {!isLoading && (msg.content && !msg.content.startsWith("__ERROR__") && organizationId || agentNamePerMessage.get(i)) && (
                         <div className="flex items-center justify-between gap-3 mt-1">
-                          {/* Agent name badge — subtle, left-aligned */}
-                          {agentNamePerMessage.get(i) ? (
-                            <div className="flex items-center gap-1 min-w-0">
-                              <svg className="w-2.5 h-2.5 text-muted-foreground opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                              </svg>
-                              <span className="text-[10px] text-muted-foreground opacity-50 truncate">
-                                {agentNamePerMessage.get(i)}
+                          {/* Agent name badge + timestamp — left-aligned */}
+                          <div className="flex items-center gap-2 min-w-0">
+                            {agentNamePerMessage.get(i) && (
+                              <div className="flex items-center gap-1 min-w-0">
+                                <svg className="w-2.5 h-2.5 text-muted-foreground opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                </svg>
+                                <span className="text-[10px] text-muted-foreground opacity-50 truncate">
+                                  {agentNamePerMessage.get(i)}
+                                </span>
+                              </div>
+                            )}
+                            {messageTimestampsRef.current.get(i) && (
+                              <span className="text-[10px] text-muted-foreground/40 shrink-0">
+                                {messageTimestampsRef.current.get(i)!.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                               </span>
-                            </div>
-                          ) : (
-                            <div />
-                          )}
+                            )}
+                          </div>
                           {/* Thumbs up/down feedback — right-aligned */}
                           {msg.content && !msg.content.startsWith("__ERROR__") && organizationId && (
                             <MessageFeedback
@@ -3396,20 +3552,34 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                 {attachments.map((file, i) => (
                   <span
                     key={`${file.name}-${i}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-surface text-[11px] text-foreground/70 border border-border-subtle"
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] border",
+                      uploadingFiles
+                        ? "bg-accent/10 text-accent border-accent/30 animate-pulse"
+                        : "bg-surface text-foreground/70 border-border-subtle"
+                    )}
                   >
-                    <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
-                    </svg>
-                    <span className="max-w-[120px] truncate">{file.name}</span>
-                    <button
-                      onClick={() => removeAttachment(i)}
-                      className="ml-0.5 text-muted hover:text-foreground transition-colors"
-                    >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    {uploadingFiles ? (
+                      <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
-                    </button>
+                    ) : (
+                      <svg className="w-3 h-3 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                      </svg>
+                    )}
+                    <span className="max-w-[120px] truncate">{file.name}</span>
+                    {!uploadingFiles && (
+                      <button
+                        onClick={() => removeAttachment(i)}
+                        className="ml-0.5 text-muted hover:text-foreground transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
                   </span>
                 ))}
               </div>
@@ -3499,10 +3669,10 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               /* Send button — matches HTML .chat-send: circular dark bg, ↑ arrow */
               <button
                 type="submit"
-                disabled={!input.trim() || isLoading}
+                disabled={!input.trim() || isLoading || uploadingFiles}
                 className={cn(
                     "w-7 h-7 rounded-full bg-foreground border-none text-background text-[13px] font-bold flex items-center justify-center transition-opacity",
-                    input.trim() && !isLoading ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-30"
+                    input.trim() && !isLoading && !uploadingFiles ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-30"
                 )}
                 aria-label="Send message"
               >
