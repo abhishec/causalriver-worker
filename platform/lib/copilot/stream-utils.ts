@@ -143,10 +143,22 @@ export function createSSEStream() {
     send(JSON.stringify({ widget }));
   };
 
+  /** Notify UI that a general/APEX agent job was queued — triggers AgentJobWidget */
+  const sendGeneralJobQueued = (job: {
+    jobId: string;
+    agentType: "general" | "apex";
+    task: string;
+    status: "pending";
+    createdAt: string;
+  }) => {
+    send(JSON.stringify({ generalJobQueued: job }));
+  };
+
   return {
     stream, send, sendText, sendError, close,
     sendAgentStep, sendProgressiveArtifact, sendAgentStatus, sendProactiveInsights,
     sendWorkflowProgress, sendIngestionProgress, sendSessionTurn, sendWidget,
+    sendGeneralJobQueued,
   };
 }
 

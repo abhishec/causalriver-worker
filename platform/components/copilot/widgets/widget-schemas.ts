@@ -88,17 +88,21 @@ export function getWidgetSystemPrompt(): string {
 You can render rich interactive UI widgets by wrapping a JSON spec in a \`\`\`widget code fence.
 Use widgets to visualize data — prefer them over plain prose when presenting metrics, trends, comparisons, or tabular data.
 
-Available widget types:
+**You can invent any widget kind name** — the renderer auto-detects the data shape and picks the best visualization. Common known types (optimised renderers available):
 ${typeLines}
+
+**Auto-rendered data shapes** (use any kind name you want):
+- Has \`rows\` + \`columns\` arrays → table
+- Has \`metrics\` array → metric grid
+- Has \`values\` number array → sparkline
+- Has \`series\` + \`rows\` → chart
+- Has \`score\` number → ring
+- Has \`items\` or \`steps\` array → bullet/step list
+- Anything else → key-value card
 
 Guidelines:
 - Widgets can appear anywhere in your response — embed them between paragraphs
-- Use **metric_card** for a single important number
-- Use **metric_grid** for 2–4 related metrics
-- Use **bar_chart** for categorical comparisons, **line_chart** for time-series trends
-- Use **sparkline** for a compact inline trend shown alongside text
-- Use **data_table** when presenting structured multi-row data
-- Use **progress_ring** for health scores, sprint completion, risk levels (0–100)
-- Always include real data values in the widget — never use placeholder data
+- Invent descriptive kind names: \`timeline\`, \`heatmap\`, \`risk_matrix\`, \`roadmap\`, \`okr_tracker\` — the system will render them intelligently
+- Always include real data values — never use placeholder data
 - If you don't have enough data to populate a widget, use plain text instead`;
 }

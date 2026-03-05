@@ -13,6 +13,7 @@ import type { WidgetPayload } from "@/components/copilot/types";
 import type { WidgetProps } from "./widget-registry";
 import { KpiCard, StatGrid, StatCard, HealthRing } from "@/components/copilot/artifact-renderers/shared";
 import type { ChartSpec } from "@/components/copilot/chart-utils";
+import { AutoWidget } from "./AutoWidget";
 
 // ── Lazy-load recharts-heavy widgets ────────────────────────────────────────
 const SparklineWidget = dynamic(
@@ -139,12 +140,10 @@ export function WidgetRenderer({ widget }: { widget: WidgetPayload }) {
   const { kind, title, subtitle, data } = widget;
   const Component = getWidgetComponent(kind);
 
+  // Unknown kind → AutoWidget inspects data shape and picks the best renderer.
+  // This means the LLM can invent any widget kind and get a sensible visual.
   if (!Component) {
-    return (
-      <div className="rounded-xl bg-surface/30 border border-border-subtle px-3 py-2 text-xs text-muted my-2">
-        Widget type <code className="font-mono">{kind}</code> not registered
-      </div>
-    );
+    return <AutoWidget kind={kind} title={title} subtitle={subtitle} data={data} />;
   }
 
   return <Component kind={kind} title={title} subtitle={subtitle} data={data} />;
