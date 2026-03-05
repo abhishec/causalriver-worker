@@ -497,7 +497,8 @@ async function runAgenticLoop(
     // Execute each tool call — cap at 5 per turn to prevent runaway cost
     const MAX_TOOL_CALLS_PER_TURN = 5;
     const cappedToolCalls = toolUseBlocks.slice(0, MAX_TOOL_CALLS_PER_TURN);
-    if (toolUseBlocks.length > MAX_TOOL_CALLS_PER_TURN) {
+    const skippedToolCalls = toolUseBlocks.slice(MAX_TOOL_CALLS_PER_TURN);
+    if (skippedToolCalls.length > 0) {
       logger.warn(`[general-worker] Turn ${turn + 1}: ${toolUseBlocks.length} tool calls requested, capping to ${MAX_TOOL_CALLS_PER_TURN}`);
     }
     const toolResults: Array<{ type: string; tool_use_id: string; content: string }> = [];
@@ -512,6 +513,14 @@ async function runAgenticLoop(
         type: "tool_result",
         tool_use_id: toolCall.id ?? "",
         content: JSON.stringify(toolResult).slice(0, 10000),
+      });
+    }
+    // Anthropic API requires a tool_result for EVERY tool_use — add stub for skipped calls
+    for (const skipped of skippedToolCalls) {
+      toolResults.push({
+        type: "tool_result",
+        tool_use_id: skipped.id ?? "",
+        content: JSON.stringify({ error: "Tool call skipped (rate limit: max 5 tool calls per turn). Request fewer tools at a time." }),
       });
     }
 

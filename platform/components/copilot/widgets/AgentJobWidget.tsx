@@ -21,7 +21,7 @@
 import { useEffect, useState, useCallback } from "react";
 import type { WidgetProps } from "./widget-registry";
 
-type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled" | "paused";
 
 interface JobProgress {
   status: JobStatus;
@@ -101,6 +101,12 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
           setProgress((prev) => ({ ...prev, status: "cancelled" }));
           setStreaming(false);
           evtSource.close();
+        } else if (msg.type === "paused") {
+          // Job checkpointed — continuing in a new Lambda (chain)
+          const m = msg as Record<string, unknown>;
+          setProgress((prev) => ({ ...prev, status: "paused", step: m.childJobId as string | null ?? null }));
+          setStreaming(false);
+          evtSource.close();
         }
       } catch {
         // ignore parse errors
@@ -147,6 +153,7 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
     completed: "text-emerald-400",
     failed: "text-red-400",
     cancelled: "text-muted",
+    paused: "text-amber-400",
   };
 
   const output = progress.result?.output as string | undefined;

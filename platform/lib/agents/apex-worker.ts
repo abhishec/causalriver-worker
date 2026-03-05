@@ -647,6 +647,7 @@ async function executeSubtask(
     // Cap tool calls per turn to prevent runaway cost
     const MAX_TOOL_CALLS_PER_TURN = 5;
     const cappedToolCalls = toolUseBlocks.slice(0, MAX_TOOL_CALLS_PER_TURN);
+    const skippedToolCalls = toolUseBlocks.slice(MAX_TOOL_CALLS_PER_TURN);
     const toolResults: Array<{ type: string; tool_use_id: string; content: string }> = [];
     for (const toolCall of cappedToolCalls) {
       toolCallCount++;
@@ -656,6 +657,14 @@ async function executeSubtask(
         type: "tool_result",
         tool_use_id: toolCall.id ?? "",
         content: JSON.stringify(toolResult).slice(0, 8000),
+      });
+    }
+    // Anthropic API requires tool_result for every tool_use — stub skipped calls
+    for (const skipped of skippedToolCalls) {
+      toolResults.push({
+        type: "tool_result",
+        tool_use_id: skipped.id ?? "",
+        content: JSON.stringify({ error: "Tool call skipped (max 5 per turn). Request fewer tools at once." }),
       });
     }
 

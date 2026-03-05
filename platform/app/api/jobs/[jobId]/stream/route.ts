@@ -102,7 +102,12 @@ export async function GET(
               : null,
           });
 
-          // Terminal states (including cancellation)
+          // Terminal states (including paused/chained — frontend should follow child job)
+          if (current.status === "paused") {
+            const childJobId = (checkpoint?.childJobId ?? null) as string | null;
+            send({ type: "paused", childJobId, elapsedMs, message: "Job checkpointed — continuing in next run" });
+            break;
+          }
           if (current.status === "completed" || current.status === "failed" || current.status === "cancelled") {
             send({
               type: current.status === "completed" ? "complete" : current.status === "cancelled" ? "cancelled" : "failed",
