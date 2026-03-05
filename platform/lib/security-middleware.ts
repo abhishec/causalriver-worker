@@ -148,6 +148,20 @@ function checkMemRateLimit(
   if (entry && now - entry.resetAt < windowMs && entry.count >= limit) {
     return { allowed: false, remaining: 0 };
   }
+
+  // Evict expired entries and cap Map size to prevent unbounded OOM growth
+  const MAX_MEM_RATE_LIMITS = 5000;
+  if (_memRateLimits.size > MAX_MEM_RATE_LIMITS) {
+    for (const [key, e] of _memRateLimits) {
+      if (e.resetAt < now) _memRateLimits.delete(key);
+    }
+    // If still too large after eviction, delete oldest entries
+    if (_memRateLimits.size > MAX_MEM_RATE_LIMITS) {
+      const keysToDelete = Array.from(_memRateLimits.keys()).slice(0, _memRateLimits.size - MAX_MEM_RATE_LIMITS);
+      for (const k of keysToDelete) _memRateLimits.delete(k);
+    }
+  }
+
   if (!entry || now - entry.resetAt >= windowMs) {
     _memRateLimits.set(memKey, { count: 1, resetAt: now });
   } else {

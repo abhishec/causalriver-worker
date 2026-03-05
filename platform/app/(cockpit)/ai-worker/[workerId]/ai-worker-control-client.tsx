@@ -122,16 +122,21 @@ const STATUS_TEXT: Record<string, string> = {
   revoked: "text-danger",
 };
 
-function timeAgo(date: string): string {
+function timeAgo(date: string | null | undefined): string {
+  if (!date) return "—";
   const diff = Date.now() - new Date(date).getTime();
+  if (isNaN(diff)) return "—";
   if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
   return `${Math.floor(diff / 86400000)}d ago`;
 }
 
-function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-US", {
+function formatDate(date: string | null | undefined): string {
+  if (!date) return "—";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",

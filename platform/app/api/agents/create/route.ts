@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

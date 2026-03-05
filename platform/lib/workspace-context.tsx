@@ -175,6 +175,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       const mapped: WorkspaceMembership[] = (rows as any[]).map((r: any) => {
         const org   = r.organizations;
+        if (!org) return null; // skip rows with broken FK
         const cust  = org?.customer ?? null;
         return {
           organization_id: r.organization_id,
@@ -192,7 +193,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
             customer_slug: cust?.slug        ?? null,
           },
         };
-      });
+      }).filter(Boolean) as WorkspaceMembership[];
 
       const isAdmin = mapped.some((m) => m.is_platform_admin);
       setMemberships(mapped);

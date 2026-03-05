@@ -11,8 +11,8 @@ export interface BrainMeta {
   intent: string;
   domains: string[];
   confidence: number;
-  regionsUsed: string[];
-  uncertainAreas: string[];
+  regionsUsed?: string[];
+  uncertainAreas?: string[];
 }
 
 export interface CopilotArtifact {

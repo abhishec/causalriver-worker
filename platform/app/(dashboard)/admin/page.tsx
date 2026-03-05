@@ -37,7 +37,7 @@ export default async function AdminFleetPage() {
     .maybeSingle();
 
   if (!adminCheck) {
-    redirect("/overview");
+    redirect("/workspace");
   }
 
   // Fetch all orgs

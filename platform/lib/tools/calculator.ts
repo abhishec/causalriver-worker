@@ -47,6 +47,21 @@ for (const fn of SAFE_MATH_FN_NAMES) {
   SAFE_CONTEXT[fn.toUpperCase()] = _mathAsRecord[fn];
 }
 
+// Additional math functions not in Math.*
+function _factorial(n: number): number {
+  if (n < 0 || !Number.isInteger(n) || n > 170) return NaN;
+  if (n === 0 || n === 1) return 1;
+  let result = 1;
+  for (let i = 2; i <= n; i++) result *= i;
+  return result;
+}
+SAFE_CONTEXT["factorial"] = _factorial;
+SAFE_CONTEXT["FACTORIAL"] = _factorial;
+SAFE_CONTEXT["nCr"] = (n: number, r: number) => _factorial(n) / (_factorial(r) * _factorial(n - r));
+SAFE_CONTEXT["nPr"] = (n: number, r: number) => _factorial(n) / _factorial(n - r);
+SAFE_CONTEXT["NCR"] = SAFE_CONTEXT["nCr"];
+SAFE_CONTEXT["NPR"] = SAFE_CONTEXT["nPr"];
+
 // Regex to validate expression — reject anything that looks like code injection
 // Allow: digits, operators, parentheses, dots, spaces, function names, commas
 const SAFE_EXPR_RE = /^[0-9\s+\-*/().^%,_a-zA-Z]+$/;

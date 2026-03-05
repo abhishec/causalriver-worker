@@ -201,5 +201,16 @@ export async function checkpointAndChain(
     // Continue anyway — child job creation is the critical path
   }
 
-  return chainContinuation(supabase, jobId, checkpointData, chainDepth);
+  try {
+    return await chainContinuation(supabase, jobId, checkpointData, chainDepth);
+  } catch (chainErr) {
+    // Revert parent from paused back to running so stale watchdog can recover
+    await Promise.resolve(
+      supabase.from("agent_queue")
+        .update({ status: "running" })
+        .eq("id", jobId)
+        .eq("status", "paused")
+    ).catch(() => {}); // fire-and-forget revert
+    throw chainErr;
+  }
 }

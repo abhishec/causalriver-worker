@@ -122,7 +122,7 @@ export function AdminSidebar() {
       {/* Footer */}
       <div className="px-2 pb-3 shrink-0">
         <Link
-          href="/overview"
+          href="/workspace"
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-all"
         >
           <svg className="w-[18px] h-[18px] text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

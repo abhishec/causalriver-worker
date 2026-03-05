@@ -61,7 +61,7 @@ export function getGAIATools(): GaiaTool[] {
     {
       name: "execute_python",
       description:
-        "Execute Python code in a sandboxed environment. Use for: mathematical calculations, data processing, file parsing, string manipulation, scientific computations. Code runs isolated with no file system or network access. Supports standard library + common packages (numpy, pandas, math, json, re, datetime).",
+        "Execute Python code in a sandboxed environment. Use for: mathematical calculations, data processing, string manipulation, scientific computations. Code runs isolated. Supports ONLY the Python standard library (math, json, re, datetime, statistics, itertools, collections, csv, io). numpy and pandas are NOT available — use the math module or manual computation instead.",
       input_schema: {
         type: "object",
         properties: {
@@ -225,7 +225,10 @@ export async function executeGAIATool(
         const lines: string[] = [];
         if (result.title) lines.push(`Title: ${result.title}`);
         lines.push(`URL: ${result.url}`);
-        lines.push(`\nContent:\n${result.textContent}`);
+        const cappedContent = result.textContent.length > 15000
+          ? result.textContent.slice(0, 15000) + "\n...[content truncated at 15000 chars]"
+          : result.textContent;
+        lines.push(`\nContent:\n${cappedContent}`);
         if (result.links.length > 0) {
           lines.push(`\nLinks (first ${Math.min(result.links.length, 10)}):`);
           result.links.slice(0, 10).forEach((l) => {
@@ -242,8 +245,18 @@ export async function executeGAIATool(
         if (result.error) {
           return `Error: ${result.error}`;
         }
-        // Return as a reference — the caller (chat route) can pass as image block
-        return `[Screenshot taken: ${result.width}x${result.height}px, base64_length=${result.base64.length}]`;
+        // Auto-analyze screenshot with vision instead of returning useless text reference
+        const visionResult = await analyzeImage(result.base64, "image/png",
+          toolInput.prompt ? String(toolInput.prompt) : "Describe everything you see in this screenshot. Extract all text, numbers, data from tables/charts.");
+        if (visionResult.error) {
+          return `Screenshot captured (${result.width}x${result.height}) but analysis failed: ${visionResult.error}`;
+        }
+        const lines: string[] = [];
+        lines.push(`Screenshot Analysis (${result.width}x${result.height}):`);
+        lines.push(visionResult.description);
+        if (visionResult.extractedText) lines.push(`\nExtracted Text: ${visionResult.extractedText}`);
+        if (visionResult.objects.length > 0) lines.push(`\nKey Objects: ${visionResult.objects.join(", ")}`);
+        return lines.join("\n");
       }
 
       case "analyze_image": {

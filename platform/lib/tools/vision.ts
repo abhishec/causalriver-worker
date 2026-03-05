@@ -12,7 +12,7 @@
 import { logger } from "@/lib/logger";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const VISION_MODEL = "claude-haiku-4-5-20251001"; // Fast + cheap for vision tasks
+const VISION_MODEL = "claude-3-5-haiku-20241022"; // Fast + cheap for vision tasks
 
 export interface VisionResult {
   description: string;    // Full visual description
@@ -54,7 +54,8 @@ export async function analyzeImage(
     };
   }
 
-  const systemPrompt = prompt ?? `You are a precise visual analyst. Examine this image and provide:
+  // Always use JSON format as system prompt; custom prompt goes into user message
+  const systemPrompt = `You are a precise visual analyst. Examine this image and provide:
 1. A detailed description of what you see (all objects, people, text, spatial layout)
 2. All text visible in the image (exact transcription, including numbers, labels, captions)
 3. Key objects, data, or entities detected
@@ -65,6 +66,11 @@ Format your response as JSON:
   "extractedText": "all visible text and numbers",
   "objects": ["list", "of", "key", "objects"]
 }`;
+
+  // If a custom prompt is provided, include it in the user message alongside the JSON instruction
+  const userTextContent = prompt
+    ? `${prompt}\n\nAnalyze this image according to the instructions above and the system prompt. Return JSON.`
+    : "Analyze this image according to the instructions. Return JSON.";
 
   try {
     const controller = new AbortController();
@@ -97,7 +103,7 @@ Format your response as JSON:
                 },
                 {
                   type: "text",
-                  text: "Analyze this image according to the instructions. Return JSON.",
+                  text: userTextContent,
                 },
               ],
             },
@@ -160,7 +166,7 @@ export async function analyzeImageUrl(url: string, prompt?: string): Promise<Vis
     const timeout = setTimeout(() => controller.abort(), 15_000);
     let resp: Response;
     try {
-      resp = await fetch(url, { signal: controller.signal });
+      resp = await fetch(url, { signal: controller.signal, headers: { "User-Agent": "Mozilla/5.0 (compatible; BrainOS/1.0)" } });
     } finally {
       clearTimeout(timeout);
     }

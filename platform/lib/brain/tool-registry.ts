@@ -322,6 +322,11 @@ export async function synthesizeToolsFromGaps(
   // TTL guard — max once per 30 min per org
   const lastRun = _synthLastRunMs.get(orgId) ?? 0;
   if (Date.now() - lastRun < SYNTH_COOLDOWN_MS) return 0;
+  // Cap Map size to prevent unbounded OOM growth (one entry per unique org)
+  if (_synthLastRunMs.size > 2000) {
+    const firstKey = _synthLastRunMs.keys().next().value;
+    if (firstKey) _synthLastRunMs.delete(firstKey);
+  }
   _synthLastRunMs.set(orgId, Date.now());
 
   try {

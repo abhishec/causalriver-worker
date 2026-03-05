@@ -1270,6 +1270,22 @@ export async function consumeSSEStream(
             if (parsed.moaResult) {
               callbacks.onMoaResult?.(parsed.moaResult);
             }
+            // GAIA agentic loop tool_call events
+            if (parsed.type === "tool_call" && parsed.name) {
+              callbacks.onAgentStatus?.({ taskId: "tool_call", status: "running", agentType: "tool", message: `Using ${parsed.name}...` });
+            }
+            // Brain training events
+            if (parsed.brainTraining) {
+              callbacks.onAgentStatus?.({ taskId: "brain_training", status: "running", agentType: "brain", message: parsed.brainTraining.message ?? "Brain training in progress..." });
+            }
+            // Process triggered events
+            if (parsed.processTriggered) {
+              callbacks.onAgentStatus?.({ taskId: "process_triggered", status: "running", agentType: "process", message: "Process triggered" });
+            }
+            // Structured artifact events — no renderer yet, acknowledged to prevent silent dropping
+            if (parsed.artifact || parsed.playbook || parsed.outcomeContract || parsed.metaCognition) {
+              // Structured data events received — no UI renderer currently, data is available in parsed
+            }
           } catch {
             // Non-JSON SSE line, skip
           }
@@ -1327,6 +1343,14 @@ export async function consumeSSEStream(
             if (parsed.brainWarning) callbacks.onBrainWarning?.(parsed.brainWarning, parsed.brainIq ?? 0);
             if (parsed.widget) callbacks.onWidget?.(parsed.widget);
             if (parsed.moaResult) callbacks.onMoaResult?.(parsed.moaResult);
+            // GAIA agentic loop tool_call events
+            if (parsed.type === "tool_call" && parsed.name) callbacks.onAgentStatus?.({ taskId: "tool_call", status: "running", agentType: "tool", message: `Using ${parsed.name}...` });
+            // Brain training events
+            if (parsed.brainTraining) callbacks.onAgentStatus?.({ taskId: "brain_training", status: "running", agentType: "brain", message: parsed.brainTraining.message ?? "Brain training in progress..." });
+            // Process triggered events
+            if (parsed.processTriggered) callbacks.onAgentStatus?.({ taskId: "process_triggered", status: "running", agentType: "process", message: "Process triggered" });
+            // Structured artifact events — no renderer yet, acknowledged to prevent silent dropping
+            if (parsed.artifact || parsed.playbook || parsed.outcomeContract || parsed.metaCognition) { /* no UI renderer yet */ }
           } catch { /* skip */ }
         }
       }
@@ -1414,11 +1438,11 @@ function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta | null; isLoad
           )}
 
           {/* Regions used */}
-          {meta.regionsUsed.length > 0 && (
+          {(meta.regionsUsed?.length ?? 0) > 0 && (
             <div>
               <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Regions Consulted</div>
               <div className="flex flex-wrap gap-1">
-                {meta.regionsUsed.map((r) => (
+                {meta.regionsUsed?.map((r) => (
                   <span key={r} className="px-2 py-0.5 rounded-full bg-surface text-[10px] text-muted-foreground">
                     {r}
                   </span>
@@ -1447,11 +1471,11 @@ function BrainContextPanel({ meta, isLoading }: { meta: BrainMeta | null; isLoad
           </div>
 
           {/* Uncertain areas */}
-          {meta.uncertainAreas.length > 0 && (
+          {(meta.uncertainAreas?.length ?? 0) > 0 && (
             <div>
               <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1.5">Uncertain Areas</div>
               <div className="space-y-0.5">
-                {meta.uncertainAreas.map((a, i) => (
+                {meta.uncertainAreas?.map((a, i) => (
                   <div key={i} className="flex items-start gap-1.5">
                     <span className="text-warning mt-0.5 text-[8px]">●</span>
                     <span className="text-[11px] text-muted-foreground">{a}</span>

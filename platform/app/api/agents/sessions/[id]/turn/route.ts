@@ -73,7 +73,7 @@ export async function POST(
       .from("agent_sessions")
       .select("organization_id, agent_type, status")
       .eq("id", sessionId)
-      .single();
+      .maybeSingle();
 
     if (sessionFetchError || !sessionRow) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -89,7 +89,7 @@ export async function POST(
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

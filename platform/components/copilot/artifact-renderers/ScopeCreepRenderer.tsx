@@ -39,7 +39,10 @@ export function ScopeCreepRenderer({ data }: { data: Record<string, any> }) {
   const totalAlerts = alerts.length;
   const criticalCount = alerts.filter((a: any) => a.level === "critical").length;
   const engagementsAffected = driftItems.filter((d: any) => (d.drift ?? d.value ?? 0) > 5).length;
-  const maxDrift = Math.max(...driftItems.map((d: any) => d.drift ?? d.value ?? 0), 0);
+  const maxDrift = driftItems.reduce(
+    (max: number, d: any) => Math.max(max, d.drift ?? d.value ?? 0),
+    0
+  );
 
   return (
     <div className="flex flex-col h-full">

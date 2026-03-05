@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ProcessesClient from "./processes-client";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -24,5 +25,9 @@ export default async function ProcessesPage() {
 
   if (!user) redirect("/login");
 
-  return <ProcessesClient />;
+  return (
+    <ErrorBoundary section="Process Intelligence">
+      <ProcessesClient />
+    </ErrorBoundary>
+  );
 }

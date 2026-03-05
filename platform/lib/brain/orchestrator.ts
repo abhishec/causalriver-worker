@@ -142,8 +142,8 @@ Return ONLY the JSON array, no other text.`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const content = response.content[0];
-    if (content.type === 'text') {
+    const content = response.content?.[0];
+    if (content?.type === 'text') {
       const routes = JSON.parse(content.text);
       return routes.sort((a: DomainRoute, b: DomainRoute) => b.confidence - a.confidence);
     }
@@ -385,8 +385,8 @@ Keep the response concise (2-4 paragraphs max).`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const content = response.content[0];
-    if (content.type === 'text') {
+    const content = response.content?.[0];
+    if (content?.type === 'text') {
       return content.text;
     }
   } catch (error) {

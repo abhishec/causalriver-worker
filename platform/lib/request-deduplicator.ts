@@ -75,6 +75,19 @@ class RequestDeduplicator {
     // 3. Execute new request
     const requestPromise = requestFn()
       .then((data) => {
+        // Cap cache size before inserting new entry to prevent unbounded OOM growth
+        const MAX_CACHE_SIZE = 500;
+        if (this.cache.size >= MAX_CACHE_SIZE) {
+          const now = Date.now();
+          for (const [k, e] of this.cache) {
+            if (now > e.timestamp + e.ttl) this.cache.delete(k);
+          }
+          // If still too big after TTL eviction, delete oldest entry
+          if (this.cache.size >= MAX_CACHE_SIZE) {
+            const firstKey = this.cache.keys().next().value;
+            if (firstKey) this.cache.delete(firstKey);
+          }
+        }
         this.cache.set(key, { data, timestamp: Date.now(), ttl });
         return data;
       })

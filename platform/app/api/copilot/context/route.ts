@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       .select("organization_id")
       .eq("organization_id", orgId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     const { data: convos } = await admin
       .from("conversations")
       .select("messages")
-      .eq("organization_id", orgId)
+      .eq("org_id", orgId)
       .order("updated_at", { ascending: false })
       .limit(5);
 
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
       .select("organization_id")
       .eq("organization_id", orgId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

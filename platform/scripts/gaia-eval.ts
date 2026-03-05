@@ -128,7 +128,9 @@ function normalizeAnswer(answer: string): string {
   return answer
     .toLowerCase()
     .trim()
-    .replace(/[.,!?;:'"()\[\]{}]/g, "")
+    .replace(/[!?;:'"()\[\]{}]/g, "")    // Remove punctuation but NOT . or ,
+    .replace(/,(?=\d{3})/g, "")           // Remove thousand-separator commas (1,234 → 1234)
+    .replace(/\.(?!\d)/g, "")             // Remove trailing/sentence periods but not decimal points
     .replace(/\s+/g, " ")
     .replace(/^(the|a|an)\s+/i, "");
 }
@@ -137,9 +139,12 @@ function isCorrect(expected: string, actual: string): boolean {
   const normExpected = normalizeAnswer(expected);
   const normActual = normalizeAnswer(actual);
 
-  // Exact match after normalization
+  // Exact match
   if (normActual === normExpected) return true;
-  if (normActual.includes(normExpected) || normExpected.includes(normActual)) return true;
+
+  // Word-boundary inclusion (not just substring)
+  const escapedExpected = normExpected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (new RegExp(`\\b${escapedExpected}\\b`).test(normActual)) return true;
 
   // Number matching (handles "12" vs "12.0" vs "twelve")
   const numExpected = parseFloat(normExpected.replace(/[^0-9.-]/g, ""));

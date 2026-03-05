@@ -99,15 +99,17 @@ export async function pollHealthOnce(
 ): Promise<PollResult> {
   const startTime = Date.now();
 
+  const _unavailable: HealthDimension = { score: 0, status: "unavailable", details: { note: "Check failed unexpectedly" } };
+
   // 1. Score all dimensions in parallel (including SLA + code health)
   const [predictions, causalGraph, signals, connectors, jobs, pipelineSla, codeHealth] = await Promise.all([
-    checkPredictionHealth(supabase, organizationId),
-    checkCausalGraphHealth(supabase, organizationId),
-    checkSignalHealth(supabase, organizationId),
-    checkConnectorHealth(supabase, organizationId),
-    checkJobHealth(supabase, organizationId),
-    checkPipelineSLA(supabase, organizationId),
-    checkCodeHealth(supabase, organizationId),
+    checkPredictionHealth(supabase, organizationId).catch(() => _unavailable),
+    checkCausalGraphHealth(supabase, organizationId).catch(() => _unavailable),
+    checkSignalHealth(supabase, organizationId).catch(() => _unavailable),
+    checkConnectorHealth(supabase, organizationId).catch(() => _unavailable),
+    checkJobHealth(supabase, organizationId).catch(() => _unavailable),
+    checkPipelineSLA(supabase, organizationId).catch(() => _unavailable),
+    checkCodeHealth(supabase, organizationId).catch(() => _unavailable),
   ]);
 
   const scores = [predictions.score, causalGraph.score, signals.score, connectors.score, jobs.score, pipelineSla.score, codeHealth.score];

@@ -38,7 +38,7 @@ export async function executeCode(
 ): Promise<CodeExecutionResult> {
   const {
     language = "python",
-    version = "3.10.0",
+    version = "*",
     stdin = "",
     args = [],
   } = options;
@@ -107,9 +107,9 @@ export async function executeCode(
     const compileStderr = data.compile?.stderr ?? "";
     const runStdout = data.run?.stdout ?? "";
     const runStderr = data.run?.stderr ?? "";
-    const exitCode = data.run?.code ?? 0;
+    const exitCode = typeof data.run?.code === "number" ? data.run.code : -1;
 
-    const fullOutput = [
+    let fullOutput = [
       compileStderr ? `[Compile] ${compileStderr}` : "",
       runStdout,
       runStderr,
@@ -118,11 +118,16 @@ export async function executeCode(
       .join("\n")
       .trim();
 
+    const MAX_OUTPUT_CHARS = 8000;
+    if (fullOutput.length > MAX_OUTPUT_CHARS) {
+      fullOutput = fullOutput.slice(0, MAX_OUTPUT_CHARS) + `\n...[truncated at ${MAX_OUTPUT_CHARS} chars, total ${fullOutput.length}]`;
+    }
+
     return {
       output: fullOutput || "(no output)",
       stdout: runStdout,
       stderr: compileStderr + (compileStderr && runStderr ? "\n" : "") + runStderr,
-      exitCode: typeof exitCode === "number" ? exitCode : 0,
+      exitCode,
       language: data.language ?? language,
       version: data.version ?? version,
     };
@@ -145,5 +150,5 @@ export async function executeCode(
  * Convenience: execute Python code specifically.
  */
 export async function executePython(code: string, stdin?: string): Promise<CodeExecutionResult> {
-  return executeCode(code, { language: "python", version: "3.10.0", stdin });
+  return executeCode(code, { language: "python", version: "*", stdin });
 }

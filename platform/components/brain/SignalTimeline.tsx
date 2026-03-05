@@ -59,6 +59,7 @@ function getDomainColor(domain: string): string {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr?.slice(0, 10) ?? "?";
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 

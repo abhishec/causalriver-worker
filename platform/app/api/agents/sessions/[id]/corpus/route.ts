@@ -48,7 +48,7 @@ export async function GET(
       .from("agent_sessions")
       .select("organization_id")
       .eq("id", sessionId)
-      .single();
+      .maybeSingle();
 
     if (!sessionRow) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -60,7 +60,7 @@ export async function GET(
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", sessionRow.organization_id as string)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -74,7 +74,7 @@ export async function GET(
       )
       .eq("agent_session_id", sessionId)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (corpusError || !corpus) {
       // No corpus yet — return empty structure (not an error)
@@ -143,7 +143,7 @@ export async function POST(
       .from("agent_sessions")
       .select("organization_id, ai_worker_id")
       .eq("id", sessionId)
-      .single();
+      .maybeSingle();
 
     if (!sessionRow) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -158,7 +158,7 @@ export async function POST(
       .select("role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -174,7 +174,7 @@ export async function POST(
       .select("id")
       .eq("agent_session_id", sessionId)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     let corpusId: string;
 
@@ -225,7 +225,7 @@ export async function POST(
           total_examples: fewShotExamples.length,
         })
         .select("id")
-        .single();
+        .maybeSingle();
 
       if (insertError || !newCorpus) {
         logger.error("[/api/agents/sessions/[id]/corpus POST] Corpus insert failed", {

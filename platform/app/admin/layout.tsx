@@ -22,7 +22,7 @@ export default async function AdminLayout({
     .eq("is_platform_admin", true)
     .maybeSingle();
 
-  if (!member) redirect("/overview");
+  if (!member) redirect("/workspace");
 
   return (
     <div className="flex min-h-screen">

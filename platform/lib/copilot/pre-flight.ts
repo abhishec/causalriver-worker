@@ -178,37 +178,58 @@ export async function runPreFlight(
   let _classifierBrainPrefix = '';
   try {
     const _24hAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const CLASSIFIER_TIMEOUT_MS = 2000;
 
-    const [signalsResult, routingFbResult, plannerResult] = await Promise.allSettled([
-      // (a) Signal count — brain data readiness (existing)
-      supabase
-        .from('cross_domain_signals')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', workspaceId),
+    let classifierResults: PromiseSettledResult<unknown>[];
+    try {
+      classifierResults = await Promise.race([
+        Promise.allSettled([
+          // (a) Signal count — brain data readiness (existing)
+          supabase
+            .from('cross_domain_signals')
+            .select('*', { count: 'estimated', head: true })
+            .eq('organization_id', workspaceId),
 
-      // (b) Routing feedback — per-domain quality from last 24h
-      // Written by captureRoutingFeedback() in post-flight after every response.
-      supabase
-        .from('ai_memory')
-        .select('domain, metadata')
-        .eq('organization_id', workspaceId)
-        .eq('memory_type', 'pattern')
-        .like('domain', 'orchestration.routing_feedback.%')
-        .gte('created_at', _24hAgo)
-        .order('created_at', { ascending: false })
-        .limit(10),
+          // (b) Routing feedback — per-domain quality from last 24h
+          // Written by captureRoutingFeedback() in post-flight after every response.
+          supabase
+            .from('ai_memory')
+            .select('domain, metadata')
+            .eq('organization_id', workspaceId)
+            .eq('memory_type', 'pattern')
+            .like('domain', 'orchestration.routing_feedback.%')
+            .gte('created_at', _24hAgo)
+            .order('created_at', { ascending: false })
+            .limit(10),
 
-      // (c) Planner state — stuck/poor-quality domains from latest cognitive cycle
-      // Written by Phase 4 of cognitive-planner.ts (metadata now includes these fields)
-      supabase
-        .from('ai_memory')
-        .select('metadata')
-        .eq('organization_id', workspaceId)
-        .eq('domain', 'cognitive-planner')
-        .eq('memory_type', 'working')
-        .order('created_at', { ascending: false })
-        .limit(1),
-    ]);
+          // (c) Planner state — stuck/poor-quality domains from latest cognitive cycle
+          // Written by Phase 4 of cognitive-planner.ts (metadata now includes these fields)
+          supabase
+            .from('ai_memory')
+            .select('metadata')
+            .eq('organization_id', workspaceId)
+            .eq('domain', 'cognitive-planner')
+            .eq('memory_type', 'working')
+            .order('created_at', { ascending: false })
+            .limit(1),
+        ]),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("classifier_timeout")), CLASSIFIER_TIMEOUT_MS)
+        ),
+      ]);
+    } catch {
+      classifierResults = [
+        { status: "rejected" as const, reason: "timeout" },
+        { status: "rejected" as const, reason: "timeout" },
+        { status: "rejected" as const, reason: "timeout" },
+      ];
+    }
+
+    const [signalsResult, routingFbResult, plannerResult] = classifierResults as [
+      PromiseSettledResult<{ count: number | null }>,
+      PromiseSettledResult<{ data: Array<{ domain: string; metadata: { response_quality?: number; service_type?: string } | null }> | null }>,
+      PromiseSettledResult<{ data: Array<{ metadata: Record<string, unknown> | null }> | null }>,
+    ];
 
     // (a) Signal count
     const _sigCount = signalsResult.status === 'fulfilled'
@@ -323,21 +344,20 @@ export async function runPreFlight(
   }
 
   // ── 8. Brain Commander execution ───────────────────────────────────────────
+  const COMMANDER_TIMEOUT_MS = 5000;
   let commandResult: any;
   try {
-    commandResult = await commander.command(message, {
-      userId: user.id,
-      interpretation,
-    });
+    commandResult = await Promise.race([
+      commander.command(message, { userId: user.id, interpretation }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("commander_timeout")), COMMANDER_TIMEOUT_MS)
+      ),
+    ]);
   } catch (cmdErr) {
-    logger.warn("[Copilot/PreFlight] Brain commander failed (non-fatal, falling back to basic chat):", {
-      error: (cmdErr as Error)?.message ?? String(cmdErr),
-      route: "/api/copilot/chat",
+    logger.warn("[Copilot/PreFlight] Commander timed out or failed", {
+      error: cmdErr instanceof Error ? cmdErr.message : String(cmdErr),
     });
-    commandResult = {
-      intelligence: { causalEdges: [], rules: [], cascadeRules: [], patterns: [], insights: [] },
-      dispatch: { complexityScore: 0 },
-    };
+    // Fall through — commandResult stays undefined, existing fallback handles it
   }
 
   // ── 9. Assemble execution context ──────────────────────────────────────────

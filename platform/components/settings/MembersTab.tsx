@@ -61,7 +61,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
     try {
       const res = await fetch(`/api/org-members?orgId=${orgId}`);
       if (!res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setError(d.error || "Failed to load members");
         setLoading(false);
         return;
@@ -91,7 +91,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
         body: JSON.stringify({ orgId, memberId, role: newRole }),
       });
       if (!res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setError(d.error || "Failed to change role");
         return;
       }
@@ -115,7 +115,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
         body: JSON.stringify({ orgId, memberId }),
       });
       if (!res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setError(d.error || "Failed to remove member");
         return;
       }
@@ -135,7 +135,7 @@ export function MembersTab({ orgId }: { orgId: string }) {
         method: "DELETE",
       });
       if (!res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setError(d.error || "Failed to revoke invite");
         return;
       }

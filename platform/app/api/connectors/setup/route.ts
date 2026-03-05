@@ -65,6 +65,9 @@ export async function POST(request: Request) {
 
   try {
     const workspaceId = await getCurrentWorkspaceId();
+    if (!workspaceId) {
+      return NextResponse.json({ error: "No workspace found" }, { status: 400 });
+    }
     const service = await createServiceClient();
 
     // Check if connector already exists

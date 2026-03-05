@@ -957,6 +957,11 @@ export async function executeDomain(
   // TTL guard prevents hammering on every request — at most once per 10 minutes
   // per org per process instance. Fire-and-forget on failure (non-fatal).
   if ((Date.now() - (_corePushLastMs.get(params.organizationId) ?? 0)) >= CORE_PUSH_INTERVAL_MS) {
+    // Cap Map size to prevent unbounded OOM growth (one entry per unique org)
+    if (_corePushLastMs.size > 2000) {
+      const firstKey = _corePushLastMs.keys().next().value;
+      if (firstKey) _corePushLastMs.delete(firstKey);
+    }
     _corePushLastMs.set(params.organizationId, Date.now()); // set before await to avoid races
     try {
       await pushCoreInsightsToOrg(params.organizationId, supabase as any);

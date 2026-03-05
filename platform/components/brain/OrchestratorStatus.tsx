@@ -146,9 +146,7 @@ export default function OrchestratorStatus() {
     ? state.runningJobs.find((j) => j.id === state.brainPopulationJobId)
     : null;
 
-  const elapsed = blockingJob
-    ? Date.now() - new Date(blockingJob.startedAt).getTime()
-    : 0;
+  const elapsed = blockingJob?.startedAt ? Date.now() - new Date(blockingJob.startedAt).getTime() : 0;
   const remainingMs = Math.max(0, BRAIN_POP_AVG_DURATION_MS - elapsed);
 
   return (

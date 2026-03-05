@@ -22,7 +22,7 @@ const BROWSERLESS_BASE_URL = "https://chrome.browserless.io";
 export interface BrowserNavigateResult {
   url: string;
   title?: string;
-  textContent: string;   // First 8000 chars of page text
+  textContent: string;   // First 20000 chars of page text (with table structure preserved)
   links: Array<{ text: string; href: string }>;
   error?: string;
 }
@@ -74,14 +74,21 @@ export async function browserNavigate(url: string, waitFor = 3000): Promise<Brow
 
     const html = await resp.text();
 
+    // Preserve table structure before stripping all tags
+    let processedHtml = html
+      .replace(/<tr[^>]*>/gi, "\n")
+      .replace(/<\/tr>/gi, "")
+      .replace(/<th[^>]*>(.*?)<\/th>/gi, " | $1")
+      .replace(/<td[^>]*>(.*?)<\/td>/gi, " | $1");
+
     // Extract text content (strip HTML tags)
-    const textContent = html
+    let textContent = processedHtml
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
       .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim()
-      .slice(0, 8000);
+      .slice(0, 20000);
 
     // Extract title
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -97,6 +104,11 @@ export async function browserNavigate(url: string, waitFor = 3000): Promise<Brow
       if (href && !href.startsWith("#") && !href.startsWith("javascript:")) {
         links.push({ text, href });
       }
+    }
+
+    // PDF detection: if we got very little text but URL looks like a PDF, give helpful message
+    if (textContent.trim().length < 50 && urlStr.toLowerCase().includes(".pdf")) {
+      textContent = "[PDF document detected — content could not be extracted via browser. Try searching for an HTML version or key facts about this document.]";
     }
 
     return { url: urlStr, title, textContent, links };

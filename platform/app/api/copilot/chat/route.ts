@@ -463,9 +463,9 @@ export async function POST(request: NextRequest) {
         const collabGraph = createCollaborationGraph();
 
         await Promise.all([
-          depGraph.load(service, workspaceId),
-          expertiseGraph.load(service, workspaceId),
-          collabGraph.load(service, workspaceId),
+          depGraph.load(service, workspaceId).catch(() => {}),
+          expertiseGraph.load(service, workspaceId).catch(() => {}),
+          collabGraph.load(service, workspaceId).catch(() => {}),
         ]);
 
         brainRegions.dependencyGraph = depGraph;
@@ -5009,11 +5009,29 @@ No connectors are configured yet. When the user asks for data from any source (S
           const MAX_GAIA_ITERATIONS = 15;
           const GAIA_DEADLINE_MS = Date.now() + 110_000; // leave 10s for streaming
 
+          // GAIA-specific system prompt: focused on exact-answer research tasks.
+          // Used INSTEAD of effectiveSystemPrompt in the tool loop to avoid bloating
+          // every iteration with the full enterprise prompt.
+          const _gaiaSystemPreamble = `You are a research agent solving a factual question. Use the available tools to find the exact answer.
+
+CRITICAL RULES:
+- Your FINAL ANSWER must be SHORT and EXACT — a single word, number, name, or brief phrase
+- Do NOT explain or pad your answer. GAIA evaluators use exact string matching
+- When you have enough information, respond with: FINAL ANSWER: [your exact answer]
+- Use calculator for ANY arithmetic — never compute in your head
+- Use web_search for current facts, statistics, named entities
+- Use execute_python for multi-step calculations (only standard library available, NO numpy/pandas)
+- Use browser_navigate to read full web page content
+- Use analyze_image for visual content questions
+
+Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
+`;
+
           // Use unknown[] for the loop messages array — the Anthropic SDK's MessageParam union
           // is complex (tool_result, tool_use, SearchResultBlockParam etc.) and we build
           // messages incrementally including tool_result blocks that satisfy the API at
           // runtime but are hard to type-narrowly at compile time.
-          const _loopMsgs: unknown[] = messages as unknown[];
+          const _loopMsgs: unknown[] = [...(messages as unknown[])];
 
           for (let _iter = 0; _iter < MAX_GAIA_ITERATIONS && Date.now() < GAIA_DEADLINE_MS; _iter++) {
             // Non-streaming: detect tool_use blocks
@@ -5025,7 +5043,9 @@ No connectors are configured yet. When the user asks for data from any source (S
               _resp = await (anthropic.messages.create as (body: unknown) => Promise<typeof _resp>)({
                 model: v4SmartModel,
                 max_tokens: 8192,
-                system: [{ type: "text" as const, text: effectiveSystemPrompt, cache_control: { type: "ephemeral" as const } }],
+                // Use focused GAIA preamble instead of full enterprise prompt — shorter context
+                // per iteration, cheaper tokens, better exact-answer compliance
+                system: [{ type: "text" as const, text: _gaiaSystemPreamble, cache_control: { type: "ephemeral" as const } }],
                 messages: _loopMsgs,
                 tools: _gaiaTools,
               });
@@ -5037,12 +5057,24 @@ No connectors are configured yet. When the user asks for data from any source (S
               break; // Fall through to normal stream
             }
 
+            if (_resp.stop_reason === "max_tokens") {
+              // Claude hit token limit mid-sentence — request continuation, don't accept truncated answer
+              _loopMsgs.push({ role: "assistant" as const, content: _resp.content });
+              _loopMsgs.push({ role: "user" as const, content: "Continue your response. When done, provide your final answer." });
+              continue;
+            }
+
             if (_resp.stop_reason !== "tool_use") {
-              // end_turn or max_tokens — extract final text
+              // end_turn — extract final text
               const _textBlocks = _resp.content.filter((b) => b.type === "text");
               if (_textBlocks.length > 0 && _gaiaToolCallCount > 0) {
                 // Only take over from normal stream if we actually called tools
-                _gaiaFinalText = _textBlocks.map((b) => b.text ?? "").join("");
+                _gaiaFinalText = _textBlocks.map((b: { text?: string }) => b.text ?? "").join("");
+                // Extract FINAL ANSWER if present
+                const _finalMatch = _gaiaFinalText.match(/FINAL ANSWER:\s*(.+?)(?:\n|$)/i);
+                if (_finalMatch) {
+                  _gaiaFinalText = _finalMatch[1].trim();
+                }
               }
               break;
             }
@@ -5067,16 +5099,18 @@ No connectors are configured yet. When the user asks for data from any source (S
               }
             }
 
-            _loopMsgs.push({ role: "user", content: _toolResults });
-
-            // Plan recitation every 5 tool calls (Manus AI "todo.md" pattern)
-            // Pushes the goal into recent context where attention is strongest
+            // Build user content: tool results + optional plan recitation
+            // Merging into ONE user message avoids consecutive user messages → Anthropic 422
+            const _userContent: Array<unknown> = [..._toolResults];
             if (_gaiaToolCallCount > 0 && _gaiaToolCallCount % 5 === 0) {
-              _loopMsgs.push({
-                role: "user",
-                content: "Before continuing: (1) What is the original question? (2) What have you found so far? (3) What are your next steps? Then proceed.",
+              // Plan recitation every 5 tool calls (Manus AI "todo.md" pattern)
+              // Pushes the goal into recent context where attention is strongest
+              _userContent.push({
+                type: "text",
+                text: "IMPORTANT: Before continuing, state: (1) the original question, (2) what you've found so far, (3) your next step. Your FINAL ANSWER must be a short exact phrase. Then proceed.",
               });
             }
+            _loopMsgs.push({ role: "user", content: _userContent });
           }
 
           if (_gaiaToolCallCount > 0) {

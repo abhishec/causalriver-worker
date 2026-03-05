@@ -87,7 +87,7 @@ export function AgentCreatedCard({ agent }: { agent: AgentCreatedInfo }) {
 
       {/* Dashboard link */}
       <Link
-        href="/dashboard"
+        href="/workspace"
         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
       >
         {/* External link icon */}

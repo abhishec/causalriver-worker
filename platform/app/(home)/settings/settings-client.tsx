@@ -548,7 +548,7 @@ export function SettingsClient({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                 </svg>
                 <span className="text-[11px] text-muted-foreground">
-                  You belong to <span className="font-medium text-foreground">{localCustomers.length}</span> customer account{localCustomers.length !== 1 ? "s" : ""} with <span className="font-medium text-foreground">{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0)}</span> AI Worker{localCustomers.reduce((acc, c) => acc + c.workspaces.length, 0) !== 1 ? "s" : ""}
+                  You belong to <span className="font-medium text-foreground">{localCustomers.length}</span> customer account{localCustomers.length !== 1 ? "s" : ""} with <span className="font-medium text-foreground">{localCustomers.reduce((acc, c) => acc + (c.workspaces?.length ?? 0), 0)}</span> AI Worker{localCustomers.reduce((acc, c) => acc + (c.workspaces?.length ?? 0), 0) !== 1 ? "s" : ""}
                 </span>
               </div>
             )}
@@ -572,7 +572,7 @@ export function SettingsClient({
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{cust.name}</span>
                             <Badge variant="accent" size="xs">{cust.plan}</Badge>
-                            <Badge variant="default" size="xs">{cust.role ? (cust.role.charAt(0)?.toUpperCase() ?? "") + cust.role.slice(1) : "Member"}</Badge>
+                            <Badge variant="default" size="xs">{cust.role ? (cust.role?.charAt(0)?.toUpperCase() ?? "") + cust.role.slice(1) : "Member"}</Badge>
                             {cust.is_design_partner && (
                               <Badge variant="default" size="xs">Design Partner</Badge>
                             )}

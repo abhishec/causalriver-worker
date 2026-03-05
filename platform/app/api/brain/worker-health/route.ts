@@ -47,6 +47,20 @@ export async function GET(req: NextRequest) {
     // Accept organizationId as a query param (from AgentLiveMonitor / cockpit)
     // so this route works even when the workspace cookie isn't set server-side.
     const queryOrgId = req.nextUrl.searchParams.get("organizationId");
+
+    // SECURITY: Verify the requesting user is a member of the queried org (IDOR prevention)
+    if (queryOrgId) {
+      const { data: membership } = await supabase
+        .from("org_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("organization_id", queryOrgId)
+        .maybeSingle();
+      if (!membership) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     const workspaceId = queryOrgId || (await getCurrentWorkspaceId());
     if (!workspaceId) {
       return NextResponse.json({

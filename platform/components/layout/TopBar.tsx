@@ -7,25 +7,10 @@ import { usePathname } from "next/navigation";
 
 const ROUTE_LABELS: Record<string, string> = {
   "/workspace": "Mission Control",
-  "/processes": "Processes",
-  "/overview": "Command Center",
-  "/copilot": "Intelligence",
+  "/brain": "Brain",
   "/connectors": "Connectors",
   "/settings": "Settings",
-  "/artifacts": "Artifacts",
-  "/brain": "Brain",
-  "/predictions": "Predictions",
-  "/agents": "Agents",
-  "/early-warning": "Early Warning",
-  "/releases": "Releases",
-  "/code-intelligence": "Code Intel",
-  "/capabilities": "Services",
-  "/observability": "Observability",
-  "/costs": "Costs",
-  "/training": "Training",
-  "/simulator": "Simulator",
-  "/aaas": "AAAS",
-  "/dashboard": "Dashboard",
+  "/processes": "Processes",
 };
 
 function openCopilot() {
@@ -42,9 +27,6 @@ export function TopBar() {
   const rawSegment = pathname.split("/").pop() ?? "";
   const autoLabel = rawSegment.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
   const pageLabel = ROUTE_LABELS[pathname] || autoLabel;
-
-  // Hide topbar on copilot page — it has its own header with service tabs
-  if (pathname === "/copilot") return null;
 
   // Show breadcrumb for non-root pages: "Mission Control > [page]"
   const showBreadcrumb = pathname !== "/workspace" && pageLabel;

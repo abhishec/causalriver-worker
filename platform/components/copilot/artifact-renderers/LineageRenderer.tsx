@@ -13,9 +13,9 @@ export function LineageRenderer({ data }: { data: Record<string, any> }) {
       <ArtifactHeader icon="🔗" title="Data Lineage — transactions" />
       <div className="flex-1 overflow-y-auto p-4">
         <div className="text-[10px] font-semibold uppercase text-muted tracking-wider mb-1">Upstream ({upstream.length})</div>
-        <div className="flex flex-wrap mb-2.5">{upstream.map((u: string) => <TechChip key={u} label={u} />)}</div>
+        <div className="flex flex-wrap mb-2.5">{upstream.filter(Boolean).map((u: string) => <TechChip key={u} label={u} />)}</div>
         <div className="text-[10px] font-semibold uppercase text-muted tracking-wider mb-1">Downstream ({downstream.length})</div>
-        <div className="flex flex-wrap mb-2.5">{downstream.map((d: string) => <TechChip key={d} label={d} />)}</div>
+        <div className="flex flex-wrap mb-2.5">{downstream.filter(Boolean).map((d: string) => <TechChip key={d} label={d} />)}</div>
         <MonoBlock>{flow}</MonoBlock>
         <div className="mt-2">
           <BalanceCheck balanced={compliant} label={complianceLabel} />

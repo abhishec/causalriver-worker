@@ -47,6 +47,8 @@ async function callAnthropicWithRetry(
     });
     if (resp.ok) return resp.json() as Promise<{ content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>; stop_reason: string }>;
     if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
+      // Consume (drain) the response body before retrying to prevent connection leaks
+      await resp.body?.cancel().catch(() => {});
       const jitter = Math.random() * 300;
       await new Promise((r) => setTimeout(r, delays[attempt] + jitter));
       lastErr = new Error(`Anthropic API ${resp.status} (attempt ${attempt + 1})`);
@@ -137,10 +139,16 @@ export async function processGeneralJobs(
 
     try {
       // Mark as running — guard with status='pending' to prevent double-claim
-      await supabase.from("agent_queue")
+      const { data: claimed } = await supabase.from("agent_queue")
         .update({ status: "running", started_at: new Date().toISOString(), heartbeat_at: new Date().toISOString() })
         .eq("id", job.id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("id");
+
+      if (!claimed || claimed.length === 0) {
+        logger.warn(`[general-worker] Job ${job.id} already claimed by another worker — skipping`);
+        continue;
+      }
 
       // Restore from checkpoint if this is a chain-continuation
       const checkpoint = job.payload.checkpoint as Record<string, unknown> | undefined;
@@ -169,6 +177,13 @@ export async function processGeneralJobs(
       const durationMs = Date.now() - startMs;
 
       if (agentResult.chained) {
+        // Ensure parent is paused regardless of whether checkpointAndChain already did it
+        await Promise.resolve(
+          supabase.from("agent_queue")
+            .update({ status: "paused" })
+            .eq("id", job.id)
+            .eq("status", "running")
+        ).catch(() => {});
         // Job was checkpointed and chained — parent is now 'paused', child is 'pending'
         logger.warn(`[general-worker] Job ${job.id} chained → ${agentResult.childJobId} (depth ${chainDepth + 1})`);
         // Record partial RL signal for intermediate chain hops — long jobs shouldn't have RL blindspots
@@ -530,8 +545,8 @@ async function runAgenticLoop(
       }
     }
 
-    // Cancellation check — poll DB every 3 turns to detect external cancel requests
-    if (turn > 0 && turn % 3 === 0) {
+    // Cancellation check — poll DB every turn to detect external cancel requests
+    if (turn > 0) {
       try {
         const { data: currentStatus } = await adminSupabase
           .from("agent_queue").select("status").eq("id", job.id).single();

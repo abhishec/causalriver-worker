@@ -263,11 +263,16 @@ export async function POST(request: NextRequest) {
   admin
     .from("webhook_delivery_log")
     .insert(logRows)
-    .then(({ error: logErr }) => {
-      if (logErr) {
-        logger.warn("[webhooks/deliver] Failed to insert delivery log:", { error: logErr.message });
+    .then(
+      ({ error: logErr }) => {
+        if (logErr) {
+          logger.warn("[webhooks/deliver] Failed to insert delivery log:", { error: logErr.message });
+        }
+      },
+      (err: unknown) => {
+        logger.warn("[webhooks/deliver] Delivery log insert threw unexpectedly:", { error: String(err) });
       }
-    });
+    );
 
   // Audit log the dispatch (fire-and-forget)
   logAuditEvent({
