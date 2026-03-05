@@ -1,115 +1,60 @@
 /**
  * Playwright Auth Setup — runs ONCE before all E2E tests.
  *
- * Uses Supabase REST API directly (bypasses UI form) to avoid issues with
- * Supabase's OAuth callback URL being configured for production, not localhost.
+ * Uses the actual login form (which calls supabase.auth.signInWithPassword
+ * via the browser client, correctly setting document.cookie). The direct REST
+ * API approach doesn't work because @supabase/ssr browser client sets cookies
+ * client-side, not via server Set-Cookie headers.
  *
  * Requires env vars: E2E_USER_EMAIL, E2E_USER_PASSWORD
  * (set in .env.local, never committed)
+ *
+ * The test user must have email/password auth enabled. If the account was
+ * created via Google OAuth, run the one-time setup script to set a password:
+ *   curl -X PUT https://PROJECT.supabase.co/auth/v1/admin/users/USER_ID \
+ *     -H "Authorization: Bearer SERVICE_ROLE_KEY" \
+ *     -d '{"password":"YOUR_PASSWORD"}'
  */
-import { test as setup } from "@playwright/test";
+import { test as setup, expect } from "@playwright/test";
 import path from "path";
-import fs from "fs";
 
 const authFile = path.join(__dirname, "../.auth/user.json");
 
 setup("authenticate", async ({ page }) => {
   const email = process.env.E2E_USER_EMAIL;
   const password = process.env.E2E_USER_PASSWORD;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!email || !password) {
     throw new Error(
       "E2E_USER_EMAIL and E2E_USER_PASSWORD must be set in .env.local"
     );
   }
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in .env.local"
-    );
-  }
 
-  // Extract project ref from Supabase URL (e.g., "zmlqvuzoodcgmkgkivfw")
-  const projectRef = new URL(supabaseUrl).hostname.split(".")[0]!;
+  // Navigate to login page
+  await page.goto("/login");
 
-  // --- Direct Supabase REST auth (bypasses UI form + OAuth callback redirect) ---
-  const authRes = await page.evaluate(
-    async ({ supabaseUrl, supabaseAnonKey, email, password }) => {
-      const res = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      return { status: res.status, body: await res.json() };
-    },
-    { supabaseUrl, supabaseAnonKey, email, password }
-  );
+  // Wait for the login form to render
+  await page.waitForSelector("#email", { timeout: 15_000 });
 
-  if (authRes.status !== 200) {
-    throw new Error(
-      `Supabase auth failed: ${authRes.status} — ${JSON.stringify(authRes.body)}`
-    );
-  }
+  // Fill credentials
+  await page.fill("#email", email);
+  await page.fill("#password", password);
 
-  const session = authRes.body as {
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-    token_type: string;
-    user: { id: string; email: string };
-  };
+  // Submit — triggers supabase.auth.signInWithPassword() which sets
+  // session cookies via document.cookie, then redirects via window.location.href
+  await page.click('button[type="submit"]');
 
-  // Supabase SSR stores the session as a base64-prefixed JSON cookie
-  const cookieValue =
-    "base64-" +
-    Buffer.from(
-      JSON.stringify({
-        access_token: session.access_token,
-        token_type: session.token_type ?? "bearer",
-        expires_in: session.expires_in ?? 3600,
-        refresh_token: session.refresh_token,
-        user: session.user,
-      })
-    ).toString("base64");
-
-  const cookieName = `sb-${projectRef}-auth-token`;
-
-  // Write auth state directly (Playwright storageState format)
-  const storageState = {
-    cookies: [
-      {
-        name: cookieName,
-        value: cookieValue,
-        domain: "localhost",
-        path: "/",
-        expires: Math.floor(Date.now() / 1000) + (session.expires_in ?? 3600),
-        httpOnly: false,
-        secure: false,
-        sameSite: "Lax" as const,
-      },
-    ],
-    origins: [],
-  };
-
-  // Apply the cookie and navigate to /workspace to let Next.js SSR
-  // set any additional session cookies (e.g., refreshed tokens via Supabase middleware).
-  // We save storageState AFTER navigation to capture everything.
-  await page.context().addCookies(storageState.cookies);
-  await page.goto("/workspace");
-  await page.waitForLoadState("domcontentloaded");
-
-  const verifyRes = await page.evaluate(async () => {
-    const r = await fetch("/api/brain/health");
-    return r.status;
+  // Wait for redirect away from /login (up to 45s — Supabase auth can be slow)
+  await page.waitForURL((url) => !url.pathname.includes("/login"), {
+    timeout: 45_000,
+    waitUntil: "domcontentloaded",
   });
 
-  // Save ALL cookies that Next.js + Supabase SSR have set after the navigation
-  fs.mkdirSync(path.dirname(authFile), { recursive: true });
+  // Verify we landed on an authenticated page
+  await expect(page).not.toHaveURL(/\/login/);
+
+  // Save the full auth state (cookies + localStorage set by browser Supabase client)
   await page.context().storageState({ path: authFile });
 
-  console.log(`Auth setup complete: ${email} → ${cookieName} (health status=${verifyRes})`);
+  console.log(`Auth setup complete: ${email} → ${page.url()}`);
 });
