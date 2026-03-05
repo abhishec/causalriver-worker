@@ -72,7 +72,10 @@ export async function GET(
           send({
             type: "progress",
             status: current.status,
-            step: checkpoint?.currentStep ?? checkpoint?.phase ?? null,
+            step: checkpoint?.currentStep ?? null,
+            phase: checkpoint?.phase ?? null,
+            totalSteps: checkpoint?.totalSteps ?? null,
+            currentSubtaskGoal: checkpoint?.currentSubtaskGoal ?? null,
             lastTool: checkpoint?.lastTool ?? null,
             totalToolCalls: checkpoint?.totalToolCalls ?? null,
             toolsUsed: checkpoint?.toolsUsed ?? null,

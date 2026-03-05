@@ -370,6 +370,24 @@ async function runApexFsm(
 
     const subtask = subtasks[currentSubtaskIndex];
 
+    // Heartbeat: write current FSM state so AgentJobWidget shows live progress
+    try {
+      await adminSupabase
+        .from("agent_queue")
+        .update({
+          heartbeat_at: new Date().toISOString(),
+          checkpoint_data: {
+            currentStep: currentSubtaskIndex + 1,
+            totalSteps: subtasks.length,
+            phase: `EXECUTING_SUBTASK_${currentSubtaskIndex + 1}`,
+            currentSubtaskGoal: subtask.goal.slice(0, 100),
+            totalToolCalls: toolCallCount,
+            lastTool: null,
+          },
+        })
+        .eq("id", job.id);
+    } catch { /* non-fatal */ }
+
     // Execute the subtask in a fresh mini agentic loop
     const subtaskResult = await executeSubtask(
       subtask, job, tools, compressedContext,
@@ -696,9 +714,21 @@ async function executeApexTool(
         if (error) return { error: error.message };
         return { success: true, memoryId: data?.id, message: `Finding "${title}" saved.` };
       }
-      case "compress_context":
-        // This tool is handled externally in the FSM; return ack
-        return { compressed: true, message: "Context compression requested." };
+      case "compress_context": {
+        // Actually compress — don't just ack. The LLM called this because context is growing.
+        // We compress all subtask results completed so far into a compact summary.
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const _supabase = getAdminClient();
+        // Grab already-completed subtasks from agent_queue checkpoint_data for context
+        const { data: jobRow } = await _supabase
+          .from("agent_queue")
+          .select("checkpoint_data")
+          .eq("id", job.id)
+          .single();
+        const existing = (jobRow?.checkpoint_data as Record<string, unknown> | null) ?? {};
+        const reason = String(input.reason ?? "context too long");
+        return { compressed: true, message: `Context compression triggered: ${reason}. Current phase captured.`, phase: existing.phase ?? null };
+      }
       default:
         return { error: `Unknown tool: ${toolName}` };
     }

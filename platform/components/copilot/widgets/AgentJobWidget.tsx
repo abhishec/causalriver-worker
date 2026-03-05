@@ -26,6 +26,9 @@ type JobStatus = "pending" | "running" | "completed" | "failed" | "paused";
 interface JobProgress {
   status: JobStatus;
   step?: string | number | null;
+  phase?: string | null;
+  totalSteps?: number | null;
+  currentSubtaskGoal?: string | null;
   lastTool?: string | null;
   totalToolCalls?: number | null;
   progress?: number | null;
@@ -61,11 +64,15 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
         };
 
         if (msg.type === "progress") {
+          const m = msg as Record<string, unknown>;
           setProgress({
             status: (msg.status as JobStatus) ?? "running",
             step: msg.step ?? null,
-            lastTool: (msg as Record<string, unknown>).lastTool as string | null ?? null,
-            totalToolCalls: (msg as Record<string, unknown>).totalToolCalls as number | null ?? null,
+            phase: m.phase as string | null ?? null,
+            totalSteps: m.totalSteps as number | null ?? null,
+            currentSubtaskGoal: m.currentSubtaskGoal as string | null ?? null,
+            lastTool: m.lastTool as string | null ?? null,
+            totalToolCalls: m.totalToolCalls as number | null ?? null,
             progress: msg.progress ?? null,
             elapsedMs: msg.elapsedMs,
           });
@@ -160,9 +167,21 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
       </div>
 
       {/* Live activity (running) */}
-      {progress.status === "running" && (progress.step !== null || lastToolLabel) && (
-        <div className="px-4 py-2 border-b border-border-subtle/40 flex items-center gap-3">
-          {progress.step !== null && progress.step !== undefined && (
+      {progress.status === "running" && (
+        <div className="px-4 py-2 border-b border-border-subtle/40 space-y-1">
+          {/* APEX: subtask progress */}
+          {progress.phase && progress.totalSteps && (
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted font-mono">
+                Subtask {progress.step}/{progress.totalSteps}
+              </span>
+              {progress.currentSubtaskGoal && (
+                <span className="text-foreground/70 truncate max-w-[240px]">{progress.currentSubtaskGoal}</span>
+              )}
+            </div>
+          )}
+          {/* General: turn counter + last tool */}
+          {!progress.phase && progress.step !== null && progress.step !== undefined && (
             <span className="text-[10px] text-muted font-mono">Turn {progress.step}</span>
           )}
           {lastToolLabel && (

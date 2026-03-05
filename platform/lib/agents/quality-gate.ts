@@ -17,6 +17,28 @@
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
+// Exponential backoff for quality-gate Anthropic call (same pattern as workers)
+async function callWithRetry(payload: unknown): Promise<{ content: Array<{ type: string; text?: string }> }> {
+  const delays = [500, 1000, 2000];
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt <= 2; attempt++) {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (resp.ok) return resp.json() as Promise<{ content: Array<{ type: string; text?: string }> }>;
+    if ((resp.status === 429 || resp.status >= 500) && attempt < 2) {
+      await new Promise((r) => setTimeout(r, delays[attempt] + Math.random() * 200));
+      lastErr = new Error(`Quality gate API ${resp.status}`);
+      continue;
+    }
+    return { content: [] }; // graceful degradation on non-retryable errors
+  }
+  lastErr; // suppress unused warning
+  return { content: [] };
+}
+
 export type QualityVerdict = "PASS" | "RETRY" | "ESCALATE";
 
 export interface QualityGateResult {
@@ -84,25 +106,12 @@ Score guide:
 - 0.0-0.39: Fails to address the goal or completely wrong`;
 
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 512,
-        messages: [{ role: "user", content: evalPrompt }],
-      }),
+    const data = await callWithRetry({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
+      messages: [{ role: "user", content: evalPrompt }],
     });
 
-    if (!resp.ok) {
-      return { verdict: "PASS", score: 0.7, feedback: "Quality gate API error — defaulting to pass." };
-    }
-
-    const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
     const text = data.content.find((b) => b.type === "text")?.text ?? "{}";
 
     // Parse JSON (strip any accidental markdown fences)
