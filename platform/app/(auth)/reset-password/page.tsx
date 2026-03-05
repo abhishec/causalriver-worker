@@ -17,16 +17,39 @@ export default function ResetPasswordPage() {
 
   const supabase = createClient();
 
-  // Check if user has a valid recovery session
+  // Check if user has a valid recovery session.
+  // Two paths:
+  // 1. PKCE flow: callback route already verified the token and set cookies → getUser() returns the user
+  // 2. Hash/implicit flow: Supabase fires PASSWORD_RECOVERY auth event → we catch it here
   useEffect(() => {
+    let settled = false;
+
+    // Listen for PASSWORD_RECOVERY auth event (hash-based flows)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        settled = true;
+        setNoSession(false);
+        setChecking(false);
+      }
+    });
+
+    // Also do an immediate getUser() check (PKCE flow where callback already set cookies)
     async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setNoSession(true);
+      if (!settled) {
+        settled = true;
+        if (!user) {
+          // Give onAuthStateChange a moment to fire before marking invalid
+          await new Promise((r) => setTimeout(r, 500));
+          const { data: { user: retryUser } } = await supabase.auth.getUser();
+          if (!retryUser) setNoSession(true);
+        }
+        setChecking(false);
       }
-      setChecking(false);
     }
     checkSession();
+
+    return () => { subscription.unsubscribe(); };
   }, [supabase]);
 
   async function handlePasswordReset(e: React.FormEvent) {

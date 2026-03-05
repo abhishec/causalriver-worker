@@ -1,9 +1,13 @@
 export const dynamic = "force-dynamic";
 
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-export async function GET(request: Request) {
+// Static env captures for Amplify Lambda SSR compatibility
+const _SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const _SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
@@ -21,33 +25,54 @@ export async function GET(request: Request) {
     | "invite"
     | null;
 
-  const supabase = await createClient();
+  const successUrl = type === "recovery"
+    ? `${origin}/reset-password`
+    : `${origin}${next}`;
 
-  // ── PKCE flow: Supabase sends token_hash + type ──────────────────
+  const errorUrl = type === "recovery"
+    ? `${origin}/login?error=auth_failed&type=recovery`
+    : `${origin}/login?error=auth_failed`;
+
+  // Create the success redirect response upfront so we can set auth cookies on it.
+  // CRITICAL: cookies() from next/headers writes to a separate response object and
+  // is NOT automatically included in NextResponse.redirect() — so we must explicitly
+  // write cookies to this response object using the request-scoped pattern below.
+  const response = NextResponse.redirect(successUrl);
+
+  const supabase = createServerClient(
+    _SUPABASE_URL,
+    _SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+          // Write auth session cookies directly onto the redirect response
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]);
+          });
+        },
+      },
+    }
+  );
+
+  // ── PKCE flow: Supabase sends token_hash + type ──────────────────────
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
     if (!error) {
-      if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/reset-password`);
-      }
-      return NextResponse.redirect(`${origin}${next}`);
+      return response; // cookies are now on this redirect response
     }
   }
 
-  // ── Implicit / code-exchange flow ────────────────────────────────
+  // ── Code-exchange flow (OAuth / PKCE code) ───────────────────────────
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/reset-password`);
-      }
-      return NextResponse.redirect(`${origin}${next}`);
+      return response; // cookies are now on this redirect response
     }
   }
 
   // Auth failed → redirect to login with error
-  if (type === "recovery") {
-    return NextResponse.redirect(`${origin}/login?error=auth_failed&type=recovery`);
-  }
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(errorUrl);
 }
