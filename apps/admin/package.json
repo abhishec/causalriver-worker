@@ -1,0 +1,30 @@
+{
+  "name": "admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start --port 3003",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.991.0",
+    "@aws-sdk/client-amplify": "^3.991.0",
+    "@aws-sdk/client-iam": "^3.991.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.95.3",
+    "clsx": "^2.1.1",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

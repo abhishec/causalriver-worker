@@ -12,15 +12,30 @@
     },
     {
       "name": "website",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
       "runtimeArgs": ["--filter", "website", "dev"],
-      "port": 3000
+      "port": 3000,
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "demo",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "demo", "dev"],
-      "port": 3002
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
+      "runtimeArgs": ["--filter", "demo", "exec", "next", "dev", "--port", "3002"],
+      "port": 3002,
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "/opt/homebrew/bin/pnpm",
+      "runtimeArgs": ["--filter", "admin", "dev"],
+      "port": 3003,
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     }
   ]
 }
