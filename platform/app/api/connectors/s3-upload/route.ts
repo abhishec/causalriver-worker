@@ -317,7 +317,7 @@ export async function POST(request: NextRequest) {
 
     // ── Auto-trigger brain cycle after signal ingestion ─────────
     if (brainTriggerResult?.triggered && brainTriggerResult.signalsIngested > 0) {
-      maybeTriggerBrainCycle(workspaceId, service).catch(() => {});
+      maybeTriggerBrainCycle(workspaceId, service).catch((e: unknown) => logger.warn("[s3-upload] maybeTriggerBrainCycle failed (non-fatal):", e));
     }
 
     return NextResponse.json({

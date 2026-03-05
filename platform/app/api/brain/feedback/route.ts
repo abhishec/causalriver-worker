@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
         updatePatternConfidence(bodyPatternIds, rating as Rating).catch((err: unknown) =>
           logger.warn("[Feedback] updatePatternConfidence failed (non-fatal)", { err: String(err) })
         );
-      }).catch(() => {}); // fire-and-forget
+      }).catch((e: unknown) => logger.warn("[feedback] rl-primer import failed (non-fatal):", e));
     }
 
     if (insertError) {

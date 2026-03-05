@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Auto-trigger brain cycle if enough signals accumulated
-      maybeTriggerBrainCycle(orgId, adminClient).catch(() => {});
+      maybeTriggerBrainCycle(orgId, adminClient).catch((e: unknown) => logger.warn("[confluence/webhook] maybeTriggerBrainCycle failed (non-fatal):", e));
     }
 
     return NextResponse.json({ ok: true, signals: signals.length });

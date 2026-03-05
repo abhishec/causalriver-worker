@@ -96,10 +96,13 @@ export async function POST(req: NextRequest) {
     });
 
     // 3. Get organization ID from webhook registration
-    // In production, this would be stored when the webhook is created
-    // For now, extract from URL params or default to environment
+    // org must be provided as a query param — no fallback prevents cross-tenant data contamination
     const searchParams = req.nextUrl.searchParams;
-    const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
+    const organizationId = searchParams.get('org');
+    if (!organizationId) {
+      logger.error('[Linear Webhook] Missing ?org= param — rejecting to prevent cross-tenant data leak');
+      return NextResponse.json({ error: 'Missing org parameter' }, { status: 400 });
+    }
 
     // 4. Initialize Supabase
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -148,7 +151,7 @@ export async function POST(req: NextRequest) {
 
     // 8. Auto-trigger brain cycle if enough signals accumulated
     if (signal) {
-      maybeTriggerBrainCycle(organizationId, supabase).catch(() => {});
+      maybeTriggerBrainCycle(organizationId, supabase).catch((e: unknown) => logger.warn("[linear/webhook] maybeTriggerBrainCycle failed (non-fatal)", { error: String(e) }));
     }
 
     // 9. Return success

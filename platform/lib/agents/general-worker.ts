@@ -187,7 +187,7 @@ export async function processGeneralJobs(
               modelId: "claude-haiku-4-5-20251001",
             })
           );
-        }).catch(() => {});
+        }).catch((e: unknown) => logger.warn("[general-worker] recordAgentOutcome (chain-hop) failed (non-fatal):", e));
       } else {
         // Job completed in this Lambda
         await supabase.from("agent_queue")

@@ -531,7 +531,7 @@ export async function POST(request: Request) {
         plan_sources: planSources.length,
         effective_fix_version: effectiveFixVersion ?? null,
       },
-    }).catch(() => {}); // fire-and-forget, never block sync
+    }).catch((e: unknown) => logger.warn("[jira/sync] universalBrainWrite failed (non-fatal):", e));
 
     // ── GAP 4: Outcome Oracle — autonomous prediction verification ─────────
     let oracleResult: { predictionsVerified: number; predictionsExpired: number; averageReward: number } | null = null;

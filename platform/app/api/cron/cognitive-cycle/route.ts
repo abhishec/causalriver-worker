@@ -547,7 +547,7 @@ export async function GET(request: NextRequest) {
               // 7E: Update quality scores for existing tools from RL invocations
               const existingTools = await getToolsForDomain(service, workerOrgId, "*").catch(() => [] as Array<{ id: string; domain: string }>);
               for (const tool of existingTools.slice(0, 10)) {
-                await updateToolQualityFromInvocations(service, workerOrgId, tool.id, tool.domain).catch(() => {});
+                await updateToolQualityFromInvocations(service, workerOrgId, tool.id, tool.domain).catch((e: unknown) => logger.warn(`[cognitive-cycle] updateToolQualityFromInvocations failed for tool ${tool.id}:`, e));
               }
               return count;
             })

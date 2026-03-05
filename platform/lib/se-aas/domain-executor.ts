@@ -1436,7 +1436,7 @@ export async function executeDomain(
       { organizationId: params.organizationId, domainType: params.domainType, confidence },
       supabase,
     )
-  ).catch(() => {});
+  ).catch((e: unknown) => logger.warn("[se-aas/domain-executor] verifyWriteback failed (non-fatal):", e));
 
   // ── Step 6b: Boilerplate-scaffold → GitHub PR write-back (non-blocking) ──
   // If the caller provided repoOwner + repoName in the request and the

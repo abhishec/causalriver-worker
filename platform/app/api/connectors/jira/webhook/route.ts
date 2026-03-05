@@ -227,7 +227,7 @@ export async function POST(req: NextRequest) {
 
     // ── Auto-trigger brain cycle if enough signals accumulated ──
     if (signals.length > 0) {
-      maybeTriggerBrainCycle(orgId, service).catch(() => {});
+      maybeTriggerBrainCycle(orgId, service).catch((e: unknown) => logger.warn("[jira/webhook] maybeTriggerBrainCycle failed (non-fatal):", e));
     }
 
     return NextResponse.json({ ok: true, signals: signals.length });

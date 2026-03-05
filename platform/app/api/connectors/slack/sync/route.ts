@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
         channels_synced: Math.min(channels.length, 20),
         lookback_days: lookbackDays,
       },
-    }).catch(() => {}); // fire-and-forget, never block sync
+    }).catch((e: unknown) => logger.warn("[slack/sync] universalBrainWrite failed (non-fatal):", e));
 
     // ── Step 4b: Thread-level ingestion with LLM signal extraction ────────
     // Fires after raw sync — groups messages into threads and extracts structured
@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
         slackCreds.access_token,
         threadChannels,
         lookbackDays * 24  // convert days to hours
-      ).catch(() => {}); // fire-and-forget — never block sync response
+      ).catch((e: unknown) => logger.warn("[slack/sync] processSlackThreads failed (non-fatal):", e));
     }
 
     // ── Step 4c: Document ingestion — thread-aware, fire-and-forget per channel ─

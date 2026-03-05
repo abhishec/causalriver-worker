@@ -241,9 +241,10 @@ export async function POST(request: NextRequest) {
 
     // When a compressed summary exists, cap history to the 10 most recent turns.
     // The LLM sees: [compressed memory block] + [last 10 turns] = unlimited memory feel.
+    // Always cap to max 30 turns to prevent OOM on extremely long uncompressed conversations.
     const conversationHistory = compressedSummary && rawConversationHistory
       ? rawConversationHistory.slice(-10)
-      : rawConversationHistory;
+      : rawConversationHistory?.slice(-30);
 
     // Accept both workspaceId (new) and organizationId (legacy) from request body
     const requestedWorkspaceId = bodyWorkspaceId || organizationId;
@@ -1143,7 +1144,7 @@ export async function POST(request: NextRequest) {
         confidenceScore: 0.85,
         domain: seaasRoute.domainType,
         metadata: { domain_type: seaasRoute.domainType, intent: interpretation?.intent },
-      }, workerId ?? undefined).catch(() => {});
+      }, workerId ?? undefined).catch((e: unknown) => logger.warn("[chat] captureOrchestrationDecision (seaas routing) failed:", e));
     }
 
     // ── EU AI Act Article 13: log domain routing decision ───────────────────
@@ -1771,7 +1772,7 @@ export async function POST(request: NextRequest) {
         confidenceScore: 0.9,
         domain: 'agent_management',
         metadata: { agent_type: agentIntent.agentType },
-      }, workerId ?? undefined).catch(() => {});
+      }, workerId ?? undefined).catch((e: unknown) => logger.warn("[chat] captureOrchestrationDecision (agent spawn) failed:", e));
     }
 
     // ── Process Engine Intent Detection ──────────────────────────────────────
@@ -1801,7 +1802,7 @@ export async function POST(request: NextRequest) {
               jobId: processResult.jobId,
               rawProcessName: processIntent.rawProcessName,
             },
-          }, workerId ?? undefined).catch(() => {});
+          }, workerId ?? undefined).catch((e: unknown) => logger.warn("[chat] captureOrchestrationDecision (process trigger) failed:", e));
         } catch (processErr) {
           logger.warn("[chat/route] Process trigger failed (non-fatal)", { err: String(processErr) });
         }
@@ -2769,7 +2770,7 @@ export async function POST(request: NextRequest) {
           durationMs: Date.now() - agentStartTime,
           modelUsed: agentModelUsed,
           outputSummary: agentOutputSummary || "Agent completed",
-        }).catch(() => {}); // non-blocking
+        }).catch((e: unknown) => logger.warn("[chat] logAgentPostFlight failed (non-blocking):", e));
 
         agentClose();
       })();
@@ -4416,7 +4417,7 @@ No connectors are configured yet. When the user asks for data from any source (S
       'claude-sonnet-4-6',
       detectedIntent ?? 'general',
       workerId ?? undefined
-    ).catch(() => {});
+    ).catch((e: unknown) => logger.warn("[chat] captureOrchestrationDecision (model routing) failed:", e));
 
     // ── Decision Record: capture routing intelligence for brain training ──
     // Initialized before the stream so it's accessible in the post-stream RL block.
@@ -5060,7 +5061,7 @@ No connectors are configured yet. When the user asks for data from any source (S
         );
         void import("@/lib/brain/entity-memory")
           .then(({ extractEntitiesLLM }) => extractEntitiesLLM(_entityText, workspaceId, workerId ?? undefined))
-          .catch(() => {});
+          .catch((e: unknown) => logger.warn("[chat] extractEntitiesLLM failed (non-fatal):", e));
         // ADR-023: CapabilityObserver — detect regret signals in LLM response
         // Fire-and-forget: seeds capability-gap entries for future synthesis
         if (streamedAssistantText && streamedAssistantText.length > 50) {
