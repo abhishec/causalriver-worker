@@ -23,6 +23,8 @@ export const dynamic = "force-dynamic";
  */
 
 const MODEL_FAST = "claude-haiku-4-5-20251001";
+// 15-second timeout for Anthropic calls — prevents Lambda hang (audit C2)
+const ANTHROPIC_TIMEOUT_MS = 15_000;
 // Token threshold: summarize when conversation exceeds 80K tokens (Haiku 200K context)
 const CLEANUP_THRESHOLD_TOKENS = 80_000;
 // Rough estimate: average tokens per message (system + user + assistant combined)
@@ -82,7 +84,8 @@ export async function POST(req: NextRequest) {
     }
 
     const anthropic = new Anthropic({ apiKey: anthropicKey });
-    const summaryResponse = await anthropic.messages.create({
+    const summaryResponse = await Promise.race([
+      anthropic.messages.create({
       model: MODEL_FAST,
       max_tokens: 1024,
       messages: [
@@ -100,7 +103,11 @@ ${historyText}
 Write a compact, dense summary that preserves all important context for continuing this conversation.`,
         },
       ],
-    });
+    }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Anthropic summarization timeout")), ANTHROPIC_TIMEOUT_MS)
+      ),
+    ]);
 
     const summary = summaryResponse.content[0]?.type === "text"
       ? summaryResponse.content[0].text

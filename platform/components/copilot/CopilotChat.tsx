@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useId, useImperativeHandle, forwardRef, FormEvent } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId, useImperativeHandle, forwardRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useShikiHighlight } from "@/lib/shiki";
@@ -1662,6 +1662,31 @@ function pruneMap<V>(m: Map<number, V>): Map<number, V> {
   return pruned;
 }
 
+// ─── MessageErrorBoundary ────────────────────────────────────────────────────
+
+class MessageErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error: error.message };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-lg bg-danger/10 border border-danger/20 p-3 text-xs text-danger">
+          Message rendering error — {this.state.error ?? "unknown error"}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── CopilotChat Component ──────────────────────────────────────────────────
 
 export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(function CopilotChat({
@@ -2407,6 +2432,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
             const res = await fetch("/api/connectors/documents/ingest", {
               method: "POST",
               body: formData,
+              signal: AbortSignal.timeout(60_000), // 60s timeout — never hang the send button
             });
             if (res.ok) {
               const result = await res.json();
@@ -2526,7 +2552,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               const updated = [...prev];
               updated[updated.length - 1] = {
                 role: "assistant",
-                content: error,
+                content: `__ERROR__${error}`,
               };
               return updated;
             });
@@ -3001,23 +3027,26 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
               if (msg.role === "system" && msg.content?.startsWith("__MEMORY_COMPACTED__")) {
                 const turnCount = msg.content.split(":")[1] ?? "0";
                 return (
-                  <motion.div
-                    key={`system-compacted-${i}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex items-center justify-center py-3"
-                  >
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/40 select-none">
-                      <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
-                      <span>memory optimized · {turnCount} turns condensed</span>
-                      <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
-                    </div>
-                  </motion.div>
+                  <MessageErrorBoundary key={`system-compacted-boundary-${i}`}>
+                    <motion.div
+                      key={`system-compacted-${i}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex items-center justify-center py-3"
+                    >
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/40 select-none">
+                        <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
+                        <span>memory optimized · {turnCount} turns condensed</span>
+                        <span className="h-px w-8 bg-muted-foreground/20 inline-block" />
+                      </div>
+                    </motion.div>
+                  </MessageErrorBoundary>
                 );
               }
 
               return (
+                <MessageErrorBoundary key={`msg-boundary-${i}`}>
                 <motion.div
                   key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`}
                   data-msg-index={i}
@@ -3362,6 +3391,7 @@ export const CopilotChat = forwardRef<CopilotChatHandle, CopilotChatProps>(funct
                     </div>
                   )}
                 </motion.div>
+                </MessageErrorBoundary>
               );
             })}
 

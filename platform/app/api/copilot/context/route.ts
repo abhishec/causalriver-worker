@@ -20,6 +20,8 @@ export const dynamic = "force-dynamic";
  */
 
 const MAX_TOKENS = 8_000;
+// 15-second timeout for Anthropic summarization — prevents Lambda hang (audit C2)
+const ANTHROPIC_TIMEOUT_MS = 15_000;
 const CHARS_PER_TOKEN = 4;
 const MODEL_FAST = routeCallType('context-compress').model;
 
@@ -185,7 +187,8 @@ export async function POST(req: NextRequest) {
           return `${role}: ${content.slice(0, 600)}${content.length > 600 ? "..." : ""}`;
         }).join("\n\n");
 
-        const summaryResponse = await anthropic.messages.create({
+        const summaryResponse = await Promise.race([
+          anthropic.messages.create({
           model: MODEL_FAST,
           max_tokens: 512,
           messages: [
@@ -203,7 +206,11 @@ ${historyText}
 Write a compact summary that lets the conversation continue with full context.`,
             },
           ],
-        });
+        }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Anthropic context compress timeout")), ANTHROPIC_TIMEOUT_MS)
+          ),
+        ]);
 
         summary = summaryResponse.content[0]?.type === "text"
           ? summaryResponse.content[0].text
