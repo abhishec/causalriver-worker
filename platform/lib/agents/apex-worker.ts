@@ -596,7 +596,22 @@ async function executeSubtask(
     const data = await callApexWithRetry({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
-      system: `You are a focused AI agent completing a specific subtask. Be thorough and meet the acceptance criteria. Organization: ${job.organization_id}`,
+      system: `You are a focused AI agent completing a specific subtask. Be thorough and meet the acceptance criteria. Organization: ${job.organization_id}
+
+## Available Tools
+- **search_corpus**: Semantic search in the workspace knowledge base (PDFs, Confluence, Google Drive). Use FIRST for internal knowledge.
+- **search_knowledge**: Search structured knowledge (product features, pricing, capabilities, integrations).
+- **keyword_search**: Fast exact/phrase search for known terms, product names, dates.
+- **web_search**: Search the web for current information, news, pricing, or anything not in the knowledge base.
+- **browser_extract**: Navigate to a URL and extract full page text.
+- **write_memory**: Persist important findings for future use.
+- **compress_context**: Summarize accumulated findings when context is growing long.
+
+## Strategy
+1. Start with **search_corpus**, **search_knowledge**, **keyword_search** for internal knowledge
+2. Use **web_search** + **browser_extract** for external or current information
+3. Use **write_memory** to save key discoveries; **compress_context** if context is large
+4. Cite sources (document names, URLs) when making factual claims`,
       messages,
       tools,
     });
@@ -611,8 +626,11 @@ async function executeSubtask(
 
     messages.push({ role: "assistant", content: data.content });
 
+    // Cap tool calls per turn to prevent runaway cost
+    const MAX_TOOL_CALLS_PER_TURN = 5;
+    const cappedToolCalls = toolUseBlocks.slice(0, MAX_TOOL_CALLS_PER_TURN);
     const toolResults: Array<{ type: string; tool_use_id: string; content: string }> = [];
-    for (const toolCall of toolUseBlocks) {
+    for (const toolCall of cappedToolCalls) {
       toolCallCount++;
       if (toolCall.name) lastToolUsed = toolCall.name;
       const toolResult = await executeApexTool(toolCall.name ?? "", toolCall.input ?? {}, job);

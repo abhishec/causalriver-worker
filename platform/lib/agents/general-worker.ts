@@ -171,7 +171,23 @@ export async function processGeneralJobs(
       if (agentResult.chained) {
         // Job was checkpointed and chained — parent is now 'paused', child is 'pending'
         logger.warn(`[general-worker] Job ${job.id} chained → ${agentResult.childJobId} (depth ${chainDepth + 1})`);
-        // Don't mark as completed — it's 'paused' from checkpointAndChain
+        // Record partial RL signal for intermediate chain hops — long jobs shouldn't have RL blindspots
+        void evaluateOutputQuality(taskDescription, agentResult.output, agentResult.toolCallCount).then(async (partialQ) => {
+          await import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
+            recordAgentOutcome(supabase, {
+              agentId: job.id,
+              organizationId: job.organization_id,
+              userId: job.organization_id,
+              aiWorkerId: job.ai_worker_id ?? undefined,
+              domain: "general-chain-hop",
+              taskDescription: `[chain-${chainDepth + 1}] ${taskDescription.slice(0, 200)}`,
+              resultSummary: agentResult.output.slice(0, 300),
+              quality: partialQ * 0.8, // discount partial to avoid inflating vs final signal
+              executionMs: durationMs,
+              modelId: "claude-haiku-4-5-20251001",
+            })
+          );
+        }).catch(() => {});
       } else {
         // Job completed in this Lambda
         await supabase.from("agent_queue")
@@ -445,10 +461,15 @@ async function runAgenticLoop(
       tools,
     });
 
-    // Collect text output
+    // Collect text output — last substantial text wins (intermediate reasoning discarded)
+    // but if last turn has no text, we retain whatever was set by a prior turn
     const textBlocks = data.content.filter((b) => b.type === "text");
     if (textBlocks.length > 0) {
-      output = textBlocks.map((b) => b.text ?? "").join("");
+      const turnText = textBlocks.map((b) => b.text ?? "").join("");
+      // Only update output if this turn adds substantive content (not just "I'll search...")
+      if (turnText.length > output.length || data.stop_reason === "end_turn") {
+        output = turnText;
+      }
     }
 
     // If no tool use, we're done
@@ -460,9 +481,14 @@ async function runAgenticLoop(
     // Add assistant message to history
     messages.push({ role: "assistant", content: data.content });
 
-    // Execute each tool call
+    // Execute each tool call — cap at 5 per turn to prevent runaway cost
+    const MAX_TOOL_CALLS_PER_TURN = 5;
+    const cappedToolCalls = toolUseBlocks.slice(0, MAX_TOOL_CALLS_PER_TURN);
+    if (toolUseBlocks.length > MAX_TOOL_CALLS_PER_TURN) {
+      logger.warn(`[general-worker] Turn ${turn + 1}: ${toolUseBlocks.length} tool calls requested, capping to ${MAX_TOOL_CALLS_PER_TURN}`);
+    }
     const toolResults: Array<{ type: string; tool_use_id: string; content: string }> = [];
-    for (const toolCall of toolUseBlocks) {
+    for (const toolCall of cappedToolCalls) {
       toolCallCount++;
       if (toolCall.name && !toolsUsed.includes(toolCall.name)) {
         toolsUsed.push(toolCall.name);
