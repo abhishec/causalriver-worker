@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import BrainPageClient from "./brain-page-client";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,9 @@ export default async function BrainPage() {
 
   if (!user) redirect("/login");
 
-  return <BrainPageClient />;
+  return (
+    <ErrorBoundary section="Brain">
+      <BrainPageClient />
+    </ErrorBoundary>
+  );
 }

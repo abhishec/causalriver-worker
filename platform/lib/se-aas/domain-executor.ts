@@ -1401,8 +1401,9 @@ export async function executeDomain(
       causalEdgesUsed: brainContext.causalEdges?.length ?? 0,
       patternsUsed: brainContext.patterns?.length ?? 0,
     }),
-  ]).catch(() => {
+  ]).catch((e: unknown) => {
     // Non-blocking: feedback failure should NEVER break domain execution
+    logger.warn("[domain-executor] Brain feedback bus failed (non-fatal):", e);
   });
 
   // Channel 5: Push insight for cross-service propagation (Gap 3 — NB-064)

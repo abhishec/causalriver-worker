@@ -404,7 +404,7 @@ export async function attemptRecovery(
           suppressUntil: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
         },
       });
-    } catch { /* non-fatal — planner will not suppress but that's acceptable */ }
+    } catch (e) { logger.warn("[recovery-agent] ai_memory suppression insert failed (non-fatal):", e); }
   })();
 
   let attemptsCount = 0;
