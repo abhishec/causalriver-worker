@@ -128,6 +128,7 @@ function normalizeAnswer(answer: string): string {
   return answer
     .toLowerCase()
     .trim()
+    .replace(/^(the answer is|my final answer is|therefore|thus|hence|so)\s+/i, "")
     .replace(/[!?;:'"()\[\]{}]/g, "")    // Remove punctuation but NOT . or ,
     .replace(/,(?=\d{3})/g, "")           // Remove thousand-separator commas (1,234 → 1234)
     .replace(/\.(?!\d)/g, "")             // Remove trailing/sentence periods but not decimal points
@@ -203,6 +204,12 @@ async function askBrainOS(question: string): Promise<{ answer: string; toolCalls
     }
   } finally {
     clearTimeout(timeout);
+  }
+
+  // Extract the LAST FINAL ANSWER occurrence (agent may revise its answer mid-stream)
+  const finalAnswerMatches = [...answer.matchAll(/FINAL ANSWER:\s*(.+?)(?:\n|$)/gi)];
+  if (finalAnswerMatches.length > 0) {
+    answer = finalAnswerMatches[finalAnswerMatches.length - 1]![1]!.trim();
   }
 
   return { answer: answer.trim(), toolCallsSeen };

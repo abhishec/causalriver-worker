@@ -58,7 +58,10 @@ export async function POST(req: NextRequest) {
 
     // 1. Get organization ID from query params
     const searchParams = req.nextUrl.searchParams;
-    const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
+    const organizationId = searchParams.get('org');
+    if (!organizationId) {
+      return NextResponse.json({ error: "Missing required 'org' query parameter" }, { status: 400 });
+    }
 
     // 2. Parse webhook payload
     const payload: OutcomeWebhookPayload = await req.json();
@@ -227,7 +230,10 @@ export async function GET(req: NextRequest) {
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const organizationId = searchParams.get('org') || process.env.DEFAULT_ORG_ID || 'core';
+    const organizationId = searchParams.get('org');
+    if (!organizationId) {
+      return NextResponse.json({ error: "Missing required 'org' query parameter" }, { status: 400 });
+    }
     const predictionId = searchParams.get('predictionId');
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

@@ -5032,6 +5032,7 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
           // messages incrementally including tool_result blocks that satisfy the API at
           // runtime but are hard to type-narrowly at compile time.
           const _loopMsgs: unknown[] = [...(messages as unknown[])];
+          let _continuationCount = 0;
 
           for (let _iter = 0; _iter < MAX_GAIA_ITERATIONS && Date.now() < GAIA_DEADLINE_MS; _iter++) {
             // Non-streaming: detect tool_use blocks
@@ -5059,6 +5060,11 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
 
             if (_resp.stop_reason === "max_tokens") {
               // Claude hit token limit mid-sentence — request continuation, don't accept truncated answer
+              // FIX 3: Cap continuations at 2 to avoid infinite max_tokens loops
+              if (_continuationCount++ >= 2) {
+                // Too many continuations — force break
+                break;
+              }
               _loopMsgs.push({ role: "assistant" as const, content: _resp.content });
               _loopMsgs.push({ role: "user" as const, content: "Continue your response. When done, provide your final answer." });
               continue;
@@ -5070,10 +5076,10 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
               if (_textBlocks.length > 0 && _gaiaToolCallCount > 0) {
                 // Only take over from normal stream if we actually called tools
                 _gaiaFinalText = _textBlocks.map((b: { text?: string }) => b.text ?? "").join("");
-                // Extract FINAL ANSWER if present
-                const _finalMatch = _gaiaFinalText.match(/FINAL ANSWER:\s*(.+?)(?:\n|$)/i);
-                if (_finalMatch) {
-                  _gaiaFinalText = _finalMatch[1].trim();
+                // FIX 5: Extract FINAL ANSWER — take LAST match, not first
+                const _allFinalMatches = [..._gaiaFinalText.matchAll(/FINAL ANSWER:\s*(.+?)(?:\n|$)/gi)];
+                if (_allFinalMatches.length > 0) {
+                  _gaiaFinalText = _allFinalMatches[_allFinalMatches.length - 1][1].trim();
                 }
               }
               break;
@@ -5082,7 +5088,7 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
             // Tool use: execute all tool calls in this response
             _loopMsgs.push({ role: "assistant", content: _resp.content });
 
-            const _toolResults: Array<{ type: "tool_result"; tool_use_id: string; content: string }> = [];
+            const _toolResults: Array<{ type: "tool_result"; tool_use_id: string; content: string; is_error?: true }> = [];
             for (const block of _resp.content) {
               if (block.type === "tool_use" && block.id && block.name) {
                 _gaiaToolCallCount++;
@@ -5095,8 +5101,28 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
                 } catch (execErr: unknown) {
                   _toolResult = `Error: ${execErr instanceof Error ? execErr.message : String(execErr)}`;
                 }
-                _toolResults.push({ type: "tool_result", tool_use_id: block.id, content: _toolResult });
+                const _isToolError = _toolResult.startsWith("Error:");
+                _toolResults.push({
+                  type: "tool_result",
+                  tool_use_id: block.id,
+                  content: _toolResult,
+                  ...(_isToolError ? { is_error: true as const } : {}),
+                });
               }
+            }
+
+            // FIX 1: Empty tool_results guard — stop_reason=tool_use but no valid tool_use blocks found
+            if (_toolResults.length === 0) {
+              // No valid tool_use blocks found despite stop_reason=tool_use — treat as end_turn
+              const _textBlocks = _resp.content.filter((b: { type: string }) => b.type === "text");
+              if (_textBlocks.length > 0 && _gaiaToolCallCount > 0) {
+                _gaiaFinalText = _textBlocks.map((b: { text?: string }) => b.text ?? "").join("");
+                const _allFinalMatches = [..._gaiaFinalText.matchAll(/FINAL ANSWER:\s*(.+?)(?:\n|$)/gi)];
+                if (_allFinalMatches.length > 0) {
+                  _gaiaFinalText = _allFinalMatches[_allFinalMatches.length - 1][1].trim();
+                }
+              }
+              break;
             }
 
             // Build user content: tool results + optional plan recitation
@@ -5115,6 +5141,32 @@ Think step-by-step. Use tools. When ready, emit FINAL ANSWER: [answer].
 
           if (_gaiaToolCallCount > 0) {
             logger.warn(`[GAIA] Agentic loop: ${_gaiaToolCallCount} tool calls, hasFinalText=${!!_gaiaFinalText}`);
+          }
+
+          // FIX 4: If tools were called but no final answer, force a synthesis call instead of falling through to normal stream
+          if (_gaiaToolCallCount > 0 && !_gaiaFinalText && _loopMsgs.length > 2) {
+            try {
+              _loopMsgs.push({ role: "user" as const, content: "Based on all the information gathered, provide your FINAL ANSWER now. Be concise and exact." });
+              const _synthResp = await (anthropic.messages.create as (body: unknown) => Promise<{ content: Array<{ type: string; text?: string }> }>)({
+                model: v4SmartModel,
+                max_tokens: 2048,
+                system: _gaiaSystemPreamble,
+                messages: _loopMsgs,
+              });
+              const _synthText = _synthResp.content
+                .filter((b: { type: string }) => b.type === "text")
+                .map((b: { text?: string }) => b.text ?? "")
+                .join("");
+              if (_synthText) {
+                _gaiaFinalText = _synthText;
+                const _allFinalMatches = [..._gaiaFinalText.matchAll(/FINAL ANSWER:\s*(.+?)(?:\n|$)/gi)];
+                if (_allFinalMatches.length > 0) {
+                  _gaiaFinalText = _allFinalMatches[_allFinalMatches.length - 1][1].trim();
+                }
+              }
+            } catch (synthErr: unknown) {
+              logger.warn("[GAIA] Synthesis call failed", { error: synthErr instanceof Error ? synthErr.message : String(synthErr) });
+            }
           }
         }
 

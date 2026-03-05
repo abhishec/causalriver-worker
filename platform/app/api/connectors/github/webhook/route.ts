@@ -664,6 +664,6 @@ async function getInstallationToken(installationId: number): Promise<string> {
     throw new Error(`Failed to get installation token: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({})) as Record<string, string>;
   return data.token;
 }

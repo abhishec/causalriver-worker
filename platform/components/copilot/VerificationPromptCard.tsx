@@ -108,7 +108,7 @@ export function VerificationPromptCard({
 
   const domain = verification.domain || "unknown";
   const label = DOMAIN_LABELS[domain] || domain;
-  const icon = DOMAIN_ICONS[domain] || domain.charAt(0).toUpperCase();
+  const icon = DOMAIN_ICONS[domain] || (domain?.charAt(0) || "?").toUpperCase();
   const daysAgo = verification.predictedAt
     ? Math.floor((Date.now() - new Date(verification.predictedAt).getTime()) / (1000 * 60 * 60 * 24))
     : null;

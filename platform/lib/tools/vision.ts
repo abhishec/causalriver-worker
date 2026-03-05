@@ -175,9 +175,12 @@ export async function analyzeImageUrl(url: string, prompt?: string): Promise<Vis
       return { description: "", extractedText: "", objects: [], error: `Failed to fetch image: ${resp.status}` };
     }
 
-    const contentType = resp.headers.get("content-type") ?? "image/png";
-    const mediaType = (["image/png", "image/jpeg", "image/gif", "image/webp"].includes(contentType)
-      ? contentType
+    const rawCt = (resp.headers.get("content-type") ?? "").split(";")[0].trim();
+    if (rawCt && !rawCt.startsWith("image/")) {
+      return { description: "", extractedText: "", objects: [], error: `URL did not return an image (content-type: ${rawCt})` };
+    }
+    const mediaType = (["image/png", "image/jpeg", "image/gif", "image/webp"].includes(rawCt)
+      ? rawCt
       : "image/png") as ImageMediaType;
 
     const buffer = await resp.arrayBuffer();

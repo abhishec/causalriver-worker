@@ -78,13 +78,13 @@ export async function browserNavigate(url: string, waitFor = 3000): Promise<Brow
     let processedHtml = html
       .replace(/<tr[^>]*>/gi, "\n")
       .replace(/<\/tr>/gi, "")
-      .replace(/<th[^>]*>(.*?)<\/th>/gi, " | $1")
-      .replace(/<td[^>]*>(.*?)<\/td>/gi, " | $1");
+      .replace(/<th[^>]*>([\s\S]*?)<\/th>/gi, " | $1")
+      .replace(/<td[^>]*>([\s\S]*?)<\/td>/gi, " | $1");
 
     // Extract text content (strip HTML tags)
     let textContent = processedHtml
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
-      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim()
@@ -109,6 +109,11 @@ export async function browserNavigate(url: string, waitFor = 3000): Promise<Brow
     // PDF detection: if we got very little text but URL looks like a PDF, give helpful message
     if (textContent.trim().length < 50 && urlStr.toLowerCase().includes(".pdf")) {
       textContent = "[PDF document detected — content could not be extracted via browser. Try searching for an HTML version or key facts about this document.]";
+    }
+
+    // Empty page detection: not a PDF but still almost no content
+    if (textContent.trim().length < 50 && !urlStr.toLowerCase().includes(".pdf")) {
+      textContent = "[Page returned very little content — possible CAPTCHA, login wall, or JavaScript-only page. URL: " + urlStr + "]";
     }
 
     return { url: urlStr, title, textContent, links };

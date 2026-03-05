@@ -174,6 +174,10 @@ export async function loadStateParams(
       });
       const defaults = _defaultParams(orgId, processType, stateName);
       _paramsCache.set(key, { params: defaults, cachedAt: Date.now() });
+      if (_paramsCache.size > 500) {
+        const firstKey = _paramsCache.keys().next().value;
+        if (firstKey) _paramsCache.delete(firstKey);
+      }
       return defaults;
     }
 
@@ -181,11 +185,19 @@ export async function loadStateParams(
       // No row yet — return defaults (will be created on first updateStateParams)
       const defaults = _defaultParams(orgId, processType, stateName);
       _paramsCache.set(key, { params: defaults, cachedAt: Date.now() });
+      if (_paramsCache.size > 500) {
+        const firstKey = _paramsCache.keys().next().value;
+        if (firstKey) _paramsCache.delete(firstKey);
+      }
       return defaults;
     }
 
     const params = _rowToParams(data as ProcessStateRLParamsRow);
     _paramsCache.set(key, { params, cachedAt: Date.now() });
+    if (_paramsCache.size > 500) {
+      const firstKey = _paramsCache.keys().next().value;
+      if (firstKey) _paramsCache.delete(firstKey);
+    }
     return params;
   } catch (err) {
     logger.warn("[state-rl] loadStateParams: threw unexpectedly (using defaults)", {
@@ -374,6 +386,10 @@ export async function updateStateParams(
     // updateStateParams call loads the same stale cached value.
     const key = _cacheKey(orgId, processType, stateName);
     _paramsCache.set(key, { params: merged, cachedAt: Date.now() });
+    if (_paramsCache.size > 500) {
+      const firstKey = _paramsCache.keys().next().value;
+      if (firstKey) _paramsCache.delete(firstKey);
+    }
 
     const { error } = await supabase
       .from("process_state_rl_params")

@@ -122,18 +122,19 @@ export async function GET(request: NextRequest) {
       }),
     });
 
-    const tokenData = await tokenResponse.json();
-
     if (!tokenResponse.ok) {
+      const tokenErrData = await tokenResponse.json().catch(() => ({})) as Record<string, string>;
       logger.error('Jira OAuth error:', {
-        error: tokenData.error,
-        error_description: tokenData.error_description,
+        error: tokenErrData.error,
+        error_description: tokenErrData.error_description,
         status: tokenResponse.status,
       });
       return NextResponse.redirect(
-        new URL(`/connectors?error=${encodeURIComponent(tokenData.error ?? 'oauth_error')}`, request.url)
+        new URL(`/connectors?error=${encodeURIComponent(tokenErrData.error ?? 'oauth_error')}`, request.url)
       );
     }
+
+    const tokenData = await tokenResponse.json().catch(() => ({}) as Record<string, unknown>);
 
     // Get accessible resources (Jira sites)
     const resourcesResponse = await fetch(
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const resources = await resourcesResponse.json();
+    const resources = await resourcesResponse.json().catch(() => []);
     if (!Array.isArray(resources) || resources.length === 0) {
       logger.error('[Jira callback] No accessible Jira sites found');
       return NextResponse.redirect(

@@ -96,12 +96,13 @@ export async function processBatchIngestion(
     return { processed: 0, remaining: 0, chunksCreated: 0, failed: 0, completed: true };
   }
 
-  // Mark as running if pending
+  // Mark as running if pending — guard with .eq("status", "pending") to prevent double-claim
   if (ingestionJob.status === "pending") {
     await supabase
       .from("ingestion_jobs")
       .update({ status: "running", started_at: new Date().toISOString() })
-      .eq("id", jobId);
+      .eq("id", jobId)
+      .eq("status", "pending");
   }
 
   // 2. Fetch the next batch

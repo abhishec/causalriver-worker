@@ -418,6 +418,7 @@ async function executeDomainWithBrainContext(
   anthropicApiKey?: string
 ): Promise<Record<string, unknown>> {
   // Assemble Brain context — the same 10-query parallel load used by SE-aaS
+  const fallback = { data: null, error: null };
   const [
     causalEdgesRes,
     patternsRes,
@@ -426,44 +427,56 @@ async function executeDomainWithBrainContext(
     recentSignalsRes,
     brainInsightsRes,
   ] = await Promise.all([
-    supabase
-      .from('causal_relationships_statistical')
-      .select('source_entity, target_entity, strength, confidence_score, lag_days, p_value, source_domain, target_domain, natural_language')
-      .eq('organization_id', organizationId)
-      .order('updated_at', { ascending: false })
-      .limit(30),
-    supabase
-      .from('brain_grammar_rules')
-      .select('rule_name, rule_body, confidence, domain')
-      .eq('organization_id', organizationId)
-      .gte('confidence', 0.5)
-      .limit(15),
-    supabase
-      .from('velocity_snapshots')
-      .select('prs_merged, mean_pr_cycle_time_hours, open_pr_count, prs_per_engineer, snapshot_date')
-      .eq('organization_id', organizationId)
-      .order('snapshot_date', { ascending: false })
-      .limit(5),
-    supabase
-      .from('bottleneck_snapshots')
-      .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share')
-      .eq('organization_id', organizationId)
-      .order('snapshot_date', { ascending: false })
-      .limit(1),
-    supabase
-      .from('cross_domain_signals')
-      .select('signal_type, signal_value, signal_metadata, source_domain, created_at')
-      .eq('organization_id', organizationId)
-      .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
-      .order('created_at', { ascending: false })
-      .limit(30),
-    supabase
-      .from('ai_memory')
-      .select('content, memory_type, cognitive_layer, created_at')
-      .eq('organization_id', organizationId)
-      .in('memory_type', ['insight', 'pattern', 'prediction', 'alert'])
-      .order('created_at', { ascending: false })
-      .limit(10),
+    Promise.resolve(
+      supabase
+        .from('causal_relationships_statistical')
+        .select('source_entity, target_entity, strength, confidence_score, lag_days, p_value, source_domain, target_domain, natural_language')
+        .eq('organization_id', organizationId)
+        .order('updated_at', { ascending: false })
+        .limit(30)
+    ).catch(() => fallback),
+    Promise.resolve(
+      supabase
+        .from('brain_grammar_rules')
+        .select('rule_name, rule_body, confidence, domain')
+        .eq('organization_id', organizationId)
+        .gte('confidence', 0.5)
+        .limit(15)
+    ).catch(() => fallback),
+    Promise.resolve(
+      supabase
+        .from('velocity_snapshots')
+        .select('prs_merged, mean_pr_cycle_time_hours, open_pr_count, prs_per_engineer, snapshot_date')
+        .eq('organization_id', organizationId)
+        .order('snapshot_date', { ascending: false })
+        .limit(5)
+    ).catch(() => fallback),
+    Promise.resolve(
+      supabase
+        .from('bottleneck_snapshots')
+        .select('bottleneck_risk_score, risk_level, reviewer_gini_coefficient, reviewer_hhi, top_reviewer_share')
+        .eq('organization_id', organizationId)
+        .order('snapshot_date', { ascending: false })
+        .limit(1)
+    ).catch(() => fallback),
+    Promise.resolve(
+      supabase
+        .from('cross_domain_signals')
+        .select('signal_type, signal_value, signal_metadata, source_domain, created_at')
+        .eq('organization_id', organizationId)
+        .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(30)
+    ).catch(() => fallback),
+    Promise.resolve(
+      supabase
+        .from('ai_memory')
+        .select('content, memory_type, cognitive_layer, created_at')
+        .eq('organization_id', organizationId)
+        .in('memory_type', ['insight', 'pattern', 'prediction', 'alert'])
+        .order('created_at', { ascending: false })
+        .limit(10)
+    ).catch(() => fallback),
   ]);
 
   const brainContext = {

@@ -171,7 +171,7 @@ export function BrainContextPanel({ brainMeta, isLoading, className, orgId, serv
             </div>
           </Link>
           <Link
-            href="/early-warning"
+            href="/brain"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors group"
           >
             <div className="w-6 h-6 rounded-md bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
@@ -185,7 +185,7 @@ export function BrainContextPanel({ brainMeta, isLoading, className, orgId, serv
             </div>
           </Link>
           <Link
-            href="/capabilities"
+            href="/brain"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-surface-hover transition-colors group"
           >
             <div className="w-6 h-6 rounded-md bg-domain-engineering/10 flex items-center justify-center group-hover:bg-domain-engineering/20 transition-colors">

@@ -138,8 +138,8 @@ export async function POST(
           try {
             // Fetch the approved turn to get input/output, and session to get corpusId
             const [turnResult, corpusResult] = await Promise.all([
-              admin.from("agent_session_turns").select("user_input, agent_output").eq("id", turnId).single(),
-              admin.from("agent_corpus").select("id").eq("session_id", sessionId).maybeSingle(),
+              admin.from("agent_session_turns").select("user_input, agent_output").eq("id", turnId).maybeSingle(),
+              admin.from("agent_corpus").select("id").eq("agent_session_id", sessionId).maybeSingle(),
             ]);
 
             const turnRow = turnResult.data;

@@ -76,11 +76,12 @@ export async function executeWorkflow(
       completedStepOrders.add(row.step_order);
     }
 
-    // Mark run as running
+    // Mark run as running — guard with .eq("status", "paused") to prevent resume race
     await supabase
       .from("workflow_runs")
       .update({ status: "running" })
-      .eq("id", runId);
+      .eq("id", runId)
+      .eq("status", "paused");
 
     logger.info(`[WorkflowEngine] Resuming run ${runId} — ${completedStepOrders.size} steps already completed`);
   } else {

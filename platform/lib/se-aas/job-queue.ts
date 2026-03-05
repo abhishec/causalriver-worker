@@ -186,6 +186,8 @@ export async function executeAndCompleteJob(
 
   const retryCount: number = (retryRow?.retry_count as number) ?? 0;
   const maxRetries: number = (retryRow?.max_retries as number) ?? 3;
+  // Global cap: prevent runaway retry loops regardless of what's stored in DB
+  const effectiveMaxRetries = Math.min(maxRetries, 5);
 
   const executionStartMs = Date.now();
 
@@ -225,7 +227,7 @@ export async function executeAndCompleteJob(
     const errMessage = err instanceof Error ? err.message : String(err);
     logger.error(`[SE-aaS JobWorker] Job ${jobId} failed:`, errMessage);
 
-    if (retryCount < maxRetries) {
+    if (retryCount < effectiveMaxRetries) {
       // Re-queue for automatic retry — transient failures get another chance
       const nextAttempt = retryCount + 1;
       await supabase
@@ -233,13 +235,13 @@ export async function executeAndCompleteJob(
         .update({
           status: "pending",
           retry_count: nextAttempt,
-          error_message: `Attempt ${nextAttempt}/${maxRetries} failed: ${errMessage.slice(0, 200)}. Retrying...`,
+          error_message: `Attempt ${nextAttempt}/${effectiveMaxRetries} failed: ${errMessage.slice(0, 200)}. Retrying...`,
           started_at: null,
           heartbeat_at: null,
         })
         .eq("id", jobId);
       logger.warn(
-        `[job-queue] Job ${jobId} re-queued for retry (attempt ${nextAttempt}/${maxRetries}): ${errMessage.slice(0, 100)}`
+        `[job-queue] Job ${jobId} re-queued for retry (attempt ${nextAttempt}/${effectiveMaxRetries}): ${errMessage.slice(0, 100)}`
       );
     } else {
       // Exhausted retries — permanent failure
@@ -247,12 +249,12 @@ export async function executeAndCompleteJob(
         .from("agent_queue")
         .update({
           status: "error",
-          error_message: `Permanently failed after ${maxRetries} retries: ${errMessage.slice(0, 200)}`,
+          error_message: `Permanently failed after ${effectiveMaxRetries} retries: ${errMessage.slice(0, 200)}`,
           completed_at: new Date().toISOString(),
         })
         .eq("id", jobId);
       logger.error(
-        `[job-queue] Job ${jobId} permanently failed after ${maxRetries} retries: ${errMessage.slice(0, 100)}`
+        `[job-queue] Job ${jobId} permanently failed after ${effectiveMaxRetries} retries: ${errMessage.slice(0, 100)}`
       );
     }
 

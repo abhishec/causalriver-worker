@@ -43,7 +43,7 @@ export async function GET() {
 
     const workspaceId = await getCurrentWorkspaceId();
     if (!workspaceId) {
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({ error: "No workspace context" }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -56,7 +56,7 @@ export async function GET() {
 
     if (error) {
       logger.warn("[connectors/health] Query error:", error.message);
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({ error: "Query failed" }, { status: 500 });
     }
 
     const health = (data ?? []).map((row) => ({
@@ -74,6 +74,6 @@ export async function GET() {
     return NextResponse.json(health);
   } catch (err) {
     logger.error("[connectors/health] Error:", err);
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const treeData = await treeResponse.json();
+    const treeData = await treeResponse.json().catch(() => ({ tree: [] }));
     const allFiles: Array<{ path: string; size: number }> = (treeData.tree || [])
       .filter((f: any) => f.type === "blob")
       .map((f: any) => ({ path: f.path, size: f.size || 0 }));

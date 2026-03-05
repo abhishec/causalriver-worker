@@ -207,7 +207,7 @@ export default async function AdminOrgsPage() {
                           m.role === "admin" ? "bg-warning/20 text-warning" :
                           "bg-surface text-muted"
                         }`}>
-                          {email.charAt(0).toUpperCase()}
+                          {(email?.charAt(0) || "?").toUpperCase()}
                         </div>
                         <span className="max-w-[140px] truncate text-foreground">{email}</span>
                         <span className="text-muted/60">{m.role}</span>
@@ -314,7 +314,7 @@ function WorkspaceCard({
         <div className="flex items-center gap-3 min-w-0">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${org.is_core_brain ? "bg-accent/20" : "bg-surface"}`}>
             <span className={`text-sm font-bold ${org.is_core_brain ? "text-accent" : "text-muted"}`}>
-              {org.name.charAt(0).toUpperCase()}
+              {(org.name?.charAt(0) || "?").toUpperCase()}
             </span>
           </div>
           <div className="min-w-0">

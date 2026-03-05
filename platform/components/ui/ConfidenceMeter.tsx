@@ -66,7 +66,7 @@ export function ConfidenceMeter({
           {pValue !== undefined && (
             <>
               <span className="text-border">|</span>
-              <span className="font-mono">p={pValue < 0.001 ? "<0.001" : pValue.toFixed(3)}</span>
+              <span className="font-mono">p={pValue != null ? (pValue < 0.001 ? "<0.001" : pValue.toFixed(3)) : "—"}</span>
             </>
           )}
           {method && (
