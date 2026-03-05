@@ -4993,41 +4993,141 @@ No connectors are configured yet. When the user asks for data from any source (S
           logger.warn(`[chat] High heap before Anthropic stream: ${_heapMb}MB — possible OOM risk`);
         }
 
-        const anthropicStream = anthropic.messages.stream({
-          model: v4SmartModel,
-          max_tokens: 8192,
-          // Enable prompt caching — saves ~90% on repeated system prompts (brain context is often similar)
-          system: [{ type: 'text' as const, text: effectiveSystemPrompt, cache_control: { type: 'ephemeral' as const } }],
-          messages,
-          // Thread request abort signal so client disconnect cancels the Anthropic call
-          // and stops token consumption. Uses request.signal passed in from the outer scope.
-        }, { signal: request.signal as any });
+        // ── GAIA Agentic Tool-Use Loop (Beat Manus Task 0) ──────────────────
+        // Two-phase approach: (1) non-streaming tool loop until end_turn,
+        // (2) stream the final answer. Max 15 iterations, 110s budget.
+        // Falls back to normal stream when no tools are invoked.
+        //
+        // Tool suite: web_search, execute_python, calculator, browser_navigate,
+        //             browser_screenshot, analyze_image  (see lib/tools/tool-executor.ts)
+        let _gaiaFinalText: string | null = null;
+        let _gaiaToolCallCount = 0;
 
-        // Safety: hard timeout — close stream if Anthropic takes >120s
-        const streamTimeout = setTimeout(() => {
-          try {
-            sendError("Response timed out after 120 seconds. Please try a shorter question.");
-            close();
-            anthropicStream.abort();
-          } catch { /* already closed */ }
-        }, 120_000);
+        {
+          const { getGAIATools, executeGAIATool } = await import("@/lib/tools/tool-executor");
+          const _gaiaTools = getGAIATools();
+          const MAX_GAIA_ITERATIONS = 15;
+          const GAIA_DEADLINE_MS = Date.now() + 110_000; // leave 10s for streaming
+
+          // Use unknown[] for the loop messages array — the Anthropic SDK's MessageParam union
+          // is complex (tool_result, tool_use, SearchResultBlockParam etc.) and we build
+          // messages incrementally including tool_result blocks that satisfy the API at
+          // runtime but are hard to type-narrowly at compile time.
+          const _loopMsgs: unknown[] = messages as unknown[];
+
+          for (let _iter = 0; _iter < MAX_GAIA_ITERATIONS && Date.now() < GAIA_DEADLINE_MS; _iter++) {
+            // Non-streaming: detect tool_use blocks
+            let _resp: {
+              stop_reason: string;
+              content: Array<{ type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }>;
+            };
+            try {
+              _resp = await (anthropic.messages.create as (body: unknown) => Promise<typeof _resp>)({
+                model: v4SmartModel,
+                max_tokens: 8192,
+                system: [{ type: "text" as const, text: effectiveSystemPrompt, cache_control: { type: "ephemeral" as const } }],
+                messages: _loopMsgs,
+                tools: _gaiaTools,
+              });
+            } catch (loopErr: unknown) {
+              logger.warn("[GAIA] Tool loop API call failed", {
+                iter: _iter,
+                error: loopErr instanceof Error ? loopErr.message : String(loopErr),
+              });
+              break; // Fall through to normal stream
+            }
+
+            if (_resp.stop_reason !== "tool_use") {
+              // end_turn or max_tokens — extract final text
+              const _textBlocks = _resp.content.filter((b) => b.type === "text");
+              if (_textBlocks.length > 0 && _gaiaToolCallCount > 0) {
+                // Only take over from normal stream if we actually called tools
+                _gaiaFinalText = _textBlocks.map((b) => b.text ?? "").join("");
+              }
+              break;
+            }
+
+            // Tool use: execute all tool calls in this response
+            _loopMsgs.push({ role: "assistant", content: _resp.content });
+
+            const _toolResults: Array<{ type: "tool_result"; tool_use_id: string; content: string }> = [];
+            for (const block of _resp.content) {
+              if (block.type === "tool_use" && block.id && block.name) {
+                _gaiaToolCallCount++;
+                // Notify frontend of tool in progress (shows in CopilotChat)
+                send(JSON.stringify({ type: "tool_call", name: block.name, input: block.input ?? {} }));
+
+                let _toolResult = "";
+                try {
+                  _toolResult = await executeGAIATool(block.name, block.input ?? {});
+                } catch (execErr: unknown) {
+                  _toolResult = `Error: ${execErr instanceof Error ? execErr.message : String(execErr)}`;
+                }
+                _toolResults.push({ type: "tool_result", tool_use_id: block.id, content: _toolResult });
+              }
+            }
+
+            _loopMsgs.push({ role: "user", content: _toolResults });
+
+            // Plan recitation every 5 tool calls (Manus AI "todo.md" pattern)
+            // Pushes the goal into recent context where attention is strongest
+            if (_gaiaToolCallCount > 0 && _gaiaToolCallCount % 5 === 0) {
+              _loopMsgs.push({
+                role: "user",
+                content: "Before continuing: (1) What is the original question? (2) What have you found so far? (3) What are your next steps? Then proceed.",
+              });
+            }
+          }
+
+          if (_gaiaToolCallCount > 0) {
+            logger.warn(`[GAIA] Agentic loop: ${_gaiaToolCallCount} tool calls, hasFinalText=${!!_gaiaFinalText}`);
+          }
+        }
 
         // Accumulate the streamed assistant text for auto-save (BUILD 4)
         let streamedAssistantText = "";
-        try {
-          for await (const event of anthropicStream) {
-            if (
-              event.type === "content_block_delta" &&
-              event.delta.type === "text_delta"
-            ) {
-              streamedAssistantText += event.delta.text;
-              sendText(event.delta.text);
+
+        if (_gaiaFinalText !== null) {
+          // ── GAIA path: tool loop completed — stream the answer directly ──
+          // No second Anthropic call needed; the loop already produced the final text.
+          streamedAssistantText = _gaiaFinalText;
+          sendText(_gaiaFinalText);
+        } else {
+          // ── Normal path: no tools invoked — stream from Anthropic as usual ──
+          const anthropicStream = anthropic.messages.stream({
+            model: v4SmartModel,
+            max_tokens: 8192,
+            // Enable prompt caching — saves ~90% on repeated system prompts (brain context is often similar)
+            system: [{ type: "text" as const, text: effectiveSystemPrompt, cache_control: { type: "ephemeral" as const } }],
+            messages,
+            // Thread request abort signal so client disconnect cancels the Anthropic call
+            // and stops token consumption. Uses request.signal passed in from the outer scope.
+          }, { signal: request.signal as any });
+
+          // Safety: hard timeout — close stream if Anthropic takes >120s
+          const streamTimeout = setTimeout(() => {
+            try {
+              sendError("Response timed out after 120 seconds. Please try a shorter question.");
+              close();
+              anthropicStream.abort();
+            } catch { /* already closed */ }
+          }, 120_000);
+
+          try {
+            for await (const event of anthropicStream) {
+              if (
+                event.type === "content_block_delta" &&
+                event.delta.type === "text_delta"
+              ) {
+                streamedAssistantText += event.delta.text;
+                sendText(event.delta.text);
+              }
             }
+          } finally {
+            // Always clear the timeout — whether stream completed, errored, or client aborted.
+            // Without finally, a throw here leaks the 120s timer.
+            clearTimeout(streamTimeout);
           }
-        } finally {
-          // Always clear the timeout — whether stream completed, errored, or client aborted.
-          // Without finally, a throw here leaks the 120s timer.
-          clearTimeout(streamTimeout);
         }
 
         // ── Raw Capability Upgrade: post-stream quality scoring + entity persistence ──

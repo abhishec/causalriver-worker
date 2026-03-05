@@ -379,6 +379,53 @@ function buildGeneralTools(): ToolDef[] {
         required: ["prior_findings"],
       },
     },
+    {
+      name: "execute_python",
+      description: "Execute Python 3 code in a sandboxed environment (Piston API). Use for: math calculations, data processing, string manipulation, scientific computations. Use print() to output results. No file system or network access.",
+      input_schema: {
+        type: "object",
+        properties: {
+          code: { type: "string", description: "Python 3 code to execute. Use print() to output results." },
+          stdin: { type: "string", description: "Optional standard input to pass to the program" },
+        },
+        required: ["code"],
+      },
+    },
+    {
+      name: "calculator",
+      description: "Instantly evaluate a math expression. Supports: +,-,*,/,**(power),%, sqrt, sin, cos, tan, log, log2, log10, exp, floor, ceil, abs, PI, E. Use ^ for power. Faster than execute_python for simple math.",
+      input_schema: {
+        type: "object",
+        properties: {
+          expression: { type: "string", description: "Math expression, e.g. 'sqrt(144)', '2**10', 'sin(PI/2)'" },
+        },
+        required: ["expression"],
+      },
+    },
+    {
+      name: "browser_navigate",
+      description: "Navigate to a URL and extract the full page text + links via cloud browser. Use when you have a specific URL and need the full content (not just search snippets).",
+      input_schema: {
+        type: "object",
+        properties: {
+          url: { type: "string", description: "Full URL to navigate to (must start with https://)" },
+          wait_ms: { type: "number", description: "Milliseconds to wait for page load (default 3000, use 5000 for JS-heavy pages)" },
+        },
+        required: ["url"],
+      },
+    },
+    {
+      name: "analyze_image",
+      description: "Analyze an image for visual content, text, numbers, charts, or diagrams using Claude Vision. Provide an image URL or base64 data.",
+      input_schema: {
+        type: "object",
+        properties: {
+          image_url: { type: "string", description: "URL of the image to analyze" },
+          image_base64: { type: "string", description: "Base64-encoded image data" },
+          prompt: { type: "string", description: "Specific question about the image" },
+        },
+      },
+    },
   ];
 }
 
@@ -397,16 +444,22 @@ ${task.slice(0, 500)}
 - **keyword_search**: Fast exact/phrase search — use for specific terms, product names, dates, numbers
 - **web_search**: Search the web for current information, news, pricing, competitors
 - **browser_extract**: Navigate to a URL and extract page content (product pages, docs, articles)
+- **browser_navigate**: Navigate a URL via cloud browser and extract full text + links (JS-rendered pages)
 - **browser_screenshot**: Take a screenshot of a web page
+- **execute_python**: Run Python 3 code in a sandbox — use for math, data processing, computations
+- **calculator**: Instant arithmetic and scientific math — sqrt, sin, cos, log, PI, E, etc.
+- **analyze_image**: Analyze an image (URL or base64) for visual content, text, charts, diagrams
 - **write_memory**: Save important findings to the knowledge base for future use
 - **compress_context**: Summarize accumulated findings when context is getting long
 
 ## Research Strategy
 1. Start with internal knowledge (**search_corpus**, **search_knowledge**, **keyword_search**)
-2. Fill gaps with external sources (**web_search** + **browser_extract**)
+2. Fill gaps with external sources (**web_search** + **browser_navigate**)
 3. Cross-reference claims across multiple sources — don't rely on a single source
-4. Save key discoveries with **write_memory** so they persist for future queries
-5. Use **compress_context** when you've accumulated extensive notes
+4. For math or data problems: use **calculator** or **execute_python**
+5. For image analysis: use **analyze_image**
+6. Save key discoveries with **write_memory** so they persist for future queries
+7. Use **compress_context** when you've accumulated extensive notes
 
 ## Output Quality Standards
 Your final answer MUST be structured as a professional deliverable:
@@ -757,6 +810,44 @@ async function executeGeneralTool(
         } catch {
           return { compressed: false, message: "Compression failed — continue with existing context." };
         }
+      }
+      case "execute_python": {
+        // Sandbox Python execution via Piston API (no local Python required)
+        const { executePython } = await import("@/lib/tools/code-execution");
+        const code = String(input.code ?? "");
+        if (!code) return { error: "code is required" };
+        const result = await executePython(code, input.stdin ? String(input.stdin) : undefined);
+        return {
+          output: result.output,
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exit_code: result.exitCode,
+          error: result.error,
+        };
+      }
+      case "calculator": {
+        // Safe arithmetic/scientific expression evaluator
+        const { calculate } = await import("@/lib/tools/calculator");
+        const expression = String(input.expression ?? "");
+        if (!expression) return { error: "expression is required" };
+        return calculate(expression) as unknown as Record<string, unknown>;
+      }
+      case "browser_navigate": {
+        // Navigate URL + extract text/links via Browserless.io
+        const { browserNavigate } = await import("@/lib/tools/browser");
+        const url = String(input.url ?? "");
+        if (!url) return { error: "url is required" };
+        const waitMs = typeof input.wait_ms === "number" ? input.wait_ms : 3000;
+        return browserNavigate(url, waitMs) as unknown as Promise<Record<string, unknown>>;
+      }
+      case "analyze_image": {
+        // Claude Vision — analyze images from URL or base64
+        const { analyzeImage, analyzeImageUrl } = await import("@/lib/tools/vision");
+        const imageUrl = input.image_url ? String(input.image_url) : undefined;
+        const imageBase64 = input.image_base64 ? String(input.image_base64) : undefined;
+        if (imageUrl) return (await analyzeImageUrl(imageUrl, input.prompt ? String(input.prompt) : undefined)) as unknown as Record<string, unknown>;
+        if (imageBase64) return (await analyzeImage(imageBase64, "image/png", input.prompt ? String(input.prompt) : undefined)) as unknown as Record<string, unknown>;
+        return { error: "provide either image_url or image_base64" };
       }
       default:
         return { error: `Unknown tool: ${toolName}` };
