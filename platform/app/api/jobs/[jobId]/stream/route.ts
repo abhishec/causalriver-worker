@@ -86,12 +86,12 @@ export async function GET(
               : null,
           });
 
-          // Terminal states
-          if (current.status === "completed" || current.status === "failed") {
+          // Terminal states (including cancellation)
+          if (current.status === "completed" || current.status === "failed" || current.status === "cancelled") {
             send({
-              type: current.status === "completed" ? "complete" : "failed",
+              type: current.status === "completed" ? "complete" : current.status === "cancelled" ? "cancelled" : "failed",
               result: current.result,
-              error: current.error_message,
+              error: current.status === "cancelled" ? "Job cancelled" : current.error_message,
               elapsedMs,
             });
             break;

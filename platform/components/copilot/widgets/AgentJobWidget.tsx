@@ -18,10 +18,10 @@
  * }
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { WidgetProps } from "./widget-registry";
 
-type JobStatus = "pending" | "running" | "completed" | "failed" | "paused";
+type JobStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 interface JobProgress {
   status: JobStatus;
@@ -44,6 +44,7 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
 
   const [progress, setProgress] = useState<JobProgress>({ status: "pending" });
   const [streaming, setStreaming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -92,6 +93,10 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
           });
           setStreaming(false);
           evtSource.close();
+        } else if (msg.type === "progress" && msg.status === "cancelled") {
+          setProgress((prev) => ({ ...prev, status: "cancelled" }));
+          setStreaming(false);
+          evtSource.close();
         }
       } catch {
         // ignore parse errors
@@ -109,6 +114,20 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
     };
   }, [jobId]);
 
+  const handleCancel = useCallback(async () => {
+    if (!jobId || cancelling) return;
+    setCancelling(true);
+    try {
+      await fetch(`/api/jobs/${jobId}/cancel`, { method: "POST" });
+      setProgress((prev) => ({ ...prev, status: "cancelled" }));
+      setStreaming(false);
+    } catch {
+      // Ignore — widget will reflect state from SSE stream
+    } finally {
+      setCancelling(false);
+    }
+  }, [jobId]); // cancelling read via early return guard; setCancelling is stable
+
   const isActive = progress.status === "pending" || progress.status === "running";
   const elapsedSec = progress.elapsedMs ? Math.round(progress.elapsedMs / 1000) : 0;
 
@@ -118,7 +137,7 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
     running: "text-blue-400",
     completed: "text-emerald-400",
     failed: "text-red-400",
-    paused: "text-muted",
+    cancelled: "text-muted",
   };
 
   const output = progress.result?.output as string | undefined;
@@ -157,6 +176,16 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
           {elapsedSec > 0 && <span>{elapsedSec}s</span>}
           {toolCalls !== undefined && <span>{toolCalls} tool calls</span>}
           {subtasksCompleted !== undefined && <span>{subtasksCompleted} subtasks</span>}
+          {isActive && (
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="text-[10px] px-1.5 py-0.5 rounded text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+            >
+              {cancelling ? "Cancelling…" : "✕ Cancel"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -215,6 +244,13 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
       {progress.status === "pending" && (
         <div className="px-4 py-3 text-sm text-muted">
           Job queued — will start within ~2 minutes on the next cron tick.
+        </div>
+      )}
+
+      {/* Cancelled */}
+      {progress.status === "cancelled" && (
+        <div className="px-4 py-3 text-sm text-muted">
+          Job cancelled.
         </div>
       )}
 

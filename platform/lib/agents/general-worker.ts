@@ -189,8 +189,9 @@ export async function processGeneralJobs(
           .eq("id", job.id);
 
         // Record RL outcome with actual quality evaluation (not length heuristic)
-        void evaluateOutputQuality(taskDescription, agentResult.output, agentResult.toolCallCount).then((quality) =>
-          import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
+        void evaluateOutputQuality(taskDescription, agentResult.output, agentResult.toolCallCount).then(async (quality) => {
+          // 1. RL feedback loop
+          await import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
             recordAgentOutcome(supabase, {
               agentId: job.id,
               organizationId: job.organization_id,
@@ -203,8 +204,25 @@ export async function processGeneralJobs(
               executionMs: durationMs,
               modelId: "claude-haiku-4-5-20251001",
             })
-          )
-        ).catch(() => {});
+          );
+          // 2. Federated knowledge write-back — Brain L25-L29 learns from agent work
+          if (quality >= 0.5 && agentResult.output.length > 100) {
+            supabase.from("federated_knowledge").insert({
+              organization_id: job.organization_id,
+              domain: `general-agent.${String(job.task_type ?? "general")}`,
+              content: agentResult.output.slice(0, 4000),
+              confidence: quality,
+              metadata: {
+                jobId: job.id,
+                task: taskDescription.slice(0, 300),
+                toolsUsed: agentResult.toolsUsed,
+                toolCallCount: agentResult.toolCallCount,
+                source: "general-worker",
+                aiWorkerId: job.ai_worker_id ?? null,
+              },
+            }).then(() => {}, () => {}); // fire-and-forget, non-fatal
+          }
+        }).catch(() => {});
       }
 
       result.succeeded++;
@@ -409,26 +427,6 @@ async function runAgenticLoop(
       break;
     }
 
-    // Progress heartbeat every 3 turns — makes AgentJobWidget show live progress
-    if (turn % 3 === 0 && turn > 0) {
-      try {
-        const { getAdminClient } = await import("@/lib/supabase/admin");
-        await getAdminClient()
-          .from("agent_queue")
-          .update({
-            heartbeat_at: new Date().toISOString(),
-            checkpoint_data: {
-              currentStep: turn,
-              totalToolCalls: toolCallCount,
-              toolsUsed,
-              lastTool: toolsUsed[toolsUsed.length - 1] ?? null,
-              partialOutput: output.slice(0, 500),
-            },
-          })
-          .eq("id", job.id);
-      } catch { /* non-fatal — heartbeat failure should not crash the loop */ }
-    }
-
     const data = await callAnthropicWithRetry({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
@@ -469,6 +467,24 @@ async function runAgenticLoop(
     }
 
     messages.push({ role: "user", content: toolResults });
+
+    // Heartbeat after every tool execution batch — lastTool is always current
+    try {
+      const { getAdminClient } = await import("@/lib/supabase/admin");
+      await getAdminClient()
+        .from("agent_queue")
+        .update({
+          heartbeat_at: new Date().toISOString(),
+          checkpoint_data: {
+            currentStep: turn + 1,
+            totalToolCalls: toolCallCount,
+            toolsUsed,
+            lastTool: toolsUsed[toolsUsed.length - 1] ?? null,
+            partialOutput: output.slice(0, 500),
+          },
+        })
+        .eq("id", job.id);
+    } catch { /* non-fatal */ }
   }
 
   return { output, toolCallCount, toolsUsed };

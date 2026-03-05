@@ -402,6 +402,29 @@ export function detectGeneralTask(
     };
   }
 
+  // 7. Document ingestion / connector sync triggers
+  // "read my google drive", "ingest confluence", "scan my docs", "sync notion"
+  if (
+    /\b(ingest|import|sync|index|read\s+(?:from\s+|my\s+)?(?:google\s+drive|drive|confluence|notion|sharepoint|dropbox)|scan\s+(?:my\s+|our\s+)?(?:docs?|documents?|files?|google\s+drive|confluence)|load\s+(?:my\s+|our\s+)?docs?|add\s+(?:my\s+|our\s+)?docs?)\b/i.test(lower)
+  ) {
+    return {
+      task: `Discover and ingest documents from the user's connected sources. User request: "${message}"`,
+      agentType: "general",
+      urls,
+    };
+  }
+
+  // 8. Explicit "summarize all my docs / knowledge base" requests
+  if (
+    /\b(what(?:'s|\s+is)\s+in\s+(?:my\s+|our\s+)?(?:knowledge\s+base|kb|docs?|documents?|files?)|summarize\s+(?:all\s+)?(?:my\s+|our\s+)?(?:docs?|documents?|files?|knowledge))\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "general",
+      urls,
+    };
+  }
+
   return null;
 }
 

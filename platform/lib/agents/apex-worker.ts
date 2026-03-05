@@ -271,7 +271,8 @@ export async function processApexJobs(
           })
           .eq("id", job.id);
 
-        // RL outcome recording
+        // RL + federated knowledge write-back
+        const apexQuality = apexResult.subtasksCompleted > 0 ? 0.85 : 0.3;
         void import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
           recordAgentOutcome(supabase, {
             agentId: job.id,
@@ -281,11 +282,28 @@ export async function processApexJobs(
             domain: "apex",
             taskDescription,
             resultSummary: apexResult.synthesis?.slice(0, 500) ?? "",
-            quality: apexResult.subtasksCompleted > 0 ? 0.85 : 0.3,
+            quality: apexQuality,
             executionMs: durationMs,
             modelId: "claude-haiku-4-5-20251001",
           })
         ).catch(() => {});
+        // Federated knowledge write-back — APEX synthesis feeds Brain L25-L29
+        if (apexResult.synthesis && apexQuality >= 0.5) {
+          supabase.from("federated_knowledge").insert({
+            organization_id: job.organization_id,
+            domain: `apex-agent.${String(job.task_type ?? "research")}`,
+            content: apexResult.synthesis.slice(0, 4000),
+            confidence: apexQuality,
+            metadata: {
+              jobId: job.id,
+              task: taskDescription.slice(0, 300),
+              subtasksCompleted: apexResult.subtasksCompleted,
+              toolCallCount: apexResult.toolCallCount,
+              source: "apex-worker",
+              aiWorkerId: job.ai_worker_id ?? null,
+            },
+          }).then(() => {}, () => {}); // fire-and-forget, non-fatal
+        }
       }
 
       result.succeeded++;
@@ -394,6 +412,26 @@ async function runApexFsm(
     );
     toolCallCount += subtaskResult.toolCallCount;
     turnsSinceCompression += subtaskResult.turnCount;
+
+    // Update heartbeat with lastTool from subtask execution (not null)
+    if (subtaskResult.lastToolUsed) {
+      try {
+        await adminSupabase
+          .from("agent_queue")
+          .update({
+            heartbeat_at: new Date().toISOString(),
+            checkpoint_data: {
+              currentStep: currentSubtaskIndex + 1,
+              totalSteps: subtasks.length,
+              phase: `EXECUTING_SUBTASK_${currentSubtaskIndex + 1}`,
+              currentSubtaskGoal: subtask.goal.slice(0, 100),
+              totalToolCalls: toolCallCount,
+              lastTool: subtaskResult.lastToolUsed,
+            },
+          })
+          .eq("id", job.id);
+      } catch { /* non-fatal */ }
+    }
 
     // Context compression every N turns
     if (turnsSinceCompression >= COMPRESSION_TURN_INTERVAL) {
@@ -506,6 +544,7 @@ interface SubtaskExecutionResult {
   output: string;
   toolCallCount: number;
   turnCount: number;
+  lastToolUsed: string | null;
 }
 
 async function executeSubtask(
@@ -524,6 +563,7 @@ async function executeSubtask(
   let output = "";
   let toolCallCount = 0;
   let turnCount = 0;
+  let lastToolUsed: string | null = null;
   const MAX_SUBTASK_TURNS = 8;
 
   for (let turn = 0; turn < MAX_SUBTASK_TURNS; turn++) {
@@ -550,6 +590,7 @@ async function executeSubtask(
     const toolResults: Array<{ type: string; tool_use_id: string; content: string }> = [];
     for (const toolCall of toolUseBlocks) {
       toolCallCount++;
+      if (toolCall.name) lastToolUsed = toolCall.name;
       const toolResult = await executeApexTool(toolCall.name ?? "", toolCall.input ?? {}, job);
       toolResults.push({
         type: "tool_result",
@@ -561,7 +602,7 @@ async function executeSubtask(
     messages.push({ role: "user", content: toolResults });
   }
 
-  return { output, toolCallCount, turnCount };
+  return { output, toolCallCount, turnCount, lastToolUsed };
 }
 
 // ── Context Compressor ────────────────────────────────────────────────────────
