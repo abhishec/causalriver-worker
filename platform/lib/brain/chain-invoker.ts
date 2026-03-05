@@ -173,7 +173,20 @@ export async function checkpointAndChain(
   checkpointData: object,
   chainDepth: number
 ): Promise<string> {
-  // Mark parent as paused with checkpoint (saveDeepCheckpoint does this)
+  // ⚠ CRITICAL: Check depth BEFORE pausing the parent.
+  // chainContinuation() also checks, but if it throws AFTER we paused,
+  // the parent gets stuck in "paused" with no child job to resume it.
+  // By checking here first, the parent stays in "running" and the caller
+  // can mark it "failed" with a clear error message.
+  if (chainDepth >= MAX_CHAIN_DEPTH) {
+    throw new Error(
+      `[chain-invoker] Max chain depth (${MAX_CHAIN_DEPTH}) reached for job ${jobId}. ` +
+      `Job has been running for ~${Math.round((chainDepth * LAMBDA_BUDGET_MS) / 60_000)} minutes. ` +
+      `Stopping to prevent infinite execution.`
+    );
+  }
+
+  // Mark parent as paused with checkpoint
   const { error: pauseError } = await supabase
     .from("agent_queue")
     .update({

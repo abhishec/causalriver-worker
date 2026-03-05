@@ -519,7 +519,21 @@ async function runAgenticLoop(
         toolsUsed.push(toolCall.name);
       }
 
-      const toolResult = await executeGeneralTool(toolCall.name ?? "", toolCall.input ?? {}, job);
+      // Per-tool timeout: browser ops get 20s, everything else 12s
+      // Prevents hung fetches from stalling the entire Lambda
+      const toolTimeoutMs = (toolCall.name === "browser_extract" || toolCall.name === "browser_screenshot") ? 20_000 : 12_000;
+      const toolResult = await Promise.race([
+        executeGeneralTool(toolCall.name ?? "", toolCall.input ?? {}, job),
+        new Promise<Record<string, unknown>>((resolve) =>
+          setTimeout(() => resolve({ error: `Tool timeout after ${toolTimeoutMs / 1000}s` }), toolTimeoutMs)
+        ),
+      ]);
+
+      // Log tool failures for observability — agents can silently degrade otherwise
+      if (toolResult.error) {
+        logger.warn(`[general-worker] Tool ${toolCall.name} failed`, { error: toolResult.error, jobId: job.id });
+      }
+
       toolResults.push({
         type: "tool_result",
         tool_use_id: toolCall.id ?? "",
@@ -537,12 +551,16 @@ async function runAgenticLoop(
 
     messages.push({ role: "user", content: toolResults });
 
-    // Context pruning every 15 turns — keep task anchor + last 20 messages to prevent overflow
+    // Context pruning every 15 turns — keep task anchor (index 0) + last 20 messages
     const COMPRESSION_TURN_INTERVAL = 15;
-    if (turn > 0 && (turn + 1) % COMPRESSION_TURN_INTERVAL === 0 && messages.length > 22) {
-      // splice(1, N) removes N elements starting at index 1 — messages[0] (task anchor) stays
-      messages.splice(1, messages.length - 21);
-      logger.warn(`[general-worker] Turn ${turn + 1}: pruned messages to ${messages.length} (context management)`);
+    const MAX_HISTORY = 20;
+    if (turn > 0 && (turn + 1) % COMPRESSION_TURN_INTERVAL === 0 && messages.length > MAX_HISTORY + 1) {
+      // Keep messages[0] (task anchor) + the last MAX_HISTORY messages
+      const anchor = messages[0];
+      const recent = messages.slice(-MAX_HISTORY);
+      messages.length = 0;
+      messages.push(anchor, ...recent);
+      logger.warn(`[general-worker] Turn ${turn + 1}: pruned to ${messages.length} messages (context management)`);
     }
 
     // Heartbeat after every tool execution batch — lastTool is always current

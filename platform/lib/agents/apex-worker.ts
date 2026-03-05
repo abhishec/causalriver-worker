@@ -661,7 +661,17 @@ async function executeSubtask(
     for (const toolCall of cappedToolCalls) {
       toolCallCount++;
       if (toolCall.name) lastToolUsed = toolCall.name;
-      const toolResult = await executeApexTool(toolCall.name ?? "", toolCall.input ?? {}, job);
+      // Per-tool timeout — prevents hung fetches from blocking APEX subtask execution
+      const toolTimeoutMs = (toolCall.name === "browser_extract" || toolCall.name === "browser_screenshot") ? 20_000 : 12_000;
+      const toolResult = await Promise.race([
+        executeApexTool(toolCall.name ?? "", toolCall.input ?? {}, job),
+        new Promise<Record<string, unknown>>((resolve) =>
+          setTimeout(() => resolve({ error: `Tool timeout after ${toolTimeoutMs / 1000}s` }), toolTimeoutMs)
+        ),
+      ]);
+      if (toolResult.error) {
+        logger.warn(`[apex-worker] Tool ${toolCall.name} failed`, { error: toolResult.error, jobId: job.id });
+      }
       toolResults.push({
         type: "tool_result",
         tool_use_id: toolCall.id ?? "",
@@ -729,7 +739,9 @@ async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob
   if (!ANTHROPIC_API_KEY) return completedWork;
 
   try {
-    const synthesisModel = String(job.payload.synthesisModel ?? "claude-haiku-4-5-20251001");
+    // Default to Sonnet for synthesis — Haiku struggles with structured executive reports.
+    // Can be overridden per-job via payload.synthesisModel for cost-sensitive cases.
+    const synthesisModel = String(job.payload.synthesisModel ?? "claude-3-5-sonnet-20241022");
     const data = await callApexWithRetry({
       model: synthesisModel,
       max_tokens: 4096,
@@ -771,8 +783,10 @@ Bullet list of all documents, URLs, and knowledge base items referenced.
       }],
     });
     return data.content.find((b) => b.type === "text")?.text ?? completedWork;
-  } catch {
-    return completedWork;
+  } catch (err) {
+    // Synthesis failed — return partial results with a clear indicator so user knows
+    logger.error("[apex-worker] Synthesis failed, returning partial results", { error: err });
+    return `${completedWork}\n\n---\n\n> ⚠ **Note:** Final synthesis could not be generated due to a temporary error. The individual research phase results above contain all findings.`;
   }
 }
 

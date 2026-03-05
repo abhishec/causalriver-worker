@@ -233,81 +233,129 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
   const [streaming, setStreaming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  // SSE reconnection state — counts how many times we've reconnected
+  const reconnectAttemptsRef = React.useRef(0);
+  const reconnectTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track when streaming started for ETA computation
+  const streamStartMsRef = React.useRef<number>(0);
 
   useEffect(() => {
     if (!jobId) return;
 
-    setStreaming(true);
-    const evtSource = new EventSource(`/api/jobs/${jobId}/stream`);
+    // Terminal states skip streaming altogether
+    const alreadyTerminal = progress.status === "completed" || progress.status === "failed" || progress.status === "cancelled";
+    if (alreadyTerminal) return;
 
-    evtSource.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data) as {
-          type?: string;
-          status?: string;
-          step?: string;
-          progress?: number;
-          elapsedMs?: number;
-          result?: Record<string, unknown>;
-          error?: string;
-        };
+    let evtSource: EventSource | null = null;
+    let closed = false;
 
-        if (msg.type === "progress") {
-          const m = msg as Record<string, unknown>;
-          setProgress({
-            status: (msg.status as JobStatus) ?? "running",
-            step: msg.step ?? null,
-            phase: m.phase as string | null ?? null,
-            totalSteps: m.totalSteps as number | null ?? null,
-            currentSubtaskGoal: m.currentSubtaskGoal as string | null ?? null,
-            lastTool: m.lastTool as string | null ?? null,
-            totalToolCalls: m.totalToolCalls as number | null ?? null,
-            partialOutput: m.partialOutput as string | null ?? null,
-            heartbeatAge: m.heartbeatAge as number | null ?? null,
-            progress: msg.progress ?? null,
-            elapsedMs: msg.elapsedMs,
-          });
-        } else if (msg.type === "complete") {
-          setProgress({
-            status: "completed",
-            result: msg.result ?? null,
-            elapsedMs: msg.elapsedMs,
-          });
-          setStreaming(false);
-          evtSource.close();
-        } else if (msg.type === "failed") {
-          setProgress({
-            status: "failed",
-            error: msg.error ?? "Agent job failed",
-            elapsedMs: msg.elapsedMs,
-          });
-          setStreaming(false);
-          evtSource.close();
-        } else if (msg.type === "progress" && msg.status === "cancelled") {
-          setProgress((prev) => ({ ...prev, status: "cancelled" }));
-          setStreaming(false);
-          evtSource.close();
-        } else if (msg.type === "paused") {
-          const m = msg as Record<string, unknown>;
-          setProgress((prev) => ({ ...prev, status: "paused", step: m.childJobId as string | null ?? null }));
-          setStreaming(false);
-          evtSource.close();
+    const MAX_RECONNECT_ATTEMPTS = 5;
+
+    const connect = () => {
+      if (closed) return;
+      evtSource = new EventSource(`/api/jobs/${jobId}/stream`);
+      setStreaming(true);
+      if (streamStartMsRef.current === 0) streamStartMsRef.current = Date.now();
+
+      evtSource.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data) as {
+            type?: string;
+            status?: string;
+            step?: string;
+            progress?: number;
+            elapsedMs?: number;
+            result?: Record<string, unknown>;
+            error?: string;
+          };
+
+          // Reset reconnect counter on any successful message
+          reconnectAttemptsRef.current = 0;
+
+          if (msg.type === "progress") {
+            const m = msg as Record<string, unknown>;
+            setProgress({
+              status: (msg.status as JobStatus) ?? "running",
+              step: msg.step ?? null,
+              phase: m.phase as string | null ?? null,
+              totalSteps: m.totalSteps as number | null ?? null,
+              currentSubtaskGoal: m.currentSubtaskGoal as string | null ?? null,
+              lastTool: m.lastTool as string | null ?? null,
+              totalToolCalls: m.totalToolCalls as number | null ?? null,
+              partialOutput: m.partialOutput as string | null ?? null,
+              heartbeatAge: m.heartbeatAge as number | null ?? null,
+              progress: msg.progress ?? null,
+              elapsedMs: msg.elapsedMs,
+            });
+          } else if (msg.type === "complete") {
+            setProgress({ status: "completed", result: msg.result ?? null, elapsedMs: msg.elapsedMs });
+            closed = true;
+            evtSource?.close();
+            setStreaming(false);
+          } else if (msg.type === "failed") {
+            setProgress({ status: "failed", error: msg.error ?? "Agent job failed", elapsedMs: msg.elapsedMs });
+            closed = true;
+            evtSource?.close();
+            setStreaming(false);
+          } else if (msg.type === "cancelled") {
+            setProgress((prev) => ({ ...prev, status: "cancelled" }));
+            closed = true;
+            evtSource?.close();
+            setStreaming(false);
+          } else if (msg.type === "paused") {
+            const m = msg as Record<string, unknown>;
+            setProgress((prev) => ({ ...prev, status: "paused", step: m.childJobId as string | null ?? null }));
+            closed = true;
+            evtSource?.close();
+            setStreaming(false);
+          } else if (msg.type === "timeout") {
+            // Server-side timeout (12min SSE limit) — reconnect to keep tracking
+            evtSource?.close();
+            scheduleReconnect();
+          }
+        } catch {
+          // ignore parse errors
         }
-      } catch {
-        // ignore parse errors
-      }
+      };
+
+      evtSource.onerror = () => {
+        evtSource?.close();
+        scheduleReconnect();
+      };
     };
 
-    evtSource.onerror = () => {
+    const scheduleReconnect = () => {
+      if (closed) return;
+      const attempt = reconnectAttemptsRef.current;
+      if (attempt >= MAX_RECONNECT_ATTEMPTS) {
+        // Exhausted reconnects — surface stale indicator but don't crash
+        setStreaming(false);
+        return;
+      }
+      reconnectAttemptsRef.current = attempt + 1;
+      // Exponential backoff: 2s, 4s, 8s, 16s, 32s
+      const backoffMs = Math.min(2000 * Math.pow(2, attempt), 32_000);
       setStreaming(false);
-      evtSource.close();
+      reconnectTimerRef.current = setTimeout(() => {
+        if (!closed) {
+          setStreaming(true);
+          connect();
+        }
+      }, backoffMs);
     };
+
+    connect();
 
     return () => {
-      evtSource.close();
+      closed = true;
+      evtSource?.close();
       setStreaming(false);
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
     };
-  }, [jobId]);
+  }, [jobId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = useCallback(async () => {
     if (!jobId || cancelling) return;
@@ -352,6 +400,19 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
   const output = progress.result?.output as string | undefined;
   const subtasksCompleted = progress.result?.subtasksCompleted as number | undefined;
 
+  const handleDownload = useCallback(() => {
+    if (!output) return;
+    const slug = task.slice(0, 40).replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+    const filename = `${slug || "agent-report"}.md`;
+    const blob = new Blob([output], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [output, task]);
+
   // Activity description in business language
   const activityLabel = progress.lastTool
     ? (ACTIVITY_LABELS[progress.lastTool] ?? `Using ${progress.lastTool}`)
@@ -365,6 +426,17 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
   const progressPct = progress.totalSteps && progress.step
     ? Math.round((Number(progress.step) / Number(progress.totalSteps)) * 100)
     : null;
+
+  // Estimated time remaining (APEX agents only, needs ≥5% done for accuracy)
+  const etaLabel = useMemo(() => {
+    if (!isActive || progressPct == null || progressPct < 5 || !progress.elapsedMs) return null;
+    const remainingPct = 100 - progressPct;
+    const msPerPct = progress.elapsedMs / progressPct;
+    const remainingSec = Math.round((remainingPct * msPerPct) / 1000);
+    if (remainingSec < 15) return null; // don't show noise when almost done
+    if (remainingSec >= 60) return `~${Math.ceil(remainingSec / 60)}m remaining`;
+    return `~${Math.ceil(remainingSec / 10) * 10}s remaining`;
+  }, [isActive, progressPct, progress.elapsedMs]);
 
   // Memoize rendered markdown for result
   const renderedOutput = useMemo(() => {
@@ -395,6 +467,7 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
         </div>
         <div className="flex items-center gap-3 text-xs text-muted">
           {elapsedLabel && <span>{elapsedLabel}</span>}
+          {etaLabel && <span className="text-blue-400/80">{etaLabel}</span>}
           {isStale && <span className="text-amber-400 font-medium">reconnecting…</span>}
           {progress.status === "completed" && subtasksCompleted !== undefined && (
             <span>{subtasksCompleted} research phases</span>
@@ -410,13 +483,23 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
             </button>
           )}
           {progress.status === "completed" && output && (
-            <button
-              type="button"
-              onClick={() => setExpanded(!expanded)}
-              className="text-[10px] px-1.5 py-0.5 rounded text-muted hover:text-foreground hover:bg-surface/60 transition-colors"
-            >
-              {expanded ? "Collapse" : "Expand"}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="text-[10px] px-1.5 py-0.5 rounded text-emerald-400 hover:bg-emerald-400/10 transition-colors"
+                title="Download report as Markdown"
+              >
+                ↓ Export
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="text-[10px] px-1.5 py-0.5 rounded text-muted hover:text-foreground hover:bg-surface/60 transition-colors"
+              >
+                {expanded ? "Collapse" : "Expand"}
+              </button>
+            </>
           )}
         </div>
       </div>

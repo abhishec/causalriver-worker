@@ -543,9 +543,34 @@ function executeInject(
   };
 }
 
+// ── Exponential backoff helper for external API calls ────────────────────────
+// Retries on 429 (rate limit) and 5xx (transient server errors).
+// Brave and Browserless both return 429 during high-traffic periods.
+
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  maxRetries = 2,
+): Promise<Response> {
+  const delays = [1000, 2000];
+  let lastResp: Response | null = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const resp = await fetch(url, init);
+    if (resp.ok) return resp;
+    if ((resp.status === 429 || resp.status >= 500) && attempt < maxRetries) {
+      lastResp = resp;
+      await new Promise((r) => setTimeout(r, delays[attempt] + Math.random() * 200));
+      continue;
+    }
+    return resp; // non-retryable error — return as-is so caller handles it
+  }
+  return lastResp!;
+}
+
 /**
  * web_search — Enterprise real-time web search via Brave Search API.
  * Returns structured search results (title, url, description).
+ * Retries 2× on 429/5xx with 1s/2s backoff.
  */
 async function executeWebSearch(
   params: WebSearchPrimitiveParams,
@@ -556,7 +581,7 @@ async function executeWebSearch(
 
   try {
     const count = Math.min(params.limit ?? 5, 20);
-    const resp = await fetch(
+    const resp = await fetchWithRetry(
       `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(params.query)}&count=${count}`,
       {
         headers: {
@@ -567,7 +592,7 @@ async function executeWebSearch(
     );
 
     if (!resp.ok) {
-      logger.warn("[primitive:web_search] Brave API error", { status: resp.status });
+      logger.warn("[primitive:web_search] Brave API error after retries", { status: resp.status });
       return { results: [], error: `Brave Search API error ${resp.status}` };
     }
 
@@ -593,6 +618,7 @@ async function executeWebSearch(
  * browser — Cloud browser automation via Browserless.io.
  * Lambda-compatible (no local Chromium needed).
  * Supports: navigate/extract (HTML content), screenshot (base64 image).
+ * Retries 2× on 429/5xx with 1s/2s backoff.
  */
 async function executeBrowser(
   params: BrowserPrimitiveParams,
@@ -605,7 +631,8 @@ async function executeBrowser(
 
   try {
     if (action === "navigate" || action === "extract") {
-      const resp = await fetch(
+      // Browserless uses token as query param (their API design, not a security concern)
+      const resp = await fetchWithRetry(
         `https://chrome.browserless.io/content?token=${BROWSERLESS_API_KEY}`,
         {
           method: "POST",
@@ -615,15 +642,19 @@ async function executeBrowser(
       );
 
       if (!resp.ok) {
+        logger.warn("[primitive:browser] Extract API error after retries", { status: resp.status, url });
         return { error: `Browserless content API error ${resp.status}` };
       }
 
       const html = await resp.text();
-      return { html: html.slice(0, 50_000), truncated: html.length > 50_000 };
+      if (html.length > 50_000) {
+        logger.warn("[primitive:browser] HTML truncated", { originalSize: html.length, url });
+      }
+      return { html: html.slice(0, 50_000), truncated: html.length > 50_000, originalSize: html.length };
     }
 
     if (action === "screenshot") {
-      const resp = await fetch(
+      const resp = await fetchWithRetry(
         `https://chrome.browserless.io/screenshot?token=${BROWSERLESS_API_KEY}`,
         {
           method: "POST",
@@ -633,6 +664,7 @@ async function executeBrowser(
       );
 
       if (!resp.ok) {
+        logger.warn("[primitive:browser] Screenshot API error after retries", { status: resp.status, url });
         return { error: `Browserless screenshot API error ${resp.status}` };
       }
 
