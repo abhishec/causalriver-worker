@@ -136,10 +136,11 @@ export async function processGeneralJobs(
     const startMs = Date.now();
 
     try {
-      // Mark as running
+      // Mark as running — guard with status='pending' to prevent double-claim
       await supabase.from("agent_queue")
         .update({ status: "running", started_at: new Date().toISOString(), heartbeat_at: new Date().toISOString() })
-        .eq("id", job.id);
+        .eq("id", job.id)
+        .eq("status", "pending");
 
       // Restore from checkpoint if this is a chain-continuation
       const checkpoint = job.payload.checkpoint as Record<string, unknown> | undefined;

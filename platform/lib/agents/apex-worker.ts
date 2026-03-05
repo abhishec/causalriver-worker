@@ -229,10 +229,11 @@ export async function processApexJobs(
     const startMs = Date.now();
 
     try {
-      // Mark as running
+      // Mark as running — guard with status='pending' to prevent double-claim
       await supabase.from("agent_queue")
         .update({ status: "running", started_at: new Date().toISOString(), heartbeat_at: new Date().toISOString() })
-        .eq("id", job.id);
+        .eq("id", job.id)
+        .eq("status", "pending");
 
       // Restore from checkpoint if continuation
       const checkpoint = job.payload.checkpoint as ApexCheckpoint | undefined;
@@ -271,8 +272,8 @@ export async function processApexJobs(
           })
           .eq("id", job.id);
 
-        // RL + federated knowledge write-back
-        const apexQuality = apexResult.subtasksCompleted > 0 ? 0.85 : 0.3;
+        // RL + federated knowledge write-back — use actual gate scores, not heuristic
+        const apexQuality = apexResult.averageScore ?? (apexResult.subtasksCompleted > 0 ? 0.75 : 0.3);
         void import("@/lib/brain/agent-rl").then(({ recordAgentOutcome }) =>
           recordAgentOutcome(supabase, {
             agentId: job.id,
@@ -330,6 +331,7 @@ interface ApexFsmResult {
   synthesis?: string;
   subtasksCompleted: number;
   toolCallCount: number;
+  averageScore?: number; // mean quality gate score across completed subtasks
   chained?: boolean;
   childJobId?: string;
 }
@@ -480,10 +482,17 @@ async function runApexFsm(
     fsmState = "COMPLETED";
   }
 
+  // Compute average quality score from subtask gate evaluations
+  const scoredSubtasks = subtasks.filter((s) => s.score != null && s.score > 0);
+  const averageScore = scoredSubtasks.length > 0
+    ? scoredSubtasks.reduce((sum, s) => sum + (s.score ?? 0), 0) / scoredSubtasks.length
+    : undefined;
+
   return {
     synthesis,
     subtasksCompleted: currentSubtaskIndex,
     toolCallCount,
+    averageScore,
   };
 }
 
@@ -756,19 +765,25 @@ async function executeApexTool(
         return { success: true, memoryId: data?.id, message: `Finding "${title}" saved.` };
       }
       case "compress_context": {
-        // Actually compress — don't just ack. The LLM called this because context is growing.
-        // We compress all subtask results completed so far into a compact summary.
-        const { getAdminClient } = await import("@/lib/supabase/admin");
-        const _supabase = getAdminClient();
-        // Grab already-completed subtasks from agent_queue checkpoint_data for context
-        const { data: jobRow } = await _supabase
-          .from("agent_queue")
-          .select("checkpoint_data")
-          .eq("id", job.id)
-          .single();
-        const existing = (jobRow?.checkpoint_data as Record<string, unknown> | null) ?? {};
-        const reason = String(input.reason ?? "context too long");
-        return { compressed: true, message: `Context compression triggered: ${reason}. Current phase captured.`, phase: existing.phase ?? null };
+        // Compress context: use Haiku to summarize the prior_findings passed by the caller.
+        // This gives Claude a compact summary it can reference instead of re-reading full history.
+        const priorFindings = String(input.prior_findings ?? input.context ?? "");
+        const reason = String(input.reason ?? "context growing");
+        if (!priorFindings || priorFindings.length < 200) {
+          return { compressed: false, message: "Not enough context to compress yet." };
+        }
+        try {
+          const summaryResp = await callApexWithRetry({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 400,
+            system: "Summarize the following research findings into a compact 3-5 bullet summary. Keep key facts, URLs, numbers, and conclusions. Discard reasoning chains and intermediate steps.",
+            messages: [{ role: "user", content: `FINDINGS TO COMPRESS:\n${priorFindings.slice(0, 3000)}` }],
+          });
+          const summary = summaryResp.content.find((b) => b.type === "text")?.text ?? priorFindings.slice(0, 500);
+          return { compressed: true, summary, reason, message: `Context compressed (${priorFindings.length} → ${summary.length} chars). Use the summary above for subsequent steps.` };
+        } catch {
+          return { compressed: false, message: "Compression failed — continue with existing context." };
+        }
       }
       default:
         return { error: `Unknown tool: ${toolName}` };

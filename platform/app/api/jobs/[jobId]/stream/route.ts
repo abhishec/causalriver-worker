@@ -45,8 +45,8 @@ export async function GET(
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
       };
 
-      // Poll every 5 seconds, max 30 minutes
-      const MAX_POLL_MS = 30 * 60 * 1000;
+      // Poll every 5 seconds, max 12 minutes (fits AWS Lambda/Amplify SSR limits)
+      const MAX_POLL_MS = 12 * 60 * 1000;
       const POLL_INTERVAL_MS = 5000;
 
       let lastStatus = "";
