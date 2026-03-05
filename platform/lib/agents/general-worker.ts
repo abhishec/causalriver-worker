@@ -358,19 +358,23 @@ Complete the following task thoroughly and accurately using the available tools:
 "${task.slice(0, 300)}"
 
 ## Available Tools
+- **search_corpus**: Semantic search in the workspace knowledge base (PDFs, Confluence, Drive docs) — use this FIRST
+- **search_knowledge**: Search structured knowledge (product features, pricing, capabilities, integrations)
+- **keyword_search**: Fast exact/phrase search in the knowledge base — use for known terms, product names, dates
 - **web_search**: Search the web for current information, news, pricing, features, competitors
 - **browser_extract**: Navigate to a URL and extract full page text (product pages, docs, articles)
 - **browser_screenshot**: Take a screenshot of a web page
-- **search_corpus**: Search the workspace knowledge base (uploaded PDFs, Confluence, Google Drive docs) using semantic search — use this FIRST for internal knowledge
-- **search_knowledge**: Search structured knowledge extracted from documents (product features, pricing tiers, capabilities, integrations)
+- **write_memory**: Persist important findings to the workspace knowledge base for future use
+- **compress_context**: Summarize accumulated findings when context is getting long — keeps you efficient
 
 ## Instructions
-1. Start with **search_corpus** and **search_knowledge** for internal knowledge before going external
-2. Use **web_search** for current market data, competitor info, or anything not in the knowledge base
-3. Use **browser_extract** to read specific pages in full depth
-4. Be thorough — cover all angles of the task before responding
-5. Cite sources (document names, URLs) when making factual claims
-6. Structure your final answer clearly with headers, bullet points, tables where appropriate
+1. Start with **search_corpus**, **search_knowledge**, and **keyword_search** for internal knowledge
+2. Use **web_search** + **browser_extract** for current market data or anything not in the knowledge base
+3. Use **write_memory** to save key discoveries (competitor pricing, product facts, market data)
+4. Use **compress_context** if you've accumulated a lot of information — pass prior findings to compress
+5. Be thorough — cover all angles of the task before responding
+6. Cite sources (document names, URLs) when making factual claims
+7. Structure your final answer clearly with headers, bullet points, tables where appropriate
 
 ## Context
 - Organization: ${job.organization_id}

@@ -656,9 +656,20 @@ async function compressSubtaskResults(completedSubtasks: Subtask[], originalTask
 // ── Synthesizer ───────────────────────────────────────────────────────────────
 
 async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob): Promise<string> {
+  // Separate passed from escalated subtasks — synthesis prompt handles them differently
+  const escalated = subtasks.filter((s) => s.verdict === "ESCALATE");
   const completedWork = subtasks
-    .map((s) => `## Subtask ${s.index + 1}: ${s.goal}\nStatus: ${s.verdict ?? "PASS"} (score: ${s.score?.toFixed(2) ?? "N/A"})\n${s.result ?? "No result"}`)
+    .map((s) => {
+      const statusLabel = s.verdict === "ESCALATE"
+        ? `⚠ ESCALATED (quality gate failed after ${s.attempts} attempts, score: ${s.score?.toFixed(2) ?? "N/A"})`
+        : `✓ PASS (score: ${s.score?.toFixed(2) ?? "N/A"})`;
+      return `## Subtask ${s.index + 1}: ${s.goal}\nStatus: ${statusLabel}\n${s.result ?? "No result"}`;
+    })
     .join("\n\n---\n\n");
+
+  const escalationNote = escalated.length > 0
+    ? `\n\nNOTE: ${escalated.length} subtask(s) were ESCALATED (quality gate failures). Address gaps in these areas explicitly and note uncertainty where coverage is incomplete.`
+    : "";
 
   if (!ANTHROPIC_API_KEY) return completedWork;
 
@@ -669,7 +680,7 @@ async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob
       system: `You are a senior analyst synthesizing research into a final, comprehensive report. Be structured, insightful, and actionable. Organization: ${job.organization_id}`,
       messages: [{
         role: "user",
-        content: `Synthesize these subtask results into a comprehensive final answer for the original task.\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProvide a well-structured, comprehensive synthesis that directly answers the original task.`,
+        content: `Synthesize these subtask results into a comprehensive final answer for the original task.${escalationNote}\n\nORIGINAL TASK: ${task}\n\n${completedWork}\n\nProvide a well-structured, comprehensive synthesis that directly answers the original task. For any ESCALATED subtasks, acknowledge the gap and provide the best available partial answer.`,
       }],
     });
     return data.content.find((b) => b.type === "text")?.text ?? completedWork;
