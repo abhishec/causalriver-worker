@@ -14,7 +14,7 @@
  * is continuously improving through OpenClaw's daemon architecture.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -165,16 +165,22 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
   const [connectForm, setConnectForm] = useState({ gatewayUrl: "", authToken: "" });
   const [showConnect, setShowConnect] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  // Track the in-flight AbortController so we can cancel on unmount or re-fetch
+  const fetchAbortRef = useRef<AbortController | null>(null);
 
   // ── Fetch gateway status + services ───────────────────────────────────
   const fetchAll = useCallback(async () => {
     if (!organizationId) return;
+    // Cancel any previous in-flight fetch before starting a new one
+    fetchAbortRef.current?.abort();
+    fetchAbortRef.current = new AbortController();
+    const { signal } = fetchAbortRef.current;
     try {
       // Fetch status, services, and RL status in parallel
       const [statusRes, servicesRes, rlRes] = await Promise.all([
-        fetch(`/api/openclaw/status?organizationId=${organizationId}`),
-        fetch(`/api/openclaw/services?organizationId=${organizationId}`),
-        fetch(`/api/brain/rl-status`),
+        fetch(`/api/openclaw/status?organizationId=${organizationId}`, { signal }),
+        fetch(`/api/openclaw/services?organizationId=${organizationId}`, { signal }),
+        fetch(`/api/brain/rl-status`, { signal }),
       ]);
 
       if (statusRes.ok) {
@@ -191,7 +197,9 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
         const data = await rlRes.json();
         setRlStatus(data);
       }
-    } catch {
+    } catch (err) {
+      // AbortError is expected on unmount/re-fetch — don't log
+      if (err instanceof Error && err.name === "AbortError") return;
       // Silent fail — panel is non-critical
     } finally {
       setLoading(false);
@@ -202,7 +210,11 @@ export function OpenClawPanel({ organizationId, className }: OpenClawPanelProps)
     fetchAll();
     // Poll every 30 seconds
     const interval = setInterval(fetchAll, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Cancel any in-flight fetch on unmount to prevent setState on dead component
+      fetchAbortRef.current?.abort();
+    };
   }, [fetchAll]);
 
   // ── Derive reinforcement stats from service data ──────────────────────

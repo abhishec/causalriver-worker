@@ -30,18 +30,24 @@ export const maxDuration = 120;
 function createSSEStream() {
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController | null = null;
+  let aborted = false;
 
   const stream = new ReadableStream({
     start(c) {
       controller = c;
     },
+    cancel() {
+      // Client disconnected — set flag so the IIFE can bail early
+      aborted = true;
+    },
   });
 
   const send = (data: string) => {
+    if (aborted) return; // Don't enqueue after client disconnect
     try {
       controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
     } catch {
-      // Stream may be closed
+      aborted = true; // Stream already closed
     }
   };
 
@@ -58,7 +64,10 @@ function createSSEStream() {
     }
   };
 
-  return { stream, send, sendJSON, close };
+  /** Returns true if the client has disconnected */
+  const isAborted = () => aborted;
+
+  return { stream, send, sendJSON, close, isAborted };
 }
 
 // ── Main Route Handler ──────────────────────────────────────────────────────
@@ -147,12 +156,15 @@ export async function POST(request: NextRequest) {
     }
 
     // ── SSE Stream ──────────────────────────────────────────────────────
-    const { stream, sendJSON, close } = createSSEStream();
+    const { stream, sendJSON, close, isAborted } = createSSEStream();
 
     // Fire-and-stream: run async while SSE pushes events
     (async () => {
       try {
         // ── Phase 1: Compose the agent ────────────────────────────────
+        // Bail immediately if client already disconnected
+        if (isAborted() || request.signal.aborted) return;
+
         const { composeAgent } = await import("@/lib/agent-composer/composer");
 
         const composition = await composeAgent(
@@ -163,6 +175,9 @@ export async function POST(request: NextRequest) {
             sendJSON({ compositionStep: progress });
           }
         );
+
+        // Client may have disconnected during composition
+        if (isAborted() || request.signal.aborted) return;
 
         // Send the full composition result
         sendJSON({
@@ -179,6 +194,9 @@ export async function POST(request: NextRequest) {
 
         // ── Phase 2: Execute (if requested) ───────────────────────────
         if (execute) {
+          // Bail before starting execution if client already disconnected
+          if (isAborted() || request.signal.aborted) return;
+
           const { executeComposedAgent } = await import("@/lib/agent-composer/executor");
           const service = await createServiceClient();
 
@@ -212,6 +230,9 @@ export async function POST(request: NextRequest) {
               },
             }
           );
+
+          // Don't send results to a disconnected client
+          if (isAborted() || request.signal.aborted) return;
 
           // Send execution summary
           sendJSON({
@@ -251,7 +272,7 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (err) {
-        sendJSON({ error: "Composition failed" });
+        if (!isAborted()) sendJSON({ error: "Composition failed" });
       } finally {
         close();
       }

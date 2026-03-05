@@ -941,20 +941,32 @@ export async function POST(request: Request) {
     // SSE streaming setup
     const encoder = new TextEncoder();
     let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
+    let aborted = false; // Set true when client disconnects
 
     const stream = new ReadableStream<Uint8Array>({
       start(c) {
         controller = c;
       },
+      cancel() {
+        // Client disconnected — skip further sends to avoid wasted work
+        aborted = true;
+      },
     });
 
     const send = (data: string) => {
-      controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+      if (aborted) return; // Don't enqueue after client disconnect
+      try {
+        controller?.enqueue(encoder.encode(`data: ${data}\n\n`));
+      } catch {
+        aborted = true; // Stream already closed
+      }
     };
 
     // Run agent execution asynchronously while streaming
     (async () => {
       try {
+        if (aborted) return; // Client already disconnected before we started
+
         send(JSON.stringify({
           type: 'progress',
           progress: 0.05,
@@ -972,6 +984,8 @@ export async function POST(request: Request) {
             send(JSON.stringify({ type: 'progress', progress, message }));
           },
         });
+
+        if (aborted) return; // Client disconnected during execution — skip result send
 
         send(JSON.stringify({
           type: 'result',
@@ -1044,12 +1058,14 @@ export async function POST(request: Request) {
           }
         })();
 
-        send("[DONE]");
-        controller!.close();
+        if (!aborted) send("[DONE]");
+        try { controller?.close(); } catch { /* already closed */ }
       } catch (err) {
-        send(JSON.stringify({ type: 'error', error: "Agent execution failed" }));
-        send("[DONE]");
-        controller!.close();
+        if (!aborted) {
+          send(JSON.stringify({ type: 'error', error: "Agent execution failed" }));
+          send("[DONE]");
+        }
+        try { controller?.close(); } catch { /* already closed */ }
       }
     })();
 

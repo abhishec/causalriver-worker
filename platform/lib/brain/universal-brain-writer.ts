@@ -38,12 +38,20 @@ const COGNITIVE_REFRESH_THRESHOLD = 50;
 const orgWriteCounts: Map<string, number> = new Map();
 // Max orgs tracked per Lambda instance — prevents unbounded Map growth under high cardinality
 const ORG_WRITE_COUNTS_MAX = 500;
+// Per-org write rate gate: max 30 writes per Lambda invocation — prevents DDoS on Supabase (audit H6)
+const MAX_WRITES_PER_ORG_PER_LAMBDA = 30;
 
 export async function universalBrainWrite(
   supabase: SupabaseClient,
   orgId: string,
   event: BrainEvent
 ): Promise<void> {
+  // Rate gate: drop writes beyond the per-org cap to protect Supabase under load (audit H6)
+  const currentOrgWrites = orgWriteCounts.get(orgId) ?? 0;
+  if (currentOrgWrites >= MAX_WRITES_PER_ORG_PER_LAMBDA) {
+    return; // Silent drop — brain writes are advisory, not critical
+  }
+
   const promises: Promise<unknown>[] = [];
 
   // 1. Write to cross_domain_signals (always — for causal graph + signal strength)

@@ -70,6 +70,10 @@ export async function GET(request: NextRequest) {
   }
 
   const startMs = Date.now();
+  // Jitter: stagger cron execution across deployments to prevent thundering herd (audit H8)
+  // 0-15s random delay — all orgs don't hit Supabase simultaneously at :00/:30
+  const jitterMs = Math.floor(Math.random() * 15_000);
+  if (jitterMs > 0) await new Promise((r) => setTimeout(r, jitterMs));
 
   try {
     const service = await createServiceClient();

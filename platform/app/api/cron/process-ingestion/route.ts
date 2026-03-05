@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     logger.error("[cron/process-ingestion] Fatal error", { error: errorMsg });
-    return NextResponse.json({ ok: false, error: errorMsg }, { status: 200 });
+    return NextResponse.json({ ok: false, error: errorMsg }, { status: 500 });
   }
 }
 

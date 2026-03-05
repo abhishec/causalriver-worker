@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
 
     // Enrich metadata with parse results
     metadata = {
-      ...(formData.get("metadata") ? JSON.parse(formData.get("metadata") as string) : {}),
+      ...(formData.get("metadata") ? (() => { try { return JSON.parse(formData.get("metadata") as string) as Record<string, unknown>; } catch { return {}; } })() : {}),
       originalFilename: filename,
       mimeType,
       fileSize: file.size,
