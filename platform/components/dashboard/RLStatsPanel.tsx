@@ -158,8 +158,21 @@ export function RLStatsPanel({
 
   useEffect(() => {
     if (refreshIntervalMs <= 0) return;
-    const interval = setInterval(fetchStats, refreshIntervalMs);
-    return () => clearInterval(interval);
+    // Skip polling when tab is hidden — avoids wasted API calls (audit M5)
+    const interval = setInterval(() => {
+      if (!document.hidden) fetchStats();
+    }, refreshIntervalMs);
+
+    // Resume immediately when tab becomes visible after a gap
+    const handleVisibility = () => {
+      if (!document.hidden) fetchStats();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [fetchStats, refreshIntervalMs]);
 
   // ── Loading skeleton ───────────────────────────────────────────────────

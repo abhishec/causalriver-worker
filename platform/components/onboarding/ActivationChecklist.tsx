@@ -126,8 +126,10 @@ export function ActivationChecklist({ orgName, onDismiss }: ActivationChecklistP
           }))
         );
       }
+      abortRef.current = null; // Release completed controller — prevents stale ref on unmount (audit L1)
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
+      abortRef.current = null; // Also release on error so unmount cleanup is a no-op (audit L1)
       // Silently fail — show defaults
     } finally {
       setLoading(false);
