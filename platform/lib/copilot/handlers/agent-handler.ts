@@ -380,7 +380,18 @@ export function detectGeneralTask(
     };
   }
 
-  // 5. Explicit "run agent for X" / "use agent to X" (general purpose)
+  // 5. Explicit "run APEX" / "use apex agent" — dispatch to APEX FSM
+  if (
+    /\b(run|use|launch|start|deploy)\s+(?:the\s+)?(?:apex|apex\s+agent|apex\s+research)\b/i.test(lower)
+  ) {
+    return {
+      task: message,
+      agentType: "apex",
+      urls,
+    };
+  }
+
+  // 5b. Explicit "run agent for X" / "use agent to X" (general purpose)
   if (
     /\b(run\s+(?:an?\s+)?agent\s+(for|to|on)|use\s+(?:an?\s+)?agent\s+(for|to)|dispatch\s+(?:an?\s+)?agent)\b/i.test(lower)
   ) {

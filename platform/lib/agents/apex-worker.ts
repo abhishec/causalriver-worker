@@ -493,6 +493,23 @@ async function runApexFsm(
   }
 
   if (fsmState === "SYNTHESIZING" && !synthesis) {
+    // Persist all subtask results before synthesis — if synthesis crashes, partial results survive in DB
+    try {
+      await adminSupabase.from("agent_queue").update({
+        checkpoint_data: {
+          currentStep: subtasks.length,
+          totalSteps: subtasks.length,
+          phase: "SYNTHESIZING",
+          totalToolCalls: toolCallCount,
+          subtaskResults: subtasks.map((s) => ({
+            index: s.index, goal: s.goal.slice(0, 100),
+            verdict: s.verdict, score: s.score,
+            result: (s.result ?? "").slice(0, 500),
+          })),
+        },
+      }).eq("id", job.id);
+    } catch { /* non-fatal */ }
+
     synthesis = await synthesizeResults(task, subtasks, job);
     fsmState = "COMPLETED";
   }

@@ -111,7 +111,7 @@ export async function chainContinuation(
   // Look up the parent's org so we don't hard-code CORE_WORKSPACE_ID fallback
   const { data: parent, error: lookupError } = await supabase
     .from("agent_queue")
-    .select("organization_id")
+    .select("organization_id, priority")
     .eq("id", parentJobId)
     .single();
 
@@ -127,7 +127,7 @@ export async function chainContinuation(
       organization_id: parent.organization_id,
       agent_type: "chain-continuation",
       task_type: "resume",
-      priority: 10, // High priority so continuations don't queue behind new jobs
+      priority: parent.priority ?? 10, // Inherit parent priority so high-priority jobs stay high-priority
       payload: { parentJobId, checkpoint },
       status: "pending",
       chain_parent_id: parentJobId,

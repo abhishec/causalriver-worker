@@ -444,6 +444,19 @@ async function runAgenticLoop(
       }
     }
 
+    // Cancellation check — poll DB every 3 turns to detect external cancel requests
+    if (turn > 0 && turn % 3 === 0) {
+      try {
+        const { getAdminClient } = await import("@/lib/supabase/admin");
+        const { data: currentStatus } = await getAdminClient()
+          .from("agent_queue").select("status").eq("id", job.id).single();
+        if (currentStatus?.status === "cancelled") {
+          logger.warn(`[general-worker] Job ${job.id} cancelled externally at turn ${turn}, exiting`);
+          return { output: output || "[Cancelled by user]", toolCallCount, toolsUsed };
+        }
+      } catch { /* non-fatal — continue if poll fails */ }
+    }
+
     // Also check cost budget if specified in payload
     const maxCostUsd = Number(job.payload.maxCostUsd ?? 0);
     // Rough cost estimate: ~$0.001 per Haiku call
@@ -503,6 +516,14 @@ async function runAgenticLoop(
     }
 
     messages.push({ role: "user", content: toolResults });
+
+    // Context pruning every 15 turns — keep task anchor + last 20 messages to prevent overflow
+    const COMPRESSION_TURN_INTERVAL = 15;
+    if (turn > 0 && (turn + 1) % COMPRESSION_TURN_INTERVAL === 0 && messages.length > 22) {
+      // splice(1, N) removes N elements starting at index 1 — messages[0] (task anchor) stays
+      messages.splice(1, messages.length - 21);
+      logger.warn(`[general-worker] Turn ${turn + 1}: pruned messages to ${messages.length} (context management)`);
+    }
 
     // Heartbeat after every tool execution batch — lastTool is always current
     try {
