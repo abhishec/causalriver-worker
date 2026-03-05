@@ -406,7 +406,7 @@ async function runAgenticLoop(
           .update({
             heartbeat_at: new Date().toISOString(),
             checkpoint_data: {
-              currentTurn: turn,
+              currentStep: turn,
               totalToolCalls: toolCallCount,
               toolsUsed,
               lastTool: toolsUsed[toolsUsed.length - 1] ?? null,
