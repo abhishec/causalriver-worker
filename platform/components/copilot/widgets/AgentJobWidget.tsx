@@ -336,7 +336,13 @@ export function AgentJobWidget({ title, data }: WidgetProps) {
       // Exponential backoff: 2s, 4s, 8s, 16s, 32s
       const backoffMs = Math.min(2000 * Math.pow(2, attempt), 32_000);
       setStreaming(false);
+      // Clear any existing timer before scheduling a new one — prevents duplicate reconnects (audit H11)
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
       reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
         if (!closed) {
           setStreaming(true);
           connect();

@@ -621,7 +621,7 @@ async function _runCognitivePlannerInner(
             _priorBanditStrategy,
             _priorOutcomeQuality,
             supabase
-          ).catch(() => {});
+          ).catch((err: unknown) => { logger.warn("[cognitive-planner] recordAgentOutcome failed (non-fatal)", { error: err instanceof Error ? err.message : String(err) }); });
         }
       }
     }

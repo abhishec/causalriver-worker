@@ -15,6 +15,8 @@
  *   - RETRY cap: 3 attempts max, then ESCALATE regardless of score
  */
 
+import { logger } from "@/lib/logger";
+
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Exponential backoff for quality-gate Anthropic call (same pattern as workers)
@@ -132,8 +134,11 @@ Score guide:
     }
 
     return { verdict, score, feedback, improvements };
-  } catch {
-    // Parse error or network error — optimistic pass to not block the pipeline
-    return { verdict: "PASS", score: 0.65, feedback: "Quality gate evaluation failed — optimistic pass." };
+  } catch (gateErr) {
+    // Parse error or network error — ESCALATE so bad subtasks don't silently pass (audit H4)
+    logger.warn("[quality-gate] Evaluation failed — ESCALATE to prevent silent pass", {
+      error: gateErr instanceof Error ? gateErr.message : String(gateErr),
+    });
+    return { verdict: "ESCALATE", score: 0.3, feedback: "Quality gate evaluation failed — escalating to prevent unvalidated output." };
   }
 }

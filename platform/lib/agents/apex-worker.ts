@@ -262,6 +262,7 @@ export async function processApexJobs(
           .update({
             status: "completed",
             completed_at: new Date().toISOString(),
+            checkpoint_data: null, // Clear stale progress state (audit M8)
             result: {
               output: apexResult.synthesis?.slice(0, 15000),
               subtasksCompleted: apexResult.subtasksCompleted,
@@ -287,23 +288,40 @@ export async function processApexJobs(
             executionMs: durationMs,
             modelId: "claude-haiku-4-5-20251001",
           })
-        ).catch(() => {});
-        // Federated knowledge write-back — APEX synthesis feeds Brain L25-L29
+        ).catch((rlErr: unknown) => {
+          logger.warn("[apex-worker] RL outcome recording failed (non-fatal)", {
+            error: rlErr instanceof Error ? rlErr.message : String(rlErr),
+            jobId: job.id,
+          });
+        });
+        // Federated knowledge write-back — APEX synthesis feeds Brain L25-L29 (audit H6: await, non-fatal)
         if (apexResult.synthesis && apexQuality >= 0.5) {
-          supabase.from("federated_knowledge").insert({
-            organization_id: job.organization_id,
-            domain: `apex-agent.${String(job.task_type ?? "research")}`,
-            content: apexResult.synthesis.slice(0, 4000),
-            confidence: apexQuality,
-            metadata: {
+          try {
+            const { error: insertErr } = await supabase.from("federated_knowledge").insert({
+              organization_id: job.organization_id,
+              domain: `apex-agent.${String(job.task_type ?? "research")}`,
+              content: apexResult.synthesis.slice(0, 4000),
+              confidence: apexQuality,
+              metadata: {
+                jobId: job.id,
+                task: taskDescription.slice(0, 300),
+                subtasksCompleted: apexResult.subtasksCompleted,
+                toolCallCount: apexResult.toolCallCount,
+                source: "apex-worker",
+                aiWorkerId: job.ai_worker_id ?? null,
+              },
+            });
+            if (insertErr) {
+              logger.warn("[apex-worker] federated_knowledge insert failed (non-fatal)", {
+                error: insertErr.message, jobId: job.id,
+              });
+            }
+          } catch (insertException) {
+            logger.warn("[apex-worker] federated_knowledge insert threw (non-fatal)", {
+              error: insertException instanceof Error ? insertException.message : String(insertException),
               jobId: job.id,
-              task: taskDescription.slice(0, 300),
-              subtasksCompleted: apexResult.subtasksCompleted,
-              toolCallCount: apexResult.toolCallCount,
-              source: "apex-worker",
-              aiWorkerId: job.ai_worker_id ?? null,
-            },
-          }).then(() => {}, () => {}); // fire-and-forget, non-fatal
+            });
+          }
         }
       }
 
@@ -723,12 +741,15 @@ async function synthesizeResults(task: string, subtasks: Subtask[], job: ApexJob
   const completed = subtasks.filter((s) => s.verdict === "PASS");
   const escalated = subtasks.filter((s) => s.verdict === "ESCALATE");
 
+  // Cap per-subtask result to 5 000 chars — prevents 700KB synthesis payloads (audit H7)
+  const MAX_SUBTASK_RESULT_CHARS = 5_000;
   const completedWork = subtasks
     .map((s) => {
       const statusLabel = s.verdict === "ESCALATE"
         ? `⚠ Partial coverage (${s.attempts} attempts)`
         : `✓ Complete`;
-      return `## Research Phase ${s.index + 1}: ${s.goal}\nStatus: ${statusLabel}\n${s.result ?? "No result"}`;
+      const resultText = (s.result ?? "No result").slice(0, MAX_SUBTASK_RESULT_CHARS);
+      return `## Research Phase ${s.index + 1}: ${s.goal}\nStatus: ${statusLabel}\n${resultText}`;
     })
     .join("\n\n---\n\n");
 

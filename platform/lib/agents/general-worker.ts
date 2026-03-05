@@ -572,8 +572,8 @@ async function runAgenticLoop(
 
     messages.push({ role: "user", content: toolResults });
 
-    // Context pruning every 15 turns — keep task anchor (index 0) + last 20 messages
-    const COMPRESSION_TURN_INTERVAL = 15;
+    // Context pruning every 5 turns — keep task anchor (index 0) + last 20 messages (audit H8: was 15)
+    const COMPRESSION_TURN_INTERVAL = 5;
     const MAX_HISTORY = 20;
     if (turn > 0 && (turn + 1) % COMPRESSION_TURN_INTERVAL === 0 && messages.length > MAX_HISTORY + 1) {
       // Keep messages[0] (task anchor) + the last MAX_HISTORY messages

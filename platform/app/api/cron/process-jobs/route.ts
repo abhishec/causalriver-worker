@@ -96,6 +96,20 @@ export async function GET(request: NextRequest) {
           );
         }
       }
+
+      // Safety net (audit H5): recover_stale_jobs RPC may incorrectly flip 'paused' jobs to
+      // 'failed' if they had no heartbeat update during the checkpointing window.
+      // Paused jobs always have checkpoint_data set by checkpointAndChain() — restore them.
+      const { data: fixedPaused, error: pausedFixErr } = await service
+        .from("agent_queue")
+        .update({ status: "paused", error_message: null })
+        .eq("status", "failed")
+        .not("checkpoint_data", "is", null)
+        .gte("updated_at", new Date(Date.now() - 30_000).toISOString())
+        .select("id");
+      if (!pausedFixErr && fixedPaused?.length) {
+        logger.warn(`[cron/process-jobs] Restored ${fixedPaused.length} paused job(s) incorrectly moved to failed`);
+      }
     } catch (recoverErr: unknown) {
       // Non-fatal: stale recovery failure must NOT prevent new jobs from running
       logger.error("[cron/process-jobs] recover_stale_jobs threw (non-fatal)", {

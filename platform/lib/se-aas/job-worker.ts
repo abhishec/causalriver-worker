@@ -434,7 +434,7 @@ export async function processSeAaSJobs(
       // (they may succeed independently or surface a clearer error to the user).
       const _orgId2 = job.organization_id;
       const _jobId2 = job.id;
-      checkAndStartWaitingJobs(_orgId2, _jobId2).catch(() => {});
+      checkAndStartWaitingJobs(_orgId2, _jobId2).catch((err: unknown) => { logger.warn("[job-worker] checkAndStartWaitingJobs failed (non-fatal)", { error: err instanceof Error ? err.message : String(err) }); });
     }
   }
 
@@ -509,7 +509,7 @@ export async function processCodeAgentJobs(
       result.succeeded++;
 
       // Unblock any jobs waiting on this child job (fire-and-forget)
-      checkAndStartWaitingJobs(job.organization_id, job.id).catch(() => {});
+      checkAndStartWaitingJobs(job.organization_id, job.id).catch((err: unknown) => { logger.warn("[job-worker] checkAndStartWaitingJobs failed (non-fatal)", { error: err instanceof Error ? err.message : String(err) }); });
     } catch (err) {
       result.failed++;
       logger.error("[job-worker] code-agent job failed", {
@@ -517,7 +517,7 @@ export async function processCodeAgentJobs(
         error: err instanceof Error ? err.message : String(err),
       });
       // Still try to unblock waiting jobs
-      checkAndStartWaitingJobs(job.organization_id, job.id).catch(() => {});
+      checkAndStartWaitingJobs(job.organization_id, job.id).catch((err: unknown) => { logger.warn("[job-worker] checkAndStartWaitingJobs failed (non-fatal)", { error: err instanceof Error ? err.message : String(err) }); });
     }
   }
 

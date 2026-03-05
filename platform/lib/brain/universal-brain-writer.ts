@@ -177,7 +177,7 @@ export async function universalBrainWriteBatch(
       supabase
         .from("ai_memory")
         .upsert(memoryRows, { onConflict: "organization_id,memory_type,domain", ignoreDuplicates: false })
-    ).catch(() => {});
+    ).catch((err: unknown) => { logger.warn("[universal-brain-writer] ai_memory write failed (non-fatal)", { error: err instanceof Error ? err.message : String(err) }); });
   }
 
   const count = (orgWriteCounts.get(orgId) ?? 0) + events.length;
