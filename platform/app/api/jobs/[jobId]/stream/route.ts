@@ -25,11 +25,26 @@ export async function GET(
     return new Response("Unauthorized", { status: 401 });
   }
 
+  // Resolve org — prevents cross-tenant data leakage
+  const { data: membership } = await supabase
+    .from("org_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
+  if (!membership?.organization_id) {
+    return new Response("No workspace", { status: 403 });
+  }
+
+  const orgId = membership.organization_id;
+
   // Verify job belongs to user's org
   const { data: job } = await supabase
     .from("agent_queue")
     .select("id, organization_id, status")
     .eq("id", jobId)
+    .eq("organization_id", orgId)
     .single();
 
   if (!job) {

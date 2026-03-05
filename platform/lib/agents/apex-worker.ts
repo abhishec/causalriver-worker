@@ -468,6 +468,21 @@ async function runApexFsm(
       // ESCALATE: mark partial and move on
       subtask.verdict = "ESCALATE";
       subtask.result = subtaskResult.output + `\n\n[Quality gate: ESCALATED after ${subtask.attempts} attempts. Feedback: ${gateResult.feedback}]`;
+      // Persist escalation event to checkpoint_data for observability + SLA tracking
+      try {
+        await adminSupabase.from("agent_queue").update({
+          checkpoint_data: {
+            currentStep: currentSubtaskIndex + 1,
+            totalSteps: subtasks.length,
+            phase: "ESCALATED",
+            currentSubtaskGoal: subtask.goal.slice(0, 100),
+            totalToolCalls: toolCallCount,
+            lastTool: subtaskResult.lastToolUsed,
+            escalationAt: new Date().toISOString(),
+            escalationReason: gateResult.feedback?.slice(0, 200) ?? "quality gate failure",
+          },
+        }).eq("id", job.id);
+      } catch { /* non-fatal */ }
       currentSubtaskIndex++;
     }
   }

@@ -332,6 +332,18 @@ function buildGeneralTools(): ToolDef[] {
         required: ["content", "title"],
       },
     },
+    {
+      name: "compress_context",
+      description: "Summarize the findings gathered so far into a compact form. Call this when you have accumulated a lot of information and need to compress it before continuing. Pass the text to compress in prior_findings.",
+      input_schema: {
+        type: "object",
+        properties: {
+          prior_findings: { type: "string", description: "The accumulated research findings to compress" },
+          reason: { type: "string", description: "Why you are compressing (e.g. 'context too long')" },
+        },
+        required: ["prior_findings"],
+      },
+    },
   ];
 }
 
@@ -592,6 +604,26 @@ async function executeGeneralTool(
         }).select("id").single();
         if (error) return { error: error.message };
         return { success: true, memoryId: data?.id, message: `Fact "${title}" saved to knowledge base.` };
+      }
+      case "compress_context": {
+        // Summarize prior_findings via Haiku — gives Claude a compact context to continue from
+        const priorFindings = String(input.prior_findings ?? "");
+        const reason = String(input.reason ?? "context growing");
+        if (!priorFindings || priorFindings.length < 200) {
+          return { compressed: false, message: "Not enough context to compress yet." };
+        }
+        try {
+          const summaryResp = await callAnthropicWithRetry({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 400,
+            system: "Summarize the following research findings into a compact 3-5 bullet summary. Keep key facts, URLs, numbers, and conclusions. Discard reasoning chains and intermediate steps.",
+            messages: [{ role: "user", content: `FINDINGS TO COMPRESS:\n${priorFindings.slice(0, 3000)}` }],
+          });
+          const summary = summaryResp.content.find((b) => b.type === "text")?.text ?? priorFindings.slice(0, 500);
+          return { compressed: true, summary, reason, message: `Context compressed (${priorFindings.length} → ${summary.length} chars). Use the summary above for subsequent steps.` };
+        } catch {
+          return { compressed: false, message: "Compression failed — continue with existing context." };
+        }
       }
       default:
         return { error: `Unknown tool: ${toolName}` };
