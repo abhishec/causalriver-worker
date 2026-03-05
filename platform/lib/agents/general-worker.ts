@@ -66,25 +66,18 @@ async function evaluateOutputQuality(task: string, output: string, toolCallCount
   // Quick heuristic pre-check: if agent made tool calls AND has substantive output, already promising
   if (toolCallCount >= 2 && output.length >= 200) {
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 128,
-          system: "You are a task completion evaluator. Respond ONLY with a JSON object: {\"score\": 0.0-1.0, \"reason\": \"brief\"}. Score 0.9+ if task fully completed with sources/evidence. Score 0.6-0.8 if partially done. Score <0.5 if task not addressed.",
-          messages: [{
-            role: "user",
-            content: `TASK: ${task.slice(0, 300)}\n\nAGENT OUTPUT (first 1000 chars):\n${output.slice(0, 1000)}\n\nScore the completion quality.`,
-          }],
-        }),
+      const data = await callAnthropicWithRetry({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 128,
+        system: "You are a task completion evaluator. Respond ONLY with a JSON object: {\"score\": 0.0-1.0, \"reason\": \"brief\"}. Score 0.9+ if task fully completed with sources/evidence. Score 0.6-0.8 if partially done. Score <0.5 if task not addressed.",
+        messages: [{
+          role: "user",
+          content: `TASK: ${task.slice(0, 300)}\n\nAGENT OUTPUT (first 1000 chars):\n${output.slice(0, 1000)}\n\nScore the completion quality.`,
+        }],
       });
-      if (resp.ok) {
-        const data = await resp.json() as { content: Array<{ type: string; text?: string }> };
-        const text = data.content?.find((b) => b.type === "text")?.text ?? "";
-        const match = text.match(/"score"\s*:\s*([0-9.]+)/);
-        if (match) return Math.min(1.0, Math.max(0.0, parseFloat(match[1])));
-      }
+      const text = data.content?.find((b) => b.type === "text")?.text ?? "";
+      const match = text.match(/"score"\s*:\s*([0-9.]+)/);
+      if (match) return Math.min(1.0, Math.max(0.0, parseFloat(match[1])));
     } catch { /* fallback to heuristic */ }
   }
   // Heuristic fallback: tool calls + output length
