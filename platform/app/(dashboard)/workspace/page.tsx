@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentWorkspaceId } from "@/lib/workspace-helpers";
 import WorkspaceMissionControl from "./workspace-mission-control";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export const dynamic = "force-dynamic";
 
@@ -32,5 +33,9 @@ export default async function WorkspacePage() {
     // pass — orgId stays empty, page handles gracefully
   }
 
-  return <WorkspaceMissionControl orgId={orgId} />;
+  return (
+    <ErrorBoundary section="Mission Control">
+      <WorkspaceMissionControl orgId={orgId} />
+    </ErrorBoundary>
+  );
 }

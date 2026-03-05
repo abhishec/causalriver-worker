@@ -28,6 +28,7 @@ async function callWithRetry(payload: unknown): Promise<{ content: Array<{ type:
       method: "POST",
       headers: { "x-api-key": ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000), // 8s per attempt — prevents APEX FSM stall on Anthropic hang
     });
     if (resp.ok) return resp.json() as Promise<{ content: Array<{ type: string; text?: string }> }>;
     if ((resp.status === 429 || resp.status >= 500) && attempt < 2) {

@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import { ConversationSidebar } from "@/components/copilot/ConversationSidebar";
 import { useConversations } from "@/lib/use-conversations";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 const CopilotChat = dynamic(
   () => import("@/components/copilot/CopilotChat").then((m) => m.CopilotChat),
@@ -712,16 +713,18 @@ function ChatTab({
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
       />
       <div className="flex-1 min-w-0 overflow-hidden h-full">
-        <CopilotChat
-          key={chatKey}
-          endpoint="/api/copilot/chat"
-          extraParams={extraParams}
-          showHeader={false}
-          examplePrompts={[]}
-          persona={persona}
-          initialConversationId={activeConvId ?? undefined}
-          onSave={handleSave}
-        />
+        <ErrorBoundary section="Copilot Chat">
+          <CopilotChat
+            key={chatKey}
+            endpoint="/api/copilot/chat"
+            extraParams={extraParams}
+            showHeader={false}
+            examplePrompts={[]}
+            persona={persona}
+            initialConversationId={activeConvId ?? undefined}
+            onSave={handleSave}
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );
