@@ -79,7 +79,7 @@ jobs:
         # Uses step conclusion since health check has continue-on-error.
         # Only fires after all retries are exhausted — not for transient blips.
         if: steps.health.conclusion == 'failure'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const title = '🚨 Production Health Check Failed After Deploy';
