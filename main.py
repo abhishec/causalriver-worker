@@ -12,7 +12,7 @@ import uvicorn
 
 def main():
     parser = argparse.ArgumentParser(
-        description="CausalRiver Worker — Apex Final causal discovery agent"
+        description="CausalRiver Worker — Adaptive causal discovery agent"
     )
     parser.add_argument("--host", type=str, default="0.0.0.0",
                         help="Host to bind server on")
@@ -20,7 +20,7 @@ def main():
                         help="Port to bind server on")
     parser.add_argument("--card-url", type=str, default=None,
                         help="Public URL advertised in agent card "
-                             "(e.g. https://causal.agentbench.example.com)")
+                             "(e.g. https://your-deployed-url.example.com)")
     args = parser.parse_args()
 
     if args.card_url:

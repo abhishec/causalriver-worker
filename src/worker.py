@@ -1,8 +1,8 @@
 """
-CausalRiver Worker Brain.
+Causal AI Worker Brain.
 
-Accepts a time-series payload and returns a causal score matrix
-using the Apex Final ensemble algorithm.
+Runs the Adaptive Causal Engine v2 — non-Gaussianity-adaptive ensemble
+of VAR, VARLiNGAM, and Counterfactual Knockout.
 """
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from src.apex_engine import apex_final_scoring
-from src.config import MAX_LAG
+from src.adaptive_engine import adaptive_causal_scoring
+from src.config import MAX_LAG, N_SHUFFLES
 
 
 def run_worker(task_input: dict) -> dict:
@@ -29,11 +29,14 @@ def run_worker(task_input: dict) -> dict:
     Returns
     -------
     {
-        "scores": [[float, ...], ...],     # shape (N, N) — scores[i][j] = j→i
+        "scores": [[float, ...], ...],  # shape (N, N) — scores[i][j] = j→i
         "signal_ids": ["A", "B", ...],
         "top_edges": [{"source": "A", "target": "B", "score": 0.42}, ...],
         "lag_used": 2,
         "n_vars": 3,
+        "n_timesteps": 500,
+        "ng_weight": 0.67,             # non-Gaussianity weight used (0=Gaussian)
+        "lingam_available": true,       # whether VARLiNGAM ran successfully
         "elapsed_ms": 1234
     }
     """
@@ -56,13 +59,17 @@ def run_worker(task_input: dict) -> dict:
     if len(signal_ids) != N:
         signal_ids = [str(i) for i in range(N)]
 
-    max_lag = int(task_input.get("max_lag", MAX_LAG))
+    max_lag   = int(task_input.get("max_lag",    MAX_LAG))
+    n_shuffles = int(task_input.get("n_shuffles", N_SHUFFLES))
+
     df = pd.DataFrame(arr, columns=signal_ids)
 
     try:
-        scores_arr = apex_final_scoring(df, max_lag=max_lag)
+        result = adaptive_causal_scoring(df, max_lag=max_lag, n_shuffles=n_shuffles)
     except Exception as e:
-        return {"error": f"Apex engine failed: {e}"}
+        return {"error": f"Adaptive engine failed: {e}"}
+
+    scores_arr = result["scores"]
 
     # Build top-edges list (sorted by score desc, no self-loops)
     edges = []
@@ -72,22 +79,21 @@ def run_worker(task_input: dict) -> dict:
                 edges.append({
                     "source": signal_ids[j],
                     "target": signal_ids[i],
-                    "score": float(scores_arr[i, j]),
+                    "score":  float(scores_arr[i, j]),
+                    "var_signal":    float(result["s_var_n"][i, j]),
+                    "lingam_signal": float(result["s_lingam_n"][i, j]),
+                    "cf_signal":     float(result["s_cf_n"][i, j]),
                 })
     edges.sort(key=lambda e: e["score"], reverse=True)
 
-    elapsed_ms = int((time.time() - t0) * 1000)
-
-    # Compute actual lag used
-    lag_used = min(max_lag, T // (3 * N))
-    lag_used = max(lag_used, 1)
-
     return {
-        "scores": scores_arr.tolist(),
-        "signal_ids": signal_ids,
-        "top_edges": edges[:50],
-        "lag_used": lag_used,
-        "n_vars": N,
-        "n_timesteps": T,
-        "elapsed_ms": elapsed_ms,
+        "scores":          scores_arr.tolist(),
+        "signal_ids":      signal_ids,
+        "top_edges":       edges[:50],
+        "lag_used":        result["lag"],
+        "n_vars":          N,
+        "n_timesteps":     T,
+        "ng_weight":       round(result["ng_weight"], 3),
+        "lingam_available": result["lingam_available"],
+        "elapsed_ms":      int((time.time() - t0) * 1000),
     }
