@@ -159,7 +159,7 @@ jobs:
           git worktree prune --expire=now 2>/dev/null || true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build Docker image (brain orchestrator)
         uses: docker/build-push-action@v6
