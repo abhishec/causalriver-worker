@@ -1,0 +1,15 @@
+{
+  manifest_version: "0.1.0",
+  program: {
+    image: "public.ecr.aws/d9m7h3k5/causalriver-worker:latest",
+    network: {
+      endpoints: [
+        { name: "endpoint", port: 9020 },
+      ],
+    },
+  },
+  provides: {
+    a2a: { kind: "a2a", endpoint: "endpoint" },
+  },
+  exports: { a2a: "a2a" },
+}
