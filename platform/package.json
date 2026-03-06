@@ -23,7 +23,7 @@
     "@aws-sdk/s3-request-presigner": "^3.991.0",
     "@nexus-ai/memory-stack": "workspace:*",
     "@octokit/rest": "^20.1.2",
-    "@supabase/ssr": "^0.6.1",
+    "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.95.3",
     "@upstash/redis": "^1.36.2",
     "clsx": "^2.1.1",
