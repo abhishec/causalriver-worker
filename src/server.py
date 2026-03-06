@@ -34,7 +34,8 @@ def _agent_card() -> dict:
         "description": (
             "Causal discovery AI worker. "
             "Given a multivariate time series, returns a causal score matrix "
-            "using the Apex Final ensemble (VAR + Counterfactual Knockout + "
+            "using the Adaptive Causal Engine v2 (Non-Gaussianity-Adaptive "
+            "VAR+VARLiNGAM blend + Counterfactual Knockout + "
             "Granger F-test + Coefficient Prior). "
             "ICLR 2025 CausalRivers benchmark submission."
         ),

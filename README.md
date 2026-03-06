@@ -23,7 +23,7 @@ The published VAR baseline (AUROC 0.7904) is the strongest result reported in th
 
 ## BrainOS Innovation: Three-Layer Causal Discovery Engine
 
-The causal engine in BrainOS — the system's causal reasoning brain region — is externalized here as a standalone worker. It stacks three innovations: non-Gaussianity-adaptive method routing, ICA-based edge orientation via VARLiNGAM, and counterfactual knockout as a confounder gate.
+The causal engine in BrainOS — the system's causal reasoning brain region — is externalized here as a standalone worker running the **Adaptive Causal Engine v2**. It stacks three innovations: non-Gaussianity-adaptive method routing, ICA-based edge orientation via VARLiNGAM, and counterfactual knockout as a confounder gate. The engine gracefully degrades: if `lingam` is unavailable or data is too sparse, it falls back to pure VAR without error.
 
 ---
 
@@ -51,6 +51,8 @@ s_base = (1 − w) × s_var  +  w × s_lingam
 
 No manual tuning. No dataset-specific hyperparameter. The blend adapts automatically.
 
+**Robustness details:** JB test filters NaN/Inf values before testing, requires a minimum of 8 observations per variable (shorter series silently receive JB=0), and captures raw JB statistics alongside the weight for diagnostics.
+
 ### 2 — VARLiNGAM for Edge Orientation (ICA on Residuals)
 
 **What Granger cannot do:** Granger treats residuals as interchangeable Gaussian noise. It cannot orient edges when lag structures are symmetric.
@@ -68,6 +70,8 @@ VARLiNGAM: y_t = A₁y_{t-1} + ... + Aₚy_{t-p} + Bx_t
 ```
 
 VARLiNGAM adjacency matrices give `coef[i,j]` = effect of j→i across lagged and contemporaneous links. We take max absolute coefficient across all lag orders and blend with VAR signal using `w`.
+
+**Graceful degradation:** `lingam` is an optional dependency. When unavailable (or when sample size is insufficient: `T < lag × N × 3 + 10`), the engine silently falls back to pure VAR scoring (`w` effectively becomes 0). The response field `lingam_available` reports whether LiNGAM contributed to the result. BIC criterion with pruning is used for model selection.
 
 ### 3 — Counterfactual Knockout: Pearl's do-calculus as a Confounder Gate
 
@@ -103,9 +107,11 @@ for source in range(N):
 
 | Condition | Interpretation | Multiplier |
 |---|---|---|
-| base high + CF low | VAR+LiNGAM say causal; shuffling source doesn't hurt target → **confounded** | ×0.80 |
-| base high + CF high | Both signals agree → **high-confidence true cause** | ×1.10 |
-| base low + CF high | Hidden causal path revealed by intervention | ×1.06 |
+| base high + CF low | VAR+LiNGAM say causal; shuffling source doesn't hurt target → **confounded** | ×0.80 (v1: ×0.85) |
+| base high + CF high | Both signals agree → **high-confidence true cause** | ×1.10 (v1: ×1.08) |
+| base low + CF high | Hidden causal path revealed by intervention | ×1.06 (v1: ×1.05) |
+
+v2 multipliers were tightened/widened from v1 based on leaderboard data: confounded penalty was strengthened (0.85→0.80), true-cause boost was widened (1.08→1.10), and hidden-path boost was refined (1.05→1.06).
 
 Multiplicative design means CF fires only when it meaningfully agrees or disagrees. On clean data it has near-zero effect. On confounder datasets it provides the decisive margin.
 
@@ -145,14 +151,23 @@ INPUT: pd.DataFrame (T × N)
   └───────────────────┬─────────────────────────────────────────┘
                       │
   ┌───────────────────▼─────────────────────────────────────────┐
-  │  FINAL SCORE ASSEMBLY                                       │
-  │  score[i,j] = s_base[i,j]                                  │
-  │             × CF gate  (×0.80 / ×1.10 / ×1.06)            │
-  │             × sign prior  (×1.04 / ×0.96)                  │
-  │             + 0.01 × f_normalized  (Granger F tie-breaker) │
+  │  NORMALIZATION CASCADE                                      │
+  │  1. Normalize VAR and LiNGAM signals separately to [0,1]   │
+  │  2. Blend in normalized space: (1−w)·var_n + w·lingam_n     │
+  │  3. Re-scale blend back to VAR magnitude                    │
+  │  4. Re-normalize for CF rank thresholding                   │
+  └───────────────────┬─────────────────────────────────────────┘
+                      │
+  ┌───────────────────▼─────────────────────────────────────────┐
+  │  SEQUENTIAL SCORE ASSEMBLY (order matters)                  │
+  │  Step 1: score = s_base[i,j]                                │
+  │  Step 2: score += 0.01 × f_normalized  (Granger F additive) │
+  │  Step 3: score × CF gate  (×0.80 / ×1.10 / ×1.06)         │
+  │  Step 4: score × sign prior  (×1.04 / ×0.96)               │
   └─────────────────────────────────────────────────────────────┘
 
-OUTPUT: scores[N,N], top_edges, ng_weight, lingam_available
+OUTPUT: scores[N,N], signal_ids, top_edges, lag_used,
+        n_vars, n_timesteps, ng_weight, lingam_available, elapsed_ms
 ```
 
 ---
@@ -179,10 +194,10 @@ OUTPUT: scores[N,N], top_edges, ng_weight, lingam_available
 
 | Module | Role |
 |---|---|
-| `src/adaptive_engine.py` | Core engine: JB test, VARLiNGAM blend, CF Knockout, score assembly |
-| `src/apex_engine.py` | v1 baseline: pure VAR + CF Knockout (kept for ablation) |
-| `src/worker.py` | Input validation, DataFrame construction, response formatting |
-| `src/server.py` | FastAPI: `POST /run`, `POST /a2a`, `GET /.well-known/agent-card.json` |
+| `src/adaptive_engine.py` | **Active engine (v2):** JB test, VARLiNGAM blend, CF Knockout, sequential score assembly |
+| `src/apex_engine.py` | v1 baseline: pure VAR + CF Knockout (superseded by adaptive_engine v2, retained for reference) |
+| `src/worker.py` | Input validation, DataFrame construction, response formatting (9-field output) |
+| `src/server.py` | FastAPI: `POST /run`, `POST /a2a`, `GET /.well-known/agent-card.json` (Adaptive Causal Engine v2) |
 | `src/config.py` | Environment variable resolution |
 | `main.py` | AgentBeats entrypoint: `--host`, `--port`, `--card-url` |
 
@@ -221,10 +236,14 @@ Response:
 ```json
 {
   "scores": [[0, 0.42, 0.11], [0.03, 0, 0.38], [0.07, 0.21, 0]],
+  "signal_ids": ["upstream_A", "station_B", "downstream_C"],
   "top_edges": [
     {"source": "upstream_A", "target": "station_B", "score": 0.42,
      "var_signal": 0.91, "lingam_signal": 0.88, "cf_signal": 0.74}
   ],
+  "lag_used": 3,
+  "n_vars": 3,
+  "n_timesteps": 200,
   "ng_weight": 0.67,
   "lingam_available": true,
   "elapsed_ms": 1240
@@ -233,6 +252,7 @@ Response:
 
 `scores[i][j]` = evidence that signal **j causes i**. Diagonal is zero.
 `ng_weight` = how much LiNGAM was used (0 = pure VAR, 1 = pure LiNGAM).
+`var_signal`, `lingam_signal`, `cf_signal` in top_edges are min-max normalized to [0,1] — used for ranking/thresholding, not raw scores.
 
 ### `POST /a2a` — AgentBeats A2A task
 
