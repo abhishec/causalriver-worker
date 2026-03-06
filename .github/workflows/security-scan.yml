@@ -203,7 +203,7 @@ jobs:
 
       - name: Notify Slack (on failure)
         if: steps.scan.conclusion == 'failure' && github.event_name == 'schedule'
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           payload: |
             {
