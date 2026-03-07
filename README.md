@@ -266,6 +266,7 @@ Standard A2A task envelope. JSON payload in `message.parts[0].text`.
 - **Causal engine:** statsmodels VAR · `lingam` VARLiNGAM · scipy Jarque-Bera · numpy
 - **Interface:** AgentBeats A2A + direct `POST /run`
 - **Protocol:** A2A JSON-RPC 2.0
+- **Note:** Pure math engine — no LLM, no brainos-core-light dependency
 
 ---
 
